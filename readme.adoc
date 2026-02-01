@@ -7,16 +7,16 @@ Microsoft Word is a perfect word processor with change tracking (a crucial aspec
 ## Good Morning
 Specman is a small Java 2D / Swing application, which builds to an executable JAR file using Maven. To run Specman, you need a Java Runtime Environment (JRE) version 17 or higher installed. The main class is specman.Specman. Opening the file goodmorning.nsd in Specman brings up the following diagramm on the screen
 
-image::goodmorning-screenshot.png[Good Morning Specman Diagramm, width=600]
+image::doc/goodmorning-screenshot.png[Good Morning Specman Diagramm, width=600]
 
 A significant graphical difference to Nassi-Shneiderman diagramms is the representation of decisions nodes by diamonds as they are known from UML activity diagramms. The original Nassi-Shneiderman notation uses triangles which causes a little messy impression when they occur repeatedly in a diagramm.
 
 Every structured step within a diagramm may be folded up, to hide the details of its inner structure. The following screenhot shows how the "Good Morning" diagramm looks like when the first if/else step is folded up:
 
-image::goodmorning-screenshot-folded.png[Good Morning Specman Diagramm Folded, width=600]
+image::doc/goodmorning-screenshot-folded.png[Good Morning Specman Diagramm Folded, width=600]
 
 ### File format
 The diagramm files have a JSON-based file format which makes them machine-readable e.g. to feed code generators or AI agent based programming pipelines. However, Specman was designed to produce  specifications which are both human-readable and technically exact, following the central ideas of Domain-Driven Design. Software gets designed before implementation, following basic clean code development principles. And these designs are represented in a way which allows business stakeholders to actively participate in the design process.
 
 ### PDF export
-Specman provides a high-quality PDF export, so that the diagramms can be shared easily with everybody involved in the software engineering process. Reviewers only need a standard tool like Adobe's Acrobat Reader to open and comment the exported diagramms. See link:goodmorning-export.pdf[goodmorning-export.pdf] for an example of a PDF export of the "Good Morning" diagramm.
+Specman provides a high-quality PDF export, so that the diagramms can be shared easily with everybody involved in the software engineering process. Reviewers only need a standard tool like Adobe's Acrobat Reader to open and comment the exported diagramms. See link:doc/goodmorning-export.pdf[goodmorning-export.pdf] for an example of a PDF export of the "Good Morning" diagramm.
