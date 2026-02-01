@@ -24,7 +24,7 @@ The diagramm files have a JSON-based file format which makes them machine-readab
 ### PDF export
 Specman provides a high-quality PDF export, so that the diagramms can be shared easily with everybody involved in the software engineering process. Reviewers only need a standard tool like Adobe's Acrobat Reader to open and comment the exported diagramms. See link:goodmorning-export.pdf[goodmorning-export.pdf] for an example of a PDF export of the "Good Morning" diagramm.
 
-### Change tracking ###
+### Change tracking
 The yellow highlighting in the screenshot above indicates changes which were made in change mode. Similar to Microsoft Word, e.g. deleting text in change mode does not actually cause the text do disappear but displayed as crossed out with a yellow background as if someone had marked the section with a text marker. Changes in a model are therefore immediately recognizable by everybody.
 
 Folding up a structured step which includes any change marks will cause the unfold-button beside the step number to be displayed with a yellow background. I.e. even if details are hidden, it is still visible that there are changes in the folded up section.
