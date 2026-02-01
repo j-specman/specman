@@ -875,8 +875,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		toolbarButtonHinzufuegen(breakSchrittAnhaengen, "break-schritt", "Break anhängen", buttonBar);
 		toolbarButtonHinzufuegen(catchSchrittAnhaengen, "catch-schritt", "Catchblock anhängen", buttonBar);
 		toolbarButtonHinzufuegen(caseAnhaengen, "zweig", "Case anhängen", buttonBar);
-		buttonBar.addSeparator();
-		toolbarButtonHinzufuegen(exportPDF, "pdf", "PDF exportieren", buttonBar);
 		//toolBar.addSeparator();   //ToDo
 		toolbarButtonHinzufuegen(einfaerben, "helligkeit", "Hintergrund schattieren", toolBar);
 		toolbarButtonHinzufuegen(loeschen, "loeschen", "Schritt löschen", toolBar);
@@ -887,8 +885,9 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		toolbarButtonHinzufuegen(aenderungenVerwerfen, "verwerfen", "Änderungen verwerfen", toolBar);
 		toolbarButtonHinzufuegen(review, "review", "Für Review zusammenklappen", toolBar);
 		toolBar.addSeparator();
-		toolbarButtonHinzufuegen(birdsview, "birdsview", "Bird's View", toolBar);
-		toolBar.add(zoom);
+    toolBar.add(zoom);
+    toolbarButtonHinzufuegen(birdsview, "birdsview", "Bird's View", toolBar);
+    toolbarButtonHinzufuegen(exportPDF, "pdf", "PDF exportieren", toolBar);
 
 		//ToDo SideBar Change from contentPane.add(toolBar, CC.xywh(1, 1, 1, 1));
 		contentPane.add(toolBar, CC.xywh(1, 1, 2, 1));
