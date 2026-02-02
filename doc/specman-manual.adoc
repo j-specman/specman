@@ -76,6 +76,8 @@ Creates a new branch in a previously created case step. The creation by button c
 image::../src/main/resources/images/break-schritt.png[Break Step]
 Creates a break step which can be understood as the occurence of business exception. It causes the following steps to be skipped down to the place where the exceptions gets caught. If it is not caught anywhere the exceptions causes the complete usecase to be aborted which is described in the diagramm. Whoever, this is usually not a good idea as it makes the reader wonder if this was designed by intention or if the design is not yet complete.
 
+There are two flavours for using break steps: The compact form is the one being used in the anagramm example: The preceding step describes some system functionality and the break step simply mentions an exceptional situation which may occur in the step before. An appropriate check for the situation is implicitly assumed to be included in the described functionality. The more comprehensive form includes a preceding step which _explicitly_ consists of nothing else but the check for a particular exceptional situation where the break step(s) then expresses the abortion of the step sequence in case the situation is present. This form is recommended, if the situation takes some more text to be described or if it is of particular importance in the overall context. The actual system functionality is then described in a step following the break step(s).
+
 image::../src/main/resources/images/catch-schritt.png[Catch Step]
 Creates a catch step for a previously defined break step. This is the only kind of step which unfortunately cannot be created by drag & drop yet and the creation takes the following steps.
 
@@ -84,5 +86,8 @@ Creates a catch step for a previously defined break step. This is the only kind 
 ** which are not already coupled with a catch step yet and
 ** which are present in the step sequence which the catch step is about to be attached to, resp. in any of its nested sequences
 * After break step selection, the coupled catch step is added, including a handling sequence with an initial simple step.
+* The break step's content makes up the heading of the catch step, and the text content of both are now always kept in sync automatically.
+
+If a development project is working with a programming language that supports exceptions, it is strongly recommended to represent break and catch by throwing and catching exceptions in the code. In this case, it is a good idea to use relatively short expressions in the break step text which allows to directly derive exception type names from.
 
 Catch steps are displayed in an optically separated sections with a gray bar above and below, making clear that this is not part of the normal control flow. Multiple catch steps for the same sequence are usually placed side by side which is
