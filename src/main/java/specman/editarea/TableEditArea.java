@@ -494,8 +494,8 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     EditorI editor = Specman.instance();
     if (columnIsMarkedAs(colIndex, Hinzugefuegt) || !editor.aenderungenVerfolgen()) {
       if (numColumns() > 1) {
-        List<EditContainer> column = removeColumn(colIndex);
         List<Integer> originalColumnsWidthPercent = copyOf(columnsWidthPercent);
+        List<EditContainer> column = removeColumn(colIndex);
         editor.addEdit(new UndoableTableColumnRemoved(this, colIndex, column, originalColumnsWidthPercent));
       } else {
         removeTableOrMarkAsDeletedUDBL();
