@@ -50,6 +50,7 @@ public class TabKeyPressedHandler extends AbstractKeyEventHandler {
     try (UndoRecording ur = Specman.instance().pauseUndo()) {
       doc.remove(caretPosition, completionLength);
     }
+    attributeSet = prepareCorrectStyleForTextInput();
     doc.insertString(caretPosition, completion, attributeSet);
     textArea().setPendingAutoCompletionEnd(null);
   }

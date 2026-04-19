@@ -53,29 +53,14 @@ Aus aktueller Anwendung
 - Hoch/Runterscrollen über Grenzen von Schritten wäre cool
 - Die meisten Texte im PDF-Export sind etwas zu klein, wenn man auf 120% Zoom exportiert
 - Sortierung der Schritte im Auswahldialog für Schrittrerefenzen ist ungünstig. Vmtl. lexikografisch.
-x Spalte aus Tabelle Löschen und anschließend Undo -> Teilungsverhältnisse werden nicht wieder restauriert.
-x Verschieben eines Schritts, der in anderen Schritten referenziert wird, sorgt für unerwünschtes Scrollen zu diesen
-   anderen Schritten.
-x Unterbinden der Unternummerierung in Untersequenzen, zunächst SubsequenzSchrittView, später auch Schleifen und Zweige
-  x Kontextmenü für Schrittnummerlabel
-  x Toggle-Menüitem für Umschaltung
-  x Persistierung der Einstellung
-  x Undo/Redo für Umschaltung der Unternummerierung
-  x Bei Schachtelung von Subsequenzen mit flacher Nummerierung muss eine Umnummerierung der inneren Sequenz an die äußere
-     propagiert werden, um ggf. kaskadierend Folgeschritte neu zu nummerierend.
-x Fokushistorie
-   Ähnlich wie in intelliJ kann der User über Drücken von Strg+Alt+Links/Rechts zu den zuletzt verwendeten Schritte navigieren.
-x Cursor links springt nicht sauber über Schrittreferenzen hinweg.
-   Man kann ein Zeichen hinein navigieren, dafür springt der Cursor nicht weiter, wenn er am Anfang einer Referenz steht.
-   Cursor rechts geht einwandfrei.
-x Klappbuttons sehen mit neuem Look&Feel komisch aus
-x PDF-Exportdialog erscheint jetzt manchmal hinter dem Hauptfenster
-x Schrittlinks werden nicht korrekt abgespeichert!! Nach dem Laden der Datei sind sie weg.
-x Springen zwischen Break und Catch über CTRL+Klick auf die Schrittnummer (analog Schrittreferenzen) wäre hilfreich
-x Durch neues Lock&Feel wird der Zielbalken beim Schritt-Dragging an der falschen Stellen angezeigt.
-   Platziert wird der Schritt hinterher korrekt, nur der Balken auf der GlassPane ist falsch positioniert.
-x Pluszeichen für zugeklappte Schritte sind manchmal ohne erkennbare Änderung in dem Schritt gelb. Siehe UC-791 Stand 24.11.2025
-x Catch lässt sich nicht löschen
+
+Autocompletions mit Github Copilot
+- Autocompletion wieder entfernen, wenn man irgendetwas anderes drückt als TAB
+- Ein- und Ausschalten der Integration
+- Auslösen durch längeres Innehalten statt TAB drücken
+- Sinnvolleren größeren Kontext bilden
+- Prüfen: was passiert, wenn man nicht online ist? Specman muss sich sinnvoll verhalten.
+x Vor Bestätigen der Autoccompletion durch TAB: Änderungsstil bzw. Normalstil setzen.
 
 Abschluss für Go-Live
 - Wenn man zu einem Breakschritt bzw. einem Catch-Bereich springt oder einer Schrittreferenz folgt, dann kann sich das Ziel

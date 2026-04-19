@@ -52,11 +52,7 @@ public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyLi
       }
     }
 
-    if (isTrackingChanges()) {
-      aenderungsStilSetzenWennNochNichtVorhanden();
-    } else {
-      standardStilSetzenWennNochNichtVorhanden();
-    }
+    prepareCorrectStyleForTextInput();
   }
 
   private void keyBackspacePressed(KeyEvent e) { new BackspaceKeyPressedHandler(textArea, e).handle(); }
@@ -135,44 +131,6 @@ public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyLi
         StyleConstants.setStrikeThrough(inputAttributes, false);
       }
     }
-  }
-
-  public void standardStilSetzenWennNochNichtVorhanden() {
-    if (!ganzerSchrittGeloeschtStilGesetzt()) {
-      StyledEditorKit k = (StyledEditorKit) getEditorKit();
-      MutableAttributeSet inputAttributes = k.getInputAttributes();
-      inputAttributes.addAttributes(standardStil);
-    }
-  }
-
-  public void aenderungsStilSetzenWennNochNichtVorhanden() {
-    // Durch die folgende If-Abfrage verhindert man, dass die als geändert
-    // markierten Buchstaben alle einzelne Elements werden.
-    // Wenn an der aktuellen Position schon gelbe Hintegrundfarbe
-    // eingestellt ist, dann Ändern wir den aktuellen Style gar nicht mehr.
-    if (!aenderungsStilGesetzt() && !stepnumberLinkNormalStyleSet(getWrappedCaretPosition())) {
-      StyledEditorKit k = (StyledEditorKit) getEditorKit();
-      MutableAttributeSet inputAttributes = k.getInputAttributes();
-      StyleConstants.setStrikeThrough(inputAttributes, false); // Falls noch Gelöscht-Stil herrschte
-      inputAttributes.addAttributes(geaendertTextBackground);
-    }
-  }
-
-  public boolean ganzerSchrittGeloeschtStilGesetzt() {
-    StyledEditorKit k = getEditorKit();
-    MutableAttributeSet inputAttributes = k.getInputAttributes();
-    Object currentTextDecoration = inputAttributes.getAttribute(CSS.Attribute.TEXT_DECORATION);
-    Object currentFontColorValue = inputAttributes.getAttribute(CSS.Attribute.COLOR);
-    if (currentTextDecoration != null && currentTextDecoration.toString().equals(INDIKATOR_GELOESCHT_MARKIERT)
-      && currentFontColorValue != null && currentFontColorValue.toString().equals(INDIKATOR_GRAU)) {
-      return false;
-    }
-    Object currentBackgroundColorValue = inputAttributes.getAttribute(CSS.Attribute.BACKGROUND_COLOR);
-    return currentBackgroundColorValue != null
-      && currentBackgroundColorValue.toString().equalsIgnoreCase(INDIKATOR_SCHWARZ)
-      && currentTextDecoration != null
-      && currentTextDecoration.toString().equalsIgnoreCase(INDIKATOR_GELOESCHT_MARKIERT)
-      && currentFontColorValue != null && currentFontColorValue.toString().equalsIgnoreCase(INDIKATOR_GRAU);
   }
 
 }
