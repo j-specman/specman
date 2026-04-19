@@ -38,6 +38,7 @@ public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyLi
       case KeyEvent.VK_BACK_SPACE -> keyBackspacePressed(e);
       case KeyEvent.VK_UP -> keyUpPressed(e);
       case KeyEvent.VK_DOWN -> keyDownPressed(e);
+      case KeyEvent.VK_ESCAPE -> keyEscapePressed(e);
       case KeyEvent.VK_LEFT -> keyLeftPressed(e);
       case KeyEvent.VK_RIGHT -> keyRightPressed(e);
       case KeyEvent.VK_ENTER -> keyEnterPressed(e);
@@ -85,6 +86,8 @@ public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyLi
   private void keyDownPressed(KeyEvent e) {
     new CrossEditAreaFocusMoverFromText(textArea).moveFocusToSucceedingEditArea();
   }
+
+  private void keyEscapePressed(KeyEvent e) { new EscapeKeyPressedHandler(textArea, e).handle(); }
 
   @Override
   public void keyTyped(KeyEvent e) {

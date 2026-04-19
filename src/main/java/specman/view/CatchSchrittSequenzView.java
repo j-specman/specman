@@ -114,9 +114,15 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     headingHeightEaterPanel = new JPanel();
     headingHeightEaterPanel.setBackground(initialChangetype.toBackgroundColor());
     this.headingRightBarWidth = headingRightBarWidth != null ? headingRightBarWidth : SPALTENLAYOUT_UMGEHUNG_GROESSE;
-    ueberschrift.setId(linkedBreakStep.id);
-    primaryCatchHeading = new CatchUeberschrift(ueberschrift, linkedBreakStep, this, initialChangetype);
-    linkedBreakStep.catchAnkoppeln(primaryCatchHeading);
+    if (linkedBreakStep != null) {
+      ueberschrift.setId(linkedBreakStep.id);
+      primaryCatchHeading = new CatchUeberschrift(ueberschrift, linkedBreakStep, this, initialChangetype);
+      linkedBreakStep.catchAnkoppeln(primaryCatchHeading);
+    }
+    else {
+      ueberschrift.setId(new SchrittID());
+      primaryCatchHeading = new CatchUeberschrift(ueberschrift, linkedBreakStep, this, initialChangetype);
+    }
     ueberschrift.addEditAreasFocusListener(this);
   }
 

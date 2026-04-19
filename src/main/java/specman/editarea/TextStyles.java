@@ -29,6 +29,7 @@ public class TextStyles {
     public static MutableAttributeSet changedStepnumberLinkStyle = new SimpleAttributeSet();
     public static MutableAttributeSet changedStepnumberLinkStylePDF = new SimpleAttributeSet();
     public static MutableAttributeSet deletedStepnumberLinkStyle = new SimpleAttributeSet();
+    public static MutableAttributeSet autoSuggestStyle = new SimpleAttributeSet();
 
     public static final java.util.List<String> FONTFILES = java.util.List.of(
       "fonts/sitka/SitkaDisplay.ttf",
@@ -160,6 +161,9 @@ public class TextStyles {
       deletedStepnumberLinkStyle.addAttribute(HTML.Tag.SPAN, htmlBackgroundStyleChanged);
       StyleConstants.setBackground(deletedStepnumberLinkStyle, changedStepnumberLinkColor);
       StyleConstants.setStrikeThrough(deletedStepnumberLinkStyle, true);
+
+      StyleConstants.setForeground(autoSuggestStyle, Color.GRAY);
+      StyleConstants.setItalic(autoSuggestStyle, true);
     }
 
     public static String toHTMLColor(Color color) {

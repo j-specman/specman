@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import specman.Aenderungsart;
 import specman.EditorI;
 import specman.Specman;
+import specman.editarea.keylistener.EscapeKeyPressedHandler;
 import specman.editarea.keylistener.TextEditAreaKeyListener;
 import specman.editarea.markups.*;
 import specman.editarea.document.WrappedDocument;
@@ -65,6 +66,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     private WrappedElement hoveredElement;
     private Aenderungsart aenderungsart;
     private TextEditAreaModel_V001 deletionBackup;
+    private WrappedPosition pendingAutoCompletionEnd;
 
     public TextEditArea(TextEditAreaModel_V001 model, Font font) {
         this.aenderungsart = model.aenderungsart;
@@ -73,8 +75,9 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
         setFont(font);
         addKeyListener(new TextEditAreaKeyListener(this));
-        addMouseListener();
-        addMouseMotionListener();
+        addStepNumberJumpMouseListener();
+        addStepNumberCursorSwitchMouseMotionListener();
+        addAutoCompletionResetFocusListener();
         setBackground(aenderungsart.toBackgroundColor());
         registerToolTipManager();
         styleChangedTextSections(model);
@@ -83,7 +86,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         }
     }
 
-    private void clear() {
+  private void clear() {
       WrappedDocument wd = getWrappedDocument();
       wd.removeFrom(wd.start());
     }
@@ -107,7 +110,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         new MarkupBackgroundStyleInitializer(this, model.markups).styleChangedTextSections();
     }
 
-    private void addMouseListener() {
+    private void addStepNumberJumpMouseListener() {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -120,7 +123,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         });
     }
 
-    private void addMouseMotionListener() {
+    private void addStepNumberCursorSwitchMouseMotionListener() {
         addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
@@ -133,7 +136,20 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         });
     }
 
-    /**
+    /** Moving the focus away from the text area should trigger the functionality which is
+     * usually triggered by the user pressing the ESC key. By April 2026 this will remove a
+     * potentially pending AI-suggested auto-completion at the caret position. */
+    private void addAutoCompletionResetFocusListener() {
+      addFocusListener(new FocusAdapter() {
+        @Override
+        public void focusLost(FocusEvent e) {
+          KeyEvent irrelevantEvent = new KeyEvent(asComponent(), 0, 0, 0, KeyEvent.VK_ESCAPE, (char) 0);
+          new EscapeKeyPressedHandler(TextEditArea.this, irrelevantEvent).handle();
+        }
+      });
+    }
+
+  /**
      * Changes the cursor when pressing the CONTROL key and hovering over a StepnumberLink.
      * <p>
      * If the text cursor resides in a different TextEditArea than the mouse cursor it's not possible to
@@ -858,4 +874,11 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
   }
 
+  public void setPendingAutoCompletionEnd(WrappedPosition p) {
+    pendingAutoCompletionEnd = p;
+  }
+
+  public WrappedPosition getPendingAutoCompletionEnd() {
+    return pendingAutoCompletionEnd;
+  }
 }

@@ -19,6 +19,11 @@ public class SchrittID {
 
 	@Override
 	public String toString() {
+    // This should never happen within Specman itself. However, it turned out to be a useful fault tolerance
+    // when developing an automatic AI-based Specman file generation which is not yet perfectly working.
+    if (nummern.isEmpty()) {
+      return "?";
+    }
 		StringBuffer b = new StringBuffer();
 		for (Integer nummer: nummern) {
 			b.append(nummer);
