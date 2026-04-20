@@ -66,7 +66,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     private WrappedElement hoveredElement;
     private Aenderungsart aenderungsart;
     private TextEditAreaModel_V001 deletionBackup;
-    private WrappedPosition pendingAutoCompletionEnd;
+    private AutoCompletion autoCompletion;
 
     public TextEditArea(TextEditAreaModel_V001 model, Font font) {
         this.aenderungsart = model.aenderungsart;
@@ -874,11 +874,8 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
   }
 
-  public void setPendingAutoCompletionEnd(WrappedPosition p) {
-    pendingAutoCompletionEnd = p;
-  }
+  public AutoCompletion getAutoCompletion() { return autoCompletion; }
 
-  public WrappedPosition getPendingAutoCompletionEnd() {
-    return pendingAutoCompletionEnd;
-  }
+  public void setAutoCompletion(AutoCompletion autoCompletion) { this.autoCompletion = autoCompletion; }
+
 }

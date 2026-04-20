@@ -1,5 +1,6 @@
 package specman.suggest.github;
 
+import specman.EditException;
 import specman.Specman;
 
 import javax.swing.*;
@@ -8,8 +9,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.prefs.Preferences;
@@ -38,6 +37,7 @@ public class CopilotAuth {
     private String cachedSessionToken;
     private Instant sessionTokenExpiry = Instant.EPOCH;
     private Preferences prefs;
+    private JDialog deviceFlowDialog;
 
     public CopilotAuth() {
         this.http = HttpClient.newBuilder()
@@ -100,15 +100,16 @@ public class CopilotAuth {
     }
 
     private String runDeviceFlow() throws Exception {
+      try {
         // 1. Request device + user code
         HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(DEVICE_CODE_URL))
-                .header("Accept", "application/json")
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(HttpRequest.BodyPublishers.ofString(
-                        "client_id=" + CLIENT_ID + "&scope=read%3Auser"))
-                .timeout(Duration.ofSeconds(10))
-                .build();
+          .uri(URI.create(DEVICE_CODE_URL))
+          .header("Accept", "application/json")
+          .header("Content-Type", "application/x-www-form-urlencoded")
+          .POST(HttpRequest.BodyPublishers.ofString(
+            "client_id=" + CLIENT_ID + "&scope=read%3Auser"))
+          .timeout(Duration.ofSeconds(10))
+          .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
         String deviceCode = extractJsonString(resp.body(), "device_code");
@@ -121,56 +122,62 @@ public class CopilotAuth {
         // 3. Poll for token
         Instant deadline = Instant.now().plusSeconds(300);
         while (Instant.now().isBefore(deadline)) {
-            Thread.sleep(interval * 1000L);
-            HttpRequest pollReq = HttpRequest.newBuilder()
-                    .uri(URI.create(ACCESS_TOKEN_URL))
-                    .header("Accept", "application/json")
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .POST(HttpRequest.BodyPublishers.ofString(
-                            "client_id=" + CLIENT_ID +
-                            "&device_code=" + deviceCode +
-                            "&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code"))
-                    .timeout(Duration.ofSeconds(10))
-                    .build();
+          Thread.sleep(interval * 1000L);
+          HttpRequest pollReq = HttpRequest.newBuilder()
+            .uri(URI.create(ACCESS_TOKEN_URL))
+            .header("Accept", "application/json")
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .POST(HttpRequest.BodyPublishers.ofString(
+              "client_id=" + CLIENT_ID +
+                "&device_code=" + deviceCode +
+                "&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code"))
+            .timeout(Duration.ofSeconds(10))
+            .build();
 
-            HttpResponse<String> pollResp = http.send(pollReq, HttpResponse.BodyHandlers.ofString());
-            String body = pollResp.body();
-            if (body.contains("access_token")) {
-                return extractJsonString(body, "access_token");
-            }
-            // "authorization_pending" → keep polling; other errors → abort
-            if (!body.contains("authorization_pending") && !body.contains("slow_down")) {
-                throw new RuntimeException("Device flow failed: " + body);
-            }
+          HttpResponse<String> pollResp = http.send(pollReq, HttpResponse.BodyHandlers.ofString());
+          String body = pollResp.body();
+          if (body.contains("access_token")) {
+            return extractJsonString(body, "access_token");
+          }
+          // "authorization_pending" → keep polling; other errors → abort
+          if (!body.contains("authorization_pending") && !body.contains("slow_down")) {
+            throw new EditException("Device flow failed: " + body);
+          }
         }
-        throw new RuntimeException("Device flow timed out");
+        throw new EditException("Device flow timed out");
+      }
+      finally {
+        if (deviceFlowDialog != null) {
+          deviceFlowDialog.dispose();
+        }
+      }
     }
 
     private void showDeviceFlowDialog(String userCode) {
-        SwingUtilities.invokeLater(() -> {
-            JDialog dialog = new JDialog((Frame) null, "GitHub Copilot Authentifizierung", false);
-            dialog.setLayout(new BorderLayout(10, 10));
+      SwingUtilities.invokeLater(() -> {
+        deviceFlowDialog = new JDialog((Frame) null, "GitHub Copilot Authentifizierung", false);
+        deviceFlowDialog.setLayout(new BorderLayout(10, 10));
 
-            JPanel panel = new JPanel(new GridLayout(4, 1, 5, 5));
-            panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 10, 15));
-            panel.add(new JLabel("Öffne im Browser:  https://github.com/login/device"));
-            JTextField codeField = new JTextField(userCode);
-            codeField.setFont(new Font(Font.MONOSPACED, Font.BOLD, 18));
-            codeField.setEditable(false);
-            codeField.setHorizontalAlignment(JTextField.CENTER);
-            panel.add(codeField);
-            panel.add(new JLabel("Gib den Code dort ein und autorisiere die App."));
-            panel.add(new JLabel("Dieses Fenster schließt sich automatisch nach der Anmeldung."));
-            dialog.add(panel, BorderLayout.CENTER);
+        JPanel panel = new JPanel(new GridLayout(4, 1, 5, 5));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 10, 15));
+        panel.add(new JLabel("Öffne im Browser:  https://github.com/login/device"));
+        JTextField codeField = new JTextField(userCode);
+        codeField.setFont(new Font(Font.MONOSPACED, Font.BOLD, 18));
+        codeField.setEditable(false);
+        codeField.setHorizontalAlignment(JTextField.CENTER);
+        panel.add(codeField);
+        panel.add(new JLabel("Gib den Code dort ein und autorisiere die App."));
+        panel.add(new JLabel("Dieses Fenster schließt sich automatisch nach der Anmeldung."));
+        deviceFlowDialog.add(panel, BorderLayout.CENTER);
 
-            JButton closeBtn = new JButton("Schließen");
-            closeBtn.addActionListener(e -> dialog.dispose());
-            dialog.add(closeBtn, BorderLayout.SOUTH);
+        JButton closeBtn = new JButton("Schließen");
+        closeBtn.addActionListener(e -> deviceFlowDialog.dispose());
+        deviceFlowDialog.add(closeBtn, BorderLayout.SOUTH);
 
-            dialog.pack();
-            dialog.setLocationRelativeTo(null);
-            dialog.setVisible(true);
-        });
+        deviceFlowDialog.pack();
+        deviceFlowDialog.setLocationRelativeTo(null);
+        deviceFlowDialog.setVisible(true);
+      });
     }
 
     // --- minimal JSON helpers (no external dependency) ---
