@@ -54,4 +54,5 @@ public interface EditorI extends FocusListener {
   void deleteStepUDBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   void moveBranchSequenceLeftUDBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   void moveBranchSequenceRightUDBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
+  boolean autocompleteOn();
 }

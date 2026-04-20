@@ -1,8 +1,11 @@
 package specman.editarea.keylistener;
 
+import specman.Specman;
 import specman.editarea.TextEditArea;
 import specman.editarea.TextEditAreaAccessMixin;
+import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
+import specman.undo.manager.UndoRecording;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.MutableAttributeSet;
@@ -120,4 +123,16 @@ public class AbstractKeyHandler implements TextEditAreaAccessMixin {
       && currentFontColorValue != null && currentFontColorValue.toString().equalsIgnoreCase(INDIKATOR_GRAU);
   }
 
+  protected void resetSuggestedAutoCompletion() {
+    WrappedPosition autoCompletionEnd = textArea().getPendingAutoCompletionEnd();
+    if (autoCompletionEnd != null) {
+      WrappedDocument doc = getWrappedDocument();
+      WrappedPosition caretPosition = getWrappedCaretPosition();
+      int completionLength = autoCompletionEnd.distance(caretPosition);
+      try(UndoRecording ur = Specman.instance().pauseUndo()) {
+        doc.remove(caretPosition, completionLength);
+      }
+      textArea().setPendingAutoCompletionEnd(null);
+    }
+  }
 }

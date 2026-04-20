@@ -55,12 +55,15 @@ Aus aktueller Anwendung
 - Sortierung der Schritte im Auswahldialog für Schrittrerefenzen ist ungünstig. Vmtl. lexikografisch.
 
 Autocompletions mit Github Copilot
-- Autocompletion wieder entfernen, wenn man irgendetwas anderes drückt als TAB
-- Ein- und Ausschalten der Integration
 - Auslösen durch längeres Innehalten statt TAB drücken
 - Sinnvolleren größeren Kontext bilden
 - Prüfen: was passiert, wenn man nicht online ist? Specman muss sich sinnvoll verhalten.
+- Keine weitere Completion auslösen, wenn schon eine läuft.
+- Nice to have: Toggle des Github-Buttons ohne Hintergrundfarbänderung. Vgl. Klappbutton.
+x Einstellung in den User Preferences festhalten
+x Ein- und Ausschalten der Integration
 x Vor Bestätigen der Autoccompletion durch TAB: Änderungsstil bzw. Normalstil setzen.
+x Autocompletion wieder entfernen, wenn man irgendetwas anderes drückt als TAB
 
 Abschluss für Go-Live
 - Wenn man zu einem Breakschritt bzw. einem Catch-Bereich springt oder einer Schrittreferenz folgt, dann kann sich das Ziel

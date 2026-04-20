@@ -28,6 +28,9 @@ public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyLi
 
   @Override
   public void keyPressed(KeyEvent e) {
+    if (e.getKeyCode() != KeyEvent.VK_TAB) {
+      resetSuggestedAutoCompletion();
+    }
     if (e.isControlDown() && e.getKeyCode() == 'V') {
       keyPastePressed(e);
     }

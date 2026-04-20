@@ -23,6 +23,7 @@ import specman.pdf.Shape;
 import specman.editarea.EditContainer;
 import specman.editarea.TextEditArea;
 import specman.modelops.DeleteStepOperation;
+import specman.suggest.github.CopilotToggleButton;
 import specman.undo.UndoableDiagrammSkaliert;
 import specman.undo.UndoableSchrittEingefaerbt;
 import specman.undo.UndoableSchrittHinzugefuegt;
@@ -848,6 +849,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 			zoom.addItem(faktor);
 		zoom.setSelectedItem(ZoomFaktor.Faktor_100);
 		zoom.setMaximumSize(new Dimension(65, 20));
+    githubCopilotCompletions = new CopilotToggleButton();
 		speichern = new JMenuItem("Speichern");
 		speichern.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
 		speichernUnter = new JMenuItem("Speichern unter...");
@@ -888,6 +890,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
     toolBar.add(zoom);
     toolbarButtonHinzufuegen(birdsview, "birdsview", "Bird's View", toolBar);
     toolbarButtonHinzufuegen(exportPDF, "pdf", "PDF exportieren", toolBar);
+    toolBar.add(githubCopilotCompletions);
 
 		//ToDo SideBar Change from contentPane.add(toolBar, CC.xywh(1, 1, 1, 1));
 		contentPane.add(toolBar, CC.xywh(1, 1, 2, 1));
@@ -1000,6 +1003,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	private JButton aenderungenVerwerfen;
 	private JComboBox<ZoomFaktor> zoom;
 	private JToggleButton aenderungenVerfolgen;
+  private CopilotToggleButton githubCopilotCompletions;
 	private JMenuItem speichern;
 	private JMenuItem speichernUnter;
 	private JMenuItem laden;
@@ -1326,4 +1330,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
     return JOptionPane.showConfirmDialog(this, message, title, optionType);
   }
 
+  @Override
+  public boolean autocompleteOn() {
+    return githubCopilotCompletions.isSelected();
+  }
 }
