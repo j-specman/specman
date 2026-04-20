@@ -1,5 +1,7 @@
 package specman.suggest.github;
 
+import specman.Specman;
+
 import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
@@ -10,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.prefs.Preferences;
 
 /**
  * Handles GitHub Device Flow OAuth and Copilot session token management.
@@ -29,16 +32,18 @@ public class CopilotAuth {
     private static final String DEVICE_CODE_URL = "https://github.com/login/device/code";
     private static final String ACCESS_TOKEN_URL = "https://github.com/login/oauth/access_token";
     private static final String COPILOT_TOKEN_URL = "https://api.github.com/copilot_internal/v2/token";
-    private static final Path TOKEN_FILE = Path.of(System.getProperty("user.home"), ".github-editor-token");
+    private static final String API_TOKEN_PREF = "copilot.api.token";
 
     private final HttpClient http;
     private String cachedSessionToken;
     private Instant sessionTokenExpiry = Instant.EPOCH;
+    private Preferences prefs;
 
     public CopilotAuth() {
         this.http = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
+        this.prefs = Preferences.userNodeForPackage(Specman.class);
     }
 
     /** Returns a valid Copilot session token, refreshing if necessary. */
@@ -63,7 +68,7 @@ public class CopilotAuth {
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
         if (resp.statusCode() != 200) {
             // GitHub token may be expired — delete and retry once
-            Files.deleteIfExists(TOKEN_FILE);
+            prefs.remove(API_TOKEN_PREF);
             githubToken = getGitHubToken();
             req = HttpRequest.newBuilder()
                     .uri(URI.create(COPILOT_TOKEN_URL))
@@ -85,12 +90,13 @@ public class CopilotAuth {
 
     /** Returns the stored GitHub OAuth token, triggering device flow if not present. */
     private String getGitHubToken() throws Exception {
-        if (Files.exists(TOKEN_FILE)) {
-            return Files.readString(TOKEN_FILE).strip();
-        }
-        String token = runDeviceFlow();
-        Files.writeString(TOKEN_FILE, token);
+      String token = prefs.get(API_TOKEN_PREF, null);
+      if (token != null) {
         return token;
+      }
+      token = runDeviceFlow();
+      prefs.put(API_TOKEN_PREF, token);
+      return token;
     }
 
     private String runDeviceFlow() throws Exception {
