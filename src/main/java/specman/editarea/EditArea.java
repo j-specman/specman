@@ -79,7 +79,10 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V001> extends Inte
 
   default AbstractListItemEditArea asListItemArea() { return null; };
 
+  default TableEditArea asTableEditArea() { return null; }
+
   List<JTextComponent> getTextAreas();
 
   void viewsNachinitialisieren();
+
 }

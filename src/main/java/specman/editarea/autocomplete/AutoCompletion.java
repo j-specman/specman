@@ -1,14 +1,15 @@
-package specman.editarea;
+package specman.editarea.autocomplete;
 
 import org.apache.commons.lang.StringUtils;
 import specman.EditException;
 import specman.Specman;
+import specman.editarea.TextEditArea;
+import specman.editarea.TextStyles;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
 import specman.editarea.keylistener.AbstractKeyHandler;
 import specman.editarea.keylistener.EscapeKeyPressedHandler;
 import specman.editarea.keylistener.TabKeyPressedHandler;
-import specman.editarea.keylistener.TextEditAreaKeyListener;
 import specman.suggest.github.CopilotClient;
 import specman.undo.manager.UndoRecording;
 
@@ -24,20 +25,18 @@ import javax.swing.text.SimpleAttributeSet;
  * focus away from the text field (see class {@link EscapeKeyPressedHandler} resp. {@link AbstractKeyHandler#resetSuggestedAutoCompletion()}). */
 public class AutoCompletion implements Runnable {
   private final TextEditArea editArea;
-  private final String before;
-  private final String after;
+  private final WrappedDocument doc;
   private WrappedPosition suggestedCompletionEnd;
   private boolean stopped = false;
 
-  public AutoCompletion(TextEditArea textEditArea, String before, String after) {
+  public AutoCompletion(TextEditArea textEditArea) {
     this.editArea = textEditArea;
-    this.before = before;
-    this.after = after;
+    this.doc = textEditArea.getWrappedDocument();
   }
 
   public void run() {
     try {
-      String completion = new CopilotClient().complete(before, after);
+      String completion = requestCompletionSuggestion();
       if (!StringUtils.isEmpty(completion) && !stopped) {
         addPendingCompletion(completion);
       }
@@ -50,6 +49,22 @@ public class AutoCompletion implements Runnable {
       x.printStackTrace();
       Specman.instance().showError(new EditException("Auto completion failed" + x.getMessage()));
     }
+  }
+
+  private String requestCompletionSuggestion() throws Exception {
+    WrappedPosition caretPosition = editArea.getWrappedCaretPosition();
+    String before = assembleBeforeText(caretPosition);
+    String after = assembleAfterText(caretPosition);
+    return new CopilotClient().complete(before, after);
+  }
+
+  private String assembleBeforeText(WrappedPosition caretPosition) {
+    return new BeforeTextCollector(editArea).collect(caretPosition);
+  }
+
+  private String assembleAfterText(WrappedPosition caretPosition) {
+    WrappedPosition end = doc.end();
+    return doc.getText(caretPosition, end.distance(caretPosition));
   }
 
   private void addPendingCompletion(String completion) {

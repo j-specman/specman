@@ -3,14 +3,13 @@ package specman.editarea.keylistener;
 import specman.EditException;
 import specman.EditorI;
 import specman.Specman;
-import specman.editarea.AutoCompletion;
+import specman.editarea.autocomplete.AutoCompletion;
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
 import specman.suggest.github.CopilotAuth;
 import specman.undo.manager.UndoRecording;
 
-import javax.swing.*;
 import javax.swing.text.AttributeSet;
 import java.awt.event.KeyEvent;
 
@@ -70,13 +69,7 @@ public class TabKeyPressedHandler extends AbstractKeyEventHandler {
    * as it might require and interactive renewal of an API token (see class {@link CopilotAuth}).
    * Therefore we must not block the event loop of the initiating main thread. */
   private void initiateAutoCompletion() {
-    WrappedDocument doc = getWrappedDocument();
-    WrappedPosition caretPosition = getWrappedCaretPosition();
-    WrappedPosition start = doc.start();
-    WrappedPosition end = doc.end();
-    String before = doc.getText(start, caretPosition.distance(start));
-    String after = doc.getText(caretPosition, end.distance(caretPosition));
-    AutoCompletion autoCompletion = new AutoCompletion(textArea(), before, after);
+    AutoCompletion autoCompletion = new AutoCompletion(textArea());
     textArea().setAutoCompletion(autoCompletion);
     new Thread(autoCompletion).start();
   }

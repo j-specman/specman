@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import specman.Aenderungsart;
 import specman.EditorI;
 import specman.Specman;
+import specman.editarea.autocomplete.AutoCompletion;
 import specman.editarea.keylistener.EscapeKeyPressedHandler;
 import specman.editarea.keylistener.TextEditAreaKeyListener;
 import specman.editarea.markups.*;

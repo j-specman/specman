@@ -1,7 +1,7 @@
 package specman.editarea.keylistener;
 
 import specman.Specman;
-import specman.editarea.AutoCompletion;
+import specman.editarea.autocomplete.AutoCompletion;
 import specman.editarea.TextEditArea;
 import specman.editarea.TextEditAreaAccessMixin;
 import specman.editarea.document.WrappedDocument;

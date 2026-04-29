@@ -38,6 +38,7 @@ public interface EditorI extends FocusListener {
 	void setCursor(Cursor cursorToUse);
   boolean aenderungenVerfolgen();
 	AbstractSchrittView findeSchritt(TextEditArea textEditArea);
+	EditContainer getIntro();
 	double scale(double length);
 	void addImageViaFileChooser();
 	List<AbstractSchrittView> listAllSteps();

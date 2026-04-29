@@ -55,8 +55,8 @@ Aus aktueller Anwendung
 - Sortierung der Schritte im Auswahldialog für Schrittrerefenzen ist ungünstig. Vmtl. lexikografisch.
 
 Autocompletions mit Github Copilot
-- Auslösen durch längeres Innehalten statt TAB drücken
 - Sinnvolleren größeren Kontext bilden
+- Auslösen durch längeres Innehalten statt TAB drücken
 - Prüfen: was passiert, wenn man nicht online ist? Specman muss sich sinnvoll verhalten.
 - Nice to have: Wenn der Dialog für den API-Key kommt, verliert die TextArea den Fokus, sodass die Completion verloren geht.
 - Nice to have: Toggle des Github-Buttons ohne Hintergrundfarbänderung. Vgl. Klappbutton.

@@ -573,4 +573,5 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   @Override public String getText() { return "table"; }
   @Override public void setEditDecorationIndentions(Indentions indentions) { /* Nothing to do */ }
   @Override public boolean isTableEditArea() { return true; }
+  @Override public TableEditArea asTableEditArea() { return this; }
 }

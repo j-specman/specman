@@ -614,6 +614,8 @@ public class EditContainer extends JPanel {
 		return hasAreas() ? editAreas.get(index) : null;
 	}
 
+  public int getEditAreaCount() { return editAreas.size(); }
+
 	public void addEditAreaByUndoRedo(EditArea initiatingTextArea, EditArea imageEditArea, TextEditArea cutOffTextArea) {
 		try (UndoRecording ur = Specman.instance().pauseUndo()) {
 			int initiatingTextAreaIndex = indexOf(initiatingTextArea);

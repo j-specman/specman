@@ -1245,6 +1245,9 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	}
 
 	@Override
+	public EditContainer getIntro() { return intro; }
+
+	@Override
 	public List<JTextComponent> queryAllTextComponents(JTextComponent tc) {
 		List<JTextComponent> result = new ArrayList<>();
 		result.addAll(intro.getTextAreas());
