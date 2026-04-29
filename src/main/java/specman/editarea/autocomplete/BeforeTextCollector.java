@@ -32,6 +32,9 @@ import java.util.List;
  *   <li>The diagram intro {@link EditContainer}, if the origin {@link TextEditArea} itself is not
  *      located in the intro.</li>
  * </ol>
+ * To avoid tangling upward traversal through edit containers / steps / step sequences with downwards traversals
+ * through text / table / list item edit areas, the class first collects the edit containers to consider and then
+ * performs the text collection in a second step.
  */
 class BeforeTextCollector {
   private static final int MAX_CHARS = 5000;
