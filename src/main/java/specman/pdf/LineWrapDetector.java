@@ -30,12 +30,16 @@ import java.util.List;
  * anything. It only serves as a wrapper to detect line wrapping in the actual renderers from
  * html2pdf. */
 public class LineWrapDetector extends ParagraphRenderer {
+  public static final int MAX_RETRIES = 4;
+
   /** The list of detectors in preparation for the current rendering */
   private static List<LineWrapDetector> currentRendering;
 
   /** The list of detectors from the last rendering attempt. Used to suggest increased widths
    * for the next attempt wherever an unexpected line wrapping occurred. */
   private static List<LineWrapDetector> lastRendering;
+
+  private static int retries;
 
   private float paragraphWidth;
   boolean wrapDetected;
@@ -85,15 +89,17 @@ public class LineWrapDetector extends ParagraphRenderer {
   public static void start() {
     lastRendering = null;
     currentRendering = new ArrayList<>();
+    retries = 0;
   }
 
   /** Returns true if the last rendering caused any line wrapping and therefore needs to be
    * repeated. The method immeditely prepares the next rendering attempt by initializing the
    * detector lists accordingly. */
   public static boolean retryRequired() {
-    if (anyWrapDetected()) {
+    if (retries < MAX_RETRIES && anyWrapDetected()) {
       lastRendering = currentRendering;
       currentRendering = new ArrayList<>();
+      retries++;
       System.err.println("Retrying PDF rendering with increased widths for wrapped lines...");
       return true;
     }
