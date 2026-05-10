@@ -94,6 +94,7 @@ public class LineWrapDetector extends ParagraphRenderer {
     if (anyWrapDetected()) {
       lastRendering = currentRendering;
       currentRendering = new ArrayList<>();
+      System.err.println("Retrying PDF rendering with increased widths for wrapped lines...");
       return true;
     }
     return false;

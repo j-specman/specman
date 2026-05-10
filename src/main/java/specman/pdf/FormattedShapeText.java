@@ -98,7 +98,7 @@ public class FormattedShapeText extends AbstractShapeText {
           Float suggestedParagraphWidth = LineWrapDetector.suggestedWidthFromLastRendering();
           float paragraphWidth = suggestedParagraphWidth != null
             ? suggestedParagraphWidth
-            : (content.getWidth() - getInsets().left - getInsets().right) * swing2pdfScaleFactor - 10f;
+            : (content.getWidth() - getInsets().left - getInsets().right) * swing2pdfScaleFactor;
 
           Paragraph p = new Paragraph()
             .setMargin(0)
