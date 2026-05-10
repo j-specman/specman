@@ -53,6 +53,7 @@ Aus aktueller Anwendung
 - Hoch/Runterscrollen über Grenzen von Schritten wäre cool
 - Die meisten Texte im PDF-Export sind etwas zu klein, wenn man auf 120% Zoom exportiert
 - Sortierung der Schritte im Auswahldialog für Schrittrerefenzen ist ungünstig. Vmtl. lexikografisch.
+x PDF-Rendering führt in seltenen Fällen zu unerwünschten Zeilenumbrüchen. Retries mit geweiteten Paragraphen notwendig.
 x Spalte aus Tabelle Löschen und anschließend Undo -> Teilungsverhältnisse werden nicht wieder restauriert.
 x Verschieben eines Schritts, der in anderen Schritten referenziert wird, sorgt für unerwünschtes Scrollen zu diesen
    anderen Schritten.

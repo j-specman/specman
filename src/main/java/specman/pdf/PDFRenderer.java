@@ -1,7 +1,5 @@
 package specman.pdf;
 
-import com.itextpdf.kernel.colors.ColorConstants;
-import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfPage;
@@ -21,7 +19,6 @@ import java.io.IOException;
 
 import static specman.pdf.Shape.DEFAULT_LINE_COLOR;
 import static specman.pdf.Shape.toPDFColor;
-import static specman.view.AbstractSchrittView.LINIENBREITE;
 
 public class PDFRenderer {
   // This factor turned out to be the one, which causes the PDF-rendered
@@ -51,23 +48,31 @@ public class PDFRenderer {
       this.pageSize = portrait ? pageSize : pageSize.rotate();
       this.withPageTiling = withPageTiling;
       this.uizoomfactor = uizoomfactor;
-      pdfOutputStream = new ByteArrayOutputStream();
-      writer = new PdfWriter(pdfOutputStream);
-      pdfDoc = new PdfDocument(writer);
-      document = new Document(pdfDoc);
     }
     catch(Exception x) {
       x.printStackTrace();
     }
   }
 
+  private void initWriterAndDocument() {
+    pdfOutputStream = new ByteArrayOutputStream();
+    writer = new PdfWriter(pdfOutputStream);
+    pdfDoc = new PdfDocument(writer);
+    document = new Document(pdfDoc);
+  }
+
   public void render(Shape rootShape) throws IOException {
-    PageSize overlengthPagesize = initPdfCanvasAndScaleFactor(rootShape);
-    int yTop = hasOverlength(overlengthPagesize)
-      ? rootShape.getHeight()
-      : (int)(pageSize.getHeight() / swing2pdfScaleFactor);
-    Point topLeftCorner = new Point(0, yTop);
-    render(rootShape, topLeftCorner, overlengthPagesize);
+    LineWrapDetector.start();
+    do {
+      initWriterAndDocument();
+      PageSize overlengthPagesize = initPdfCanvasAndScaleFactor(rootShape);
+      int yTop = hasOverlength(overlengthPagesize)
+        ? rootShape.getHeight()
+        : (int)(pageSize.getHeight() / swing2pdfScaleFactor);
+      Point topLeftCorner = new Point(0, yTop);
+      render(rootShape, topLeftCorner, overlengthPagesize);
+    }
+    while(LineWrapDetector.retryRequired());
   }
 
   private PageSize initPdfCanvasAndScaleFactor(Shape rootShape) {

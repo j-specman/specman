@@ -26,12 +26,18 @@ import com.itextpdf.layout.element.IBlockElement;
 import com.itextpdf.layout.element.IElement;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.font.FontProvider;
+import com.itextpdf.layout.layout.LayoutContext;
+import com.itextpdf.layout.layout.LayoutResult;
 import com.itextpdf.layout.properties.Leading;
 import com.itextpdf.layout.properties.LineHeight;
 import com.itextpdf.layout.properties.Property;
+import com.itextpdf.layout.renderer.IRenderer;
+import com.itextpdf.layout.renderer.LineRenderer;
+import com.itextpdf.layout.renderer.ParagraphRenderer;
 import org.junit.jupiter.api.Test;
 
 import javax.imageio.ImageIO;
+import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -42,6 +48,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import static com.itextpdf.kernel.pdf.PdfName.BaseFont;
+import static com.itextpdf.layout.properties.Property.FONT_PROVIDER;
 
 /**
  *  Simple examples taken from https://www.tutorialspoint.com/itext/itext_drawing_line.htm
@@ -298,5 +305,69 @@ public class ITextTest {
     desktop.open(new java.io.File("sample.pdf"));
   }
 
+  static class LineWrapDetectingRenderer extends ParagraphRenderer {
+
+    private final float expectedHeight;
+    private float renderedHeight = 0;
+
+    LineWrapDetectingRenderer(Paragraph modelElement, float expectedHeight) {
+      super(modelElement);
+      this.expectedHeight = expectedHeight;
+    }
+
+    @Override
+    public LayoutResult layout(LayoutContext layoutContext) {
+      LayoutResult result = super.layout(layoutContext);
+      if (getOccupiedArea() != null) {
+        renderedHeight = getOccupiedArea().getBBox().getHeight();
+      }
+      return result;
+    }
+
+    boolean hasUnexpectedWrap() {
+      return renderedHeight > expectedHeight * 1.5f;
+    }
+  }
+
+  @Test
+  void testUnexpectedLineWrap() throws Exception {
+    java.util.List<IElement> elements = HtmlConverter.convertToElements("<html>\n" +
+      "  <body>\n" +
+      "    Hello World!" +
+      "  </body>\n" +
+      "</html>\n");
+
+    PdfDocument pdf = new PdfDocument(new PdfWriter("sample.pdf"));
+    Document document = new Document(pdf);
+
+    java.util.List<LineWrapDetectingRenderer> renderers = new ArrayList<>();
+
+    for (IElement elementToPrint : elements) {
+      Paragraph p = new Paragraph()
+        .setBackgroundColor(ColorConstants.YELLOW)
+        .setMargin(0)
+        .setMultipliedLeading(0.0f)
+        .setCharacterSpacing(-0.1f)
+        .setFixedPosition(200, 700, 60);
+      p.add((IBlockElement) elementToPrint);
+
+      LineWrapDetectingRenderer renderer = new LineWrapDetectingRenderer(p, 13.8f);
+      p.setNextRenderer(renderer);
+      renderers.add(renderer);
+
+      document.add(p);
+    }
+
+    document.close();
+
+    for (LineWrapDetectingRenderer renderer : renderers) {
+      if (renderer.hasUnexpectedWrap()) {
+        System.out.println("Unerwarteter Zeilenumbruch in: " + renderer.getOccupiedArea());
+      }
+    }
+
+    Desktop desktop = Desktop.getDesktop();
+    desktop.open(new java.io.File("sample.pdf"));
+  }
 
 }

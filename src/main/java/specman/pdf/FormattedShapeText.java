@@ -3,18 +3,14 @@ package specman.pdf;
 import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
-import com.itextpdf.io.font.FontProgram;
 import com.itextpdf.io.font.FontProgramFactory;
 import com.itextpdf.kernel.font.PdfFont;
-import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.IBlockElement;
 import com.itextpdf.layout.element.IElement;
 import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.font.FontInfo;
 import com.itextpdf.layout.font.FontProvider;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import specman.Specman;
 import specman.editarea.HTMLTags;
@@ -28,7 +24,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Utilities;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -66,7 +61,6 @@ public class FormattedShapeText extends AbstractShapeText {
 
     try {
       java.util.List<TextlineDimension> lines = scanLineDimensions();
-      float paragraphWidth = (content.getWidth() - getInsets().left - getInsets().right) * swing2pdfScaleFactor;
       MarkedCharSequence changemarks = content.findMarkups();
 
       for (TextlineDimension line: lines) {
@@ -101,6 +95,11 @@ public class FormattedShapeText extends AbstractShapeText {
             elementToPrint.setProperty(FONT_PROVIDER, fontProvider);
           }
 
+          Float suggestedParagraphWidth = LineWrapDetector.suggestedWidthFromLastRendering();
+          float paragraphWidth = suggestedParagraphWidth != null
+            ? suggestedParagraphWidth
+            : (content.getWidth() - getInsets().left - getInsets().right) * swing2pdfScaleFactor - 10f;
+
           Paragraph p = new Paragraph()
             .setMargin(0)
             .setMultipliedLeading(0.0f)
@@ -111,6 +110,7 @@ public class FormattedShapeText extends AbstractShapeText {
               (renderOffset.y - line.getY() - line.getHeight()) * swing2pdfScaleFactor,
               paragraphWidth);
           p.add((IBlockElement) elementToPrint);
+          new LineWrapDetector(p, paragraphWidth);
 
           document.add(p);
         }
