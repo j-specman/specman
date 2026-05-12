@@ -35,20 +35,20 @@ public class LineWrapDetector extends ParagraphRenderer {
   /** The list of detectors in preparation for the current rendering */
   private static List<LineWrapDetector> currentRendering;
 
-  /** The list of detectors from the last rendering attempt. Used to suggest increased widths
-   * for the next attempt wherever an unexpected line wrapping occurred. */
+  /** The list of detectors from the last rendering attempt. Used to suggest tighter character
+   * spacing for the next attempt wherever an unexpected line wrapping occurred. */
   private static List<LineWrapDetector> lastRendering;
 
   private static int retries;
 
-  private float paragraphWidth;
+  private float characterSpacing;
   boolean wrapDetected;
 
-  public LineWrapDetector(Paragraph paragraph, float paragraphWidth) {
+  public LineWrapDetector(Paragraph paragraph, float characterSpacing) {
     super(paragraph);
     currentRendering.add(this);
     paragraph.setNextRenderer(this);
-    this.paragraphWidth = paragraphWidth;
+    this.characterSpacing = characterSpacing;
   }
 
   @Override
@@ -72,21 +72,21 @@ public class LineWrapDetector extends ParagraphRenderer {
     return wrapDetected;
   }
 
-  public static Float suggestedWidthFromLastRendering() {
+  public static Float suggestedCharacterSpacingFromLastRendering() {
     if (lastRendering == null) {
       return null;
     }
     // This is a bit tricky: we know that every rendering repetition requires the same number of paragraphs in the same
     // order. The paragraph being in preparation is the first one which no detector is yet present in the current detector
-    // list. So the current list size can be used as an index to address the current paragraph's detector from tha last
+    // list. So the current list size can be used as an index to address the current paragraph's detector from the last
     // rendering attempt.
     int lastDetectorIndex = currentRendering.size();
     LineWrapDetector lastDetector = lastRendering.get(lastDetectorIndex);
-    float paragraphWidth = lastDetector.paragraphWidth;
-    return lastDetector.wrapDetected() ? paragraphWidth + 2f : paragraphWidth;
+    float spacing = lastDetector.characterSpacing;
+    return lastDetector.wrapDetected() ? spacing - 0.1f * (float)Math.pow(2, retries - 1) : spacing;
   }
 
-  public static void start() {
+  public static void init() {
     lastRendering = null;
     currentRendering = new ArrayList<>();
     retries = 0;

@@ -1076,6 +1076,13 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 				Point scrollPosition = scrollPane.getViewport().getViewPosition();
 				Point workingAreaLocation = arbeitsbereich.getLocation();
 				workingAreaLocation.translate(scrollPosition.x, scrollPosition.y);
+
+				// Following lines force a complete UI layouting which is crucial for
+				// propper PDF rendering in case, the user didn't yet actually work with
+				// the spec but simply opened it for PDF export without touching it.
+				arbeitsbereich.setSize(arbeitsbereich.getPreferredSize());
+				arbeitsbereich.validate();
+
 				Shape all = new Shape(workingAreaLocation)
 					.add(intro.getShape())
 					.add(hauptSequenz.getShapeSequence())

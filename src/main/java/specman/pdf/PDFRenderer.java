@@ -62,7 +62,7 @@ public class PDFRenderer {
   }
 
   public void render(Shape rootShape) throws IOException {
-    LineWrapDetector.start();
+    LineWrapDetector.init();
     do {
       initWriterAndDocument();
       PageSize overlengthPagesize = initPdfCanvasAndScaleFactor(rootShape);

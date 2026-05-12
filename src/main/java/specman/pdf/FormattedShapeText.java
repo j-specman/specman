@@ -95,22 +95,21 @@ public class FormattedShapeText extends AbstractShapeText {
             elementToPrint.setProperty(FONT_PROVIDER, fontProvider);
           }
 
-          Float suggestedParagraphWidth = LineWrapDetector.suggestedWidthFromLastRendering();
-          float paragraphWidth = suggestedParagraphWidth != null
-            ? suggestedParagraphWidth
-            : (content.getWidth() - getInsets().left - getInsets().right) * swing2pdfScaleFactor;
+          float paragraphWidth = (content.getWidth() - getInsets().left - getInsets().right) * swing2pdfScaleFactor;
+          Float suggestedCharacterSpacing = LineWrapDetector.suggestedCharacterSpacingFromLastRendering();
+          float characterSpacing = suggestedCharacterSpacing != null ? suggestedCharacterSpacing : -0.1f;
 
           Paragraph p = new Paragraph()
             .setMargin(0)
             .setMultipliedLeading(0.0f)
-            .setCharacterSpacing(-0.1f)
+            .setCharacterSpacing(characterSpacing)
             .setFontSize(scaledFontSize)
             .setFixedPosition(
               (renderOffset.x + line.getX()) * swing2pdfScaleFactor,
               (renderOffset.y - line.getY() - line.getHeight()) * swing2pdfScaleFactor,
               paragraphWidth);
           p.add((IBlockElement) elementToPrint);
-          new LineWrapDetector(p, paragraphWidth);
+          new LineWrapDetector(p, characterSpacing);
 
           document.add(p);
         }
