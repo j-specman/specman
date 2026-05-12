@@ -99,7 +99,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	//TODO window for dragging
 	public final JWindow window = new JWindow();
 	private final Set<Integer> pressedKeys = new HashSet<>();
-	public static final String SPECMAN_TITLE = "Specman";
+	public static String SPECMAN_TITLE = "Specman " + SpecmanVersion.getVersion();
 
 	public Specman(File fileToOpen) throws Exception {
 		instance = this;
@@ -176,7 +176,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
   private void openInitialFile(File fileToOpen) {
 		if (fileToOpen != null) {
-			diagrammLaden(fileToOpen);
+			// Das Laden des Diagramms muss hier verzögert erfolgen, nachdem der initiale Layout-Zyklus gelaufen ist.
+			// Andernfalls kommt es zu Problemen, wenn man die geöffnete Datei gar nicht bearbeitet, sondern nur direkt
+			// einen PDF-Export vornimmt. Der Export übernimmt nämlich das Layout aus dem UI, und wenn das noch nicht
+			// vollständig aufgebaut ist, wird der Export Murks (abgeschnittene Texte, zu kleine Boxen...)
+			SwingUtilities.invokeLater(() -> diagrammLaden(fileToOpen));
 		}
 	}
 
@@ -1076,13 +1080,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 				Point scrollPosition = scrollPane.getViewport().getViewPosition();
 				Point workingAreaLocation = arbeitsbereich.getLocation();
 				workingAreaLocation.translate(scrollPosition.x, scrollPosition.y);
-
-				// Following lines force a complete UI layouting which is crucial for
-				// propper PDF rendering in case, the user didn't yet actually work with
-				// the spec but simply opened it for PDF export without touching it.
-				arbeitsbereich.setSize(arbeitsbereich.getPreferredSize());
-				arbeitsbereich.validate();
-
 				Shape all = new Shape(workingAreaLocation)
 					.add(intro.getShape())
 					.add(hauptSequenz.getShapeSequence())
