@@ -134,12 +134,6 @@
             <version>${itext.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>html2pdf</artifactId>
-            <!-- Different version from core. See https://kb.itextpdf.com/home/it7kb/compatibility-matrix for matching versions -->
-            <version>6.3.0</version>
-        </dependency>
 
         <dependency>
             <groupId>org.asciidoctor</groupId>

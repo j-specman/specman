@@ -62,17 +62,13 @@ public class PDFRenderer {
   }
 
   public void render(Shape rootShape) throws IOException {
-    LineWrapDetector.init();
-    do {
-      initWriterAndDocument();
-      PageSize overlengthPagesize = initPdfCanvasAndScaleFactor(rootShape);
-      int yTop = hasOverlength(overlengthPagesize)
-        ? rootShape.getHeight()
-        : (int)(pageSize.getHeight() / swing2pdfScaleFactor);
-      Point topLeftCorner = new Point(0, yTop);
-      render(rootShape, topLeftCorner, overlengthPagesize);
-    }
-    while(LineWrapDetector.retryRequired());
+    initWriterAndDocument();
+    PageSize overlengthPagesize = initPdfCanvasAndScaleFactor(rootShape);
+    int yTop = hasOverlength(overlengthPagesize)
+      ? rootShape.getHeight()
+      : (int)(pageSize.getHeight() / swing2pdfScaleFactor);
+    Point topLeftCorner = new Point(0, yTop);
+    render(rootShape, topLeftCorner, overlengthPagesize);
   }
 
   private PageSize initPdfCanvasAndScaleFactor(Shape rootShape) {

@@ -1,6 +1,5 @@
 package specman.pdf;
 
-import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.font.PdfSimpleFont;

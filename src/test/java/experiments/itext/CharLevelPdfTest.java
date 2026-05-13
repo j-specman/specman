@@ -379,7 +379,10 @@ public class CharLevelPdfTest extends JFrame {
    */
   private String toITextFamilyName(Font swingFont) {
     String family = swingFont.getFamily();
-    // Strip spaces — iText registered names match the TTF PostScript family (no spaces)
+    if (family.equalsIgnoreCase("Monospaced") || family.equalsIgnoreCase("Courier New")
+        || family.equalsIgnoreCase("Courier")) {
+      return "CourierPrime";
+    }
     return family.replace(" ", "");
   }
 

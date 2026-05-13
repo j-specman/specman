@@ -18,16 +18,13 @@ public class TextStyles {
     public static final int SCHRITTNR_FONTSIZE = 10;
 
     public static MutableAttributeSet geaendertTextBackground = new SimpleAttributeSet();
-    public static MutableAttributeSet geaendertTextBackgroundPDF = new SimpleAttributeSet();
     public static MutableAttributeSet geloeschtStil = new SimpleAttributeSet();
     public static MutableAttributeSet ganzerSchrittGeloeschtStil = new SimpleAttributeSet();
     public static MutableAttributeSet standardStil = new SimpleAttributeSet();
     public static MutableAttributeSet standardTextBackground = new SimpleAttributeSet();
     public static MutableAttributeSet quellschrittStil = new SimpleAttributeSet();
     public static MutableAttributeSet stepnumberLinkStyle = new SimpleAttributeSet();
-    public static MutableAttributeSet stepnumberLinkStylePDF = new SimpleAttributeSet();
     public static MutableAttributeSet changedStepnumberLinkStyle = new SimpleAttributeSet();
-    public static MutableAttributeSet changedStepnumberLinkStylePDF = new SimpleAttributeSet();
     public static MutableAttributeSet deletedStepnumberLinkStyle = new SimpleAttributeSet();
 
     public static final java.util.List<String> FONTFILES = java.util.List.of(
@@ -100,30 +97,16 @@ public class TextStyles {
     public static final String changedStepnumberLinkHTMLColor = toHTMLColor(changedStepnumberLinkColor);
 
     static {
-      // TODO JL: Modify comment concerning usage in PDF
-      // Das hier ist ein bisschen tricky:
-      // Die Zeile mit StyleConstants.setBackground sorgt dafür, dass man die Hintergrundfarbe
-      // unmittelbar beim Editieren in der Oberfläche sieht. Allerdings taucht sie dann nicht
-      // im abgespeicherten HTML auf und geht auch verloren, sobald man einen Zeilenumbruch im
-      // Text einfügt. Also braucht man noch ein weiteres, persistentes Styling über ein Span-Tag,
-      // wie ich es hier gefunden habe:
-      // https://stackoverflow.com/questions/13285526/jtextpane-text-background-color-does-not-work
       String htmlStyleGeaendert = "background-color:" + INDIKATOR_GELB;
       String htmlStyleSchwarz = "background-color:" + INDIKATOR_SCHWARZ;
       String htmlStyleStandard = "background-color:" + toHTMLColor(TEXT_BACKGROUND_COLOR_STANDARD);
-      String htmlStyleSteplink = "background-color:" + stepnumberLinkStyleHTMLColor;
-      String htmlStyleChangedSteplink = "background-color:" + changedStepnumberLinkHTMLColor;
 
       SimpleAttributeSet htmlBackgroundStyleChanged = new SimpleAttributeSet();
       SimpleAttributeSet htmlBackgroundStyleBlack = new SimpleAttributeSet();
       SimpleAttributeSet htmlBackgroundStyleStandard = new SimpleAttributeSet();
-      SimpleAttributeSet htmlBackgroundStyleSteplink = new SimpleAttributeSet();
-      SimpleAttributeSet htmlBackgroundStyleChangedSteplink = new SimpleAttributeSet();
 
       htmlBackgroundStyleChanged.addAttribute(HTML.Attribute.STYLE, htmlStyleGeaendert);
       StyleConstants.setBackground(geaendertTextBackground, AENDERUNGSMARKIERUNG_FARBE);
-      StyleConstants.setBackground(geaendertTextBackgroundPDF, AENDERUNGSMARKIERUNG_FARBE);
-      geaendertTextBackgroundPDF.addAttribute(HTML.Tag.SPAN, htmlBackgroundStyleChanged);
 
       StyleConstants.setBackground(geloeschtStil, AENDERUNGSMARKIERUNG_FARBE);
       StyleConstants.setStrikeThrough(geloeschtStil, true);
@@ -148,14 +131,7 @@ public class TextStyles {
       StyleConstants.setFontSize(quellschrittStil, 7);
 
       StyleConstants.setBackground(stepnumberLinkStyle, stepnumberLinkStyleColor);
-      htmlBackgroundStyleSteplink.addAttribute(HTML.Attribute.STYLE, htmlStyleSteplink);
-      StyleConstants.setBackground(stepnumberLinkStylePDF, stepnumberLinkStyleColor);
-      stepnumberLinkStylePDF.addAttribute(HTML.Tag.SPAN, htmlBackgroundStyleSteplink);
-
       StyleConstants.setBackground(changedStepnumberLinkStyle, changedStepnumberLinkColor);
-      htmlBackgroundStyleChangedSteplink.addAttribute(HTML.Attribute.STYLE, htmlStyleChangedSteplink);
-      StyleConstants.setBackground(changedStepnumberLinkStylePDF, changedStepnumberLinkColor);
-      changedStepnumberLinkStylePDF.addAttribute(HTML.Tag.SPAN, htmlBackgroundStyleChangedSteplink);
 
       deletedStepnumberLinkStyle.addAttribute(HTML.Tag.SPAN, htmlBackgroundStyleChanged);
       StyleConstants.setBackground(deletedStepnumberLinkStyle, changedStepnumberLinkColor);
