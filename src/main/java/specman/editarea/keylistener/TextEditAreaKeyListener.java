@@ -19,7 +19,6 @@ import static specman.editarea.TextStyles.INDIKATOR_SCHWARZ;
 import static specman.editarea.TextStyles.deletedStepnumberLinkStyle;
 import static specman.editarea.TextStyles.geaendertTextBackground;
 import static specman.editarea.TextStyles.geloeschtStil;
-import static specman.editarea.TextStyles.standardStil;
 
 public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyListener {
   public TextEditAreaKeyListener(TextEditArea textArea) {
@@ -138,7 +137,11 @@ public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyLi
     if (!ganzerSchrittGeloeschtStilGesetzt()) {
       StyledEditorKit k = (StyledEditorKit) getEditorKit();
       MutableAttributeSet inputAttributes = k.getInputAttributes();
-      inputAttributes.addAttributes(standardStil);
+      // Remove explicit color attributes rather than setting white/black values —
+      // positively setting colors would clutter the HTML with spurious span/font elements.
+      inputAttributes.removeAttribute(CSS.Attribute.BACKGROUND_COLOR);
+      inputAttributes.removeAttribute(CSS.Attribute.COLOR);
+      StyleConstants.setStrikeThrough(inputAttributes, false);
     }
   }
 

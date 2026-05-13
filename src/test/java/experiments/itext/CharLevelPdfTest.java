@@ -344,7 +344,8 @@ public class CharLevelPdfTest extends JFrame {
 
   private Font getResolvedFont(JEditorPane editor, int offset) {
     View rootView = editor.getUI().getRootView(editor);
-    return findGlyphView(rootView, offset);
+    Font resolved = findGlyphView(rootView, offset);
+    return resolved != null ? resolved : editor.getFont();
   }
 
   private Font findGlyphView(View view, int offset) {

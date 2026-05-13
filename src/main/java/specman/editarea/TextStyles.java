@@ -20,7 +20,6 @@ public class TextStyles {
     public static MutableAttributeSet geaendertTextBackground = new SimpleAttributeSet();
     public static MutableAttributeSet geloeschtStil = new SimpleAttributeSet();
     public static MutableAttributeSet ganzerSchrittGeloeschtStil = new SimpleAttributeSet();
-    public static MutableAttributeSet standardStil = new SimpleAttributeSet();
     public static MutableAttributeSet standardTextBackground = new SimpleAttributeSet();
     public static MutableAttributeSet quellschrittStil = new SimpleAttributeSet();
     public static MutableAttributeSet stepnumberLinkStyle = new SimpleAttributeSet();
@@ -99,11 +98,9 @@ public class TextStyles {
     static {
       String htmlStyleGeaendert = "background-color:" + INDIKATOR_GELB;
       String htmlStyleSchwarz = "background-color:" + INDIKATOR_SCHWARZ;
-      String htmlStyleStandard = "background-color:" + toHTMLColor(TEXT_BACKGROUND_COLOR_STANDARD);
 
       SimpleAttributeSet htmlBackgroundStyleChanged = new SimpleAttributeSet();
       SimpleAttributeSet htmlBackgroundStyleBlack = new SimpleAttributeSet();
-      SimpleAttributeSet htmlBackgroundStyleStandard = new SimpleAttributeSet();
 
       htmlBackgroundStyleChanged.addAttribute(HTML.Attribute.STYLE, htmlStyleGeaendert);
       StyleConstants.setBackground(geaendertTextBackground, AENDERUNGSMARKIERUNG_FARBE);
@@ -117,11 +114,6 @@ public class TextStyles {
       StyleConstants.setStrikeThrough(ganzerSchrittGeloeschtStil, true);
       StyleConstants.setForeground(ganzerSchrittGeloeschtStil, Schriftfarbe_Geloescht);
 
-      htmlBackgroundStyleStandard.addAttribute(HTML.Attribute.STYLE, htmlStyleStandard);
-      standardStil.addAttribute(HTML.Tag.SPAN, htmlBackgroundStyleStandard);
-      StyleConstants.setBackground(standardStil, TEXT_BACKGROUND_COLOR_STANDARD);
-      StyleConstants.setStrikeThrough(standardStil, false);
-      StyleConstants.setForeground(standardStil, Schriftfarbe_Standard);
       StyleConstants.setBackground(standardTextBackground, TEXT_BACKGROUND_COLOR_STANDARD);
 
       quellschrittStil.addAttribute(HTML.Tag.SPAN, htmlBackgroundStyleChanged);

@@ -144,7 +144,10 @@ public class FormattedShapeText extends AbstractShapeText {
 
   private Font getResolvedFont(int offset) {
     View rootView = content.getUI().getRootView(content);
-    return findGlyphView(rootView, offset);
+    Font resolved = findGlyphView(rootView, offset);
+    // findGlyphView should always find a GlyphView for any visible character, but
+    // content.getFont() is a safe fallback to prevent NPEs in the calling code.
+    return resolved != null ? resolved : content.getFont();
   }
 
   private Font findGlyphView(View view, int offset) {
