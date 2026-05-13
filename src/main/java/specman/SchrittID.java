@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * Die ID eines Schrittes ist aus mehreren laufenden Nummern aufgebaut, die der üblichen Notation wie 1.19.7 entsprechen
  */
-public class SchrittID {
+public class SchrittID implements Comparable<SchrittID> {
 	public final List<Integer> nummern = new ArrayList<Integer>();
 
 	public SchrittID() {} // For Jackson only
@@ -64,6 +64,15 @@ public class SchrittID {
 	public int hashCode() {
 		return Objects.hash(nummern);
 	}
+
+  @Override
+  public int compareTo(SchrittID other) {
+    for (int i = 0; i < Math.min(nummern.size(), other.nummern.size()); i++) {
+      int cmp = Integer.compare(nummern.get(i), other.nummern.get(i));
+      if (cmp != 0) return cmp;
+    }
+    return Integer.compare(nummern.size(), other.nummern.size());
+  }
 
   public static String asString(SchrittID id) {
     return id == null ? null : id.toString();

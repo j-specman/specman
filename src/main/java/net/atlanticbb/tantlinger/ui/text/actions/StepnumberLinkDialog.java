@@ -57,7 +57,9 @@ public class StepnumberLinkDialog extends JDialog {
     }
 
     private void init() {
-        steps = Specman.instance().listAllSteps();
+        steps = Specman.instance().listAllSteps().stream()
+          .sorted((a, b) -> a.getId().compareTo(b.getId()))
+          .toList();
 
         JPanel headerPanel = new HeaderPanel(title, desc, icon);
 

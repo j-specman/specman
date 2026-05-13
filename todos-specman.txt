@@ -51,8 +51,8 @@ Aus aktueller Anwendung
     Man muss dann mehrfach klicken, um das eigentliche Undo auszulösen
 - PDF-Option "Export beim Speichern"
 - Hoch/Runterscrollen über Grenzen von Schritten wäre cool
-- Die meisten Texte im PDF-Export sind etwas zu klein, wenn man auf 120% Zoom exportiert
-- Sortierung der Schritte im Auswahldialog für Schrittrerefenzen ist ungünstig. Vmtl. lexikografisch.
+x Sortierung der Schritte im Auswahldialog für Schrittrerefenzen ist ungünstig. Vmtl. lexikografisch.
+x Die meisten Texte im PDF-Export sind etwas zu klein, wenn man auf 120% Zoom exportiert
 x PDF-Rendering führt in seltenen Fällen zu unerwünschten Zeilenumbrüchen. Retries mit geweiteten Paragraphen notwendig.
 x Spalte aus Tabelle Löschen und anschließend Undo -> Teilungsverhältnisse werden nicht wieder restauriert.
 x Verschieben eines Schritts, der in anderen Schritten referenziert wird, sorgt für unerwünschtes Scrollen zu diesen
@@ -141,7 +141,7 @@ x PDF-Export
   - Nice to have: Seitenzahlen bei Tiling
   - Nice to have: Bulletpoints / Zahlen von Lineitems liegen nicht auf der Baseline des Lineitem-Texts
   - Nice to have: Springen über Schrittreferenzen im PDF
-  - Es kommt hin und wieder (inzwischen selten) zu Zeilen, die im PDF etwas zu lang sind und dann in die nächste Zeile umbrechen
+  x Es kommt hin und wieder (inzwischen selten) zu Zeilen, die im PDF etwas zu lang sind und dann in die nächste Zeile umbrechen
      Kann man das Feld für den Text einfach etwas zu breit definieren? Besser der Text ragt gelegentlich rechts ein wenig
      raus als wenn er umbricht und den Text darunter unleserlich macht. Problem scheint aber hauptsächlich zu entstehen,
      wenn der Inhalt skaliert werden muss. Wenn das also sauber funktioniert, ist das Problem hier vielleicht weg.
@@ -189,7 +189,14 @@ x Ist der letzte Schritt einer Sequenz ein Subsequenzschritt, und klappt man die
 
 Bugs fixen
 - Ändern des Paragraphtypen lässt sich nicht zurücknehmen
-- Falsche Fontgröße für "bar" im PDF-Export bei <font size="3">foo<span>bar</span></font>
+- Komplettes Rewrite von DraggingLogic
+- resyncSchrittnummerStil sollte nur beim Aufbau aus Modell verwendet werden. Ansonsten sollte beim (Neu-)Setzen der ID der Stil immer erhalten bleiben, abhängig von Geloescht und Quellschritt
+- Fokus setzen beim Entfernen des vorletzten Schritts
+- Löschen des vorletzten Zweigs erlauben
+- Abfangen des Löschens des letzten Zweigs im Case
+- NumberStepBackground in RoundedBorderDecorator schwarz färben wenn Schritt gelöscht ist
+- 'Cannot invoke "specman.SpaltenResizer.getShape()" because "this.breitenAnpasser" is null' in PDF-Export with no diagram
+x Falsche Fontgröße für "bar" im PDF-Export bei <font size="3">foo<span>bar</span></font>
    Vielleicht weil die Styles von span und font[size=3]>span beide passen
 x Fehler in UndoableSchrittVerschobenMarkiert.undoEdit:
    Bei neuem Quellschritt erfolgt ein Aufruf von step.aenderungsmarkierungenEntfernen();
@@ -203,13 +210,6 @@ x Letzter Zeilenumbruch in einem Schritt kann nicht entfernt werden
       Eine Ausgabe von document.getText() mit den Offsets gibt jedoch den erwarteten Text (\n) zurück.
 x Beim Undo einer Verschiebung eines BreakSchritts im Änderungsmodus, wird die Schrittnummer im verlinkten Catch-Schritt nicht mehr gerendert
      Repaint des Diagramms bringt sie wieder zum Vorschein.
-- Komplettes Rewrite von DraggingLogic
-- resyncSchrittnummerStil sollte nur beim Aufbau aus Modell verwendet werden. Ansonsten sollte beim (Neu-)Setzen der ID der Stil immer erhalten bleiben, abhängig von Geloescht und Quellschritt
-- Fokus setzen beim Entfernen des vorletzten Schritts
-- Löschen des vorletzten Zweigs erlauben
-- Abfangen des Löschens des letzten Zweigs im Case
-- NumberStepBackground in RoundedBorderDecorator schwarz färben wenn Schritt gelöscht ist
-- 'Cannot invoke "specman.SpaltenResizer.getShape()" because "this.breitenAnpasser" is null' in PDF-Export with no diagram
 x Hellgelber Hintergrund wird beim Laden von Datei nicht überall wieder hergestellt
 
 
