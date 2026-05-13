@@ -118,6 +118,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		scrollPane = new JScrollPane();
     viewport = new PausableViewport();
     scrollPane.setViewport(viewport);
+		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
+		scrollPane.getHorizontalScrollBar().setUnitIncrement(20);
 		//TODO
 		scrollPane.addMouseWheelListener(new DragMouseAdapter(this));
 		contentPane.add(scrollPane, CC.xy(2, 3));
