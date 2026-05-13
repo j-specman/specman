@@ -1,30 +1,21 @@
 package specman;
 
-import specman.editarea.TableEditAreaSelectionTracker;
 import specman.pdf.LineShape;
 import specman.pdf.Shape;
 import specman.undo.UndoableSpaltenbreiteAngepasst;
-import specman.view.AbstractSchrittView;
 
-import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.MouseAdapter;
+import java.awt.KeyboardFocusManager;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
-import java.awt.image.BufferedImage;
-
-import static java.awt.Cursor.DEFAULT_CURSOR;
-import static java.awt.Cursor.getPredefinedCursor;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
 
 public class SpaltenResizer extends JPanel implements MouseListener {
 	Integer dragX;
+	boolean dragCancelled;
 	final SpaltenContainerI container;
 	final int spalte;
 	static Cursor leftRightCursor;
@@ -42,9 +33,20 @@ public class SpaltenResizer extends JPanel implements MouseListener {
 
 		addMouseMotionListener(new MouseMotionAdapter() {
 			@Override public void mouseDragged(MouseEvent e) {
-				dragX = e.getX();
-				Specman.instance().vertikalLinieSetzen(dragX, SpaltenResizer.this);
+				if (!dragCancelled) {
+					dragX = e.getX();
+					Specman.instance().vertikalLinieSetzen(dragX, SpaltenResizer.this);
+				}
 			}
+		});
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
+			if (e.getID() == KeyEvent.KEY_PRESSED && e.getKeyCode() == KeyEvent.VK_ESCAPE && dragX != null) {
+				dragX = null;
+				dragCancelled = true;
+				Specman.instance().vertikalLinieSetzen(0, null);
+				return true;
+			}
+			return false;
 		});
 	}
 
@@ -56,10 +58,12 @@ public class SpaltenResizer extends JPanel implements MouseListener {
 	}
 
   @Override public void mouseClicked(MouseEvent e) {}
+
   @Override public void mousePressed(MouseEvent e) {}
 
   @Override
   public void mouseReleased(MouseEvent e) {
+      dragCancelled = false;
       if (dragX != null) {
         int ermoeglichteVeraenderung = container.spaltenbreitenAnpassenNachMausDragging(e.getX(), spalte);
         if (ermoeglichteVeraenderung != 0) {

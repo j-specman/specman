@@ -1,8 +1,12 @@
 Aus aktueller Anwendung
-- Page-up / Page-down geht nicht
-- Fokus ist nach dem Öffnen auf der Zoom-Kombobox. Wenn man also noch dem Öffnen einer Datei auf Page-down / Page-up drückt, ändert man den Zoomfaktor, statt dass man auf dem Wege Scrollen kann
 - Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
 - Multi-Catch
+  - Obersten Co-Catch nach oben schieben macht diesen zum primären Catch
+     - Reorg der Nummerierung wird notwendig
+  - Undo-Experience beim Löschen eines Co-Catchs (und einer Catch-Sequenz) verbessern
+    Das Klicken auf den Lösch-Button löst eine FocusLost und eine Synchronisation der Texte zwischen Catch und Break aus
+    Diese Aktionen landen in der Undo-Historie vor dem eigentlichen Löschen des Co-Catchs.
+    Man muss dann mehrfach klicken, um das eigentliche Undo auszulösen
   x Hinzufügen hinter primärer Überschrift
   x Synch der Texte in Co-Catchs - Break-Schritt braucht Info zur Catch-Überschrift
   x Renummerierung bei Nummernänderung der Breakschritte
@@ -43,14 +47,11 @@ Aus aktueller Anwendung
       x Schreiben auf Datei
       x Laden von Datei
     x Undo / Redo
-  - Obersten Co-Catch nach oben schieben macht diesen zum primären Catch
-     - Reorg der Nummerierung wird notwendig
-  - Undo-Experience beim Löschen eines Co-Catchs (und einer Catch-Sequenz) verbessern
-    Das Klicken auf den Lösche-Button löst eine FocusLost und eine Synchronisation der Texte zwischen Catch und Break aus
-    Diese Aktionen landen in der Undo-Historie vor dem eigentlichen Löschen des Co-Catchs.
-    Man muss dann mehrfach klicken, um das eigentliche Undo auszulösen
 - PDF-Option "Export beim Speichern"
-- Hoch/Runterscrollen über Grenzen von Schritten wäre cool
+- Hoch/Runter über Grenzen von Schritten wäre cool
+x Page-up / Page-down geht nicht
+x Scrollen mit Mausrad ist zu langsam
+x Fokus ist nach dem Öffnen auf der Zoom-Kombobox. Wenn man also noch dem Öffnen einer Datei auf Page-down / Page-up drückt, ändert man den Zoomfaktor, statt dass man auf dem Wege Scrollen kann
 x Sortierung der Schritte im Auswahldialog für Schrittrerefenzen ist ungünstig. Vmtl. lexikografisch.
 x Die meisten Texte im PDF-Export sind etwas zu klein, wenn man auf 120% Zoom exportiert
 x PDF-Rendering führt in seltenen Fällen zu unerwünschten Zeilenumbrüchen. Retries mit geweiteten Paragraphen notwendig.

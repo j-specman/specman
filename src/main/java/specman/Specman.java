@@ -120,6 +120,20 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
     scrollPane.setViewport(viewport);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
 		scrollPane.getHorizontalScrollBar().setUnitIncrement(20);
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
+			if (e.getID() != KeyEvent.KEY_PRESSED) return false;
+			JScrollBar bar = scrollPane.getVerticalScrollBar();
+			int pageSize = scrollPane.getViewport().getHeight();
+			if (e.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
+				bar.setValue(bar.getValue() + pageSize);
+				return true;
+			}
+			if (e.getKeyCode() == KeyEvent.VK_PAGE_UP) {
+				bar.setValue(bar.getValue() - pageSize);
+				return true;
+			}
+			return false;
+		});
 		//TODO
 		scrollPane.addMouseWheelListener(new DragMouseAdapter(this));
 		contentPane.add(scrollPane, CC.xy(2, 3));
@@ -1016,6 +1030,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	private static Specman instance;
 
 	public static EditorI instance() { return instance; }
+
 
 	public boolean aenderungenVerfolgen() {
 		return aenderungenVerfolgen.isSelected();
