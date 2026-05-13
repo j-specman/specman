@@ -25,6 +25,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.io.Serial;
+import java.util.Comparator;
 import java.util.List;
 
 public class StepnumberLinkDialog extends JDialog {
@@ -57,8 +58,11 @@ public class StepnumberLinkDialog extends JDialog {
     }
 
     private void init() {
-        steps = Specman.instance().listAllSteps().stream()
-          .sorted((a, b) -> a.getId().compareTo(b.getId()))
+        steps = Specman
+          .instance()
+          .listAllSteps()
+          .stream()
+          .sorted(Comparator.comparing(AbstractSchrittView::getId))
           .toList();
 
         JPanel headerPanel = new HeaderPanel(title, desc, icon);
