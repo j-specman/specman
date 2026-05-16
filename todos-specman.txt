@@ -7,46 +7,6 @@ Aus aktueller Anwendung
     Das Klicken auf den Lösch-Button löst eine FocusLost und eine Synchronisation der Texte zwischen Catch und Break aus
     Diese Aktionen landen in der Undo-Historie vor dem eigentlichen Löschen des Co-Catchs.
     Man muss dann mehrfach klicken, um das eigentliche Undo auszulösen
-  x Hinzufügen hinter primärer Überschrift
-  x Synch der Texte in Co-Catchs - Break-Schritt braucht Info zur Catch-Überschrift
-  x Renummerierung bei Nummernänderung der Breakschritte
-    x Primär, also inkl. Behandlungssequenz
-    x Co, also nur Catch-Überschrift
-  x Co-Catch entfernen, implizit durch Löschen des Breakschritts
-  x Hinzufügen hinter Co-Catch: lastFocusedTextArea wird nicht gesetzt
-  x Hin- und Herscrollen zwischen Co-Catch und Break-Schritt
-  x Co-Catch entfernen, explizit
-  x Schreiben auf Datei
-  x Laden von Datei
-  x Zoom in Co-Catches
-  x PDF-Export
-  x Rechter Balken
-    x Hinzufügen mit ersten Co-Catch
-    x Entfernen mit letztem Co-Catch
-    x Zoom für Balkenbreite
-    x Resizer für Balkenbreite
-    x Balkenbreite auf Datei schreiben
-    x Balkenbreite von Datei lesen (ACHTUNG: Mit Null-Unterstützung für Kompatibilität!)
-    x PDF-Rendering
-  x Catch-Dreieck nur so hoch wie der Überschrifttext. Wird sonst fies hoch bei einfachen Catch-Sequenzen neben Catch-Sequenzen mit Co-Catches
-  x Undo / Redo
-    x Co-Catch einfügen
-    x Co-Catch entfernen
-    x Balkenbreite ändern
-  x Co-Catches hoch und runter schieben, analog Catch-Sequenzen rechts und links
-    x Undo / Redo
-  x Änderungsmarkierung
-    x Hinzufügen
-      x Annehmen
-      x Verwerfen
-      x Schreiben auf Datei
-      x Laden von Datei
-    x Entfernen
-      x Annehmen
-      x Verwerfen
-      x Schreiben auf Datei
-      x Laden von Datei
-    x Undo / Redo
 - PDF-Option "Export beim Speichern"
 - Hoch/Runter über Grenzen von Schritten wäre cool
 x Page-up / Page-down geht nicht
@@ -54,30 +14,11 @@ x Scrollen mit Mausrad ist zu langsam
 x Fokus ist nach dem Öffnen auf der Zoom-Kombobox. Wenn man also noch dem Öffnen einer Datei auf Page-down / Page-up drückt, ändert man den Zoomfaktor, statt dass man auf dem Wege Scrollen kann
 x Sortierung der Schritte im Auswahldialog für Schrittrerefenzen ist ungünstig. Vmtl. lexikografisch.
 x Die meisten Texte im PDF-Export sind etwas zu klein, wenn man auf 120% Zoom exportiert
-x PDF-Rendering führt in seltenen Fällen zu unerwünschten Zeilenumbrüchen. Retries mit geweiteten Paragraphen notwendig.
-x Spalte aus Tabelle Löschen und anschließend Undo -> Teilungsverhältnisse werden nicht wieder restauriert.
-x Verschieben eines Schritts, der in anderen Schritten referenziert wird, sorgt für unerwünschtes Scrollen zu diesen
-   anderen Schritten.
-x Unterbinden der Unternummerierung in Untersequenzen, zunächst SubsequenzSchrittView, später auch Schleifen und Zweige
-  x Kontextmenü für Schrittnummerlabel
-  x Toggle-Menüitem für Umschaltung
-  x Persistierung der Einstellung
-  x Undo/Redo für Umschaltung der Unternummerierung
-  x Bei Schachtelung von Subsequenzen mit flacher Nummerierung muss eine Umnummerierung der inneren Sequenz an die äußere
-     propagiert werden, um ggf. kaskadierend Folgeschritte neu zu nummerierend.
 x Fokushistorie
    Ähnlich wie in intelliJ kann der User über Drücken von Strg+Alt+Links/Rechts zu den zuletzt verwendeten Schritte navigieren.
 x Cursor links springt nicht sauber über Schrittreferenzen hinweg.
    Man kann ein Zeichen hinein navigieren, dafür springt der Cursor nicht weiter, wenn er am Anfang einer Referenz steht.
    Cursor rechts geht einwandfrei.
-x Klappbuttons sehen mit neuem Look&Feel komisch aus
-x PDF-Exportdialog erscheint jetzt manchmal hinter dem Hauptfenster
-x Schrittlinks werden nicht korrekt abgespeichert!! Nach dem Laden der Datei sind sie weg.
-x Springen zwischen Break und Catch über CTRL+Klick auf die Schrittnummer (analog Schrittreferenzen) wäre hilfreich
-x Durch neues Lock&Feel wird der Zielbalken beim Schritt-Dragging an der falschen Stellen angezeigt.
-   Platziert wird der Schritt hinterher korrekt, nur der Balken auf der GlassPane ist falsch positioniert.
-x Pluszeichen für zugeklappte Schritte sind manchmal ohne erkennbare Änderung in dem Schritt gelb. Siehe UC-791 Stand 24.11.2025
-x Catch lässt sich nicht löschen
 
 Abschluss für Go-Live
 - Wenn man zu einem Breakschritt bzw. einem Catch-Bereich springt oder einer Schrittreferenz folgt, dann kann sich das Ziel
@@ -136,42 +77,15 @@ Abschluss für Go-Live
     ACHTUNG: wird im Moment auch ausgelöst, wenn wir im Suchdialog von einem Feld zum nächsten
       springen und im neuen Feld die Caretposition auf 0 setzen. Hier am besten mal schauen, warum
       das im Ursprungscode des Dialogs beim Ersetzen nicht auch schon ein Problem war.
-x Beim öffnen der Dialoge für Fontgrößenänderung sind diese nicht korrekt initialisiert, wenn man einen anderen Zoomfaktor
-    als 100% eingestellt hat.
 x PDF-Export
   - Nice to have: Seitenzahlen bei Tiling
   - Nice to have: Bulletpoints / Zahlen von Lineitems liegen nicht auf der Baseline des Lineitem-Texts
   - Nice to have: Springen über Schrittreferenzen im PDF
-  x Es kommt hin und wieder (inzwischen selten) zu Zeilen, die im PDF etwas zu lang sind und dann in die nächste Zeile umbrechen
-     Kann man das Feld für den Text einfach etwas zu breit definieren? Besser der Text ragt gelegentlich rechts ein wenig
-     raus als wenn er umbricht und den Text darunter unleserlich macht. Problem scheint aber hauptsächlich zu entstehen,
-     wenn der Inhalt skaliert werden muss. Wenn das also sauber funktioniert, ist das Problem hier vielleicht weg.
-  x In einem Vorformatierten Absatz sollten uneingeschränkt Spaces möglich sein
-     HTMLBlockAction#changeBlockType
-  x Vorformatierten Absatz im PDF-Stylesheet mit Top-Margin versehen. Der Text wird leicht nach oben verschoben angezeigt
-  x Font-Auswahldialog breiter machen, damit man die Größenangaben komplett lesen kann
-  x Fonttyp-Combobox sorgt für Fokusverlust im aktuellen Textfeld, sodass die Auswahl nicht auf den selektierten Text
-     anwendbar ist. Im Fontgrößen-Button / Font-Farbendialog / Font-Auswahldialog besteht das Problem nicht
-  x Auswahl der Fontgröße im Font-Auswahldialog nicht in Pixeln, sondern in Größenklassen analog Größenbutton.
-     Default: Mittel (Size 4), analog Auswahlbutton
-  x Im Font-Auswahldialog zeigt die Vorschau nicht den richtigen Font, wenn man auf "Sitka" stellt.
-  x Fonts im Auswahldialog mit Namen kombiniert aus Family und Eigenschaft darstellen:
-     x Sitka - Serif
-     x Roboto - Sans Serif
-     x Courier Prime - Monospace
-  x PDF-Generierung ist seit der Wiederverwendung eingebetteter Fonts deutlich langsamer geworden. Anders herum
-     hätte ich es erwartet. Woran liegt das?
-  x Fonts werden bei der PDF-Generierung in jeden einzelnen Paragrafen dubliziert eingebetten. Deswegen sind die
-     PDF-Dateien so riesig groß. Wie man die nur *einmalig* einbettet, habe ich noch nicht herausgefunden.
-  x Font-Einschränkung wieder entfernen. Mindestens ein Sans Serif und ein Monospace Font müssen dabei sein
 - Ordentliche Fehlermeldungsanzeige
 - Permanente Aktualisierung der Birdsview oder vielleicht erst mal Birdsview rausnehmen
 - Vielleicht eine kleiner Top-Inset für Schritt-Texte, um die Überschneidung mit den Labels zu verringern?
 - Doku aktualisieren
 - Beschriftungen internationalisieren
-x Neben Serif-Font auch Sans Serif und Monospace Font einbauen und alle anderen entfernen
-  x Muss auch alles PDF-tauglich sein
-x Tabellentexte werden initial nicht mit dem richtigen Font dargestellt. Erst nach Speichern und neu Laden sind sie korrekt
 x Tabellen als separate Elemente analog Bilder
   - Nice to have: Einfärben von Zellen (statt Schritt), wenn Fokus in Tabellenzelle steht
   - Nice to have: Springen in die nächste Zelle durch Drücken von TAB
@@ -179,14 +93,6 @@ x Tabellen als separate Elemente analog Bilder
   x Zurücknehmen hinzugefügter Zeilen und Spalten
   x Löschen neu hinzugefügter Zeilen und Spalten muss direkt Wirkung zeigen
   x Berücksichtigen von Änderungsmodus beim Hinzufügen / Löschen von Zeilen
-x Ist der letzte Schritt einer Sequenz ein Subsequenzschritt, und klappt man diesen zusammen, verbleibt unterhalb
-   ein schwarzer Bereich, wenn parallele Sequenzen mehr Platz nach unten in Anspruch nehmen.
-    x BottomFiller
-    x SubsequenzSchrittView
-    x VerweigungSchrittView
-    x SchleifenSchrittView
-    x Richtige Farbe nach dem Laden von Datei
-    x Entfärben bei Annahme der Änderungen
 
 Bugs fixen
 - Ändern des Paragraphtypen lässt sich nicht zurücknehmen
@@ -197,22 +103,6 @@ Bugs fixen
 - Abfangen des Löschens des letzten Zweigs im Case
 - NumberStepBackground in RoundedBorderDecorator schwarz färben wenn Schritt gelöscht ist
 - 'Cannot invoke "specman.SpaltenResizer.getShape()" because "this.breitenAnpasser" is null' in PDF-Export with no diagram
-x Falsche Fontgröße für "bar" im PDF-Export bei <font size="3">foo<span>bar</span></font>
-   Vielleicht weil die Styles von span und font[size=3]>span beide passen
-x Fehler in UndoableSchrittVerschobenMarkiert.undoEdit:
-   Bei neuem Quellschritt erfolgt ein Aufruf von step.aenderungsmarkierungenEntfernen();
-   Dadurch gehen auch Änderungen *vor* der Verschiebung verloren.
-x Nach dem Löschen eines Breakschritts mit verknüpfter Catch-Sequenz wird beim Undo zwar beides wieder hergestellt aber die Verknüpfung nicht
-   D.h. bei Redo bleibt die Catch-Sequenz zurück
-x Letzter Zeilenumbruch in einem Schritt kann nicht entfernt werden
-    - Problem ist, dass der Umbruch nicht entfernt werden kann, da der Offset angeblich größer als das Dokumentenende ist:
-      RemoveAction.actionPerformed(e) -> HTMLUtils.removeElement()Zeile199 - Es wird erkannt, dass der Offset des zu entfernenden Elements größer ist
-      als die Länge des Documents und die zu entfernende Länge auf 0 reduziert wird. Dies führt dazu, dass der Zeilenumbruch nicht entfernt wird.
-      Eine Ausgabe von document.getText() mit den Offsets gibt jedoch den erwarteten Text (\n) zurück.
-x Beim Undo einer Verschiebung eines BreakSchritts im Änderungsmodus, wird die Schrittnummer im verlinkten Catch-Schritt nicht mehr gerendert
-     Repaint des Diagramms bringt sie wieder zum Vorschein.
-x Hellgelber Hintergrund wird beim Laden von Datei nicht überall wieder hergestellt
-
 
 Auf längere Sicht - nicht notwendig für ersten Go-Live:
 - Schritt-Morphing: If/Else -> Case usw.
