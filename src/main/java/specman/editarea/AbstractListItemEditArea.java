@@ -22,6 +22,7 @@ import java.awt.event.FocusListener;
 import java.util.HashMap;
 import java.util.List;
 
+import specman.styles.Styles;
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.Aenderungsart.Untracked;
@@ -78,7 +79,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
 
   @Override
   public void setGeloeschtMarkiertStilUDBL() {
-    setBackgroundUDBL(TextStyles.AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE);
+    setBackgroundUDBL(Styles.AENDERUNGSFARBE.panelColor);
     content.setGeloeschtMarkiertStilUDBL(null);
   }
 

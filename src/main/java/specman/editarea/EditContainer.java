@@ -38,10 +38,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static specman.editarea.TextStyles.AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE;
-import static specman.editarea.TextStyles.BACKGROUND_COLOR_STANDARD;
-import static specman.editarea.TextStyles.SCHRITTNR_FONTSIZE;
-import static specman.editarea.TextStyles.labelFont;
+import specman.styles.Styles;
+import static specman.styles.Styles.AENDERUNGSFARBE;
+import static specman.styles.Styles.BACKGROUND_COLOR_STANDARD;
+import static specman.styles.Styles.SCHRITTNR_FONTSIZE;
+import static specman.styles.Styles.labelFont;
 import static specman.model.v001.EditorContentModel_V001.empty;
 
 /** Zentrales grafisches Containerpanel für einen zusammenhängenden Text mit einem Nummernlabel
@@ -138,7 +139,7 @@ public class EditContainer extends JPanel {
 			EditArea editArea;
 			if (editAreaModel instanceof TextEditAreaModel_V001) {
 				TextEditAreaModel_V001 textEditAreaModel = (TextEditAreaModel_V001)editAreaModel;
-				editArea = new TextEditArea(textEditAreaModel, TextStyles.DEFAULTFONT);
+				editArea = new TextEditArea(textEditAreaModel, Styles.DEFAULTFONT);
 			}
 			else if (editAreaModel instanceof ImageEditAreaModel_V001) {
 				ImageEditAreaModel_V001 imageEditAreaModel = (ImageEditAreaModel_V001)editAreaModel;
@@ -203,12 +204,12 @@ public class EditContainer extends JPanel {
 
 	public void setQuellStil(SchrittID zielschrittID) {
 		editAreas.forEach(ea -> ea.setQuellStil());
-		setBackground(AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE);
+		setBackground(AENDERUNGSFARBE.panelColor);
 		schrittNummer.setSourceStyle(zielschrittID);
 	}
 
 	public void setGeloeschtMarkiertStilUDBL(SchrittID id) {
-		setBackgroundUDBL(AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE);
+		setBackgroundUDBL(AENDERUNGSFARBE.panelColor);
 		modifyableEditAreas().forEach(ea -> ea.setGeloeschtMarkiertStilUDBL());
 		if (schrittNummer != null) {
 			schrittNummer.setDeletedStyleUDBL(id);

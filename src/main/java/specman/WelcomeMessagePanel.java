@@ -1,6 +1,6 @@
 package specman;
 
-import specman.editarea.TextStyles;
+import specman.styles.Styles;
 import specman.view.AbstractSchrittView;
 
 import javax.swing.*;
@@ -10,7 +10,7 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.Properties;
 
-import static specman.editarea.TextStyles.DIAGRAMM_LINE_COLOR;
+import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
 
 public class WelcomeMessagePanel extends JLabel {
 

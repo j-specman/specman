@@ -10,7 +10,7 @@ import specman.undo.props.UDBL;
 import javax.swing.*;
 import java.awt.*;
 
-import static specman.editarea.TextStyles.AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE;
+import static specman.styles.Styles.AENDERUNGSFARBE;
 
 public class QuellSchrittView extends AbstractSchrittView {
 
@@ -21,7 +21,7 @@ public class QuellSchrittView extends AbstractSchrittView {
         //Die Höhe des Schrittnummer-Labels sollte die Höhe bestimmen.
         super(editor, parent, new EditorContentModel_V001(".", Aenderungsart.Quellschritt), id, Aenderungsart.Quellschritt);
         setQuellStil();
-        setBackgroundUDBL(AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE);
+        setBackgroundUDBL(AENDERUNGSFARBE.panelColor);
     }
 
     @Override

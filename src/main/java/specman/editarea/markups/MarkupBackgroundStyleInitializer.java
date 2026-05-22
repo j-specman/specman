@@ -2,7 +2,7 @@ package specman.editarea.markups;
 
 import specman.Specman;
 import specman.editarea.TextEditArea;
-import specman.editarea.TextStyles;
+import specman.styles.Styles;
 import specman.editarea.document.WrappedDocument;
 import specman.model.v001.Markup_V001;
 import specman.undo.manager.UndoRecording;
@@ -12,7 +12,7 @@ import javax.swing.text.AttributeSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import static specman.editarea.TextStyles.standardTextBackground;
+import static specman.styles.Styles.standardTextBackground;
 
 /** The yellow background of text sections being marked as changed, is <i>not</i> included
  * in the HTML content of a text area. The styling must therefore be initialized from the

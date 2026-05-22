@@ -16,17 +16,17 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 
 import static specman.SchrittID.asString;
-import static specman.editarea.TextStyles.AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE;
-import static specman.editarea.TextStyles.Hintergrundfarbe_Geloescht;
-import static specman.editarea.TextStyles.Hintergrundfarbe_Schrittnummer;
-import static specman.editarea.TextStyles.SCHRITTNUMMER_VORDERGRUNDFARBE;
-import static specman.editarea.TextStyles.Schriftfarbe_Geloescht;
-import static specman.editarea.TextStyles.labelFont;
+import static specman.styles.Styles.AENDERUNGSFARBE;
+import static specman.styles.Styles.DELETED_BACKGROUND_COLOR;
+import static specman.styles.Styles.SCHRITTNUMMER_FARBE;
+import static specman.styles.Styles.SCHRITTNUMMER_VORDERGRUNDFARBE;
+import static specman.styles.Styles.Schriftfarbe_Geloescht;
+import static specman.styles.Styles.labelFont;
 
 public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
-  private static final Border STANDARD_BORDER = new MatteBorder(0, 2, 0, 1, Hintergrundfarbe_Schrittnummer);
-  private static final Border CHANGED_BORDER = new MatteBorder(0, 2, 0, 1, AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE);
-  private static final Border DELETED_BORDER = new MatteBorder(0, 2, 0, 1, Hintergrundfarbe_Geloescht);
+  private static final Border STANDARD_BORDER = new MatteBorder(0, 2, 0, 1, SCHRITTNUMMER_FARBE.color);
+  private static final Border CHANGED_BORDER = new MatteBorder(0, 2, 0, 1, AENDERUNGSFARBE.panelColor);
+  private static final Border DELETED_BORDER = new MatteBorder(0, 2, 0, 1, DELETED_BACKGROUND_COLOR.color);
   private static final String SPACER = " ";
   private static final String TO_TARGET_ARROW = SPACER + ">" + SPACER;
   private static final String FROM_SOURCE_ARROW = SPACER + "<" + SPACER;
@@ -38,7 +38,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
 
     structure = LabelStructure.Standard;
     setFont(labelFont);
-    setBackground(Hintergrundfarbe_Schrittnummer);
+    setBackground(SCHRITTNUMMER_FARBE.color);
     setBorder(STANDARD_BORDER);
     setForeground(Color.WHITE);
     setOpaque(true);
@@ -126,12 +126,12 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
   }
 
   private boolean fullTextDeleted() {
-    return structure == LabelStructure.Standard && getBackground() == Hintergrundfarbe_Geloescht;
+    return structure == LabelStructure.Standard && getBackground() == DELETED_BACKGROUND_COLOR.color;
   }
 
   public void setStandardStyle(SchrittID id) {
     setBorder(STANDARD_BORDER);
-    setBackground(Hintergrundfarbe_Schrittnummer);
+    setBackground(SCHRITTNUMMER_FARBE.color);
     setForeground(SCHRITTNUMMER_VORDERGRUNDFARBE);
     this.structure = LabelStructure.Standard;
     setText(id.toString());
@@ -140,15 +140,15 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
   public void setTargetStyleUDBL(SchrittID quellschrittId) {
     setStructureUDBL(LabelStructure.Target);
     setBorderUDBL(CHANGED_BORDER);
-    setBackgroundUDBL(AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE);
-    setForegroundUDBL(Hintergrundfarbe_Geloescht);
+    setBackgroundUDBL(AENDERUNGSFARBE.panelColor);
+    setForegroundUDBL(SCHRITTNUMMER_VORDERGRUNDFARBE);
     resyncSourceSuffixUDBL(quellschrittId);
   }
 
   public void setSourceStyle(SchrittID zielschrittID) {
     setStructure(LabelStructure.Source);
     setBorder(DELETED_BORDER);
-    setBackground(Hintergrundfarbe_Geloescht);
+    setBackground(DELETED_BACKGROUND_COLOR.color);
     setForeground(Schriftfarbe_Geloescht);
     NumberPair numbers = splitText();
     setTextUDBL(numbers.own, asString(zielschrittID));
@@ -180,7 +180,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
   public void setDeletedStyleUDBL(SchrittID id) {
     setStructureUDBL(LabelStructure.Standard);
     setBorderUDBL(DELETED_BORDER);
-    setBackgroundUDBL(Hintergrundfarbe_Geloescht);
+    setBackgroundUDBL(DELETED_BACKGROUND_COLOR.color);
     setForegroundUDBL(Schriftfarbe_Geloescht);
     setTextUDBL(id.toString(), null);
   }

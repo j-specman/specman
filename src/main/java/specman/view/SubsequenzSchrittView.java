@@ -17,7 +17,7 @@ import java.awt.Color;
 import java.awt.event.ComponentEvent;
 import java.util.List;
 
-import static specman.editarea.TextStyles.DIAGRAMM_LINE_COLOR;
+import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.view.KlappButton.ZEILENLAYOUT_FILLER_HIDDEN;
 
 public class SubsequenzSchrittView extends AbstractSchrittView {

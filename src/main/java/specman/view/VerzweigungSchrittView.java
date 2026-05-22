@@ -16,8 +16,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
 
-import static specman.editarea.TextStyles.BACKGROUND_COLOR_STANDARD;
-import static specman.editarea.TextStyles.DIAGRAMM_LINE_COLOR;
+import static specman.styles.Styles.BACKGROUND_COLOR_STANDARD;
+import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
 
 /** Basisklasse für If, If/Else und Case */
 abstract public class VerzweigungSchrittView extends AbstractSchrittView implements SpaltenContainerI {

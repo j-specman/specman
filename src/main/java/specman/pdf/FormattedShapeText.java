@@ -9,7 +9,7 @@ import com.itextpdf.layout.font.FontCharacteristics;
 import com.itextpdf.layout.font.FontInfo;
 import com.itextpdf.layout.font.FontProvider;
 import specman.editarea.TextEditArea;
-import specman.editarea.TextStyles;
+import specman.styles.Styles;
 
 import javax.swing.text.*;
 import java.awt.*;
@@ -262,7 +262,7 @@ public class FormattedShapeText extends AbstractShapeText {
   public static void initFont(int uizoomfactor, float swing2pdfScaleFactor) {
     try {
       fontProvider = new FontProvider();
-      for (String fontfile : TextStyles.FONTFILES) {
+      for (String fontfile : Styles.FONTFILES) {
         fontProvider.addFont(FontProgramFactory.createFont(fontfile));
       }
       fontProvider.addFont(FontProgramFactory.createFont()); // Helvetica for step labels

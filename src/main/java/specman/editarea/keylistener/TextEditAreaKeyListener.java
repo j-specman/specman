@@ -13,12 +13,12 @@ import javax.swing.text.html.CSS;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import static specman.editarea.TextStyles.INDIKATOR_GELOESCHT_MARKIERT;
-import static specman.editarea.TextStyles.INDIKATOR_GRAU;
-import static specman.editarea.TextStyles.INDIKATOR_SCHWARZ;
-import static specman.editarea.TextStyles.deletedStepnumberLinkStyle;
-import static specman.editarea.TextStyles.geaendertTextBackground;
-import static specman.editarea.TextStyles.geloeschtStil;
+import static specman.styles.Styles.INDIKATOR_GELOESCHT_MARKIERT;
+import static specman.styles.Styles.SCHRITTNUMMER_FARBE;
+import static specman.styles.Styles.DELETED_BACKGROUND_COLOR;
+import static specman.styles.Styles.AENDERUNGSFARBE;
+import static specman.styles.Styles.deletedStepnumberLinkStyle;
+import static specman.styles.Styles.geloeschtStil;
 
 public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyListener {
   public TextEditAreaKeyListener(TextEditArea textArea) {
@@ -151,10 +151,10 @@ public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyLi
     // Wenn an der aktuellen Position schon gelbe Hintegrundfarbe
     // eingestellt ist, dann Ändern wir den aktuellen Style gar nicht mehr.
     if (!aenderungsStilGesetzt() && !stepnumberLinkNormalStyleSet(getWrappedCaretPosition())) {
-      StyledEditorKit k = (StyledEditorKit) getEditorKit();
+      StyledEditorKit k = getEditorKit();
       MutableAttributeSet inputAttributes = k.getInputAttributes();
       StyleConstants.setStrikeThrough(inputAttributes, false); // Falls noch Gelöscht-Stil herrschte
-      inputAttributes.addAttributes(geaendertTextBackground);
+      inputAttributes.addAttributes(AENDERUNGSFARBE.text.background);
     }
   }
 
@@ -164,15 +164,15 @@ public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyLi
     Object currentTextDecoration = inputAttributes.getAttribute(CSS.Attribute.TEXT_DECORATION);
     Object currentFontColorValue = inputAttributes.getAttribute(CSS.Attribute.COLOR);
     if (currentTextDecoration != null && currentTextDecoration.toString().equals(INDIKATOR_GELOESCHT_MARKIERT)
-      && currentFontColorValue != null && currentFontColorValue.toString().equals(INDIKATOR_GRAU)) {
+      && currentFontColorValue != null && SCHRITTNUMMER_FARBE.isBackground(currentFontColorValue.toString())) {
       return false;
     }
     Object currentBackgroundColorValue = inputAttributes.getAttribute(CSS.Attribute.BACKGROUND_COLOR);
     return currentBackgroundColorValue != null
-      && currentBackgroundColorValue.toString().equalsIgnoreCase(INDIKATOR_SCHWARZ)
+      && DELETED_BACKGROUND_COLOR.isBackground(currentBackgroundColorValue.toString())
       && currentTextDecoration != null
       && currentTextDecoration.toString().equalsIgnoreCase(INDIKATOR_GELOESCHT_MARKIERT)
-      && currentFontColorValue != null && currentFontColorValue.toString().equalsIgnoreCase(INDIKATOR_GRAU);
+      && currentFontColorValue != null && SCHRITTNUMMER_FARBE.isBackground(currentFontColorValue.toString());
   }
 
 }

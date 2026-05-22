@@ -16,8 +16,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Utilities;
 import java.awt.event.KeyEvent;
 
-import static specman.editarea.TextStyles.deletedStepnumberLinkStyle;
-import static specman.editarea.TextStyles.geloeschtStil;
+import static specman.styles.Styles.deletedStepnumberLinkStyle;
+import static specman.styles.Styles.geloeschtStil;
 import static specman.editarea.markups.CharType.ParagraphBoundary;
 
 class BackspaceKeyPressedHandler extends AbstractRemovalKeyPressedHandler {

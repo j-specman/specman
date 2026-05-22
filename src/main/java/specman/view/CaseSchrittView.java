@@ -32,9 +32,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import static specman.Specman.initialtext;
-import static specman.editarea.TextStyles.BACKGROUND_COLOR_STANDARD;
+import static specman.styles.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.pdf.Shape.GAP_COLOR;
-import static specman.editarea.TextStyles.AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE;
+import static specman.styles.Styles.AENDERUNGSFARBE;
 import static specman.view.KlappButton.ZEILENLAYOUT_FILLER_HIDDEN;
 
 
@@ -425,7 +425,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 			else {
 				zweig.alsGeloeschtMarkierenUDBL();
 				if (zweig == caseSequenzen.get(0)) {
-					UDBL.setBackgroundUDBL(panelFall1, AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE);
+					UDBL.setBackgroundUDBL(panelFall1, AENDERUNGSFARBE.panelColor);
 					UDBL.repaint(panel);
 				}
 			}

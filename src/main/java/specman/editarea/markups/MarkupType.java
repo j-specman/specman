@@ -5,12 +5,15 @@ import specman.editarea.document.WrappedElement;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.html.CSS;
 
-import static specman.editarea.TextStyles.*;
+import static specman.styles.Styles.AENDERUNGSFARBE;
+import static specman.styles.Styles.STEPNUMBER_LINK_COLOR;
 
 public enum MarkupType {
   Changed, Steplink, ChangedSteplink;
 
-  public boolean marksChange() { return this == Changed || this == ChangedSteplink; }
+  public boolean marksChange() {
+    return this == Changed || this == ChangedSteplink;
+  }
 
   public boolean matches(MarkupSearchPurpose searchPurpose) {
     return searchPurpose == searchPurpose.All ||
@@ -18,19 +21,7 @@ public enum MarkupType {
   }
 
   public static MarkupType fromBackground(WrappedElement element) {
-    String backgroundColorValue = getBackgroundColorFromElement(element);
-    if (backgroundColorValue != null) {
-      if (backgroundColorValue.equals(changedStepnumberLinkHTMLColor)) {
-        return MarkupType.ChangedSteplink;
-      }
-      else if (backgroundColorValue.equals(INDIKATOR_GELB)) {
-        return MarkupType.Changed;
-      }
-      else if (backgroundColorValue.equals(stepnumberLinkStyleHTMLColor)) {
-        return MarkupType.Steplink;
-      }
-    }
-    return null;
+    return AENDERUNGSFARBE.toMarkupType(getBackgroundColorFromElement(element));
   }
 
   private static String getBackgroundColorFromElement(WrappedElement element) {
@@ -41,11 +32,11 @@ public enum MarkupType {
   public AttributeSet toBackground() {
     switch(this) {
       case Changed:
-        return geaendertTextBackground;
+        return AENDERUNGSFARBE.text.background;
       case Steplink:
-        return stepnumberLinkStyle;
+        return STEPNUMBER_LINK_COLOR.background;
       case ChangedSteplink:
-        return changedStepnumberLinkStyle;
+        return AENDERUNGSFARBE.stepnumberLink.background;
     }
     return null;
   }

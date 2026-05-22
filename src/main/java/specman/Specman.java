@@ -61,9 +61,9 @@ import java.util.Set;
 
 import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.Aenderungsart.Untracked;
-import static specman.editarea.TextStyles.AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE;
-import static specman.editarea.TextStyles.BACKGROUND_COLOR_STANDARD;
-import static specman.editarea.TextStyles.DIAGRAMM_LINE_COLOR;
+import static specman.styles.Styles.AENDERUNGSFARBE;
+import static specman.styles.Styles.BACKGROUND_COLOR_STANDARD;
+import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.view.RelativeStepPosition.After;
 
 /**
@@ -1145,7 +1145,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
 	public static Color schrittHintergrund() {
 		return (instance() != null && instance().aenderungenVerfolgen()) ?
-			AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE : BACKGROUND_COLOR_STANDARD;
+			AENDERUNGSFARBE.panelColor : BACKGROUND_COLOR_STANDARD;
 	}
 
 	//Methode um die Aenderugnsart von neuen Schritten auf hinzugefügt zu ändern, wenn die Änderungsverfolgung aktiviert ist

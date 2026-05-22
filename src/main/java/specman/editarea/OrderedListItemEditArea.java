@@ -11,7 +11,7 @@ import java.awt.geom.Rectangle2D;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static specman.editarea.TextStyles.DIAGRAMM_LINE_COLOR;
+import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
 
 public class OrderedListItemEditArea extends AbstractListItemEditArea {
   private static final int DEFAULT_RIGHT_GAP = 3;

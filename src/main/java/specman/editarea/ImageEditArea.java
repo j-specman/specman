@@ -45,7 +45,7 @@ import java.util.List;
 
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Untracked;
-import static specman.editarea.TextStyles.AENDERUNGSMARKIERUNG_FARBE;
+import static specman.styles.Styles.AENDERUNGSFARBE;
 import static specman.view.AbstractSchrittView.FORMLAYOUT_GAP;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
 
@@ -62,7 +62,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     new LineBorder(FOCUS_BORDER_COLOR, BORDER_THICKNESS));
   private static final Border UNSELECTED_BORDER =
     new EmptyBorder(new Insets(BORDER_THICKNESS*2, BORDER_THICKNESS*2, BORDER_THICKNESS*2, BORDER_THICKNESS*2));
-  private static final Border UNSELECTED_CHANGED_BORDER = new LineBorder(AENDERUNGSMARKIERUNG_FARBE, BORDER_THICKNESS*2);
+  private static final Border UNSELECTED_CHANGED_BORDER = new LineBorder(AENDERUNGSFARBE.text.color, BORDER_THICKNESS*2);
 
   private BufferedImage fullSizeImage;
   private ImageIcon scaledIcon;

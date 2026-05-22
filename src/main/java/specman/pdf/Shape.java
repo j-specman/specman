@@ -3,13 +3,13 @@ package specman.pdf;
 import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvasConstants.LineJoinStyle;
-import specman.editarea.TextStyles;
+import specman.styles.Styles;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static specman.editarea.TextStyles.DIAGRAMM_LINE_COLOR;
+import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
 
 public class Shape {

@@ -7,7 +7,7 @@ import specman.*;
 import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TextEditArea;
-import specman.editarea.TextStyles;
+import specman.styles.Styles;
 import specman.model.v001.CatchSchrittSequenzModel_V001;
 import specman.model.v001.CoCatchModel_V001;
 import specman.model.v001.EditorContentModel_V001;
@@ -26,7 +26,7 @@ import java.util.List;
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.ColumnSpecByPercent.copyOf;
-import static specman.editarea.TextStyles.AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE;
+import static specman.styles.Styles.AENDERUNGSFARBE;
 import static specman.view.AbstractSchrittView.*;
 
 public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements FocusListener, SpaltenContainerI {
@@ -108,7 +108,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
 
   private void init(BreakSchrittView linkedBreakStep, Integer headingRightBarWidth, Aenderungsart initialChangetype) {
     headingPanel = new JPanel();
-    headingPanel.setBackground(TextStyles.DIAGRAMM_LINE_COLOR);
+    headingPanel.setBackground(Styles.DIAGRAMM_LINE_COLOR);
     headingRightBarPanel = new JPanel();
     headingRightBarPanel.setBackground(initialChangetype.toBackgroundColor());
     headingHeightEaterPanel = new JPanel();
@@ -241,8 +241,8 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   protected void ueberschriftAlsGeloeschtMarkierenUDBL() {
     primaryCatchHeading.alsGeloeschtMarkierenUDBL();
     coCatchHeadings.forEach(cch -> cch.alsGeloeschtMarkierenUDBL());
-    headingHeightEaterPanel.setBackground(AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE);
-    headingRightBarPanel.setBackground(AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE);
+    headingHeightEaterPanel.setBackground(AENDERUNGSFARBE.panelColor);
+    headingRightBarPanel.setBackground(AENDERUNGSFARBE.panelColor);
   }
 
   @Override public void focusGained(FocusEvent e) {}
@@ -303,8 +303,8 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   public void aenderungsmarkierungenEntfernen() {
     primaryCatchHeading.aenderungsmarkierungenEntfernen();
     coCatchHeadings.forEach(cch -> cch.aenderungsmarkierungenEntfernen());
-    headingHeightEaterPanel.setBackground(TextStyles.BACKGROUND_COLOR_STANDARD);
-    headingRightBarPanel.setBackground(TextStyles.BACKGROUND_COLOR_STANDARD);
+    headingHeightEaterPanel.setBackground(Styles.BACKGROUND_COLOR_STANDARD);
+    headingRightBarPanel.setBackground(Styles.BACKGROUND_COLOR_STANDARD);
   }
 
   public CatchSchrittSequenzModel_V001 generiereModel(boolean formatierterText) {

@@ -11,7 +11,7 @@ import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
 import specman.editarea.InteractiveStepFragment;
-import specman.editarea.TextStyles;
+import specman.styles.Styles;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.CatchBereichModel_V001;
@@ -31,7 +31,7 @@ import static specman.Aenderungsart.Geloescht;
 import static specman.ColumnSpecByPercent.allocPercent;
 import static specman.ColumnSpecByPercent.copyOf;
 import static specman.ColumnSpecByPercent.releasePercent;
-import static specman.editarea.TextStyles.DIAGRAMM_LINE_COLOR;
+import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.pdf.Shape.GAP_COLOR;
 
 public class CatchBereich extends AbstractSchrittView implements KlappbarerBereichI, ComponentListener, SpaltenContainerI {
@@ -61,8 +61,8 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
 
     bereichPanel.setBackground(DIAGRAMM_LINE_COLOR);
     sequencesPanel.setBackground(DIAGRAMM_LINE_COLOR);
-    bottomBar.setBackground(TextStyles.Hintergrundfarbe_Deviderbar);
-    topBar.setBackground(TextStyles.Hintergrundfarbe_Deviderbar);
+    bottomBar.setBackground(Styles.Hintergrundfarbe_Deviderbar);
+    topBar.setBackground(Styles.Hintergrundfarbe_Deviderbar);
     topBar.setLayout(null);
 
     klappen = new KlappButton(this, topBar, bereichLayout, 4, null);

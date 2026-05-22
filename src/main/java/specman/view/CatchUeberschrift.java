@@ -20,8 +20,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.Arrays;
 
-import static specman.editarea.TextStyles.AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE;
-import static specman.editarea.TextStyles.BACKGROUND_COLOR_STANDARD;
+import static specman.styles.Styles.AENDERUNGSFARBE;
+import static specman.styles.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_SICHTBAR;
 import static specman.view.AbstractSchrittView.umgehungLayout;
@@ -113,7 +113,7 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   public void alsGeloeschtMarkierenUDBL() {
     changetype = Aenderungsart.Geloescht;
     ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.id);
-    UDBL.setBackgroundUDBL(this, AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE);
+    UDBL.setBackgroundUDBL(this, AENDERUNGSFARBE.panelColor);
   }
 
   @Override public void componentResized(ComponentEvent e) { ueberschrift.updateBounds(); }

@@ -38,7 +38,9 @@ import static specman.ColumnSpecByPercent.copyOf;
 import static specman.ColumnSpecByPercent.percents2specs;
 import static specman.ColumnSpecByPercent.recomputePercents;
 import static specman.ColumnSpecByPercent.releasePercent;
-import static specman.editarea.TextStyles.DIAGRAMM_LINE_COLOR;
+import specman.styles.Styles;
+import static specman.styles.Styles.AENDERUNGSFARBE;
+import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.view.AbstractSchrittView.FORMLAYOUT_GAP;
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_SICHTBAR;
 
@@ -178,7 +180,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   private void addCell(int rowIndex, String content) {
-    TextEditArea initialContentArea = new TextEditArea(new TextEditAreaModel_V001(content), TextStyles.DEFAULTFONT);
+    TextEditArea initialContentArea = new TextEditArea(new TextEditAreaModel_V001(content), Styles.DEFAULTFONT);
     addCell(rowIndex, new EditContainer(Specman.instance(), initialContentArea, null));
   }
 
@@ -194,7 +196,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
 
   @Override
   public void setGeloeschtMarkiertStilUDBL() {
-    setBackgroundUDBL(TextStyles.AENDERUNGSMARKIERUNG_HINTERGRUNDFARBE);
+    setBackgroundUDBL(Styles.AENDERUNGSFARBE.panelColor);
     cellstream().forEach(cell -> cell.setGeloeschtMarkiertStilUDBL(null));
   }
 
