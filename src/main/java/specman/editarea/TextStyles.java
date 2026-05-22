@@ -107,15 +107,12 @@ public class TextStyles {
       StyleConstants.setBackground(geloeschtStil, AENDERUNGSMARKIERUNG_FARBE);
       StyleConstants.setStrikeThrough(geloeschtStil, true);
 
-      htmlBackgroundStyleBlack.addAttribute(HTML.Attribute.STYLE, htmlStyleSchwarz);
-      ganzerSchrittGeloeschtStil.addAttribute(HTML.Tag.SPAN, htmlBackgroundStyleBlack);
       StyleConstants.setBackground(ganzerSchrittGeloeschtStil, Hintergrundfarbe_Geloescht);
       StyleConstants.setStrikeThrough(ganzerSchrittGeloeschtStil, true);
       StyleConstants.setForeground(ganzerSchrittGeloeschtStil, Schriftfarbe_Geloescht);
 
       StyleConstants.setBackground(standardTextBackground, TEXT_BACKGROUND_COLOR_STANDARD);
 
-      quellschrittStil.addAttribute(HTML.Tag.SPAN, htmlBackgroundStyleChanged);
       StyleConstants.setBackground(quellschrittStil, AENDERUNGSMARKIERUNG_FARBE);
       StyleConstants.setStrikeThrough(quellschrittStil, true);
       StyleConstants.setForeground(quellschrittStil, Schriftfarbe_Geloescht);
