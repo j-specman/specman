@@ -25,17 +25,14 @@ import specman.view.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.JTextComponent;
 import javax.swing.undo.UndoableEdit;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -348,38 +345,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		});
 
 
-		aenderungenUebernehmen.addActionListener(e -> {
-			try (UndoRecording ur = composeUndo()) {
-				int changesMade = 0;
-				changesMade += intro.aenderungenUebernehmen();
-				intro.aenderungsmarkierungenEntfernen(null);
-				changesMade += hauptSequenz.aenderungenUebernehmen(Specman.this);
-				changesMade += outro.aenderungenUebernehmen();
-				outro.aenderungsmarkierungenEntfernen(null);
-				if (changesMade > 0) {
-					diagrammAktualisieren(null);
-				} else {
-					JOptionPane.showMessageDialog(this, "Das Diagramm enthält keine Änderungen.");
-				}
-			}
-			catch (EditException ex) {
-				showError(ex);
-			}
-		});
-
-		aenderungenVerwerfen.addActionListener(e -> {
-			try (UndoRecording ur = composeUndo()) {
-				int changesReverted = hauptSequenz.aenderungenVerwerfen(Specman.this);
-				if (changesReverted > 0) {
-					diagrammAktualisieren(null);
-				} else {
-					JOptionPane.showMessageDialog(this, "Das Diagramm enthält keine Änderungen.");
-				}
-			}
-			catch (EditException ex) {
-				showError(ex);
-			}
-    });
 
 	}
 
@@ -389,26 +354,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	}
 
 	public void addImageViaFileChooser() {
-		try {
-			if (lastFocusedTextArea != null) {
-				JFileChooser fileChooser = new JFileChooser();
-				fileChooser.setCurrentDirectory(new File("."));
-				fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Images", "jpg", "png", "gif", "bmp"));
-				fileChooser.setAcceptAllFileFilterUsed(true);
-				int result = fileChooser.showOpenDialog(arbeitsbereich);
-				if (result == JFileChooser.APPROVE_OPTION) {
-					File selectedFile = fileChooser.getSelectedFile();
-						if (selectedFile != null && selectedFile.exists()) {
-							BufferedImage image = ImageIO.read(selectedFile);
-							lastFocusedTextArea.addImage(image);
-					}
-				}
-			}
-		}
-		catch(IOException iox) {
-			throw new RuntimeException(iox);
-		}
+		new AddImageSpecmanOp(this).addViaFileChooser();
 	}
 
 	public void addTable(int columns, int rows) {
@@ -549,8 +495,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		review = new JButton();
 		birdsview = new BirdsViewSpecmanOpButton(this);
 		aenderungenVerfolgen = new JToggleButton();
-		aenderungenUebernehmen = new JButton();
-		aenderungenVerwerfen = new JButton();
+		aenderungenUebernehmen = new AcceptChangesOpButton(this);
+		aenderungenVerwerfen = new RevertChangesOpButton(this);
 		aenderungenVerfolgen.setBackground(AENDERUNGSFARBE.panelColor);
 		aenderungenUebernehmen.setBackground(AENDERUNGSFARBE.panelColor);
 		aenderungenVerwerfen.setBackground(AENDERUNGSFARBE.panelColor);
@@ -586,7 +532,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		toolbarButtonHinzufuegen(createBreakStep, "break-schritt", "Create break step", buttonBar);
 		toolbarButtonHinzufuegen(createCatchStep, "catch-schritt", "Create catch block", buttonBar);
 		toolbarButtonHinzufuegen(createCaseBranch, "zweig", "Create case branch", buttonBar);
-		//toolBar.addSeparator();   //ToDo
 		toolbarButtonHinzufuegen(einfaerben, "helligkeit", "Hintergrund schattieren", toolBar);
 		toolbarButtonHinzufuegen(loeschen, "loeschen", "Schritt löschen", toolBar);
 		toolbarButtonHinzufuegen(toggleBorderType, "switch-border", "Rahmen umschalten", toolBar);
@@ -600,13 +545,10 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
     toolbarButtonHinzufuegen(birdsview, "birdsview", "Bird's View", toolBar);
     toolbarButtonHinzufuegen(exportPDF, "pdf", "PDF exportieren", toolBar);
 
-		//ToDo SideBar Change from contentPane.add(toolBar, CC.xywh(1, 1, 1, 1));
 		contentPane.add(toolBar, CC.xywh(1, 1, 2, 1));
 		contentPane.add(buttonBar, CC.xy(1, 3));
 		pack();
 		setLocationRelativeTo(getOwner());
-		// JFormDesigner - End of component initialization  //GEN-END:initComponents
-		//TODO
 		DragMouseAdapter dragButtonAdapter = new DragMouseAdapter(this);
 		addDragAdapter(createSimpleStep, dragButtonAdapter);
 		addDragAdapter(createWhileStep, dragButtonAdapter);
@@ -700,26 +642,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		return menu;
 	}
 
-	private static class ColorDotIcon implements Icon {
-		private static final int SIZE = 10;
-		private final Color color;
-
-		ColorDotIcon(Color color) { this.color = color; }
-
-		@Override public void paintIcon(Component c, Graphics g, int x, int y) {
-			Graphics2D g2 = (Graphics2D) g.create();
-			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g2.setColor(color);
-			g2.fillOval(x, y, SIZE, SIZE);
-			g2.setColor(color.darker());
-			g2.drawOval(x, y, SIZE, SIZE);
-			g2.dispose();
-		}
-
-		@Override public int getIconWidth()  { return SIZE; }
-		@Override public int getIconHeight() { return SIZE; }
-	}
-
 	private JToolBar toolBar;
 	private JToolBar buttonBar; // Sidebar ergänzt
 	private CreateSimpleStepOpButton createSimpleStep;
@@ -738,8 +660,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	private ToggleBorderTypeOpButton toggleBorderType;
 	private JButton review;
 	private BirdsViewSpecmanOpButton birdsview;
-	private JButton aenderungenUebernehmen;
-	private JButton aenderungenVerwerfen;
+	private AcceptChangesOpButton aenderungenUebernehmen;
+	private RevertChangesOpButton aenderungenVerwerfen;
 	private JComboBox<ZoomFaktor> zoom;
 	JToggleButton aenderungenVerfolgen;
 	private JMenuItem speichern;
@@ -808,10 +730,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	public void exportAsPDF() {
 		new ExportPDFSpecmanOp(this).export();
 	}
-
-	public int zoomFaktor() { return zoomFaktor; }
-
-
 
 	@Override public int getZoomFactor() {
 		return zoomFaktor;
