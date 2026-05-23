@@ -34,7 +34,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import specman.graphics.ChangeColorSet;
@@ -294,10 +293,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
 	private void actionListenerHinzufuegen() {
 
-		exportPDF.addActionListener((e -> {
-      exportAsPDF();
-    }));
-
 		speichern.addActionListener(e -> diagrammSpeichern(false));
 		speichernUnter.addActionListener(e -> diagrammSpeichern(true));
 		laden.addActionListener(e -> diagrammLaden());
@@ -307,14 +302,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		exportAsGraphvizMenuItem.addActionListener(e -> exportAsGraphviz());
 
 		exitMenuItem.addActionListener(e -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
-
-		review.addActionListener(e -> hauptSequenz.zusammenklappenFuerReview());
-
-		zoom.addActionListener(e -> {
-			int prozentNeu = ((ZoomFaktor) zoom.getSelectedItem()).getProzent();
-			int prozentAlt = skalieren(prozentNeu);
-			undoManager.addEdit(new UndoableDiagrammSkaliert(Specman.this, prozentAlt));
-		});
 	}
 
   @Override
@@ -344,7 +331,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	public int skalieren(int prozent) {
 		int bisherigerFaktor = zoomFaktor;
 		zoomFaktor = prozent;
-		zoomFaktorAnzeigeAktualisieren(prozent);
+		zoom.updateDisplay(prozent);
     KlappButton.scaleIcons(prozent, bisherigerFaktor);
 		float diagrammbreite100Prozent = (float)diagrammbreite / bisherigerFaktor * 100;
 		int neueDiagrammbreite = (int)(diagrammbreite100Prozent * prozent / 100);
@@ -355,17 +342,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		return bisherigerFaktor;
 	}
 
-	/** Nicht so schön, aber nötig: hier wird der Zoomfaktor in der Combobox auf einen neuen Wert aktualisiert,
-	 * ohne dass dabei der AktionListener aufgerufen wird, der dann wiederum einen Eintrag im UndoManager
-	 * produzieren würde. Wir brauchen die Umstellung des Werts aber grade für Undo und Redo, wo natürlich
-	 * nichts neues eingetragen werden soll. Wir machen das durch Entfernen und wieder Anklemmen der Listener.
-	 */
 	void zoomFaktorAnzeigeAktualisieren(int prozent) {
-		ZoomFaktor faktor = ZoomFaktor.valueOf("Faktor_" + zoomFaktor);
-		List<ActionListener> listeners = Arrays.asList(zoom.getActionListeners());
-		listeners.forEach(l -> zoom.removeActionListener(l));
-		zoom.setSelectedItem(faktor);
-		listeners.forEach(l -> zoom.addActionListener(l));
+		zoom.updateDisplay(prozent);
 	}
 
 	private void diagrammSpeichern(boolean dateiauswahlErzwingen) {
@@ -418,11 +396,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		toolBar = new JToolBar();
 		toolBar.setFloatable(false);
 		stepButtonBar = new StepButtonBar(this);
-		exportPDF = new JButton();
+		exportPDF = new ExportPDFOpButton(this);
 		einfaerben = new ToneOpButton(this);
 		loeschen = new DeleteStepOpButton(this);
 		toggleBorderType = new ToggleBorderTypeOpButton(this);
-		review = new JButton();
+		review = new ReviewOpButton(this);
 		birdsview = new BirdsViewSpecmanOpButton(this);
 		aenderungenVerfolgen = new JToggleButton();
 		aenderungenUebernehmen = new AcceptChangesOpButton(this);
@@ -430,11 +408,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		aenderungenVerfolgen.setBackground(AENDERUNGSFARBE.panelColor);
 		aenderungenUebernehmen.setBackground(AENDERUNGSFARBE.panelColor);
 		aenderungenVerwerfen.setBackground(AENDERUNGSFARBE.panelColor);
-		zoom = new JComboBox<ZoomFaktor>();
-		for (ZoomFaktor faktor: ZoomFaktor.values())
-			zoom.addItem(faktor);
-		zoom.setSelectedItem(ZoomFaktor.Faktor_100);
-		zoom.setMaximumSize(new Dimension(65, 20));
+		zoom = new ZoomComboBox(this);
 		speichern = new JMenuItem("Speichern");
 		speichern.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
 		speichernUnter = new JMenuItem("Speichern unter...");
@@ -530,15 +504,15 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
 	private JToolBar toolBar;
 	private StepButtonBar stepButtonBar;
-	private JButton exportPDF;
+	private ExportPDFOpButton exportPDF;
 	private ToneOpButton einfaerben;
 	DeleteStepOpButton loeschen;
 	private ToggleBorderTypeOpButton toggleBorderType;
-	private JButton review;
+	private ReviewOpButton review;
 	private BirdsViewSpecmanOpButton birdsview;
 	private AcceptChangesOpButton aenderungenUebernehmen;
 	private RevertChangesOpButton aenderungenVerwerfen;
-	private JComboBox<ZoomFaktor> zoom;
+	private ZoomComboBox zoom;
 	JToggleButton aenderungenVerfolgen;
 	private JMenuItem speichern;
 	private JMenuItem speichernUnter;
