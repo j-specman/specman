@@ -5,7 +5,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import specman.Specman;
-import specman.styles.Styles;
+import specman.graphics.Styles;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,8 +13,8 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
-import static specman.styles.Styles.BACKGROUND_COLOR_STANDARD;
-import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
+import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
+import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 
 public class RoundedBorderDecorator extends JPanel {
   private static final int INSET = 15;

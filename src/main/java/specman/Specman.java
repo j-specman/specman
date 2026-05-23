@@ -9,6 +9,7 @@ import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
 import specman.editarea.EditArea;
 import specman.editarea.InteractiveStepFragment;
+import specman.graphics.IconReader;
 import specman.model.v001.*;
 import specman.pdf.PDFExportChooser;
 import specman.editarea.EditContainer;
@@ -20,7 +21,6 @@ import specman.undo.manager.UndoRecording;
 import specman.undo.manager.UndoRecordingMode;
 import specman.view.*;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import javax.swing.text.JTextComponent;
@@ -33,15 +33,14 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import specman.styles.ChangeColorSet;
-import static specman.styles.Styles.AENDERUNGSFARBE;
-import static specman.styles.Styles.CHANGESETS;
-import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
+import specman.graphics.ChangeColorSet;
+import static specman.graphics.Styles.AENDERUNGSFARBE;
+import static specman.graphics.Styles.CHANGESETS;
+import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 
 public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	public static final int INITIAL_DIAGRAMM_WIDTH = 700;
@@ -93,7 +92,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
     scrollPane.setViewport(viewport);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
 		scrollPane.getHorizontalScrollBar().setUnitIncrement(20);
-		scrollPane.addMouseWheelListener(new DragMouseAdapter(this));
+		scrollPane.addMouseWheelListener(createDragMouseAdapter());
 		contentPane.add(scrollPane, CC.xy(2, 3));
 
 		arbeitsbereich = new JPanel() {
@@ -183,7 +182,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	}
 
 	private void setApplicationIcon() {
-		setIconImage(readImageIcon("specman").getImage());
+		setIconImage(IconReader.readImageIcon("specman").getImage());
 	}
 
 	private void setupQuestionDialogWhenClosingWithoutSaving() {
@@ -504,24 +503,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		setLocationRelativeTo(getOwner());
 	}
 
-	public static ImageIcon readImageIcon(String iconBasename) {
-		String resource = "images/" + iconBasename + ".png";
-		try {
-			URL imageURL = Specman.class.getClassLoader().getResource(resource);
-			Image image = ImageIO.read(imageURL);
-			if (image == null) {
-				throw new IllegalArgumentException("Can't load image icon " + resource);
-			}
-			return new ImageIcon(image);
-		}
-		catch(IOException iox) {
-			iox.printStackTrace();
-			throw new IllegalArgumentException("Error reading image icon " + resource + ": " + iox.getMessage());
-		}
-	}
-
 	private void toolbarButtonHinzufuegen(AbstractButton button, String iconBasename, String tooltip, JToolBar tb) {
-		button.setIcon(readImageIcon(iconBasename));
+		button.setIcon(IconReader.readImageIcon(iconBasename));
 		button.setMargin(new Insets(0, 0, 0, 0));
 		button.setToolTipText(tooltip);
 		tb.add(button);
@@ -655,16 +638,10 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		return undoManager;
 	}
 
-	public JButton getCreateSimpleStep() { return stepButtonBar.getCreateSimpleStep(); }
-	public JButton getCreateWhileStep() { return stepButtonBar.getCreateWhileStep(); }
-	public JButton getCreateWhileWhileStep() { return stepButtonBar.getCreateWhileWhileStep(); }
-	public JButton getCreateIfElseStep() { return stepButtonBar.getCreateIfElseStep(); }
-	public JButton getCreateIfStep() { return stepButtonBar.getCreateIfStep(); }
-	public JButton getCreateCaseStep() { return stepButtonBar.getCreateCaseStep(); }
-	public JButton getCreateSubsequenceStep() { return stepButtonBar.getCreateSubsequenceStep(); }
-	public JButton getCreateBreakStep() { return stepButtonBar.getCreateBreakStep(); }
-	public JButton getCreateCatchStep() { return stepButtonBar.getCreateCatchStep(); }
-	public JButton getCreateCaseBranch() { return stepButtonBar.getCreateCaseBranch(); }
+	@Override
+	public DragMouseAdapter createDragMouseAdapter() {
+		return new DragMouseAdapter(this, stepButtonBar);
+	}
 
 	@Override public TextEditArea getLastFocusedTextArea() {
 		return lastFocusedTextArea;

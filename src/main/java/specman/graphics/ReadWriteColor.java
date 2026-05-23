@@ -1,4 +1,4 @@
-package specman.styles;
+package specman.graphics;
 
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;

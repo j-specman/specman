@@ -17,8 +17,7 @@ import java.awt.Color;
 import java.awt.event.ComponentEvent;
 import java.util.List;
 
-import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
-import static specman.view.KlappButton.ZEILENLAYOUT_FILLER_HIDDEN;
+import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 
 public class SubsequenzSchrittView extends AbstractSchrittView {
 	public static final int TEXTEINRUECKUNG = 18;

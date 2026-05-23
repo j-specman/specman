@@ -22,7 +22,7 @@ import java.awt.event.FocusListener;
 import java.util.HashMap;
 import java.util.List;
 
-import specman.styles.Styles;
+import specman.graphics.Styles;
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.Aenderungsart.Untracked;

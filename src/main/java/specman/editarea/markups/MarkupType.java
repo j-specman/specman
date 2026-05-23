@@ -5,8 +5,8 @@ import specman.editarea.document.WrappedElement;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.html.CSS;
 
-import static specman.styles.Styles.AENDERUNGSFARBE;
-import static specman.styles.Styles.STEPNUMBER_LINK_COLOR;
+import static specman.graphics.Styles.AENDERUNGSFARBE;
+import static specman.graphics.Styles.STEPNUMBER_LINK_COLOR;
 
 public enum MarkupType {
   Changed, Steplink, ChangedSteplink;

@@ -1,9 +1,7 @@
 package specman.editarea.stepnumberlabel;
 
-import specman.Aenderungsart;
-import specman.EditException;
+import specman.graphics.IconReader;
 import specman.Specman;
-import specman.modelops.MoveBranchSequenceLeftOperation;
 import specman.undo.UndoableFlatNumberingToggled;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
@@ -69,7 +67,7 @@ public class StepnumberContextMenu implements MouseListener {
   }
 
   private JMenuItem createItem(String label, String iconBasename, ActionListener actionListener) {
-    ImageIcon icon = Specman.readImageIcon(iconBasename);
+    ImageIcon icon = IconReader.readImageIcon(iconBasename);
     JMenuItem item = new JMenuItem(label, icon);
     item.addActionListener(actionListener);
     popup.add(item);

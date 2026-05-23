@@ -30,7 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static specman.Aenderungsart.Untracked;
 import static specman.TextInit.initialtext;
-import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
+import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.pdf.Shape.GAP_COLOR;
 import static specman.view.RelativeStepPosition.After;
 import static specman.view.RelativeStepPosition.Before;

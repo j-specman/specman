@@ -45,7 +45,7 @@ import java.util.List;
 
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Untracked;
-import static specman.styles.Styles.AENDERUNGSFARBE;
+import static specman.graphics.Styles.AENDERUNGSFARBE;
 import static specman.view.AbstractSchrittView.FORMLAYOUT_GAP;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
 

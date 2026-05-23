@@ -1,4 +1,4 @@
-package specman.styles;
+package specman.graphics;
 
 import specman.editarea.markups.MarkupType;
 import java.awt.Color;

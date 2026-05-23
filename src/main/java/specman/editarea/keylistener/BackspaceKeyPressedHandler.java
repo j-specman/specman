@@ -2,22 +2,14 @@ package specman.editarea.keylistener;
 
 import specman.EditorI;
 import specman.Specman;
-import specman.editarea.StepnumberLink;
 import specman.editarea.TextEditArea;
-import specman.editarea.document.WrappedDocument;
-import specman.editarea.document.WrappedElement;
 import specman.editarea.document.WrappedPosition;
-import specman.undo.UndoableStepnumberLinkRemoved;
 import specman.undo.manager.UndoRecording;
-import specman.view.AbstractSchrittView;
 
-import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Utilities;
 import java.awt.event.KeyEvent;
 
-import static specman.styles.Styles.deletedStepnumberLinkStyle;
-import static specman.styles.Styles.geloeschtStil;
 import static specman.editarea.markups.CharType.ParagraphBoundary;
 
 class BackspaceKeyPressedHandler extends AbstractRemovalKeyPressedHandler {

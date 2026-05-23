@@ -1,11 +1,12 @@
 package specman;
 
 import specman.draganddrop.DragMouseAdapter;
+import specman.graphics.IconReader;
 
 import javax.swing.*;
 import java.awt.*;
 
-class StepButtonBar extends JToolBar {
+public class StepButtonBar extends JToolBar {
 
   private final CreateSimpleStepOpButton createSimpleStep;
   private final CreateWhileStepOpButton createWhileStep;
@@ -43,7 +44,7 @@ class StepButtonBar extends JToolBar {
     addButton(createCatchStep, "catch-schritt", "Create catch block");
     addButton(createCaseBranch, "zweig", "Create case branch");
 
-    DragMouseAdapter dragAdapter = new DragMouseAdapter(specman);
+    DragMouseAdapter dragAdapter = new DragMouseAdapter(specman, this);
     wireUpDragAdapter(createSimpleStep, dragAdapter);
     wireUpDragAdapter(createWhileStep, dragAdapter);
     wireUpDragAdapter(createWhileWhileStep, dragAdapter);
@@ -57,7 +58,7 @@ class StepButtonBar extends JToolBar {
   }
 
   private void addButton(AbstractButton button, String iconBasename, String tooltip) {
-    button.setIcon(Specman.readImageIcon(iconBasename));
+    button.setIcon(IconReader.readImageIcon(iconBasename));
     button.setMargin(new Insets(0, 0, 0, 0));
     button.setToolTipText(tooltip);
     add(button);

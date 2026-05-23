@@ -7,9 +7,8 @@ import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.font.FontCharacteristics;
 import com.itextpdf.layout.font.FontInfo;
-import com.itextpdf.layout.font.FontProvider;
 import specman.editarea.TextEditArea;
-import specman.styles.Styles;
+import specman.graphics.Styles;
 
 import javax.swing.text.*;
 import java.awt.*;

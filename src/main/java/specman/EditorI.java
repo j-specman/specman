@@ -1,5 +1,6 @@
 package specman;
 
+import specman.draganddrop.DragMouseAdapter;
 import specman.editarea.EditArea;
 import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
@@ -54,4 +55,5 @@ public interface EditorI extends FocusListener {
   void deleteStepUDBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   void moveBranchSequenceLeftUDBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   void moveBranchSequenceRightUDBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
+  DragMouseAdapter createDragMouseAdapter();
 }

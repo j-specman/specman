@@ -4,7 +4,7 @@ import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 
 import java.awt.*;
 
-import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
+import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 
 public class CircleShape extends Shape {
   private int radius;

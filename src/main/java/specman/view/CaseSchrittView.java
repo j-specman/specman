@@ -12,7 +12,6 @@ import specman.SchrittID;
 import specman.SpaltenResizer;
 import specman.Specman;
 import specman.TextInit;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.CaseSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
@@ -33,10 +32,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import static specman.TextInit.initialtext;
-import static specman.styles.Styles.BACKGROUND_COLOR_STANDARD;
+import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.pdf.Shape.GAP_COLOR;
-import static specman.styles.Styles.AENDERUNGSFARBE;
-import static specman.view.KlappButton.ZEILENLAYOUT_FILLER_HIDDEN;
+import static specman.graphics.Styles.AENDERUNGSFARBE;
 
 
 public class CaseSchrittView extends VerzweigungSchrittView {

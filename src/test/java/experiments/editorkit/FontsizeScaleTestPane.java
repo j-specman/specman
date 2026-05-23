@@ -1,6 +1,6 @@
 package experiments.editorkit;
 
-import specman.editarea.TextStyles;
+import specman.graphics.Styles;
 
 import javax.swing.*;
 import javax.swing.text.Element;
@@ -22,7 +22,7 @@ class FontsizeScaleTestPane extends JEditorPane {
       "<font size=\"6\">6</font>" +
       "<font size=\"7\">7</font>" +
       "</body></html>");
-    setFont(TextStyles.DEFAULTFONT.deriveFont(Fontsize.SWING_FONTSIZE));
+    setFont(Styles.DEFAULTFONT.deriveFont(Fontsize.SWING_FONTSIZE));
     putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     document = (StyledDocument)getDocument();
   }

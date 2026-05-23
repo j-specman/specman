@@ -2,8 +2,8 @@ package specman;
 
 import java.awt.*;
 
-import static specman.styles.Styles.AENDERUNGSFARBE;
-import static specman.styles.Styles.BACKGROUND_COLOR_STANDARD;
+import static specman.graphics.Styles.AENDERUNGSFARBE;
+import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 
 public enum Aenderungsart {
 	Untracked, Hinzugefuegt, Geloescht, Quellschritt, Zielschritt;

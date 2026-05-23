@@ -7,7 +7,7 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.font.FontCharacteristics;
 import com.itextpdf.layout.font.FontInfo;
-import specman.editarea.TextStyles;
+import specman.graphics.Styles;
 import specman.pdf.FormattedShapeText;
 import specman.pdf.PDFRenderer;
 
@@ -389,7 +389,7 @@ public class CharLevelPdfTest extends JFrame {
 
   public static void main(String[] args) {
     SwingUtilities.invokeLater(() -> {
-      TextStyles.FONTFILES.forEach(f -> {
+      Styles.FONTFILES.forEach(f -> {
         try (var s = CharLevelPdfTest.class.getClassLoader().getResourceAsStream(f)) {
           Font font = Font.createFont(Font.TRUETYPE_FONT, s);
           GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);

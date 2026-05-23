@@ -10,7 +10,7 @@ import specman.undo.props.UDBL;
 import javax.swing.*;
 import java.awt.*;
 
-import static specman.styles.Styles.AENDERUNGSFARBE;
+import static specman.graphics.Styles.AENDERUNGSFARBE;
 
 public class QuellSchrittView extends AbstractSchrittView {
 

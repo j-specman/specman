@@ -13,8 +13,8 @@ import specman.view.AbstractSchrittView;
 
 import java.awt.event.KeyEvent;
 
-import static specman.styles.Styles.deletedStepnumberLinkStyle;
-import static specman.styles.Styles.geloeschtStil;
+import static specman.graphics.Styles.deletedStepnumberLinkStyle;
+import static specman.graphics.Styles.geloeschtStil;
 
 abstract class AbstractRemovalKeyPressedHandler extends AbstractKeyEventHandler {
   protected AbstractRemovalKeyPressedHandler(TextEditArea textArea, KeyEvent event) {

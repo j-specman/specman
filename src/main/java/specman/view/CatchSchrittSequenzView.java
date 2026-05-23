@@ -9,7 +9,7 @@ import specman.*;
 import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TextEditArea;
-import specman.styles.Styles;
+import specman.graphics.Styles;
 import specman.model.v001.CatchSchrittSequenzModel_V001;
 import specman.model.v001.CoCatchModel_V001;
 import specman.model.v001.EditorContentModel_V001;
@@ -28,7 +28,7 @@ import java.util.List;
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.ColumnSpecByPercent.copyOf;
-import static specman.styles.Styles.AENDERUNGSFARBE;
+import static specman.graphics.Styles.AENDERUNGSFARBE;
 import static specman.view.AbstractSchrittView.*;
 
 public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements FocusListener, SpaltenContainerI {

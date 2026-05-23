@@ -39,11 +39,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import specman.styles.Styles;
-import static specman.styles.Styles.AENDERUNGSFARBE;
-import static specman.styles.Styles.BACKGROUND_COLOR_STANDARD;
-import static specman.styles.Styles.SCHRITTNR_FONTSIZE;
-import static specman.styles.Styles.labelFont;
+import specman.graphics.Styles;
+import static specman.graphics.Styles.AENDERUNGSFARBE;
+import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
+import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
+import static specman.graphics.Styles.labelFont;
 import static specman.model.v001.EditorContentModel_V001.empty;
 
 /** Zentrales grafisches Containerpanel für einen zusammenhängenden Text mit einem Nummernlabel

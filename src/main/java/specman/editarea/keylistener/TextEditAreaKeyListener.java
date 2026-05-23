@@ -13,12 +13,12 @@ import javax.swing.text.html.CSS;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import static specman.styles.Styles.INDIKATOR_GELOESCHT_MARKIERT;
-import static specman.styles.Styles.SCHRITTNUMMER_FARBE;
-import static specman.styles.Styles.DELETED_BACKGROUND_COLOR;
-import static specman.styles.Styles.AENDERUNGSFARBE;
-import static specman.styles.Styles.deletedStepnumberLinkStyle;
-import static specman.styles.Styles.geloeschtStil;
+import static specman.graphics.Styles.INDIKATOR_GELOESCHT_MARKIERT;
+import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
+import static specman.graphics.Styles.DELETED_BACKGROUND_COLOR;
+import static specman.graphics.Styles.AENDERUNGSFARBE;
+import static specman.graphics.Styles.deletedStepnumberLinkStyle;
+import static specman.graphics.Styles.geloeschtStil;
 
 public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyListener {
   public TextEditAreaKeyListener(TextEditArea textArea) {

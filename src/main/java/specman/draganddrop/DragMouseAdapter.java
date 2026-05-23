@@ -5,6 +5,7 @@ import specman.SchrittID;
 import specman.editarea.stepnumberlabel.BreakCatchScrollMouseAdapter;
 import specman.EditException;
 import specman.Specman;
+import specman.StepButtonBar;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.view.AbstractSchrittView;
@@ -29,9 +30,9 @@ public class DragMouseAdapter extends MouseAdapter {
 	private	JTextField dummy;
 	private final DraggingLogic draggingLogic;
 
-	public DragMouseAdapter(Specman specman) {
+	public DragMouseAdapter(Specman specman, StepButtonBar stepButtonBar) {
 		this.specman = specman;
-		this.draggingLogic = new DraggingLogic(specman);
+		this.draggingLogic = new DraggingLogic(specman, stepButtonBar);
 	}
 
   @Override

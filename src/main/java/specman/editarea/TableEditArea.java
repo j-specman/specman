@@ -38,9 +38,9 @@ import static specman.ColumnSpecByPercent.copyOf;
 import static specman.ColumnSpecByPercent.percents2specs;
 import static specman.ColumnSpecByPercent.recomputePercents;
 import static specman.ColumnSpecByPercent.releasePercent;
-import specman.styles.Styles;
-import static specman.styles.Styles.AENDERUNGSFARBE;
-import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
+import specman.graphics.Styles;
+
+import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.view.AbstractSchrittView.FORMLAYOUT_GAP;
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_SICHTBAR;
 

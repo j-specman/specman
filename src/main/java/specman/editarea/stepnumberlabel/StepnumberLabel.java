@@ -16,12 +16,12 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 
 import static specman.SchrittID.asString;
-import static specman.styles.Styles.AENDERUNGSFARBE;
-import static specman.styles.Styles.DELETED_BACKGROUND_COLOR;
-import static specman.styles.Styles.SCHRITTNUMMER_FARBE;
-import static specman.styles.Styles.SCHRITTNUMMER_VORDERGRUNDFARBE;
-import static specman.styles.Styles.Schriftfarbe_Geloescht;
-import static specman.styles.Styles.labelFont;
+import static specman.graphics.Styles.AENDERUNGSFARBE;
+import static specman.graphics.Styles.DELETED_BACKGROUND_COLOR;
+import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
+import static specman.graphics.Styles.SCHRITTNUMMER_VORDERGRUNDFARBE;
+import static specman.graphics.Styles.Schriftfarbe_Geloescht;
+import static specman.graphics.Styles.labelFont;
 
 public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
   private static final Border STANDARD_BORDER = new MatteBorder(0, 2, 0, 1, SCHRITTNUMMER_FARBE.color);
@@ -43,7 +43,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
     setForeground(Color.WHITE);
     setOpaque(true);
 
-    DragMouseAdapter ada = new DragMouseAdapter((Specman)Specman.instance());
+    DragMouseAdapter ada = Specman.instance().createDragMouseAdapter();
     addMouseListener(ada);
     addMouseMotionListener(ada);
     addMouseListener(BreakCatchScrollMouseAdapter.instance);

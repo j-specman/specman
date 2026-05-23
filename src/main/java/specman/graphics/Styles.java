@@ -1,4 +1,4 @@
-package specman.styles;
+package specman.graphics;
 
 import net.atlanticbb.tantlinger.ui.text.actions.SpecmanFontSizeAction;
 import specman.Specman;

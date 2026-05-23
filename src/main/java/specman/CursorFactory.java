@@ -1,5 +1,7 @@
 package specman;
 
+import specman.graphics.IconReader;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -19,9 +21,9 @@ public class CursorFactory {
   public static Cursor createCursor(String baseImageName, HotspotPlacement hotspotPlacement) {
     Dimension bestCursorSize = Toolkit.getDefaultToolkit().getBestCursorSize(0, 0);
     try {
-      ImageIcon icon = Specman.readImageIcon(baseImageName);
+      ImageIcon icon = IconReader.readImageIcon(baseImageName);
       if (icon.getIconWidth() > bestCursorSize.width || icon.getIconHeight() > bestCursorSize.height) {
-        icon = Specman.readImageIcon(baseImageName + "-32");
+        icon = IconReader.readImageIcon(baseImageName + "-32");
       }
       final BufferedImage bufferedImage = new BufferedImage( bestCursorSize.width, bestCursorSize.height, BufferedImage.TYPE_INT_ARGB );
       final Graphics graphic = bufferedImage.getGraphics();

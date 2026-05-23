@@ -2,7 +2,7 @@ package experiments.editorkit;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
-import specman.editarea.TextStyles;
+import specman.graphics.Styles;
 
 import javax.swing.*;
 import javax.swing.text.html.HTML;
@@ -27,7 +27,7 @@ public class TestEditor extends JFrame {
 
     field = new JEditorPane();
     field.setContentType("text/html");
-    field.setFont(TextStyles.DEFAULTFONT.deriveFont(Fontsize.SWING_FONTSIZE));
+    field.setFont(Styles.DEFAULTFONT.deriveFont(Fontsize.SWING_FONTSIZE));
     field.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
 
     field.addKeyListener(new KeyAdapter() {

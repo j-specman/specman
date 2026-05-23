@@ -2,6 +2,7 @@ package specman.view;
 
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import specman.graphics.IconReader;
 import specman.Specman;
 
 import javax.swing.*;
@@ -27,8 +28,8 @@ import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_VERBORGEN;
  * @author less02
  */
 public class KlappButton extends JLabel implements MouseMotionListener, MouseListener {
-  private static final Icon icon = Specman.readImageIcon("minus");
-  private static final Icon selectedIcon = Specman.readImageIcon("plus");
+  private static final Icon icon = IconReader.readImageIcon("minus");
+  private static final Icon selectedIcon = IconReader.readImageIcon("plus");
   private static Icon iconScaled = icon;
   private static Icon selectedIconScaled = selectedIcon;
   public static final int MINIMUM_ICON_LENGTH = icon.getIconHeight() + 2; // The minimum border is 1px top + bottom each
