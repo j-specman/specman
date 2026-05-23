@@ -2,7 +2,6 @@ package specman;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.jgoodies.forms.factories.CC;
-import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import specman.draganddrop.DragMouseAdapter;
@@ -35,7 +34,6 @@ import java.util.List;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 
 public class Specman extends JFrame implements EditorI, SpaltenContainerI {
-	public static final int INITIAL_DIAGRAMM_WIDTH = 700;
 	private static final BasicStroke GESTRICHELTE_LINIE =
 			new BasicStroke(1.0f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND, 1.0f, new float[] {10.0f, 10.0f }, 0f);
 	public static String SPECMAN_TITLE = "Specman " + SpecmanVersion.getVersion();
@@ -49,8 +47,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	JScrollPane scrollPane;
   PausableViewport viewport;
 	EditContainer intro, outro;
-	FormLayout hauptlayout;
-	int diagrammbreite = INITIAL_DIAGRAMM_WIDTH;
+	int diagrammbreite = WorkingAreaPanel.INITIAL_DIAGRAMM_WIDTH;
 	int zoomFaktor = 100;
 	File diagrammDatei;
 	private JComponent welcomeMessage;
@@ -87,12 +84,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		contentPane.add(scrollPane, CC.xy(2, 3));
 
 		arbeitsbereich = new WorkingAreaPanel();
-
-		hauptlayout = new FormLayout(
-				"20px, " + INITIAL_DIAGRAMM_WIDTH + "px, " + AbstractSchrittView.FORMLAYOUT_GAP,
-				"10px, fill:pref, fill:default, fill:pref");
-		arbeitsbereich.setLayout(hauptlayout);
-		arbeitsbereich.setBackground(new Color(247, 247, 253));
 		displayWelcomeMessage();
 
 		intro = new EditContainer(this);
@@ -171,7 +162,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				if (undoManager.hasUnsavedChanges()) {
-
 					int dialogResult = JOptionPane.showConfirmDialog(Specman.instance,
 							"Änderungen am Dokument '" + getDiagramFilename() + "' vor dem Schließen speichern?" +
 									"\nIhre Änderungen gehen verloren, wenn Sie diese nicht speichern.",
@@ -179,11 +169,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
 					if (dialogResult == JOptionPane.CANCEL_OPTION) { // Prevent closing
 						return;
-					} else if (dialogResult == JOptionPane.YES_OPTION) { // Save & Close
+					}
+					else if (dialogResult == JOptionPane.YES_OPTION) { // Save & Close
 						diagrammSpeichern(false);
 					}
-                }
-
+				}
 				dispose();
 				System.exit(0);
 			}
@@ -208,17 +198,13 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
 	@Override
 	public void vertikalLinieSetzen(int x, SpaltenResizer spaltenResizer) {
-		Integer dragX;
+		Integer dragX = null;
 		if (spaltenResizer != null) {
 			Point relativePosition = SwingUtilities.convertPoint(spaltenResizer, new Point(x, 0), arbeitsbereich);
 			dragX = (int)relativePosition.getX();
 		}
-		else {
-			dragX = null;
-		}
 		arbeitsbereich.showDragLine(dragX);
 	}
-
 
 	void hauptSequenzInitialisieren() {
 		if (hauptSequenzContainer != null) {
@@ -328,7 +314,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	}
 
 	private void diagrammbreiteSetzen(int breite) {
-		hauptlayout.setColumnSpec(2, ColumnSpec.decode(breite + "px"));
+		arbeitsbereich.diagrammbreiteSetzen(breite);
 	}
 
 	public void diagrammAktualisieren(EditArea editArea) {
@@ -361,10 +347,9 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	}
 
 	private void initComponents() {
-		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
 		diagramToolBar = new DiagramToolBar(this);
 		stepButtonBar = new StepButtonBar(this);
-		//======== this ========
+
 		contentPane = new JPanel();
 		setContentPane(contentPane);
 		contentPane.setLayout(new FormLayout("pref, default:grow", "default, default, fill:10px:grow")); //ToDo Sidebar added "pref"
