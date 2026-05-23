@@ -16,9 +16,11 @@ import javax.swing.*;
 abstract class AbstractSpecmanOpButton extends JButton {
 
   protected final Specman specman;
+  protected final SpecmanOpContext context;
 
   AbstractSpecmanOpButton(Specman specman) {
     this.specman = specman;
+    this.context = specman;
     registerActionListener();
   }
 

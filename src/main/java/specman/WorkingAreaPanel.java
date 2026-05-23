@@ -1,5 +1,6 @@
 package specman;
 
+import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.view.AbstractSchrittView;
@@ -15,6 +16,7 @@ public class WorkingAreaPanel extends JPanel {
 
   private final FormLayout hauptlayout;
   private Integer dragX;
+  private JComponent welcomeMessage;
 
   public WorkingAreaPanel() {
     hauptlayout = new FormLayout(
@@ -22,6 +24,21 @@ public class WorkingAreaPanel extends JPanel {
       "10px, fill:pref, fill:default, fill:pref");
     setLayout(hauptlayout);
     setBackground(new Color(247, 247, 253));
+    showWelcomeMessage();
+  }
+
+  public void showWelcomeMessage() {
+    welcomeMessage = new WelcomeMessagePanel();
+    add(welcomeMessage, CC.xy(2, 3));
+  }
+
+  public boolean dropWelcomeMessage() {
+    if (welcomeMessage == null) {
+      return false;
+    }
+    remove(welcomeMessage);
+    welcomeMessage = null;
+    return true;
   }
 
   public void diagrammbreiteSetzen(int breite) {

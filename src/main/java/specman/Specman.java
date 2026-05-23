@@ -33,7 +33,7 @@ import java.util.List;
 
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 
-public class Specman extends JFrame implements EditorI, SpaltenContainerI {
+public class Specman extends JFrame implements EditorI, SpaltenContainerI, SpecmanOpContext {
 	private static final BasicStroke GESTRICHELTE_LINIE =
 			new BasicStroke(1.0f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND, 1.0f, new float[] {10.0f, 10.0f }, 0f);
 	public static String SPECMAN_TITLE = "Specman " + SpecmanVersion.getVersion();
@@ -50,7 +50,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	int diagrammbreite = WorkingAreaPanel.INITIAL_DIAGRAMM_WIDTH;
 	int zoomFaktor = 100;
 	File diagrammDatei;
-	private JComponent welcomeMessage;
   FocusHistory focusHistory = new FocusHistory();
 
 	private DiagramToolBar diagramToolBar;
@@ -84,7 +83,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		contentPane.add(scrollPane, CC.xy(2, 3));
 
 		arbeitsbereich = new WorkingAreaPanel();
-		displayWelcomeMessage();
 
 		intro = new EditContainer(this);
 		intro.setOpaque(false);
@@ -139,15 +137,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		keyboardOp.register();
 	}
 
-	private void displayWelcomeMessage() {
-		welcomeMessage = new WelcomeMessagePanel();
-		arbeitsbereich.add(welcomeMessage, CC.xy(2, 3));
-	}
-
 	public void dropWelcomeMessage() {
-		if (welcomeMessage != null) {
-			arbeitsbereich.remove(welcomeMessage);
-			welcomeMessage = null;
+		if (arbeitsbereich.dropWelcomeMessage()) {
 			hauptSequenzInitialisieren();
 		}
 	}

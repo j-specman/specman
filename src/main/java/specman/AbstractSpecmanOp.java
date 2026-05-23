@@ -11,9 +11,11 @@ package specman;
 abstract class AbstractSpecmanOp {
 
   protected final Specman specman;
+  protected final SpecmanOpContext context;
 
   AbstractSpecmanOp(Specman specman) {
     this.specman = specman;
+    this.context = specman;
   }
 
 }

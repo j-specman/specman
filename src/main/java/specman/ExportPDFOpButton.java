@@ -8,7 +8,7 @@ class ExportPDFOpButton extends AbstractSpecmanOpButton {
 
   @Override
   void execute() throws EditException {
-    specman.exportAsPDF();
+    context.exportAsPDF();
   }
 
 }
