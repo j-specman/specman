@@ -46,7 +46,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	public static String SPECMAN_TITLE = "Specman " + SpecmanVersion.getVersion();
 
 	TextEditArea lastFocusedTextArea;
-	public SchrittSequenzView hauptSequenz;
+	private SchrittSequenzView hauptSequenz;
 	JPanel contentPane;
 	JPanel arbeitsbereich;
 	JPanel hauptSequenzContainer;
@@ -68,7 +68,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	public final JWindow window = new JWindow();
 	private KeyboardSpecmanOp keyboardOp;
 
-	DiagramToolBar diagramToolBar;
+	private DiagramToolBar diagramToolBar;
 	private StepButtonBar stepButtonBar;
 	private JMenuItem speichern;
 	private JMenuItem speichernUnter;
@@ -482,6 +482,10 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		return diagramToolBar.isChangeModeEnabled();
 	}
 
+	public void setChangeModeEnabled(boolean enabled) {
+		diagramToolBar.setChangeModeEnabled(enabled);
+	}
+
 	public static void main(String[] args) throws Exception {
     setLookAndFeel();
 		File initialFileToOpen = readFileFromArgs(args);
@@ -526,6 +530,10 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
 	public SchrittSequenzView getHauptSequenz() {
 		return hauptSequenz;
+	}
+
+	public void setHauptSequenz(SchrittSequenzView hauptSequenz) {
+		this.hauptSequenz = hauptSequenz;
 	}
 
 	public SpecmanUndoManager getUndoManager() {

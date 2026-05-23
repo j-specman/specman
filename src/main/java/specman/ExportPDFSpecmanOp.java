@@ -34,7 +34,7 @@ class ExportPDFSpecmanOp extends AbstractSpecmanOp {
     workingAreaLocation.translate(scrollPosition.x, scrollPosition.y);
     Shape all = new Shape(workingAreaLocation)
         .add(specman.intro.getShape())
-        .add(specman.hauptSequenz.getShapeSequence())
+        .add(specman.getHauptSequenz().getShapeSequence())
         .add(specman.breitenAnpasser.getShape())
         .add(specman.outro.getShape());
     try {

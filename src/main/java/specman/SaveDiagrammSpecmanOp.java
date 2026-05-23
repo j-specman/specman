@@ -69,7 +69,7 @@ class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         specman.diagrammbreite,
         specman.zoomFaktor,
         specman.aenderungenVerfolgen(),
-        specman.hauptSequenz.generiereSchrittSequenzModel(formatierterText),
+        specman.getHauptSequenz().generiereSchrittSequenzModel(formatierterText),
         specman.intro.editorContent2Model(formatierterText),
         specman.outro.editorContent2Model(formatierterText),
         specman.pdfExportOptions);

@@ -8,7 +8,7 @@ class ReviewOpButton extends AbstractSpecmanOpButton {
 
   @Override
   void execute() throws EditException {
-    specman.hauptSequenz.zusammenklappenFuerReview();
+    specman.getHauptSequenz().zusammenklappenFuerReview();
   }
 
 }

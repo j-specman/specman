@@ -34,7 +34,7 @@ class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
   void laden(File diagramFile) {
     try {
       specman.focusHistory.clear();
-      specman.diagramToolBar.setChangeModeEnabled(false);
+      specman.setChangeModeEnabled(false);
       specman.dropWelcomeMessage();
       specman.setDiagrammDatei(diagramFile);
 
@@ -51,16 +51,16 @@ class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
       specman.outro.setEditorContent(model.outro);
       specman.pdfExportOptions = model.pdfExportOptions;
       specman.setName(model.name);
-      specman.hauptSequenz = new SchrittSequenzView(specman, null, model.hauptSequenz);
+      specman.setHauptSequenz(new SchrittSequenzView(specman, null, model.hauptSequenz));
 
       specman.hauptSequenzInitialisieren();
       quellZielZuweisung(model.queryAllSteps());
-      specman.hauptSequenz.viewsNachinitialisieren();
+      specman.getHauptSequenz().viewsNachinitialisieren();
       specman.intro.viewsNachinitialisieren();
       specman.intro.registerAllExistingStepnumbers();
       specman.outro.viewsNachinitialisieren();
       specman.outro.registerAllExistingStepnumbers();
-      specman.diagramToolBar.setChangeModeEnabled(model.changeModeenabled);
+      specman.setChangeModeEnabled(model.changeModeenabled);
       specman.recentFiles.add(diagramFile);
       specman.undoManager.discardAllEdits();
     }
@@ -72,11 +72,11 @@ class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
   private void quellZielZuweisung(List<AbstractSchrittModel_V001> allModelSteps) {
     for (AbstractSchrittModel_V001 modelStep : allModelSteps) {
       if (modelStep.quellschrittID != null) {
-        AbstractSchrittView zielschritt = specman.hauptSequenz.findeSchrittZuId(modelStep.id);
+        AbstractSchrittView zielschritt = specman.getHauptSequenz().findeSchrittZuId(modelStep.id);
         if (zielschritt instanceof QuellSchrittView) {
           continue;
         }
-        QuellSchrittView quellSchritt = (QuellSchrittView) specman.hauptSequenz.findeSchrittZuId(modelStep.quellschrittID);
+        QuellSchrittView quellSchritt = (QuellSchrittView) specman.getHauptSequenz().findeSchrittZuId(modelStep.quellschrittID);
         zielschritt.setQuellschrittUDBL(quellSchritt);
         quellSchritt.setZielschritt(zielschritt);
       }

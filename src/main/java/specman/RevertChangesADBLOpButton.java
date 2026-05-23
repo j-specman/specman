@@ -10,7 +10,7 @@ class RevertChangesADBLOpButton extends AbstractADBLSpecmanOpButton {
 
   @Override
   void execute() throws EditException {
-    int changesReverted = specman.hauptSequenz.aenderungenVerwerfen(specman);
+    int changesReverted = specman.getHauptSequenz().aenderungenVerwerfen(specman);
     if (changesReverted > 0) {
       specman.diagrammAktualisieren(null);
     } else {

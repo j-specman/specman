@@ -12,7 +12,7 @@ class CreateCaseBranchADBLOpButton extends AbstractADBLSpecmanOpButton {
   @Override
   void execute() throws EditException {
     specman.dropWelcomeMessage();
-    AbstractSchrittView schritt = specman.hauptSequenz.findeSchritt(specman.lastFocusedTextArea);
+    AbstractSchrittView schritt = specman.getHauptSequenz().findeSchritt(specman.lastFocusedTextArea);
     if (!(schritt instanceof CaseSchrittView)) {
       specman.fehler("Kein Case-Schritt ausgewählt");
       return;

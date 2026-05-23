@@ -12,10 +12,10 @@ abstract class AbstractCreateStepOpButton extends AbstractADBLSpecmanOpButton {
   @Override
   void execute() throws EditException {
     specman.dropWelcomeMessage();
-    AbstractSchrittView referenceStep = specman.hauptSequenz.findeSchritt(specman.lastFocusedTextArea);
+    AbstractSchrittView referenceStep = specman.getHauptSequenz().findeSchritt(specman.lastFocusedTextArea);
     AbstractSchrittView newStep = (referenceStep != null)
         ? insertAfter(referenceStep.getParent(), referenceStep)
-        : append(specman.hauptSequenz);
+        : append(specman.getHauptSequenz());
     specman.newStepPostInit(newStep);
   }
 

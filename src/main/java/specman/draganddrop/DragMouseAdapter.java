@@ -65,7 +65,7 @@ public class DragMouseAdapter extends MouseAdapter {
 			specman.window.pack();
 			updateWindowLocation(pt, parent);
 			specman.window.setVisible(true);
-			draggingLogic.dragGlassPanePos(ptCon, specman.hauptSequenz.schritte, NoInsert, e);
+			draggingLogic.dragGlassPanePos(ptCon, specman.getHauptSequenz().schritte, NoInsert, e);
 		}
 		catch(EditException ex) {
 			specman.showError(ex);
@@ -93,7 +93,7 @@ public class DragMouseAdapter extends MouseAdapter {
 			}
 			specman.window.setVisible(false);
 			Point ptCon = SwingUtilities.convertPoint((Component)e.getSource(),(int) e.getPoint().getX(),(int)e.getPoint().getY()-2, specman);
-			draggingLogic.dragGlassPanePos(ptCon, specman.hauptSequenz.schritte, Insert, e);
+			draggingLogic.dragGlassPanePos(ptCon, specman.getHauptSequenz().schritte, Insert, e);
 			specman.getGlassPane().setVisible(false);
 			specman.setCursor(Cursor.getDefaultCursor());
 			specman.window.remove(dummy);

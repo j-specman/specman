@@ -16,7 +16,7 @@ class ToneOpButton extends AbstractADBLSpecmanOpButton {
     if (specman.lastFocusedTextArea == null) {
       return;
     }
-    AbstractSchrittView schritt = specman.hauptSequenz.findeSchritt(specman.lastFocusedTextArea);
+    AbstractSchrittView schritt = specman.getHauptSequenz().findeSchritt(specman.lastFocusedTextArea);
     Color aktuelleHintergrundfarbe = schritt.getBackground();
     int farbwert = aktuelleHintergrundfarbe.getRed() == 240 ? 255 : 240;
     Color neueHintergrundfarbe = new Color(farbwert, farbwert, farbwert);

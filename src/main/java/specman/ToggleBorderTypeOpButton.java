@@ -12,7 +12,7 @@ class ToggleBorderTypeOpButton extends AbstractADBLSpecmanOpButton {
 
   @Override
   void execute() throws EditException {
-    AbstractSchrittView schritt = specman.hauptSequenz.findeSchritt(specman.lastFocusedTextArea);
+    AbstractSchrittView schritt = specman.getHauptSequenz().findeSchritt(specman.lastFocusedTextArea);
     if (schritt == null) {
       return;
     }
