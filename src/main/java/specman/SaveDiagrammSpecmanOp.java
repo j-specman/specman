@@ -42,7 +42,7 @@ class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
       }
       // Generating the model includes cleaning up text edit areas which in turn runs setText which
       // in turn causes the scroll position to be changed. Therefore, temporarily pause scrolling.
-      StruktogrammModel_V001 model = specman.generiereStruktogrammModel(true);
+      StruktogrammModel_V001 model = generiereStruktogrammModel(true);
       ModelEnvelope wrappedModel = wrapModel(model);
 
       ObjectMapper objectMapper = new ObjectMapper();
@@ -61,6 +61,18 @@ class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
     catch (IOException e) {
       specman.displayException(e);
     }
+  }
+
+  private StruktogrammModel_V001 generiereStruktogrammModel(boolean formatierterText) {
+    return new StruktogrammModel_V001(
+        specman.getName(),
+        specman.diagrammbreite,
+        specman.zoomFaktor,
+        specman.aenderungenVerfolgen(),
+        specman.hauptSequenz.generiereSchrittSequenzModel(formatierterText),
+        specman.intro.editorContent2Model(formatierterText),
+        specman.outro.editorContent2Model(formatierterText),
+        specman.pdfExportOptions);
   }
 
   private ModelEnvelope wrapModel(StruktogrammModel_V001 model) {

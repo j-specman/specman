@@ -10,8 +10,6 @@ import specman.draganddrop.GlassPane;
 import specman.editarea.EditArea;
 import specman.editarea.InteractiveStepFragment;
 import specman.model.v001.*;
-import specman.modelops.MoveBranchSequenceLeftOperation;
-import specman.modelops.MoveBranchSequenceRightOperation;
 import specman.pdf.PDFExportChooser;
 import specman.editarea.EditContainer;
 import specman.editarea.TextEditArea;
@@ -38,9 +36,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import specman.styles.ChangeColorSet;
 import static specman.styles.Styles.AENDERUNGSFARBE;
@@ -75,7 +71,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
 	//TODO window for dragging
 	public final JWindow window = new JWindow();
-	private final Set<Integer> pressedKeys = new HashSet<>();
+	private KeyboardSpecmanOp keyboardOp;
 	public static String SPECMAN_TITLE = "Specman " + SpecmanVersion.getVersion();
 
 	public Specman(File fileToOpen) throws Exception {
@@ -97,24 +93,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
     scrollPane.setViewport(viewport);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
 		scrollPane.getHorizontalScrollBar().setUnitIncrement(20);
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
-			if (e.getID() != KeyEvent.KEY_PRESSED) return false;
-			JScrollBar bar = scrollPane.getVerticalScrollBar();
-			int pageSize = scrollPane.getViewport().getHeight();
-			if (e.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
-				bar.setValue(bar.getValue() + pageSize);
-				return true;
-			}
-			if (e.getKeyCode() == KeyEvent.VK_PAGE_UP) {
-				bar.setValue(bar.getValue() - pageSize);
-				return true;
-			}
-			return false;
-		});
-		//TODO
 		scrollPane.addMouseWheelListener(new DragMouseAdapter(this));
 		contentPane.add(scrollPane, CC.xy(2, 3));
-		// ToDo Sidebar change from getContentPane().add(scrollPane, CC.xy(1, 3));
 
 		arbeitsbereich = new JPanel() {
 			@Override
@@ -185,14 +165,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	 * Sets up a KeyEventDispatcher to provide a list of pressed keys used by another container.
 	 */
 	private void configureKeyboardManager() {
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
-			if (e.getID() == KeyEvent.KEY_PRESSED) {
-				pressedKeys.add(e.getKeyCode());
-			} else if (e.getID() == KeyEvent.KEY_RELEASED) {
-				pressedKeys.remove(e.getKeyCode());
-			}
-			return false;
-		});
+		keyboardOp = new KeyboardSpecmanOp(this);
+		keyboardOp.register();
 	}
 
 	private void displayWelcomeMessage() {
@@ -656,7 +630,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	private CreateCaseBranchOpButton createCaseBranch;
 	private JButton exportPDF;
 	private ToneOpButton einfaerben;
-	private DeleteStepOpButton loeschen;
+	DeleteStepOpButton loeschen;
 	private ToggleBorderTypeOpButton toggleBorderType;
 	private JButton review;
 	private BirdsViewSpecmanOpButton birdsview;
@@ -702,19 +676,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 			}
 		}
 		return null;
-	}
-
-	public StruktogrammModel_V001 generiereStruktogrammModel(boolean formatierterText) {
-		StruktogrammModel_V001 model = new StruktogrammModel_V001(
-			getName(),
-			diagrammbreite,
-			zoomFaktor,
-			aenderungenVerfolgen(),
-			hauptSequenz.generiereSchrittSequenzModel(formatierterText),
-			intro.editorContent2Model(formatierterText),
-			outro.editorContent2Model(formatierterText),
-      pdfExportOptions);
-		return model;
 	}
 
 	public void exportAsGraphviz() {
@@ -792,15 +753,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		return result;
 	}
 
-	/**
-	 * Returns a step if the provided stepnumber matches.
-	 * This could be optimized by skipping all steps after the position where the step is supposed to be.
-	 * <p>
-	 * However, this case shouldn't be called since that means we are searching for a non-existing step which
-	 * currently isn't possible - Except due to a bug, that's why we throw the Exception above.
-	 */
 	public boolean isKeyPressed(int keyCode) {
-		return pressedKeys.contains(keyCode);
+		return keyboardOp.isKeyPressed(keyCode);
 	}
 
 	@Override
@@ -861,32 +815,17 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
   @Override
   public void deleteStepUDBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
-    try(UndoRecording ur = composeUndo()) {
-      loeschen.deleteStep(step, initiatingFragment);
-    }
-    catch (EditException ex) {
-      showError(ex);
-    }
+    new DeleteStepSpecmanOp(this, step, initiatingFragment).run();
   }
 
   @Override
   public void moveBranchSequenceLeftUDBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
-    try(UndoRecording ur = composeUndo()) {
-      new MoveBranchSequenceLeftOperation(step, initiatingFragment).execute();
-    }
-    catch (EditException ex) {
-      showError(ex);
-    }
+    new MoveBranchSequenceLeftSpecmanOp(this, step, initiatingFragment).run();
   }
 
   @Override
   public void moveBranchSequenceRightUDBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
-    try(UndoRecording ur = composeUndo()) {
-      new MoveBranchSequenceRightOperation(step, initiatingFragment).execute();
-    }
-    catch (EditException ex) {
-      showError(ex);
-    }
+    new MoveBranchSequenceRightSpecmanOp(this, step, initiatingFragment).run();
   }
 
   @Override
