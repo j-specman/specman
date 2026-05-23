@@ -9,7 +9,6 @@ import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Locale;
 
 public class Styles {
     public static final int FONTSIZE = SpecmanFontSizeAction.DEFAULT_FONTSIZE;
@@ -77,7 +76,10 @@ public class Styles {
     public static final ReadWriteColor STEPNUMBER_LINK_COLOR = new ReadWriteColor(new Color(220, 220, 220));
     public static final ChangeColorSet AENDERUNGSFARBE = new ChangeColorSet(
       Color.yellow,
-      new Color(255, 255, 200),
+//      new Color(100, 255, 255), // cyan
+//      new Color(150, 255, 150), // green
+//      new Color(255, 220, 150), // orange
+//      new Color(255, 180, 180), // pink
       STEPNUMBER_LINK_COLOR.color);
 
     static {
@@ -99,21 +101,4 @@ public class Styles {
         StyleConstants.setStrikeThrough(deletedStepnumberLinkStyle, true);
     }
 
-    public static String toHTMLColor(Color color) {
-        if (color == null) {
-            return "#000000";
-        }
-        else if (color.getAlpha() != 255) {
-            return String.format(Locale.US, "rgba(%d, %d, %d, %1.1f)",
-              color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() / 255f);
-        }
-        return "#" + Integer.toHexString(color.getRGB()).substring(2).toLowerCase();
-    }
-
-    public static Color combineColors(Color color, Color anotherColor) {
-        int r = (color.getRed() + anotherColor.getRed()) / 2;
-        int g = (color.getGreen() + anotherColor.getGreen()) / 2;
-        int b = (color.getBlue() + anotherColor.getBlue()) / 2;
-        return new Color(r, g, b);
-    }
 }

@@ -863,6 +863,9 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		aenderungenVerfolgen = new JToggleButton();
 		aenderungenUebernehmen = new JButton();
 		aenderungenVerwerfen = new JButton();
+		aenderungenVerfolgen.setBackground(AENDERUNGSFARBE.panelColor);
+		aenderungenUebernehmen.setBackground(AENDERUNGSFARBE.panelColor);
+		aenderungenVerwerfen.setBackground(AENDERUNGSFARBE.panelColor);
 		zoom = new JComboBox<ZoomFaktor>();
 		for (ZoomFaktor faktor: ZoomFaktor.values())
 			zoom.addItem(faktor);

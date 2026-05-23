@@ -4,6 +4,7 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import java.awt.Color;
+import java.util.Locale;
 
 /**
  * Bundles the two representations of a color that Swing's {@link javax.swing.text.html.HTMLEditorKit}
@@ -26,12 +27,23 @@ public class ReadWriteColor {
 
   public ReadWriteColor(Color color) {
     this.color = color;
-    this.htmlColor = Styles.toHTMLColor(color);
+    this.htmlColor = toHTMLColor(color);
     this.background = new SimpleAttributeSet();
     StyleConstants.setBackground(background, color);
   }
 
   public boolean isBackground(String cssColor) {
     return cssColor != null && htmlColor.equalsIgnoreCase(cssColor);
+  }
+
+  public static String toHTMLColor(Color color) {
+    if (color == null) {
+      return "#000000";
+    }
+    else if (color.getAlpha() != 255) {
+      return String.format(Locale.US, "rgba(%d, %d, %d, %1.1f)",
+        color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() / 255f);
+    }
+    return "#" + Integer.toHexString(color.getRGB()).substring(2).toLowerCase();
   }
 }
