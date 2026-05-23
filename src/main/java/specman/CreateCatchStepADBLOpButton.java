@@ -3,9 +3,9 @@ package specman;
 import specman.view.AbstractSchrittView;
 import specman.view.CatchUeberschrift;
 
-class CreateCatchStepOpButton extends AbstractUDBLSpecmanOpButton {
+class CreateCatchStepADBLOpButton extends AbstractADBLSpecmanOpButton {
 
-  CreateCatchStepOpButton(Specman specman) { super(specman); }
+  CreateCatchStepADBLOpButton(Specman specman) { super(specman); }
 
   @Override
   void execute() throws EditException {

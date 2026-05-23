@@ -4,11 +4,12 @@ import specman.undo.manager.UndoRecording;
 
 /**
  * Base class for toolbar buttons whose operation must be recorded as a single
- * atomic undo step. Wraps {@link #execute()} in {@link Specman#composeUndo()}.
+ * atomic undo step. ADBL is short for <b>A</b>tomic un<b>D</b>oa<b>BL</b>e.
+ * Wraps {@link #execute()} in {@link Specman#composeUndo()}.
  */
-abstract class AbstractUDBLSpecmanOpButton extends AbstractSpecmanOpButton {
+abstract class AbstractADBLSpecmanOpButton extends AbstractSpecmanOpButton {
 
-  AbstractUDBLSpecmanOpButton(Specman specman) {
+  AbstractADBLSpecmanOpButton(Specman specman) {
     super(specman);
   }
 

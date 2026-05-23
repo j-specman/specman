@@ -34,7 +34,7 @@ class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
   void laden(File diagramFile) {
     try {
       specman.focusHistory.clear();
-      specman.aenderungenVerfolgen.setSelected(false);
+      specman.diagramToolBar.setChangeModeEnabled(false);
       specman.dropWelcomeMessage();
       specman.setDiagrammDatei(diagramFile);
 
@@ -60,7 +60,7 @@ class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
       specman.intro.registerAllExistingStepnumbers();
       specman.outro.viewsNachinitialisieren();
       specman.outro.registerAllExistingStepnumbers();
-      specman.aenderungenVerfolgen.setSelected(model.changeModeenabled);
+      specman.diagramToolBar.setChangeModeEnabled(model.changeModeenabled);
       specman.recentFiles.add(diagramFile);
       specman.undoManager.discardAllEdits();
     }

@@ -2,9 +2,9 @@ package specman;
 
 import javax.swing.*;
 
-class AcceptChangesOpButton extends AbstractUDBLSpecmanOpButton {
+class AcceptChangesADBLOpButton extends AbstractADBLSpecmanOpButton {
 
-  AcceptChangesOpButton(Specman specman) {
+  AcceptChangesADBLOpButton(Specman specman) {
     super(specman);
   }
 

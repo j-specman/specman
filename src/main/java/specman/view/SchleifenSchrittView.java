@@ -205,7 +205,7 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 
 	@Override public void resyncStepnumberStyleUDBL() {
 		super.resyncStepnumberStyleUDBL();
-		wiederholSequenz.resyncStepnumberStyleUDBL();
+		wiederholSequenz.resyncStepnumberStyleADBL();
 	}
 
 	@Override public void viewsNachinitialisieren() {

@@ -76,17 +76,17 @@ public class StepnumberContextMenu implements MouseListener {
 
   private JMenuItem createDeleteItem() {
     return createItem("Löschen", "loeschen",
-      e -> Specman.instance().deleteStepUDBL(currentStep, initiatingLabel));
+      e -> Specman.instance().deleteStepADBL(currentStep, initiatingLabel));
   }
 
   private JMenuItem createLeftItem() {
     return createItem("Move left", "arrow-left",
-      e -> Specman.instance().moveBranchSequenceLeftUDBL(currentStep, initiatingLabel));
+      e -> Specman.instance().moveBranchSequenceLeftADBL(currentStep, initiatingLabel));
   }
 
   private JMenuItem createRightItem() {
     return createItem("Move right", "arrow-right",
-      e -> Specman.instance().moveBranchSequenceRightUDBL(currentStep, initiatingLabel));
+      e -> Specman.instance().moveBranchSequenceRightADBL(currentStep, initiatingLabel));
   }
 
   private StepnumberLabel label(MouseEvent e) {

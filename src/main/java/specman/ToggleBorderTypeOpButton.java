@@ -4,7 +4,7 @@ import specman.undo.UndoableToggleStepBorder;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
 
-class ToggleBorderTypeOpButton extends AbstractUDBLSpecmanOpButton {
+class ToggleBorderTypeOpButton extends AbstractADBLSpecmanOpButton {
 
   ToggleBorderTypeOpButton(Specman specman) {
     super(specman);

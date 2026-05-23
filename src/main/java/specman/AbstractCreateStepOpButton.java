@@ -3,9 +3,7 @@ package specman;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
 
-import static specman.view.RelativeStepPosition.After;
-
-abstract class AbstractCreateStepOpButton extends AbstractUDBLSpecmanOpButton {
+abstract class AbstractCreateStepOpButton extends AbstractADBLSpecmanOpButton {
 
   AbstractCreateStepOpButton(Specman specman) {
     super(specman);

@@ -14,7 +14,6 @@ import specman.model.v001.*;
 import specman.pdf.PDFExportChooser;
 import specman.editarea.EditContainer;
 import specman.editarea.TextEditArea;
-import specman.undo.UndoableDiagrammSkaliert;
 import specman.undo.UndoableSchrittHinzugefuegt;
 import specman.undo.manager.SpecmanUndoManager;
 import specman.undo.manager.UndoRecording;
@@ -26,7 +25,6 @@ import javax.swing.border.MatteBorder;
 import javax.swing.text.JTextComponent;
 import javax.swing.undo.UndoableEdit;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -45,6 +43,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	public static final int INITIAL_DIAGRAMM_WIDTH = 700;
 	private static final BasicStroke GESTRICHELTE_LINIE =
 			new BasicStroke(1.0f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND, 1.0f, new float[] {10.0f, 10.0f }, 0f);
+	public static String SPECMAN_TITLE = "Specman " + SpecmanVersion.getVersion();
 
 	TextEditArea lastFocusedTextArea;
 	public SchrittSequenzView hauptSequenz;
@@ -66,10 +65,19 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
   PDFExportOptionsModel_V001 pdfExportOptions;
   FocusHistory focusHistory = new FocusHistory();
 
-	//TODO window for dragging
 	public final JWindow window = new JWindow();
 	private KeyboardSpecmanOp keyboardOp;
-	public static String SPECMAN_TITLE = "Specman " + SpecmanVersion.getVersion();
+
+	DiagramToolBar diagramToolBar;
+	private StepButtonBar stepButtonBar;
+	private JMenuItem speichern;
+	private JMenuItem speichernUnter;
+	private JMenuItem laden;
+	private JMenuItem exportAsPDFMenuItem;
+	private JMenuItem exportAsGraphvizMenuItem;
+	private JMenuItem exitMenuItem;
+
+	private static Specman instance;
 
 	public Specman(File fileToOpen) throws Exception {
 		instance = this;
@@ -305,8 +313,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	}
 
   @Override
-	public void resyncStepnumberStyleUDBL() {
-    hauptSequenz.resyncStepnumberStyleUDBL();
+	public void resyncStepnumberStyleADBL() {
+    hauptSequenz.resyncStepnumberStyleADBL();
 	}
 
 	public void addImageViaFileChooser() {
@@ -331,7 +339,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	public int skalieren(int prozent) {
 		int bisherigerFaktor = zoomFaktor;
 		zoomFaktor = prozent;
-		zoom.updateDisplay(prozent);
+		zoomFaktorAnzeigeAktualisieren(prozent);
     KlappButton.scaleIcons(prozent, bisherigerFaktor);
 		float diagrammbreite100Prozent = (float)diagrammbreite / bisherigerFaktor * 100;
 		int neueDiagrammbreite = (int)(diagrammbreite100Prozent * prozent / 100);
@@ -343,7 +351,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	}
 
 	void zoomFaktorAnzeigeAktualisieren(int prozent) {
-		zoom.updateDisplay(prozent);
+		diagramToolBar.updateZoomDisplay(prozent);
 	}
 
 	private void diagrammSpeichern(boolean dateiauswahlErzwingen) {
@@ -384,7 +392,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	}
 
 	public void newStepPostInit(AbstractSchrittView newStep) {
-    resyncStepnumberStyleUDBL();
+    resyncStepnumberStyleADBL();
 		addEdit(new UndoableSchrittHinzugefuegt(newStep, newStep.getParent()));
 		newStep.skalieren(zoomFaktor, 100);
 		newStep.initInheritedTextFieldIndentions();
@@ -393,22 +401,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
 	private void initComponents() {
 		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-		toolBar = new JToolBar();
-		toolBar.setFloatable(false);
+		diagramToolBar = new DiagramToolBar(this);
 		stepButtonBar = new StepButtonBar(this);
-		exportPDF = new ExportPDFOpButton(this);
-		einfaerben = new ToneOpButton(this);
-		loeschen = new DeleteStepOpButton(this);
-		toggleBorderType = new ToggleBorderTypeOpButton(this);
-		review = new ReviewOpButton(this);
-		birdsview = new BirdsViewSpecmanOpButton(this);
-		aenderungenVerfolgen = new JToggleButton();
-		aenderungenUebernehmen = new AcceptChangesOpButton(this);
-		aenderungenVerwerfen = new RevertChangesOpButton(this);
-		aenderungenVerfolgen.setBackground(AENDERUNGSFARBE.panelColor);
-		aenderungenUebernehmen.setBackground(AENDERUNGSFARBE.panelColor);
-		aenderungenVerwerfen.setBackground(AENDERUNGSFARBE.panelColor);
-		zoom = new ZoomComboBox(this);
 		speichern = new JMenuItem("Speichern");
 		speichern.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
 		speichernUnter = new JMenuItem("Speichern unter...");
@@ -425,31 +419,10 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		setContentPane(contentPane);
 		contentPane.setLayout(new FormLayout("pref, default:grow", "default, default, fill:10px:grow")); //ToDo Sidebar added "pref"
 
-		//======== toolBar ========
-		toolbarButtonHinzufuegen(einfaerben, "helligkeit", "Hintergrund schattieren", toolBar);
-		toolbarButtonHinzufuegen(loeschen, "loeschen", "Schritt löschen", toolBar);
-		toolbarButtonHinzufuegen(toggleBorderType, "switch-border", "Rahmen umschalten", toolBar);
-		toolBar.addSeparator();
-		toolbarButtonHinzufuegen(aenderungenVerfolgen, "aenderungen", "Änderungen verfolgen", toolBar);
-		toolbarButtonHinzufuegen(aenderungenUebernehmen, "uebernehmen", "Änderungen übernehmen", toolBar);
-		toolbarButtonHinzufuegen(aenderungenVerwerfen, "verwerfen", "Änderungen verwerfen", toolBar);
-		toolbarButtonHinzufuegen(review, "review", "Für Review zusammenklappen", toolBar);
-		toolBar.addSeparator();
-    toolBar.add(zoom);
-    toolbarButtonHinzufuegen(birdsview, "birdsview", "Bird's View", toolBar);
-    toolbarButtonHinzufuegen(exportPDF, "pdf", "PDF exportieren", toolBar);
-
-		contentPane.add(toolBar, CC.xywh(1, 1, 2, 1));
+		contentPane.add(diagramToolBar, CC.xywh(1, 1, 2, 1));
 		contentPane.add(stepButtonBar, CC.xy(1, 3));
 		pack();
 		setLocationRelativeTo(getOwner());
-	}
-
-	private void toolbarButtonHinzufuegen(AbstractButton button, String iconBasename, String tooltip, JToolBar tb) {
-		button.setIcon(IconReader.readImageIcon(iconBasename));
-		button.setMargin(new Insets(0, 0, 0, 0));
-		button.setToolTipText(tooltip);
-		tb.add(button);
 	}
 
 	HTMLEditorPane shefEditorPane;
@@ -502,32 +475,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		return menu;
 	}
 
-	private JToolBar toolBar;
-	private StepButtonBar stepButtonBar;
-	private ExportPDFOpButton exportPDF;
-	private ToneOpButton einfaerben;
-	DeleteStepOpButton loeschen;
-	private ToggleBorderTypeOpButton toggleBorderType;
-	private ReviewOpButton review;
-	private BirdsViewSpecmanOpButton birdsview;
-	private AcceptChangesOpButton aenderungenUebernehmen;
-	private RevertChangesOpButton aenderungenVerwerfen;
-	private ZoomComboBox zoom;
-	JToggleButton aenderungenVerfolgen;
-	private JMenuItem speichern;
-	private JMenuItem speichernUnter;
-	private JMenuItem laden;
-	private JMenuItem exportAsPDFMenuItem;
-	private JMenuItem exportAsGraphvizMenuItem;
-	private JMenuItem exitMenuItem;
-
-	private static Specman instance;
-
 	public static EditorI instance() { return instance; }
 
 
 	public boolean aenderungenVerfolgen() {
-		return aenderungenVerfolgen.isSelected();
+		return diagramToolBar.isChangeModeEnabled();
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -684,18 +636,18 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
   }
 
   @Override
-  public void deleteStepUDBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
-    new DeleteStepSpecmanOp(this, step, initiatingFragment).run();
+  public void deleteStepADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
+    new DeleteStepADBLOp(this, step, initiatingFragment).run();
   }
 
   @Override
-  public void moveBranchSequenceLeftUDBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
-    new MoveBranchSequenceLeftSpecmanOp(this, step, initiatingFragment).run();
+  public void moveBranchSequenceLeftADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
+    new MoveBranchSequenceLeftADBLOp(this, step, initiatingFragment).run();
   }
 
   @Override
-  public void moveBranchSequenceRightUDBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
-    new MoveBranchSequenceRightSpecmanOp(this, step, initiatingFragment).run();
+  public void moveBranchSequenceRightADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
+    new MoveBranchSequenceRightADBLOp(this, step, initiatingFragment).run();
   }
 
   @Override

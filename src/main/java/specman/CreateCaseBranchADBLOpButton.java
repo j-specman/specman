@@ -5,9 +5,9 @@ import specman.view.AbstractSchrittView;
 import specman.view.CaseSchrittView;
 import specman.view.ZweigSchrittSequenzView;
 
-class CreateCaseBranchOpButton extends AbstractUDBLSpecmanOpButton {
+class CreateCaseBranchADBLOpButton extends AbstractADBLSpecmanOpButton {
 
-  CreateCaseBranchOpButton(Specman specman) { super(specman); }
+  CreateCaseBranchADBLOpButton(Specman specman) { super(specman); }
 
   @Override
   void execute() throws EditException {
@@ -24,7 +24,7 @@ class CreateCaseBranchOpButton extends AbstractUDBLSpecmanOpButton {
       return;
     }
     ZweigSchrittSequenzView neuerZweig = caseSchritt.neuenZweigHinzufuegen(specman, ausgewaehlterZweig);
-    specman.resyncStepnumberStyleUDBL();
+    specman.resyncStepnumberStyleADBL();
     specman.addEdit(new UndoableZweigHinzugefuegt(specman, neuerZweig, caseSchritt));
     schritt.skalieren(specman.zoomFaktor, 100);
     specman.diagrammAktualisieren(schritt.getFirstEditArea());

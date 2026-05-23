@@ -5,7 +5,7 @@ import specman.view.AbstractSchrittView;
 
 import java.awt.*;
 
-class ToneOpButton extends AbstractUDBLSpecmanOpButton {
+class ToneOpButton extends AbstractADBLSpecmanOpButton {
 
   ToneOpButton(Specman specman) {
     super(specman);

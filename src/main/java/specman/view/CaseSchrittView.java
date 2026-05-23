@@ -387,9 +387,9 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 
 	@Override public void resyncStepnumberStyleUDBL() {
 		super.resyncStepnumberStyleUDBL();
-		getSonstSequenz().resyncStepnumberStyleUDBL();
+		getSonstSequenz().resyncStepnumberStyleADBL();
 		for (ZweigSchrittSequenzView caseSequenz : caseSequenzen) {
-			caseSequenz.resyncStepnumberStyleUDBL();
+			caseSequenz.resyncStepnumberStyleADBL();
 		}
 
 	}

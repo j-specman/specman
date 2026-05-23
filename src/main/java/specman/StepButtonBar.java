@@ -16,8 +16,8 @@ public class StepButtonBar extends JToolBar {
   private final CreateCaseStepOpButton createCaseStep;
   private final CreateSubsequenceStepOpButton createSubsequenceStep;
   private final CreateBreakStepOpButton createBreakStep;
-  private final CreateCatchStepOpButton createCatchStep;
-  private final CreateCaseBranchOpButton createCaseBranch;
+  private final CreateCatchStepADBLOpButton createCatchStep;
+  private final CreateCaseBranchADBLOpButton createCaseBranch;
 
   StepButtonBar(Specman specman) {
     super(JToolBar.VERTICAL);
@@ -30,8 +30,8 @@ public class StepButtonBar extends JToolBar {
     createCaseStep = new CreateCaseStepOpButton(specman);
     createSubsequenceStep = new CreateSubsequenceStepOpButton(specman);
     createBreakStep = new CreateBreakStepOpButton(specman);
-    createCatchStep = new CreateCatchStepOpButton(specman);
-    createCaseBranch = new CreateCaseBranchOpButton(specman);
+    createCatchStep = new CreateCatchStepADBLOpButton(specman);
+    createCaseBranch = new CreateCaseBranchADBLOpButton(specman);
 
     addButton(createSimpleStep, "einfacher-schritt", "Create simple step");
     addButton(createWhileStep, "while-schritt", "Create while step");

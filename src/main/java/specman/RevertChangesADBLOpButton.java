@@ -2,9 +2,9 @@ package specman;
 
 import javax.swing.*;
 
-class RevertChangesOpButton extends AbstractUDBLSpecmanOpButton {
+class RevertChangesADBLOpButton extends AbstractADBLSpecmanOpButton {
 
-  RevertChangesOpButton(Specman specman) {
+  RevertChangesADBLOpButton(Specman specman) {
     super(specman);
   }
 

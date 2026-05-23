@@ -144,7 +144,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 
 	@Override public void resyncStepnumberStyleUDBL() {
 		super.resyncStepnumberStyleUDBL();
-		subsequenz.resyncStepnumberStyleUDBL();
+		subsequenz.resyncStepnumberStyleADBL();
 	}
 
 	@Override public void viewsNachinitialisieren() {

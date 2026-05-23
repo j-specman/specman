@@ -30,7 +30,6 @@ import java.awt.event.FocusEvent;
 import java.util.List;
 
 import static specman.TextInit.initialtext;
-import static specman.view.KlappButton.ZEILENLAYOUT_FILLER_HIDDEN;
 
 public class IfElseSchrittView extends VerzweigungSchrittView implements ComponentListener, SpaltenContainerI {
 	ZweigSchrittSequenzView ifSequenz;
@@ -267,8 +266,8 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 
 	@Override public void resyncStepnumberStyleUDBL() {
 		super.resyncStepnumberStyleUDBL();
-		getElseSequenz().resyncStepnumberStyleUDBL();
-		getIfSequenz().resyncStepnumberStyleUDBL();
+		getElseSequenz().resyncStepnumberStyleADBL();
+		getIfSequenz().resyncStepnumberStyleADBL();
 	}
 
 	@Override public void viewsNachinitialisieren() {
