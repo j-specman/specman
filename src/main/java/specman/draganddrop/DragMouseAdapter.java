@@ -12,6 +12,7 @@ import specman.view.AbstractSchrittView;
 
 import javax.swing.JComponent;
 import javax.swing.JTextField;
+import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -29,6 +30,7 @@ public class DragMouseAdapter extends MouseAdapter {
 	private final Specman specman;
 	private	JTextField dummy;
 	private final DraggingLogic draggingLogic;
+	private final JWindow window = new JWindow();
 
 	public DragMouseAdapter(Specman specman, StepButtonBar stepButtonBar) {
 		this.specman = specman;
@@ -61,10 +63,10 @@ public class DragMouseAdapter extends MouseAdapter {
 				specman.setCursor(Cursor.getDefaultCursor());
 			}
 			specman.getGlassPane().setVisible(false);
-			specman.window.add(dummy);
-			specman.window.pack();
+			window.add(dummy);
+			window.pack();
 			updateWindowLocation(pt, parent);
-			specman.window.setVisible(true);
+			window.setVisible(true);
 			draggingLogic.dragGlassPanePos(ptCon, specman.getHauptSequenz().schritte, NoInsert, e);
 		}
 		catch(EditException ex) {
@@ -76,7 +78,7 @@ public class DragMouseAdapter extends MouseAdapter {
 	private void updateWindowLocation(Point pt, JComponent parent){
 		Point p = new Point(pt.x  +3, pt.y +3);
 		SwingUtilities.convertPointToScreen(p,parent);
-		specman.window.setLocation(p);
+		window.setLocation(p);
 	}
 
   @Override
@@ -91,12 +93,12 @@ public class DragMouseAdapter extends MouseAdapter {
 				specman.setCursor(Cursor.getDefaultCursor());
 				return;
 			}
-			specman.window.setVisible(false);
+			window.setVisible(false);
 			Point ptCon = SwingUtilities.convertPoint((Component)e.getSource(),(int) e.getPoint().getX(),(int)e.getPoint().getY()-2, specman);
 			draggingLogic.dragGlassPanePos(ptCon, specman.getHauptSequenz().schritte, Insert, e);
 			specman.getGlassPane().setVisible(false);
 			specman.setCursor(Cursor.getDefaultCursor());
-			specman.window.remove(dummy);
+			window.remove(dummy);
 		}
 		catch(EditException ex) {
 			specman.showError(ex);

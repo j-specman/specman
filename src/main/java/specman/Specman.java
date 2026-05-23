@@ -57,12 +57,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	private JComponent welcomeMessage;
   FocusHistory focusHistory = new FocusHistory();
 
-	public final JWindow window = new JWindow();
-	private KeyboardSpecmanOp keyboardOp;
-
 	private DiagramToolBar diagramToolBar;
 	private StepButtonBar stepButtonBar;
 	private SpecmanMenuBar menuBar;
+
+	private KeyboardSpecmanOp keyboardOp;
 	private final ExportPDFSpecmanOp exportPDFOp = new ExportPDFSpecmanOp(this);
 
 	private static Specman instance;
