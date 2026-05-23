@@ -449,19 +449,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	private void initComponents() {
 		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
 		toolBar = new JToolBar();
-		toolBar.setFloatable(false); //ToDo Sidebar added
-		buttonBar = new JToolBar(JToolBar.VERTICAL); //ToDo Sidebar added
-
-		createSimpleStep = new CreateSimpleStepOpButton(this);
-		createWhileStep = new CreateWhileStepOpButton(this);
-		createWhileWhileStep = new CreateWhileWhileStepOpButton(this);
-		createIfElseStep = new CreateIfElseStepOpButton(this);
-		createIfStep = new CreateIfStepOpButton(this);
-		createCaseStep = new CreateCaseStepOpButton(this);
-		createSubsequenceStep = new CreateSubsequenceStepOpButton(this);
-		createBreakStep = new CreateBreakStepOpButton(this);
-		createCatchStep = new CreateCatchStepOpButton(this);
-		createCaseBranch = new CreateCaseBranchOpButton(this);
+		toolBar.setFloatable(false);
+		stepButtonBar = new StepButtonBar(this);
 		exportPDF = new JButton();
 		einfaerben = new ToneOpButton(this);
 		loeschen = new DeleteStepOpButton(this);
@@ -496,16 +485,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		contentPane.setLayout(new FormLayout("pref, default:grow", "default, default, fill:10px:grow")); //ToDo Sidebar added "pref"
 
 		//======== toolBar ========
-		toolbarButtonHinzufuegen(createSimpleStep, "einfacher-schritt", "Create simple step", buttonBar);
-		toolbarButtonHinzufuegen(createWhileStep, "while-schritt", "Create while step", buttonBar);
-		toolbarButtonHinzufuegen(createWhileWhileStep, "whilewhile-schritt", "Create while-while step", buttonBar);
-		toolbarButtonHinzufuegen(createIfElseStep, "ifelse-schritt", "Create if-else step", buttonBar);
-		toolbarButtonHinzufuegen(createIfStep, "if-schritt", "Create if step", buttonBar);
-		toolbarButtonHinzufuegen(createCaseStep, "case-schritt", "Create case step", buttonBar);
-		toolbarButtonHinzufuegen(createSubsequenceStep, "subsequenz-schritt", "Create subsequence step", buttonBar);
-		toolbarButtonHinzufuegen(createBreakStep, "break-schritt", "Create break step", buttonBar);
-		toolbarButtonHinzufuegen(createCatchStep, "catch-schritt", "Create catch block", buttonBar);
-		toolbarButtonHinzufuegen(createCaseBranch, "zweig", "Create case branch", buttonBar);
 		toolbarButtonHinzufuegen(einfaerben, "helligkeit", "Hintergrund schattieren", toolBar);
 		toolbarButtonHinzufuegen(loeschen, "loeschen", "Schritt löschen", toolBar);
 		toolbarButtonHinzufuegen(toggleBorderType, "switch-border", "Rahmen umschalten", toolBar);
@@ -520,27 +499,9 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
     toolbarButtonHinzufuegen(exportPDF, "pdf", "PDF exportieren", toolBar);
 
 		contentPane.add(toolBar, CC.xywh(1, 1, 2, 1));
-		contentPane.add(buttonBar, CC.xy(1, 3));
+		contentPane.add(stepButtonBar, CC.xy(1, 3));
 		pack();
 		setLocationRelativeTo(getOwner());
-		DragMouseAdapter dragButtonAdapter = new DragMouseAdapter(this);
-		addDragAdapter(createSimpleStep, dragButtonAdapter);
-		addDragAdapter(createWhileStep, dragButtonAdapter);
-		addDragAdapter(createWhileWhileStep, dragButtonAdapter);
-		addDragAdapter(createIfElseStep, dragButtonAdapter);
-		addDragAdapter(createIfStep, dragButtonAdapter);
-		addDragAdapter(createCaseStep, dragButtonAdapter);
-		addDragAdapter(createSubsequenceStep, dragButtonAdapter);
-		addDragAdapter(createBreakStep, dragButtonAdapter);
-		addDragAdapter(createCatchStep, dragButtonAdapter);
-		addDragAdapter(createCaseBranch, dragButtonAdapter);
-
-
-	}
-
-	private void addDragAdapter(JButton button, DragMouseAdapter adapter) {
-		button.addMouseListener(adapter);
-		button.addMouseMotionListener(adapter);
 	}
 
 	public static ImageIcon readImageIcon(String iconBasename) {
@@ -617,17 +578,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	}
 
 	private JToolBar toolBar;
-	private JToolBar buttonBar; // Sidebar ergänzt
-	private CreateSimpleStepOpButton createSimpleStep;
-	private CreateWhileStepOpButton createWhileStep;
-	private CreateWhileWhileStepOpButton createWhileWhileStep;
-	private CreateIfElseStepOpButton createIfElseStep;
-	private CreateIfStepOpButton createIfStep;
-	private CreateCaseStepOpButton createCaseStep;
-	private CreateSubsequenceStepOpButton createSubsequenceStep;
-	private CreateBreakStepOpButton createBreakStep;
-	private CreateCatchStepOpButton createCatchStep;
-	private CreateCaseBranchOpButton createCaseBranch;
+	private StepButtonBar stepButtonBar;
 	private JButton exportPDF;
 	private ToneOpButton einfaerben;
 	DeleteStepOpButton loeschen;
@@ -704,16 +655,16 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		return undoManager;
 	}
 
-	public JButton getCreateSimpleStep() { return createSimpleStep; }
-	public JButton getCreateWhileStep() { return createWhileStep; }
-	public JButton getCreateWhileWhileStep() { return createWhileWhileStep; }
-	public JButton getCreateIfElseStep() { return createIfElseStep; }
-	public JButton getCreateIfStep() { return createIfStep; }
-	public JButton getCreateCaseStep() { return createCaseStep; }
-	public JButton getCreateSubsequenceStep() { return createSubsequenceStep; }
-	public JButton getCreateBreakStep() { return createBreakStep; }
-	public JButton getCreateCatchStep() { return createCatchStep; }
-	public JButton getCreateCaseBranch() { return createCaseBranch; }
+	public JButton getCreateSimpleStep() { return stepButtonBar.getCreateSimpleStep(); }
+	public JButton getCreateWhileStep() { return stepButtonBar.getCreateWhileStep(); }
+	public JButton getCreateWhileWhileStep() { return stepButtonBar.getCreateWhileWhileStep(); }
+	public JButton getCreateIfElseStep() { return stepButtonBar.getCreateIfElseStep(); }
+	public JButton getCreateIfStep() { return stepButtonBar.getCreateIfStep(); }
+	public JButton getCreateCaseStep() { return stepButtonBar.getCreateCaseStep(); }
+	public JButton getCreateSubsequenceStep() { return stepButtonBar.getCreateSubsequenceStep(); }
+	public JButton getCreateBreakStep() { return stepButtonBar.getCreateBreakStep(); }
+	public JButton getCreateCatchStep() { return stepButtonBar.getCreateCatchStep(); }
+	public JButton getCreateCaseBranch() { return stepButtonBar.getCreateCaseBranch(); }
 
 	@Override public TextEditArea getLastFocusedTextArea() {
 		return lastFocusedTextArea;
