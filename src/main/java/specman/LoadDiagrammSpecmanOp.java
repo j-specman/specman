@@ -2,15 +2,18 @@ package specman;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import specman.model.ModelEnvelope;
+import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.StruktogrammModel_V001;
 import specman.view.KlappButton;
+import specman.view.QuellSchrittView;
 import specman.view.SchrittSequenzView;
+import specman.view.AbstractSchrittView;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
 
@@ -33,7 +36,6 @@ class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
       specman.focusHistory.clear();
       specman.aenderungenVerfolgen.setSelected(false);
       specman.dropWelcomeMessage();
-      specman.postInitSchritte = new ArrayList<>();
       specman.setDiagrammDatei(diagramFile);
 
       ObjectMapper objectMapper = new ObjectMapper();
@@ -52,8 +54,7 @@ class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
       specman.hauptSequenz = new SchrittSequenzView(specman, null, model.hauptSequenz);
 
       specman.hauptSequenzInitialisieren();
-      specman.neueSchritteNachinitialisieren();
-      specman.quellZielZuweisung(model.queryAllSteps());
+      quellZielZuweisung(model.queryAllSteps());
       specman.hauptSequenz.viewsNachinitialisieren();
       specman.intro.viewsNachinitialisieren();
       specman.intro.registerAllExistingStepnumbers();
@@ -65,6 +66,20 @@ class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
     }
     catch (IOException e) {
       specman.displayException(e);
+    }
+  }
+
+  private void quellZielZuweisung(List<AbstractSchrittModel_V001> allModelSteps) {
+    for (AbstractSchrittModel_V001 modelStep : allModelSteps) {
+      if (modelStep.quellschrittID != null) {
+        AbstractSchrittView zielschritt = specman.hauptSequenz.findeSchrittZuId(modelStep.id);
+        if (zielschritt instanceof QuellSchrittView) {
+          continue;
+        }
+        QuellSchrittView quellSchritt = (QuellSchrittView) specman.hauptSequenz.findeSchrittZuId(modelStep.quellschrittID);
+        zielschritt.setQuellschrittUDBL(quellSchritt);
+        quellSchritt.setZielschritt(zielschritt);
+      }
     }
   }
 

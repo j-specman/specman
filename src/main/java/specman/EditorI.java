@@ -22,7 +22,6 @@ import java.util.List;
  * later e.g. allow to run multiple editors windows within a single editor
  * application. */
 public interface EditorI extends FocusListener {
-	void schrittFuerNachinitialisierungRegistrieren(AbstractSchrittView schritt);
 	void vertikalLinieSetzen(int x, SpaltenResizer spaltenResizer);
 	void diagrammLaden(File diagramFile);
 	int getZoomFactor();

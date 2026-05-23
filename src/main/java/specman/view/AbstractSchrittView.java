@@ -276,8 +276,6 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		unterSequenzen().forEach(sequenz -> sequenz.entfernen(this, purpose));
 	}
 
-	public void nachinitialisieren() {}
-
 	public void skalieren(int prozentNeu, int prozentAktuell) {
 		editContainer.skalieren(prozentNeu, prozentAktuell);
 		editContainer.updateBounds();

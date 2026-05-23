@@ -61,7 +61,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	int zoomFaktor = 100;
 	Integer dragX;
 	File diagrammDatei;
-	List<AbstractSchrittView> postInitSchritte;
 	RecentFiles recentFiles;
 	private JComponent welcomeMessage;
 	PDFExportChooser pdfExportChooser;
@@ -316,9 +315,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 			int prozentAlt = skalieren(prozentNeu);
 			undoManager.addEdit(new UndoableDiagrammSkaliert(Specman.this, prozentAlt));
 		});
-
-
-
 	}
 
   @Override
@@ -353,7 +349,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		float diagrammbreite100Prozent = (float)diagrammbreite / bisherigerFaktor * 100;
 		int neueDiagrammbreite = (int)(diagrammbreite100Prozent * prozent / 100);
 		spaltenbreitenAnpassenNachMausDragging(neueDiagrammbreite - diagrammbreite, 0);
-    KlappButton.scaleIcons(prozent, bisherigerFaktor);
 		hauptSequenz.skalieren(prozent, bisherigerFaktor);
 		intro.skalieren(prozent, bisherigerFaktor);
 		outro.skalieren(prozent, bisherigerFaktor);
@@ -383,33 +378,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
 	public void diagrammLaden(File diagramFile) {
 		new LoadDiagrammSpecmanOp(this).laden(diagramFile);
-	}
-
-	void quellZielZuweisung(List<AbstractSchrittModel_V001> allModelSteps) {
-		for(AbstractSchrittModel_V001 modelStep: allModelSteps) {
-			if (modelStep.quellschrittID != null) {
-				AbstractSchrittView zielschritt = hauptSequenz.findeSchrittZuId(modelStep.id);
-				if(zielschritt instanceof QuellSchrittView) {
-					continue;
-				}
-				else {
-					QuellSchrittView quellSchritt = (QuellSchrittView) hauptSequenz.findeSchrittZuId(modelStep.quellschrittID);
-					zielschritt.setQuellschrittUDBL(quellSchritt);
-					quellSchritt.setZielschritt(zielschritt);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void schrittFuerNachinitialisierungRegistrieren(AbstractSchrittView schritt) {
-		postInitSchritte.add(schritt);
-	}
-
-	void neueSchritteNachinitialisieren() {
-		for (AbstractSchrittView schritt: postInitSchritte) {
-			schritt.nachinitialisieren();
-		}
 	}
 
 	private void diagrammbreiteSetzen(int breite) {
