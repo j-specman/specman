@@ -1,5 +1,7 @@
 package specman.view;
 
+import specman.TextInit;
+
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -37,7 +39,7 @@ public class BreakSchrittView extends AbstractSchrittView {
 				dreieckZeichnen((Graphics2D)g);
 			}
 		};
-		panel.setBackground(Specman.schrittHintergrund());
+		panel.setBackground(TextInit.schrittHintergrund());
 		layout = new FormLayout(
 				umgehungLayout() + ", 10dlu:grow",
 				"fill:pref, " + AbstractSchrittView.ZEILENLAYOUT_INHALT_SICHTBAR);

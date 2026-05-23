@@ -11,6 +11,7 @@ import specman.SchrittID;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
+import specman.TextInit;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.WhileSchrittModel_V001;
@@ -54,7 +55,7 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 
 		linkerBalken = new JPanel();
 		linkerBalken.setLayout(null);
-		linkerBalken.setBackground(Specman.schrittHintergrund());
+		linkerBalken.setBackground(TextInit.schrittHintergrund());
 
 		if (mitUnteremBalken) {
 			layout.appendRow(RowSpec.decode(FORMLAYOUT_GAP));
@@ -62,7 +63,7 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 			panel.add(linkerBalken, CC.xywh(1, 1, 1, 4));
 			untererBalken = new JPanel();
 			untererBalken.setLayout(null);
-			untererBalken.setBackground(Specman.schrittHintergrund());
+			untererBalken.setBackground(TextInit.schrittHintergrund());
 			panel.add(untererBalken, CC.xywh(1, 5, 3, 1));
 		}
 		else {

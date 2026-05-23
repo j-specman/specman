@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-/** Use this type of button to run make an atomic undo composition from all the undoable
+/** Use this type of button to run an atomic undo composition from all the undoable
  * changes performed by the action listeners. */
 public class ActionUDBLButton extends JButton {
   public ActionUDBLButton(String text) {

@@ -4,6 +4,7 @@ import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
 import specman.Specman;
+import specman.TextInit;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.ZweigSchrittSequenzModel_V001;
 import specman.editarea.EditContainer;
@@ -32,7 +33,7 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 	public ZweigSchrittSequenzView(EditorI editor, AbstractSchrittView parent, SchrittID sequenzBasisId, EditorContentModel_V001 initialerText) {
 		super(parent, sequenzBasisId);
 		ueberschriftInitialisieren(editor, initialerText, null);
-		this.aenderungsart = Specman.initialArt();
+		this.aenderungsart = TextInit.initialArt();
 	}
 
 	protected void ueberschriftInitialisieren(EditorI editor, EditorContentModel_V001 initialerText, SchrittID initialeSchrittnummer) {

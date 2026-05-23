@@ -3,6 +3,7 @@ package specman.model.v001;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import specman.Aenderungsart;
 import specman.Specman;
+import specman.TextInit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ public class TextEditAreaModel_V001 extends AbstractEditAreaModel_V001 {
 		aenderungsart = null;
 	}
 
-	public TextEditAreaModel_V001(String text) { this(text, text, new ArrayList<>(), Specman.initialArt()); }
+	public TextEditAreaModel_V001(String text) { this(text, text, new ArrayList<>(), TextInit.initialArt()); }
 
 	public TextEditAreaModel_V001(String text, Aenderungsart aenderungsart) { this(text, text, new ArrayList<>(), aenderungsart); }
 

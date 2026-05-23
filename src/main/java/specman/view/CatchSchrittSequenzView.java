@@ -1,5 +1,7 @@
 package specman.view;
 
+import specman.TextInit;
+
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -50,7 +52,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   public CatchSchrittSequenzView(CatchBereich catchBereich, BreakSchrittView linkedBreakStep) {
     super(Specman.instance(), catchBereich, linkedBreakStep.id.naechsteEbene(), linkedBreakStep.getEditorContent(true));
     einfachenSchrittAnhaengen(Specman.instance());
-    init(linkedBreakStep, null, Specman.initialArt());
+    init(linkedBreakStep, null, TextInit.initialArt());
     initHeadingsLayout();
   }
 
@@ -134,7 +136,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   public void addCoCatchUDBL(CatchUeberschrift referenceCatchHeading, BreakSchrittView breakStepToLink) {
     int insertionIndex = coCatchHeadings.indexOf(referenceCatchHeading) + 1;
     EditorContentModel_V001 breakStepContent = breakStepToLink.getEditorContent(true);
-    CatchUeberschrift coCatchHeading = addCoCatch(insertionIndex, breakStepContent, breakStepToLink, Specman.initialArt());
+    CatchUeberschrift coCatchHeading = addCoCatch(insertionIndex, breakStepContent, breakStepToLink, TextInit.initialArt());
     initHeadingsLayout();
     Specman.instance().addEdit(new UndoableCoCatchAdded(this, breakStepToLink, insertionIndex, coCatchHeading));
   }

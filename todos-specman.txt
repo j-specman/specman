@@ -1,24 +1,28 @@
+Multiple Changesets - Wichtig für nächste CR-Phase bei der ERSTEn
+- Auswahl des Changesets im Menu
+- Einfärben der Änderungsbutton entsprechende des ausgewählten Changesets
+- Ausgewählten Changeset im Modell festhalten
+- Markups für Änderungen im Modell mit Changeset-Nummer anreichern
+- Annahme / Ablehnung von Änderungen auf aktuellen Changeset beschränken
+- Editregeln bei konkurrierenden Änderungen
+- Merge von Changesets
+
 Aus aktueller Anwendung
 - Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
-- Multi-Catch
-  - Obersten Co-Catch nach oben schieben macht diesen zum primären Catch
-     - Reorg der Nummerierung wird notwendig
-  - Undo-Experience beim Löschen eines Co-Catchs (und einer Catch-Sequenz) verbessern
-    Das Klicken auf den Lösch-Button löst eine FocusLost und eine Synchronisation der Texte zwischen Catch und Break aus
-    Diese Aktionen landen in der Undo-Historie vor dem eigentlichen Löschen des Co-Catchs.
-    Man muss dann mehrfach klicken, um das eigentliche Undo auszulösen
 - PDF-Option "Export beim Speichern"
 - Hoch/Runter über Grenzen von Schritten wäre cool
 x Page-up / Page-down geht nicht
 x Scrollen mit Mausrad ist zu langsam
 x Fokus ist nach dem Öffnen auf der Zoom-Kombobox. Wenn man also noch dem Öffnen einer Datei auf Page-down / Page-up drückt, ändert man den Zoomfaktor, statt dass man auf dem Wege Scrollen kann
 x Sortierung der Schritte im Auswahldialog für Schrittrerefenzen ist ungünstig. Vmtl. lexikografisch.
-x Die meisten Texte im PDF-Export sind etwas zu klein, wenn man auf 120% Zoom exportiert
-x Fokushistorie
-   Ähnlich wie in intelliJ kann der User über Drücken von Strg+Alt+Links/Rechts zu den zuletzt verwendeten Schritte navigieren.
-x Cursor links springt nicht sauber über Schrittreferenzen hinweg.
-   Man kann ein Zeichen hinein navigieren, dafür springt der Cursor nicht weiter, wenn er am Anfang einer Referenz steht.
-   Cursor rechts geht einwandfrei.
+
+Reste Multi-Catch
+- Obersten Co-Catch nach oben schieben macht diesen zum primären Catch
+   - Reorg der Nummerierung wird notwendig
+- Undo-Experience beim Löschen eines Co-Catchs (und einer Catch-Sequenz) verbessern
+  Das Klicken auf den Lösch-Button löst eine FocusLost und eine Synchronisation der Texte zwischen Catch und Break aus
+  Diese Aktionen landen in der Undo-Historie vor dem eigentlichen Löschen des Co-Catchs.
+  Man muss dann mehrfach klicken, um das eigentliche Undo auszulösen
 
 Abschluss für Go-Live
 - Wenn man zu einem Breakschritt bzw. einem Catch-Bereich springt oder einer Schrittreferenz folgt, dann kann sich das Ziel

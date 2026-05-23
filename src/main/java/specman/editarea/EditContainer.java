@@ -8,6 +8,7 @@ import specman.Aenderungsart;
 import specman.EditorI;
 import specman.SchrittID;
 import specman.Specman;
+import specman.TextInit;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
@@ -279,11 +280,11 @@ public class EditContainer extends JPanel {
 	}
 
 	public static EditorContentModel_V001 right(String text) {
-		return Specman.initialtext(text, "right");
+		return TextInit.initialtext(text, "right");
 	}
 
 	public static EditorContentModel_V001 center(String text) {
-		return Specman.initialtext(text, "center");
+		return TextInit.initialtext(text, "center");
 	}
 
 	public Container getKlappButtonParent() { return schrittNummer.getParent(); }
@@ -388,7 +389,7 @@ public class EditContainer extends JPanel {
 		try (UndoRecording ur = editor.composeUndo()) {
 			int initiatingTextAreaIndex = indexOf(initiatingTextArea);
 			WrappedPosition initiatingCaretPosition = initiatingTextArea.getWrappedCaretPosition();
-			ImageEditArea imageEditArea = new ImageEditArea(image, Specman.initialArt());
+			ImageEditArea imageEditArea = new ImageEditArea(image, TextInit.initialArt());
 			addEditArea(imageEditArea, initiatingTextAreaIndex+1);
 			TextEditArea cutOffTextArea = initiatingTextArea.split(initiatingCaretPosition);
 			if (cutOffTextArea != null) {
@@ -427,7 +428,7 @@ public class EditContainer extends JPanel {
 
 	public TextEditArea addTextEditArea(ImageEditArea initiatingImageEditArea) {
 		int initiatingIndex = indexOf(initiatingImageEditArea);
-		TextEditAreaModel_V001 addedModel = new TextEditAreaModel_V001("", "", new ArrayList<>(), Specman.initialArt());
+		TextEditAreaModel_V001 addedModel = new TextEditAreaModel_V001("", "", new ArrayList<>(), TextInit.initialArt());
 		TextEditArea newEditArea = new TextEditArea(addedModel, getFont());
 		addEditArea(newEditArea, initiatingIndex+1);
 		return newEditArea;

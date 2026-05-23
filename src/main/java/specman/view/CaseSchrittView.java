@@ -11,6 +11,7 @@ import specman.EditorI;
 import specman.SchrittID;
 import specman.SpaltenResizer;
 import specman.Specman;
+import specman.TextInit;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.CaseSchrittModel_V001;
@@ -31,7 +32,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
-import static specman.Specman.initialtext;
+import static specman.TextInit.initialtext;
 import static specman.styles.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.pdf.Shape.GAP_COLOR;
 import static specman.styles.Styles.AENDERUNGSFARBE;
@@ -56,21 +57,21 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		panel.add(editContainer, INITIAL_DUMMY);
 		/** @author PVN */
 		lueckenFueller = new JPanel();
-		lueckenFueller.setBackground(Specman.schrittHintergrund());
+		lueckenFueller.setBackground(TextInit.schrittHintergrund());
 		panel.add(lueckenFueller, CC.xy(1, 1));
 
 		panelCase = new JPanel();
-		panelCase.setBackground(Specman.schrittHintergrund());
+		panelCase.setBackground(TextInit.schrittHintergrund());
 		panelCase.setLayout(createSpalteLinks());
 		panel.add(panelCase, CC.xy(3, 1));
 
 		panelSonst = new JPanel();
-		panelSonst.setBackground(Specman.schrittHintergrund());
+		panelSonst.setBackground(TextInit.schrittHintergrund());
 		panelSonst.setLayout(createSpalteRechts());
 		panel.add(panelSonst, CC.xy(1, 3));
 
 		panelFall1 = new JPanel();
-		panelFall1.setBackground(Specman.schrittHintergrund());
+		panelFall1.setBackground(TextInit.schrittHintergrund());
 		panelFall1.setLayout(createSpalteLinks());
 		panel.add(panelFall1, CC.xy(3, 3));
 	}
@@ -360,7 +361,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		neuerZweig.einfachenSchrittAnhaengen(editor);
 		zweigHinzufuegen(editor, neuerZweig, linkerNachbarIndex+2);
 		if (neuerZweig == caseSequenzen.get(0)) {
-			panelFall1.setBackground(Specman.schrittHintergrund());
+			panelFall1.setBackground(TextInit.schrittHintergrund());
 		}
 		return neuerZweig;
 	}

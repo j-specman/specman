@@ -203,7 +203,7 @@ public class DraggingLogic implements Serializable {
 
                 //Abfrage ob es sich um den letzten Schritt einer Subsequenz handelt
                 // Zusätzliche Abfrage da Marker beim CaseAnängen angezeigt wurde
-                if (!(e.getSource().equals(specman.getCaseAnhaengen()))) {
+                if (!(e.getSource().equals(specman.getCreateCaseBranch()))) {
                     if (schrittListe.get(schrittListe.size() - 1) == schritt && schritt.getId().nummern.size() > 1) {
                         if (lastPixels(pos, p, glassPaneHeight, r, glassPane, schritt, insertDecision)) {
                             break;
@@ -212,7 +212,7 @@ public class DraggingLogic implements Serializable {
                 }
 
                 //Add Case
-                if (e.getSource().equals(specman.getCaseAnhaengen())) {
+                if (e.getSource().equals(specman.getCreateCaseBranch())) {
                     if (schritt instanceof CaseSchrittView) {
                         CaseSchrittView caseSchritt = (CaseSchrittView) schritt;
 
@@ -409,7 +409,7 @@ public class DraggingLogic implements Serializable {
     private void insertFirstStep(List<AbstractSchrittView> schrittListe, InsertDecision insertDecision, MouseEvent e) {
         if (schrittListe.size() == 0 &&
           insertDecision == InsertDecision.Insert &&
-          !e.getSource().equals(specman.getCatchSchrittAnhaengen())) {
+          !e.getSource().equals(specman.getCreateCatchStep())) {
             SchrittSequenzView curSequenz = specman.getHauptSequenz();
             specman.dropWelcomeMessage();
             addNeuerSchritt(e, curSequenz);
@@ -425,47 +425,47 @@ public class DraggingLogic implements Serializable {
             moveStep(insertionPosition, referenceStep, label);
         }
 
-        else if (e.getSource().equals(specman.getEinfachenSchrittAnhaengen())) {
+        else if (e.getSource().equals(specman.getCreateSimpleStep())) {
             referenceStep = sequenz.einfachenSchrittZwischenschieben(insertionPosition, referenceStep, specman);
             specman.newStepPostInit(referenceStep);
             specman.hauptSequenz.resyncStepnumberStyleUDBL();
         }
-        else if (e.getSource().equals(specman.getWhileSchrittAnhaengen())) {
+        else if (e.getSource().equals(specman.getCreateWhileStep())) {
             referenceStep = sequenz.whileSchrittZwischenschieben(insertionPosition, referenceStep, specman);
             specman.newStepPostInit(referenceStep);
             specman.hauptSequenz.resyncStepnumberStyleUDBL();
         }
-        else if (e.getSource().equals(specman.getWhileWhileSchrittAnhaengen())) {
+        else if (e.getSource().equals(specman.getCreateWhileWhileStep())) {
             referenceStep = sequenz.whileWhileSchrittZwischenschieben(insertionPosition, referenceStep, specman);
             specman.newStepPostInit(referenceStep);
             specman.hauptSequenz.resyncStepnumberStyleUDBL();
         }
-        else if (e.getSource().equals(specman.getIfElseSchrittAnhaengen())) {
+        else if (e.getSource().equals(specman.getCreateIfElseStep())) {
             referenceStep = sequenz.ifElseSchrittZwischenschieben(insertionPosition, referenceStep, specman);
             specman.newStepPostInit(referenceStep);
             specman.hauptSequenz.resyncStepnumberStyleUDBL();
         }
-        else if (e.getSource().equals(specman.getIfSchrittAnhaengen())) {
+        else if (e.getSource().equals(specman.getCreateIfStep())) {
             referenceStep = sequenz.ifSchrittZwischenschieben(insertionPosition, referenceStep, specman);
             specman.newStepPostInit(referenceStep);
             specman.hauptSequenz.resyncStepnumberStyleUDBL();
         }
-        else if (e.getSource().equals(specman.getCaseSchrittAnhaengen())) {
+        else if (e.getSource().equals(specman.getCreateCaseStep())) {
             referenceStep = sequenz.caseSchrittZwischenschieben(insertionPosition, referenceStep, specman);
             specman.newStepPostInit(referenceStep);
             specman.hauptSequenz.resyncStepnumberStyleUDBL();
         }
-        else if (e.getSource().equals(specman.getSubsequenzSchrittAnhaengen())) {
+        else if (e.getSource().equals(specman.getCreateSubsequenceStep())) {
             referenceStep = sequenz.subsequenzSchrittZwischenschieben(insertionPosition, referenceStep, specman);
             specman.newStepPostInit(referenceStep);
             specman.hauptSequenz.resyncStepnumberStyleUDBL();
         }
-        else if (e.getSource().equals(specman.getBreakSchrittAnhaengen())) {
+        else if (e.getSource().equals(specman.getCreateBreakStep())) {
             referenceStep = sequenz.breakSchrittZwischenschieben(insertionPosition, referenceStep, specman);
             specman.newStepPostInit(referenceStep);
             specman.hauptSequenz.resyncStepnumberStyleUDBL();
         }
-        else if (e.getSource().equals(specman.getCatchSchrittAnhaengen())) {
+        else if (e.getSource().equals(specman.getCreateCatchStep())) {
             // TODO JL: Catch
         }
     }
@@ -515,21 +515,21 @@ public class DraggingLogic implements Serializable {
 
     //Neuen Schritt anhängen abhängig vom Button
     private void addNeuerSchritt(MouseEvent e, SchrittSequenzView sequenz) {
-        if (e.getSource().equals(specman.getEinfachenSchrittAnhaengen())) {
+        if (e.getSource().equals(specman.getCreateSimpleStep())) {
             sequenz.einfachenSchrittAnhaengen(specman);
-        } else if (e.getSource().equals(specman.getWhileSchrittAnhaengen())) {
+        } else if (e.getSource().equals(specman.getCreateWhileStep())) {
             sequenz.whileSchrittAnhaengen(specman);
-        } else if (e.getSource().equals(specman.getWhileWhileSchrittAnhaengen())) {
+        } else if (e.getSource().equals(specman.getCreateWhileWhileStep())) {
             sequenz.whileWhileSchrittAnhaengen(specman);
-        } else if (e.getSource().equals(specman.getIfElseSchrittAnhaengen())) {
+        } else if (e.getSource().equals(specman.getCreateIfElseStep())) {
             sequenz.ifElseSchrittAnhaengen(specman);
-        } else if (e.getSource().equals(specman.getIfSchrittAnhaengen())) {
+        } else if (e.getSource().equals(specman.getCreateIfStep())) {
             sequenz.ifSchrittAnhaengen(specman);
-        } else if (e.getSource().equals(specman.getCaseSchrittAnhaengen())) {
+        } else if (e.getSource().equals(specman.getCreateCaseStep())) {
             sequenz.caseSchrittAnhaengen(specman);
-        } else if (e.getSource().equals(specman.getSubsequenzSchrittAnhaengen())) {
+        } else if (e.getSource().equals(specman.getCreateSubsequenceStep())) {
             sequenz.subsequenzSchrittAnhaengen(specman);
-        } else if (e.getSource().equals(specman.getBreakSchrittAnhaengen())) {
+        } else if (e.getSource().equals(specman.getCreateBreakStep())) {
             sequenz.breakSchrittAnhaengen(specman);
         }
     }

@@ -15,7 +15,7 @@ import specman.undo.props.UDBL;
 
 import java.awt.*;
 
-import static specman.Specman.schrittHintergrund;
+import static specman.TextInit.schrittHintergrund;
 import static specman.model.v001.EditorContentModel_V001.empty;
 
 /**

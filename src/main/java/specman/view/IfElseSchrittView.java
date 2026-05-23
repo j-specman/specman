@@ -10,6 +10,7 @@ import specman.SchrittID;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
+import specman.TextInit;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.IfElseSchrittModel_V001;
@@ -28,7 +29,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.List;
 
-import static specman.Specman.initialtext;
+import static specman.TextInit.initialtext;
 import static specman.view.KlappButton.ZEILENLAYOUT_FILLER_HIDDEN;
 
 public class IfElseSchrittView extends VerzweigungSchrittView implements ComponentListener, SpaltenContainerI {
@@ -44,9 +45,9 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		super(editor, parent, initialerText, id, anderungsart, createPanelLayout());
 		/** @author PVN */
 		leeresFeld = new JPanel();
-		leeresFeld.setBackground(Specman.schrittHintergrund());
+		leeresFeld.setBackground(TextInit.schrittHintergrund());
 		panelBedingung = new JPanel();
-		panelBedingung.setBackground(Specman.schrittHintergrund());
+		panelBedingung.setBackground(TextInit.schrittHintergrund());
 		panelBedingung.setLayout(createSpalteLinks());
 		panelBedingung.add(editContainer, "2,1");
 		panel.add(panelBedingung, CC.xy(3, 1));
@@ -99,7 +100,7 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		elseSequenz.ueberschrift.addEditAreasFocusListener(this);
 		/** @author PVN */
 		panelElse = new JPanel();
-		panelElse.setBackground(Specman.schrittHintergrund());
+		panelElse.setBackground(TextInit.schrittHintergrund());
 		panelElse.setLayout(createSpalteLinks());
 		panelElse.add(elseSequenz.ueberschrift, CC.xywh(2, 1, 1, 1));
 		panel.add(panelElse, CC.xy(3, 3));
@@ -109,7 +110,7 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		ifSequenz.ueberschrift.addEditAreasFocusListener(this);
 		/**@author PVN */
 		panelIf = new JPanel();
-		panelIf.setBackground(Specman.schrittHintergrund());
+		panelIf.setBackground(TextInit.schrittHintergrund());
 		panelIf.setLayout(createSpalteRechts());
 		panelIf.add(ifSequenz.ueberschrift, CC.xy(1,1));
 		panel.add(panelIf, CC.xy(1, 3));
