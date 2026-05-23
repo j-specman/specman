@@ -43,7 +43,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	TextEditArea lastFocusedTextArea;
 	private SchrittSequenzView hauptSequenz;
 	JPanel contentPane;
-	JPanel arbeitsbereich;
+	WorkingAreaPanel arbeitsbereich;
 	JPanel hauptSequenzContainer;
 	SpaltenResizer breitenAnpasser;
 	JScrollPane scrollPane;
@@ -52,7 +52,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	FormLayout hauptlayout;
 	int diagrammbreite = INITIAL_DIAGRAMM_WIDTH;
 	int zoomFaktor = 100;
-	Integer dragX;
 	File diagrammDatei;
 	private JComponent welcomeMessage;
   FocusHistory focusHistory = new FocusHistory();
@@ -87,17 +86,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		scrollPane.addMouseWheelListener(createDragMouseAdapter());
 		contentPane.add(scrollPane, CC.xy(2, 3));
 
-		arbeitsbereich = new JPanel() {
-			@Override
-			public void paint(Graphics g) {
-				super.paint(g);
-				if (dragX != null) {
-					Graphics2D g2 = (Graphics2D)g;
-					g2.setStroke(GESTRICHELTE_LINIE);
-					g.drawLine(dragX, 0, dragX, arbeitsbereich.getHeight());
-				}
-			}
-		};
+		arbeitsbereich = new WorkingAreaPanel();
 
 		hauptlayout = new FormLayout(
 				"20px, " + INITIAL_DIAGRAMM_WIDTH + "px, " + AbstractSchrittView.FORMLAYOUT_GAP,
@@ -213,13 +202,13 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		diagrammbreite += delta;
 		diagrammbreiteSetzen(diagrammbreite);
 		diagrammAktualisieren(null);
-		dragX = null;
-		arbeitsbereich.repaint();
+		arbeitsbereich.showDragLine(null);
 		return delta;
 	}
 
 	@Override
 	public void vertikalLinieSetzen(int x, SpaltenResizer spaltenResizer) {
+		Integer dragX;
 		if (spaltenResizer != null) {
 			Point relativePosition = SwingUtilities.convertPoint(spaltenResizer, new Point(x, 0), arbeitsbereich);
 			dragX = (int)relativePosition.getX();
@@ -227,7 +216,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		else {
 			dragX = null;
 		}
-		arbeitsbereich.repaint();
+		arbeitsbereich.showDragLine(dragX);
 	}
 
 
