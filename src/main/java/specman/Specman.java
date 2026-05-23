@@ -61,8 +61,10 @@ import java.util.Set;
 
 import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.Aenderungsart.Untracked;
+import specman.styles.ChangeColorSet;
 import static specman.styles.Styles.AENDERUNGSFARBE;
 import static specman.styles.Styles.BACKGROUND_COLOR_STANDARD;
+import static specman.styles.Styles.CHANGESETS;
 import static specman.styles.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.view.RelativeStepPosition.After;
 
@@ -978,6 +980,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		menuBar.add(shefEditorPane.getEditMenu());
 		menuBar.add(shefEditorPane.getFormatMenu());
 		menuBar.add(shefEditorPane.getInsertMenu());
+		menuBar.add(baueAenderungsfarbenMenu());
 
 		setJMenuBar(menuBar);
 		contentPane.add(shefEditorPane.getFormatToolBar(), CC.xywh(1, 2, 2, 1));
@@ -999,6 +1002,37 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		dateiMenu.add(exportAsGraphvizMenuItem);
 		dateiMenu.add(exitMenuItem);
 		return dateiMenu;
+	}
+
+	private JMenu baueAenderungsfarbenMenu() {
+		JMenu menu = new JMenu("Änderungsfarbe");
+		menu.setIcon(new ColorDotIcon(AENDERUNGSFARBE.text.color));
+		for (ChangeColorSet cs : CHANGESETS) {
+			JMenuItem item = new JMenuItem(new ColorDotIcon(cs.text.color));
+			item.addActionListener(e -> fehler("Work in progress"));
+			menu.add(item);
+		}
+		return menu;
+	}
+
+	private static class ColorDotIcon implements Icon {
+		private static final int SIZE = 10;
+		private final Color color;
+
+		ColorDotIcon(Color color) { this.color = color; }
+
+		@Override public void paintIcon(Component c, Graphics g, int x, int y) {
+			Graphics2D g2 = (Graphics2D) g.create();
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			g2.setColor(color);
+			g2.fillOval(x, y, SIZE, SIZE);
+			g2.setColor(color.darker());
+			g2.drawOval(x, y, SIZE, SIZE);
+			g2.dispose();
+		}
+
+		@Override public int getIconWidth()  { return SIZE; }
+		@Override public int getIconHeight() { return SIZE; }
 	}
 
 	private JToolBar toolBar;

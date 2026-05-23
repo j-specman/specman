@@ -7,6 +7,7 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
+import java.util.List;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -20,7 +21,7 @@ public class Styles {
     public static MutableAttributeSet quellschrittStil = new SimpleAttributeSet();
     public static MutableAttributeSet deletedStepnumberLinkStyle = new SimpleAttributeSet();
 
-    public static final java.util.List<String> FONTFILES = java.util.List.of(
+    public static final List<String> FONTFILES = List.of(
       "fonts/sitka/SitkaDisplay.ttf",
       "fonts/sitka/SitkaDisplay-Italic.ttf",
       "fonts/sitka/SitkaDisplay-Bold.ttf",
@@ -74,13 +75,16 @@ public class Styles {
     public static final ReadWriteColor DELETED_BACKGROUND_COLOR = new ReadWriteColor(Color.BLACK);
 
     public static final ReadWriteColor STEPNUMBER_LINK_COLOR = new ReadWriteColor(new Color(220, 220, 220));
-    public static final ChangeColorSet AENDERUNGSFARBE = new ChangeColorSet(
-      Color.yellow,
-//      new Color(100, 255, 255), // cyan
-//      new Color(150, 255, 150), // green
-//      new Color(255, 220, 150), // orange
-//      new Color(255, 180, 180), // pink
-      STEPNUMBER_LINK_COLOR.color);
+
+    public static final List<ChangeColorSet> CHANGESETS = List.of(
+      new ChangeColorSet(Color.yellow, STEPNUMBER_LINK_COLOR.color),
+      new ChangeColorSet(new Color(150, 255, 150), STEPNUMBER_LINK_COLOR.color), // green
+      new ChangeColorSet(new Color(100, 255, 255), STEPNUMBER_LINK_COLOR.color), // cyan
+      new ChangeColorSet(new Color(255, 220, 150), STEPNUMBER_LINK_COLOR.color), // orange
+      new ChangeColorSet(new Color(255, 180, 180), STEPNUMBER_LINK_COLOR.color) // pink
+    );
+
+    public static final ChangeColorSet AENDERUNGSFARBE = CHANGESETS.get(0);
 
     static {
         StyleConstants.setBackground(geloeschtStil, AENDERUNGSFARBE.text.color);
