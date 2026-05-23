@@ -11,7 +11,6 @@ import specman.editarea.EditArea;
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.IconReader;
 import specman.model.v001.*;
-import specman.pdf.PDFExportChooser;
 import specman.editarea.EditContainer;
 import specman.editarea.TextEditArea;
 import specman.undo.UndoableSchrittHinzugefuegt;
@@ -26,7 +25,6 @@ import javax.swing.text.JTextComponent;
 import javax.swing.undo.UndoableEdit;
 import java.awt.*;
 import java.awt.event.FocusEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -34,9 +32,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import specman.graphics.ChangeColorSet;
-import static specman.graphics.Styles.AENDERUNGSFARBE;
-import static specman.graphics.Styles.CHANGESETS;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 
 public class Specman extends JFrame implements EditorI, SpaltenContainerI {
@@ -59,10 +54,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	int zoomFaktor = 100;
 	Integer dragX;
 	File diagrammDatei;
-	RecentFiles recentFiles;
 	private JComponent welcomeMessage;
-	PDFExportChooser pdfExportChooser;
-  PDFExportOptionsModel_V001 pdfExportOptions;
   FocusHistory focusHistory = new FocusHistory();
 
 	public final JWindow window = new JWindow();
@@ -70,12 +62,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
 	private DiagramToolBar diagramToolBar;
 	private StepButtonBar stepButtonBar;
-	private JMenuItem speichern;
-	private JMenuItem speichernUnter;
-	private JMenuItem laden;
-	private JMenuItem exportAsPDFMenuItem;
-	private JMenuItem exportAsGraphvizMenuItem;
-	private JMenuItem exitMenuItem;
+	private SpecmanMenuBar menuBar;
+	private final ExportPDFSpecmanOp exportPDFOp = new ExportPDFSpecmanOp(this);
 
 	private static Specman instance;
 
@@ -84,7 +72,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		setApplicationIcon();
 		setTitle(SPECMAN_TITLE);
 
-		recentFiles = new RecentFiles(this);
 		undoManager = new SpecmanUndoManager(this);
 
 		initComponents();
@@ -129,7 +116,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		arbeitsbereich.add(outro, CC.xy(2, 4));
 
 		scrollPane.setViewportView(arbeitsbereich);
-		actionListenerHinzufuegen();
 		setInitialWindowSizeAndScreenCenteredLocation();
 		setVisible(true);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -299,19 +285,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		JOptionPane.showMessageDialog(this, text);
 	}
 
-	private void actionListenerHinzufuegen() {
-
-		speichern.addActionListener(e -> diagrammSpeichern(false));
-		speichernUnter.addActionListener(e -> diagrammSpeichern(true));
-		laden.addActionListener(e -> diagrammLaden());
-
-		exportAsPDFMenuItem.addActionListener(e -> exportAsPDF());
-
-		exportAsGraphvizMenuItem.addActionListener(e -> exportAsGraphviz());
-
-		exitMenuItem.addActionListener(e -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
-	}
-
   @Override
 	public void resyncStepnumberStyleADBL() {
     hauptSequenz.resyncStepnumberStyleADBL();
@@ -354,11 +327,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		diagramToolBar.updateZoomDisplay(prozent);
 	}
 
-	private void diagrammSpeichern(boolean dateiauswahlErzwingen) {
+	void diagrammSpeichern(boolean dateiauswahlErzwingen) {
 		new SaveDiagrammSpecmanOp(this).speichern(dateiauswahlErzwingen);
 	}
 
-	private void diagrammLaden() {
+	void diagrammLaden() {
 		new LoadDiagrammSpecmanOp(this).laden();
 	}
 
@@ -403,17 +376,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
 		diagramToolBar = new DiagramToolBar(this);
 		stepButtonBar = new StepButtonBar(this);
-		speichern = new JMenuItem("Speichern");
-		speichern.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
-		speichernUnter = new JMenuItem("Speichern unter...");
-		speichernUnter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
-		laden = new JMenuItem("Laden...");
-		laden.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
-		exportAsPDFMenuItem = new JMenuItem("Als PDF exportieren...");
-		exportAsPDFMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK));
-		exportAsGraphvizMenuItem = new JMenuItem("Als Graphviz exportieren");
-		exitMenuItem = new JMenuItem("Beenden");
-		exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
 		//======== this ========
 		contentPane = new JPanel();
 		setContentPane(contentPane);
@@ -435,44 +397,14 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
   private void initShefController() throws Exception {
 		shefEditorPane = new HTMLEditorPane(undoManager);
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.add(baueDateiMenu());
-		menuBar.add(shefEditorPane.getEditMenu());
-		menuBar.add(shefEditorPane.getFormatMenu());
-		menuBar.add(shefEditorPane.getInsertMenu());
-		menuBar.add(baueAenderungsfarbenMenu());
-
+		menuBar = new SpecmanMenuBar(this, shefEditorPane);
 		setJMenuBar(menuBar);
 		contentPane.add(shefEditorPane.getFormatToolBar(), CC.xywh(1, 2, 2, 1));
-
 	}
 
 	@Override
 	public void addEdit(UndoableEdit edit) {
     	undoManager.addEdit(edit);
-	}
-
-	private JMenu baueDateiMenu() {
-		JMenu dateiMenu = new JMenu("Datei");
-		dateiMenu.add(laden);
-		dateiMenu.add(recentFiles.menu());
-		dateiMenu.add(speichern);
-		dateiMenu.add(speichernUnter);
-		dateiMenu.add(exportAsPDFMenuItem);
-		dateiMenu.add(exportAsGraphvizMenuItem);
-		dateiMenu.add(exitMenuItem);
-		return dateiMenu;
-	}
-
-	private JMenu baueAenderungsfarbenMenu() {
-		JMenu menu = new JMenu("Änderungsfarbe");
-		menu.setIcon(new ColorDotIcon(AENDERUNGSFARBE.text.color));
-		for (ChangeColorSet cs : CHANGESETS) {
-			JMenuItem item = new JMenuItem(new ColorDotIcon(cs.text.color));
-			item.addActionListener(e -> fehler("Work in progress"));
-			menu.add(item);
-		}
-		return menu;
 	}
 
 	public static EditorI instance() { return instance; }
@@ -484,6 +416,22 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 
 	public void setChangeModeEnabled(boolean enabled) {
 		diagramToolBar.setChangeModeEnabled(enabled);
+	}
+
+	void addRecentFile(File file) {
+		menuBar.addRecentFile(file);
+	}
+
+	void resetPdfExportChooser() {
+		exportPDFOp.resetChooser();
+	}
+
+	void setPdfExportOptions(PDFExportOptionsModel_V001 options) {
+		exportPDFOp.setPdfExportOptions(options);
+	}
+
+	PDFExportOptionsModel_V001 getPdfExportOptions() {
+		return exportPDFOp.getPdfExportOptions();
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -521,7 +469,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 	}
 
 	public void exportAsPDF() {
-		new ExportPDFSpecmanOp(this).export();
+		exportPDFOp.export();
 	}
 
 	@Override public int getZoomFactor() {

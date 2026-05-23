@@ -27,7 +27,7 @@ class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
     fileChooser.setFileFilter(new FileNameExtensionFilter("Nassi Diagramme", "nsd"));
     if (fileChooser.showOpenDialog(specman) == JFileChooser.APPROVE_OPTION) {
       laden(fileChooser.getSelectedFile());
-      specman.pdfExportChooser = null;
+      specman.resetPdfExportChooser();
     }
   }
 
@@ -49,7 +49,7 @@ class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
       specman.diagrammbreite = model.breite;
       specman.intro.setEditorContent(model.intro);
       specman.outro.setEditorContent(model.outro);
-      specman.pdfExportOptions = model.pdfExportOptions;
+      specman.setPdfExportOptions(model.pdfExportOptions);
       specman.setName(model.name);
       specman.setHauptSequenz(new SchrittSequenzView(specman, null, model.hauptSequenz));
 
@@ -61,7 +61,7 @@ class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
       specman.outro.viewsNachinitialisieren();
       specman.outro.registerAllExistingStepnumbers();
       specman.setChangeModeEnabled(model.changeModeenabled);
-      specman.recentFiles.add(diagramFile);
+      specman.addRecentFile(diagramFile);
       specman.undoManager.discardAllEdits();
     }
     catch (IOException e) {

@@ -1,5 +1,6 @@
 package specman;
 
+import specman.model.v001.PDFExportOptionsModel_V001;
 import specman.pdf.PDFExportChooser;
 import specman.pdf.PDFRenderer;
 import specman.pdf.Shape;
@@ -10,22 +11,29 @@ import java.io.IOException;
 
 class ExportPDFSpecmanOp extends AbstractSpecmanOp {
 
+  private PDFExportChooser pdfExportChooser;
+  private PDFExportOptionsModel_V001 pdfExportOptions;
+
+  void resetChooser() { pdfExportChooser = null; }
+  void setPdfExportOptions(PDFExportOptionsModel_V001 options) { pdfExportOptions = options; }
+  PDFExportOptionsModel_V001 getPdfExportOptions() { return pdfExportOptions; }
+
   ExportPDFSpecmanOp(Specman specman) {
     super(specman);
   }
 
   void export() {
-    if (specman.pdfExportChooser == null) {
-      specman.pdfExportChooser = new PDFExportChooser();
+    if (pdfExportChooser == null) {
+      pdfExportChooser = new PDFExportChooser();
     }
-    specman.pdfExportChooser.initFromModel(specman.pdfExportOptions);
-    int result = specman.pdfExportChooser.showSaveDialog(specman.scrollPane, specman.diagrammDatei);
+    pdfExportChooser.initFromModel(pdfExportOptions);
+    int result = pdfExportChooser.showSaveDialog(specman.scrollPane, specman.diagrammDatei);
     if (result != JFileChooser.APPROVE_OPTION) {
       return;
     }
-    specman.pdfExportChooser.safeUserPreferences();
-    specman.pdfExportOptions = specman.pdfExportChooser.getExportOptions();
-    java.io.File selectedFile = specman.pdfExportChooser.getSelectedFile();
+    pdfExportChooser.safeUserPreferences();
+    pdfExportOptions = pdfExportChooser.getExportOptions();
+    java.io.File selectedFile = pdfExportChooser.getSelectedFile();
     if (selectedFile == null) {
       return;
     }
@@ -39,15 +47,15 @@ class ExportPDFSpecmanOp extends AbstractSpecmanOp {
         .add(specman.outro.getShape());
     try {
       new PDFRenderer(selectedFile.getAbsolutePath(),
-          specman.pdfExportChooser.getSelectedPageSize(),
-          specman.pdfExportChooser.isPortrait(),
-          specman.pdfExportChooser.getPaging(),
+          pdfExportChooser.getSelectedPageSize(),
+          pdfExportChooser.isPortrait(),
+          pdfExportChooser.getPaging(),
           specman.zoomFaktor).render(all);
     }
     catch (IOException iox) {
       specman.displayException(iox);
     }
-    if (specman.pdfExportChooser.displayResult()) {
+    if (pdfExportChooser.displayResult()) {
       try {
         Desktop.getDesktop().open(selectedFile);
       }

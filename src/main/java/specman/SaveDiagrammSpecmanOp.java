@@ -52,7 +52,7 @@ class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
       fos.write(json);
       fos.close();
 
-      specman.recentFiles.add(specman.diagrammDatei);
+      specman.addRecentFile(specman.diagrammDatei);
       specman.undoManager.discardAllEdits();
     }
     catch (JsonProcessingException jpx) {
@@ -72,7 +72,7 @@ class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         specman.getHauptSequenz().generiereSchrittSequenzModel(formatierterText),
         specman.intro.editorContent2Model(formatierterText),
         specman.outro.editorContent2Model(formatierterText),
-        specman.pdfExportOptions);
+        specman.getPdfExportOptions());
   }
 
   private ModelEnvelope wrapModel(StruktogrammModel_V001 model) {
