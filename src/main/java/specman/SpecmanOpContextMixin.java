@@ -22,9 +22,25 @@ public interface SpecmanOpContextMixin {
   default java.io.File getDiagrammDatei() { return context().getDiagrammDatei(); }
   default javax.swing.JScrollPane getScrollPane() { return context().getScrollPane(); }
   default SpaltenResizer getBreitenAnpasser() { return context().getBreitenAnpasser(); }
+  default void setDiagrammDatei(java.io.File file) { context().setDiagrammDatei(file); }
+  default void addRecentFile(java.io.File file) { context().addRecentFile(file); }
+  default specman.model.v001.PDFExportOptionsModel_V001 getPdfExportOptions() { return context().getPdfExportOptions(); }
+  default void clearFocusHistory() { context().clearFocusHistory(); }
+  default void resetPdfExportChooser() { context().resetPdfExportChooser(); }
+  default void setChangeModeEnabled(boolean enabled) { context().setChangeModeEnabled(enabled); }
+  default void setZoomFaktor(int prozent) { context().setZoomFaktor(prozent); }
+  default void zoomFaktorAnzeigeAktualisieren(int prozent) { context().zoomFaktorAnzeigeAktualisieren(prozent); }
+  default void setDiagrammbreite(int breite) { context().setDiagrammbreite(breite); }
+  default void setPdfExportOptions(specman.model.v001.PDFExportOptionsModel_V001 options) { context().setPdfExportOptions(options); }
+  default void setHauptSequenz(specman.view.SchrittSequenzView seq) { context().setHauptSequenz(seq); }
+  default void hauptSequenzInitialisieren() { context().hauptSequenzInitialisieren(); }
+  default void setDiagrammName(String name) { context().setDiagrammName(name); }
+  default ScrollPause pauseScrolling() { return context().pauseScrolling(); }
+  default void discardAllUndoEdits() { context().discardAllUndoEdits(); }
+  default String getDiagrammName() { return context().getDiagrammName(); }
+  default int getDiagrammbreite() { return context().getDiagrammbreite(); }
 
   // EditorI methods used by ops
-  default void showError(EditException ex) { context().showError(ex); }
   default UndoRecording composeUndo() { return context().composeUndo(); }
   default void diagrammAktualisieren(EditArea editArea) { context().diagrammAktualisieren(editArea); }
   default TextEditArea getLastFocusedTextArea() { return context().getLastFocusedTextArea(); }

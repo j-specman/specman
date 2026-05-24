@@ -15,8 +15,8 @@ class ExportPDFSpecmanOp extends AbstractSpecmanOp {
   private PDFExportOptionsModel_V001 pdfExportOptions;
 
   void resetChooser() { pdfExportChooser = null; }
-  void setPdfExportOptions(PDFExportOptionsModel_V001 options) { pdfExportOptions = options; }
-  PDFExportOptionsModel_V001 getPdfExportOptions() { return pdfExportOptions; }
+  public void setPdfExportOptions(PDFExportOptionsModel_V001 options) { pdfExportOptions = options; }
+  public PDFExportOptionsModel_V001 getPdfExportOptions() { return pdfExportOptions; }
 
   ExportPDFSpecmanOp(SpecmanOpContext context) {
     super(context);

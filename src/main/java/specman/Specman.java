@@ -197,7 +197,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		arbeitsbereich.showDragLine(dragX);
 	}
 
-	void hauptSequenzInitialisieren() {
+	@Override
+	public void hauptSequenzInitialisieren() {
 		if (hauptSequenzContainer != null) {
 			arbeitsbereich.remove(hauptSequenzContainer);
 		}
@@ -241,9 +242,25 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		lastFocusedTextArea = area;
   }
 
-	void setDiagrammDatei(File diagrammDatei) {
+	@Override
+	public void setDiagrammDatei(File diagrammDatei) {
 		this.diagrammDatei = diagrammDatei;
 		setTitle(getDiagramFilename() + " - "+ SPECMAN_TITLE);
+	}
+
+	@Override
+	public void discardAllUndoEdits() {
+		undoManager.discardAllEdits();
+	}
+
+	@Override
+	public String getDiagrammName() {
+		return getName();
+	}
+
+	@Override
+	public int getDiagrammbreite() {
+		return diagrammbreite;
 	}
 
 	public void fehler(String text) {
@@ -293,7 +310,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		return bisherigerFaktor;
 	}
 
-	void zoomFaktorAnzeigeAktualisieren(int prozent) {
+	@Override
+	public void zoomFaktorAnzeigeAktualisieren(int prozent) {
 		diagramToolBar.updateZoomDisplay(prozent);
 	}
 
@@ -424,19 +442,43 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		diagramToolBar.setChangeModeEnabled(enabled);
 	}
 
-	void addRecentFile(File file) {
+	@Override
+	public void addRecentFile(File file) {
 		menuBar.addRecentFile(file);
 	}
 
-	void resetPdfExportChooser() {
+	@Override
+	public void setDiagrammName(String name) {
+		setName(name);
+	}
+
+	@Override
+	public void clearFocusHistory() {
+		focusHistory.clear();
+	}
+
+	@Override
+	public void setZoomFaktor(int prozent) {
+		zoomFaktor = prozent;
+	}
+
+	@Override
+	public void setDiagrammbreite(int breite) {
+		diagrammbreite = breite;
+	}
+
+	@Override
+	public void resetPdfExportChooser() {
 		exportPDFOp.resetChooser();
 	}
 
-	void setPdfExportOptions(PDFExportOptionsModel_V001 options) {
+	@Override
+	public void setPdfExportOptions(PDFExportOptionsModel_V001 options) {
 		exportPDFOp.setPdfExportOptions(options);
 	}
 
-	PDFExportOptionsModel_V001 getPdfExportOptions() {
+	@Override
+	public PDFExportOptionsModel_V001 getPdfExportOptions() {
 		return exportPDFOp.getPdfExportOptions();
 	}
 

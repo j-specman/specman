@@ -15,30 +15,30 @@ class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
 
   private static final String PROJEKTDATEI_EXTENSION = ".nsd";
 
-  SaveDiagrammSpecmanOp(Specman specman) {
-    super(specman);
+  SaveDiagrammSpecmanOp(SpecmanOpContext context) {
+    super(context);
   }
 
   void speichern(boolean dateiauswahlErzwingen) {
-    try (ScrollPause sp = specman.pauseScrolling()) {
-      if (specman.diagrammDatei == null || dateiauswahlErzwingen) {
-        File verzeichnis = (specman.diagrammDatei != null) ? specman.diagrammDatei.getParentFile() : null;
+    try (ScrollPause sp = pauseScrolling()) {
+      if (getDiagrammDatei() == null || dateiauswahlErzwingen) {
+        File verzeichnis = (getDiagrammDatei() != null) ? getDiagrammDatei().getParentFile() : null;
         JFileChooser fileChooser = new JFileChooser(verzeichnis);
         fileChooser.setFileFilter(new FileNameExtensionFilter("Nassi Diagramme", "nsd"));
-        if (fileChooser.showSaveDialog(specman) != JFileChooser.APPROVE_OPTION)
+        if (fileChooser.showSaveDialog(getScrollPane()) != JFileChooser.APPROVE_OPTION)
           return;
         String ausgewaehlterDateiname = fileChooser.getSelectedFile().getAbsolutePath();
         if (!ausgewaehlterDateiname.endsWith(PROJEKTDATEI_EXTENSION))
           ausgewaehlterDateiname += PROJEKTDATEI_EXTENSION;
         File ausgewaehlteDatei = new File(ausgewaehlterDateiname);
-        if (!ausgewaehlteDatei.equals(specman.diagrammDatei) && ausgewaehlteDatei.exists()) {
-          int confirmErgebnis = JOptionPane.showConfirmDialog(specman,
+        if (!ausgewaehlteDatei.equals(getDiagrammDatei()) && ausgewaehlteDatei.exists()) {
+          int confirmErgebnis = showConfirmDialog(
               "Die ausgewählte Datei existiert bereits.\nSoll die Datei überschrieben werden?",
               "Datei überschreiben?", JOptionPane.OK_CANCEL_OPTION);
           if (confirmErgebnis == JOptionPane.CANCEL_OPTION)
             return;
         }
-        specman.setDiagrammDatei(new File(ausgewaehlterDateiname));
+        setDiagrammDatei(new File(ausgewaehlterDateiname));
       }
       // Generating the model includes cleaning up text edit areas which in turn runs setText which
       // in turn causes the scroll position to be changed. Therefore, temporarily pause scrolling.
@@ -48,31 +48,31 @@ class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.enableDefaultTyping();
       byte[] json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(wrappedModel);
-      FileOutputStream fos = new FileOutputStream(specman.diagrammDatei);
+      FileOutputStream fos = new FileOutputStream(getDiagrammDatei());
       fos.write(json);
       fos.close();
 
-      specman.addRecentFile(specman.diagrammDatei);
-      specman.undoManager.discardAllEdits();
+      addRecentFile(getDiagrammDatei());
+      discardAllUndoEdits();
     }
     catch (JsonProcessingException jpx) {
-      specman.displayException(jpx);
+      displayException(jpx);
     }
     catch (IOException e) {
-      specman.displayException(e);
+      displayException(e);
     }
   }
 
   private StruktogrammModel_V001 generiereStruktogrammModel(boolean formatierterText) {
     return new StruktogrammModel_V001(
-        specman.getName(),
-        specman.diagrammbreite,
-        specman.zoomFaktor,
-        specman.aenderungenVerfolgen(),
-        specman.getHauptSequenz().generiereSchrittSequenzModel(formatierterText),
-        specman.intro.editorContent2Model(formatierterText),
-        specman.outro.editorContent2Model(formatierterText),
-        specman.getPdfExportOptions());
+        getDiagrammName(),
+        getDiagrammbreite(),
+        getZoomFactor(),
+        aenderungenVerfolgen(),
+        getHauptSequenz().generiereSchrittSequenzModel(formatierterText),
+        getIntro().editorContent2Model(formatierterText),
+        getOutro().editorContent2Model(formatierterText),
+        getPdfExportOptions());
   }
 
   private ModelEnvelope wrapModel(StruktogrammModel_V001 model) {

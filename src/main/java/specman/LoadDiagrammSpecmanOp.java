@@ -17,66 +17,66 @@ import java.util.List;
 
 class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
 
-  LoadDiagrammSpecmanOp(Specman specman) {
-    super(specman);
+  LoadDiagrammSpecmanOp(SpecmanOpContext context) {
+    super(context);
   }
 
   void laden() {
-    File verzeichnis = (specman.diagrammDatei != null) ? specman.diagrammDatei.getParentFile() : null;
+    File verzeichnis = (getDiagrammDatei() != null) ? getDiagrammDatei().getParentFile() : null;
     JFileChooser fileChooser = new JFileChooser(verzeichnis);
     fileChooser.setFileFilter(new FileNameExtensionFilter("Nassi Diagramme", "nsd"));
-    if (fileChooser.showOpenDialog(specman) == JFileChooser.APPROVE_OPTION) {
+    if (fileChooser.showOpenDialog(getScrollPane()) == JFileChooser.APPROVE_OPTION) {
       laden(fileChooser.getSelectedFile());
-      specman.resetPdfExportChooser();
+      resetPdfExportChooser();
     }
   }
 
   void laden(File diagramFile) {
     try {
-      specman.focusHistory.clear();
-      specman.setChangeModeEnabled(false);
-      specman.dropWelcomeMessage();
-      specman.setDiagrammDatei(diagramFile);
+      clearFocusHistory();
+      setChangeModeEnabled(false);
+      dropWelcomeMessage();
+      setDiagrammDatei(diagramFile);
 
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.enableDefaultTyping();
-      ModelEnvelope envelope = objectMapper.readValue(specman.diagrammDatei, ModelEnvelope.class);
+      ModelEnvelope envelope = objectMapper.readValue(getDiagrammDatei(), ModelEnvelope.class);
       StruktogrammModel_V001 model = (StruktogrammModel_V001) envelope.model;
 
-      specman.zoomFaktor = model.zoomFaktor;
-      specman.zoomFaktorAnzeigeAktualisieren(specman.zoomFaktor);
-      KlappButton.scaleIcons(specman.zoomFaktor, 0);
-      specman.diagrammbreite = model.breite;
-      specman.intro.setEditorContent(model.intro);
-      specman.outro.setEditorContent(model.outro);
-      specman.setPdfExportOptions(model.pdfExportOptions);
-      specman.setName(model.name);
-      specman.setHauptSequenz(new SchrittSequenzView(specman, null, model.hauptSequenz));
+      setZoomFaktor(model.zoomFaktor);
+      zoomFaktorAnzeigeAktualisieren(model.zoomFaktor);
+      KlappButton.scaleIcons(model.zoomFaktor, 0);
+      setDiagrammbreite(model.breite);
+      getIntro().setEditorContent(model.intro);
+      getOutro().setEditorContent(model.outro);
+      setPdfExportOptions(model.pdfExportOptions);
+      setDiagrammName(model.name);
+      setHauptSequenz(new SchrittSequenzView(context, null, model.hauptSequenz));
 
-      specman.hauptSequenzInitialisieren();
+      hauptSequenzInitialisieren();
       quellZielZuweisung(model.queryAllSteps());
-      specman.getHauptSequenz().viewsNachinitialisieren();
-      specman.intro.viewsNachinitialisieren();
-      specman.intro.registerAllExistingStepnumbers();
-      specman.outro.viewsNachinitialisieren();
-      specman.outro.registerAllExistingStepnumbers();
-      specman.setChangeModeEnabled(model.changeModeenabled);
-      specman.addRecentFile(diagramFile);
-      specman.undoManager.discardAllEdits();
+      getHauptSequenz().viewsNachinitialisieren();
+      getIntro().viewsNachinitialisieren();
+      getIntro().registerAllExistingStepnumbers();
+      getOutro().viewsNachinitialisieren();
+      getOutro().registerAllExistingStepnumbers();
+      setChangeModeEnabled(model.changeModeenabled);
+      addRecentFile(diagramFile);
+      discardAllUndoEdits();
     }
     catch (IOException e) {
-      specman.displayException(e);
+      displayException(e);
     }
   }
 
   private void quellZielZuweisung(List<AbstractSchrittModel_V001> allModelSteps) {
     for (AbstractSchrittModel_V001 modelStep : allModelSteps) {
       if (modelStep.quellschrittID != null) {
-        AbstractSchrittView zielschritt = specman.getHauptSequenz().findeSchrittZuId(modelStep.id);
+        AbstractSchrittView zielschritt = getHauptSequenz().findeSchrittZuId(modelStep.id);
         if (zielschritt instanceof QuellSchrittView) {
           continue;
         }
-        QuellSchrittView quellSchritt = (QuellSchrittView) specman.getHauptSequenz().findeSchrittZuId(modelStep.quellschrittID);
+        QuellSchrittView quellSchritt = (QuellSchrittView) getHauptSequenz().findeSchrittZuId(modelStep.quellschrittID);
         zielschritt.setQuellschrittUDBL(quellSchritt);
         quellSchritt.setZielschritt(zielschritt);
       }

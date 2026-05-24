@@ -10,11 +10,9 @@ package specman;
  */
 abstract class AbstractSpecmanOp implements SpecmanOpContextMixin {
 
-  protected final Specman specman;
   protected final SpecmanOpContext context;
 
   AbstractSpecmanOp(SpecmanOpContext context) {
-    this.specman = context instanceof Specman ? (Specman) context : null;
     this.context = context;
   }
 
