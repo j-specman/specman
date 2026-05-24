@@ -13,9 +13,9 @@ abstract class AbstractSpecmanOp implements SpecmanOpContextMixin {
   protected final Specman specman;
   protected final SpecmanOpContext context;
 
-  AbstractSpecmanOp(Specman specman) {
-    this.specman = specman;
-    this.context = specman;
+  AbstractSpecmanOp(SpecmanOpContext context) {
+    this.specman = context instanceof Specman ? (Specman) context : null;
+    this.context = context;
   }
 
   @Override

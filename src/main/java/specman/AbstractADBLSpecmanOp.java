@@ -1,5 +1,6 @@
 package specman;
 
+import specman.opbuttons.AbstractADBLSpecmanOpButton;
 import specman.undo.manager.UndoRecording;
 
 /**
@@ -10,12 +11,12 @@ import specman.undo.manager.UndoRecording;
  */
 abstract class AbstractADBLSpecmanOp extends AbstractSpecmanOp {
 
-  AbstractADBLSpecmanOp(Specman specman) {
-    super(specman);
+  AbstractADBLSpecmanOp(SpecmanOpContext context) {
+    super(context);
   }
 
   void run() {
-    try (UndoRecording ur = specman.composeUndo()) {
+    try (UndoRecording ur = composeUndo()) {
       execute();
     }
     catch (EditException ex) {

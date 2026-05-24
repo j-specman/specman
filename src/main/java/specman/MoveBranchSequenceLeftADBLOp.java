@@ -9,8 +9,8 @@ class MoveBranchSequenceLeftADBLOp extends AbstractADBLSpecmanOp {
   private final AbstractSchrittView step;
   private final InteractiveStepFragment initiatingFragment;
 
-  MoveBranchSequenceLeftADBLOp(Specman specman, AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
-    super(specman);
+  MoveBranchSequenceLeftADBLOp(SpecmanOpContext context, AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
+    super(context);
     this.step = step;
     this.initiatingFragment = initiatingFragment;
   }

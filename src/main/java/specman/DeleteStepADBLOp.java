@@ -15,8 +15,8 @@ class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
   private final AbstractSchrittView step;
   private final InteractiveStepFragment initiatingFragment;
 
-  DeleteStepADBLOp(Specman specman, AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
-    super(specman);
+  DeleteStepADBLOp(SpecmanOpContext context, AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
+    super(context);
     this.step = step;
     this.initiatingFragment = initiatingFragment;
   }
