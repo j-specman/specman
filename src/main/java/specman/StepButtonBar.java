@@ -2,6 +2,7 @@ package specman;
 
 import specman.draganddrop.DragMouseAdapter;
 import specman.graphics.IconReader;
+import specman.opbuttons.*;
 
 import javax.swing.*;
 import java.awt.*;

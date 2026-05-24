@@ -1,6 +1,7 @@
 package specman;
 
 import specman.graphics.IconReader;
+import specman.opbuttons.*;
 
 import javax.swing.*;
 import java.awt.*;

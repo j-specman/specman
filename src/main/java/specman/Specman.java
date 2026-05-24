@@ -246,7 +246,12 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		setTitle(getDiagramFilename() + " - "+ SPECMAN_TITLE);
 	}
 
-	void fehler(String text) {
+	public void fehler(String text) {
+		JOptionPane.showMessageDialog(this, text);
+	}
+
+	@Override
+	public void showMessage(String text) {
 		JOptionPane.showMessageDialog(this, text);
 	}
 
@@ -327,6 +332,16 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 				scrollPane.getViewport().setViewPosition(viewPosition);
 			});
 		}
+	}
+
+	@Override
+	public JPanel getHauptSequenzContainer() {
+		return hauptSequenzContainer;
+	}
+
+	@Override
+	public Image createDiagramImage(int width, int height) {
+		return createImage(width, height);
 	}
 
 	public void newStepPostInit(AbstractSchrittView newStep) {
@@ -436,12 +451,28 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		exportPDFOp.export();
 	}
 
+	@Override
+	public void zusammenklappenFuerReview() {
+		getHauptSequenz().zusammenklappenFuerReview();
+	}
+
 	@Override public int getZoomFactor() {
 		return zoomFaktor;
 	}
 
+	@Override
 	public SchrittSequenzView getHauptSequenz() {
 		return hauptSequenz;
+	}
+
+	@Override
+	public EditContainer getIntro() {
+		return intro;
+	}
+
+	@Override
+	public EditContainer getOutro() {
+		return outro;
 	}
 
 	public void setHauptSequenz(SchrittSequenzView hauptSequenz) {

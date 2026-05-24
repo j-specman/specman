@@ -1,4 +1,6 @@
-package specman;
+package specman.opbuttons;
+
+import specman.*;
 
 import specman.undo.manager.UndoRecording;
 
@@ -7,20 +9,20 @@ import specman.undo.manager.UndoRecording;
  * atomic undo step. ADBL is short for <b>A</b>tomic un<b>D</b>oa<b>BL</b>e.
  * Wraps {@link #execute()} in {@link Specman#composeUndo()}.
  */
-abstract class AbstractADBLSpecmanOpButton extends AbstractSpecmanOpButton {
+public abstract class AbstractADBLSpecmanOpButton extends AbstractSpecmanOpButton {
 
-  AbstractADBLSpecmanOpButton(Specman specman) {
+  public AbstractADBLSpecmanOpButton(Specman specman) {
     super(specman);
   }
 
   @Override
   void registerActionListener() {
     addActionListener(e -> {
-      try (UndoRecording ur = specman.composeUndo()) {
+      try (UndoRecording ur = composeUndo()) {
         execute();
       }
       catch (EditException ex) {
-        specman.showError(ex);
+        context.showError(ex);
       }
     });
   }

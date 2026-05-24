@@ -1,22 +1,24 @@
-package specman;
+package specman.opbuttons;
+
+import specman.*;
 
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
 
-abstract class AbstractCreateStepOpButton extends AbstractADBLSpecmanOpButton {
+public abstract class AbstractCreateStepOpButton extends AbstractADBLSpecmanOpButton {
 
-  AbstractCreateStepOpButton(Specman specman) {
+  public AbstractCreateStepOpButton(Specman specman) {
     super(specman);
   }
 
   @Override
   void execute() throws EditException {
-    specman.dropWelcomeMessage();
-    AbstractSchrittView referenceStep = specman.getHauptSequenz().findeSchritt(specman.lastFocusedTextArea);
+    dropWelcomeMessage();
+    AbstractSchrittView referenceStep = getHauptSequenz().findeSchritt(getLastFocusedTextArea());
     AbstractSchrittView newStep = (referenceStep != null)
         ? insertAfter(referenceStep.getParent(), referenceStep)
-        : append(specman.getHauptSequenz());
-    specman.newStepPostInit(newStep);
+        : append(getHauptSequenz());
+    newStepPostInit(newStep);
   }
 
   abstract AbstractSchrittView insertAfter(SchrittSequenzView sequence, AbstractSchrittView referenceStep) throws EditException;

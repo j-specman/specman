@@ -1,4 +1,6 @@
-package specman;
+package specman.opbuttons;
+
+import specman.*;
 
 import javax.swing.*;
 
@@ -13,13 +15,11 @@ import javax.swing.*;
  * {@link Specman#toolbarButtonHinzufuegen} when the button is added to the toolbar
  * in {@code initComponents}.
  */
-abstract class AbstractSpecmanOpButton extends JButton {
+public abstract class AbstractSpecmanOpButton extends JButton implements SpecmanOpContextMixin {
 
-  protected final Specman specman;
   protected final SpecmanOpContext context;
 
-  AbstractSpecmanOpButton(Specman specman) {
-    this.specman = specman;
+  public AbstractSpecmanOpButton(Specman specman) {
     this.context = specman;
     registerActionListener();
   }
@@ -30,10 +30,13 @@ abstract class AbstractSpecmanOpButton extends JButton {
         execute();
       }
       catch (EditException ex) {
-        specman.showError(ex);
+        context.showError(ex);
       }
     });
   }
+
+  @Override
+  public SpecmanOpContext context() { return context; }
 
   abstract void execute() throws EditException;
 

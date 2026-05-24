@@ -1,25 +1,26 @@
-package specman;
+package specman.opbuttons;
+
+import specman.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-class BirdsViewSpecmanOpButton extends AbstractSpecmanOpButton {
+public class BirdsViewSpecmanOpButton extends AbstractSpecmanOpButton {
 
-  BirdsViewSpecmanOpButton(Specman specman) {
+  public BirdsViewSpecmanOpButton(Specman specman) {
     super(specman);
   }
 
   @Override
   void execute() throws EditException {
-    if (specman.hauptSequenzContainer == null) {
+    Image i = getBirdsViewImage();
+    if (i == null) {
       return;
     }
-    final int breite = specman.hauptSequenzContainer.getBounds().width;
-    final int hoehe = specman.hauptSequenzContainer.getBounds().height;
-    final Image i = specman.createImage(breite, hoehe);
-    specman.hauptSequenzContainer.paint(i.getGraphics());
+    final int breite = i.getWidth(null);
+    final int hoehe = i.getHeight(null);
     final JLabel l = new JLabel(new ImageIcon(i.getScaledInstance(breite / 5, hoehe / 5, Image.SCALE_SMOOTH)));
     final JPanel p = new JPanel(new BorderLayout());
     p.add(l, BorderLayout.CENTER);
@@ -46,6 +47,17 @@ class BirdsViewSpecmanOpButton extends AbstractSpecmanOpButton {
     d.getContentPane().add(p);
     d.pack();
     d.setVisible(true);
+  }
+
+  private Image getBirdsViewImage() {
+    if (getHauptSequenzContainer() == null) {
+      return null;
+    }
+    Image image = createDiagramImage(
+      getHauptSequenzContainer().getBounds().width,
+      getHauptSequenzContainer().getBounds().height);
+    getHauptSequenzContainer().paint(image.getGraphics());
+    return image;
   }
 
 }

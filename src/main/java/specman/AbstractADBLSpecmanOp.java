@@ -19,7 +19,7 @@ abstract class AbstractADBLSpecmanOp extends AbstractSpecmanOp {
       execute();
     }
     catch (EditException ex) {
-      specman.showError(ex);
+      context.showError(ex);
     }
   }
 

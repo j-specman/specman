@@ -1,27 +1,29 @@
-package specman;
+package specman.opbuttons;
+
+import specman.*;
 
 import specman.undo.UndoableSchrittEingefaerbt;
 import specman.view.AbstractSchrittView;
 
 import java.awt.*;
 
-class ToneOpButton extends AbstractADBLSpecmanOpButton {
+public class ToneOpButton extends AbstractADBLSpecmanOpButton {
 
-  ToneOpButton(Specman specman) {
+  public ToneOpButton(Specman specman) {
     super(specman);
   }
 
   @Override
   void execute() throws EditException {
-    if (specman.lastFocusedTextArea == null) {
+    if (getLastFocusedTextArea() == null) {
       return;
     }
-    AbstractSchrittView schritt = specman.getHauptSequenz().findeSchritt(specman.lastFocusedTextArea);
+    AbstractSchrittView schritt = getHauptSequenz().findeSchritt(getLastFocusedTextArea());
     Color aktuelleHintergrundfarbe = schritt.getBackground();
     int farbwert = aktuelleHintergrundfarbe.getRed() == 240 ? 255 : 240;
     Color neueHintergrundfarbe = new Color(farbwert, farbwert, farbwert);
     schritt.setBackgroundUDBL(neueHintergrundfarbe);
-    specman.addEdit(new UndoableSchrittEingefaerbt(schritt, aktuelleHintergrundfarbe, neueHintergrundfarbe));
+    addEdit(new UndoableSchrittEingefaerbt(schritt, aktuelleHintergrundfarbe, neueHintergrundfarbe));
   }
 
 }

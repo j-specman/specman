@@ -1,25 +1,27 @@
-package specman;
+package specman.opbuttons;
+
+import specman.*;
 
 import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;
 
-class DeleteStepOpButton extends AbstractSpecmanOpButton {
+public class DeleteStepOpButton extends AbstractSpecmanOpButton {
 
-  DeleteStepOpButton(Specman specman) {
+  public DeleteStepOpButton(Specman specman) {
     super(specman);
   }
 
   @Override
   void execute() throws EditException {
-    if (specman.lastFocusedTextArea == null) {
+    if (getLastFocusedTextArea() == null) {
       return;
     }
-    AbstractSchrittView step = findStep(specman.lastFocusedTextArea);
-    specman.deleteStepADBL(step, specman.lastFocusedTextArea);
+    AbstractSchrittView step = findStep((TextEditArea) getLastFocusedTextArea());
+    deleteStepADBL(step, getLastFocusedTextArea());
   }
 
   private AbstractSchrittView findStep(TextEditArea initiatingTextArea) throws EditException {
-    AbstractSchrittView schritt = specman.findeSchritt(initiatingTextArea);
+    AbstractSchrittView schritt = findeSchritt(initiatingTextArea);
     if (schritt == null) {
       throw new EditException("Ups - niemandem scheint das Feld zu gehören, in dem steht: " + initiatingTextArea.getText());
     }
