@@ -12,7 +12,7 @@ public class CreateCatchStepADBLOpButton extends AbstractADBLSpecmanOpButton {
 
   @Override
   void execute() throws EditException {
-    TextEditArea lastFocused = (TextEditArea) getLastFocusedTextArea();
+    TextEditArea lastFocused = getLastFocusedTextArea();
     AbstractSchrittView referenceStep = getHauptSequenz().findeSchritt(lastFocused);
     CatchUeberschrift referenceCatchHeading = lastFocused.containingCatchHeading();
     if (referenceStep != null) {

@@ -16,7 +16,7 @@ public class DeleteStepOpButton extends AbstractSpecmanOpButton {
     if (getLastFocusedTextArea() == null) {
       return;
     }
-    AbstractSchrittView step = findStep((TextEditArea) getLastFocusedTextArea());
+    AbstractSchrittView step = findStep(getLastFocusedTextArea());
     deleteStepADBL(step, getLastFocusedTextArea());
   }
 

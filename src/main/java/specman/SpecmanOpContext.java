@@ -17,6 +17,12 @@ public interface SpecmanOpContext extends EditorI {
   void showMessage(String text);
   void dropWelcomeMessage();
   void fehler(String text);
+  void displayException(Exception e);
+  java.awt.Container getArbeitsbereich();
+  void scrollBy(int delta);
+  java.io.File getDiagrammDatei();
+  javax.swing.JScrollPane getScrollPane();
+  SpaltenResizer getBreitenAnpasser();
   void newStepPostInit(AbstractSchrittView newStep);
   javax.swing.JPanel getHauptSequenzContainer();
   java.awt.Image createDiagramImage(int width, int height);

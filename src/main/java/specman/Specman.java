@@ -335,6 +335,33 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	}
 
 	@Override
+	public WorkingAreaPanel getArbeitsbereich() {
+		return arbeitsbereich;
+	}
+
+	@Override
+	public void scrollBy(int pages) {
+		JScrollBar bar = scrollPane.getVerticalScrollBar();
+		int pageSize = scrollPane.getViewport().getHeight();
+		bar.setValue(bar.getValue() + pages * pageSize);
+	}
+
+	@Override
+	public File getDiagrammDatei() {
+		return diagrammDatei;
+	}
+
+	@Override
+	public JScrollPane getScrollPane() {
+		return scrollPane;
+	}
+
+	@Override
+	public SpaltenResizer getBreitenAnpasser() {
+		return breitenAnpasser;
+	}
+
+	@Override
 	public JPanel getHauptSequenzContainer() {
 		return hauptSequenzContainer;
 	}
@@ -549,7 +576,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
     return new ScrollPause(viewport);
   }
 
-  void displayException(Exception x) {
+  @Override
+  public void displayException(Exception x) {
     x.printStackTrace();
     displayErrorMessage(x.getMessage());
   }

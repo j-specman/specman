@@ -4,14 +4,13 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.HashSet;
 import java.util.Set;
-import javax.swing.*;
 
 class KeyboardSpecmanOp extends AbstractSpecmanOp {
 
   private final Set<Integer> pressedKeys = new HashSet<>();
 
-  KeyboardSpecmanOp(Specman specman) {
-    super(specman);
+  KeyboardSpecmanOp(SpecmanOpContext context) {
+    super(context);
   }
 
   boolean isKeyPressed(int keyCode) {
@@ -47,14 +46,12 @@ class KeyboardSpecmanOp extends AbstractSpecmanOp {
    */
   private boolean handleScrollKeys(KeyEvent e) {
     if (e.getID() != KeyEvent.KEY_PRESSED) return false;
-    JScrollBar bar = specman.scrollPane.getVerticalScrollBar();
-    int pageSize = specman.scrollPane.getViewport().getHeight();
     if (e.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
-      bar.setValue(bar.getValue() + pageSize);
+      scrollBy(+1);
       return true;
     }
     if (e.getKeyCode() == KeyEvent.VK_PAGE_UP) {
-      bar.setValue(bar.getValue() - pageSize);
+      scrollBy(-1);
       return true;
     }
     return false;

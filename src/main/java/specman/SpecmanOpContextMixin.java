@@ -18,17 +18,23 @@ public interface SpecmanOpContextMixin {
   default EditContainer getIntro() { return context().getIntro(); }
   default EditContainer getOutro() { return context().getOutro(); }
   default SchrittSequenzView getHauptSequenz() { return context().getHauptSequenz(); }
+  default void scrollBy(int delta) { context().scrollBy(delta); }
+  default java.io.File getDiagrammDatei() { return context().getDiagrammDatei(); }
+  default javax.swing.JScrollPane getScrollPane() { return context().getScrollPane(); }
+  default SpaltenResizer getBreitenAnpasser() { return context().getBreitenAnpasser(); }
 
   // EditorI methods used by ops
   default void showError(EditException ex) { context().showError(ex); }
   default UndoRecording composeUndo() { return context().composeUndo(); }
   default void diagrammAktualisieren(EditArea editArea) { context().diagrammAktualisieren(editArea); }
-  default InteractiveStepFragment getLastFocusedTextArea() { return context().getLastFocusedTextArea(); }
+  default TextEditArea getLastFocusedTextArea() { return context().getLastFocusedTextArea(); }
   default AbstractSchrittView findeSchritt(TextEditArea area) { return context().findeSchritt(area); }
   default void addEdit(javax.swing.undo.UndoableEdit edit) { context().addEdit(edit); }
   default void deleteStepADBL(AbstractSchrittView step, InteractiveStepFragment fragment) { context().deleteStepADBL(step, fragment); }
   default void dropWelcomeMessage() { context().dropWelcomeMessage(); }
   default void fehler(String text) { context().fehler(text); }
+  default void displayException(Exception e) { context().displayException(e); }
+  default java.awt.Container getArbeitsbereich() { return context().getArbeitsbereich(); }
   default void newStepPostInit(AbstractSchrittView newStep) { context().newStepPostInit(newStep); }
   default javax.swing.JPanel getHauptSequenzContainer() { return context().getHauptSequenzContainer(); }
   default java.awt.Image createDiagramImage(int width, int height) { return context().createDiagramImage(width, height); }
