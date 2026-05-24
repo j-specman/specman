@@ -9,7 +9,7 @@ import static specman.view.RelativeStepPosition.After;
 
 public class CreateIfStepOpButton extends AbstractCreateStepOpButton {
 
-  public CreateIfStepOpButton(Specman context) { super(context); }
+  public CreateIfStepOpButton(SpecmanOpContext context) { super(context); }
 
   @Override AbstractSchrittView insertAfter(SchrittSequenzView seq, AbstractSchrittView ref) throws EditException {
     return seq.ifSchrittZwischenschieben(After, ref, context);

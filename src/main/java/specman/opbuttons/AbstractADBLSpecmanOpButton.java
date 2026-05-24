@@ -11,8 +11,8 @@ import specman.undo.manager.UndoRecording;
  */
 public abstract class AbstractADBLSpecmanOpButton extends AbstractSpecmanOpButton {
 
-  public AbstractADBLSpecmanOpButton(Specman specman) {
-    super(specman);
+  public AbstractADBLSpecmanOpButton(SpecmanOpContext context) {
+    super(context);
   }
 
   @Override

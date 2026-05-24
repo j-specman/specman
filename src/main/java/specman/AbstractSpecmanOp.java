@@ -8,7 +8,7 @@ package specman;
  * is intentionally done via package visibility rather than EditorI, to avoid bloating
  * the EditorI interface with implementation details.
  */
-abstract class AbstractSpecmanOp {
+abstract class AbstractSpecmanOp implements SpecmanOpContextMixin {
 
   protected final Specman specman;
   protected final SpecmanOpContext context;
@@ -17,5 +17,8 @@ abstract class AbstractSpecmanOp {
     this.specman = specman;
     this.context = specman;
   }
+
+  @Override
+  public SpecmanOpContext context() { return context; }
 
 }

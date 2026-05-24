@@ -19,8 +19,8 @@ public abstract class AbstractSpecmanOpButton extends JButton implements Specman
 
   protected final SpecmanOpContext context;
 
-  public AbstractSpecmanOpButton(Specman specman) {
-    this.context = specman;
+  public AbstractSpecmanOpButton(SpecmanOpContext context) {
+    this.context = context;
     registerActionListener();
   }
 

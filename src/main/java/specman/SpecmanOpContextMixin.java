@@ -33,5 +33,7 @@ public interface SpecmanOpContextMixin {
   default javax.swing.JPanel getHauptSequenzContainer() { return context().getHauptSequenzContainer(); }
   default java.awt.Image createDiagramImage(int width, int height) { return context().createDiagramImage(width, height); }
   default void resyncStepnumberStyleADBL() { context().resyncStepnumberStyleADBL(); }
+  default boolean aenderungenVerfolgen() { return context().aenderungenVerfolgen(); }
+  default int showConfirmDialog(String message, String title, int optionType) { return context().showConfirmDialog(message, title, optionType); }
   default int getZoomFactor() { return context().getZoomFactor(); }
 }

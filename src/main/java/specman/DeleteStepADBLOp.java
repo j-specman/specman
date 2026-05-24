@@ -23,14 +23,14 @@ class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
 
   @Override
   void execute() throws EditException {
-    if (specman.aenderungenVerfolgen()
+    if (aenderungenVerfolgen()
         && step.getAenderungsart() != Hinzugefuegt
         && !(step instanceof CatchBereich)) {
       if (step.getAenderungsart() != Aenderungsart.Geloescht) {
         if (isDeletionAllowed(step)) {
           step.alsGeloeschtMarkierenUDBL();
         }
-        specman.resyncStepnumberStyleADBL();
+        resyncStepnumberStyleADBL();
       }
     }
     else {
@@ -38,8 +38,8 @@ class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
         CaseSchrittView caseSchritt = (CaseSchrittView) step;
         ZweigSchrittSequenzView zweig = caseSchritt.headingToBranch(initiatingFragment);
         if (zweig != null) {
-          int zweigIndex = caseSchritt.zweigEntfernen(specman, zweig);
-          specman.addEdit(new UndoableZweigEntfernt(specman, zweig, caseSchritt, zweigIndex));
+          int zweigIndex = caseSchritt.zweigEntfernen(context, zweig);
+          addEdit(new UndoableZweigEntfernt(context, zweig, caseSchritt, zweigIndex));
           return;
         }
       }
@@ -60,8 +60,8 @@ class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
         step.markStepnumberLinksAsDefect();
         SchrittSequenzView sequenz = step.getParent();
         int schrittIndex = sequenz.schrittEntfernen(step, Discard);
-        specman.addEdit(new UndoableSchrittEntfernt(step, sequenz, schrittIndex));
-        specman.resyncStepnumberStyleADBL();
+        addEdit(new UndoableSchrittEntfernt(step, sequenz, schrittIndex));
+        resyncStepnumberStyleADBL();
       }
     }
   }
@@ -71,7 +71,7 @@ class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
       throw new EditException("Der letzte Schritt kann nicht entfernt werden.");
     }
     if (step.hasStepnumberLinks()) {
-      int dialogResult = specman.showConfirmDialog(
+      int dialogResult = showConfirmDialog(
           "Der zu löschende Schritt wird referenziert. Möchten Sie den Schritt " +
               "wirklich löschen? Die Referenzen werden dann als 'Defekt' markiert.",
           "Verknüpfte Schrittreferenzen", JOptionPane.OK_CANCEL_OPTION);

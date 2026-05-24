@@ -7,8 +7,8 @@ import specman.view.SchrittSequenzView;
 
 public abstract class AbstractCreateStepOpButton extends AbstractADBLSpecmanOpButton {
 
-  public AbstractCreateStepOpButton(Specman specman) {
-    super(specman);
+  public AbstractCreateStepOpButton(SpecmanOpContext context) {
+    super(context);
   }
 
   @Override
