@@ -2,8 +2,9 @@ package specman.ops;
 
 import specman.EditException;
 import specman.editarea.InteractiveStepFragment;
-import specman.modelops.MoveBranchSequenceLeftOperation;
+import specman.undo.UndoableBranchSequenceMovedLeft;
 import specman.view.AbstractSchrittView;
+import specman.view.CatchBereich;
 
 public class MoveBranchSequenceLeftADBLOp extends AbstractADBLSpecmanOp {
 
@@ -16,9 +17,14 @@ public class MoveBranchSequenceLeftADBLOp extends AbstractADBLSpecmanOp {
     this.initiatingFragment = initiatingFragment;
   }
 
+  /** Moving catch sequences right or left is not considered as a change being reflected in change recording. */
   @Override
   void execute() throws EditException {
-    new MoveBranchSequenceLeftOperation(step, initiatingFragment).execute();
+    if (step instanceof CatchBereich) {
+      CatchBereich catchBereich = (CatchBereich) step;
+      catchBereich.moveCatchSequenceLeft(initiatingFragment);
+    }
+    addEdit(new UndoableBranchSequenceMovedLeft(step, initiatingFragment));
   }
 
 }

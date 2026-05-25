@@ -1,12 +1,9 @@
 package specman.undo;
 
 import specman.EditException;
+import specman.Specman;
 import specman.editarea.InteractiveStepFragment;
-import specman.modelops.MoveBranchSequenceLeftOperation;
-import specman.modelops.MoveBranchSequenceRightOperation;
 import specman.view.AbstractSchrittView;
-
-import javax.swing.undo.UndoableEdit;
 
 public class UndoableBranchSequenceMovedLeft extends AbstractUndoableInteraction {
   private final AbstractSchrittView step;
@@ -19,11 +16,11 @@ public class UndoableBranchSequenceMovedLeft extends AbstractUndoableInteraction
 
   @Override
   protected void undoEdit() throws EditException {
-    new MoveBranchSequenceRightOperation(step, initiatingFragment).execute();
+    Specman.instance().moveBranchSequenceRightADBL(step, initiatingFragment);
   }
 
   @Override
   protected void redoEdit() throws EditException {
-    new MoveBranchSequenceLeftOperation(step, initiatingFragment).execute();
+    Specman.instance().moveBranchSequenceLeftADBL(step, initiatingFragment);
   }
 }
