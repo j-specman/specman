@@ -1,23 +1,25 @@
-package specman;
+package specman.ops;
+
+import specman.SpecmanOpContext;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.HashSet;
 import java.util.Set;
 
-class KeyboardSpecmanOp extends AbstractSpecmanOp {
+public class KeyboardSpecmanOp extends AbstractSpecmanOp {
 
   private final Set<Integer> pressedKeys = new HashSet<>();
 
-  KeyboardSpecmanOp(SpecmanOpContext context) {
+  public KeyboardSpecmanOp(SpecmanOpContext context) {
     super(context);
   }
 
-  boolean isKeyPressed(int keyCode) {
+  public boolean isKeyPressed(int keyCode) {
     return pressedKeys.contains(keyCode);
   }
 
-  void register() {
+  public void register() {
     KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
       trackPressedKeys(e);
       return handleScrollKeys(e);

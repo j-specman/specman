@@ -1,6 +1,7 @@
-package specman;
+package specman.ops;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import specman.SpecmanOpContext;
 import specman.model.ModelEnvelope;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.StruktogrammModel_V001;
@@ -15,13 +16,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
+public class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
 
-  LoadDiagrammSpecmanOp(SpecmanOpContext context) {
+  public LoadDiagrammSpecmanOp(SpecmanOpContext context) {
     super(context);
   }
 
-  void laden() {
+  public void laden() {
     File verzeichnis = (getDiagrammDatei() != null) ? getDiagrammDatei().getParentFile() : null;
     JFileChooser fileChooser = new JFileChooser(verzeichnis);
     fileChooser.setFileFilter(new FileNameExtensionFilter("Nassi Diagramme", "nsd"));
@@ -31,7 +32,7 @@ class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
     }
   }
 
-  void laden(File diagramFile) {
+  public void laden(File diagramFile) {
     try {
       clearFocusHistory();
       setChangeModeEnabled(false);

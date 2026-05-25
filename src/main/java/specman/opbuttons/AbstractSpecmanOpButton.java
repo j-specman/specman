@@ -1,6 +1,7 @@
 package specman.opbuttons;
 
 import specman.*;
+import specman.ops.AbstractSpecmanOp;
 
 import javax.swing.*;
 

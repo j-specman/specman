@@ -1,7 +1,10 @@
-package specman;
+package specman.ops;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import specman.ScrollPause;
+import specman.SpecmanOpContext;
+import specman.SpecmanVersion;
 import specman.model.ModelEnvelope;
 import specman.model.v001.StruktogrammModel_V001;
 
@@ -11,15 +14,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
+public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
 
   private static final String PROJEKTDATEI_EXTENSION = ".nsd";
 
-  SaveDiagrammSpecmanOp(SpecmanOpContext context) {
+  public SaveDiagrammSpecmanOp(SpecmanOpContext context) {
     super(context);
   }
 
-  void speichern(boolean dateiauswahlErzwingen) {
+  public void speichern(boolean dateiauswahlErzwingen) {
     try (ScrollPause sp = pauseScrolling()) {
       if (getDiagrammDatei() == null || dateiauswahlErzwingen) {
         File verzeichnis = (getDiagrammDatei() != null) ? getDiagrammDatei().getParentFile() : null;

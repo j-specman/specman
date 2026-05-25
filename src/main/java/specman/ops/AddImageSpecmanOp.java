@@ -1,5 +1,6 @@
-package specman;
+package specman.ops;
 
+import specman.SpecmanOpContext;
 import specman.editarea.TextEditArea;
 
 import javax.imageio.ImageIO;
@@ -9,13 +10,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-class AddImageSpecmanOp extends AbstractSpecmanOp {
+public class AddImageSpecmanOp extends AbstractSpecmanOp {
 
-  AddImageSpecmanOp(SpecmanOpContext context) {
+  public AddImageSpecmanOp(SpecmanOpContext context) {
     super(context);
   }
 
-  void addViaFileChooser() {
+  public void addViaFileChooser() {
     TextEditArea lastFocused = getLastFocusedTextArea();
     if (lastFocused == null) {
       return;

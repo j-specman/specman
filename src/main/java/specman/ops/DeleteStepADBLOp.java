@@ -1,5 +1,8 @@
-package specman;
+package specman.ops;
 
+import specman.Aenderungsart;
+import specman.EditException;
+import specman.SpecmanOpContext;
 import specman.editarea.InteractiveStepFragment;
 import specman.undo.UndoableSchrittEntfernt;
 import specman.undo.UndoableZweigEntfernt;
@@ -10,12 +13,12 @@ import javax.swing.*;
 import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.view.StepRemovalPurpose.Discard;
 
-class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
+public class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
 
   private final AbstractSchrittView step;
   private final InteractiveStepFragment initiatingFragment;
 
-  DeleteStepADBLOp(SpecmanOpContext context, AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
+  public DeleteStepADBLOp(SpecmanOpContext context, AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
     super(context);
     this.step = step;
     this.initiatingFragment = initiatingFragment;

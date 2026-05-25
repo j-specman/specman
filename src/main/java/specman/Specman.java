@@ -7,6 +7,8 @@ import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
 import specman.editarea.EditArea;
+import specman.ops.*;
+
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.IconReader;
 import specman.model.v001.*;
