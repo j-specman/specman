@@ -3,7 +3,6 @@ package specman.ops;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import specman.ScrollPause;
-import specman.SpecmanOpContext;
 import specman.SpecmanVersion;
 import specman.model.ModelEnvelope;
 import specman.model.v001.StruktogrammModel_V001;

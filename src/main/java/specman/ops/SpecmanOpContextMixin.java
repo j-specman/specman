@@ -1,5 +1,7 @@
-package specman;
+package specman.ops;
 
+import specman.ScrollPause;
+import specman.SpaltenResizer;
 import specman.editarea.EditArea;
 import specman.undo.manager.UndoRecording;
 import specman.editarea.EditContainer;

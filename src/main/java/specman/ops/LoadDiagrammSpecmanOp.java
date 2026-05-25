@@ -1,7 +1,6 @@
 package specman.ops;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import specman.SpecmanOpContext;
 import specman.model.ModelEnvelope;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.StruktogrammModel_V001;

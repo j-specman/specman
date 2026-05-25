@@ -1,7 +1,5 @@
 package specman.ops;
 
-import specman.SpecmanOpContext;
-
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.HashSet;

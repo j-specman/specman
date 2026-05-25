@@ -1,8 +1,7 @@
 package specman.ops;
 
 import specman.EditException;
-import specman.SpecmanOpContext;
-import specman.opbuttons.AbstractADBLSpecmanOpButton;
+import specman.ops.buttons.AbstractADBLSpecmanOpButton;
 import specman.undo.manager.UndoRecording;
 
 /**

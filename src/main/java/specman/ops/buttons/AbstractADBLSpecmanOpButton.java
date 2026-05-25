@@ -1,7 +1,8 @@
-package specman.opbuttons;
+package specman.ops.buttons;
 
 import specman.*;
 
+import specman.ops.SpecmanOpContext;
 import specman.undo.manager.UndoRecording;
 
 /**

@@ -1,4 +1,4 @@
-package specman.opbuttons;
+package specman.ops.buttons;
 
 import specman.*;
 

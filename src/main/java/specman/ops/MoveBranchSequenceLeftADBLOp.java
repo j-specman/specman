@@ -1,7 +1,6 @@
 package specman.ops;
 
 import specman.EditException;
-import specman.SpecmanOpContext;
 import specman.editarea.InteractiveStepFragment;
 import specman.modelops.MoveBranchSequenceLeftOperation;
 import specman.view.AbstractSchrittView;

@@ -2,7 +2,6 @@ package specman.ops;
 
 import specman.Aenderungsart;
 import specman.EditException;
-import specman.SpecmanOpContext;
 import specman.editarea.InteractiveStepFragment;
 import specman.undo.UndoableSchrittEntfernt;
 import specman.undo.UndoableZweigEntfernt;

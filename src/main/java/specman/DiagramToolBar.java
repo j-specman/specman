@@ -1,7 +1,14 @@
 package specman;
 
 import specman.graphics.IconReader;
-import specman.opbuttons.*;
+import specman.ops.buttons.AcceptChangesADBLOpButton;
+import specman.ops.buttons.BirdsViewSpecmanOpButton;
+import specman.ops.buttons.DeleteStepOpButton;
+import specman.ops.buttons.ExportPDFOpButton;
+import specman.ops.buttons.RevertChangesADBLOpButton;
+import specman.ops.buttons.ReviewOpButton;
+import specman.ops.buttons.ToggleBorderTypeOpButton;
+import specman.ops.buttons.ToneOpButton;
 
 import javax.swing.*;
 import java.awt.*;

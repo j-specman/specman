@@ -1,5 +1,9 @@
-package specman;
+package specman.ops;
 
+import specman.EditorI;
+import specman.ScrollPause;
+import specman.SpaltenResizer;
+import specman.Specman;
 import specman.editarea.EditContainer;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;

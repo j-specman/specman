@@ -2,7 +2,16 @@ package specman;
 
 import specman.draganddrop.DragMouseAdapter;
 import specman.graphics.IconReader;
-import specman.opbuttons.*;
+import specman.ops.buttons.CreateBreakStepOpButton;
+import specman.ops.buttons.CreateCaseBranchADBLOpButton;
+import specman.ops.buttons.CreateCaseStepOpButton;
+import specman.ops.buttons.CreateCatchStepADBLOpButton;
+import specman.ops.buttons.CreateIfElseStepOpButton;
+import specman.ops.buttons.CreateIfStepOpButton;
+import specman.ops.buttons.CreateSimpleStepOpButton;
+import specman.ops.buttons.CreateSubsequenceStepOpButton;
+import specman.ops.buttons.CreateWhileStepOpButton;
+import specman.ops.buttons.CreateWhileWhileStepOpButton;
 
 import javax.swing.*;
 import java.awt.*;

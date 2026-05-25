@@ -1,6 +1,5 @@
 package specman.ops;
 
-import specman.SpecmanOpContext;
 import specman.editarea.TextEditArea;
 
 import javax.imageio.ImageIO;

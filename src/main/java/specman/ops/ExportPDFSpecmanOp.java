@@ -1,6 +1,5 @@
 package specman.ops;
 
-import specman.SpecmanOpContext;
 import specman.model.v001.PDFExportOptionsModel_V001;
 import specman.pdf.PDFExportChooser;
 import specman.pdf.PDFRenderer;

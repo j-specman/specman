@@ -1,7 +1,9 @@
-package specman.opbuttons;
+package specman.ops.buttons;
 
 import specman.*;
 import specman.ops.AbstractSpecmanOp;
+import specman.ops.SpecmanOpContext;
+import specman.ops.SpecmanOpContextMixin;
 
 import javax.swing.*;
 

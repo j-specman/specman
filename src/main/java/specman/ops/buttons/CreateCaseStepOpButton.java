@@ -1,22 +1,23 @@
-package specman.opbuttons;
+package specman.ops.buttons;
 
 import specman.*;
 
+import specman.ops.SpecmanOpContext;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
 
 import static specman.view.RelativeStepPosition.After;
 
-public class CreateWhileStepOpButton extends AbstractCreateStepOpButton {
+public class CreateCaseStepOpButton extends AbstractCreateStepOpButton {
 
-  public CreateWhileStepOpButton(SpecmanOpContext context) { super(context); }
+  public CreateCaseStepOpButton(SpecmanOpContext context) { super(context); }
 
   @Override AbstractSchrittView insertAfter(SchrittSequenzView seq, AbstractSchrittView ref) throws EditException {
-    return seq.whileSchrittZwischenschieben(After, ref, context);
+    return seq.caseSchrittZwischenschieben(After, ref, context);
   }
 
   @Override AbstractSchrittView append(SchrittSequenzView seq) throws EditException {
-    return seq.whileSchrittAnhaengen(context);
+    return seq.caseSchrittAnhaengen(context);
   }
 
 }

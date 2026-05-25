@@ -1,8 +1,5 @@
 package specman.ops;
 
-import specman.SpecmanOpContext;
-import specman.SpecmanOpContextMixin;
-
 /**
  * Base class for functionality extracted from the {@link specman.Specman} monolith.
  * <p>
