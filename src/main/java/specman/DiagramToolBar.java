@@ -31,7 +31,11 @@ public class DiagramToolBar extends JToolBar {
     aenderungenVerfolgen = new JToggleButton();
     aenderungenUebernehmen = new AcceptChangesADBLOpButton(specman);
     aenderungenVerwerfen = new RevertChangesADBLOpButton(specman);
-    updateChangeSetColor(specman.changeset().panelColor());
+    updateChangeSetColor(specman.changeset());
+    aenderungenVerfolgen.addChangeListener(e ->
+        aenderungenVerfolgen.setBackground(aenderungenVerfolgen.isSelected()
+            ? specman.changeset().activeButtonColor()
+            : specman.changeset().buttonColor()));
 
     ReviewOpButton review = new ReviewOpButton(specman);
     zoom = new ZoomComboBox(specman);
@@ -68,13 +72,15 @@ public class DiagramToolBar extends JToolBar {
   }
 
   public void updateChangeSet(ChangeSet changeSet) {
-    updateChangeSetColor(changeSet.panelColor());
+    updateChangeSetColor(changeSet);
   }
 
-  private void updateChangeSetColor(Color color) {
-    aenderungenVerfolgen.setBackground(color);
-    aenderungenUebernehmen.setBackground(color);
-    aenderungenVerwerfen.setBackground(color);
+  private void updateChangeSetColor(ChangeSet changeSet) {
+    aenderungenVerfolgen.setBackground(aenderungenVerfolgen.isSelected()
+        ? changeSet.activeButtonColor()
+        : changeSet.buttonColor());
+    aenderungenUebernehmen.setBackground(changeSet.buttonColor());
+    aenderungenVerwerfen.setBackground(changeSet.buttonColor());
   }
 
   public void updateZoomDisplay(int prozent) {

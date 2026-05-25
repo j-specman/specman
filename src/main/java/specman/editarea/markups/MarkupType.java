@@ -5,6 +5,7 @@ import specman.editarea.document.WrappedElement;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.html.CSS;
 
+import specman.ChangeSet;
 import static specman.ChangeSet.changeset;
 import static specman.graphics.Styles.STEPNUMBER_LINK_COLOR;
 
@@ -21,7 +22,8 @@ public enum MarkupType {
   }
 
   public static MarkupType fromBackground(WrappedElement element) {
-    return changeset().toMarkupType(getBackgroundColorFromElement(element));
+    String cssColor = getBackgroundColorFromElement(element);
+    return ChangeSet.markupTypeFromBackground(cssColor);
   }
 
   private static String getBackgroundColorFromElement(WrappedElement element) {

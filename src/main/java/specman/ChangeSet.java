@@ -51,6 +51,8 @@ public class ChangeSet {
   public Color menuColor() { return colors.text.color; }
 
   public Color panelColor() { return colors.panelColor; }
+  public Color buttonColor() { return colors.panelColor; }
+  public Color activeButtonColor() { return colors.text.color; }
   public boolean isAnyBackground(String cssColor) { return colors.isAnyBackground(cssColor); }
   public MarkupType toMarkupType(String cssColor) { return colors.toMarkupType(cssColor); }
   public Color textColor() { return colors.text.color; }
@@ -67,5 +69,15 @@ public class ChangeSet {
   public MutableAttributeSet getDeletedStepnumberLinkStyle() { return deletedStepnumberLinkStyle; }
 
   public static ChangeSet changeset() { return Specman.instance().changeset(); }
+
+  public static MarkupType markupTypeFromBackground(String cssColor) {
+    for (ChangeSet cs : ALL) {
+      MarkupType type = cs.colors.toMarkupType(cssColor);
+      if (type != null) {
+        return type;
+      }
+    }
+    return null;
+  }
 
 }

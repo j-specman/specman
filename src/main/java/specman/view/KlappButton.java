@@ -88,7 +88,6 @@ public class KlappButton extends JLabel implements MouseMotionListener, MouseLis
     borderColor = backgroundColor.darker();
   }
 
-
   public void refreshGeklappt() {
     String requiredRowLayoutContent = isSelected()
       ? ZEILENLAYOUT_INHALT_VERBORGEN

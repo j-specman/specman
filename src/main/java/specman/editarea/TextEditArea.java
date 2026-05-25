@@ -397,7 +397,15 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     public boolean elementHatAenderungshintergrund(WrappedElement e) {
-        return changeset().isAnyBackground(getBackgroundColorFromElement(e));
+        return elementHatAenderungshintergrund(e, null);
+    }
+
+    public boolean elementHatAenderungshintergrund(WrappedElement e, ChangeSet cs) {
+        String cssColor = getBackgroundColorFromElement(e);
+        if (cs != null) {
+            return cs.isAnyBackground(cssColor);
+        }
+        return ChangeSet.ALL.stream().anyMatch(c -> c.isAnyBackground(cssColor));
     }
 
     public boolean aenderungsStilGesetzt() {
