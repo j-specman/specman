@@ -7,7 +7,7 @@ import javax.swing.text.html.CSS;
 
 import specman.ChangeSet;
 import static specman.ChangeSet.changeset;
-import static specman.graphics.Styles.STEPNUMBER_LINK_COLOR;
+import static specman.ChangeSet.STEPNUMBER_LINK_COLOR;
 
 public enum MarkupType {
   Changed, Steplink, ChangedSteplink;

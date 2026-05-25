@@ -70,8 +70,6 @@ public class Styles {
     public static final String INDIKATOR_GELOESCHT_MARKIERT = "line-through";
     public static final ReadWriteColor SCHRITTNUMMER_FARBE = new ReadWriteColor(Color.LIGHT_GRAY);
     public static final ReadWriteColor DELETED_BACKGROUND_COLOR = new ReadWriteColor(Color.BLACK);
-    public static final ReadWriteColor STEPNUMBER_LINK_COLOR = new ReadWriteColor(new Color(220, 220, 220));
-
     static {
         StyleConstants.setBackground(ganzerSchrittGeloeschtStil, DELETED_BACKGROUND_COLOR.color);
         StyleConstants.setStrikeThrough(ganzerSchrittGeloeschtStil, true);

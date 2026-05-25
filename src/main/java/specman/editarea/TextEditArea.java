@@ -56,7 +56,7 @@ import static specman.graphics.Styles.TEXT_BACKGROUND_COLOR_STANDARD;
 import static specman.graphics.Styles.INDIKATOR_GELOESCHT_MARKIERT;
 import static specman.graphics.Styles.DEFAULTFONT;
 import static specman.graphics.Styles.ganzerSchrittGeloeschtStil;
-import static specman.graphics.Styles.STEPNUMBER_LINK_COLOR;
+import static specman.ChangeSet.STEPNUMBER_LINK_COLOR;
 import static specman.editarea.markups.MarkupSearchPurpose.All;
 import static specman.editarea.markups.MarkupSearchPurpose.FirstChangeOnly;
 
@@ -638,9 +638,9 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
             AttributeSet previousAttribute = doc.getCharacterElement(caretPos).getAttributes();
             MutableAttributeSet stepnumberAttribute = new SimpleAttributeSet(previousAttribute);
-            stepnumberAttribute.addAttributes(Styles.STEPNUMBER_LINK_COLOR.background);
+            stepnumberAttribute.addAttributes(ChangeSet.STEPNUMBER_LINK_COLOR.background);
             StyleConstants.setBackground(stepnumberAttribute,
-                    isTrackingChanges() ? changeset().stepnumberLinkColor() : Styles.STEPNUMBER_LINK_COLOR.color);
+                    isTrackingChanges() ? changeset().stepnumberLinkColor() : ChangeSet.STEPNUMBER_LINK_COLOR.color);
 
             doc.insertString(caretPos, stepnumberText, stepnumberAttribute);
 
@@ -655,7 +655,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     private boolean stepnumberLinkNormalStyleSet(WrappedElement element) {
         String color = getBackgroundColorFromElement(element);
-        return Styles.STEPNUMBER_LINK_COLOR.isBackground(color);
+        return ChangeSet.STEPNUMBER_LINK_COLOR.isBackground(color);
     }
 
 

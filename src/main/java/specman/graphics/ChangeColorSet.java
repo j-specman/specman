@@ -1,5 +1,6 @@
 package specman.graphics;
 
+import specman.ChangeSet;
 import specman.editarea.markups.MarkupType;
 import java.awt.Color;
 
@@ -48,7 +49,7 @@ public class ChangeColorSet {
     if (isTextBackground(cssColor)) {
       return MarkupType.Changed;
     }
-    if (Styles.STEPNUMBER_LINK_COLOR.isBackground(cssColor)) {
+    if (ChangeSet.STEPNUMBER_LINK_COLOR.isBackground(cssColor)) {
       return MarkupType.Steplink;
     }
     return null;

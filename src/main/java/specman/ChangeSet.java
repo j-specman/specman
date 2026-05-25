@@ -2,6 +2,7 @@ package specman;
 
 import specman.editarea.markups.MarkupType;
 import specman.graphics.ChangeColorSet;
+import specman.graphics.ReadWriteColor;
 
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
@@ -12,9 +13,10 @@ import java.util.Map;
 
 import static specman.graphics.Styles.Schriftfarbe_Geloescht;
 import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
-import static specman.graphics.Styles.STEPNUMBER_LINK_COLOR;
 
 public class ChangeSet {
+
+  public static final ReadWriteColor STEPNUMBER_LINK_COLOR = new ReadWriteColor(new Color(220, 220, 220));
 
   public static final ChangeSet DEFAULT;
 
