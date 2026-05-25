@@ -7,7 +7,8 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static specman.graphics.Styles.Schriftfarbe_Geloescht;
 import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
@@ -15,22 +16,32 @@ import static specman.graphics.Styles.STEPNUMBER_LINK_COLOR;
 
 public class ChangeSet {
 
-  public static final ChangeSet DEFAULT = new ChangeSet(new ChangeColorSet(Color.yellow, STEPNUMBER_LINK_COLOR.color));
+  public static final ChangeSet DEFAULT;
 
-  public static final List<ChangeSet> ALL = List.of(
-    DEFAULT,
-    new ChangeSet(new ChangeColorSet(new Color(150, 255, 150), STEPNUMBER_LINK_COLOR.color)), // green
-    new ChangeSet(new ChangeColorSet(new Color(100, 255, 255), STEPNUMBER_LINK_COLOR.color)), // cyan
-    new ChangeSet(new ChangeColorSet(new Color(255, 220, 150), STEPNUMBER_LINK_COLOR.color)), // orange
-    new ChangeSet(new ChangeColorSet(new Color(255, 170, 170), STEPNUMBER_LINK_COLOR.color))  // pink
-  );
+  public static final Map<String, ChangeSet> ALL;
 
+  static {
+    ALL = new LinkedHashMap<>();
+    register("yellow", Color.yellow);
+    register("green",  new Color(150, 255, 150));
+    register("cyan",   new Color(100, 255, 255));
+    register("orange", new Color(255, 220, 150));
+    register("pink",   new Color(255, 170, 170));
+    DEFAULT = ALL.get("yellow");
+  }
+
+  private static void register(String name, Color color) {
+    ALL.put(name, new ChangeSet(name, new ChangeColorSet(color, STEPNUMBER_LINK_COLOR.color)));
+  }
+
+  public final String name;
   public final ChangeColorSet colors;
   private final MutableAttributeSet deletedStyle;
   private final MutableAttributeSet sourceStyle;
   private final MutableAttributeSet deletedStepnumberLinkStyle;
 
-  public ChangeSet(ChangeColorSet colors) {
+  private ChangeSet(String name, ChangeColorSet colors) {
+    this.name = name;
     this.colors = colors;
 
     deletedStyle = new SimpleAttributeSet();
@@ -70,8 +81,16 @@ public class ChangeSet {
 
   public static ChangeSet changeset() { return Specman.instance().changeset(); }
 
+  public static ChangeSet fromName(String name) {
+    return name != null ? ALL.get(name) : null;
+  }
+
+  public static boolean isAnyChangeSetBackground(String cssColor) {
+    return ALL.values().stream().anyMatch(cs -> cs.isAnyBackground(cssColor));
+  }
+
   public static MarkupType markupTypeFromBackground(String cssColor) {
-    for (ChangeSet cs : ALL) {
+    for (ChangeSet cs : ALL.values()) {
       MarkupType type = cs.colors.toMarkupType(cssColor);
       if (type != null) {
         return type;

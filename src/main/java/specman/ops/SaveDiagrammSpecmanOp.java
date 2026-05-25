@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import specman.ScrollPause;
 import specman.SpecmanVersion;
+import static specman.ChangeSet.changeset;
 import specman.model.ModelEnvelope;
 import specman.model.v001.StruktogrammModel_V001;
 
@@ -74,7 +75,8 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         getHauptSequenz().generiereSchrittSequenzModel(formatierterText),
         getIntro().editorContent2Model(formatierterText),
         getOutro().editorContent2Model(formatierterText),
-        getPdfExportOptions());
+        getPdfExportOptions(),
+        changeset().name);
   }
 
   private ModelEnvelope wrapModel(StruktogrammModel_V001 model) {

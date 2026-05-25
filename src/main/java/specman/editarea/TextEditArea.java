@@ -405,7 +405,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         if (cs != null) {
             return cs.isAnyBackground(cssColor);
         }
-        return ChangeSet.ALL.stream().anyMatch(c -> c.isAnyBackground(cssColor));
+        return ChangeSet.isAnyChangeSetBackground(cssColor);
     }
 
     public boolean aenderungsStilGesetzt() {

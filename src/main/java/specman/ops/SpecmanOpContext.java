@@ -1,5 +1,6 @@
 package specman.ops;
 
+import specman.ChangeSet;
 import specman.EditorI;
 import specman.ScrollPause;
 import specman.SpaltenResizer;
@@ -44,6 +45,7 @@ public interface SpecmanOpContext extends EditorI {
   void setDiagrammName(String name);
   ScrollPause pauseScrolling();
   void discardAllUndoEdits();
+  void updateChangeSet(ChangeSet changeSet);
   String getDiagrammName();
   int getDiagrammbreite();
   void newStepPostInit(AbstractSchrittView newStep);

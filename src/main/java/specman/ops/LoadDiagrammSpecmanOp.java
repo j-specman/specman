@@ -1,6 +1,7 @@
 package specman.ops;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import specman.ChangeSet;
 import specman.model.ModelEnvelope;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.StruktogrammModel_V001;
@@ -61,6 +62,10 @@ public class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
       getOutro().viewsNachinitialisieren();
       getOutro().registerAllExistingStepnumbers();
       setChangeModeEnabled(model.changeModeenabled);
+      ChangeSet changeSet = ChangeSet.fromName(model.changeSetName);
+      if (changeSet != null) {
+        context.updateChangeSet(changeSet);
+      }
       addRecentFile(diagramFile);
       discardAllUndoEdits();
     }

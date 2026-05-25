@@ -11,6 +11,7 @@ import java.io.File;
 class SpecmanMenuBar extends JMenuBar {
 
   private final RecentFiles recentFiles;
+  private JMenu aenderungsfarbenMenu;
 
   SpecmanMenuBar(Specman specman, HTMLEditorPane shefEditorPane) {
     recentFiles = new RecentFiles(specman);
@@ -47,14 +48,11 @@ class SpecmanMenuBar extends JMenuBar {
     dateiMenu.add(exportAsGraphviz);
     dateiMenu.add(exit);
 
-    JMenu aenderungsfarbenMenu = new JMenu("Änderungsfarbe");
+    aenderungsfarbenMenu = new JMenu("Änderungsfarbe");
     aenderungsfarbenMenu.setIcon(new ChangeSetDotIcon(specman.currentChangeSet));
-    for (ChangeSet cs : ChangeSet.ALL) {
+    for (ChangeSet cs : ChangeSet.ALL.values()) {
       JMenuItem item = new JMenuItem(new ChangeSetDotIcon(cs));
-      item.addActionListener(e -> {
-        specman.updateChangeSet(cs);
-        aenderungsfarbenMenu.setIcon(new ChangeSetDotIcon(cs));
-      });
+      item.addActionListener(e -> specman.updateChangeSet(cs));
       aenderungsfarbenMenu.add(item);
     }
 
@@ -67,6 +65,10 @@ class SpecmanMenuBar extends JMenuBar {
 
   void addRecentFile(File file) {
     recentFiles.add(file);
+  }
+
+  void updateChangeSet(ChangeSet changeSet) {
+    aenderungsfarbenMenu.setIcon(new ChangeSetDotIcon(changeSet));
   }
 
 }

@@ -11,6 +11,7 @@ public class StruktogrammModel_V001 {
 	public final SchrittSequenzModel_V001 hauptSequenz;
 	public final EditorContentModel_V001 intro, outro;
   public final PDFExportOptionsModel_V001 pdfExportOptions;
+  public final String changeSetName;
 
 	@Deprecated public StruktogrammModel_V001() { // For Jackson only
 		this.name = null;
@@ -21,9 +22,10 @@ public class StruktogrammModel_V001 {
 		this.intro = null;
 		this.outro = null;
     this.pdfExportOptions = null;
+    this.changeSetName = null;
 	}
 
-	public StruktogrammModel_V001(String name, int breite, int zoomFaktor, boolean changeModeenabled, SchrittSequenzModel_V001 hauptSequenz, EditorContentModel_V001 intro, EditorContentModel_V001 outro, PDFExportOptionsModel_V001 pdfExportOptions) {
+	public StruktogrammModel_V001(String name, int breite, int zoomFaktor, boolean changeModeenabled, SchrittSequenzModel_V001 hauptSequenz, EditorContentModel_V001 intro, EditorContentModel_V001 outro, PDFExportOptionsModel_V001 pdfExportOptions, String changeSetName) {
 		this.name = name;
 		this.breite = breite;
 		this.changeModeenabled = changeModeenabled;
@@ -32,6 +34,7 @@ public class StruktogrammModel_V001 {
 		this.intro = intro;
 		this.outro = outro;
     this.pdfExportOptions = pdfExportOptions;
+    this.changeSetName = changeSetName;
 	}
 
 	public List<AbstractSchrittModel_V001> queryAllSteps() {

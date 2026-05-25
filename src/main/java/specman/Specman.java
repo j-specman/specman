@@ -448,6 +448,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	public void updateChangeSet(ChangeSet changeSet) {
 		currentChangeSet = changeSet;
 		diagramToolBar.updateChangeSet(changeSet);
+		menuBar.updateChangeSet(changeSet);
 	}
 
 	@Override
