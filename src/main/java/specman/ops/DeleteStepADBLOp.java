@@ -26,9 +26,9 @@ public class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
   @Override
   void execute() throws EditException {
     if (aenderungenVerfolgen()
-        && step.getAenderungsart() != Hinzugefuegt
+        && !step.getChangeInfo().isAdded()
         && !(step instanceof CatchBereich)) {
-      if (step.getAenderungsart() != Aenderungsart.Geloescht) {
+      if (!step.getChangeInfo().isDeleted()) {
         if (isDeletionAllowed(step)) {
           step.alsGeloeschtMarkierenUDBL();
         }

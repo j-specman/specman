@@ -2,7 +2,6 @@ package specman.editarea;
 
 import net.atlanticbb.tantlinger.ui.text.CompoundUndoManager;
 import org.apache.commons.lang.StringUtils;
-import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.model.v001.ChangeInfo_V001;
 import static specman.ChangeInfo.fromModel;
@@ -41,9 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static specman.Aenderungsart.Geloescht;
-import static specman.Aenderungsart.Hinzugefuegt;
-import static specman.Aenderungsart.Untracked;
 import static specman.editarea.HTMLTags.BODY_INTRO;
 import static specman.editarea.HTMLTags.BODY_OUTRO;
 import static specman.editarea.HTMLTags.HEAD_INTRO;

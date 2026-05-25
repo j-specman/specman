@@ -30,8 +30,8 @@ public class BreakSchrittView extends AbstractSchrittView {
 	final FormLayout layout;
 	CatchUeberschrift catchHeading;
 
-	public BreakSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 content, SchrittID id, Aenderungsart aenderungsart) {
-		super(editor, parent, content, id, aenderungsart);
+	public BreakSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 content, SchrittID id, ChangeInfo changeInfo) {
+		super(editor, parent, content, id, changeInfo);
 		panel = new JPanel() {
 			@Override
 			public void paint(Graphics g) {
@@ -49,7 +49,7 @@ public class BreakSchrittView extends AbstractSchrittView {
 	}
 
 	public BreakSchrittView(EditorI editor, SchrittSequenzView parent, BreakSchrittModel_V001 model) {
-		this(editor, parent, model.inhalt, model.id, model.aenderungsart);
+		this(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
 		setBackgroundUDBL(new Color(model.farbe));
 	}
 
@@ -104,7 +104,7 @@ public class BreakSchrittView extends AbstractSchrittView {
 			id,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
-			aenderungsart,
+			changeInfo,
 			getQuellschrittID(),
 			getDecorated()
 		);
@@ -117,7 +117,7 @@ public class BreakSchrittView extends AbstractSchrittView {
 
 	@Override
 	public void focusLost(FocusEvent e) {
-		if (catchHeading != null && aenderungsart != Aenderungsart.Geloescht) {
+		if (catchHeading != null && changeInfo.art() != Aenderungsart.Geloescht) {
       try(ScrollPause sp = Specman.instance().pauseScrolling()) {
         catchHeading.updateFromBreakStepContent();
       }

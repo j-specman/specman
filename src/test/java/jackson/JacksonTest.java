@@ -38,7 +38,7 @@ public class JacksonTest {
 	@Test
 	void testEnvelope() throws Exception {
 		SchrittID id = new SchrittID(0);
-		StruktogrammModel_V001 model = new StruktogrammModel_V001(null, 10, 100, false, null, null, null, null);
+		StruktogrammModel_V001 model = new StruktogrammModel_V001(null, 10, 100, false, null, null, null, null, null);
 		ModelEnvelope writeenvelope = new ModelEnvelope();
 		writeenvelope.model = model;
 		writeenvelope.modelType = model.getClass().getName();

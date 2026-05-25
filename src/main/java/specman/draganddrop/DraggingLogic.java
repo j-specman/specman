@@ -198,7 +198,7 @@ public class DraggingLogic implements Serializable {
             p = SwingUtilities.convertPoint(schritt.getPanel(), 0, 0, specman);
             Rectangle r = createRectangle(p, schritt.getPanel());
 
-            if(schritt.getAenderungsart() == Aenderungsart.Geloescht){
+            if(schritt.getChangeInfo().isDeleted()){
                 //Auf einem Gelöschten Schritt nur verbot zeigen
                 
             }
@@ -388,7 +388,7 @@ public class DraggingLogic implements Serializable {
         r.setLocation(p);
         if (r.contains(pos)) {
         	for( AbstractSchrittView vergleichsstep :  specman.getHauptSequenz().schritte) {
-        		if(!(vergleichsstep.getAenderungsart() == Aenderungsart.Geloescht || vergleichsstep.getAenderungsart() == Aenderungsart.Quellschritt )) {
+        		if(!(vergleichsstep.getChangeInfo().isDeleted() || vergleichsstep.getChangeInfo().isSourceStep() )) {
         			id = vergleichsstep.getId().toString();
         			break;
         		}
@@ -483,7 +483,7 @@ public class DraggingLogic implements Serializable {
             }
 
             SchrittSequenzView targetSequence = referenceStep.getParent();
-            if(specman.aenderungenVerfolgen() && movingStep.getAenderungsart() != Aenderungsart.Hinzugefuegt) {
+            if(specman.aenderungenVerfolgen() && !movingStep.getChangeInfo().isAdded()) {
                 SchrittSequenzView sourceSequence = movingStep.getParent();
                 QuellSchrittView quellschritt;
                 sourceSequence = movingStep.getParent();

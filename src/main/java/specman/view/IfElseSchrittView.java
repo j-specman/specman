@@ -3,7 +3,7 @@ package specman.view;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
-import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
@@ -40,8 +40,8 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 	JPanel panelElse;
 	JPanel panelIf;
 
-	protected IfElseSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, Aenderungsart anderungsart, boolean withDefaultContent) {
-		super(editor, parent, initialerText, id, anderungsart, createPanelLayout());
+	protected IfElseSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, boolean withDefaultContent) {
+		super(editor, parent, initialerText, id, changeInfo, createPanelLayout());
 		/** @author PVN */
 		leeresFeld = new JPanel();
 		leeresFeld.setBackground(TextInit.schrittHintergrund());
@@ -64,7 +64,7 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 	}
 
 	public IfElseSchrittView(EditorI editor, SchrittSequenzView parent, IfElseSchrittModel_V001 model) {
-		this(editor, parent, model.inhalt, model.id, model.aenderungsart, false);
+		this(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), false);
 		panel.add(new SpaltenResizer(this), CC.xywh(2, 1, 1, 5));
 		initIfSequenz(new ZweigSchrittSequenzView(editor, this, model.ifSequenz));
 		initElseSequenz(new ZweigSchrittSequenzView(editor, this, model.elseSequenz));
@@ -73,8 +73,8 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		klappen.init(model.zugeklappt);
 	}
 
-	public IfElseSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, Aenderungsart aenderungsart) {
-		this(editor, parent, initialerText, id, aenderungsart, true);
+	public IfElseSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
+		this(editor, parent, initialerText, id, changeInfo, true);
 	}
 
 	protected void initIfSequenz(ZweigSchrittSequenzView pIfSequenz) {
@@ -228,7 +228,7 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 			getBackground().getRGB(),
 			getDecorated(),
 			klappen.isSelected(),
-			aenderungsart,
+			changeInfo,
 			ifSequenz.generiereZweigSchrittSequenzModel(formatierterText),
 			elseSequenz.generiereZweigSchrittSequenzModel(formatierterText),
 			ifBreitenanteil(ifSequenz.ueberschrift.getWidth(), elseSequenz.ueberschrift.getWidth()), getQuellschrittID());

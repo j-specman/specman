@@ -1,11 +1,11 @@
 package specman.undo.props;
 
-import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.view.AbstractSchrittView;
 
-public class UndoableSetAenderungsart extends UndoableSetProperty<Aenderungsart> {
+public class UndoableSetAenderungsart extends UndoableSetProperty<ChangeInfo> {
 
-  public UndoableSetAenderungsart(AbstractSchrittView schrittView, Aenderungsart undoAenderungsart) {
-    super(undoAenderungsart, schrittView::setAenderungsart, schrittView::getAenderungsart);
+  public UndoableSetAenderungsart(AbstractSchrittView schrittView, ChangeInfo undoChangeInfo) {
+    super(undoChangeInfo, schrittView::setChangeInfo, schrittView::getChangeInfo);
   }
 }

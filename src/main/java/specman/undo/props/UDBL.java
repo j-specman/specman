@@ -13,6 +13,7 @@ import specman.view.AbstractSchrittView;
 import specman.view.QuellSchrittView;
 import specman.view.SchrittSequenzView;
 
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
@@ -68,27 +69,20 @@ public class UDBL {
     }
   }
 
-  public static void setAenderungsart(AbstractSchrittView abstractSchrittView, Aenderungsart aenderungsart) {
-    Aenderungsart undoAenderungsart = abstractSchrittView.getAenderungsart();
-    if (!Objects.equals(undoAenderungsart, aenderungsart)) {
-      abstractSchrittView.setAenderungsart(aenderungsart);
-      addEdit(new UndoableSetAenderungsart(abstractSchrittView, undoAenderungsart));
+  public static void setChangeInfo(SchrittSequenzView schrittSequenzView, ChangeInfo changeInfo) {
+    ChangeInfo undoChangeInfo = schrittSequenzView.getChangeInfo();
+    if (!Objects.equals(undoChangeInfo, changeInfo)) {
+      schrittSequenzView.setChangeInfo(changeInfo);
+      addEdit(new UndoableSetChangeInfoSchrittSequenzView(schrittSequenzView, undoChangeInfo));
     }
   }
 
-  public static void setAenderungsart(SchrittSequenzView schrittSequenzView, Aenderungsart aenderungsart) {
-    Aenderungsart undoAenderungsart = schrittSequenzView.getAenderungsart();
-    if (!Objects.equals(undoAenderungsart, aenderungsart)) {
-      schrittSequenzView.setAenderungsart(aenderungsart);
-      addEdit(new UndoableSetAenderungsartSchrittSequenzView(schrittSequenzView, undoAenderungsart));
-    }
-  }
 
-  public static void setAenderungsart(EditArea editArea, Aenderungsart aenderungsart) {
-    Aenderungsart undoAenderungsart = editArea.getAenderungsart();
-    if (!Objects.equals(undoAenderungsart, aenderungsart)) {
-      editArea.setAenderungsart(aenderungsart);
-      addEdit(new UndoableSetAenderungsartEditArea(editArea, undoAenderungsart));
+  public static void setChangeInfo(AbstractSchrittView schrittView, ChangeInfo changeInfo) {
+    ChangeInfo undoChangeInfo = schrittView.getChangeInfo();
+    if (!Objects.equals(undoChangeInfo, changeInfo)) {
+      schrittView.setChangeInfo(changeInfo);
+      addEdit(new UndoableSetChangeInfoAbstractSchrittView(schrittView, undoChangeInfo));
     }
   }
 

@@ -1,6 +1,6 @@
 package specman.model.v001;
 
-import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.SchrittID;
 
 import java.util.ArrayList;
@@ -15,8 +15,8 @@ public class CatchSchrittSequenzModel_V001 extends ZweigSchrittSequenzModel_V001
     this.headingRightBarWidth = null;
   }
 
-  public CatchSchrittSequenzModel_V001(SchrittID breakSchrittId, Aenderungsart aenderungsart, EditorContentModel_V001 ueberschrift, List<CoCatchModel_V001> coCatches, Integer headingRightBarWidth) {
-    super(breakSchrittId, aenderungsart, null, ueberschrift);
+  public CatchSchrittSequenzModel_V001(SchrittID breakSchrittId, ChangeInfo changeInfo, EditorContentModel_V001 ueberschrift, List<CoCatchModel_V001> coCatches, Integer headingRightBarWidth) {
+    super(breakSchrittId, changeInfo, null, ueberschrift);
     this.coCatches = coCatches;
     this.headingRightBarWidth = headingRightBarWidth;
   }

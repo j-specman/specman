@@ -3,7 +3,7 @@ package specman.view;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.ColumnSpecByPercent;
 import specman.EditException;
 import specman.EditorI;
@@ -49,7 +49,7 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
   List<Integer> sequencesWidthPercent;
 
   public CatchBereich(SchrittSequenzView parent) {
-    super(Specman.instance(), parent, new EditorContentModel_V001(), null, Aenderungsart.Untracked);
+    super(Specman.instance(), parent, new EditorContentModel_V001(), null, ChangeInfo.untracked());
     computeBarRowSpec(Specman.instance().getZoomFactor());
     bereichLayout = new FormLayout("10px:grow",
       FORMLAYOUT_GAP + "," + barRowSpec + "," + FORMLAYOUT_GAP + ",fill:pref," + FORMLAYOUT_GAP + "," + barRowSpec);

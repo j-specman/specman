@@ -19,7 +19,7 @@ public class QuellSchrittView extends AbstractSchrittView {
     public QuellSchrittView(EditorI editor, SchrittSequenzView parent, SchrittID id) {
         //TODO JL: der "." sorgt für eine Mindesthöhe des Quellschritts. Muss noch gesäubert werden.
         //Die Höhe des Schrittnummer-Labels sollte die Höhe bestimmen.
-        super(editor, parent, new EditorContentModel_V001(".", new ChangeInfo(Aenderungsart.Quellschritt, changeset())), id, Aenderungsart.Quellschritt);
+        super(editor, parent, new EditorContentModel_V001(".", new ChangeInfo(Aenderungsart.Quellschritt, changeset())), id, new ChangeInfo(Aenderungsart.Quellschritt, changeset()));
         setQuellStil();
         setBackgroundUDBL(changeset().panelColor());
     }
@@ -28,7 +28,7 @@ public class QuellSchrittView extends AbstractSchrittView {
     public JComponent getDecoratedComponent() { return decorated(editContainer); }
 
     public QuellSchrittView(EditorI editor, SchrittSequenzView parent, QuellSchrittModel_V001 model) {
-        super(editor, parent, model.inhalt, model.id, model.aenderungsart);
+        super(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
         setBackgroundUDBL(new Color(model.farbe));
     }
 
@@ -38,7 +38,7 @@ public class QuellSchrittView extends AbstractSchrittView {
             id,
             getEditorContent(formatierterText),
             getBackground().getRGB(),
-            aenderungsart,
+            changeInfo,
             getZielschrittID(),
             getDecorated()
         );
@@ -54,7 +54,7 @@ public class QuellSchrittView extends AbstractSchrittView {
 
     public void setQuellStil() {
       editContainer.setQuellStil(getZielschrittID());
-      setAenderungsart(Aenderungsart.Quellschritt);
+      setChangeInfo(new ChangeInfo(Aenderungsart.Quellschritt, changeset()));
     }
 
     @Override

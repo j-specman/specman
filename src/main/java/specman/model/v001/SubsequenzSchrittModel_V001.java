@@ -1,6 +1,6 @@
 package specman.model.v001;
 
-import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.SchrittID;
 import specman.view.RoundedBorderDecorationStyle;
 
@@ -19,13 +19,13 @@ public class SubsequenzSchrittModel_V001 extends StrukturierterSchrittModel_V001
 		SchrittID id,
 		EditorContentModel_V001 inhalt,
 		int farbe,
-		Aenderungsart aenderungsart,
+		ChangeInfo changeInfo,
 		boolean zugeklappt,
 		SchrittSequenzModel_V001 subsequenz,
 		SchrittID quellschrittID,
 		RoundedBorderDecorationStyle decorationStyle,
     boolean flatNumbering) {
-		super(id, inhalt, farbe, aenderungsart, zugeklappt, quellschrittID, decorationStyle);
+		super(id, inhalt, farbe, changeInfo, zugeklappt, quellschrittID, decorationStyle);
 		this.subsequenz = subsequenz;
     this.flatNumbering = flatNumbering;
 	}

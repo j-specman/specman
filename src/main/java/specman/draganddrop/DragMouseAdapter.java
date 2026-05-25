@@ -131,7 +131,7 @@ public class DragMouseAdapter extends MouseAdapter {
 			int counter = 0;
 			AbstractSchrittView step = labelToStep( (InteractiveStepFragment) e.getSource());
 			for(AbstractSchrittView Schritt: step.getParent().schritte) {
-				if(!(Schritt.getAenderungsart() == Aenderungsart.Geloescht || Schritt.getAenderungsart() == Aenderungsart.Quellschritt)) {
+				if(!(Schritt.getChangeInfo().isDeleted() || Schritt.getChangeInfo().isSourceStep())) {
 					counter++;
 				}
 			}
@@ -144,7 +144,7 @@ public class DragMouseAdapter extends MouseAdapter {
 	private boolean checkGeloeschterSchritt(MouseEvent e){
 		if(e.getSource() instanceof InteractiveStepFragment){
 			AbstractSchrittView step = labelToStep( (InteractiveStepFragment) e.getSource());
-			return step.getAenderungsart()== Aenderungsart.Geloescht;
+			return step.getChangeInfo().isDeleted();
 		}
 		return false;
 	}
@@ -152,7 +152,7 @@ public class DragMouseAdapter extends MouseAdapter {
 	private boolean checkQuellSchritt(MouseEvent e){
 		if(e.getSource() instanceof InteractiveStepFragment){
 			AbstractSchrittView step = labelToStep( (InteractiveStepFragment) e.getSource());
-			return step.getAenderungsart() == Aenderungsart.Quellschritt;
+			return step.getChangeInfo().isSourceStep();
 		}
 		return false;
 	}

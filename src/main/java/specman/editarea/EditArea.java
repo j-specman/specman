@@ -70,10 +70,6 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V001> extends Inte
 
   ChangeInfo getChangeInfo();
 
-  default void setAenderungsart(Aenderungsart aenderungsart) { setChangeInfo(getChangeInfo().withArt(aenderungsart)); }
-
-  default Aenderungsart getAenderungsart() { return getChangeInfo().art(); }
-
   EditContainer getParent();
 
   default boolean isListItemArea() { return false; }

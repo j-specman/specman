@@ -551,7 +551,7 @@ public class EditContainer extends JPanel {
 	}
 
 	public boolean isMarkedAs(Aenderungsart aenderungsart) {
-		return editAreas.stream().allMatch(ea -> ea.getAenderungsart() == aenderungsart);
+		return editAreas.stream().allMatch(ea -> ea.getChangeInfo().art() == aenderungsart);
 	}
 
 	public List<JTextComponent> getTextAreas() {

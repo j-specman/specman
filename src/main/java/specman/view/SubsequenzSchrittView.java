@@ -35,8 +35,8 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
    * other hand switching off the sub-numbering save a numbering level. Which variant is better depends on the situation. */
   boolean flatNumbering;
 
-	protected SubsequenzSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, Aenderungsart aenderungsart, boolean withDefaultContent) {
-		super(editor, parent, initialerText, id, aenderungsart);
+	protected SubsequenzSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, boolean withDefaultContent) {
+		super(editor, parent, initialerText, id, changeInfo);
 
 		editContainer.updateDecorationIndentions(new Indentions(TEXTEINRUECKUNG));
 
@@ -48,7 +48,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 
 		panel.add(editContainer, CC.xy(1, 1));
 
-    filler = new BottomFiller(panel, layout, aenderungsart);
+    filler = new BottomFiller(panel, layout, changeInfo.art());
 		klappen = new KlappButton(this, editContainer.getKlappButtonParent(), layout, CONTENTROW, filler.row);
 
 		if (withDefaultContent) {
@@ -62,12 +62,12 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
     UDBL.setBackgroundUDBL(filler, bg);
   }
 
-  public SubsequenzSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, Aenderungsart aenderungsart) {
-		this(editor, parent, initialerText, id, aenderungsart, true);
+  public SubsequenzSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
+		this(editor, parent, initialerText, id, changeInfo, true);
 	}
 
 	public SubsequenzSchrittView(EditorI editor, SchrittSequenzView parent, SubsequenzSchrittModel_V001 model) {
-		this(editor, parent, model.inhalt, model.id, model.aenderungsart, false);
+		this(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), false);
 		initSubsequenz(new SchrittSequenzView(editor, this, model.subsequenz), model.flatNumbering);
 		setBackgroundUDBL(new Color(model.farbe));
 		klappen.init(model.zugeklappt);
@@ -133,7 +133,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 			id,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
-			aenderungsart,
+			changeInfo,
 			klappen.isSelected(),
 			subsequenz.generiereSchrittSequenzModel(formatierterText),
 			getQuellschrittID(),

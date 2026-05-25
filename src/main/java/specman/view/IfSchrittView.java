@@ -3,7 +3,7 @@ package specman.view;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 
-import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.EditorI;
 import specman.SchrittID;
 import specman.Specman;
@@ -31,15 +31,15 @@ import static specman.model.v001.EditorContentModel_V001.empty;
 public class IfSchrittView extends IfElseSchrittView {
 	int ifBreite;
 	
-	public IfSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerString, SchrittID id, Aenderungsart aenderungsart) {
-		super(editor, parent, initialerString, id, aenderungsart, false);
+	public IfSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerString, SchrittID id, ChangeInfo changeInfo) {
+		super(editor, parent, initialerString, id, changeInfo, false);
 		initIfSequenz(new ZweigSchrittSequenzView(editor, this, id.naechsteID().naechsteEbene(), empty()));
 		initElseSequenz(new ZweigSchrittSequenzView(editor, this, id.naechsteEbene(), EditContainer.right("Ja")));
 		ifBreite = SPALTENLAYOUT_UMGEHUNG_GROESSE + 2; /**@author PVN, Dueck */ 
 	}
 
 	public IfSchrittView(EditorI editor, SchrittSequenzView parent, IfSchrittModel_V001 model) {
-		super(editor, parent, model.inhalt, model.id, model.aenderungsart, false);
+		super(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), false);
 		initIfSequenz(new ZweigSchrittSequenzView(editor, this, new SchrittID(), empty()));
 		initElseSequenz(new ZweigSchrittSequenzView(editor, this, model.ifSequenz));
 		this.setBackgroundUDBL(new Color(model.farbe));
@@ -102,7 +102,7 @@ public class IfSchrittView extends IfElseSchrittView {
 			getBackground().getRGB(),
 			getDecorated(),
 			klappen.isSelected(),
-			aenderungsart,
+			changeInfo,
 			elseSequenz.generiereZweigSchrittSequenzModel(formatierterText),
 			ifSequenz.ueberschrift.getWidth(), getQuellschrittID());
 		return model;

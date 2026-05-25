@@ -26,8 +26,6 @@ import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import static specman.Aenderungsart.Geloescht;
-import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.ColumnSpecByPercent.copyOf;
 import static specman.view.AbstractSchrittView.*;
 
@@ -52,14 +50,14 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   public CatchSchrittSequenzView(CatchBereich catchBereich, BreakSchrittView linkedBreakStep) {
     super(Specman.instance(), catchBereich, linkedBreakStep.id.naechsteEbene(), linkedBreakStep.getEditorContent(true));
     einfachenSchrittAnhaengen(Specman.instance());
-    init(linkedBreakStep, null, TextInit.initialArt());
+    init(linkedBreakStep, null, TextInit.initialChangeInfo());
     initHeadingsLayout();
   }
 
   public CatchSchrittSequenzView(AbstractSchrittView parent, CatchSchrittSequenzModel_V001 model) {
     super(Specman.instance(), parent, model);
     BreakSchrittView linkedBreakSchritt = (BreakSchrittView) parent.getParent().findStepByStepID(model.id.toString());
-    init(linkedBreakSchritt, model.headingRightBarWidth, model.aenderungsart);
+    init(linkedBreakSchritt, model.headingRightBarWidth, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
     initCoCatches(model.coCatches);
     initHeadingsLayout();
   }
@@ -108,16 +106,16 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     return delta;
   }
 
-  private void init(BreakSchrittView linkedBreakStep, Integer headingRightBarWidth, Aenderungsart initialChangetype) {
+  private void init(BreakSchrittView linkedBreakStep, Integer headingRightBarWidth, ChangeInfo initialChangeInfo) {
     headingPanel = new JPanel();
     headingPanel.setBackground(Styles.DIAGRAMM_LINE_COLOR);
     headingRightBarPanel = new JPanel();
-    headingRightBarPanel.setBackground(initialChangetype.toBackgroundColor());
+    headingRightBarPanel.setBackground(initialChangeInfo.panelColor());
     headingHeightEaterPanel = new JPanel();
-    headingHeightEaterPanel.setBackground(initialChangetype.toBackgroundColor());
+    headingHeightEaterPanel.setBackground(initialChangeInfo.panelColor());
     this.headingRightBarWidth = headingRightBarWidth != null ? headingRightBarWidth : SPALTENLAYOUT_UMGEHUNG_GROESSE;
     ueberschrift.setId(linkedBreakStep.id);
-    primaryCatchHeading = new CatchUeberschrift(ueberschrift, linkedBreakStep, this, initialChangetype);
+    primaryCatchHeading = new CatchUeberschrift(ueberschrift, linkedBreakStep, this, initialChangeInfo);
     linkedBreakStep.catchAnkoppeln(primaryCatchHeading);
     ueberschrift.addEditAreasFocusListener(this);
   }
@@ -127,7 +125,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
       int insertionIndex = 0;
       for (CoCatchModel_V001 coCatchModel : coCatches) {
         BreakSchrittView breakStepToLink = (BreakSchrittView) parent.getParent().findStepByStepID(coCatchModel.breakStepId.toString());
-        addCoCatch(insertionIndex, coCatchModel.heading, breakStepToLink, coCatchModel.changetype);
+        addCoCatch(insertionIndex, coCatchModel.heading, breakStepToLink, ChangeInfo.fromModel(coCatchModel.changeInfo, coCatchModel.changetype));
         insertionIndex++;
       }
     }
@@ -136,7 +134,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   public void addCoCatchUDBL(CatchUeberschrift referenceCatchHeading, BreakSchrittView breakStepToLink) {
     int insertionIndex = coCatchHeadings.indexOf(referenceCatchHeading) + 1;
     EditorContentModel_V001 breakStepContent = breakStepToLink.getEditorContent(true);
-    CatchUeberschrift coCatchHeading = addCoCatch(insertionIndex, breakStepContent, breakStepToLink, TextInit.initialArt());
+    CatchUeberschrift coCatchHeading = addCoCatch(insertionIndex, breakStepContent, breakStepToLink, TextInit.initialChangeInfo());
     initHeadingsLayout();
     Specman.instance().addEdit(new UndoableCoCatchAdded(this, breakStepToLink, insertionIndex, coCatchHeading));
   }
@@ -149,7 +147,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     headingPanel.revalidate();
   }
 
-  private CatchUeberschrift addCoCatch(int insertionIndex, EditorContentModel_V001 heading, BreakSchrittView breakStepToLink, Aenderungsart changetype) {
+  private CatchUeberschrift addCoCatch(int insertionIndex, EditorContentModel_V001 heading, BreakSchrittView breakStepToLink, ChangeInfo changetype) {
     EditContainer coCatchHeadingContent = new EditContainer(Specman.instance(), heading, breakStepToLink.id);
     coCatchHeadingContent.addEditAreasFocusListener(this);
     CatchUeberschrift coCatchHeading = new CatchUeberschrift(coCatchHeadingContent, breakStepToLink, this, changetype);
@@ -199,7 +197,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
 
   public void removeOrMarkAsDeletedUDBL() {
     EditorI editor = Specman.instance();
-    if (aenderungsart == Hinzugefuegt || !editor.aenderungenVerfolgen()) {
+    if (changeInfo.isAdded() || !editor.aenderungenVerfolgen()) {
       removeUDBL();
     }
     else {
@@ -222,7 +220,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
 
   public void removeOrMarkAsDeletedUDBL(CatchUeberschrift catchHeading) {
     EditorI editor = Specman.instance();
-    if (catchHeading.changetype == Hinzugefuegt || !editor.aenderungenVerfolgen()) {
+    if (catchHeading.changetype.isAdded() || !editor.aenderungenVerfolgen()) {
       removeUDBL(catchHeading);
     }
     else {
@@ -250,7 +248,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   @Override public void focusGained(FocusEvent e) {}
 
   @Override public void focusLost(FocusEvent e) {
-    if (aenderungsart != Geloescht) {
+    if (!changeInfo.isDeleted()) {
       TextEditArea editArea = (TextEditArea) e.getSource();
       CatchUeberschrift catchHeading = editArea.containingCatchHeading();
       catchHeading.updateLinkedBreakStepContent();
@@ -259,7 +257,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
 
   @Override
   public int aenderungenUebernehmen(EditorI editor) throws EditException {
-    if (aenderungsart == Geloescht) {
+    if (changeInfo.isDeleted()) {
       removeUDBL();
       return 1;
     }
@@ -275,12 +273,12 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
 
   @Override
   public int aenderungenVerwerfen(EditorI editor) throws EditException {
-    Aenderungsart lastChangetype = aenderungsart;
+    ChangeInfo lastChangetype = changeInfo;
     int changesReverted = super.aenderungenVerwerfen(editor) + primaryCatchHeading.aenderungenVerwerfen();
     for (CatchUeberschrift coCatchHeading : modifyableCoCatchHeadings()) {
       changesReverted += coCatchHeading.aenderungenVerwerfen();
     }
-    if (lastChangetype == Geloescht) {
+    if (lastChangetype.isDeleted()) {
       // While the catch sequences was marked as deleted, its heading was not synchronized
       // with the linked break step's content. So when we have rolled back a deletion, we
       // might have to resynchronize
@@ -313,7 +311,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     List<CoCatchModel_V001> coCatches = generateCoCatchModels(formatierterText);
     CatchSchrittSequenzModel_V001 model = new CatchSchrittSequenzModel_V001(
       primaryCatchHeading.linkedBreakStepId(),
-      aenderungsart,
+      changeInfo,
       ueberschrift.editorContent2Model(formatierterText),
       coCatches,
       headingRightBarWidth);
@@ -360,7 +358,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   }
 
   public boolean isDeleted() {
-    return aenderungsart == Geloescht;
+    return changeInfo.isDeleted();
   }
 
   public boolean isPrimaryHeading(CatchUeberschrift catchUeberschrift) {

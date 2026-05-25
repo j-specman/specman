@@ -6,6 +6,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
@@ -50,8 +51,8 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	JPanel panelSonst; //neu
 	JPanel panelFall1; //neu
 
-	public CaseSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, Aenderungsart aenderungsart, int numCases) {
-		super(editor, parent, initialerText, id, aenderungsart, createPanelLayout(numCases));
+	public CaseSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, int numCases) {
+		super(editor, parent, initialerText, id, changeInfo, createPanelLayout(numCases));
 		panel.add(editContainer, INITIAL_DUMMY);
 		/** @author PVN */
 		lueckenFueller = new JPanel();
@@ -81,8 +82,8 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		spaltenResizerAnlegen(editor);
 	}
 
-	public CaseSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, Aenderungsart aenderungsart) {
-		this(editor, parent, initialerText, id, aenderungsart, 2);
+	public CaseSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
+		this(editor, parent, initialerText, id, changeInfo, 2);
 		initCases(
 				editor,
 				new ZweigSchrittSequenzView(editor, this, id.naechsteEbene(), initialtext("Sonst")),
@@ -98,7 +99,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	}
 
 	public CaseSchrittView(EditorI editor, SchrittSequenzView parent, CaseSchrittModel_V001 model) {
-		this(editor, parent, model.inhalt, model.id, model.aenderungsart, model.caseSequenzen.size());
+		this(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), model.caseSequenzen.size());
 		initCases(
 				editor,
 				new ZweigSchrittSequenzView(editor, this, model.sonstSequenz),
@@ -264,7 +265,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 			id,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
-			aenderungsart,
+			changeInfo,
 			klappen.isSelected(),
 			sonstSequenz.generiereZweigSchrittSequenzModel(formatierterText),
 			new ArrayList<Float>(spaltenbreitenAnteileBerechnen(spaltenbreitenErmitteln())),
@@ -406,7 +407,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
     EditorI editor = Specman.instance();
 		ZweigSchrittSequenzView zweig = headingToBranch(editor.getLastFocusedTextArea());
 		if (zweig != null) {
-			if (zweig.getAenderungsart() == Aenderungsart.Hinzugefuegt) {
+			if (zweig.getChangeInfo().isAdded()) {
 				int zweigIndex = zweigEntfernen(editor, zweig);
 				editor.addEdit(new UndoableZweigEntfernt(editor, zweig, this, zweigIndex));
 			}
@@ -515,7 +516,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		int changesMade = sonstSequenz.aenderungenUebernehmen(editor);
 		List<ZweigSchrittSequenzView> caseSequenzen = new CopyOnWriteArrayList<ZweigSchrittSequenzView>(this.caseSequenzen);
 		for (ZweigSchrittSequenzView caseSequenz : caseSequenzen) {
-			if (caseSequenz.getAenderungsart() == Aenderungsart.Geloescht) {
+			if (caseSequenz.getChangeInfo().isDeleted()) {
 				zweigEntfernen(editor, caseSequenz);
 				changesMade++;
 			}
@@ -541,7 +542,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		List<ZweigSchrittSequenzView> caseSequenzen = new CopyOnWriteArrayList<ZweigSchrittSequenzView>(this.caseSequenzen);
 		int changesReverted = sonstSequenz.aenderungenVerwerfen(editor);
 		for (ZweigSchrittSequenzView caseSequenz : caseSequenzen) {
-			if(caseSequenz.getAenderungsart() == Aenderungsart.Hinzugefuegt) {
+			if(caseSequenz.getChangeInfo().isAdded()) {
 				changesReverted += zweigEntfernen(editor, caseSequenz);
 			}
 			else {

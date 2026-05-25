@@ -15,6 +15,7 @@ import javax.swing.text.JTextComponent;
 import java.awt.Color;
 import java.util.List;
 
+import specman.ChangeInfo;
 import static specman.Aenderungsart.Untracked;
 
 /**
@@ -33,7 +34,7 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 	public ZweigSchrittSequenzView(EditorI editor, AbstractSchrittView parent, SchrittID sequenzBasisId, EditorContentModel_V001 initialerText) {
 		super(parent, sequenzBasisId);
 		ueberschriftInitialisieren(editor, initialerText, null);
-		this.aenderungsart = TextInit.initialArt();
+		this.changeInfo = TextInit.initialChangeInfo();
 	}
 
 	protected void ueberschriftInitialisieren(EditorI editor, EditorContentModel_V001 initialerText, SchrittID initialeSchrittnummer) {
@@ -49,7 +50,7 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 	public ZweigSchrittSequenzModel_V001 generiereZweigSchrittSequenzModel(boolean formatierterText) {
 		ZweigSchrittSequenzModel_V001 model = new ZweigSchrittSequenzModel_V001(
 				sequenzBasisId,
-				aenderungsart,
+				changeInfo,
 				catchBereich.generiereCatchBereichModel(formatierterText),
 				ueberschrift.editorContent2Model(formatierterText));
 		populateModel(model, formatierterText);
@@ -113,7 +114,7 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 
 	public void aenderungsmarkierungenEntfernen() {
 		ueberschrift.aenderungsmarkierungenEntfernen(null);
-		setAenderungsart(Untracked);
+		changeInfo = ChangeInfo.untracked();
 	}
 
 	public int ueberschriftAenderungenUebernehmen() {

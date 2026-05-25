@@ -3,7 +3,7 @@ package specman.view;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
-import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.SchrittID;
 import static specman.ChangeSet.changeset;
 import specman.editarea.EditContainer;
@@ -30,15 +30,15 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   final CatchSchrittSequenzView catchSequence;
   BreakSchrittView linkedBreakStep;
   final FormLayout layout;
-  Aenderungsart changetype;
+  ChangeInfo changetype;
 
-  public CatchUeberschrift(EditContainer ueberschrift, BreakSchrittView linkedBreakStep, CatchSchrittSequenzView catchSequence, Aenderungsart changetype) {
+  public CatchUeberschrift(EditContainer ueberschrift, BreakSchrittView linkedBreakStep, CatchSchrittSequenzView catchSequence, ChangeInfo changetype) {
     this.ueberschrift = ueberschrift;
     this.linkedBreakStep = linkedBreakStep;
     this.catchSequence = catchSequence;
     this.changetype = changetype;
-    this.setBackground(changetype.toBackgroundColor());
-    this.ueberschrift.setBackground(changetype.toBackgroundColor());
+    this.setBackground(changetype.panelColor());
+    this.ueberschrift.setBackground(changetype.panelColor());
     if (isDeleted()) {
       ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.id);
     }
@@ -83,14 +83,14 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   }
 
   public int aenderungenUebernehmen() {
-    int numChanges = changetype.asNumChanges();
+    int numChanges = changetype.numChanges();
     if (isDeleted()) {
       remove();
     }
     else {
       numChanges += ueberschrift.aenderungenUebernehmen();
     }
-    changetype = Aenderungsart.Untracked;
+    changetype = ChangeInfo.untracked();
     return numChanges;
   }
 
@@ -101,16 +101,16 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
 
   public int aenderungenVerwerfen() {
     int numChanges = 0;
-    if (changetype == Aenderungsart.Hinzugefuegt) {
+    if (changetype.isAdded()) {
       catchSequence.removeUDBL(this);
-      numChanges += changetype.asNumChanges();
-      changetype = Aenderungsart.Untracked;
+      numChanges += changetype.numChanges();
+      changetype = ChangeInfo.untracked();
     }
     return numChanges + ueberschrift.aenderungenVerwerfen();
   }
 
   public void alsGeloeschtMarkierenUDBL() {
-    changetype = Aenderungsart.Geloescht;
+    changetype = changetype.deleted();
     ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.id);
     UDBL.setBackgroundUDBL(this, changeset().panelColor());
   }
@@ -201,6 +201,6 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   }
 
   public boolean isDeleted() {
-    return changetype == Aenderungsart.Geloescht;
+    return changetype.isDeleted();
   }
 }

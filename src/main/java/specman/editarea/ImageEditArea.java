@@ -2,7 +2,6 @@ package specman.editarea;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
-import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.EditorI;
 import specman.SpaltenContainerI;

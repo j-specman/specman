@@ -4,7 +4,7 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
@@ -41,8 +41,8 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 	SchrittSequenzView wiederholSequenz;
 	int balkenbreite;
 
-	public SchleifenSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, Aenderungsart aenderungsart, boolean mitUnteremBalken) {
-		super(editor, parent, initialerText, id, aenderungsart);
+	public SchleifenSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, boolean mitUnteremBalken) {
+		super(editor, parent, initialerText, id, changeInfo);
 		panel = new JPanel();
 		panel.setBackground(DIAGRAMM_LINE_COLOR);
 		balkenbreite = SPALTENLAYOUT_UMGEHUNG_GROESSE;
@@ -74,17 +74,17 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
     panel.addComponentListener(this);
 		panel.add(new SpaltenResizer(this), CC.xy(2, 3));
 
-    filler = new BottomFiller(panel, layout, aenderungsart);
+    filler = new BottomFiller(panel, layout, changeInfo.art());
     klappen = new KlappButton(this, editContainer.getKlappButtonParent(), layout, CONTENTROW, filler.row);
 	}
 
-	public SchleifenSchrittView(EditorI editor, SchrittSequenzView parent, SchrittID id, Aenderungsart aenderungsart) {
-		this(editor, parent, null, id, aenderungsart, false);
+	public SchleifenSchrittView(EditorI editor, SchrittSequenzView parent, SchrittID id, ChangeInfo changeInfo) {
+		this(editor, parent, null, id, changeInfo, false);
 		initWiederholsequenz(einschrittigeInitialsequenz(editor, id.naechsteEbene()));
 	}
 
 	public SchleifenSchrittView(EditorI editor, SchrittSequenzView parent, WhileSchrittModel_V001 model, boolean mitUnteremBalken) {
-		this(editor, parent, model.inhalt, model.id, model.aenderungsart, mitUnteremBalken);
+		this(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), mitUnteremBalken);
 		initWiederholsequenzFromModel(editor, model);
 	}
 
@@ -194,7 +194,7 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 			id,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
-			aenderungsart,
+			changeInfo,
 			klappen.isSelected(),
 			wiederholSequenz.generiereSchrittSequenzModel(formatierterText),
 			0,

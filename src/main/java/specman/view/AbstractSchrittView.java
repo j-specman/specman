@@ -1,10 +1,12 @@
 package specman.view;
 
 import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
 import specman.Specman;
+import static specman.ChangeInfo.fromModel;
 import static specman.ChangeSet.changeset;
 import specman.editarea.EditArea;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
@@ -60,33 +62,29 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	protected final EditContainer editContainer;
 	protected SchrittID id;
-	protected Aenderungsart aenderungsart;
+	protected ChangeInfo changeInfo;
 	protected SchrittSequenzView parent;
 	protected RoundedBorderDecorator roundedBorderDecorator;
 	protected QuellSchrittView quellschritt;
 
 	private final java.util.List<TextEditArea> referencedByTextEditAreas = new ArrayList<>();
 
-	public AbstractSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialContent, SchrittID id, Aenderungsart aenderungsart) {
+	public AbstractSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialContent, SchrittID id, ChangeInfo changeInfo) {
 		this.id = id;
-		this.aenderungsart = aenderungsart;
+		this.changeInfo = changeInfo;
 		this.editContainer = new EditContainer(editor, initialContent, id);
 		this.parent = parent;
 		editContainer.addEditAreasFocusListener(this);
 		editContainer.addEditComponentListener(this);
 	}
 
-	public Aenderungsart getAenderungsart() {
-		return aenderungsart;
-	}
-
-	public void setAenderungsart(Aenderungsart aenderungsart) {
-		this.aenderungsart = aenderungsart;
-	}
-
 	public void setAenderungsartUDBL(Aenderungsart aenderungsart) {
-		UDBL.setAenderungsart(this, aenderungsart);
+		UDBL.setChangeInfo(this, changeInfo.withArt(aenderungsart));
 	}
+
+	public ChangeInfo getChangeInfo() { return changeInfo; }
+
+	public void setChangeInfo(ChangeInfo changeInfo) { this.changeInfo = changeInfo; }
 
 	public void setId(SchrittID id) {
 		SchrittID oldSchrittID = this.id;
@@ -197,7 +195,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public void setGeloeschtMarkiertStilUDBL() {
-		setBackgroundUDBL(changeset().panelColor());
+		setBackgroundUDBL(changeInfo.changeSet().panelColor());
 		editContainer.setGeloeschtMarkiertStilUDBL(id);
 		setAenderungsartUDBL(Geloescht);
 	}
@@ -388,16 +386,16 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public void resyncStepnumberStyleUDBL() {
-    if (getAenderungsart() == Aenderungsart.Quellschritt) {
+    if (changeInfo.isSourceStep()) {
 			editContainer.resyncStepnumberAsSourceUDBL(((QuellSchrittView)this).getZielschrittID());
 		}
-		else if (getAenderungsart() == Zielschritt) {
+		else if (changeInfo.isTargetStep()) {
 			editContainer.resyncStepnumberAsTargetUDBL(getQuellschritt().getId());
 		}
 	}
 
 	public void viewsNachinitialisieren() {
-    switch (aenderungsart) {
+    switch (changeInfo.art()) {
       case Geloescht -> setGeloeschtMarkiertStilUDBL();
       case Quellschritt -> ((QuellSchrittView) this).setQuellStil();
       case Zielschritt -> setZielschrittStilUDBL();
@@ -438,8 +436,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public int aenderungenUebernehmen(EditorI editor) throws EditException {
-		int changesMade = editAenderungenUebernehmen() + aenderungsart.asNumChanges();
-		switch (aenderungsart) {
+		int changesMade = editAenderungenUebernehmen() + changeInfo.numChanges();
+		switch (changeInfo.art()) {
 			case Geloescht:
 			case Quellschritt:
 				markStepnumberLinksAsDefect();
@@ -450,7 +448,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 				break;
 		}
 		aenderungsmarkierungenEntfernen();
-		setAenderungsart(Untracked);
+		changeInfo = ChangeInfo.untracked();
 		return changesMade;
 	}
 
@@ -459,8 +457,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public int aenderungenVerwerfen(EditorI editor) throws EditException {
-		int changesReverted = editAenderungenVerwerfen() + aenderungsart.asNumChanges();
-		switch (aenderungsart) {
+		int changesReverted = editAenderungenVerwerfen() + changeInfo.numChanges();
+		switch (changeInfo.art()) {
 			case Hinzugefuegt:
 				markStepnumberLinksAsDefect();
 				getParent().schrittEntfernen(this, Discard);
@@ -475,7 +473,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 				break;
 		}
 		aenderungsmarkierungenEntfernen();
-		setAenderungsart(Untracked);
+		changeInfo = ChangeInfo.untracked();
 		return changesReverted;
 	}
 
@@ -568,6 +566,6 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
   public void moveCoCatchDownUDBL(StepnumberLabel initiatingLabel) {}
 
   public boolean allowsDeletion(StepnumberLabel initiatingLabel) {
-    return getParent().allowsStepDeletion() && aenderungsart != Geloescht;
+    return getParent().allowsStepDeletion() && !changeInfo.isDeleted();
   }
 }

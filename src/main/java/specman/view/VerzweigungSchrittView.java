@@ -2,6 +2,7 @@ package specman.view;
 
 import com.jgoodies.forms.layout.FormLayout;
 import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.EditorI;
 import specman.SchrittID;
 import specman.SpaltenContainerI;
@@ -28,8 +29,8 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 	final KlappButton klappen;
 	FormLayout panelLayout;
 
-	public VerzweigungSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, Aenderungsart aenderungsart, FormLayout panelLayout) {
-		super(editor, parent, initialerText, id, aenderungsart);
+	public VerzweigungSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, FormLayout panelLayout) {
+		super(editor, parent, initialerText, id, changeInfo);
 		this.panelLayout = panelLayout;
 		panel = new JPanel() {
 			@Override
@@ -45,7 +46,7 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 		panel.addComponentListener(this);
 		panel.setEnabled(false);
 
-    filler = new BottomFiller(panel, panelLayout, aenderungsart);
+    filler = new BottomFiller(panel, panelLayout, changeInfo.art());
     klappen = new KlappButton(this, editContainer.getKlappButtonParent(), panelLayout, CONTENTROW, filler.row);
 		klappen.addComponentListener(new ComponentAdapter() {
 			// Kleine Sch�nheitsgeschichte: Der Klapp-Button liegt �ber der linken Dreieckslinie.
