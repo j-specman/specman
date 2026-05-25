@@ -2,6 +2,7 @@ package specman.view;
 
 import specman.Aenderungsart;
 import specman.EditorI;
+import static specman.ChangeSet.changeset;
 import specman.SchrittID;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.QuellSchrittModel_V001;
@@ -9,8 +10,6 @@ import specman.undo.props.UDBL;
 
 import javax.swing.*;
 import java.awt.*;
-
-import static specman.graphics.Styles.AENDERUNGSFARBE;
 
 public class QuellSchrittView extends AbstractSchrittView {
 
@@ -21,7 +20,7 @@ public class QuellSchrittView extends AbstractSchrittView {
         //Die Höhe des Schrittnummer-Labels sollte die Höhe bestimmen.
         super(editor, parent, new EditorContentModel_V001(".", Aenderungsart.Quellschritt), id, Aenderungsart.Quellschritt);
         setQuellStil();
-        setBackgroundUDBL(AENDERUNGSFARBE.panelColor);
+        setBackgroundUDBL(changeset().panelColor());
     }
 
     @Override

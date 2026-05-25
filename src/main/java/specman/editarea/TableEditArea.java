@@ -7,6 +7,7 @@ import specman.EditorI;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
+import static specman.ChangeSet.changeset;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.TableEditAreaModel_V001;
@@ -196,7 +197,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
 
   @Override
   public void setGeloeschtMarkiertStilUDBL() {
-    setBackgroundUDBL(Styles.AENDERUNGSFARBE.panelColor);
+    setBackgroundUDBL(changeset().panelColor());
     cellstream().forEach(cell -> cell.setGeloeschtMarkiertStilUDBL(null));
   }
 

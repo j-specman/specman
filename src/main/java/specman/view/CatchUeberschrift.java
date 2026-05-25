@@ -5,6 +5,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.Aenderungsart;
 import specman.SchrittID;
+import static specman.ChangeSet.changeset;
 import specman.editarea.EditContainer;
 import specman.model.v001.CoCatchModel_V001;
 import specman.model.v001.EditorContentModel_V001;
@@ -19,7 +20,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.Arrays;
 
-import static specman.graphics.Styles.AENDERUNGSFARBE;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_SICHTBAR;
@@ -112,7 +112,7 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   public void alsGeloeschtMarkierenUDBL() {
     changetype = Aenderungsart.Geloescht;
     ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.id);
-    UDBL.setBackgroundUDBL(this, AENDERUNGSFARBE.panelColor);
+    UDBL.setBackgroundUDBL(this, changeset().panelColor());
   }
 
   @Override public void componentResized(ComponentEvent e) { ueberschrift.updateBounds(); }

@@ -6,6 +6,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import specman.Aenderungsart;
 import specman.EditorI;
 import specman.Specman;
+import static specman.ChangeSet.changeset;
 import specman.editarea.document.WrappedPosition;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.EditorContentModel_V001;
@@ -22,7 +23,6 @@ import java.awt.event.FocusListener;
 import java.util.HashMap;
 import java.util.List;
 
-import specman.graphics.Styles;
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.Aenderungsart.Untracked;
@@ -79,7 +79,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
 
   @Override
   public void setGeloeschtMarkiertStilUDBL() {
-    setBackgroundUDBL(Styles.AENDERUNGSFARBE.panelColor);
+    setBackgroundUDBL(changeset().panelColor());
     content.setGeloeschtMarkiertStilUDBL(null);
   }
 

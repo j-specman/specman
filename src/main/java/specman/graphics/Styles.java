@@ -15,11 +15,8 @@ public class Styles {
     public static final int FONTSIZE = SpecmanFontSizeAction.DEFAULT_FONTSIZE;
     public static final int SCHRITTNR_FONTSIZE = 10;
 
-    public static MutableAttributeSet geloeschtStil = new SimpleAttributeSet();
     public static MutableAttributeSet ganzerSchrittGeloeschtStil = new SimpleAttributeSet();
     public static MutableAttributeSet standardTextBackground = new SimpleAttributeSet();
-    public static MutableAttributeSet quellschrittStil = new SimpleAttributeSet();
-    public static MutableAttributeSet deletedStepnumberLinkStyle = new SimpleAttributeSet();
 
     public static final List<String> FONTFILES = List.of(
       "fonts/sitka/SitkaDisplay.ttf",
@@ -73,36 +70,14 @@ public class Styles {
     public static final String INDIKATOR_GELOESCHT_MARKIERT = "line-through";
     public static final ReadWriteColor SCHRITTNUMMER_FARBE = new ReadWriteColor(Color.LIGHT_GRAY);
     public static final ReadWriteColor DELETED_BACKGROUND_COLOR = new ReadWriteColor(Color.BLACK);
-
     public static final ReadWriteColor STEPNUMBER_LINK_COLOR = new ReadWriteColor(new Color(220, 220, 220));
 
-    public static final List<ChangeColorSet> CHANGESETS = List.of(
-      new ChangeColorSet(Color.yellow, STEPNUMBER_LINK_COLOR.color),
-      new ChangeColorSet(new Color(150, 255, 150), STEPNUMBER_LINK_COLOR.color), // green
-      new ChangeColorSet(new Color(100, 255, 255), STEPNUMBER_LINK_COLOR.color), // cyan
-      new ChangeColorSet(new Color(255, 220, 150), STEPNUMBER_LINK_COLOR.color), // orange
-      new ChangeColorSet(new Color(255, 180, 180), STEPNUMBER_LINK_COLOR.color) // pink
-    );
-
-    public static final ChangeColorSet AENDERUNGSFARBE = CHANGESETS.get(0);
-
     static {
-        StyleConstants.setBackground(geloeschtStil, AENDERUNGSFARBE.text.color);
-        StyleConstants.setStrikeThrough(geloeschtStil, true);
-
         StyleConstants.setBackground(ganzerSchrittGeloeschtStil, DELETED_BACKGROUND_COLOR.color);
         StyleConstants.setStrikeThrough(ganzerSchrittGeloeschtStil, true);
         StyleConstants.setForeground(ganzerSchrittGeloeschtStil, Schriftfarbe_Geloescht);
 
         StyleConstants.setBackground(standardTextBackground, TEXT_BACKGROUND_COLOR_STANDARD);
-
-        StyleConstants.setBackground(quellschrittStil, AENDERUNGSFARBE.text.color);
-        StyleConstants.setStrikeThrough(quellschrittStil, true);
-        StyleConstants.setForeground(quellschrittStil, Schriftfarbe_Geloescht);
-        StyleConstants.setFontSize(quellschrittStil, 7);
-
-        StyleConstants.setBackground(deletedStepnumberLinkStyle, AENDERUNGSFARBE.stepnumberLink.color);
-        StyleConstants.setStrikeThrough(deletedStepnumberLinkStyle, true);
     }
 
 }

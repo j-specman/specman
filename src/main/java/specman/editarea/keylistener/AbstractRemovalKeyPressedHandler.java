@@ -2,6 +2,7 @@ package specman.editarea.keylistener;
 
 import specman.EditorI;
 import specman.Specman;
+import static specman.ChangeSet.changeset;
 import specman.editarea.StepnumberLink;
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedDocument;
@@ -13,8 +14,8 @@ import specman.view.AbstractSchrittView;
 
 import java.awt.event.KeyEvent;
 
-import static specman.graphics.Styles.deletedStepnumberLinkStyle;
-import static specman.graphics.Styles.geloeschtStil;
+import specman.Specman;
+import static specman.ChangeSet.changeset;
 
 abstract class AbstractRemovalKeyPressedHandler extends AbstractKeyEventHandler {
   protected AbstractRemovalKeyPressedHandler(TextEditArea textArea, KeyEvent event) {
@@ -73,12 +74,12 @@ abstract class AbstractRemovalKeyPressedHandler extends AbstractKeyEventHandler 
             }
           }
           else if (stepnumberLinkNormalStyleSet(currentStartPosition)) {
-            markRangeAsDeleted(linkStilStart, linkStilEnd.distance(linkStilStart), deletedStepnumberLinkStyle);
+            markRangeAsDeleted(linkStilStart, linkStilEnd.distance(linkStilStart), changeset().getDeletedStepnumberLinkStyle());
             maxDeletionMarked = maxDeletionMarked.max(linkStilEnd);
             setCaretPosition(linkStilStart.unwrap());
           }
           else {
-            markRangeAsDeleted(currentStartPosition, length, geloeschtStil);
+            markRangeAsDeleted(currentStartPosition, length, changeset().getDeletedStyle());
             setCaretPosition(currentStartPosition.unwrap());
           }
         }

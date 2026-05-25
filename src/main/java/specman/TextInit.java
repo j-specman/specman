@@ -12,7 +12,7 @@ import java.util.List;
 
 import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.Aenderungsart.Untracked;
-import static specman.graphics.Styles.AENDERUNGSFARBE;
+import static specman.ChangeSet.changeset;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 
 public class TextInit {
@@ -35,7 +35,7 @@ public class TextInit {
 
   public static Color schrittHintergrund() {
     return (Specman.instance() != null && Specman.instance().aenderungenVerfolgen())
-        ? AENDERUNGSFARBE.panelColor
+        ? changeset().panelColor()
         : BACKGROUND_COLOR_STANDARD;
   }
 

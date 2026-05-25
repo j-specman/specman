@@ -6,6 +6,7 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.*;
+import static specman.ChangeSet.changeset;
 import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TextEditArea;
@@ -28,7 +29,6 @@ import java.util.List;
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.ColumnSpecByPercent.copyOf;
-import static specman.graphics.Styles.AENDERUNGSFARBE;
 import static specman.view.AbstractSchrittView.*;
 
 public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements FocusListener, SpaltenContainerI {
@@ -243,8 +243,8 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   protected void ueberschriftAlsGeloeschtMarkierenUDBL() {
     primaryCatchHeading.alsGeloeschtMarkierenUDBL();
     coCatchHeadings.forEach(cch -> cch.alsGeloeschtMarkierenUDBL());
-    headingHeightEaterPanel.setBackground(AENDERUNGSFARBE.panelColor);
-    headingRightBarPanel.setBackground(AENDERUNGSFARBE.panelColor);
+    headingHeightEaterPanel.setBackground(changeset().panelColor());
+    headingRightBarPanel.setBackground(changeset().panelColor());
   }
 
   @Override public void focusGained(FocusEvent e) {}

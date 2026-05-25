@@ -54,4 +54,5 @@ public interface EditorI extends FocusListener {
   void moveBranchSequenceLeftADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   void moveBranchSequenceRightADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   DragMouseAdapter createDragMouseAdapter();
+  ChangeSet changeset();
 }

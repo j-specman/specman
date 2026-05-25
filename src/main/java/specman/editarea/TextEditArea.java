@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import specman.Aenderungsart;
 import specman.EditorI;
 import specman.Specman;
+import static specman.ChangeSet.changeset;
 import specman.editarea.keylistener.TextEditAreaKeyListener;
 import specman.editarea.markups.*;
 import specman.editarea.document.WrappedDocument;
@@ -46,14 +47,16 @@ import static specman.editarea.HTMLTags.HEAD_INTRO;
 import static specman.editarea.HTMLTags.HEAD_OUTRO;
 import static specman.editarea.HTMLTags.HTML_INTRO;
 import static specman.editarea.HTMLTags.HTML_OUTRO;
+import specman.ChangeSet;
+import specman.Specman;
+import static specman.ChangeSet.changeset;
+import specman.graphics.ChangeColorSet;
 import specman.graphics.Styles;
-import static specman.graphics.Styles.AENDERUNGSFARBE;
 import static specman.graphics.Styles.FONTSIZE;
 import static specman.graphics.Styles.TEXT_BACKGROUND_COLOR_STANDARD;
 import static specman.graphics.Styles.INDIKATOR_GELOESCHT_MARKIERT;
 import static specman.graphics.Styles.DEFAULTFONT;
 import static specman.graphics.Styles.ganzerSchrittGeloeschtStil;
-import static specman.graphics.Styles.quellschrittStil;
 import static specman.graphics.Styles.STEPNUMBER_LINK_COLOR;
 import static specman.editarea.markups.MarkupSearchPurpose.All;
 import static specman.editarea.markups.MarkupSearchPurpose.FirstChangeOnly;
@@ -184,7 +187,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     @Override
     public void setQuellStil() {
-        setStyleUDBL(quellschrittStil, AENDERUNGSFARBE.panelColor, false);
+        setStyleUDBL(changeset().getSourceStyle(), changeset().panelColor(), false);
     }
 
     @Override
@@ -197,7 +200,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
       aenderungenVerwerfen();
       setAenderungsartUDBL(Geloescht);
       deletionBackup = getTextWithMarkups(true);
-      setStyleUDBL(ganzerSchrittGeloeschtStil, AENDERUNGSFARBE.panelColor, false);
+      setStyleUDBL(ganzerSchrittGeloeschtStil, changeset().panelColor(), false);
     }
 
     @Override
@@ -394,7 +397,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     public boolean elementHatAenderungshintergrund(WrappedElement e) {
-        return AENDERUNGSFARBE.isAnyBackground(getBackgroundColorFromElement(e));
+        return changeset().isAnyBackground(getBackgroundColorFromElement(e));
     }
 
     public boolean aenderungsStilGesetzt() {
@@ -405,7 +408,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
             return false;
         }
         Object currentBackgroundColorValue = inputAttributes.getAttribute(CSS.Attribute.BACKGROUND_COLOR);
-        return (currentBackgroundColorValue != null && currentBackgroundColorValue.toString().equalsIgnoreCase(AENDERUNGSFARBE.text.htmlColor));
+        return (currentBackgroundColorValue != null && currentBackgroundColorValue.toString().equalsIgnoreCase(changeset().textHtmlColor()));
     }
 
     public WrappedPosition getWrappedCaretPosition() {
@@ -630,7 +633,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
             MutableAttributeSet stepnumberAttribute = new SimpleAttributeSet(previousAttribute);
             stepnumberAttribute.addAttributes(Styles.STEPNUMBER_LINK_COLOR.background);
             StyleConstants.setBackground(stepnumberAttribute,
-                    isTrackingChanges() ? Styles.AENDERUNGSFARBE.stepnumberLink.color : Styles.STEPNUMBER_LINK_COLOR.color);
+                    isTrackingChanges() ? changeset().stepnumberLinkColor() : Styles.STEPNUMBER_LINK_COLOR.color);
 
             doc.insertString(caretPos, stepnumberText, stepnumberAttribute);
 
@@ -651,7 +654,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     public boolean stepnumberLinkChangedStyleSet(WrappedElement element) {
         String color = getBackgroundColorFromElement(element);
-        return color != null && color.equalsIgnoreCase(Styles.AENDERUNGSFARBE.stepnumberLink.htmlColor);
+        return color != null && color.equalsIgnoreCase(changeset().stepnumberLinkHtmlColor());
     }
 
 

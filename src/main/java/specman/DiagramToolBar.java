@@ -13,8 +13,6 @@ import specman.ops.buttons.ToneOpButton;
 import javax.swing.*;
 import java.awt.*;
 
-import static specman.graphics.Styles.AENDERUNGSFARBE;
-
 public class DiagramToolBar extends JToolBar {
 
   private final JToggleButton aenderungenVerfolgen;
@@ -27,12 +25,13 @@ public class DiagramToolBar extends JToolBar {
     DeleteStepOpButton loeschen = new DeleteStepOpButton(specman);
     ToggleBorderTypeOpButton toggleBorderType = new ToggleBorderTypeOpButton(specman);
 
+    Color changeColor = specman.changeset().panelColor();
     aenderungenVerfolgen = new JToggleButton();
     AcceptChangesADBLOpButton aenderungenUebernehmen = new AcceptChangesADBLOpButton(specman);
     RevertChangesADBLOpButton aenderungenVerwerfen = new RevertChangesADBLOpButton(specman);
-    aenderungenVerfolgen.setBackground(AENDERUNGSFARBE.panelColor);
-    aenderungenUebernehmen.setBackground(AENDERUNGSFARBE.panelColor);
-    aenderungenVerwerfen.setBackground(AENDERUNGSFARBE.panelColor);
+    aenderungenVerfolgen.setBackground(changeColor);
+    aenderungenUebernehmen.setBackground(changeColor);
+    aenderungenVerwerfen.setBackground(changeColor);
 
     ReviewOpButton review = new ReviewOpButton(specman);
     zoom = new ZoomComboBox(specman);

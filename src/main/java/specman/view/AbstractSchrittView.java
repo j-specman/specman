@@ -5,6 +5,7 @@ import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
 import specman.Specman;
+import static specman.ChangeSet.changeset;
 import specman.editarea.EditArea;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.AbstractSchrittModel_V001;
@@ -40,7 +41,6 @@ import java.util.List;
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Untracked;
 import static specman.Aenderungsart.Zielschritt;
-import static specman.graphics.Styles.AENDERUNGSFARBE;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.view.RelativeStepPosition.After;
 import static specman.view.RoundedBorderDecorationStyle.Co;
@@ -197,7 +197,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public void setGeloeschtMarkiertStilUDBL() {
-		setBackgroundUDBL(AENDERUNGSFARBE.panelColor);
+		setBackgroundUDBL(changeset().panelColor());
 		editContainer.setGeloeschtMarkiertStilUDBL(id);
 		setAenderungsartUDBL(Geloescht);
 	}

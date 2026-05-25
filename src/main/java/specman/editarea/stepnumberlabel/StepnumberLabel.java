@@ -3,6 +3,7 @@ package specman.editarea.stepnumberlabel;
 import org.apache.commons.lang.math.IntRange;
 import specman.SchrittID;
 import specman.Specman;
+import static specman.ChangeSet.changeset;
 import specman.draganddrop.DragMouseAdapter;
 import specman.editarea.InteractiveStepFragment;
 import specman.pdf.LineShape;
@@ -16,7 +17,9 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 
 import static specman.SchrittID.asString;
-import static specman.graphics.Styles.AENDERUNGSFARBE;
+import specman.ChangeSet;
+import specman.Specman;
+import static specman.ChangeSet.changeset;
 import static specman.graphics.Styles.DELETED_BACKGROUND_COLOR;
 import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
 import static specman.graphics.Styles.SCHRITTNUMMER_VORDERGRUNDFARBE;
@@ -25,7 +28,7 @@ import static specman.graphics.Styles.labelFont;
 
 public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
   private static final Border STANDARD_BORDER = new MatteBorder(0, 2, 0, 1, SCHRITTNUMMER_FARBE.color);
-  private static final Border CHANGED_BORDER = new MatteBorder(0, 2, 0, 1, AENDERUNGSFARBE.panelColor);
+  private static final Border CHANGED_BORDER = new MatteBorder(0, 2, 0, 1, ChangeSet.DEFAULT.colors.panelColor);
   private static final Border DELETED_BORDER = new MatteBorder(0, 2, 0, 1, DELETED_BACKGROUND_COLOR.color);
   private static final String SPACER = " ";
   private static final String TO_TARGET_ARROW = SPACER + ">" + SPACER;
@@ -140,7 +143,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
   public void setTargetStyleUDBL(SchrittID quellschrittId) {
     setStructureUDBL(LabelStructure.Target);
     setBorderUDBL(CHANGED_BORDER);
-    setBackgroundUDBL(AENDERUNGSFARBE.panelColor);
+    setBackgroundUDBL(changeset().panelColor());
     setForegroundUDBL(SCHRITTNUMMER_VORDERGRUNDFARBE);
     resyncSourceSuffixUDBL(quellschrittId);
   }

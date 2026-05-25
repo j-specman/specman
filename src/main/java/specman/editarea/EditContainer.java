@@ -9,6 +9,7 @@ import specman.EditorI;
 import specman.SchrittID;
 import specman.Specman;
 import specman.TextInit;
+import static specman.ChangeSet.changeset;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
@@ -40,7 +41,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import specman.graphics.Styles;
-import static specman.graphics.Styles.AENDERUNGSFARBE;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
 import static specman.graphics.Styles.labelFont;
@@ -205,12 +205,12 @@ public class EditContainer extends JPanel {
 
 	public void setQuellStil(SchrittID zielschrittID) {
 		editAreas.forEach(ea -> ea.setQuellStil());
-		setBackground(AENDERUNGSFARBE.panelColor);
+		setBackground(changeset().panelColor());
 		schrittNummer.setSourceStyle(zielschrittID);
 	}
 
 	public void setGeloeschtMarkiertStilUDBL(SchrittID id) {
-		setBackgroundUDBL(AENDERUNGSFARBE.panelColor);
+		setBackgroundUDBL(changeset().panelColor());
 		modifyableEditAreas().forEach(ea -> ea.setGeloeschtMarkiertStilUDBL());
 		if (schrittNummer != null) {
 			schrittNummer.setDeletedStyleUDBL(id);

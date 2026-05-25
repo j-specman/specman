@@ -1,6 +1,7 @@
 package specman.editarea.keylistener;
 
 import specman.Specman;
+import static specman.ChangeSet.changeset;
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedPosition;
 import specman.editarea.focusmover.CrossEditAreaFocusMoverFromText;
@@ -15,10 +16,9 @@ import java.awt.event.KeyListener;
 
 import static specman.graphics.Styles.INDIKATOR_GELOESCHT_MARKIERT;
 import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
+import specman.Specman;
+import static specman.ChangeSet.changeset;
 import static specman.graphics.Styles.DELETED_BACKGROUND_COLOR;
-import static specman.graphics.Styles.AENDERUNGSFARBE;
-import static specman.graphics.Styles.deletedStepnumberLinkStyle;
-import static specman.graphics.Styles.geloeschtStil;
 
 public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyListener {
   public TextEditAreaKeyListener(TextEditArea textArea) {
@@ -117,9 +117,9 @@ public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyLi
 
       if (!selectionStart.equals(selectionEnd)) {
         if (stepnumberLinkNormalStyleSet(selectionStart)) {
-          markRangeAsDeleted(selectionStart, selectionEnd.distance(selectionStart), deletedStepnumberLinkStyle);
+          markRangeAsDeleted(selectionStart, selectionEnd.distance(selectionStart), changeset().getDeletedStepnumberLinkStyle());
         } else {
-          markRangeAsDeleted(selectionStart, selectionEnd.distance(selectionStart), geloeschtStil);
+          markRangeAsDeleted(selectionStart, selectionEnd.distance(selectionStart), changeset().getDeletedStyle());
         }
 
         setSelectionStart(selectionEnd.unwrap());
@@ -154,7 +154,7 @@ public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyLi
       StyledEditorKit k = getEditorKit();
       MutableAttributeSet inputAttributes = k.getInputAttributes();
       StyleConstants.setStrikeThrough(inputAttributes, false); // Falls noch Gelöscht-Stil herrschte
-      inputAttributes.addAttributes(AENDERUNGSFARBE.text.background);
+      inputAttributes.addAttributes(changeset().textBackground());
     }
   }
 

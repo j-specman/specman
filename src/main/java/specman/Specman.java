@@ -53,6 +53,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	int zoomFaktor = 100;
 	File diagrammDatei;
   FocusHistory focusHistory = new FocusHistory();
+  ChangeSet currentChangeSet = ChangeSet.DEFAULT;
 
 	private DiagramToolBar diagramToolBar;
 	private StepButtonBar stepButtonBar;
@@ -677,5 +678,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
   public int showConfirmDialog(String message, String title, int optionType) {
     return JOptionPane.showConfirmDialog(this, message, title, optionType);
   }
+
+  @Override
+  public ChangeSet changeset() { return currentChangeSet; }
 
 }

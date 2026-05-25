@@ -2,7 +2,7 @@ package specman;
 
 import java.awt.*;
 
-import static specman.graphics.Styles.AENDERUNGSFARBE;
+import static specman.ChangeSet.changeset;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 
 public enum Aenderungsart {
@@ -10,7 +10,7 @@ public enum Aenderungsart {
 
 	public Color toBackgroundColor() {
 		return (this == Hinzugefuegt || this == Geloescht)
-			? AENDERUNGSFARBE.panelColor
+			? changeset().panelColor()
 			: BACKGROUND_COLOR_STANDARD;
 	}
 

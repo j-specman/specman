@@ -11,6 +11,7 @@ import specman.EditorI;
 import specman.SchrittID;
 import specman.SpaltenResizer;
 import specman.Specman;
+import static specman.ChangeSet.changeset;
 import specman.TextInit;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.CaseSchrittModel_V001;
@@ -34,7 +35,6 @@ import java.util.stream.Collectors;
 import static specman.TextInit.initialtext;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.pdf.Shape.GAP_COLOR;
-import static specman.graphics.Styles.AENDERUNGSFARBE;
 
 
 public class CaseSchrittView extends VerzweigungSchrittView {
@@ -424,7 +424,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 			else {
 				zweig.alsGeloeschtMarkierenUDBL();
 				if (zweig == caseSequenzen.get(0)) {
-					UDBL.setBackgroundUDBL(panelFall1, AENDERUNGSFARBE.panelColor);
+					UDBL.setBackgroundUDBL(panelFall1, changeset().panelColor());
 					UDBL.repaint(panel);
 				}
 			}

@@ -1,15 +1,12 @@
 package specman;
 
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
-import specman.graphics.ChangeColorSet;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 
-import static specman.graphics.Styles.AENDERUNGSFARBE;
-import static specman.graphics.Styles.CHANGESETS;
 
 class SpecmanMenuBar extends JMenuBar {
 
@@ -51,10 +48,13 @@ class SpecmanMenuBar extends JMenuBar {
     dateiMenu.add(exit);
 
     JMenu aenderungsfarbenMenu = new JMenu("Änderungsfarbe");
-    aenderungsfarbenMenu.setIcon(new ColorDotIcon(AENDERUNGSFARBE.text.color));
-    for (ChangeColorSet cs : CHANGESETS) {
-      JMenuItem item = new JMenuItem(new ColorDotIcon(cs.text.color));
-      item.addActionListener(e -> specman.fehler("Work in progress"));
+    aenderungsfarbenMenu.setIcon(new ChangeSetDotIcon(specman.currentChangeSet));
+    for (ChangeSet cs : ChangeSet.ALL) {
+      JMenuItem item = new JMenuItem(new ChangeSetDotIcon(cs));
+      item.addActionListener(e -> {
+        specman.currentChangeSet = cs;
+        aenderungsfarbenMenu.setIcon(new ChangeSetDotIcon(cs));
+      });
       aenderungsfarbenMenu.add(item);
     }
 
