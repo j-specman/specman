@@ -2,7 +2,7 @@ package specman.editarea;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
-import specman.Aenderungsart;
+import specman.ChangeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,13 +10,13 @@ import java.awt.*;
 public class ImageEditAreaGlassPane extends JPanel {
   static final Color FOCUS_AND_DELETED_GLASS_COLOR = new Color(100, 100, 100, 80);
 
-  ImageEditAreaGlassPane(Aenderungsart aenderungsart) {
+  ImageEditAreaGlassPane(ChangeInfo changeInfo) {
     setLayout(new FormLayout(
       "fill:8px,pref:grow,fill:8px",
       "fill:8px,fill:pref:grow,fill:3px,fill:pref:grow,fill:8px"));
     setBackground(FOCUS_AND_DELETED_GLASS_COLOR);
 
-    if (aenderungsart == Aenderungsart.Geloescht) {
+    if (changeInfo.isDeleted()) {
       new ImageDeletedMarker();
     }
     else {

@@ -1,6 +1,7 @@
 package specman.editarea;
 
 import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.AbstractEditAreaModel_V001;
 import specman.pdf.Shape;
@@ -65,9 +66,13 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V001> extends Inte
 
   boolean enthaelt(InteractiveStepFragment fragment);
 
-  void setAenderungsart(Aenderungsart aenderungsart);
+  void setChangeInfo(ChangeInfo changeInfo);
 
-  Aenderungsart getAenderungsart();
+  ChangeInfo getChangeInfo();
+
+  default void setAenderungsart(Aenderungsart aenderungsart) { setChangeInfo(getChangeInfo().withArt(aenderungsart)); }
+
+  default Aenderungsart getAenderungsart() { return getChangeInfo().art(); }
 
   EditContainer getParent();
 

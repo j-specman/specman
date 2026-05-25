@@ -29,7 +29,7 @@ public class TextInit {
     String styledText = (align != null)
         ? "<div align='" + align + "'>" + text + "</div>"
         : text;
-    TextEditAreaModel_V001 textModel = new TextEditAreaModel_V001(styledText, text, markups, initialArt());
+    TextEditAreaModel_V001 textModel = new TextEditAreaModel_V001(styledText, text, markups, initialChangeInfo());
     return new EditorContentModel_V001(textModel);
   }
 
@@ -43,6 +43,12 @@ public class TextInit {
     return (Specman.instance() != null && Specman.instance().aenderungenVerfolgen())
         ? Hinzugefuegt
         : Untracked;
+  }
+
+  public static ChangeInfo initialChangeInfo() {
+    return (Specman.instance() != null && Specman.instance().aenderungenVerfolgen())
+        ? ChangeInfo.added()
+        : ChangeInfo.untracked();
   }
 
 }

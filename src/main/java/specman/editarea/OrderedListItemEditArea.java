@@ -1,6 +1,6 @@
 package specman.editarea;
 
-import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.Specman;
 import specman.model.v001.ListItemEditAreaModel_V001;
 import specman.pdf.LabelShapeText;
@@ -16,8 +16,8 @@ public class OrderedListItemEditArea extends AbstractListItemEditArea {
   private static final int DEFAULT_RIGHT_GAP = 3;
   private int rightGap;
 
-  public OrderedListItemEditArea(TextEditArea initialContent, Aenderungsart aenderungsart) {
-    super(initialContent, aenderungsart);
+  public OrderedListItemEditArea(TextEditArea initialContent, ChangeInfo changeInfo) {
+    super(initialContent, changeInfo);
     initRightGap();
   }
 
@@ -65,7 +65,7 @@ public class OrderedListItemEditArea extends AbstractListItemEditArea {
 
   @Override
   protected AbstractListItemEditArea createSplittedItem(TextEditArea splitTextEditArea) {
-    return new OrderedListItemEditArea(splitTextEditArea, aenderungsart);
+    return new OrderedListItemEditArea(splitTextEditArea, changeInfo);
   }
 
   @Override

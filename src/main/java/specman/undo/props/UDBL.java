@@ -1,7 +1,10 @@
 package specman.undo.props;
 
 import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.Specman;
+import specman.editarea.EditArea;
+import specman.editarea.ImageEditArea;
 import specman.editarea.EditArea;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.editarea.stepnumberlabel.StepnumberLabel.LabelStructure;
@@ -86,6 +89,14 @@ public class UDBL {
     if (!Objects.equals(undoAenderungsart, aenderungsart)) {
       editArea.setAenderungsart(aenderungsart);
       addEdit(new UndoableSetAenderungsartEditArea(editArea, undoAenderungsart));
+    }
+  }
+
+  public static void setChangeInfo(EditArea editArea, ChangeInfo changeInfo) {
+    ChangeInfo undoChangeInfo = editArea.getChangeInfo();
+    if (!Objects.equals(undoChangeInfo, changeInfo)) {
+      editArea.setChangeInfo(changeInfo);
+      addEdit(new UndoableSetChangeInfoEditArea(editArea, undoChangeInfo));
     }
   }
 

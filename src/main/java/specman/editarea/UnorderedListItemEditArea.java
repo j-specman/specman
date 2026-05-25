@@ -1,6 +1,6 @@
 package specman.editarea;
 
-import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.Specman;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.ListItemEditAreaModel_V001;
@@ -17,8 +17,8 @@ public class UnorderedListItemEditArea extends AbstractListItemEditArea {
   static final int DEFAULT_PROMPT_RADIUS = 3;
   private int promptRadius;
 
-  public UnorderedListItemEditArea(TextEditArea initialContent, Aenderungsart aenderungsart) {
-    super(initialContent, aenderungsart);
+  public UnorderedListItemEditArea(TextEditArea initialContent, ChangeInfo changeInfo) {
+    super(initialContent, changeInfo);
   }
 
   public UnorderedListItemEditArea(ListItemEditAreaModel_V001 model) {
@@ -73,7 +73,7 @@ public class UnorderedListItemEditArea extends AbstractListItemEditArea {
 
   @Override
   protected AbstractListItemEditArea createSplittedItem(TextEditArea splitTextEditArea) {
-    return new UnorderedListItemEditArea(splitTextEditArea, aenderungsart);
+    return new UnorderedListItemEditArea(splitTextEditArea, changeInfo);
   }
 
   @Override

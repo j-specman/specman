@@ -3,11 +3,15 @@ package specman.editarea;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.EditorI;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
+import specman.TextInit;
+import specman.model.v001.ChangeInfo_V001;
 import static specman.ChangeSet.changeset;
+import static specman.ChangeInfo.fromModel;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.TableEditAreaModel_V001;
@@ -58,7 +62,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   private static final String TABLELAYOUT_ROWSPEC = ZEILENLAYOUT_INHALT_SICHTBAR;
   private static final int WHOLETABLE_COLUMN_INDICATOR = -1;
 
-  private Aenderungsart aenderungsart;
+  private ChangeInfo changeInfo;
   private final List<FocusListener> editAreasFocusListeners = new ArrayList<>();
   private final List<ComponentListener> editAreasComponentListeners = new ArrayList<>();
   private FormLayout tablePanelLayout;
@@ -68,15 +72,15 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   JPanel tablePanel;
   List<List<EditContainer>> cells = new ArrayList<>();
 
-  public TableEditArea(int columns, int rows, Aenderungsart aenderungsart) {
-    this.aenderungsart = aenderungsart;
+  public TableEditArea(int columns, int rows, ChangeInfo changeInfo) {
+    this.changeInfo = changeInfo;
     this.tableWidthPercent = 100;
     initPanels(columns, rows);
     addInitialCells(columns, rows);
   }
 
   public TableEditArea(TableEditAreaModel_V001 model) {
-    this.aenderungsart = model.aenderungsart;
+    this.changeInfo = fromModel(model.changeInfo, model.aenderungsart);
     this.tableWidthPercent = model.tableWidthPercent;
     this.columnsWidthPercent = model.columnsWidthPercent;
     int rows = model.cells.size();
@@ -120,7 +124,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     String outerColumnAndRowSpec = borderThickness + "px," + tableColSpec + "," + rightGapColSpec;
     FormLayout areaLayout = new FormLayout(outerColumnAndRowSpec, outerColumnAndRowSpec);
     setLayout(areaLayout);
-    setBackground(aenderungsart.toBackgroundColor());
+    setBackground(changeInfo.panelColor());
     // Removing and re-associating the tablePanel child is required to ensure propper
     // re-layouting after changing the layout in the lines above
     remove(tablePanel);
@@ -129,7 +133,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
 
   @Override
   public void setEditBackgroundUDBL(Color bg) {
-    cellstream().forEach(cell -> cell.setBackgroundUDBL(aenderungsart.toBackgroundColor()));
+    cellstream().forEach(cell -> cell.setBackgroundUDBL(changeInfo.panelColor()));
     setBackgroundUDBL(bg);
   }
 
@@ -164,11 +168,11 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       cells.add(new ArrayList<>());
     }
     for (int c = 0; c < columns; c++) {
-      addCell(0, "<b>Spalte " + (c+1) + "</b>");
+      addCell(0, "<b>Spalte " + (c+1) + "</b>", changeInfo);
     }
     for (int r = 1; r < rows; r++) {
       for (int c = 0; c < columns; c++) {
-        addCell(r, "Zelle " + (c+1) + "." + r);
+        addCell(r, "Zelle " + (c+1) + "." + r, changeInfo);
       }
     }
   }
@@ -180,8 +184,8 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     tablePanel.add(cell, CC.xy(2 + columnIndex * 2, 2 + rowIndex * 2));
   }
 
-  private void addCell(int rowIndex, String content) {
-    TextEditArea initialContentArea = new TextEditArea(new TextEditAreaModel_V001(content), Styles.DEFAULTFONT);
+  private void addCell(int rowIndex, String content, ChangeInfo changeInfo) {
+    TextEditArea initialContentArea = new TextEditArea(new TextEditAreaModel_V001(content, content, new ArrayList<>(), changeInfo), Styles.DEFAULTFONT);
     addCell(rowIndex, new EditContainer(Specman.instance(), initialContentArea, null));
   }
 
@@ -211,7 +215,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
         .collect(Collectors.toList());
       cellsModel.add(rowModel);
     }
-    return new TableEditAreaModel_V001(cellsModel, tableWidthPercent, columnsWidthPercent, aenderungsart);
+    return new TableEditAreaModel_V001(cellsModel, tableWidthPercent, columnsWidthPercent, new ChangeInfo_V001(changeInfo));
   }
 
   @Override
@@ -225,8 +229,8 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
    * as it is a similar situation of a container having multiple
    */
   public int aenderungenUebernehmen() {
-    int changesMade = aenderungsart.asNumChanges();
-    if (aenderungsart == Geloescht || allCellsMarkedAs(Geloescht)) {
+    int changesMade = changeInfo.numChanges();
+    if (changeInfo.isDeleted() || allCellsMarkedAs(Geloescht)) {
       getParent().removeEditAreaUDBL(this);
       changesMade++;
     }
@@ -236,14 +240,14 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       changesMade += cellstream().mapToInt(cell -> cell.aenderungenUebernehmen()).sum();
     }
     aenderungsmarkierungenEntfernen();
-    aenderungsart = Untracked;
+    changeInfo = ChangeInfo.untracked();
     return changesMade;
   }
 
   @Override
   public int aenderungenVerwerfen() {
-    int changesReverted = aenderungsart.asNumChanges();
-    if (aenderungsart == Hinzugefuegt || allCellsMarkedAs(Hinzugefuegt)) {
+    int changesReverted = changeInfo.numChanges();
+    if (changeInfo.isAdded() || allCellsMarkedAs(Hinzugefuegt)) {
       getParent().removeEditAreaUDBL(this);
       changesReverted++;
     }
@@ -253,7 +257,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       changesReverted += cellstream().mapToInt(cell -> cell.aenderungenVerwerfen()).sum();
     }
     aenderungsmarkierungenEntfernen();
-    aenderungsart = Untracked;
+    changeInfo = ChangeInfo.untracked();
     return changesReverted;
   }
 
@@ -399,7 +403,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     // If the table is already marked as removed, the method here should not have been called
     if (deletionsMustBeMarked()) {
       setGeloeschtMarkiertStilUDBL();
-      setAenderungsartUDBL(Geloescht);
+      setChangeInfoUDBL(changeInfo.deleted());
     }
     else {
       getParent().removeEditAreaUDBL(this); // Already includes undo recording
@@ -421,14 +425,14 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     EditorI editor = Specman.instance();
     List<EditContainer> row = new ArrayList<>();
     for (int c = 0; c < numColumns(); c++) {
-      row.add(new EditContainer(editor));
+      row.add(new EditContainer(editor, TextInit.initialChangeInfo()));
     }
     cells.add(rowIndex, row);
     recomputeLayout();
   }
 
   private boolean deletionsMustBeMarked() {
-    return Specman.instance().aenderungenVerfolgen() && aenderungsart == Untracked;
+    return Specman.instance().aenderungenVerfolgen() && changeInfo.isUntracked();
   }
 
   public void removeRowOrMarkAsDeletedUDBL(int rowIndex) {
@@ -473,7 +477,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
 
     List<Integer> originalColumnsWidthPercent = allocPercent(colIndex, columnsWidthPercent);
     for (List<EditContainer> row : cells) {
-      row.add(colIndex, new EditContainer(editor));
+      row.add(colIndex, new EditContainer(editor, TextInit.initialChangeInfo()));
     }
     recomputeLayout();
     return originalColumnsWidthPercent;
@@ -528,11 +532,11 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     recomputeLayout();
   }
 
-  @Override public Aenderungsart getAenderungsart() { return aenderungsart; }
-  @Override public void setAenderungsart(Aenderungsart aenderungsart) { this.aenderungsart = aenderungsart; }
-  private void setAenderungsartUDBL(Aenderungsart aenderungsart) { UDBL.setAenderungsart(this, aenderungsart); }
+  @Override public ChangeInfo getChangeInfo() { return changeInfo; }
+  @Override public void setChangeInfo(ChangeInfo changeInfo) { this.changeInfo = changeInfo; }
+  private void setChangeInfoUDBL(ChangeInfo changeInfo) { UDBL.setChangeInfo(this, changeInfo); }
 
-  public boolean isMarkedAsDeleted() { return aenderungsart == Geloescht; }
+  public boolean isMarkedAsDeleted() { return changeInfo.isDeleted(); }
   private boolean allCellsMarkedAs(Aenderungsart aenderungsart) {
     return cells.stream().allMatch(row -> rowIsMarkedAs(row, aenderungsart));
   }
@@ -557,7 +561,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
 
   @Override
   public void viewsNachinitialisieren() {
-    if (aenderungsart == Geloescht) {
+    if (changeInfo.isDeleted()) {
       for (List<EditContainer> row : cells) {
         row.stream().forEach(ec -> ec.setGeloeschtMarkiertStilUDBL(null));
       }

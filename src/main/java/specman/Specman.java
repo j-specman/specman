@@ -286,7 +286,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	public void addTable(int columns, int rows) {
 		if (lastFocusedTextArea != null) {
-			EditArea nextFocusArea = lastFocusedTextArea.addTable(columns, rows, TextInit.initialArt());
+			EditArea nextFocusArea = lastFocusedTextArea.addTable(columns, rows);
 			diagrammAktualisieren(nextFocusArea);
 		}
 	}
@@ -294,7 +294,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	@Override
 	public void toggleListItem(boolean ordered) {
 		if (lastFocusedTextArea != null) {
-			EditArea nextFocusArea = lastFocusedTextArea.toggleListItemUDBL(ordered, TextInit.initialArt());
+			EditArea nextFocusArea = lastFocusedTextArea.toggleListItemUDBL(ordered);
 			diagrammAktualisieren(nextFocusArea);
 		}
 	}

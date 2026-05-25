@@ -1,6 +1,7 @@
 package specman.view;
 
 import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.EditorI;
 import static specman.ChangeSet.changeset;
 import specman.SchrittID;
@@ -18,7 +19,7 @@ public class QuellSchrittView extends AbstractSchrittView {
     public QuellSchrittView(EditorI editor, SchrittSequenzView parent, SchrittID id) {
         //TODO JL: der "." sorgt für eine Mindesthöhe des Quellschritts. Muss noch gesäubert werden.
         //Die Höhe des Schrittnummer-Labels sollte die Höhe bestimmen.
-        super(editor, parent, new EditorContentModel_V001(".", Aenderungsart.Quellschritt), id, Aenderungsart.Quellschritt);
+        super(editor, parent, new EditorContentModel_V001(".", new ChangeInfo(Aenderungsart.Quellschritt, changeset())), id, Aenderungsart.Quellschritt);
         setQuellStil();
         setBackgroundUDBL(changeset().panelColor());
     }

@@ -3,12 +3,14 @@ package specman.editarea;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.EditorI;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
 import specman.editarea.focusmover.CrossEditAreaFocusMoverFromImage;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
+import specman.model.v001.ChangeInfo_V001;
 import specman.model.v001.ImageEditAreaModel_V001;
 import specman.pdf.Shape;
 import specman.pdf.ShapeImage;
@@ -43,8 +45,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
-import static specman.Aenderungsart.Geloescht;
-import static specman.Aenderungsart.Untracked;
 import specman.ChangeSet;
 import static specman.view.AbstractSchrittView.FORMLAYOUT_GAP;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
@@ -62,7 +62,6 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     new LineBorder(FOCUS_BORDER_COLOR, BORDER_THICKNESS));
   private static final Border UNSELECTED_BORDER =
     new EmptyBorder(new Insets(BORDER_THICKNESS*2, BORDER_THICKNESS*2, BORDER_THICKNESS*2, BORDER_THICKNESS*2));
-  private static final Border UNSELECTED_CHANGED_BORDER = new LineBorder(ChangeSet.DEFAULT.colors.text.color, BORDER_THICKNESS*2);
 
   private BufferedImage fullSizeImage;
   private ImageIcon scaledIcon;
@@ -70,11 +69,11 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   private float individualScalePercent;
   private JLabel image;
   private ImageEditAreaGlassPane focusGlass;
-  private Aenderungsart aenderungsart;
+  private ChangeInfo changeInfo;
 
-  ImageEditArea(BufferedImage fullSizeImage, Aenderungsart aenderungsart) {
+  ImageEditArea(BufferedImage fullSizeImage, ChangeInfo changeInfo) {
     this.fullSizeImage = fullSizeImage;
-    this.aenderungsart = aenderungsart;
+    this.changeInfo = changeInfo;
     this.individualScalePercent = 1;
     postInit();
   }
@@ -83,7 +82,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     try {
       InputStream input = new ByteArrayInputStream(imageEditAreaModel.imageData);
       this.fullSizeImage = ImageIO.read(input);
-      this.aenderungsart = imageEditAreaModel.aenderungsart;
+      this.changeInfo = ChangeInfo.fromModel(imageEditAreaModel.changeInfo, imageEditAreaModel.aenderungsart);
       this.individualScalePercent = imageEditAreaModel.individualScalePercent;
       postInit();
     }
@@ -98,10 +97,10 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     this.image = new JLabel();
     add(image, CC.xy(1, 1));
     this.add(new SpaltenResizer(this, IRRELEVANT_COLUMNRESIZE_INDEX), CC.xy(2, 1));
-    setBackground(aenderungsart.toBackgroundColor());
+    setBackground(changeInfo.panelColor());
     image.setBorder(changetype2border());
     addComponentListener(this);
-    updateListenersByAenderungsart();
+    updateListenersByChangeInfo();
   }
 
   @Override
@@ -109,11 +108,11 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     add(schrittNummer);
   }
 
-  private void updateListenersByAenderungsart() {
+  private void updateListenersByChangeInfo() {
     removeMouseListener(this);
     removeFocusListener(this);
     removeKeyListener(this);
-    if (aenderungsart != Aenderungsart.Geloescht) {
+    if (!changeInfo.isDeleted()) {
       addMouseListener(this);
       addFocusListener(this);
       addKeyListener(this);
@@ -186,7 +185,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
       setImageBorderByChangetypeUDBL();
     }
     try (UndoRecording ur = editor.composeUndo()){
-      if (aenderungsart == Untracked && editor.aenderungenVerfolgen()) {
+      if (changeInfo.isUntracked() && editor.aenderungenVerfolgen()) {
         setGeloeschtMarkiertStilUDBL();
       }
       else {
@@ -204,7 +203,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public void focusGained(FocusEvent e) {
-    if (aenderungsart != Aenderungsart.Geloescht) {
+    if (!changeInfo.isDeleted()) {
       image.setBorder(SELECTED_BORDER);
       addGlassPanel();
     }
@@ -212,7 +211,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public void focusLost(FocusEvent e) {
-    if (aenderungsart != Aenderungsart.Geloescht) {
+    if (!changeInfo.isDeleted()) {
       image.setBorder(changetype2border());
       removeGlassPanel();
     }
@@ -227,7 +226,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   private void addGlassPanel() {
     if (focusGlass == null) {
-      focusGlass = new ImageEditAreaGlassPane(aenderungsart);
+      focusGlass = new ImageEditAreaGlassPane(changeInfo);
       add(focusGlass, CC.xy(1, 1));
       // Removing and re-attaching the image causes it to be drawn *below* the focus glass
       remove(image);
@@ -243,7 +242,9 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   }
 
   private Border changetype2border() {
-    return aenderungsart == Aenderungsart.Hinzugefuegt ? UNSELECTED_CHANGED_BORDER : UNSELECTED_BORDER;
+    return changeInfo.isAdded()
+        ? new LineBorder(changeInfo.changeSet().textColor(), BORDER_THICKNESS*2)
+        : UNSELECTED_BORDER;
   }
 
   public void setImageBorderUDBL(Border border) { UDBL.setBorderUDBL(image, border); }
@@ -258,36 +259,37 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public void aenderungsmarkierungenEntfernen() {
-    aenderungsart = Untracked;
+    changeInfo = ChangeInfo.untracked();
   }
 
   @Override
   public void setGeloeschtMarkiertStilUDBL() {
-    if (aenderungsart == Untracked) {
-      updateChangetypeAndDependentStylingUDBL(Aenderungsart.Geloescht);
+    if (changeInfo.isUntracked()) {
+      updateChangetypeAndDependentStylingUDBL(changeInfo.deleted());
       focusGlass.toDeleted();
     }
-    else if (aenderungsart == Geloescht) {
+    else if (changeInfo.isDeleted()) {
       addGlassPanel();
       focusGlass.toDeleted();
     }
-    else if (aenderungsart == Aenderungsart.Hinzugefuegt) {
+    else if (changeInfo.isAdded()) {
       getParent().removeEditAreaUDBL(this); // Includes recording of required undos
     }
   }
 
-  private void updateChangetypeAndDependentStylingUDBL(Aenderungsart aenderungsart) {
-    setAenderungsartUDBL(aenderungsart);
+  private void updateChangetypeAndDependentStylingUDBL(ChangeInfo newChangeInfo) {
+    setChangeInfoUDBL(newChangeInfo);
     setImageBorderByChangetypeUDBL();
     setEditBackgroundUDBL(null);
   }
 
-  public Aenderungsart getAenderungsart() { return aenderungsart; }
+  public ChangeInfo getChangeInfo() { return changeInfo; }
 
-  public void setAenderungsart(Aenderungsart aenderungsart) {
-    this.aenderungsart = aenderungsart;
-    updateListenersByAenderungsart();
-    if (aenderungsart == Aenderungsart.Geloescht) {
+
+  public void setChangeInfo(ChangeInfo changeInfo) {
+    this.changeInfo = changeInfo;
+    updateListenersByChangeInfo();
+    if (changeInfo.isDeleted()) {
       addGlassPanel();
     }
     else {
@@ -295,8 +297,8 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     }
   }
 
-  public void setAenderungsartUDBL(Aenderungsart aenderungsart) {
-    UDBL.setAenderungsart(this, aenderungsart);
+  public void setChangeInfoUDBL(ChangeInfo changeInfo) {
+    UDBL.setChangeInfo(this, changeInfo);
   }
 
   @Override
@@ -307,7 +309,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     try {
       ByteArrayOutputStream bytes = new ByteArrayOutputStream();
       ImageIO.write(fullSizeImage, PERSISTED_IMAGETYPE, bytes);
-      return new ImageEditAreaModel_V001(bytes.toByteArray(), PERSISTED_IMAGETYPE, aenderungsart, individualScalePercent);
+      return new ImageEditAreaModel_V001(bytes.toByteArray(), PERSISTED_IMAGETYPE, new ChangeInfo_V001(changeInfo), individualScalePercent);
     }
     catch (IOException iox) {
       throw new RuntimeException(iox);
@@ -319,28 +321,24 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public void skalieren(int prozentNeu, int prozentAktuell) {
-    // Nothing to do: image is automacically resized by the pack() methode if necessary
+    // Nothing to do: image is automatically resized by the pack() method if necessary
   }
 
   @Override
   public int aenderungenUebernehmen() {
-    int changesMade = aenderungsart.asNumChanges();
-    switch (aenderungsart) {
-      case Hinzugefuegt -> updateChangetypeAndDependentStylingUDBL(Untracked);
-      case Geloescht -> getParent().removeEditAreaUDBL(this);
-    }
-    aenderungsart = Untracked;
+    int changesMade = changeInfo.numChanges();
+    if (changeInfo.isAdded()) updateChangetypeAndDependentStylingUDBL(ChangeInfo.untracked());
+    else if (changeInfo.isDeleted()) getParent().removeEditAreaUDBL(this);
+    changeInfo = ChangeInfo.untracked();
     return changesMade;
   }
 
   @Override
   public int aenderungenVerwerfen() {
-    int changesReverted = aenderungsart.asNumChanges();
-    switch(aenderungsart) {
-      case Hinzugefuegt -> getParent().removeEditAreaUDBL(this);
-      case Geloescht -> updateChangetypeAndDependentStylingUDBL(Untracked);
-    }
-    aenderungsart = Untracked;
+    int changesReverted = changeInfo.numChanges();
+    if (changeInfo.isAdded()) getParent().removeEditAreaUDBL(this);
+    else if (changeInfo.isDeleted()) updateChangetypeAndDependentStylingUDBL(ChangeInfo.untracked());
+    changeInfo = ChangeInfo.untracked();
     return changesReverted;
   }
 
@@ -350,7 +348,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   @Override public boolean isImageEditArea() { return true; }
 
   @Override
-  public boolean enthaeltAenderungsmarkierungen() { return aenderungsart != null; }
+  public boolean enthaeltAenderungsmarkierungen() { return changeInfo != null; }
 
   @Override
   public void findStepnumberLinkIDs(HashMap<TextEditArea, List<String>> stepnumberLinkMap) {
@@ -359,7 +357,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public void setEditBackgroundUDBL(Color bg) {
-    setBackgroundUDBL(aenderungsart.toBackgroundColor());
+    setBackgroundUDBL(changeInfo.panelColor());
   }
 
   public void setBackgroundUDBL(Color bg) {
@@ -429,7 +427,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public void viewsNachinitialisieren() {
-    if (aenderungsart == Geloescht) {
+    if (changeInfo.isDeleted()) {
       setGeloeschtMarkiertStilUDBL();
     }
   }

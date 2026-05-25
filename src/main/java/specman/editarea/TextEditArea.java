@@ -3,6 +3,9 @@ package specman.editarea;
 import net.atlanticbb.tantlinger.ui.text.CompoundUndoManager;
 import org.apache.commons.lang.StringUtils;
 import specman.Aenderungsart;
+import specman.ChangeInfo;
+import specman.model.v001.ChangeInfo_V001;
+import static specman.ChangeInfo.fromModel;
 import specman.EditorI;
 import specman.Specman;
 import static specman.ChangeSet.changeset;
@@ -65,11 +68,11 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     private static final String INITIAL_EMPTY_CONTENT_INDICATOR = "x";
 
     private WrappedElement hoveredElement;
-    private Aenderungsart aenderungsart;
+    private ChangeInfo changeInfo;
     private TextEditAreaModel_V001 deletionBackup;
 
     public TextEditArea(TextEditAreaModel_V001 model, Font font) {
-        this.aenderungsart = model.aenderungsart;
+        this.changeInfo = fromModel(model.changeInfo, model.aenderungsart);
         String initialText = model.isEmpty() ? INITIAL_EMPTY_CONTENT_INDICATOR : model.text;
         Specman.instance().instrumentWysEditor(this, initialText, 0);
         putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
@@ -77,7 +80,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         addKeyListener(new TextEditAreaKeyListener(this));
         addMouseListener();
         addMouseMotionListener();
-        setBackground(aenderungsart.toBackgroundColor());
+        setBackground(changeInfo.panelColor());
         registerToolTipManager();
         styleChangedTextSections(model);
         if (model.isEmpty()) {
@@ -198,7 +201,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     @Override
     public void setGeloeschtMarkiertStilUDBL() {
       aenderungenVerwerfen();
-      setAenderungsartUDBL(Geloescht);
+      setChangeInfoUDBL(changeInfo.deleted());
       deletionBackup = getTextWithMarkups(true);
       setStyleUDBL(ganzerSchrittGeloeschtStil, changeset().panelColor(), false);
     }
@@ -226,7 +229,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         else {
             text = getPlainText().replace("\n", " ").trim();
         }
-        return new TextEditAreaModel_V001(text, getPlainText(), markups, aenderungsart);
+        return new TextEditAreaModel_V001(text, getPlainText(), markups, changeInfo);
     }
 
     public void cleanupText() {
@@ -270,7 +273,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     public int aenderungenUebernehmen() {
         EditorI editor = Specman.instance();
         WrappedDocument doc = getWrappedDocument();
-        int changesMade = aenderungsart.asNumChanges();
+        int changesMade = changeInfo.numChanges();
 
         List<GeloeschtMarkierung_V001> loeschungen = new ArrayList<>();
         for (WrappedElement e : doc.getRootElements()) {
@@ -293,13 +296,13 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     // TODO JL: Muss mit aenderungsmarkierungenUebernehmen zusammengelegt werden
     public int aenderungenVerwerfen() {
-        int changesReverted = aenderungsart.asNumChanges();
-        if (aenderungsart == Hinzugefuegt) {
+        int changesReverted = changeInfo.numChanges();
+        if (changeInfo.isAdded()) {
             if (!areaDetachedByMerge()) {
                 getParent().removeEditAreaUDBL(this);
             }
         }
-        else if (aenderungsart == Geloescht) {
+        else if (changeInfo.isDeleted()) {
             if (deletionBackup != null) {
                 setText(deletionBackup.text);
                 setEditable(true);
@@ -326,7 +329,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
                 }
             }
         }
-        aenderungsart = Untracked;
+        changeInfo = ChangeInfo.untracked();
         return changesReverted;
     }
 
@@ -359,7 +362,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
             changesMade += aenderungsmarkierungenUebernehmen(e.getElement(i), loeschungen);
         }
 
-        aenderungsart = Untracked;
+        changeInfo = ChangeInfo.untracked();
         return changesMade;
     }
 
@@ -502,29 +505,29 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         getParent().addImageUDBL(image, this);
     }
 
-    public EditArea addTable(int columns, int rows, Aenderungsart aenderungsart) {
-        return getParent().addTableUDBL(this, columns, rows, aenderungsart);
+    public EditArea addTable(int columns, int rows) {
+        return getParent().addTableUDBL(this, columns, rows);
     }
 
-    public EditArea toggleListItemUDBL(boolean ordered, Aenderungsart aenderungsart) {
+    public EditArea toggleListItemUDBL(boolean ordered) {
         // TODO JL: Evt. noch schlauer machen. Toggle von Ordered -> Unordered und umgekehrt
         EditContainer editContainer = getParent();
         if (editContainer.getParent() instanceof UnorderedListItemEditArea) {
             UnorderedListItemEditArea unorderedListItemEditArea = (UnorderedListItemEditArea) editContainer.getParent();
-            return unorderedListItemEditArea.getParent().dissolveListItemEditAreaUDBL(unorderedListItemEditArea, aenderungsart);
+            return unorderedListItemEditArea.getParent().dissolveListItemEditAreaUDBL(unorderedListItemEditArea);
         }
         if (editContainer.getParent() instanceof OrderedListItemEditArea) {
             OrderedListItemEditArea orderedListItemEditArea = (OrderedListItemEditArea) editContainer.getParent();
-            return orderedListItemEditArea.getParent().dissolveListItemEditAreaUDBL(orderedListItemEditArea, aenderungsart);
+            return orderedListItemEditArea.getParent().dissolveListItemEditAreaUDBL(orderedListItemEditArea);
         }
         else {
-            return getParent().addListItemUDBL(this, ordered, aenderungsart);
+            return getParent().addListItemUDBL(this, ordered);
         }
     }
 
     @Override
     public TextEditAreaModel_V001 toModel(boolean formatierterText) {
-      return (aenderungsart == Geloescht)
+      return changeInfo.isDeleted()
         ? deletionBackup
         : getTextWithMarkups(formatierterText);
     }
@@ -548,7 +551,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     public TextEditArea copyArea() {
-        TextEditAreaModel_V001 modelCopy = new TextEditAreaModel_V001(getText(), getPlainText(), new ArrayList<>(), aenderungsart);
+        TextEditAreaModel_V001 modelCopy = new TextEditAreaModel_V001(getText(), getPlainText(), new ArrayList<>(), changeInfo);
         MarkedCharSequence marksBackup = findMarkups();
         TextEditArea areaCopy = new TextEditArea(modelCopy, this.getFont());
         List<Markup_V001> recoveredChangemarks = new MarkupRecovery(getWrappedDocument(), marksBackup).recover();
@@ -695,7 +698,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     @Override
     public boolean enthaeltAenderungsmarkierungen() {
-        return aenderungsart.istAenderung()
+        return changeInfo.isChange()
           || !findMarkups(FirstChangeOnly).isEmpty();
     }
 
@@ -817,14 +820,14 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     @Override
     public boolean enthaelt(InteractiveStepFragment fragment) { return this == fragment; }
 
-    @Override public Aenderungsart getAenderungsart() { return aenderungsart; }
-    @Override public void setAenderungsart(Aenderungsart aenderungsart) {
-      this.aenderungsart = aenderungsart;
-      if (aenderungsart != Geloescht) {
+    @Override public ChangeInfo getChangeInfo() { return changeInfo; }
+    @Override public void setChangeInfo(ChangeInfo changeInfo) {
+      this.changeInfo = changeInfo;
+      if (!changeInfo.isDeleted()) {
         deletionBackup = null;
       }
     }
-    private void setAenderungsartUDBL(Aenderungsart aenderungsart) { UDBL.setAenderungsart(this, aenderungsart); }
+    private void setChangeInfoUDBL(ChangeInfo changeInfo) { UDBL.setChangeInfo(this, changeInfo); }
 
     public Shape getShape() {
         return new Shape(this).withText(new FormattedShapeText(this));
@@ -859,7 +862,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
   @Override
   public void viewsNachinitialisieren() {
-    if (aenderungsart == Geloescht) {
+    if (changeInfo.isDeleted()) {
       setGeloeschtMarkiertStilUDBL();
     }
   }

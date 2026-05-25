@@ -4,11 +4,12 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.Aenderungsart;
+import specman.ChangeInfo;
 import specman.EditorI;
 import specman.Specman;
-import static specman.ChangeSet.changeset;
 import specman.editarea.document.WrappedPosition;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
+import specman.model.v001.ChangeInfo_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.ListItemEditAreaModel_V001;
 import specman.undo.UndoableListItemSplitted;
@@ -23,26 +24,24 @@ import java.awt.event.FocusListener;
 import java.util.HashMap;
 import java.util.List;
 
-import static specman.Aenderungsart.Geloescht;
-import static specman.Aenderungsart.Hinzugefuegt;
-import static specman.Aenderungsart.Untracked;
+import static specman.ChangeInfo.fromModel;
 
 abstract public class AbstractListItemEditArea extends JPanel implements EditArea<ListItemEditAreaModel_V001> {
   static final int DEFAULT_PROMPT_SPACE = 20;
   protected EditContainer content;
-  protected Aenderungsart aenderungsart;
+  protected ChangeInfo changeInfo;
   protected int promptSpace;
   protected JPanel itemPrompt;
   protected FormLayout layout;
 
-  public AbstractListItemEditArea(TextEditArea initialContent, Aenderungsart aenderungsart) {
-    this.aenderungsart = aenderungsart;
+  public AbstractListItemEditArea(TextEditArea initialContent, ChangeInfo changeInfo) {
+    this.changeInfo = changeInfo;
     this.content = new EditContainer(Specman.instance(), initialContent, null);
     initLayout();
   }
 
   public AbstractListItemEditArea(ListItemEditAreaModel_V001 model) {
-    this.aenderungsart = model.aenderungsart;
+    this.changeInfo = fromModel(model.changeInfo, model.aenderungsart);
     this.content = new EditContainer(Specman.instance(), model.content, null);
     initLayout();
   }
@@ -62,7 +61,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
       }
     };
     this.itemPrompt.setOpaque(true);
-    this.setBackground(aenderungsart.toBackgroundColor());
+    this.setBackground(changeInfo.panelColor());
 
     add(itemPrompt, CC.xy(1, 1));
   }
@@ -73,20 +72,23 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
     if (itemPrompt != null) { // is null on look&feel defaults init
       itemPrompt.setBackground(bg);
     }
+    if (content != null) {
+      content.setBackground(bg);
+    }
   }
 
   protected abstract void drawPrompt(Graphics2D g);
 
   @Override
   public void setGeloeschtMarkiertStilUDBL() {
-    setBackgroundUDBL(changeset().panelColor());
+    setBackgroundUDBL(changeInfo.changeSet().panelColor());
     content.setGeloeschtMarkiertStilUDBL(null);
   }
 
   @Override
   public ListItemEditAreaModel_V001 toModel(boolean formatierterText) {
     EditorContentModel_V001 contentModel = content.editorContent2Model(formatierterText);
-    return new ListItemEditAreaModel_V001(contentModel, ordered(), aenderungsart);
+    return new ListItemEditAreaModel_V001(contentModel, ordered(), new ChangeInfo_V001(changeInfo));
   }
 
   abstract protected boolean ordered();
@@ -100,8 +102,8 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
 
   @Override
   public int aenderungenUebernehmen() {
-    int changesMade = aenderungsart.asNumChanges();
-    if (aenderungsart == Geloescht) {
+    int changesMade = changeInfo.numChanges();
+    if (changeInfo.isDeleted()) {
       getParent().removeEditAreaUDBL(this);
       changesMade++;
     }
@@ -109,14 +111,14 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
       changesMade += content.aenderungenUebernehmen();
     }
     aenderungsmarkierungenEntfernen();
-    aenderungsart = Untracked;
+    changeInfo = ChangeInfo.untracked();
     return changesMade;
   }
 
   @Override
   public int aenderungenVerwerfen() {
-    int changesMade = aenderungsart.asNumChanges();
-    if (aenderungsart == Hinzugefuegt) {
+    int changesMade = changeInfo.numChanges();
+    if (changeInfo.isAdded()) {
       getParent().removeEditAreaUDBL(this);
       changesMade++;
     }
@@ -124,7 +126,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
       changesMade += content.aenderungenVerwerfen();
     }
     aenderungsmarkierungenEntfernen();
-    aenderungsart = Untracked;
+    changeInfo = ChangeInfo.untracked();
     return changesMade;
   }
 
@@ -136,17 +138,12 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
 
   @Override
   public void setEditBackgroundUDBL(Color bg) {
-    content.setBackgroundUDBL(aenderungsart.toBackgroundColor());
+    content.setBackgroundUDBL(changeInfo.panelColor());
     setBackgroundUDBL(bg);
   }
 
   private void setBackgroundUDBL(Color bg) {
     UDBL.setBackgroundUDBL(this, bg);
-  }
-
-  @Override
-  public void setAenderungsart(Aenderungsart aenderungsart) {
-
   }
 
   public EditContainer getContent() {
@@ -167,7 +164,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
       if (splitTextEditArea == null) {
         splitTextEditArea = new TextEditArea(initiatingEditArea.getFont());
       }
-      AbstractListItemEditArea splitListItemEditArea =  createSplittedItem(splitTextEditArea);
+      AbstractListItemEditArea splitListItemEditArea = createSplittedItem(splitTextEditArea);
       moveEditAreas(initiatingEditArea, splitListItemEditArea);
       editor.addEdit(new UndoableListItemSplitted(this, initiatingEditArea, splitListItemEditArea));
       editor.diagrammAktualisieren(splitListItemEditArea.content.getFirstEditArea());
@@ -195,7 +192,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
 
   @Override
   public void viewsNachinitialisieren() {
-    if (aenderungsart == Geloescht) {
+    if (changeInfo.isDeleted()) {
       content.setGeloeschtMarkiertStilUDBL(null);
     }
     content.viewsNachinitialisieren();
@@ -213,13 +210,13 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   @Override public synchronized void addComponentListener(ComponentListener l) { content.addEditComponentListener(l); }
   @Override public void requestFocus() { content.requestFocus(); }
 
-
   //**************** canonical EditArea method implementations ************************
-  @Override public boolean enthaeltAenderungsmarkierungen() { return aenderungsart.istAenderung() || content.enthaeltAenderungsmarkierungen(); }
+  @Override public boolean enthaeltAenderungsmarkierungen() { return changeInfo.isChange() || content.enthaeltAenderungsmarkierungen(); }
   @Override public void aenderungsmarkierungenEntfernen() { content.aenderungsmarkierungenEntfernen(null); }
   @Override public void findStepnumberLinkIDs(HashMap<TextEditArea, List<String>> stepnumberLinkMap) { content.findStepnumberLinkIDs(stepnumberLinkMap); }
   @Override public boolean enthaelt(InteractiveStepFragment fragment) { return content.enthaelt(fragment); }
-  @Override public Aenderungsart getAenderungsart() { return aenderungsart; }
+  @Override public ChangeInfo getChangeInfo() { return changeInfo; }
+  @Override public void setChangeInfo(ChangeInfo changeInfo) { this.changeInfo = changeInfo; }
   @Override public EditContainer getParent() { return (EditContainer) super.getParent(); }
   @Override public Component asComponent() { return this; }
   @Override public String getPlainText() { return content.getPlainText(); }
