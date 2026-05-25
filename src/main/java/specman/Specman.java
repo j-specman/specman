@@ -445,6 +445,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		diagramToolBar.setChangeModeEnabled(enabled);
 	}
 
+	public void updateChangeSet(ChangeSet changeSet) {
+		currentChangeSet = changeSet;
+		diagramToolBar.updateChangeSet(changeSet);
+	}
+
 	@Override
 	public void addRecentFile(File file) {
 		menuBar.addRecentFile(file);

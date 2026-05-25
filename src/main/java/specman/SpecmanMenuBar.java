@@ -52,7 +52,7 @@ class SpecmanMenuBar extends JMenuBar {
     for (ChangeSet cs : ChangeSet.ALL) {
       JMenuItem item = new JMenuItem(new ChangeSetDotIcon(cs));
       item.addActionListener(e -> {
-        specman.currentChangeSet = cs;
+        specman.updateChangeSet(cs);
         aenderungsfarbenMenu.setIcon(new ChangeSetDotIcon(cs));
       });
       aenderungsfarbenMenu.add(item);

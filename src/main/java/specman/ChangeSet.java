@@ -22,7 +22,7 @@ public class ChangeSet {
     new ChangeSet(new ChangeColorSet(new Color(150, 255, 150), STEPNUMBER_LINK_COLOR.color)), // green
     new ChangeSet(new ChangeColorSet(new Color(100, 255, 255), STEPNUMBER_LINK_COLOR.color)), // cyan
     new ChangeSet(new ChangeColorSet(new Color(255, 220, 150), STEPNUMBER_LINK_COLOR.color)), // orange
-    new ChangeSet(new ChangeColorSet(new Color(255, 180, 180), STEPNUMBER_LINK_COLOR.color))  // pink
+    new ChangeSet(new ChangeColorSet(new Color(255, 170, 170), STEPNUMBER_LINK_COLOR.color))  // pink
   );
 
   public final ChangeColorSet colors;

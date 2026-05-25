@@ -7,6 +7,7 @@ import specman.ops.buttons.DeleteStepOpButton;
 import specman.ops.buttons.ExportPDFOpButton;
 import specman.ops.buttons.RevertChangesADBLOpButton;
 import specman.ops.buttons.ReviewOpButton;
+
 import specman.ops.buttons.ToggleBorderTypeOpButton;
 import specman.ops.buttons.ToneOpButton;
 
@@ -16,6 +17,8 @@ import java.awt.*;
 public class DiagramToolBar extends JToolBar {
 
   private final JToggleButton aenderungenVerfolgen;
+  private final AcceptChangesADBLOpButton aenderungenUebernehmen;
+  private final RevertChangesADBLOpButton aenderungenVerwerfen;
   private final ZoomComboBox zoom;
 
   DiagramToolBar(Specman specman) {
@@ -25,13 +28,10 @@ public class DiagramToolBar extends JToolBar {
     DeleteStepOpButton loeschen = new DeleteStepOpButton(specman);
     ToggleBorderTypeOpButton toggleBorderType = new ToggleBorderTypeOpButton(specman);
 
-    Color changeColor = specman.changeset().panelColor();
     aenderungenVerfolgen = new JToggleButton();
-    AcceptChangesADBLOpButton aenderungenUebernehmen = new AcceptChangesADBLOpButton(specman);
-    RevertChangesADBLOpButton aenderungenVerwerfen = new RevertChangesADBLOpButton(specman);
-    aenderungenVerfolgen.setBackground(changeColor);
-    aenderungenUebernehmen.setBackground(changeColor);
-    aenderungenVerwerfen.setBackground(changeColor);
+    aenderungenUebernehmen = new AcceptChangesADBLOpButton(specman);
+    aenderungenVerwerfen = new RevertChangesADBLOpButton(specman);
+    updateChangeSetColor(specman.changeset().panelColor());
 
     ReviewOpButton review = new ReviewOpButton(specman);
     zoom = new ZoomComboBox(specman);
@@ -65,6 +65,16 @@ public class DiagramToolBar extends JToolBar {
 
   public boolean isChangeModeEnabled() {
     return aenderungenVerfolgen.isSelected();
+  }
+
+  public void updateChangeSet(ChangeSet changeSet) {
+    updateChangeSetColor(changeSet.panelColor());
+  }
+
+  private void updateChangeSetColor(Color color) {
+    aenderungenVerfolgen.setBackground(color);
+    aenderungenUebernehmen.setBackground(color);
+    aenderungenVerwerfen.setBackground(color);
   }
 
   public void updateZoomDisplay(int prozent) {
