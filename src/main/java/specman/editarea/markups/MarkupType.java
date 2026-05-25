@@ -21,26 +21,9 @@ public enum MarkupType {
       searchPurpose == searchPurpose.FirstChangeOnly && marksChange();
   }
 
-  public static MarkupType fromBackground(WrappedElement element) {
-    String cssColor = getBackgroundColorFromElement(element);
-    return ChangeSet.markupTypeFromBackground(cssColor);
-  }
-
-  private static String getBackgroundColorFromElement(WrappedElement element) {
+  public static String getBackgroundColorFromElement(WrappedElement element) {
     Object backgroundColorValue = element.getAttributes().getAttribute(CSS.Attribute.BACKGROUND_COLOR);
     return backgroundColorValue != null ? backgroundColorValue.toString() : null;
-  }
-
-  public AttributeSet toBackground() {
-    switch(this) {
-      case Changed:
-        return changeset().textBackground();
-      case Steplink:
-        return STEPNUMBER_LINK_COLOR.background;
-      case ChangedSteplink:
-        return changeset().stepnumberLinkBackground();
-    }
-    return null;
   }
 
 }

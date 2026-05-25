@@ -1,9 +1,12 @@
 package specman.editarea.markups;
 
+import specman.ChangeSet;
 import specman.editarea.document.WrappedPosition;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static specman.ChangeSet.changeset;
 
 public class MarkedCharSequence {
   final List<MarkedChar> chars;
@@ -33,8 +36,8 @@ public class MarkedCharSequence {
     return chars.get(pos);
   }
 
-  public MarkupType type(int pos) {
-    return get(pos).markupType;
+  public TextMarkup type(int pos) {
+    return get(pos).markup;
   }
 
   public boolean isVisibleChar(int pos) {
@@ -44,7 +47,10 @@ public class MarkedCharSequence {
 
   public void insertParagraphBoundaryAt(WrappedPosition pos, boolean changed) {
     int modelPos = pos.toModel();
-    chars.add(modelPos, new MarkedChar('\n', changed ? MarkupType.Changed : null));
+    TextMarkup markup = changed
+      ? new TextMarkup(MarkupType.Changed, changeset())
+      : null;
+    chars.add(modelPos, new MarkedChar('\n', markup));
   }
 
   public void append(MarkedCharSequence changemarks) {

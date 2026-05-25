@@ -6,17 +6,17 @@ import specman.editarea.document.WrappedPosition;
 
 public class MarkedChar {
   public final char c;
-  public final MarkupType markupType;
+  public final TextMarkup markup;
 
   public MarkedChar(WrappedDocument doc, WrappedPosition p) {
     c = doc.getChar(p);
     WrappedElement element = doc.getCharacterElement(p);
-    markupType = MarkupType.fromBackground(element);
+    markup = TextMarkup.fromBackground(element);
   }
 
-  public MarkedChar(char c, MarkupType markupType) {
+  public MarkedChar(char c, TextMarkup markup) {
     this.c = c;
-    this.markupType = markupType;
+    this.markup = markup;
   }
 
 }

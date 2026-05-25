@@ -12,14 +12,14 @@ import static specman.editarea.markups.CharType.NonWhitespace;
 public class MarkupRecovery {
   final WrappedDocumentI target;
   final MarkedCharSequence source;
-  final MarkupType[] marksPerChar;
+  final TextMarkup[] marksPerChar;
   WrappedPosition targetProgress;
   Integer sourceProgress;
 
   public MarkupRecovery(WrappedDocumentI target, MarkedCharSequence source) {
     this.target = target;
     this.source = source;
-    this.marksPerChar = new MarkupType[target.getLength()];
+    this.marksPerChar = new TextMarkup[target.getLength()];
     this.targetProgress = target.fromModel(0);
     this.sourceProgress = 0;
   }
@@ -92,22 +92,22 @@ public class MarkupRecovery {
   private List<Markup_V001> assembleMarkupsFromMarkupsPerChar() {
     List<Markup_V001> changemarks = new java.util.ArrayList<>();
     Integer markStart = null;
-    MarkupType lastType = null;
+    TextMarkup lastMarkup = null;
     for (int i = 0; i < marksPerChar.length; i++) {
-      MarkupType currentType = marksPerChar[i];
-      if (!Objects.equals(currentType, lastType)) {
+      TextMarkup currentType = marksPerChar[i];
+      if (!Objects.equals(currentType, lastMarkup)) {
         if (markStart != null) {
-          changemarks.add(new Markup_V001(markStart, i - 1, lastType));
+          changemarks.add(new Markup_V001(markStart, i - 1, lastMarkup));
           markStart = null;
         }
         if (currentType != null) {
           markStart = i;
         }
-        lastType = currentType;
+        lastMarkup = currentType;
       }
     }
     if (markStart != null) {
-      changemarks.add(new Markup_V001(markStart, marksPerChar.length - 1, lastType));
+      changemarks.add(new Markup_V001(markStart, marksPerChar.length - 1, lastMarkup));
     }
     return changemarks;
   }

@@ -248,10 +248,10 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     private void findMarkups(WrappedElement e, java.util.List<Markup_V001> ergebnis, MarkupSearchPurpose searchPurpose) {
-        MarkupType markupType = MarkupType.fromBackground(e);
-        if (markupType != null && markupType.matches(searchPurpose)) {
-            ergebnis.add(new Markup_V001(e.getStartOffset().toModel(), e.getEndOffset().toModel()-1, markupType));
-            if (markupType.matches(searchPurpose) && searchPurpose == FirstChangeOnly) {
+        TextMarkup markup = TextMarkup.fromBackground(e);
+        if (markup != null && markup.matches(searchPurpose)) {
+            ergebnis.add(new Markup_V001(e.getStartOffset().toModel(), e.getEndOffset().toModel()-1, markup));
+            if (searchPurpose == FirstChangeOnly) {
                 return;
             }
         }

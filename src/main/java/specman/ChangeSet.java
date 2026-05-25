@@ -1,6 +1,7 @@
 package specman;
 
 import specman.editarea.markups.MarkupType;
+import specman.editarea.markups.TextMarkup;
 import specman.graphics.ChangeColorSet;
 import specman.graphics.ReadWriteColor;
 
@@ -67,7 +68,6 @@ public class ChangeSet {
   public Color buttonColor() { return colors.panelColor; }
   public Color activeButtonColor() { return colors.text.color; }
   public boolean isAnyBackground(String cssColor) { return colors.isAnyBackground(cssColor); }
-  public MarkupType toMarkupType(String cssColor) { return colors.toMarkupType(cssColor); }
   public Color textColor() { return colors.text.color; }
   public String textHtmlColor() { return colors.text.htmlColor; }
   public javax.swing.text.AttributeSet textBackground() { return colors.text.background; }
@@ -91,11 +91,13 @@ public class ChangeSet {
     return ALL.values().stream().anyMatch(cs -> cs.isAnyBackground(cssColor));
   }
 
-  public static MarkupType markupTypeFromBackground(String cssColor) {
+  public static TextMarkup textMarkupFromBackground(String cssColor) {
     for (ChangeSet cs : ALL.values()) {
       MarkupType type = cs.colors.toMarkupType(cssColor);
       if (type != null) {
-        return type;
+        return (type != MarkupType.Steplink)
+          ? new TextMarkup(type, cs)
+          : new TextMarkup(type, null);
       }
     }
     return null;

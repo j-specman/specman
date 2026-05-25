@@ -1,16 +1,19 @@
 package specman.model.v001;
 
 import specman.editarea.markups.MarkupType;
+import specman.editarea.markups.TextMarkup;
 
 import java.util.Objects;
 
 public class Markup_V001 {
 	final int from, to;
 	final MarkupType type;
+	final String changeset;
 	
 	@Deprecated public Markup_V001() { // For Jackson only
 		from = to = 0;
 		type = null;
+		changeset = null;
 	}
 
 	@Deprecated
@@ -18,12 +21,14 @@ public class Markup_V001 {
 		this.from = from;
 		this.to = to;
 		this.type = MarkupType.Changed;
+		this.changeset = null;
 	}
 
-	public Markup_V001(int from, int to, MarkupType type) {
+	public Markup_V001(int from, int to, TextMarkup markup) {
 		this.from = from;
 		this.to = to;
-		this.type = type;
+		this.type = markup.type;
+		this.changeset = markup.changeSet.name;
 	}
 
 	public int getFrom() {
@@ -35,6 +40,8 @@ public class Markup_V001 {
 	}
 
 	public MarkupType getType() { return type; }
+
+	public String getChangeset() { return changeset; }
 
 	public int laenge() {
 		return to - from + 1;

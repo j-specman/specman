@@ -35,7 +35,7 @@ public class MarkupBackgroundStyleInitializer {
     List<StyledSection> stylings = new ArrayList<>();
     for (int i = 0; i < model.size(); i++) {
       Markup_V001 change = model.get(i);
-      AttributeSet style = change.getType().toBackground();
+      AttributeSet style = TextMarkup.toBackground(change);
       StyledSection changeSection = new StyledSection(change.getFrom(), change.laenge(), style);
       stylings.add(changeSection);
       StyledSection standardSection = followingStandardSection(model, i);

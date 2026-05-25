@@ -2,6 +2,7 @@ package specman;
 
 import org.jetbrains.annotations.Nullable;
 import specman.editarea.markups.MarkupType;
+import specman.editarea.markups.TextMarkup;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.Markup_V001;
 import specman.model.v001.TextEditAreaModel_V001;
@@ -24,7 +25,8 @@ public class TextInit {
   public static EditorContentModel_V001 initialtext(String text, @Nullable String align) {
     List<Markup_V001> markups = new ArrayList<>();
     if (Specman.instance().aenderungenVerfolgen()) {
-      markups.add(new Markup_V001(0, text.length() - 1, MarkupType.Changed));
+      TextMarkup markup = new TextMarkup(MarkupType.Changed, changeset());
+      markups.add(new Markup_V001(0, text.length() - 1, markup));
     }
     String styledText = (align != null)
         ? "<div align='" + align + "'>" + text + "</div>"
