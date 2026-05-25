@@ -3,12 +3,12 @@ package specman;
 import javax.swing.*;
 import java.awt.*;
 
-class ColorDotIcon implements Icon {
+class ChangeSetDotIcon implements Icon {
   private static final int SIZE = 10;
   private final Color color;
 
-  ColorDotIcon(Color color) {
-    this.color = color;
+  ChangeSetDotIcon(ChangeSet changeSet) {
+    this.color = changeSet.menuColor();
   }
 
   @Override
