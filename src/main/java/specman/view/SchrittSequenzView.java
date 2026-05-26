@@ -478,11 +478,16 @@ public class SchrittSequenzView {
 	}
 
 	public int aenderungenVerwerfen(EditorI editor) throws EditException {
-		int changesReverted = 0;
-		if (!changeInfo.isAdded()) {
-			for (AbstractSchrittView schritt: schritte) {
-				changesReverted += schritt.aenderungenVerwerfen(editor);
+		int changesReverted = changeInfo.numChanges();
+		for (AbstractSchrittView schritt: schritte) {
+			if (schritte.size() == 1) {
+				// This keeps us from running into the exception that the last step of a sequence must not be removed.
+				// This is not completely clean, because if e.g. the last remaining step is a source or target step from
+				// a step movement, the reversal might be incomplete here. We live with that for now as it is a known
+				// open issue, that the removal of last steps should be possible.
+				break;
 			}
+			changesReverted += schritt.aenderungenVerwerfen(editor);
 		}
 		changeInfo = ChangeInfo.untracked();
 		if (catchBereich != null) {
