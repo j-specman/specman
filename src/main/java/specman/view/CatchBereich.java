@@ -10,6 +10,7 @@ import specman.EditorI;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
+import specman.TextInit;
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.Styles;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
@@ -166,7 +167,7 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
 
   public CatchSchrittSequenzView catchSequenzAnhaengenUDBL(BreakSchrittView breakStepToLink) {
     List<Integer> originalSequencesWidthPercents = copyOf(sequencesWidthPercent);
-    CatchSchrittSequenzView catchSequence = new CatchSchrittSequenzView(this, breakStepToLink);
+    CatchSchrittSequenzView catchSequence = new CatchSchrittSequenzView(this, breakStepToLink, TextInit.initialChangeInfo());
     addCatchSequence(catchSequence, null, null);
     Specman.instance().addEdit(new UndoableCatchSequenceAdded(catchSequence, originalSequencesWidthPercents));
     return catchSequence;

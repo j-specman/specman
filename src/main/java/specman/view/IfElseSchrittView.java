@@ -58,8 +58,8 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		});
 		panel.add(new SpaltenResizer(this), CC.xywh(2, 1, 1, 5));
 		if(withDefaultContent) {
-			initIfSequenz(new ZweigSchrittSequenzView(editor, this, id.naechsteEbene(), initialtext("Ja")));
-			initElseSequenz(new ZweigSchrittSequenzView(editor, this, id.naechsteID().naechsteEbene(), EditContainer.right("Nein")));
+			initIfSequenz(new ZweigSchrittSequenzView(editor, this, id.naechsteEbene(), initialtext("Ja"), changeInfo));
+			initElseSequenz(new ZweigSchrittSequenzView(editor, this, id.naechsteID().naechsteEbene(), EditContainer.right("Nein"), changeInfo));
 		}
 	}
 

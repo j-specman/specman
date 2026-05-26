@@ -31,8 +31,8 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 		ueberschriftInitialisieren(editor, model.ueberschrift != null ? model.ueberschrift : null, null);
 	}
 
-	public ZweigSchrittSequenzView(EditorI editor, AbstractSchrittView parent, SchrittID sequenzBasisId, EditorContentModel_V001 initialerText) {
-		super(parent, sequenzBasisId);
+	public ZweigSchrittSequenzView(EditorI editor, AbstractSchrittView parent, SchrittID sequenzBasisId, EditorContentModel_V001 initialerText, ChangeInfo changeInfo) {
+		super(parent, sequenzBasisId, changeInfo);
 		ueberschriftInitialisieren(editor, initialerText, null);
 		this.changeInfo = TextInit.initialChangeInfo();
 	}

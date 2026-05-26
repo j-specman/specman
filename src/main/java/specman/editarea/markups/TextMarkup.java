@@ -7,6 +7,8 @@ import specman.model.v001.Markup_V001;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.html.CSS;
 
+import java.util.Objects;
+
 import static specman.ChangeSet.STEPNUMBER_LINK_COLOR;
 import static specman.ChangeSet.changeset;
 
@@ -45,5 +47,17 @@ public class TextMarkup {
 
   public boolean matches(MarkupSearchPurpose searchPurpose) {
     return type.matches(searchPurpose);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+    TextMarkup markup = (TextMarkup) o;
+    return type == markup.type && changeSet == markup.changeSet;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(type, changeSet);
   }
 }

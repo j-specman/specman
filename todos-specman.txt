@@ -1,10 +1,13 @@
 Multiple Changesets - Wichtig für nächste CR-Phase bei der ERSTEn
-- Auswahl des Changesets im Menu
-- Einfärben der Änderungsbutton entsprechende des ausgewählten Changesets
-- Ausgewählten Changeset im Modell festhalten
-- Markups für Änderungen im Modell mit Changeset-Nummer anreichern
+- Markups auf Datei beschränken sich immer auf ein einzelnes Zeichen
+- Geerbter Fehler: Änderungen zurücknehmen auf einem neu angelegten Schleifenschritt führt zu Fehlermeldung beim Versuch, den letzten Schritt
+   zu löschen, der ebenfalls as neu angelegt gekennzeichnet ist.
+x Auswahl des Changesets im Menu
+x Einfärben der Änderungsbutton entsprechende des ausgewählten Changesets
+x Ausgewählten Changeset im Modell festhalten
+x Markups für Änderungen im Modell mit Changeset-Nummer anreichern
 - Annahme / Ablehnung von Änderungen auf aktuellen Changeset beschränken
-- Editregeln bei konkurrierenden Änderungen
+x Editregeln bei konkurrierenden Änderungen
 - Merge von Changesets
 
 Aus aktueller Anwendung

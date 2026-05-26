@@ -52,7 +52,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		klappen = new KlappButton(this, editContainer.getKlappButtonParent(), layout, CONTENTROW, filler.row);
 
 		if (withDefaultContent) {
-      initSubsequenz(einschrittigeInitialsequenz(editor, id.naechsteEbene()), false);
+      initSubsequenz(einschrittigeInitialsequenz(editor, id.naechsteEbene(), changeInfo), false);
 		}
 	}
 
@@ -73,8 +73,8 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		klappen.init(model.zugeklappt);
 	}
 
-	private SchrittSequenzView einschrittigeInitialsequenz(EditorI editor, SchrittID id) {
-		SchrittSequenzView sequenz = new SchrittSequenzView(this, id);
+	private SchrittSequenzView einschrittigeInitialsequenz(EditorI editor, SchrittID id, ChangeInfo changeInfo) {
+		SchrittSequenzView sequenz = new SchrittSequenzView(this, id, changeInfo);
 		sequenz.einfachenSchrittAnhaengen(editor);
 		return sequenz;
 	}

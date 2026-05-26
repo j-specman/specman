@@ -59,11 +59,12 @@ public class SchrittSequenzView {
 	final AbstractSchrittView parent;
 
 	public SchrittSequenzView() {
-		this(null, new SchrittID(0));
+		this(null, new SchrittID(0), TextInit.initialChangeInfo());
 	}
 
-	public SchrittSequenzView(AbstractSchrittView parent, SchrittID sequenzBasisId) {
+	public SchrittSequenzView(AbstractSchrittView parent, SchrittID sequenzBasisId, ChangeInfo changeInfo) {
 		this.parent = parent;
+		this.changeInfo = changeInfo;
 		panel = new JPanel();
 		huellLayout = new FormLayout("10px:grow", ZEILENLAYOUT_LETZTER_SCHRITT + ", " + ZEILENLAYOUT_CATCHBEREICH);
 		panel.setLayout(huellLayout);
@@ -83,8 +84,7 @@ public class SchrittSequenzView {
 	}
 
 	public SchrittSequenzView(EditorI editor, AbstractSchrittView parent, SchrittSequenzModel_V001 model) {
-		this(parent, model.id);
-    this.changeInfo = ChangeInfo.fromModel(model.changeInfo, model.aenderungsart);
+		this(parent, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
 		for (AbstractSchrittModel_V001 schritt : model.schritte) {
 			AbstractSchrittView schrittView = AbstractSchrittView.baueSchrittView(editor, this, schritt);
 			appendStep(schrittView);
@@ -479,8 +479,10 @@ public class SchrittSequenzView {
 
 	public int aenderungenVerwerfen(EditorI editor) throws EditException {
 		int changesReverted = 0;
-		for (AbstractSchrittView schritt: schritte) {
-			changesReverted += schritt.aenderungenVerwerfen(editor);
+		if (!changeInfo.isAdded()) {
+			for (AbstractSchrittView schritt: schritte) {
+				changesReverted += schritt.aenderungenVerwerfen(editor);
+			}
 		}
 		changeInfo = ChangeInfo.untracked();
 		if (catchBereich != null) {

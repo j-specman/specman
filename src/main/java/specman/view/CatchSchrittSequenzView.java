@@ -47,8 +47,8 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
    * the primary heading and the handling sequence. */
   List<CatchUeberschrift> coCatchHeadings = new ArrayList<>();
 
-  public CatchSchrittSequenzView(CatchBereich catchBereich, BreakSchrittView linkedBreakStep) {
-    super(Specman.instance(), catchBereich, linkedBreakStep.id.naechsteEbene(), linkedBreakStep.getEditorContent(true));
+  public CatchSchrittSequenzView(CatchBereich catchBereich, BreakSchrittView linkedBreakStep, ChangeInfo changeInfo) {
+    super(Specman.instance(), catchBereich, linkedBreakStep.id.naechsteEbene(), linkedBreakStep.getEditorContent(true), changeInfo);
     einfachenSchrittAnhaengen(Specman.instance());
     init(linkedBreakStep, null, TextInit.initialChangeInfo());
     initHeadingsLayout();

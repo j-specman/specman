@@ -78,11 +78,6 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
     klappen = new KlappButton(this, editContainer.getKlappButtonParent(), layout, CONTENTROW, filler.row);
 	}
 
-	public SchleifenSchrittView(EditorI editor, SchrittSequenzView parent, SchrittID id, ChangeInfo changeInfo) {
-		this(editor, parent, null, id, changeInfo, false);
-		initWiederholsequenz(einschrittigeInitialsequenz(editor, id.naechsteEbene()));
-	}
-
 	public SchleifenSchrittView(EditorI editor, SchrittSequenzView parent, WhileSchrittModel_V001 model, boolean mitUnteremBalken) {
 		this(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), mitUnteremBalken);
 		initWiederholsequenzFromModel(editor, model);
@@ -113,8 +108,8 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 		layout.setColumnSpec(1, ColumnSpec.decode(balkenbreite + "px"));
 	}
 
-	protected SchrittSequenzView einschrittigeInitialsequenz(EditorI editor, SchrittID id) {
-		SchrittSequenzView sequenz = new SchrittSequenzView(this, id);
+	protected SchrittSequenzView einschrittigeInitialsequenz(EditorI editor, SchrittID id, ChangeInfo changeInfo) {
+		SchrittSequenzView sequenz = new SchrittSequenzView(this, id, changeInfo);
 		sequenz.einfachenSchrittAnhaengen(editor);
 		return sequenz;
 	}
