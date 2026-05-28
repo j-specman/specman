@@ -183,7 +183,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     @Override
     public void setQuellStil(ChangeSet changeSet) {
-        setStyleUDBL(changeSet.getSourceStyle(), changeset().panelColor(), false);
+        setStyleUDBL(changeSet.getSourceStyle(), changeSet.panelColor(), false);
     }
 
     @Override

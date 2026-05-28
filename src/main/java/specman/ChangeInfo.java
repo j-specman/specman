@@ -2,10 +2,13 @@ package specman;
 
 import specman.model.v001.ChangeInfo_V001;
 
+import java.awt.*;
+
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.Aenderungsart.Untracked;
 import static specman.ChangeSet.changeset;
+import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.util.ObjectUtils.nvl;
 
 public class ChangeInfo {
@@ -40,8 +43,8 @@ public class ChangeInfo {
   public ChangeSet changeSet() { return changeSet; }
   public String changeSetName() { return changeSet != null ? changeSet.name : null; }
 
-  public java.awt.Color panelColor() {
-    return isChange() ? changeSet.panelColor() : specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
+  public Color panelColor() {
+    return isChange() ? changeSet.panelColor() : BACKGROUND_COLOR_STANDARD;
   }
 
   public boolean isUntracked() { return art == Untracked; }
@@ -68,4 +71,5 @@ public class ChangeInfo {
   public ChangeInfo toQuellschritt() {
     return new ChangeInfo(Aenderungsart.Quellschritt, nvl(this.changeSet(), changeset()));
   }
+
 }

@@ -48,7 +48,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 
 		panel.add(editContainer, CC.xy(1, 1));
 
-    filler = new BottomFiller(panel, layout, changeInfo.art());
+    filler = new BottomFiller(panel, layout, changeInfo);
 		klappen = new KlappButton(this, editContainer.getKlappButtonParent(), layout, CONTENTROW, filler.row);
 
 		if (withDefaultContent) {

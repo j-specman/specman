@@ -46,7 +46,7 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 		panel.addComponentListener(this);
 		panel.setEnabled(false);
 
-    filler = new BottomFiller(panel, panelLayout, changeInfo.art());
+    filler = new BottomFiller(panel, panelLayout, changeInfo);
     klappen = new KlappButton(this, editContainer.getKlappButtonParent(), panelLayout, CONTENTROW, filler.row);
 		klappen.addComponentListener(new ComponentAdapter() {
 			// Kleine Sch�nheitsgeschichte: Der Klapp-Button liegt �ber der linken Dreieckslinie.

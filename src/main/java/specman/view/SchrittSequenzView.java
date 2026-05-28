@@ -7,6 +7,7 @@ import com.jgoodies.forms.layout.RowSpec;
 import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
+import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
@@ -29,10 +30,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Untracked;
+import static specman.ChangeSet.changeset;
 import static specman.TextInit.initialtext;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.pdf.Shape.GAP_COLOR;
+import static specman.util.ObjectUtils.nvl;
 import static specman.view.RelativeStepPosition.After;
 import static specman.view.RelativeStepPosition.Before;
 import static specman.view.RoundedBorderDecorationStyle.Co;
@@ -497,10 +501,15 @@ public class SchrittSequenzView {
 	}
 
 	public void alsGeloeschtMarkierenUDBL() {
+		setAenderungsartUDBL(Geloescht);
 		for (AbstractSchrittView schritt: schritte) {
 			schritt.alsGeloeschtMarkierenUDBL();
 		}
-		UDBL.setChangeInfo(this, changeInfo.deleted());
+	}
+
+	public void setAenderungsartUDBL(Aenderungsart aenderungsart) {
+		ChangeSet changeset = nvl(changeInfo.changeSet(), changeset());
+		UDBL.setChangeInfo(this, new ChangeInfo(aenderungsart, changeset));
 	}
 
 	public void toggleBorderType(AbstractSchrittView schritt) {

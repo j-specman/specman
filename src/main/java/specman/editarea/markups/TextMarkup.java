@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import specman.ChangeSet;
 import specman.editarea.document.WrappedElement;
 import specman.model.v001.Markup_V001;
+import specman.util.ObjectUtils;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.html.CSS;
@@ -12,6 +13,7 @@ import java.util.Objects;
 
 import static specman.ChangeSet.STEPNUMBER_LINK_COLOR;
 import static specman.ChangeSet.changeset;
+import static specman.util.ObjectUtils.nvl;
 
 public class TextMarkup {
 
@@ -29,10 +31,7 @@ public class TextMarkup {
   }
 
   public static AttributeSet toBackground(Markup_V001 change) {
-    ChangeSet changeSet = ChangeSet.fromName(change.getChangeset());
-    if (changeSet == null) {
-      changeSet = ChangeSet.changeset();
-    }
+    ChangeSet changeSet = nvl(ChangeSet.fromName(change.getChangeset()), changeset());
     switch (change.getType()) {
       case Changed:
         return changeSet.textBackground();
