@@ -491,10 +491,23 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		return exportPDFOp.getPdfExportOptions();
 	}
 
+	/**
+	 * Swing requires all component creation and visibility changes to happen on the Event Dispatch
+	 * Thread (EDT). Without invokeAndWait the constructor — including setVisible(true) — would run
+	 * on the main thread, causing a race condition that sporadically prevents the window from
+	 * appearing. invokeAndWait (rather than invokeLater) is used so that main() does not return
+	 * before the window is fully initialized.
+	 */
 	public static void main(String[] args) throws Exception {
     setLookAndFeel();
 		File initialFileToOpen = readFileFromArgs(args);
-		new Specman(initialFileToOpen);
+		SwingUtilities.invokeAndWait(() -> {
+			try {
+				new Specman(initialFileToOpen);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
 	}
 
   private static void setLookAndFeel() {

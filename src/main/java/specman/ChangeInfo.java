@@ -3,6 +3,7 @@ package specman;
 import specman.model.v001.ChangeInfo_V001;
 
 import java.awt.*;
+import java.util.Objects;
 
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Hinzugefuegt;
@@ -74,6 +75,18 @@ public class ChangeInfo {
 
   public ChangeInfo toQuellschritt() {
     return new ChangeInfo(Aenderungsart.Quellschritt, nvl(this.changeSet(), changeset()));
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+    ChangeInfo that = (ChangeInfo) o;
+    return art == that.art && changeSet == that.changeSet;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(art, changeSet);
   }
 
 }

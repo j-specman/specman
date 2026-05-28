@@ -27,8 +27,7 @@ public class UndoableSchrittHinzugefuegt extends AbstractUndoableInteraction {
 
 	@Override public boolean canUndo() {
 		try {
-			sequenz.checkSchrittEntfernen(schritt, Discard);
-			return true;
+			return sequenz.checkSchrittEntfernen(schritt, Discard);
 		}
 		catch(EditException ex) {
 			return false;

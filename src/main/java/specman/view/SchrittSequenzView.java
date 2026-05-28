@@ -40,6 +40,8 @@ import static specman.view.RelativeStepPosition.Before;
 import static specman.view.RoundedBorderDecorationStyle.Co;
 import static specman.view.RoundedBorderDecorationStyle.Full;
 import static specman.view.RoundedBorderDecorationStyle.None;
+import static specman.view.StepRemovalPurpose.Confirm;
+import static specman.view.StepRemovalPurpose.Revert;
 
 public class SchrittSequenzView {
 	public static final String ZEILENLAYOUT_GAP = AbstractSchrittView.FORMLAYOUT_GAP;
@@ -338,30 +340,41 @@ public class SchrittSequenzView {
 		}
 	}
 
-	public void checkSchrittEntfernen(AbstractSchrittView schritt, StepRemovalPurpose purpose) throws EditException {
-		if (schritte.size() == 1 && !purpose.clearChangeSet()) {
-			throw new EditException("Letzten Schritt entfernen is nich!");
+	/** Currently it is not allowed to remove the very last step within a sequence. However, there is
+	 * one exception: if a step is removed by reversal or confirmation of a change set, we don't complain
+	 * as long as the sequence has an equal change info. This means that both step and sequence were both
+	 * added in the same change set or both removed in the same change set. So they are *both* about to
+	 * share the same fate of vanishing from the UI and in this case we allow a temporary inconsistent state
+	 * of an empty sequence. */
+	public boolean checkSchrittEntfernen(AbstractSchrittView schritt, StepRemovalPurpose purpose) throws EditException {
+		if (schritte.size() > 1) {
+			return true;
 		}
+		if (purpose.clearChangeSet() && changeInfo.equals(schritt.changeInfo)) {
+			return false;
+		}
+		throw new EditException("Letzten Schritt entfernen is nich!");
 	}
 
 	/**
-	 * @return Den Index des entfernten Schritts in der Sequenz. Dient der Wiedereingliederung beim Redo
+	 * @return index of the removed step, required for re-integration on redo.
 	 */
 	public int schrittEntfernen(AbstractSchrittView schritt, StepRemovalPurpose purpose) throws EditException {
-		checkSchrittEntfernen(schritt, purpose);
-		schritt.entfernen(this, purpose);
-		sequenzBereich.remove(schritt.getDecoratedComponent());
 		int schrittIndex = schritte.indexOf(schritt);
-		int layoutZeilenLoeschIndex = (schrittIndex == 0) ? 1 : schrittIndex*2;
-		sequenzbereichLayout.removeRow(layoutZeilenLoeschIndex);
-		sequenzbereichLayout.removeRow(layoutZeilenLoeschIndex);
-		schritte.remove(schrittIndex);
-		updateFollowingStepDecoration(schrittIndex);
-		updateLayoutRowspecsForAllsStepsAndGaps();
-		renummerieren(sequenzBasisId);
-    renumberFollowingStepsInParent();
-		AbstractSchrittView naechsterFokus = schritte.get(schrittIndex == 0 ? schrittIndex : schrittIndex-1);
-		Specman.instance().diagrammAktualisieren(naechsterFokus.getFirstEditArea());
+		if (checkSchrittEntfernen(schritt, purpose)) {
+			schritt.entfernen(this, purpose);
+			sequenzBereich.remove(schritt.getDecoratedComponent());
+			int layoutZeilenLoeschIndex = (schrittIndex == 0) ? 1 : schrittIndex * 2;
+			sequenzbereichLayout.removeRow(layoutZeilenLoeschIndex);
+			sequenzbereichLayout.removeRow(layoutZeilenLoeschIndex);
+			schritte.remove(schrittIndex);
+			updateFollowingStepDecoration(schrittIndex);
+			updateLayoutRowspecsForAllsStepsAndGaps();
+			renummerieren(sequenzBasisId);
+			renumberFollowingStepsInParent();
+			AbstractSchrittView naechsterFokus = schritte.get(schrittIndex == 0 ? schrittIndex : schrittIndex - 1);
+			Specman.instance().diagrammAktualisieren(naechsterFokus.getFirstEditArea());
+		}
 		return schrittIndex;
 	}
 
@@ -475,10 +488,10 @@ public class SchrittSequenzView {
 		for (AbstractSchrittView schritt: schritte) {
 			changesMade += schritt.aenderungenUebernehmen(editor);
 		}
-		changeInfo = ChangeInfo.untracked();
 		if (catchBereich != null) {
 			changesMade += catchBereich.aenderungenUebernehmen(editor);
 		}
+ 	  changeInfo = ChangeInfo.untracked();
 		return changesMade;
 	}
 

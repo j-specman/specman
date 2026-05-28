@@ -49,6 +49,7 @@ import static specman.view.RelativeStepPosition.After;
 import static specman.view.RoundedBorderDecorationStyle.Co;
 import static specman.view.RoundedBorderDecorationStyle.Full;
 import static specman.view.RoundedBorderDecorationStyle.None;
+import static specman.view.StepRemovalPurpose.Confirm;
 import static specman.view.StepRemovalPurpose.Discard;
 import static specman.view.StepRemovalPurpose.Move;
 import static specman.view.StepRemovalPurpose.Revert;
@@ -444,7 +445,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 			case Geloescht:
 			case Quellschritt:
 				markStepnumberLinksAsDefect();
-				getParent().schrittEntfernen(this, Discard);
+				getParent().schrittEntfernen(this, Confirm);
 				break;
 			case Zielschritt:
 				setQuellschrittUDBL(null);
