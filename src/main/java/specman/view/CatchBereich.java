@@ -246,11 +246,11 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
 
   @Override
   public int aenderungenVerwerfen(EditorI editor) throws EditException {
-    int changesReverted = 0;
+    int changesRejected = 0;
     for (CatchSchrittSequenzView seq: modifyableCatchSequences()) {
-      changesReverted += seq.aenderungenVerwerfen(editor);
+      changesRejected += seq.aenderungenVerwerfen(editor);
     }
-    return changesReverted;
+    return changesRejected;
   }
 
   @Override

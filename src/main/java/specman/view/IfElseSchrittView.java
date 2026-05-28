@@ -303,17 +303,17 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 	}
 
 	@Override protected int editAenderungenVerwerfen() {
-		int changesReverted = super.editAenderungenVerwerfen();
-		changesReverted += elseSequenz.ueberschriftAenderungenVerwerfen();
-		changesReverted += ifSequenz.ueberschriftAenderungenVerwerfen();
-		return changesReverted;
+		int changesRejected = super.editAenderungenVerwerfen();
+		changesRejected += elseSequenz.ueberschriftAenderungenVerwerfen();
+		changesRejected += ifSequenz.ueberschriftAenderungenVerwerfen();
+		return changesRejected;
 	}
 
 	@Override public int aenderungenVerwerfen(EditorI editor) throws EditException {
-		int changesReverted = super.aenderungenVerwerfen(editor);
-		changesReverted += elseSequenz.aenderungenVerwerfen(editor);
-		changesReverted += ifSequenz.aenderungenVerwerfen(editor);
-		return changesReverted;
+		int changesRejected = super.aenderungenVerwerfen(editor);
+		changesRejected += elseSequenz.aenderungenVerwerfen(editor);
+		changesRejected += ifSequenz.aenderungenVerwerfen(editor);
+		return changesRejected;
 	}
 
 	@Override public AbstractSchrittView findeSchrittZuId(SchrittID id) {

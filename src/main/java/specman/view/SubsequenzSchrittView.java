@@ -163,9 +163,9 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 	}
 
 	@Override public int aenderungenVerwerfen(EditorI editor) throws EditException {
-		int changesReverted = super.aenderungenVerwerfen(editor);
-		changesReverted += subsequenz.aenderungenVerwerfen(editor);
-		return changesReverted;
+		int changesRejected = super.aenderungenVerwerfen(editor);
+		changesRejected += subsequenz.aenderungenVerwerfen(editor);
+		return changesRejected;
 	}
 
 	@Override public void alsGeloeschtMarkierenUDBL() {

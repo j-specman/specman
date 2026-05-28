@@ -529,28 +529,28 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	}
 
 	@Override protected int editAenderungenVerwerfen() {
-		int changesReverted = super.editAenderungenVerwerfen();
-		changesReverted += sonstSequenz.ueberschriftAenderungenVerwerfen();
+		int changesRejected = super.editAenderungenVerwerfen();
+		changesRejected += sonstSequenz.ueberschriftAenderungenVerwerfen();
 		for (ZweigSchrittSequenzView caseSequenz : caseSequenzen) {
-			changesReverted += caseSequenz.ueberschriftAenderungenVerwerfen();
+			changesRejected += caseSequenz.ueberschriftAenderungenVerwerfen();
 		}
-		return changesReverted;
+		return changesRejected;
 	}
 
 	@Override public int aenderungenVerwerfen(EditorI editor) throws EditException {
 		//Wir spiegeln die Liste einmal auf eine CopyOnWriteArrayList um zweige während des durchlaufens bearbeiten zu können
 		List<ZweigSchrittSequenzView> caseSequenzen = new CopyOnWriteArrayList<ZweigSchrittSequenzView>(this.caseSequenzen);
-		int changesReverted = sonstSequenz.aenderungenVerwerfen(editor);
+		int changesRejected = sonstSequenz.aenderungenVerwerfen(editor);
 		for (ZweigSchrittSequenzView caseSequenz : caseSequenzen) {
 			if(caseSequenz.getChangeInfo().isAdded()) {
-				changesReverted += zweigEntfernen(editor, caseSequenz);
+				changesRejected += zweigEntfernen(editor, caseSequenz);
 			}
 			else {
-				changesReverted += caseSequenz.aenderungenVerwerfen(editor);
+				changesRejected += caseSequenz.aenderungenVerwerfen(editor);
 			}
 		}
-		changesReverted += super.aenderungenVerwerfen(editor);
-		return changesReverted;
+		changesRejected += super.aenderungenVerwerfen(editor);
+		return changesRejected;
 	}
 
 	@Override

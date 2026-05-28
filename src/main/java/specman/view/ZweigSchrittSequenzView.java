@@ -98,9 +98,9 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 
 	@Override
 	public int aenderungenVerwerfen(EditorI editor) throws EditException {
-		int changesReverted = super.aenderungenVerwerfen(editor);
+		int changesRejected = super.aenderungenVerwerfen(editor);
 		aenderungsmarkierungenEntfernen();
-		return changesReverted;
+		return changesRejected;
 	}
 
 	@Override

@@ -275,9 +275,9 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   @Override
   public int aenderungenVerwerfen(EditorI editor) throws EditException {
     ChangeInfo lastChangetype = changeInfo;
-    int changesReverted = super.aenderungenVerwerfen(editor) + primaryCatchHeading.aenderungenVerwerfen();
+    int changesRejected = super.aenderungenVerwerfen(editor) + primaryCatchHeading.aenderungenVerwerfen();
     for (CatchUeberschrift coCatchHeading : modifyableCoCatchHeadings()) {
-      changesReverted += coCatchHeading.aenderungenVerwerfen();
+      changesRejected += coCatchHeading.aenderungenVerwerfen();
     }
     if (lastChangetype.isDeleted()) {
       // While the catch sequences was marked as deleted, its heading was not synchronized
@@ -285,7 +285,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
       // might have to resynchronize
       updateHeadings();
     }
-    return changesReverted;
+    return changesRejected;
   }
 
   /** Required for iterations that may modify the list of headings.

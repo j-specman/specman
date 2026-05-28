@@ -5,7 +5,7 @@ import specman.ops.buttons.AcceptChangesADBLOpButton;
 import specman.ops.buttons.BirdsViewSpecmanOpButton;
 import specman.ops.buttons.DeleteStepOpButton;
 import specman.ops.buttons.ExportPDFOpButton;
-import specman.ops.buttons.RevertChangesADBLOpButton;
+import specman.ops.buttons.RejectChangesADBLOpButton;
 import specman.ops.buttons.ReviewOpButton;
 
 import specman.ops.buttons.ToggleBorderTypeOpButton;
@@ -18,7 +18,7 @@ public class DiagramToolBar extends JToolBar {
 
   private final JToggleButton aenderungenVerfolgen;
   private final AcceptChangesADBLOpButton aenderungenUebernehmen;
-  private final RevertChangesADBLOpButton aenderungenVerwerfen;
+  private final RejectChangesADBLOpButton aenderungenVerwerfen;
   private final ZoomComboBox zoom;
 
   DiagramToolBar(Specman specman) {
@@ -30,7 +30,7 @@ public class DiagramToolBar extends JToolBar {
 
     aenderungenVerfolgen = new JToggleButton();
     aenderungenUebernehmen = new AcceptChangesADBLOpButton(specman);
-    aenderungenVerwerfen = new RevertChangesADBLOpButton(specman);
+    aenderungenVerwerfen = new RejectChangesADBLOpButton(specman);
     updateChangeSetColor(specman.changeset());
     aenderungenVerfolgen.addChangeListener(e ->
         aenderungenVerfolgen.setBackground(aenderungenVerfolgen.isSelected()

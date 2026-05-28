@@ -2,16 +2,16 @@ package specman.ops.buttons;
 
 import specman.*;
 
-public class RevertChangesADBLOpButton extends AbstractADBLSpecmanOpButton {
+public class RejectChangesADBLOpButton extends AbstractADBLSpecmanOpButton {
 
-  public RevertChangesADBLOpButton(Specman specman) {
+  public RejectChangesADBLOpButton(Specman specman) {
     super(specman);
   }
 
   @Override
   void execute() throws EditException {
-    int changesReverted = getHauptSequenz().aenderungenVerwerfen(context);
-    if (changesReverted > 0) {
+    int changesRejected = getHauptSequenz().aenderungenVerwerfen(context);
+    if (changesRejected > 0) {
       diagrammAktualisieren(null);
     } else {
       showMessage("Das Diagramm enthält keine Änderungen.");

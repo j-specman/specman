@@ -336,11 +336,11 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public int aenderungenVerwerfen() {
-    int changesReverted = changeInfo.numChanges();
+    int changesRejected = changeInfo.numChanges();
     if (changeInfo.isAdded()) getParent().removeEditAreaUDBL(this);
     else if (changeInfo.isDeleted()) updateChangetypeAndDependentStylingUDBL(ChangeInfo.untracked());
     changeInfo = ChangeInfo.untracked();
-    return changesReverted;
+    return changesRejected;
   }
 
   @Override public String getText() { return "image"; }

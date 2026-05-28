@@ -49,10 +49,10 @@ import static specman.view.RelativeStepPosition.After;
 import static specman.view.RoundedBorderDecorationStyle.Co;
 import static specman.view.RoundedBorderDecorationStyle.Full;
 import static specman.view.RoundedBorderDecorationStyle.None;
-import static specman.view.StepRemovalPurpose.Confirm;
+import static specman.view.StepRemovalPurpose.Accept;
 import static specman.view.StepRemovalPurpose.Discard;
 import static specman.view.StepRemovalPurpose.Move;
-import static specman.view.StepRemovalPurpose.Revert;
+import static specman.view.StepRemovalPurpose.Reject;
 
 abstract public class AbstractSchrittView implements KlappbarerBereichI, ComponentListener, FocusListener {
 	public static final int LINIENBREITE = 2;
@@ -445,7 +445,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 			case Geloescht:
 			case Quellschritt:
 				markStepnumberLinksAsDefect();
-				getParent().schrittEntfernen(this, Confirm);
+				getParent().schrittEntfernen(this, Accept);
 				break;
 			case Zielschritt:
 				setQuellschrittUDBL(null);
@@ -461,11 +461,11 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public int aenderungenVerwerfen(EditorI editor) throws EditException {
-		int changesReverted = editAenderungenVerwerfen() + changeInfo.numChanges();
+		int changesRejected = editAenderungenVerwerfen() + changeInfo.numChanges();
 		switch (changeInfo.art()) {
 			case Hinzugefuegt:
 				markStepnumberLinksAsDefect();
-				getParent().schrittEntfernen(this, Revert);
+				getParent().schrittEntfernen(this, Reject);
 				break;
 			case Zielschritt:
 				getParent().schrittEntfernen(this, Move);
@@ -478,7 +478,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		}
 		aenderungsmarkierungenEntfernen();
 		changeInfo = ChangeInfo.untracked();
-		return changesReverted;
+		return changesRejected;
 	}
 
 	protected int editAenderungenVerwerfen() {

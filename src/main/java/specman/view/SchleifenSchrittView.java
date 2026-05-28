@@ -219,9 +219,9 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 	}
 
 	@Override public int aenderungenVerwerfen(EditorI editor) throws EditException {
-		int changesReverted = super.aenderungenVerwerfen(editor);
-		changesReverted += wiederholSequenz.aenderungenVerwerfen(editor);
-		return changesReverted;
+		int changesRejected = super.aenderungenVerwerfen(editor);
+		changesRejected += wiederholSequenz.aenderungenVerwerfen(editor);
+		return changesRejected;
 	}
 
 	@Override public void alsGeloeschtMarkierenUDBL() {

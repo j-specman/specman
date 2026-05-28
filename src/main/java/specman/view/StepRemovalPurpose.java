@@ -4,15 +4,14 @@ package specman.view;
  * The appropriate removal methods might need to know that. E.g. a break step with a linked
  * catch sequence, will also discard this sequence in case it is discarded but keep it in case of
  * movement.
- * Another reason for step removal might be the reversal or the confirmation of a change set.
- * in these cases the */
+ * Another reason for step removal might be rejecting or accepting a change set. */
 public enum StepRemovalPurpose {
   Discard,
   Move,
-  Revert,
-  Confirm;
+  Reject,
+  Accept;
 
   public boolean clearChangeSet() {
-    return this == Revert || this == Confirm;
+    return this == Reject || this == Accept;
   }
 }

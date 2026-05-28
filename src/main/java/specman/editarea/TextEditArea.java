@@ -289,7 +289,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     // TODO JL: Muss mit aenderungsmarkierungenUebernehmen zusammengelegt werden
     public int aenderungenVerwerfen() {
-        int changesReverted = changeInfo.numChanges();
+        int changesRejected = changeInfo.numChanges();
         if (changeInfo.isAdded()) {
             if (!areaDetachedByMerge()) {
                 getParent().removeEditAreaUDBL(this);
@@ -308,7 +308,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
             WrappedDocument doc = getWrappedDocument();
             List<GeloeschtMarkierung_V001> loeschungen = new ArrayList<>();
             for (WrappedElement e : doc.getRootElements()) {
-                changesReverted += aenderungsmarkierungenVerwerfen(e, loeschungen);
+                changesRejected += aenderungsmarkierungenVerwerfen(e, loeschungen);
             }
             for (int i = 0; i < loeschungen.size(); i++) {
                 GeloeschtMarkierung_V001 loeschung = loeschungen.get((loeschungen.size()) - 1 - i);
@@ -316,14 +316,14 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
                     WrappedPosition loeschungVon = doc.fromModel(loeschung.getVon());
                     WrappedPosition loeschungBis = doc.fromModel(loeschung.getBis());
                     removeTextAndUnregisterStepnumberLinks(loeschungVon, loeschungBis, editor);
-                    changesReverted++;
+                    changesRejected++;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
         changeInfo = ChangeInfo.untracked();
-        return changesReverted;
+        return changesRejected;
     }
 
     /** If an image edit area is removed while discarding changes, this text area
@@ -363,7 +363,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     private int aenderungsmarkierungenVerwerfen(
             WrappedElement e,
             List<GeloeschtMarkierung_V001> loeschungen) {
-        int changesReverted = 0;
+        int changesRejected = 0;
 
         WrappedDocument doc = getWrappedDocument();
         if (elementHatAenderungshintergrund(e)) {
@@ -376,15 +376,15 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
                 StyleConstants.setBackground(entfaerbt, stepnumberLinkChangedStyleSet(e) ? STEPNUMBER_LINK_COLOR.color : TEXT_BACKGROUND_COLOR_STANDARD);
                 StyleConstants.setStrikeThrough(entfaerbt, false);
                 doc.setCharacterAttributes(e.getStartOffset(), e.getEndOffset().distance(e.getStartOffset()), entfaerbt, true);
-                changesReverted++;
+                changesRejected++;
             }
 
         }
         for (int i = 0; i < e.getElementCount(); i++) {
-            changesReverted += aenderungsmarkierungenVerwerfen(e.getElement(i), loeschungen);
+            changesRejected += aenderungsmarkierungenVerwerfen(e.getElement(i), loeschungen);
         }
 
-        return changesReverted;
+        return changesRejected;
     }
 
     public boolean elementHatDurchgestrichenenText(WrappedElement e) {

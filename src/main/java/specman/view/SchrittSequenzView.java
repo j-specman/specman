@@ -40,8 +40,8 @@ import static specman.view.RelativeStepPosition.Before;
 import static specman.view.RoundedBorderDecorationStyle.Co;
 import static specman.view.RoundedBorderDecorationStyle.Full;
 import static specman.view.RoundedBorderDecorationStyle.None;
-import static specman.view.StepRemovalPurpose.Confirm;
-import static specman.view.StepRemovalPurpose.Revert;
+import static specman.view.StepRemovalPurpose.Accept;
+import static specman.view.StepRemovalPurpose.Reject;
 
 public class SchrittSequenzView {
 	public static final String ZEILENLAYOUT_GAP = AbstractSchrittView.FORMLAYOUT_GAP;
@@ -496,15 +496,15 @@ public class SchrittSequenzView {
 	}
 
 	public int aenderungenVerwerfen(EditorI editor) throws EditException {
-		int changesReverted = changeInfo.numChanges();
+		int changesRejected = changeInfo.numChanges();
 		for (AbstractSchrittView schritt: schritte) {
-			changesReverted += schritt.aenderungenVerwerfen(editor);
+			changesRejected += schritt.aenderungenVerwerfen(editor);
 		}
 		changeInfo = ChangeInfo.untracked();
 		if (catchBereich != null) {
-			changesReverted += catchBereich.aenderungenVerwerfen(editor);
+			changesRejected += catchBereich.aenderungenVerwerfen(editor);
 		}
-		return changesReverted;
+		return changesRejected;
 	}
 
 	public void alsGeloeschtMarkierenUDBL() {

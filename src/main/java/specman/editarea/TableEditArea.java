@@ -247,19 +247,19 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
 
   @Override
   public int aenderungenVerwerfen() {
-    int changesReverted = changeInfo.numChanges();
+    int changesRejected = changeInfo.numChanges();
     if (changeInfo.isAdded() || allCellsMarkedAs(Hinzugefuegt)) {
       getParent().removeEditAreaUDBL(this);
-      changesReverted++;
+      changesRejected++;
     }
     else {
-      changesReverted += removeRowsMarkedAs(Hinzugefuegt);
-      changesReverted += removeColumnsMarkedAs(Hinzugefuegt);
-      changesReverted += cellstream().mapToInt(cell -> cell.aenderungenVerwerfen()).sum();
+      changesRejected += removeRowsMarkedAs(Hinzugefuegt);
+      changesRejected += removeColumnsMarkedAs(Hinzugefuegt);
+      changesRejected += cellstream().mapToInt(cell -> cell.aenderungenVerwerfen()).sum();
     }
     aenderungsmarkierungenEntfernen();
     changeInfo = ChangeInfo.untracked();
-    return changesReverted;
+    return changesRejected;
   }
 
   private int removeColumnsMarkedAs(Aenderungsart aenderungsart) {
