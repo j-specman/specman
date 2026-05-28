@@ -110,7 +110,7 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   }
 
   public void alsGeloeschtMarkierenUDBL() {
-    changeInfo = changeInfo.deleted();
+    changeInfo = changeInfo.deleted(changeset());
     ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.id, changeInfo.changeSet());
     UDBL.setBackgroundUDBL(this, changeset().panelColor());
   }
