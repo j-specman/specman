@@ -51,6 +51,7 @@ import static specman.view.RoundedBorderDecorationStyle.Full;
 import static specman.view.RoundedBorderDecorationStyle.None;
 import static specman.view.StepRemovalPurpose.Discard;
 import static specman.view.StepRemovalPurpose.Move;
+import static specman.view.StepRemovalPurpose.Revert;
 
 abstract public class AbstractSchrittView implements KlappbarerBereichI, ComponentListener, FocusListener {
 	public static final int LINIENBREITE = 2;
@@ -271,7 +272,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return sequenzenAuflisten(null, einzelSequenzen);
 	}
 
-	/** Informiert den Schritt dar�ber, dass er gerade aus seiner Sequenz entfernt wird */
+	/** Informiert den Schritt darüber, dass er gerade aus seiner Sequenz entfernt wird */
 	public void entfernen(SchrittSequenzView container, StepRemovalPurpose purpose) {
 		unterSequenzen().forEach(sequenz -> sequenz.entfernen(this, purpose));
 	}
@@ -463,7 +464,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		switch (changeInfo.art()) {
 			case Hinzugefuegt:
 				markStepnumberLinksAsDefect();
-				getParent().schrittEntfernen(this, Discard);
+				getParent().schrittEntfernen(this, Revert);
 				break;
 			case Zielschritt:
 				getParent().schrittEntfernen(this, Move);

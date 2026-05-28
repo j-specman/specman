@@ -4,4 +4,12 @@ package specman.view;
  * The appropriate removal methods might need to know that. E.g. a break step with a linked
  * catch sequence, will also discard this sequence in case it is discarded but keep it in case of
  * movement. */
-public enum StepRemovalPurpose { Discard, Move }
+public enum StepRemovalPurpose {
+  Discard,
+  Move,
+  Revert;
+
+  public boolean clearChangeSet() {
+    return this == Revert;
+  }
+}

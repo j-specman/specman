@@ -4,7 +4,6 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.ChangeSet;
@@ -31,7 +30,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static specman.Aenderungsart.Geloescht;
-import static specman.Aenderungsart.Untracked;
 import static specman.ChangeSet.changeset;
 import static specman.TextInit.initialtext;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
@@ -340,8 +338,8 @@ public class SchrittSequenzView {
 		}
 	}
 
-	public void checkSchrittEntfernen(AbstractSchrittView schritt) throws EditException {
-		if (schritte.size() == 1) {
+	public void checkSchrittEntfernen(AbstractSchrittView schritt, StepRemovalPurpose purpose) throws EditException {
+		if (schritte.size() == 1 && !purpose.clearChangeSet()) {
 			throw new EditException("Letzten Schritt entfernen is nich!");
 		}
 	}
@@ -350,7 +348,7 @@ public class SchrittSequenzView {
 	 * @return Den Index des entfernten Schritts in der Sequenz. Dient der Wiedereingliederung beim Redo
 	 */
 	public int schrittEntfernen(AbstractSchrittView schritt, StepRemovalPurpose purpose) throws EditException {
-		checkSchrittEntfernen(schritt);
+		checkSchrittEntfernen(schritt, purpose);
 		schritt.entfernen(this, purpose);
 		sequenzBereich.remove(schritt.getDecoratedComponent());
 		int schrittIndex = schritte.indexOf(schritt);
@@ -457,6 +455,9 @@ public class SchrittSequenzView {
 		for(AbstractSchrittView schritt: schritte) {
 			schritt.viewsNachinitialisieren();
 		}
+		if (catchBereich != null) {
+			catchBereich.viewsNachinitialisieren();
+		}
 	}
 
 	public AbstractSchrittView findeSchrittZuId(SchrittID id){
@@ -484,13 +485,6 @@ public class SchrittSequenzView {
 	public int aenderungenVerwerfen(EditorI editor) throws EditException {
 		int changesReverted = changeInfo.numChanges();
 		for (AbstractSchrittView schritt: schritte) {
-			if (schritte.size() == 1) {
-				// This keeps us from running into the exception that the last step of a sequence must not be removed.
-				// This is not completely clean, because if e.g. the last remaining step is a source or target step from
-				// a step movement, the reversal might be incomplete here. We live with that for now as it is a known
-				// open issue, that the removal of last steps should be possible.
-				break;
-			}
 			changesReverted += schritt.aenderungenVerwerfen(editor);
 		}
 		changeInfo = ChangeInfo.untracked();

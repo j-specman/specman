@@ -29,6 +29,10 @@ public class ChangeInfo {
   public static ChangeInfo added() { return new ChangeInfo(Hinzugefuegt, changeset()); }
   public static ChangeInfo untracked() { return UNTRACKED; }
 
+  /** This method allows to read files from Specman version 1.1.x which do not contain {@link ChangeInfo_V001}s but
+   * only {@link Aenderungsart}s without an info about the change set which caused the modification. So if we don't
+   * find a change info, we use the fallback, combined with the current change set. Specman warns about that once
+   * <i>writing</i> the file with Specman 1.2 or higher, it won't longer be readable for older Specman versions. */
   public static ChangeInfo fromModel(ChangeInfo_V001 changeInfo, Aenderungsart fallback) {
     if (changeInfo != null) {
       return changeInfo.toChangeInfo();
