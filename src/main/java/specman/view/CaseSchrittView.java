@@ -255,7 +255,6 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		UDBL.setBackgroundUDBL(panelCase, bg);
 		UDBL.setBackgroundUDBL(panelSonst, bg);
 		UDBL.setBackgroundUDBL(panelFall1, bg);
-		caseSequenzen.forEach(sequenz -> sequenz.ueberschrift.setBackgroundUDBL(bg));
 		UDBL.repaint(panel); // Damit die Linien nachgezeichnet werden
 	}
 
