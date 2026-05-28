@@ -4,6 +4,7 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
+import specman.ChangeSet;
 import specman.EditorI;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
@@ -37,7 +38,6 @@ import java.util.stream.Stream;
 
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Hinzugefuegt;
-import static specman.Aenderungsart.Untracked;
 import static specman.ColumnSpecByPercent.allocPercent;
 import static specman.ColumnSpecByPercent.copyOf;
 import static specman.ColumnSpecByPercent.percents2specs;
@@ -200,9 +200,10 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   @Override
-  public void setGeloeschtMarkiertStilUDBL() {
-    setBackgroundUDBL(changeset().panelColor());
-    cellstream().forEach(cell -> cell.setGeloeschtMarkiertStilUDBL(null));
+  public void setGeloeschtMarkiertStilUDBL(ChangeSet triggerSet) {
+    setChangeInfo(changeInfo.deleted(triggerSet));
+    setBackgroundUDBL(triggerSet.panelColor());
+    cellstream().forEach(cell -> cell.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet()));
   }
 
   @Override
@@ -402,8 +403,8 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     // If the table is marked as created, it can simply be removed
     // If the table is already marked as removed, the method here should not have been called
     if (deletionsMustBeMarked()) {
-      setGeloeschtMarkiertStilUDBL();
       setChangeInfoUDBL(changeInfo.deleted());
+      setGeloeschtMarkiertStilUDBL(changeInfo.changeSet());
     }
     else {
       getParent().removeEditAreaUDBL(this); // Already includes undo recording
@@ -448,7 +449,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       }
     }
     else {
-      cells.get(rowIndex).forEach(cell -> cell.setGeloeschtMarkiertStilUDBL(null));
+      cells.get(rowIndex).forEach(cell -> cell.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet()));
     }
   }
 
@@ -509,7 +510,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       }
     }
     else {
-      cells.forEach(row -> row.get(colIndex).setGeloeschtMarkiertStilUDBL(null));
+      cells.forEach(row -> row.get(colIndex).setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet()));
     }
   }
 
@@ -563,7 +564,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   public void viewsNachinitialisieren() {
     if (changeInfo.isDeleted()) {
       for (List<EditContainer> row : cells) {
-        row.stream().forEach(ec -> ec.setGeloeschtMarkiertStilUDBL(null));
+        row.stream().forEach(ec -> ec.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet()));
       }
     }
     for (List<EditContainer> row : cells) {
@@ -571,7 +572,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     }
   }
 
-  @Override public void setQuellStil() { /* Not required for tables - source steps only contain an empty text area */ }
+  @Override public void setQuellStil(ChangeSet changeSet) { /* Not required for tables - source steps only contain an empty text area */ }
   @Override public void addSchrittnummer(StepnumberLabel schrittNummer) { add(schrittNummer); }
   @Override public Component asComponent() { return this; }
   @Override public String getPlainText() { return ""; }

@@ -4,6 +4,7 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.ChangeInfo;
+import specman.ChangeSet;
 import specman.EditorI;
 import specman.Specman;
 import specman.editarea.document.WrappedPosition;
@@ -79,9 +80,9 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   protected abstract void drawPrompt(Graphics2D g);
 
   @Override
-  public void setGeloeschtMarkiertStilUDBL() {
+  public void setGeloeschtMarkiertStilUDBL(ChangeSet triggerSet) {
     setBackgroundUDBL(changeInfo.changeSet().panelColor());
-    content.setGeloeschtMarkiertStilUDBL(null);
+    content.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet());
   }
 
   @Override
@@ -192,7 +193,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   @Override
   public void viewsNachinitialisieren() {
     if (changeInfo.isDeleted()) {
-      content.setGeloeschtMarkiertStilUDBL(null);
+      content.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet());
     }
     content.viewsNachinitialisieren();
   }
@@ -223,7 +224,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   @Override public ImageEditArea asImageArea() { return null; }
   @Override public AbstractListItemEditArea asListItemArea() { return this; };
   @Override public boolean isListItemArea() { return true; }
-  @Override public void setQuellStil() { /* Not required for list items - source steps only contain an empty text area */ }
+  @Override public void setQuellStil(ChangeSet changeSet) { /* Not required for list items - source steps only contain an empty text area */ }
   @Override public void setEditDecorationIndentions(Indentions indentions) { /* Nothing to do here */ }
   @Override public String getText() { return "list item"; }
   @Override public void addSchrittnummer(StepnumberLabel schrittNummer) {}

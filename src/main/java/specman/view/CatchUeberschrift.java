@@ -30,17 +30,17 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   final CatchSchrittSequenzView catchSequence;
   BreakSchrittView linkedBreakStep;
   final FormLayout layout;
-  ChangeInfo changetype;
+  ChangeInfo changeInfo;
 
-  public CatchUeberschrift(EditContainer ueberschrift, BreakSchrittView linkedBreakStep, CatchSchrittSequenzView catchSequence, ChangeInfo changetype) {
+  public CatchUeberschrift(EditContainer ueberschrift, BreakSchrittView linkedBreakStep, CatchSchrittSequenzView catchSequence, ChangeInfo changeInfo) {
     this.ueberschrift = ueberschrift;
     this.linkedBreakStep = linkedBreakStep;
     this.catchSequence = catchSequence;
-    this.changetype = changetype;
-    this.setBackground(changetype.panelColor());
-    this.ueberschrift.setBackground(changetype.panelColor());
+    this.changeInfo = changeInfo;
+    this.setBackground(changeInfo.panelColor());
+    this.ueberschrift.setBackground(changeInfo.panelColor());
     if (isDeleted()) {
-      ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.id);
+      ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.id, changeInfo.changeSet());
     }
     layout = new FormLayout(umgehungLayout() + ", 10px:grow", ZEILENLAYOUT_INHALT_SICHTBAR);
     setLayout(layout);
@@ -83,14 +83,14 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   }
 
   public int aenderungenUebernehmen() {
-    int numChanges = changetype.numChanges();
+    int numChanges = changeInfo.numChanges();
     if (isDeleted()) {
       remove();
     }
     else {
       numChanges += ueberschrift.aenderungenUebernehmen();
     }
-    changetype = ChangeInfo.untracked();
+    changeInfo = ChangeInfo.untracked();
     return numChanges;
   }
 
@@ -101,17 +101,17 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
 
   public int aenderungenVerwerfen() {
     int numChanges = 0;
-    if (changetype.isAdded()) {
+    if (changeInfo.isAdded()) {
       catchSequence.removeUDBL(this);
-      numChanges += changetype.numChanges();
-      changetype = ChangeInfo.untracked();
+      numChanges += changeInfo.numChanges();
+      changeInfo = ChangeInfo.untracked();
     }
     return numChanges + ueberschrift.aenderungenVerwerfen();
   }
 
   public void alsGeloeschtMarkierenUDBL() {
-    changetype = changetype.deleted();
-    ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.id);
+    changeInfo = changeInfo.deleted();
+    ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.id, changeInfo.changeSet());
     UDBL.setBackgroundUDBL(this, changeset().panelColor());
   }
 
@@ -193,7 +193,7 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
     return new CoCatchModel_V001(
       linkedBreakStepId(),
       ueberschrift.editorContent2Model(formatierterText),
-      changetype);
+      changeInfo);
   }
 
   public boolean allowsDeletion() {
@@ -201,6 +201,6 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   }
 
   public boolean isDeleted() {
-    return changetype.isDeleted();
+    return changeInfo.isDeleted();
   }
 }

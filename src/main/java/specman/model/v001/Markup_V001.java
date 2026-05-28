@@ -28,7 +28,7 @@ public class Markup_V001 {
 		this.from = from;
 		this.to = to;
 		this.type = markup.type;
-		this.changeset = markup.changeSet.name;
+		this.changeset = markup.changeSetName();
 	}
 
 	public int getFrom() {

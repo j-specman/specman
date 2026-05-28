@@ -6,6 +6,7 @@ import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.Aenderungsart.Untracked;
 import static specman.ChangeSet.changeset;
+import static specman.util.ObjectUtils.nvl;
 
 public class ChangeInfo {
 
@@ -55,7 +56,16 @@ public class ChangeInfo {
     return new ChangeInfo(newArt, changeSet);
   }
 
+  @Deprecated
+  /** Use {@link #deleted(ChangeSet)} instead. */
   public ChangeInfo deleted() { return withArt(Geloescht); }
-  public ChangeInfo accepted() { return untracked(); }
 
+  public ChangeInfo deleted(ChangeSet triggerSet) { return new ChangeInfo(Geloescht, triggerSet); }
+
+  @Override
+  public String toString() { return art + ((changeSet != null) ? ", " + changeSet : ""); }
+
+  public ChangeInfo toQuellschritt() {
+    return new ChangeInfo(Aenderungsart.Quellschritt, nvl(this.changeSet(), changeset()));
+  }
 }

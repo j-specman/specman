@@ -4,6 +4,8 @@ import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 
+import static specman.util.ObjectUtils.nvl;
+
 public class ChangeInfo_V001 {
   public final Aenderungsart changetype;
   public final String changeset;
@@ -23,6 +25,6 @@ public class ChangeInfo_V001 {
       return ChangeInfo.UNTRACKED;
     }
     ChangeSet cs = ChangeSet.fromName(changeset);
-    return new ChangeInfo(changetype, cs != null ? cs : ChangeSet.changeset());
+    return new ChangeInfo(changetype, nvl(cs, ChangeSet.changeset()));
   }
 }

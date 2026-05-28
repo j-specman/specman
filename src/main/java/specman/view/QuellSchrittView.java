@@ -4,6 +4,7 @@ import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.EditorI;
 import static specman.ChangeSet.changeset;
+import static specman.util.ObjectUtils.nvl;
 import specman.SchrittID;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.QuellSchrittModel_V001;
@@ -24,13 +25,13 @@ public class QuellSchrittView extends AbstractSchrittView {
         setBackgroundUDBL(changeset().panelColor());
     }
 
+    public QuellSchrittView(EditorI editor, SchrittSequenzView parent, QuellSchrittModel_V001 model) {
+      super(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
+      setBackgroundUDBL(new Color(model.farbe));
+    }
+
     @Override
     public JComponent getDecoratedComponent() { return decorated(editContainer); }
-
-    public QuellSchrittView(EditorI editor, SchrittSequenzView parent, QuellSchrittModel_V001 model) {
-        super(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
-        setBackgroundUDBL(new Color(model.farbe));
-    }
 
     @Override
     public QuellSchrittModel_V001 generiereModel(boolean formatierterText) {
@@ -53,8 +54,8 @@ public class QuellSchrittView extends AbstractSchrittView {
     }
 
     public void setQuellStil() {
-      editContainer.setQuellStil(getZielschrittID());
-      setChangeInfo(new ChangeInfo(Aenderungsart.Quellschritt, changeset()));
+      setChangeInfo(changeInfo.toQuellschritt());
+      editContainer.setQuellStil(getZielschrittID(), changeInfo.changeSet());
     }
 
     @Override

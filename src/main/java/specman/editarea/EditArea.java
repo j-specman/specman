@@ -1,7 +1,7 @@
 package specman.editarea;
 
-import specman.Aenderungsart;
 import specman.ChangeInfo;
+import specman.ChangeSet;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.AbstractEditAreaModel_V001;
 import specman.pdf.Shape;
@@ -19,7 +19,10 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V001> extends Inte
 
   int getWidth();
 
-  void setGeloeschtMarkiertStilUDBL();
+  /** The passed ChangeSet is the one which the deletion has been triggered with. The EditArea
+   * might already have a change set assigned e.g. which caused the area to be created. The
+   * deletion trigger change set rules over the existing one. */
+  void setGeloeschtMarkiertStilUDBL(ChangeSet triggerSet);
 
   Component asComponent();
 
@@ -50,7 +53,7 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V001> extends Inte
   default boolean isOrderedListItemArea() { return false; }
   ImageEditArea asImageArea();
 
-  void setQuellStil();
+  void setQuellStil(ChangeSet changeSet);
 
   void aenderungsmarkierungenEntfernen();
 

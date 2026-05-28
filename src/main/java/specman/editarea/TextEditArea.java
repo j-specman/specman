@@ -3,7 +3,7 @@ package specman.editarea;
 import net.atlanticbb.tantlinger.ui.text.CompoundUndoManager;
 import org.apache.commons.lang.StringUtils;
 import specman.ChangeInfo;
-import specman.model.v001.ChangeInfo_V001;
+
 import static specman.ChangeInfo.fromModel;
 import specman.EditorI;
 import specman.Specman;
@@ -47,10 +47,7 @@ import static specman.editarea.HTMLTags.HEAD_OUTRO;
 import static specman.editarea.HTMLTags.HTML_INTRO;
 import static specman.editarea.HTMLTags.HTML_OUTRO;
 import specman.ChangeSet;
-import specman.Specman;
-import static specman.ChangeSet.changeset;
-import specman.graphics.ChangeColorSet;
-import specman.graphics.Styles;
+
 import static specman.graphics.Styles.FONTSIZE;
 import static specman.graphics.Styles.TEXT_BACKGROUND_COLOR_STANDARD;
 import static specman.graphics.Styles.INDIKATOR_GELOESCHT_MARKIERT;
@@ -185,8 +182,8 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     private void setEditableUDBL(boolean editable) { UDBL.setEditable(this, editable); }
 
     @Override
-    public void setQuellStil() {
-        setStyleUDBL(changeset().getSourceStyle(), changeset().panelColor(), false);
+    public void setQuellStil(ChangeSet changeSet) {
+        setStyleUDBL(changeSet.getSourceStyle(), changeset().panelColor(), false);
     }
 
     @Override
@@ -195,11 +192,11 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     @Override
-    public void setGeloeschtMarkiertStilUDBL() {
+    public void setGeloeschtMarkiertStilUDBL(ChangeSet triggerSet) {
       aenderungenVerwerfen();
-      setChangeInfoUDBL(changeInfo.deleted());
+      setChangeInfoUDBL(changeInfo.deleted(triggerSet));
       deletionBackup = getTextWithMarkups(true);
-      setStyleUDBL(ganzerSchrittGeloeschtStil, changeset().panelColor(), false);
+      setStyleUDBL(ganzerSchrittGeloeschtStil, triggerSet.panelColor(), false);
     }
 
     @Override
@@ -859,7 +856,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
   @Override
   public void viewsNachinitialisieren() {
     if (changeInfo.isDeleted()) {
-      setGeloeschtMarkiertStilUDBL();
+      setGeloeschtMarkiertStilUDBL(changeInfo.changeSet());
     }
   }
 

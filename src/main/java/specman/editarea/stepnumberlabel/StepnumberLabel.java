@@ -140,11 +140,11 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
     setText(id.toString());
   }
 
-  public void setTargetStyleUDBL(SchrittID quellschrittId) {
+  public void setTargetStyleUDBL(SchrittID quellschrittId, ChangeSet changeset) {
     setStructureUDBL(LabelStructure.Target);
     setBorderUDBL(CHANGED_BORDER);
-    setBackgroundUDBL(changeset().panelColor());
-    setForegroundUDBL(SCHRITTNUMMER_VORDERGRUNDFARBE);
+    setBackgroundUDBL(changeset.panelColor());
+    setForegroundUDBL(DELETED_BACKGROUND_COLOR.color);
     resyncSourceSuffixUDBL(quellschrittId);
   }
 

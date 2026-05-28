@@ -1,5 +1,6 @@
 package specman.editarea.markups;
 
+import org.jetbrains.annotations.Nullable;
 import specman.ChangeSet;
 import specman.editarea.document.WrappedElement;
 import specman.model.v001.Markup_V001;
@@ -15,9 +16,9 @@ import static specman.ChangeSet.changeset;
 public class TextMarkup {
 
   public final MarkupType type;
-  public final ChangeSet changeSet;
+  public final @Nullable ChangeSet changeSet;
 
-  public TextMarkup(MarkupType type, ChangeSet changeSet) {
+  public TextMarkup(MarkupType type, @Nullable ChangeSet changeSet) {
     this.type = type;
     this.changeSet = changeSet;
   }
@@ -59,5 +60,9 @@ public class TextMarkup {
   @Override
   public int hashCode() {
     return Objects.hash(type, changeSet);
+  }
+
+  public String changeSetName() {
+    return changeSet != null ? changeSet.name : null;
   }
 }

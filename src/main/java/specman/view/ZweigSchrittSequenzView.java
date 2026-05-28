@@ -3,7 +3,6 @@ package specman.view;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
-import specman.Specman;
 import specman.TextInit;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.ZweigSchrittSequenzModel_V001;
@@ -16,7 +15,6 @@ import java.awt.Color;
 import java.util.List;
 
 import specman.ChangeInfo;
-import static specman.Aenderungsart.Untracked;
 
 /**
  * SchrittSequenzView, die einen Zweig in einer Verzweigung durch If, If/Else oder Case
@@ -95,7 +93,7 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 	}
 
 	protected void ueberschriftAlsGeloeschtMarkierenUDBL() {
-		ueberschrift.setGeloeschtMarkiertStilUDBL(null);
+		ueberschrift.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet());
 	}
 
 	@Override

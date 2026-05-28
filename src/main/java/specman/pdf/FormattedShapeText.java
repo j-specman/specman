@@ -10,6 +10,8 @@ import com.itextpdf.layout.font.FontInfo;
 import specman.editarea.TextEditArea;
 import specman.graphics.Styles;
 
+import static specman.util.ObjectUtils.nvl;
+
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.font.LineMetrics;
@@ -146,7 +148,7 @@ public class FormattedShapeText extends AbstractShapeText {
     Font resolved = findGlyphView(rootView, offset);
     // findGlyphView should always find a GlyphView for any visible character, but
     // content.getFont() is a safe fallback to prevent NPEs in the calling code.
-    return resolved != null ? resolved : content.getFont();
+    return nvl(resolved, content::getFont);
   }
 
   private Font findGlyphView(View view, int offset) {

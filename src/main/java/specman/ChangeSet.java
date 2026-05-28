@@ -103,4 +103,6 @@ public class ChangeSet {
     return null;
   }
 
+  @Override
+  public String toString() { return name; }
 }

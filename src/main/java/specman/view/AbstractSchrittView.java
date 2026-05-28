@@ -2,12 +2,14 @@ package specman.view;
 
 import specman.Aenderungsart;
 import specman.ChangeInfo;
+import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
 import specman.Specman;
-import static specman.ChangeInfo.fromModel;
+
 import static specman.ChangeSet.changeset;
+import static specman.util.ObjectUtils.nvl;
 import specman.editarea.EditArea;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.AbstractSchrittModel_V001;
@@ -41,7 +43,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static specman.Aenderungsart.Geloescht;
-import static specman.Aenderungsart.Untracked;
 import static specman.Aenderungsart.Zielschritt;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.view.RelativeStepPosition.After;
@@ -79,7 +80,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public void setAenderungsartUDBL(Aenderungsart aenderungsart) {
-		UDBL.setChangeInfo(this, changeInfo.withArt(aenderungsart));
+    ChangeSet changeset = nvl(changeInfo.changeSet(), changeset());
+		UDBL.setChangeInfo(this, new ChangeInfo(aenderungsart, changeset));
 	}
 
 	public ChangeInfo getChangeInfo() { return changeInfo; }
@@ -139,7 +141,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	protected JComponent decorated(JComponent undecoratedComponent) {
-		return roundedBorderDecorator != null ? roundedBorderDecorator : undecoratedComponent;
+		return nvl(roundedBorderDecorator, undecoratedComponent);
 	}
 
 	public boolean isStrukturiert() { return false; }
@@ -195,14 +197,14 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public void setGeloeschtMarkiertStilUDBL() {
-		setBackgroundUDBL(changeInfo.changeSet().panelColor());
-		editContainer.setGeloeschtMarkiertStilUDBL(id);
 		setAenderungsartUDBL(Geloescht);
+		setBackgroundUDBL(changeInfo.changeSet().panelColor());
+		editContainer.setGeloeschtMarkiertStilUDBL(id, changeInfo.changeSet());
 	}
 
 	public void setZielschrittStilUDBL() {
-		editContainer.setZielschrittStilUDBL(getQuellschritt().getId());
 		setAenderungsartUDBL(Zielschritt);
+		editContainer.setZielschrittStilUDBL(getQuellschritt().getId(), changeInfo.changeSet());
 	}
 
 	public void alsGeloeschtMarkierenUDBL() {

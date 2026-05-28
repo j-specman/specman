@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static specman.ColumnSpecByPercent.copyOf;
+import static specman.util.ObjectUtils.nvl;
 import static specman.view.AbstractSchrittView.*;
 
 public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements FocusListener, SpaltenContainerI {
@@ -113,7 +114,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     headingRightBarPanel.setBackground(initialChangeInfo.panelColor());
     headingHeightEaterPanel = new JPanel();
     headingHeightEaterPanel.setBackground(initialChangeInfo.panelColor());
-    this.headingRightBarWidth = headingRightBarWidth != null ? headingRightBarWidth : SPALTENLAYOUT_UMGEHUNG_GROESSE;
+    this.headingRightBarWidth = nvl(headingRightBarWidth, SPALTENLAYOUT_UMGEHUNG_GROESSE);
     ueberschrift.setId(linkedBreakStep.id);
     primaryCatchHeading = new CatchUeberschrift(ueberschrift, linkedBreakStep, this, initialChangeInfo);
     linkedBreakStep.catchAnkoppeln(primaryCatchHeading);
@@ -220,7 +221,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
 
   public void removeOrMarkAsDeletedUDBL(CatchUeberschrift catchHeading) {
     EditorI editor = Specman.instance();
-    if (catchHeading.changetype.isAdded() || !editor.aenderungenVerfolgen()) {
+    if (catchHeading.changeInfo.isAdded() || !editor.aenderungenVerfolgen()) {
       removeUDBL(catchHeading);
     }
     else {

@@ -45,6 +45,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import specman.ChangeSet;
+
+import static specman.ChangeSet.changeset;
 import static specman.view.AbstractSchrittView.FORMLAYOUT_GAP;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
 
@@ -185,7 +187,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     }
     try (UndoRecording ur = editor.composeUndo()){
       if (changeInfo.isUntracked() && editor.aenderungenVerfolgen()) {
-        setGeloeschtMarkiertStilUDBL();
+        setGeloeschtMarkiertStilUDBL(changeset());
       }
       else {
         getParent().removeEditAreaUDBL(ImageEditArea.this);
@@ -252,7 +254,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   public EditContainer getParent() { return (EditContainer) super.getParent(); }
 
   @Override
-  public void setQuellStil() {
+  public void setQuellStil(ChangeSet changeSet) {
     // Not required for images - source steps only contain an empty text area
   }
 
@@ -262,9 +264,9 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   }
 
   @Override
-  public void setGeloeschtMarkiertStilUDBL() {
+  public void setGeloeschtMarkiertStilUDBL(ChangeSet triggerSet) {
     if (changeInfo.isUntracked()) {
-      updateChangetypeAndDependentStylingUDBL(changeInfo.deleted());
+      updateChangetypeAndDependentStylingUDBL(changeInfo.deleted(triggerSet));
       focusGlass.toDeleted();
     }
     else if (changeInfo.isDeleted()) {
@@ -427,7 +429,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   @Override
   public void viewsNachinitialisieren() {
     if (changeInfo.isDeleted()) {
-      setGeloeschtMarkiertStilUDBL();
+      setGeloeschtMarkiertStilUDBL(changeInfo.changeSet());
     }
   }
 }

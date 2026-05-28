@@ -5,6 +5,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import specman.Aenderungsart;
+import specman.ChangeSet;
 import specman.EditorI;
 import specman.SchrittID;
 import specman.Specman;
@@ -204,19 +205,19 @@ public class EditContainer extends JPanel {
 		}
 	}
 
-	public void setZielschrittStilUDBL(SchrittID quellschrittId) {
-		schrittNummer.setTargetStyleUDBL(quellschrittId);
+	public void setZielschrittStilUDBL(SchrittID quellschrittId, ChangeSet changeSet) {
+		schrittNummer.setTargetStyleUDBL(quellschrittId, changeSet);
 	}
 
-	public void setQuellStil(SchrittID zielschrittID) {
-		editAreas.forEach(ea -> ea.setQuellStil());
-		setBackground(changeset().panelColor());
+	public void setQuellStil(SchrittID zielschrittID, ChangeSet changeSet) {
+		editAreas.forEach(ea -> ea.setQuellStil(changeSet));
+		setBackground(changeSet.panelColor());
 		schrittNummer.setSourceStyle(zielschrittID);
 	}
 
-	public void setGeloeschtMarkiertStilUDBL(SchrittID id) {
-		setBackgroundUDBL(changeset().panelColor());
-		modifyableEditAreas().forEach(ea -> ea.setGeloeschtMarkiertStilUDBL());
+	public void setGeloeschtMarkiertStilUDBL(SchrittID id, ChangeSet changeSet) {
+		setBackgroundUDBL(changeSet.panelColor());
+		modifyableEditAreas().forEach(ea -> ea.setGeloeschtMarkiertStilUDBL(changeSet));
 		if (schrittNummer != null) {
 			schrittNummer.setDeletedStyleUDBL(id);
 		}
