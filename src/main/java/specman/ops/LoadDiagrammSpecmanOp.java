@@ -55,7 +55,7 @@ public class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
       getOutro().setEditorContent(model.outro);
       setPdfExportOptions(model.pdfExportOptions);
       setDiagrammName(model.name);
-      setHauptSequenz(new SchrittSequenzView(context, null, model.hauptSequenz));
+      setHauptSequenz(new SchrittSequenzView(null, model.hauptSequenz));
 
       hauptSequenzInitialisieren();
       quellZielZuweisung(model.queryAllSteps());

@@ -2,6 +2,7 @@ package specman.editarea.keylistener;
 
 import specman.Specman;
 import specman.editarea.TextEditArea;
+import static specman.Specman.editor;
 
 import java.awt.event.KeyEvent;
 
@@ -12,7 +13,7 @@ public class LeftKeyPressedHandler extends AbstractRemovalKeyPressedHandler {
 
   void handle() {
     if (event.isControlDown() && event.isAltDown()) {
-      Specman.instance().scrollBackwardInEditHistory();
+      editor().scrollBackwardInEditHistory();
       event.consume();
     }
     else if (skipToStepnumberLinkStart()) {

@@ -4,6 +4,7 @@ import specman.EditException;
 import specman.Specman;
 import specman.editarea.InteractiveStepFragment;
 import specman.view.AbstractSchrittView;
+import static specman.Specman.editor;
 
 public class UndoableBranchSequenceMovedRight extends AbstractUndoableInteraction {
   private final AbstractSchrittView step;
@@ -16,11 +17,11 @@ public class UndoableBranchSequenceMovedRight extends AbstractUndoableInteractio
 
   @Override
   protected void undoEdit() throws EditException {
-    Specman.instance().moveBranchSequenceLeftADBL(step, initiatingFragment);
+    editor().moveBranchSequenceLeftADBL(step, initiatingFragment);
   }
 
   @Override
   protected void redoEdit() throws EditException {
-    Specman.instance().moveBranchSequenceRightADBL(step, initiatingFragment);
+    editor().moveBranchSequenceRightADBL(step, initiatingFragment);
   }
 }

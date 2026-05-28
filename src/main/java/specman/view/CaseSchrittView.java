@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import static specman.TextInit.initialtext;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.pdf.Shape.GAP_COLOR;
+import static specman.Specman.editor;
 
 
 public class CaseSchrittView extends VerzweigungSchrittView {
@@ -51,8 +52,8 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	JPanel panelSonst; //neu
 	JPanel panelFall1; //neu
 
-	public CaseSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, int numCases) {
-		super(editor, parent, initialerText, id, changeInfo, createPanelLayout(numCases));
+	public CaseSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, int numCases) {
+		super(parent, initialerText, id, changeInfo, createPanelLayout(numCases));
 		panel.add(editContainer, INITIAL_DUMMY);
 		/** @author PVN */
 		lueckenFueller = new JPanel();
@@ -75,35 +76,33 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		panel.add(panelFall1, CC.xy(3, 3));
 	}
 
-	protected void initCases(EditorI editor, ZweigSchrittSequenzView sonstSequenz, List<ZweigSchrittSequenzView> caseSequenzen) {
+	protected void initCases(ZweigSchrittSequenzView sonstSequenz, List<ZweigSchrittSequenzView> caseSequenzen) {
 		sonstFallAnlegen(sonstSequenz);
 		casesAnlegen(caseSequenzen);
 		layoutConstraintsSetzen();
-		spaltenResizerAnlegen(editor);
+		spaltenResizerAnlegen();
 	}
 
-	public CaseSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
-		this(editor, parent, initialerText, id, changeInfo, 2);
+	public CaseSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
+		this(parent, initialerText, id, changeInfo, 2);
 		initCases(
-				editor,
-				new ZweigSchrittSequenzView(editor, this, id.naechsteEbene(), initialtext("Sonst"), changeInfo),
+				new ZweigSchrittSequenzView(this, id.naechsteEbene(), initialtext("Sonst"), changeInfo),
 				new ArrayList<ZweigSchrittSequenzView>(Arrays.asList(
-						new ZweigSchrittSequenzView(editor, this, id.naechsteID().naechsteEbene(), initialtext("Fall 1"), changeInfo),
-						new ZweigSchrittSequenzView(editor, this, id.naechsteID().naechsteID().naechsteEbene(), initialtext("Fall 2"), changeInfo))));
+						new ZweigSchrittSequenzView(this, id.naechsteID().naechsteEbene(), initialtext("Fall 1"), changeInfo),
+						new ZweigSchrittSequenzView(this, id.naechsteID().naechsteID().naechsteEbene(), initialtext("Fall 2"), changeInfo))));
 	}
 
-	private List<ZweigSchrittSequenzView> caseSequenzenAufbauen(EditorI editor, List<ZweigSchrittSequenzModel_V001> model) {
+	private List<ZweigSchrittSequenzView> caseSequenzenAufbauen(List<ZweigSchrittSequenzModel_V001> model) {
 		return model.stream()
-				.map(sequenzModel -> new ZweigSchrittSequenzView(editor, this, sequenzModel))
+				.map(sequenzModel -> new ZweigSchrittSequenzView(this, sequenzModel))
 				.collect(Collectors.toList());
 	}
 
-	public CaseSchrittView(EditorI editor, SchrittSequenzView parent, CaseSchrittModel_V001 model) {
-		this(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), model.caseSequenzen.size());
+	public CaseSchrittView(SchrittSequenzView parent, CaseSchrittModel_V001 model) {
+		this(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), model.caseSequenzen.size());
 		initCases(
-				editor,
-				new ZweigSchrittSequenzView(editor, this, model.sonstSequenz),
-				caseSequenzenAufbauen(editor, model.caseSequenzen));
+				new ZweigSchrittSequenzView(this, model.sonstSequenz),
+				caseSequenzenAufbauen(model.caseSequenzen));
 		setBackgroundUDBL(new Color(model.farbe));
 		spaltenbreitenAnteileSetzen(model.spaltenbreitenAnteile);
 		klappen.init(model.zugeklappt);
@@ -120,7 +119,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		getSpaltenResizers().forEach(resizer -> resizer.setVisible(auf));
 	}
 
-	private void spaltenResizerAnlegen(EditorI editor) {
+	private void spaltenResizerAnlegen() {
 		for (int i = 0; i < caseSequenzen.size(); i++) {
 			panel.add(new SpaltenResizer(this, i), CC.xywh(2 + 2*i, 4, 1, 2));
 		}
@@ -224,7 +223,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		spaltenBreiten.set(spalte+1, spaltenBreiten.get(spalte+1) - delta);
 		List<Float> breitenAnteile = spaltenbreitenAnteileBerechnen(spaltenBreiten);
 		spaltenbreitenAnteileSetzen(breitenAnteile);
-		Specman.instance().diagrammAktualisieren(null);
+		editor().diagrammAktualisieren(null);
 		return delta;
 	}
 
@@ -295,7 +294,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		return null;
 	}
 
-	public int zweigEntfernen(EditorI editor, ZweigSchrittSequenzView zweig) {
+	public int zweigEntfernen(ZweigSchrittSequenzView zweig) {
 		if (zweig == sonstSequenz) {
 			System.err.println("Noch nicht fertig: Sonst-Sequenz entfernen");
 			return -1;
@@ -316,11 +315,11 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		}
 		int caseIndex = caseSequenzen.indexOf(zweig);
 		zweigAusListeUndPanelEntfernen(zweig);
-		zweigAnzahlAenderungAbschliessen(editor, spaltenbreitenErmitteln());
+		zweigAnzahlAenderungAbschliessen(spaltenbreitenErmitteln());
 		return caseIndex+1; // 0 ist Indikator f�r Sonst-Zweig, ab 1 beginnen die Cases
 	}
 
-	public void zweigHinzufuegen(EditorI editor, ZweigSchrittSequenzView zweig, int zweigIndex) {
+	public void zweigHinzufuegen(ZweigSchrittSequenzView zweig, int zweigIndex) {
 		if (zweigIndex == 0) {
 			System.err.println("Noch nicht fertig: Sonst-Sequenz hinzuf�gen");
 			return;
@@ -335,30 +334,30 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		panel.add(zweig.getContainer(), INITIAL_DUMMY);
 		panel.add(zweig.ueberschrift, INITIAL_DUMMY);
 
-		zweigAnzahlAenderungAbschliessen(editor, spaltenBreiten);
+		zweigAnzahlAenderungAbschliessen(spaltenBreiten);
 	}
 
-	private void zweigAnzahlAenderungAbschliessen(EditorI editor, ArrayList<Integer> spaltenBreiten) {
+	private void zweigAnzahlAenderungAbschliessen(ArrayList<Integer> spaltenBreiten) {
 		spaltenResizerEntfernen();
 		panelLayout = createPanelLayout(caseSequenzen.size());
 		panel.setLayout(panelLayout);
 		layoutConstraintsSetzen();
 		spaltenbreitenAnteileSetzen(spaltenbreitenAnteileBerechnen(spaltenBreiten));
-		spaltenResizerAnlegen(editor);
+		spaltenResizerAnlegen();
 
 		setId(id);
 		parent.renumberFollowingSteps(this);
 		klappen.refreshGeklappt();
 
-		editor.diagrammAktualisieren(null);
+		editor().diagrammAktualisieren(null);
 	}
 
-	public ZweigSchrittSequenzView neuenZweigHinzufuegen(EditorI editor, ZweigSchrittSequenzView linkerNachbar) {
+	public ZweigSchrittSequenzView neuenZweigHinzufuegen(ZweigSchrittSequenzView linkerNachbar) {
 		int linkerNachbarIndex = caseSequenzen.indexOf(linkerNachbar);
 		ZweigSchrittSequenzView neuerZweig = new ZweigSchrittSequenzView
-			(editor, this, linkerNachbar.naechsteNachbarSequenzID(), initialtext("Fall " + (linkerNachbarIndex+2)), TextInit.initialChangeInfo());
-		neuerZweig.einfachenSchrittAnhaengen(editor);
-		zweigHinzufuegen(editor, neuerZweig, linkerNachbarIndex+2);
+			(this, linkerNachbar.naechsteNachbarSequenzID(), initialtext("Fall " + (linkerNachbarIndex+2)), TextInit.initialChangeInfo());
+		neuerZweig.einfachenSchrittAnhaengen();
+		zweigHinzufuegen(neuerZweig, linkerNachbarIndex+2);
 		if (neuerZweig == caseSequenzen.get(0)) {
 			panelFall1.setBackground(TextInit.schrittHintergrund());
 		}
@@ -404,12 +403,12 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	}
 
 	@Override public void alsGeloeschtMarkierenUDBL() {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
 		ZweigSchrittSequenzView zweig = headingToBranch(editor.getLastFocusedTextArea());
 		if (zweig != null) {
 			if (zweig.getChangeInfo().isAdded()) {
-				int zweigIndex = zweigEntfernen(editor, zweig);
-				editor.addEdit(new UndoableZweigEntfernt(editor, zweig, this, zweigIndex));
+				int zweigIndex = zweigEntfernen(zweig);
+				editor().addEdit(new UndoableZweigEntfernt(zweig, this, zweigIndex));
 			}
 
 			//Markieren von Sonstsequenz und fall 1, 2 nicht ermöglichen
@@ -510,21 +509,21 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		return changesMade;
 	}
 
-	@Override public int aenderungenUebernehmen(EditorI editor) throws EditException {
+	@Override public int aenderungenUebernehmen() throws EditException {
 		panelFall1.setBackground(BACKGROUND_COLOR_STANDARD);
 		setBackgroundUDBL(BACKGROUND_COLOR_STANDARD);
-		int changesMade = sonstSequenz.aenderungenUebernehmen(editor);
+		int changesMade = sonstSequenz.aenderungenUebernehmen();
 		List<ZweigSchrittSequenzView> caseSequenzen = new CopyOnWriteArrayList<ZweigSchrittSequenzView>(this.caseSequenzen);
 		for (ZweigSchrittSequenzView caseSequenz : caseSequenzen) {
 			if (caseSequenz.getChangeInfo().isDeleted()) {
-				zweigEntfernen(editor, caseSequenz);
+				zweigEntfernen(caseSequenz);
 				changesMade++;
 			}
 			else {
-				changesMade += caseSequenz.aenderungenUebernehmen(editor);
+				changesMade += caseSequenz.aenderungenUebernehmen();
 			}
 		}
-		changesMade += super.aenderungenUebernehmen(editor);
+		changesMade += super.aenderungenUebernehmen();
 		return changesMade;
 	}
 
@@ -537,19 +536,19 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		return changesRejected;
 	}
 
-	@Override public int aenderungenVerwerfen(EditorI editor) throws EditException {
+	@Override public int aenderungenVerwerfen() throws EditException {
 		//Wir spiegeln die Liste einmal auf eine CopyOnWriteArrayList um zweige während des durchlaufens bearbeiten zu können
 		List<ZweigSchrittSequenzView> caseSequenzen = new CopyOnWriteArrayList<ZweigSchrittSequenzView>(this.caseSequenzen);
-		int changesRejected = sonstSequenz.aenderungenVerwerfen(editor);
+		int changesRejected = sonstSequenz.aenderungenVerwerfen();
 		for (ZweigSchrittSequenzView caseSequenz : caseSequenzen) {
 			if(caseSequenz.getChangeInfo().isAdded()) {
-				changesRejected += zweigEntfernen(editor, caseSequenz);
+				changesRejected += zweigEntfernen(caseSequenz);
 			}
 			else {
-				changesRejected += caseSequenz.aenderungenVerwerfen(editor);
+				changesRejected += caseSequenz.aenderungenVerwerfen();
 			}
 		}
-		changesRejected += super.aenderungenVerwerfen(editor);
+		changesRejected += super.aenderungenVerwerfen();
 		return changesRejected;
 	}
 

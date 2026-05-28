@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
+import static specman.Specman.editor;
 
 /** This class is responsible for remembering the last 5 diagramm files which have been opened
  * resp. created to provide appropriate fast access menu itens. The list of files is persisted
@@ -18,11 +19,9 @@ public class RecentFiles {
     private static final int MAX_FILES = 5;
 
     private final JMenu menu;
-    private final EditorI editor;
     List<File> recentFiles;
 
-    RecentFiles(EditorI editor) {
-        this.editor = editor;
+    RecentFiles() {
         this.menu = new JMenu("Zuletzt geladen");
         this.recentFiles = readLastFilesFromPreferences();
         populateMenuFromRecentFileList();
@@ -36,7 +35,7 @@ public class RecentFiles {
             item.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    editor.diagrammLaden(lastFile);
+                    editor().diagrammLaden(lastFile);
                 }
             });
             menu.add(item);

@@ -2,6 +2,7 @@ package net.atlanticbb.tantlinger.ui.text.actions;
 
 import net.atlanticbb.tantlinger.ui.UIUtils;
 import specman.Specman;
+import static specman.Specman.editor;
 
 import javax.swing.JEditorPane;
 import java.awt.event.ActionEvent;
@@ -19,6 +20,6 @@ public class ImageAction extends BasicEditAction {
 
     @Override
     protected void doEdit(ActionEvent actionEvent, JEditorPane jEditorPane) {
-        Specman.instance().addImageViaFileChooser();
+        editor().addImageViaFileChooser();
     }
 }

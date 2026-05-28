@@ -24,19 +24,19 @@ import specman.ChangeInfo;
 public class ZweigSchrittSequenzView extends SchrittSequenzView {
 	EditContainer ueberschrift;
 
-	public ZweigSchrittSequenzView(EditorI editor, AbstractSchrittView parent, ZweigSchrittSequenzModel_V001 model) {
-		super(editor, parent, model);
-		ueberschriftInitialisieren(editor, model.ueberschrift != null ? model.ueberschrift : null, null);
+	public ZweigSchrittSequenzView(AbstractSchrittView parent, ZweigSchrittSequenzModel_V001 model) {
+		super(parent, model);
+		ueberschriftInitialisieren(model.ueberschrift != null ? model.ueberschrift : null, null);
 	}
 
-	public ZweigSchrittSequenzView(EditorI editor, AbstractSchrittView parent, SchrittID sequenzBasisId, EditorContentModel_V001 initialerText, ChangeInfo changeInfo) {
+	public ZweigSchrittSequenzView(AbstractSchrittView parent, SchrittID sequenzBasisId, EditorContentModel_V001 initialerText, ChangeInfo changeInfo) {
 		super(parent, sequenzBasisId, changeInfo);
-		ueberschriftInitialisieren(editor, initialerText, null);
+		ueberschriftInitialisieren(initialerText, null);
 		this.changeInfo = TextInit.initialChangeInfo();
 	}
 
-	protected void ueberschriftInitialisieren(EditorI editor, EditorContentModel_V001 initialerText, SchrittID initialeSchrittnummer) {
-		ueberschrift = new EditContainer(editor, initialerText, initialeSchrittnummer);
+	protected void ueberschriftInitialisieren( EditorContentModel_V001 initialerText, SchrittID initialeSchrittnummer) {
+		ueberschrift = new EditContainer(initialerText, initialeSchrittnummer);
 	}
 
 	@Override
@@ -97,15 +97,15 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 	}
 
 	@Override
-	public int aenderungenVerwerfen(EditorI editor) throws EditException {
-		int changesRejected = super.aenderungenVerwerfen(editor);
+	public int aenderungenVerwerfen() throws EditException {
+		int changesRejected = super.aenderungenVerwerfen();
 		aenderungsmarkierungenEntfernen();
 		return changesRejected;
 	}
 
 	@Override
-	public int aenderungenUebernehmen(EditorI editor) throws EditException {
-		int changesCommitted = super.aenderungenUebernehmen(editor);
+	public int aenderungenUebernehmen() throws EditException {
+		int changesCommitted = super.aenderungenUebernehmen();
 		aenderungsmarkierungenEntfernen();
 		return changesCommitted;
 	}

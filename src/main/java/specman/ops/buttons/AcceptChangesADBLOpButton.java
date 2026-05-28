@@ -13,7 +13,7 @@ public class AcceptChangesADBLOpButton extends AbstractADBLSpecmanOpButton {
     int changesMade = 0;
     changesMade += getIntro().aenderungenUebernehmen();
     getIntro().aenderungsmarkierungenEntfernen(null);
-    changesMade += getHauptSequenz().aenderungenUebernehmen(context);
+    changesMade += getHauptSequenz().aenderungenUebernehmen();
     changesMade += getOutro().aenderungenUebernehmen();
     getOutro().aenderungsmarkierungenEntfernen(null);
     if (changesMade > 0) {

@@ -3,6 +3,7 @@ package net.atlanticbb.tantlinger.ui.text.actions;
 import net.atlanticbb.tantlinger.ui.UIUtils;
 import net.atlanticbb.tantlinger.ui.text.actions.BasicEditAction;
 import specman.Specman;
+import static specman.Specman.editor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,5 +40,5 @@ public class TableAction extends BasicEditAction {
     }
 
 
-    //Specman.instance().addTable();
+    //editor().addTable();
 }

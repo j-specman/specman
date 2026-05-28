@@ -47,6 +47,7 @@ import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
 import static specman.graphics.Styles.labelFont;
 import static specman.model.v001.EditorContentModel_V001.empty;
+import static specman.Specman.editor;
 
 /** Zentrales grafisches Containerpanel für einen zusammenhängenden Text mit einem Nummernlabel
  * für Schrittbeschreibungen. Normalerweise besteht diese Beschreibung aus einem einzelnen HTML
@@ -106,13 +107,13 @@ public class EditContainer extends JPanel {
 	private Indentions indentions;
 	private boolean schrittNummerSichtbar = true;
 
-	public EditContainer(EditorI editor, TextEditArea initialContent, SchrittID schrittId) {
-		this(editor, new EditorContentModel_V001(), schrittId);
+	public EditContainer(TextEditArea initialContent, SchrittID schrittId) {
+		this(new EditorContentModel_V001(), schrittId);
 		addEditArea(initialContent, 0);
-    skalieren(editor.getZoomFactor(), 0);
+    skalieren(editor().getZoomFactor(), 0);
 	}
 
-	public EditContainer(EditorI editor, EditorContentModel_V001 initialContent, SchrittID schrittId) {
+	public EditContainer(EditorContentModel_V001 initialContent, SchrittID schrittId) {
 		if (schrittId != null) {
 			schrittNummer = new StepnumberLabel(schrittId);
 			setEnabled(false);
@@ -123,9 +124,9 @@ public class EditContainer extends JPanel {
 		initLayoutAndEditAreas(initialContent);
 		updateDecorationIndentions(new Indentions());
 
-    skalieren(editor.getZoomFactor(), 0);
+    skalieren(editor().getZoomFactor(), 0);
 
-    addEditAreasFocusListener(editor);
+    addEditAreasFocusListener(editor());
   }
 
 	private void initLayout(EditorContentModel_V001 content) {
@@ -171,15 +172,15 @@ public class EditContainer extends JPanel {
 				editAreas.get(0).addSchrittnummer(schrittNummer);
 			}
 		}
-		skalieren(Specman.instance().getZoomFactor(), 0);
+		skalieren(editor().getZoomFactor(), 0);
 	}
 
-	public EditContainer(EditorI editor) {
-		this(editor, empty(), null);
+	public EditContainer() {
+		this(empty(), null);
 	}
 
-	public EditContainer(EditorI editor, ChangeInfo changeInfo) {
-		this(editor, new EditorContentModel_V001("", changeInfo), null);
+	public EditContainer(ChangeInfo changeInfo) {
+		this(new EditorContentModel_V001("", changeInfo), null);
 	}
 
 	/** Entfernt im Rahmen der Übernahme oder Rücknahme von Änderungen alle Einfärbungen,
@@ -373,7 +374,7 @@ public class EditContainer extends JPanel {
 	public InteractiveStepFragment asInteractiveFragment() { return editAreas.get(0); }
 
 	public EditArea addTableUDBL(TextEditArea initiatingTextArea, int columns, int rows) {
-		EditorI editor = Specman.instance();
+		EditorI editor = editor();
 		TableEditArea tableEditArea;
 		try (UndoRecording ur = editor.composeUndo()) {
 			int initiatingTextAreaIndex = indexOf(initiatingTextArea);
@@ -391,7 +392,7 @@ public class EditContainer extends JPanel {
 	}
 
 	public void addImageUDBL(BufferedImage image, TextEditArea initiatingTextArea) {
-		EditorI editor = Specman.instance();
+		EditorI editor = editor();
 		try (UndoRecording ur = editor.composeUndo()) {
 			int initiatingTextAreaIndex = indexOf(initiatingTextArea);
 			WrappedPosition initiatingCaretPosition = initiatingTextArea.getWrappedCaretPosition();
@@ -408,7 +409,7 @@ public class EditContainer extends JPanel {
 	}
 
 	public EditArea addListItemUDBL(TextEditArea initiatingTextArea, boolean ordered) {
-		EditorI editor = Specman.instance();
+		EditorI editor = editor();
 		AbstractListItemEditArea liEditArea;
 		try (UndoRecording ur = editor.composeUndo()) {
 			int initiatingTextAreaIndex = indexOf(initiatingTextArea);
@@ -459,7 +460,7 @@ public class EditContainer extends JPanel {
 	}
 
 	public void removeEditAreaUDBL(EditArea editarea) {
-		EditorI editor = Specman.instance();
+		EditorI editor = editor();
 		try (UndoRecording ur = editor.composeUndo()) {
 			TextEditArea leadingTextArea = null;
 			TextEditArea trailingTextArea = null;
@@ -492,7 +493,7 @@ public class EditContainer extends JPanel {
 	}
 
 	public void removeEditAreaByUndoRedo(EditArea editArea, TextEditArea cutOffTextArea) {
-		try (UndoRecording ur = Specman.instance().pauseUndo()) {
+		try (UndoRecording ur = editor().pauseUndo()) {
 			removeEditAreaComponent(editArea);
 			if (cutOffTextArea != null) {
 				removeEditAreaComponent(cutOffTextArea);
@@ -623,7 +624,7 @@ public class EditContainer extends JPanel {
 	}
 
 	public void addEditAreaByUndoRedo(EditArea initiatingTextArea, EditArea imageEditArea, TextEditArea cutOffTextArea) {
-		try (UndoRecording ur = Specman.instance().pauseUndo()) {
+		try (UndoRecording ur = editor().pauseUndo()) {
 			int initiatingTextAreaIndex = indexOf(initiatingTextArea);
 			addEditArea(imageEditArea, initiatingTextAreaIndex+1);
 			if (cutOffTextArea != null) {
@@ -634,7 +635,7 @@ public class EditContainer extends JPanel {
 	}
 
 	public void mergeListItemAreasByUndoRedo(AbstractListItemEditArea initiatingArea, AbstractListItemEditArea splitArea) {
-		try (UndoRecording ur = Specman.instance().pauseUndo()) {
+		try (UndoRecording ur = editor().pauseUndo()) {
 			// The very first edit content in the split list item is ignored. It was created by
 			// splitting the last text area of the initiating list item which is already restored
 			// by undo of its text modification.
@@ -651,7 +652,7 @@ public class EditContainer extends JPanel {
 			// Dissolve the list item by merging its content into the upper edit container
 			AbstractListItemEditArea liEditArea = (AbstractListItemEditArea)getParent();
 			EditArea lastLiftUp = liEditArea.getParent().dissolveListItemEditAreaUDBL(liEditArea);
-			Specman.instance().diagrammAktualisieren(lastLiftUp);
+			editor().diagrammAktualisieren(lastLiftUp);
       return lastLiftUp;
 		}
 		// The preceeding edit area is a list item
@@ -661,7 +662,7 @@ public class EditContainer extends JPanel {
 				EditArea preceedingArea = editAreas.get(areaIndex-1);
 				if (preceedingArea.isListItemArea()) {
 					TextEditArea nextToFocus = mergeTextIntoListItem(preceedingArea.asListItemArea(), initiatingTextEditArea);
-					Specman.instance().diagrammAktualisieren(nextToFocus);
+					editor().diagrammAktualisieren(nextToFocus);
           return nextToFocus;
 				}
 			}
@@ -670,7 +671,7 @@ public class EditContainer extends JPanel {
 	}
 
 	private TextEditArea mergeTextIntoListItem(AbstractListItemEditArea target, TextEditArea initiatingTextEditArea) {
-		EditorI editor = Specman.instance();
+		EditorI editor = editor();
 		try (UndoRecording ur = editor.composeUndo()) {
 			TextEditArea nextToFocus = target.appendText(initiatingTextEditArea);
 			removeEditAreaComponent(initiatingTextEditArea);
@@ -683,7 +684,7 @@ public class EditContainer extends JPanel {
 	 * If the preceeding edit area is a text area, merge the first text edit area of the list item with it.
 	 * If the succeeding edit area is a text area and the list item's last edit area es well, merge them. */
 	public EditArea dissolveListItemEditAreaUDBL(AbstractListItemEditArea liEditArea) {
-		EditorI editor = Specman.instance();
+		EditorI editor = editor();
 		List<EditArea> liftUpAreas = liEditArea.content.modifyableEditAreas();
 		EditArea lastLiftUpArea = null;
 		TextEditArea followingTextEditArea = null;
@@ -741,7 +742,7 @@ public class EditContainer extends JPanel {
 	}
 
 	public void undoDissolveListItemEditArea(AbstractListItemEditArea liEditArea, int liEditAreaIndex, List<EditArea> liftUpAreas, TextEditArea followingTextEditArea) {
-		try (UndoRecording ur = Specman.instance().pauseUndo()) {
+		try (UndoRecording ur = editor().pauseUndo()) {
 			addEditArea(liEditArea, liEditAreaIndex);
 			int lastLiftUpIndex = liEditAreaIndex + 1;
 			for (EditArea liftUpArea : liftUpAreas) {
@@ -758,7 +759,7 @@ public class EditContainer extends JPanel {
 	}
 
 	public EditArea redoDissolveListItemEditArea(AbstractListItemEditArea liEditArea, int liEditAreaIndex, List<EditArea> liftUpAreas, TextEditArea followingTextEditArea) {
-		try (UndoRecording ur = Specman.instance().pauseUndo()) {
+		try (UndoRecording ur = editor().pauseUndo()) {
 			if (leadingTextMergeOnDissolve(liEditArea)) {
 				liftUpAreas = liftUpAreas.subList(1, liftUpAreas.size());
 			}
@@ -774,7 +775,7 @@ public class EditContainer extends JPanel {
 	}
 
   public void registerAllExistingStepnumbers() {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     HashMap<TextEditArea, List<String>> stepnumberLinks = new HashMap<>();
     findStepnumberLinkIDs(stepnumberLinks);
     for (Map.Entry<TextEditArea, List<String>> listEntry : stepnumberLinks.entrySet()) {

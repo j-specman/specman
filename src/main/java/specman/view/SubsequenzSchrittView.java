@@ -18,6 +18,7 @@ import java.awt.event.ComponentEvent;
 import java.util.List;
 
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
+import static specman.Specman.editor;
 
 public class SubsequenzSchrittView extends AbstractSchrittView {
 	public static final int TEXTEINRUECKUNG = 18;
@@ -35,8 +36,8 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
    * other hand switching off the sub-numbering save a numbering level. Which variant is better depends on the situation. */
   boolean flatNumbering;
 
-	protected SubsequenzSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, boolean withDefaultContent) {
-		super(editor, parent, initialerText, id, changeInfo);
+	protected SubsequenzSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, boolean withDefaultContent) {
+		super(parent, initialerText, id, changeInfo);
 
 		editContainer.updateDecorationIndentions(new Indentions(TEXTEINRUECKUNG));
 
@@ -52,7 +53,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		klappen = new KlappButton(this, editContainer.getKlappButtonParent(), layout, CONTENTROW, filler.row);
 
 		if (withDefaultContent) {
-      initSubsequenz(einschrittigeInitialsequenz(editor, id.naechsteEbene(), changeInfo), false);
+      initSubsequenz(einschrittigeInitialsequenz(id.naechsteEbene(), changeInfo), false);
 		}
 	}
 
@@ -62,20 +63,20 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
     UDBL.setBackgroundUDBL(filler, bg);
   }
 
-  public SubsequenzSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
-		this(editor, parent, initialerText, id, changeInfo, true);
+  public SubsequenzSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
+		this(parent, initialerText, id, changeInfo, true);
 	}
 
-	public SubsequenzSchrittView(EditorI editor, SchrittSequenzView parent, SubsequenzSchrittModel_V001 model) {
-		this(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), false);
-		initSubsequenz(new SchrittSequenzView(editor, this, model.subsequenz), model.flatNumbering);
+	public SubsequenzSchrittView(SchrittSequenzView parent, SubsequenzSchrittModel_V001 model) {
+		this(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), false);
+		initSubsequenz(new SchrittSequenzView(this, model.subsequenz), model.flatNumbering);
 		setBackgroundUDBL(new Color(model.farbe));
 		klappen.init(model.zugeklappt);
 	}
 
-	private SchrittSequenzView einschrittigeInitialsequenz(EditorI editor, SchrittID id, ChangeInfo changeInfo) {
+	private SchrittSequenzView einschrittigeInitialsequenz(SchrittID id, ChangeInfo changeInfo) {
 		SchrittSequenzView sequenz = new SchrittSequenzView(this, id, changeInfo);
-		sequenz.einfachenSchrittAnhaengen(editor);
+		sequenz.einfachenSchrittAnhaengen();
 		return sequenz;
 	}
 
@@ -156,15 +157,15 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		return findeSchrittZuIdIncludingSubSequences(id, subsequenz);
 	}
 
-	@Override public int aenderungenUebernehmen(EditorI editor) throws EditException {
-		int changesMade = super.aenderungenUebernehmen(editor);
-		changesMade += subsequenz.aenderungenUebernehmen(editor);
+	@Override public int aenderungenUebernehmen() throws EditException {
+		int changesMade = super.aenderungenUebernehmen();
+		changesMade += subsequenz.aenderungenUebernehmen();
 		return changesMade;
 	}
 
-	@Override public int aenderungenVerwerfen(EditorI editor) throws EditException {
-		int changesRejected = super.aenderungenVerwerfen(editor);
-		changesRejected += subsequenz.aenderungenVerwerfen(editor);
+	@Override public int aenderungenVerwerfen() throws EditException {
+		int changesRejected = super.aenderungenVerwerfen();
+		changesRejected += subsequenz.aenderungenVerwerfen();
 		return changesRejected;
 	}
 
@@ -219,7 +220,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
     getParent().renumberFollowingSteps(this);
 
     // Required to ensure repaint and thus width resizing of all effected step number labels
-    Specman.instance().diagrammAktualisieren(null);
+    editor().diagrammAktualisieren(null);
   }
 
   private void renumberSubsequence() {

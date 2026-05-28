@@ -30,6 +30,7 @@ import java.awt.event.FocusEvent;
 import java.util.List;
 
 import static specman.TextInit.initialtext;
+import static specman.Specman.editor;
 
 public class IfElseSchrittView extends VerzweigungSchrittView implements ComponentListener, SpaltenContainerI {
 	ZweigSchrittSequenzView ifSequenz;
@@ -40,8 +41,8 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 	JPanel panelElse;
 	JPanel panelIf;
 
-	protected IfElseSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, boolean withDefaultContent) {
-		super(editor, parent, initialerText, id, changeInfo, createPanelLayout());
+	protected IfElseSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, boolean withDefaultContent) {
+		super(parent, initialerText, id, changeInfo, createPanelLayout());
 		/** @author PVN */
 		leeresFeld = new JPanel();
 		leeresFeld.setBackground(TextInit.schrittHintergrund());
@@ -58,23 +59,23 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		});
 		panel.add(new SpaltenResizer(this), CC.xywh(2, 1, 1, 5));
 		if(withDefaultContent) {
-			initIfSequenz(new ZweigSchrittSequenzView(editor, this, id.naechsteEbene(), initialtext("Ja"), changeInfo));
-			initElseSequenz(new ZweigSchrittSequenzView(editor, this, id.naechsteID().naechsteEbene(), EditContainer.right("Nein"), changeInfo));
+			initIfSequenz(new ZweigSchrittSequenzView(this, id.naechsteEbene(), initialtext("Ja"), changeInfo));
+			initElseSequenz(new ZweigSchrittSequenzView(this, id.naechsteID().naechsteEbene(), EditContainer.right("Nein"), changeInfo));
 		}
 	}
 
-	public IfElseSchrittView(EditorI editor, SchrittSequenzView parent, IfElseSchrittModel_V001 model) {
-		this(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), false);
+	public IfElseSchrittView(SchrittSequenzView parent, IfElseSchrittModel_V001 model) {
+		this(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), false);
 		panel.add(new SpaltenResizer(this), CC.xywh(2, 1, 1, 5));
-		initIfSequenz(new ZweigSchrittSequenzView(editor, this, model.ifSequenz));
-		initElseSequenz(new ZweigSchrittSequenzView(editor, this, model.elseSequenz));
+		initIfSequenz(new ZweigSchrittSequenzView(this, model.ifSequenz));
+		initElseSequenz(new ZweigSchrittSequenzView(this, model.elseSequenz));
 		setBackgroundUDBL(new Color(model.farbe));
 		ifBreitenanteilSetzen(model.ifBreitenanteil);
 		klappen.init(model.zugeklappt);
 	}
 
-	public IfElseSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
-		this(editor, parent, initialerText, id, changeInfo, true);
+	public IfElseSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
+		this(parent, initialerText, id, changeInfo, true);
 	}
 
 	protected void initIfSequenz(ZweigSchrittSequenzView pIfSequenz) {
@@ -121,7 +122,7 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		float angepassteElseBreite = elseSequenz.ueberschrift.getWidth() - delta;
 		float angepassterIfBreitenanteil = ifBreitenanteil(angepassteIfBreite, angepassteElseBreite);
 		ifBreitenanteilSetzen(angepassterIfBreitenanteil);
-		Specman.instance().diagrammAktualisieren(null);
+		editor().diagrammAktualisieren(null);
 		return delta;
 	}
 
@@ -295,10 +296,10 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		return changesMade;
 	}
 
-	@Override public int aenderungenUebernehmen(EditorI editor) throws EditException {
-		int changesMade = super.aenderungenUebernehmen(editor);
-		changesMade += elseSequenz.aenderungenUebernehmen(editor);
-		changesMade += ifSequenz.aenderungenUebernehmen(editor);
+	@Override public int aenderungenUebernehmen() throws EditException {
+		int changesMade = super.aenderungenUebernehmen();
+		changesMade += elseSequenz.aenderungenUebernehmen();
+		changesMade += ifSequenz.aenderungenUebernehmen();
 		return changesMade;
 	}
 
@@ -309,10 +310,10 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		return changesRejected;
 	}
 
-	@Override public int aenderungenVerwerfen(EditorI editor) throws EditException {
-		int changesRejected = super.aenderungenVerwerfen(editor);
-		changesRejected += elseSequenz.aenderungenVerwerfen(editor);
-		changesRejected += ifSequenz.aenderungenVerwerfen(editor);
+	@Override public int aenderungenVerwerfen() throws EditException {
+		int changesRejected = super.aenderungenVerwerfen();
+		changesRejected += elseSequenz.aenderungenVerwerfen();
+		changesRejected += ifSequenz.aenderungenVerwerfen();
 		return changesRejected;
 	}
 

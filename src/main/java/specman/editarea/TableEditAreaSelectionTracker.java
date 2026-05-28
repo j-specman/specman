@@ -17,6 +17,7 @@ import static specman.CursorFactory.HotspotPlacement.BottomRight;
 import static specman.CursorFactory.HotspotPlacement.Right;
 import static specman.CursorFactory.createCursor;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
+import static specman.Specman.editor;
 
 public class TableEditAreaSelectionTracker implements MouseListener, MouseMotionListener {
   private static final Color SELECTION_COLOR = new Color(200, 200, 200, 150);
@@ -58,7 +59,7 @@ public class TableEditAreaSelectionTracker implements MouseListener, MouseMotion
   @Override public void mouseDragged(MouseEvent e) {}
 
   @Override public void mouseClicked(MouseEvent e) {
-    try(UndoRecording ur = Specman.instance().composeUndo()) {
+    try(UndoRecording ur = editor().composeUndo()) {
       if (selectionOperation != null) {
         setEditAreaCursor(null);
         switch(selectionOperation) {

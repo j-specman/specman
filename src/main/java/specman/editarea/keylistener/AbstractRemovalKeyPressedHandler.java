@@ -16,6 +16,7 @@ import java.awt.event.KeyEvent;
 
 import specman.Specman;
 import static specman.ChangeSet.changeset;
+import static specman.Specman.editor;
 
 abstract class AbstractRemovalKeyPressedHandler extends AbstractKeyEventHandler {
   protected AbstractRemovalKeyPressedHandler(TextEditArea textArea, KeyEvent event) {
@@ -42,7 +43,7 @@ abstract class AbstractRemovalKeyPressedHandler extends AbstractKeyEventHandler 
       return maxDeletionMarked;
     }
 
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
 
     try (UndoRecording ur = editor.composeUndo()) {
       for (WrappedPosition currentEndPosition = endOffset; currentEndPosition.greater(startOffset); ) { // The missing position-- is intended, see below
@@ -58,10 +59,10 @@ abstract class AbstractRemovalKeyPressedHandler extends AbstractKeyEventHandler 
 
         if (elementIsChangedButNotMarkedAsDeleted(element)) {
           if (stepnumberLinkChangedStyleSet(element)) {
-            removeTextAndUnregisterStepnumberLinks(linkStilStart, linkStilEnd, editor);
+            removeTextAndUnregisterStepnumberLinks(linkStilStart, linkStilEnd);
           }
           else {
-            removeTextAndUnregisterStepnumberLinks(currentStartPosition, currentEndPosition, editor);
+            removeTextAndUnregisterStepnumberLinks(currentStartPosition, currentEndPosition);
           }
         }
         else {
@@ -91,7 +92,7 @@ abstract class AbstractRemovalKeyPressedHandler extends AbstractKeyEventHandler 
     return maxDeletionMarked;
   }
 
-  protected void removeTextAndUnregisterStepnumberLinks(WrappedPosition startOffset, WrappedPosition endOffset, EditorI editor) {
+  protected void removeTextAndUnregisterStepnumberLinks(WrappedPosition startOffset, WrappedPosition endOffset) {
     if (startOffset.greater(endOffset)) {
       throw new IllegalArgumentException("StartOffSet is greater than EndOffset - Make sure not to set the length as endOffset");
     }
@@ -106,9 +107,9 @@ abstract class AbstractRemovalKeyPressedHandler extends AbstractKeyEventHandler 
       if (stepnumberLinkStyleSet(element)) {
         String stepnumberLinkID = getStepnumberLinkIDFromElement(currentOffset, currentEndOffset);
         if (!StepnumberLink.isStepnumberLinkDefect(stepnumberLinkID)) {
-          AbstractSchrittView step = editor.findStepByStepID(stepnumberLinkID);
+          AbstractSchrittView step = editor().findStepByStepID(stepnumberLinkID);
           step.unregisterStepnumberLink(textArea);
-          editor.addEdit(new UndoableStepnumberLinkRemoved(step, textArea));
+          editor().addEdit(new UndoableStepnumberLinkRemoved(step, textArea));
         }
       }
 

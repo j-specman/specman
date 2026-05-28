@@ -15,6 +15,7 @@ import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.Aenderungsart.Untracked;
 import static specman.ChangeSet.changeset;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
+import static specman.Specman.editor;
 
 public class TextInit {
 
@@ -24,7 +25,7 @@ public class TextInit {
 
   public static EditorContentModel_V001 initialtext(String text, @Nullable String align) {
     List<Markup_V001> markups = new ArrayList<>();
-    if (Specman.instance().aenderungenVerfolgen()) {
+    if (editor().aenderungenVerfolgen()) {
       TextMarkup markup = new TextMarkup(MarkupType.Changed, changeset());
       markups.add(new Markup_V001(0, text.length() - 1, markup));
     }
@@ -36,19 +37,19 @@ public class TextInit {
   }
 
   public static Color schrittHintergrund() {
-    return (Specman.instance() != null && Specman.instance().aenderungenVerfolgen())
+    return (editor() != null && editor().aenderungenVerfolgen())
         ? changeset().panelColor()
         : BACKGROUND_COLOR_STANDARD;
   }
 
   public static Aenderungsart initialArt() {
-    return (Specman.instance() != null && Specman.instance().aenderungenVerfolgen())
+    return (editor() != null && editor().aenderungenVerfolgen())
         ? Hinzugefuegt
         : Untracked;
   }
 
   public static ChangeInfo initialChangeInfo() {
-    return (Specman.instance() != null && Specman.instance().aenderungenVerfolgen())
+    return (editor() != null && editor().aenderungenVerfolgen())
         ? ChangeInfo.added()
         : ChangeInfo.untracked();
   }

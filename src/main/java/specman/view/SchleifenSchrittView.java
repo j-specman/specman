@@ -28,6 +28,7 @@ import java.util.List;
 
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.pdf.Shape.GAP_COLOR;
+import static specman.Specman.editor;
 
 public class SchleifenSchrittView extends AbstractSchrittView implements SpaltenContainerI {
   private static final int CONTENTROW = 3;
@@ -41,8 +42,8 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 	SchrittSequenzView wiederholSequenz;
 	int balkenbreite;
 
-	public SchleifenSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, boolean mitUnteremBalken) {
-		super(editor, parent, initialerText, id, changeInfo);
+	public SchleifenSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, boolean mitUnteremBalken) {
+		super(parent, initialerText, id, changeInfo);
 		panel = new JPanel();
 		panel.setBackground(DIAGRAMM_LINE_COLOR);
 		balkenbreite = SPALTENLAYOUT_UMGEHUNG_GROESSE;
@@ -78,13 +79,13 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
     klappen = new KlappButton(this, editContainer.getKlappButtonParent(), layout, CONTENTROW, filler.row);
 	}
 
-	public SchleifenSchrittView(EditorI editor, SchrittSequenzView parent, WhileSchrittModel_V001 model, boolean mitUnteremBalken) {
-		this(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), mitUnteremBalken);
-		initWiederholsequenzFromModel(editor, model);
+	public SchleifenSchrittView(SchrittSequenzView parent, WhileSchrittModel_V001 model, boolean mitUnteremBalken) {
+		this(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), mitUnteremBalken);
+		initWiederholsequenzFromModel(model);
 	}
 
-	protected void initWiederholsequenzFromModel(EditorI editor, WhileSchrittModel_V001 model) {
-		initWiederholsequenz(new SchrittSequenzView(editor, this, model.wiederholSequenz));
+	protected void initWiederholsequenzFromModel(WhileSchrittModel_V001 model) {
+		initWiederholsequenz(new SchrittSequenzView(this, model.wiederholSequenz));
 		setBackgroundUDBL(new Color(model.farbe));
 		balkenbreiteSetzen(model.balkenbreite);
 		klappen.init(model.zugeklappt);
@@ -99,7 +100,7 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 	public int spaltenbreitenAnpassenNachMausDragging(int delta, int spalte) {
 		int angepassteBalkenBreite = linkerBalken.getWidth() + delta;
 		balkenbreiteSetzen(angepassteBalkenBreite);
-		Specman.instance().diagrammAktualisieren(null);
+		editor().diagrammAktualisieren(null);
 		return delta;
 	}
 
@@ -108,9 +109,9 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 		layout.setColumnSpec(1, ColumnSpec.decode(balkenbreite + "px"));
 	}
 
-	protected SchrittSequenzView einschrittigeInitialsequenz(EditorI editor, SchrittID id, ChangeInfo changeInfo) {
+	protected SchrittSequenzView einschrittigeInitialsequenz(SchrittID id, ChangeInfo changeInfo) {
 		SchrittSequenzView sequenz = new SchrittSequenzView(this, id, changeInfo);
-		sequenz.einfachenSchrittAnhaengen(editor);
+		sequenz.einfachenSchrittAnhaengen();
 		return sequenz;
 	}
 
@@ -212,15 +213,15 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 		return findeSchrittZuIdIncludingSubSequences(id, wiederholSequenz);
 	}
 
-	@Override public int aenderungenUebernehmen(EditorI editor) throws EditException {
-		int changesMade = super.aenderungenUebernehmen(editor);
-		changesMade += wiederholSequenz.aenderungenUebernehmen(editor);
+	@Override public int aenderungenUebernehmen() throws EditException {
+		int changesMade = super.aenderungenUebernehmen();
+		changesMade += wiederholSequenz.aenderungenUebernehmen();
 		return changesMade;
 	}
 
-	@Override public int aenderungenVerwerfen(EditorI editor) throws EditException {
-		int changesRejected = super.aenderungenVerwerfen(editor);
-		changesRejected += wiederholSequenz.aenderungenVerwerfen(editor);
+	@Override public int aenderungenVerwerfen() throws EditException {
+		int changesRejected = super.aenderungenVerwerfen();
+		changesRejected += wiederholSequenz.aenderungenVerwerfen();
 		return changesRejected;
 	}
 

@@ -19,6 +19,7 @@ import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
 import specman.Specman;
 import static specman.ChangeSet.changeset;
 import static specman.graphics.Styles.DELETED_BACKGROUND_COLOR;
+import static specman.Specman.editor;
 
 public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyListener {
   public TextEditAreaKeyListener(TextEditArea textArea) {
@@ -107,10 +108,10 @@ public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyLi
   public void keyReleased(KeyEvent e) {}
 
   public void markSelectedTextAsDeletedInModificationMode() {
-    if (!Specman.instance().aenderungenVerfolgen()) {
+    if (!editor().aenderungenVerfolgen()) {
       return;
     }
-    AbstractSchrittView textOwner = Specman.instance().findeSchritt(textArea);
+    AbstractSchrittView textOwner = editor().findeSchritt(textArea);
     if (textOwner != null && isEditable()) {
       WrappedPosition selectionStart = getWrappedSelectionStart();
       WrappedPosition selectionEnd = getWrappedSelectionEnd();

@@ -7,6 +7,7 @@ import specman.Specman;
 import specman.view.RoundedBorderDecorationStyle;
 
 import static specman.view.RoundedBorderDecorationStyle.None;
+import static specman.Specman.editor;
 
 public class Indentions {
     public static final int JEDITORPANE_DEFAULT_BORDER_THICKNESS = 3;
@@ -73,6 +74,6 @@ public class Indentions {
           : this;
     }
 
-    private int zoomPercent() { return Specman.instance().getZoomFactor(); }
+    private int zoomPercent() { return editor().getZoomFactor(); }
 
 }

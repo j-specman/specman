@@ -6,6 +6,7 @@ import specman.editarea.EditArea;
 import specman.editarea.ImageEditArea;
 import specman.editarea.TextEditArea;
 import specman.editarea.EditContainer;
+import static specman.Specman.editor;
 
 public class UndoableEditAreaRemoved extends AbstractUndoableInteraction {
   private final EditContainer editContainer;
@@ -22,12 +23,12 @@ public class UndoableEditAreaRemoved extends AbstractUndoableInteraction {
   @Override
   protected void undoEdit() throws EditException {
     editContainer.addEditAreaByUndoRedo(leadingTextArea, editArea, trailingTextArea);
-    Specman.instance().diagrammAktualisieren(null);
+    editor().diagrammAktualisieren(null);
   }
 
   @Override
   protected void redoEdit() throws EditException {
     editContainer.removeEditAreaByUndoRedo(editArea, trailingTextArea);
-    Specman.instance().diagrammAktualisieren(null);
+    editor().diagrammAktualisieren(null);
   }
 }

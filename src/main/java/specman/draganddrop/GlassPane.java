@@ -2,6 +2,7 @@ package specman.draganddrop;
 
 import com.formdev.flatlaf.FlatLaf;
 import specman.Specman;
+import static specman.Specman.editor;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -44,6 +45,6 @@ public class GlassPane extends JPanel {
 	public void setInputRecBounds(int x, int y, int width, int height) {
 		y -= contentPaneY;
 		insertPosIndicator.setBounds(x - windowsoffset, y, width, height);
-		Specman.instance().setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+		editor().setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 	}
 }

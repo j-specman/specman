@@ -29,6 +29,7 @@ import java.util.List;
 import static specman.ColumnSpecByPercent.copyOf;
 import static specman.util.ObjectUtils.nvl;
 import static specman.view.AbstractSchrittView.*;
+import static specman.Specman.editor;
 
 public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements FocusListener, SpaltenContainerI {
   JPanel headingPanel;
@@ -49,14 +50,14 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   List<CatchUeberschrift> coCatchHeadings = new ArrayList<>();
 
   public CatchSchrittSequenzView(CatchBereich catchBereich, BreakSchrittView linkedBreakStep, ChangeInfo changeInfo) {
-    super(Specman.instance(), catchBereich, linkedBreakStep.id.naechsteEbene(), linkedBreakStep.getEditorContent(true), changeInfo);
-    einfachenSchrittAnhaengen(Specman.instance());
+    super(catchBereich, linkedBreakStep.id.naechsteEbene(), linkedBreakStep.getEditorContent(true), changeInfo);
+    einfachenSchrittAnhaengen();
     init(linkedBreakStep, null, TextInit.initialChangeInfo());
     initHeadingsLayout();
   }
 
   public CatchSchrittSequenzView(AbstractSchrittView parent, CatchSchrittSequenzModel_V001 model) {
-    super(Specman.instance(), parent, model);
+    super(parent, model);
     BreakSchrittView linkedBreakSchritt = (BreakSchrittView) parent.getParent().findStepByStepID(model.id.toString());
     init(linkedBreakSchritt, model.headingRightBarWidth, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
     initCoCatches(model.coCatches);
@@ -137,19 +138,19 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     EditorContentModel_V001 breakStepContent = breakStepToLink.getEditorContent(true);
     CatchUeberschrift coCatchHeading = addCoCatch(insertionIndex, breakStepContent, breakStepToLink, TextInit.initialChangeInfo());
     initHeadingsLayout();
-    Specman.instance().addEdit(new UndoableCoCatchAdded(this, breakStepToLink, insertionIndex, coCatchHeading));
+    editor().addEdit(new UndoableCoCatchAdded(this, breakStepToLink, insertionIndex, coCatchHeading));
   }
 
   public void addCoCatchUDBL(int insertionIndex, CatchUeberschrift coCatchHeading, BreakSchrittView breakStepToLink) {
     coCatchHeadings.add(insertionIndex, coCatchHeading);
     breakStepToLink.catchAnkoppeln(coCatchHeading);
     initHeadingsLayout();
-    Specman.instance().addEdit(new UndoableCoCatchAdded(this, breakStepToLink, insertionIndex, coCatchHeading));
+    editor().addEdit(new UndoableCoCatchAdded(this, breakStepToLink, insertionIndex, coCatchHeading));
     headingPanel.revalidate();
   }
 
   private CatchUeberschrift addCoCatch(int insertionIndex, EditorContentModel_V001 heading, BreakSchrittView breakStepToLink, ChangeInfo changetype) {
-    EditContainer coCatchHeadingContent = new EditContainer(Specman.instance(), heading, breakStepToLink.id);
+    EditContainer coCatchHeadingContent = new EditContainer(heading, breakStepToLink.id);
     coCatchHeadingContent.addEditAreasFocusListener(this);
     CatchUeberschrift coCatchHeading = new CatchUeberschrift(coCatchHeadingContent, breakStepToLink, this, changetype);
     coCatchHeadings.add(insertionIndex, coCatchHeading);
@@ -158,9 +159,9 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   }
 
   @Override
-  protected void ueberschriftInitialisieren(EditorI editor, EditorContentModel_V001 initialerText, SchrittID initialeSchrittnummer) {
+  protected void ueberschriftInitialisieren( EditorContentModel_V001 initialerText, SchrittID initialeSchrittnummer) {
     // Dummy SchrittID causes the heading to be created with step number label which will be updated later
-    super.ueberschriftInitialisieren(editor, initialerText, new SchrittID(0));
+    super.ueberschriftInitialisieren(initialerText, new SchrittID(0));
   }
 
   @Override
@@ -197,7 +198,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   }
 
   public void removeOrMarkAsDeletedUDBL() {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     if (changeInfo.isAdded() || !editor.aenderungenVerfolgen()) {
       removeUDBL();
     }
@@ -215,12 +216,12 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
       coCatchHeadings.remove(catchHeading);
       catchHeading.disconnectLinkedBreakStep();
       initHeadingsLayout();
-      Specman.instance().addEdit(new UndoableCoCatchRemoved(this, catchHeading.linkedBreakStep, catchHeading, deletionIndex));
+      editor().addEdit(new UndoableCoCatchRemoved(this, catchHeading.linkedBreakStep, catchHeading, deletionIndex));
     }
   }
 
   public void removeOrMarkAsDeletedUDBL(CatchUeberschrift catchHeading) {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     if (catchHeading.changeInfo.isAdded() || !editor.aenderungenVerfolgen()) {
       removeUDBL(catchHeading);
     }
@@ -235,7 +236,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     int catchIndex = catchBereich.catchEntfernen(this);
     primaryCatchHeading.disconnectLinkedBreakStep();
     coCatchHeadings.stream().forEach(coCatchHeading -> coCatchHeading.disconnectLinkedBreakStep());
-    Specman.instance().addEdit(new UndoableCatchSequenceRemoved(this, catchIndex, backupSequencesWidthPercent));
+    editor().addEdit(new UndoableCatchSequenceRemoved(this, catchIndex, backupSequencesWidthPercent));
   }
 
   @Override
@@ -257,13 +258,13 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   }
 
   @Override
-  public int aenderungenUebernehmen(EditorI editor) throws EditException {
+  public int aenderungenUebernehmen() throws EditException {
     if (changeInfo.isDeleted()) {
       removeUDBL();
       return 1;
     }
     else {
-      int numChanges = super.aenderungenUebernehmen(editor)
+      int numChanges = super.aenderungenUebernehmen()
         + primaryCatchHeading.aenderungenUebernehmen();
       for (CatchUeberschrift coCatchHeading : modifyableCoCatchHeadings()) {
         numChanges += coCatchHeading.aenderungenUebernehmen();
@@ -273,9 +274,9 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   }
 
   @Override
-  public int aenderungenVerwerfen(EditorI editor) throws EditException {
+  public int aenderungenVerwerfen() throws EditException {
     ChangeInfo lastChangetype = changeInfo;
-    int changesRejected = super.aenderungenVerwerfen(editor) + primaryCatchHeading.aenderungenVerwerfen();
+    int changesRejected = super.aenderungenVerwerfen() + primaryCatchHeading.aenderungenVerwerfen();
     for (CatchUeberschrift coCatchHeading : modifyableCoCatchHeadings()) {
       changesRejected += coCatchHeading.aenderungenVerwerfen();
     }

@@ -11,6 +11,7 @@ import javax.swing.text.Utilities;
 import java.awt.event.KeyEvent;
 
 import static specman.editarea.markups.CharType.ParagraphBoundary;
+import static specman.Specman.editor;
 
 class BackspaceKeyPressedHandler extends AbstractRemovalKeyPressedHandler {
   BackspaceKeyPressedHandler(TextEditArea textArea, KeyEvent keyEvent) {
@@ -62,7 +63,7 @@ class BackspaceKeyPressedHandler extends AbstractRemovalKeyPressedHandler {
         int rowStart = Utilities.getRowStart(textArea, textArea.getCaretPosition());
         int rowEnd = Utilities.getRowEnd(textArea, textArea.getCaretPosition());
         if (rowStart == rowEnd) {
-          try(UndoRecording ur = Specman.instance().composeUndo()) {
+          try(UndoRecording ur = editor().composeUndo()) {
             cleanupText();
           }
           return true;
@@ -89,12 +90,12 @@ class BackspaceKeyPressedHandler extends AbstractRemovalKeyPressedHandler {
   }
 
   public void removeStepnumberLinkBefore() {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     try (UndoRecording ur = editor.composeUndo()) {
       WrappedPosition position = getWrappedSelectionEnd().dec();
       WrappedPosition startOffset = getWrappedSelectionStart().min(getStartOffsetFromPosition(position));
       WrappedPosition endOffset = getEndOffsetFromPosition(position);
-      removeTextAndUnregisterStepnumberLinks(startOffset, endOffset, editor);
+      removeTextAndUnregisterStepnumberLinks(startOffset, endOffset);
     }
   }
 

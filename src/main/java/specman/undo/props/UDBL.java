@@ -12,6 +12,7 @@ import specman.undo.AbstractUndoableInteraction;
 import specman.view.AbstractSchrittView;
 import specman.view.QuellSchrittView;
 import specman.view.SchrittSequenzView;
+import static specman.Specman.editor;
 
 
 import javax.swing.*;
@@ -34,7 +35,7 @@ import java.util.Objects;
  */
 public class UDBL {
   private static void addEdit(AbstractUndoableInteraction action) {
-    Specman.instance().addEdit(action);
+    editor().addEdit(action);
   }
 
   public static void setBackgroundUDBL(Component component, Color bg) {

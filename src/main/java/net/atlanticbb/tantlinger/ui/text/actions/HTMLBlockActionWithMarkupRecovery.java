@@ -9,6 +9,7 @@ import specman.editarea.markups.MarkupBackgroundStyleInitializer;
 import specman.editarea.markups.MarkupRecovery;
 import specman.model.v001.Markup_V001;
 import specman.undo.manager.UndoRecording;
+import static specman.Specman.editor;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -42,7 +43,7 @@ public class HTMLBlockActionWithMarkupRecovery extends HTMLBlockAction {
 
   @Override
   protected void wysiwygEditPerformed(ActionEvent actionEvent, JEditorPane jEditorPane) {
-    try (UndoRecording ur = Specman.instance().composeUndo()) {
+    try (UndoRecording ur = editor().composeUndo()) {
       MarkedCharSequence marksBackup = backupMarkups(jEditorPane);
       core.wysiwygEditPerformed(actionEvent, jEditorPane);
       recoverMarkups(marksBackup, jEditorPane);

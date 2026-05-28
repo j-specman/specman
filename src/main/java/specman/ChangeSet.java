@@ -14,6 +14,7 @@ import java.util.Map;
 
 import static specman.graphics.Styles.Schriftfarbe_Geloescht;
 import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
+import static specman.Specman.editor;
 
 public class ChangeSet {
 
@@ -81,7 +82,7 @@ public class ChangeSet {
 
   public MutableAttributeSet getDeletedStepnumberLinkStyle() { return deletedStepnumberLinkStyle; }
 
-  public static ChangeSet changeset() { return Specman.instance().changeset(); }
+  public static ChangeSet changeset() { return editor().changeset(); }
 
   public static ChangeSet fromName(String name) {
     return name != null ? ALL.get(name) : null;

@@ -25,6 +25,7 @@ import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
 import static specman.graphics.Styles.SCHRITTNUMMER_VORDERGRUNDFARBE;
 import static specman.graphics.Styles.Schriftfarbe_Geloescht;
 import static specman.graphics.Styles.labelFont;
+import static specman.Specman.editor;
 
 public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
   private static final Border STANDARD_BORDER = new MatteBorder(0, 2, 0, 1, SCHRITTNUMMER_FARBE.color);
@@ -46,7 +47,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
     setForeground(Color.WHITE);
     setOpaque(true);
 
-    DragMouseAdapter ada = Specman.instance().createDragMouseAdapter();
+    DragMouseAdapter ada = editor().createDragMouseAdapter();
     addMouseListener(ada);
     addMouseMotionListener(ada);
     addMouseListener(BreakCatchScrollMouseAdapter.instance);

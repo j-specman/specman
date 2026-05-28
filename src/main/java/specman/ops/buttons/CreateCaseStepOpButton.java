@@ -13,11 +13,11 @@ public class CreateCaseStepOpButton extends AbstractCreateStepOpButton {
   public CreateCaseStepOpButton(SpecmanOpContext context) { super(context); }
 
   @Override AbstractSchrittView insertAfter(SchrittSequenzView seq, AbstractSchrittView ref) throws EditException {
-    return seq.caseSchrittZwischenschieben(After, ref, context);
+    return seq.caseSchrittZwischenschieben(After, ref);
   }
 
   @Override AbstractSchrittView append(SchrittSequenzView seq) throws EditException {
-    return seq.caseSchrittAnhaengen(context);
+    return seq.caseSchrittAnhaengen();
   }
 
 }

@@ -9,6 +9,7 @@ import specman.editarea.markups.MarkupBackgroundStyleInitializer;
 import specman.editarea.markups.MarkupRecovery;
 import specman.model.v001.Markup_V001;
 import specman.undo.manager.UndoRecording;
+import static specman.Specman.editor;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
@@ -32,11 +33,11 @@ class EnterKeyPressedHandler extends AbstractKeyEventHandler {
         return;
       }
       MarkedCharSequence changes = findMarkups();
-      changes.insertParagraphBoundaryAt(getWrappedCaretPosition(), Specman.instance().aenderungenVerfolgen());
+      changes.insertParagraphBoundaryAt(getWrappedCaretPosition(), editor().aenderungenVerfolgen());
       // We start the Undo composition here and close it in the invokeLater section to cover both
       // - all the changes from JEditoPane when inserting a new paragraph and
       // - all changes required for changemark recovery
-      UndoRecording ur = Specman.instance().composeUndo();
+      UndoRecording ur = editor().composeUndo();
       SwingUtilities.invokeLater(() -> {
         java.util.List<Markup_V001> recoveredChangemarks = new MarkupRecovery(getWrappedDocument(), changes).recover();
         new MarkupBackgroundStyleInitializer(textArea, recoveredChangemarks).styleChangedTextSections();

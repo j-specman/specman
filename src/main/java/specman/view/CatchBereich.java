@@ -33,6 +33,7 @@ import static specman.ColumnSpecByPercent.copyOf;
 import static specman.ColumnSpecByPercent.releasePercent;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.pdf.Shape.GAP_COLOR;
+import static specman.Specman.editor;
 
 public class CatchBereich extends AbstractSchrittView implements KlappbarerBereichI, ComponentListener, SpaltenContainerI {
   private static final int BOTTOMBAR_LAYOUTROW = 6;
@@ -50,8 +51,8 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
   List<Integer> sequencesWidthPercent;
 
   public CatchBereich(SchrittSequenzView parent) {
-    super(Specman.instance(), parent, new EditorContentModel_V001(), null, ChangeInfo.untracked());
-    computeBarRowSpec(Specman.instance().getZoomFactor());
+    super(parent, new EditorContentModel_V001(), null, ChangeInfo.untracked());
+    computeBarRowSpec(editor().getZoomFactor());
     bereichLayout = new FormLayout("10px:grow",
       FORMLAYOUT_GAP + "," + barRowSpec + "," + FORMLAYOUT_GAP + ",fill:pref," + FORMLAYOUT_GAP + "," + barRowSpec);
     bereichPanel.setLayout(bereichLayout);
@@ -169,7 +170,7 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
     List<Integer> originalSequencesWidthPercents = copyOf(sequencesWidthPercent);
     CatchSchrittSequenzView catchSequence = new CatchSchrittSequenzView(this, breakStepToLink, TextInit.initialChangeInfo());
     addCatchSequence(catchSequence, null, null);
-    Specman.instance().addEdit(new UndoableCatchSequenceAdded(catchSequence, originalSequencesWidthPercents));
+    editor().addEdit(new UndoableCatchSequenceAdded(catchSequence, originalSequencesWidthPercents));
     return catchSequence;
   }
 
@@ -236,19 +237,19 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
       .orElse(null);
   }
 
-  public int aenderungenUebernehmen(EditorI editor) throws EditException {
+  public int aenderungenUebernehmen() throws EditException {
     int changesCommitted = 0;
     for (CatchSchrittSequenzView seq: modifyableCatchSequences()) {
-      changesCommitted += seq.aenderungenUebernehmen(editor);
+      changesCommitted += seq.aenderungenUebernehmen();
     }
     return changesCommitted;
   }
 
   @Override
-  public int aenderungenVerwerfen(EditorI editor) throws EditException {
+  public int aenderungenVerwerfen() throws EditException {
     int changesRejected = 0;
     for (CatchSchrittSequenzView seq: modifyableCatchSequences()) {
-      changesRejected += seq.aenderungenVerwerfen(editor);
+      changesRejected += seq.aenderungenVerwerfen();
     }
     return changesRejected;
   }
@@ -314,7 +315,7 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
     // The user might not have focussed anything in the catch step sequence before he
     // scrolled to the break step - so in case hwe want's to scroll back by CTRL+ALT+Left,
     // we explicitely add the heading to the edit history here.
-    Specman.instance().appendToEditHistory(catchHeading.ueberschrift);
+    editor().appendToEditHistory(catchHeading.ueberschrift);
     catchHeading.scrollToBreak();
   }
 

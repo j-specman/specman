@@ -9,6 +9,7 @@ import specman.undo.manager.UndoRecording;
 import java.awt.event.KeyEvent;
 
 import static specman.editarea.markups.CharType.ParagraphBoundary;
+import static specman.Specman.editor;
 
 class DeleteKeyPressedHandler extends AbstractRemovalKeyPressedHandler {
   DeleteKeyPressedHandler(TextEditArea textArea, KeyEvent keyEvent) {
@@ -37,12 +38,12 @@ class DeleteKeyPressedHandler extends AbstractRemovalKeyPressedHandler {
   }
 
   void removeStepnumberLinkAfter() {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     try (UndoRecording ur = editor.composeUndo()) {
       WrappedPosition position = getWrappedSelectionStart().inc();
       WrappedPosition endOffset = getWrappedSelectionEnd().max(getEndOffsetFromPosition(position));
       WrappedPosition startOffset = getStartOffsetFromPosition(position);
-      removeTextAndUnregisterStepnumberLinks(startOffset, endOffset, editor);
+      removeTextAndUnregisterStepnumberLinks(startOffset, endOffset);
     }
   }
 

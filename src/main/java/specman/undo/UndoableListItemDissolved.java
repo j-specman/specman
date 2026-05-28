@@ -6,6 +6,7 @@ import specman.editarea.AbstractListItemEditArea;
 import specman.editarea.EditArea;
 import specman.editarea.EditContainer;
 import specman.editarea.TextEditArea;
+import static specman.Specman.editor;
 
 import java.util.List;
 
@@ -27,12 +28,12 @@ public class UndoableListItemDissolved extends AbstractUndoableInteraction {
   @Override
   protected void undoEdit() throws EditException {
     editContainer.undoDissolveListItemEditArea(liEditArea, liEditAreaIndex, liftUpAreas, followingTextEditArea);
-    Specman.instance().diagrammAktualisieren(liEditArea);
+    editor().diagrammAktualisieren(liEditArea);
   }
 
   @Override
   protected void redoEdit() throws EditException {
     EditArea nextFocused = editContainer.redoDissolveListItemEditArea(liEditArea, liEditAreaIndex, liftUpAreas, followingTextEditArea);
-    Specman.instance().diagrammAktualisieren(nextFocused);
+    editor().diagrammAktualisieren(nextFocused);
   }
 }

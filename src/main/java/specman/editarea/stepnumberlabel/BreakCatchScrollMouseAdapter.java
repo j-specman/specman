@@ -4,6 +4,7 @@ import specman.Specman;
 import specman.view.AbstractSchrittView;
 import specman.view.BreakSchrittView;
 import specman.view.CatchBereich;
+import static specman.Specman.editor;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -28,7 +29,7 @@ public class BreakCatchScrollMouseAdapter extends MouseAdapter {
   }
 
   private boolean stepRefersToOtherStep(MouseEvent e) {
-    return Specman.instance().findStep(source(e)).refersToOtherStep();
+    return editor().findStep(source(e)).refersToOtherStep();
   }
 
   @Override
@@ -44,7 +45,7 @@ public class BreakCatchScrollMouseAdapter extends MouseAdapter {
   public void mouseClicked(MouseEvent e) {
     if (userWantsToScroll(e)) {
       StepnumberLabel stepnumberLabel = source(e);
-      AbstractSchrittView step = Specman.instance().findStep(stepnumberLabel);
+      AbstractSchrittView step = editor().findStep(stepnumberLabel);
       if (step instanceof BreakSchrittView) {
         ((BreakSchrittView) step).scrollToCatch();
       }
@@ -58,7 +59,7 @@ public class BreakCatchScrollMouseAdapter extends MouseAdapter {
     StepnumberLabel stepnumberLabel = source(e);
     if (!Objects.equals(stepnumberLabel.getToolTipText(), tooltip)) {
       stepnumberLabel.setToolTipText(tooltip);
-      Specman.instance().setCursor(cursor);
+      editor().setCursor(cursor);
     }
   }
 

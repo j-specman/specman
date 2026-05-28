@@ -40,8 +40,8 @@ public class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
         CaseSchrittView caseSchritt = (CaseSchrittView) step;
         ZweigSchrittSequenzView zweig = caseSchritt.headingToBranch(initiatingFragment);
         if (zweig != null) {
-          int zweigIndex = caseSchritt.zweigEntfernen(context, zweig);
-          addEdit(new UndoableZweigEntfernt(context, zweig, caseSchritt, zweigIndex));
+          int zweigIndex = caseSchritt.zweigEntfernen(zweig);
+          addEdit(new UndoableZweigEntfernt(zweig, caseSchritt, zweigIndex));
           return;
         }
       }

@@ -2,6 +2,7 @@ package net.atlanticbb.tantlinger.ui.text.actions;
 
 import net.atlanticbb.tantlinger.ui.UIUtils;
 import specman.Specman;
+import static specman.Specman.editor;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -19,7 +20,7 @@ public class UnorderedListItemAction extends BasicEditAction {
 
   @Override
   protected void doEdit(ActionEvent actionEvent, JEditorPane jEditorPane) {
-    Specman.instance().toggleListItem(false);
+    editor().toggleListItem(false);
   }
 
 }

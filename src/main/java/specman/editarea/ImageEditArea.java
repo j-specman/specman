@@ -49,6 +49,7 @@ import specman.ChangeSet;
 import static specman.ChangeSet.changeset;
 import static specman.view.AbstractSchrittView.FORMLAYOUT_GAP;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
+import static specman.Specman.editor;
 
 public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel_V001>,
   FocusListener, MouseListener, KeyListener, ComponentListener, SpaltenContainerI {
@@ -93,7 +94,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   }
 
   private void postInit() {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     setLayout(new FormLayout("pref, " + AFTERIMAGELINE_GAP + ", pref:grow", "fill:pref:grow"));
     this.image = new JLabel();
     add(image, CC.xy(1, 1));
@@ -166,7 +167,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   }
 
   private void appendTextEditAreaByKeypressUDBL() {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     try (UndoRecording ur = editor.pauseUndo()){
       // Change back to unselected border before starting to record undoable operations
       setImageBorderByChangetypeUDBL();
@@ -180,7 +181,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   }
 
   private void removeAreaByKeypressUDBL() {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     try (UndoRecording ur = editor.pauseUndo()){
       // Change back to unselected border before starting to record undoable operations
       setImageBorderByChangetypeUDBL();
@@ -391,7 +392,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   private void adaptImageSize() {
     int availableWidth = getWidth() - 3 * LINIENBREITE;
     if (availableWidth > 0) {
-      int maximumZoomedWidth = (int)(fullSizeImage.getWidth() * Specman.instance().getZoomFactor() / 100 * individualScalePercent);
+      int maximumZoomedWidth = (int)(fullSizeImage.getWidth() * editor().getZoomFactor() / 100 * individualScalePercent);
       int scaledWidth = Math.min(availableWidth, maximumZoomedWidth);
       if (scaledIcon == null || scaledWidth != scaledIcon.getIconWidth()) {
         totalScalePercent = (float)scaledWidth / (float)fullSizeImage.getWidth();

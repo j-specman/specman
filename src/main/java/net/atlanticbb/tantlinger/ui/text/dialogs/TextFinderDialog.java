@@ -28,6 +28,7 @@ import net.atlanticbb.tantlinger.i18n.I18n;
 import net.atlanticbb.tantlinger.ui.text.TextEditPopupManager;
 import specman.Specman;
 import specman.undo.manager.UndoRecording;
+import static specman.Specman.editor;
 
 /** This is an adaption of the original TextFinerDialog, extended to work
  * on a list of text components rather than a single one. Unfortunately the
@@ -69,7 +70,7 @@ public class TextFinderDialog extends JDialog {
   }
 
   public void initSearchCycle(JTextComponent tc) {
-    this.allTextComponents = Specman.instance().queryAllTextComponents(tc);
+    this.allTextComponents = editor().queryAllTextComponents(tc);
     String selectedText = tc.getSelectedText();
     if (selectedText != null) {
       txtFind1.setText(selectedText);
@@ -387,7 +388,7 @@ public class TextFinderDialog extends JDialog {
             this.setSelection(index, index + key.length(), this.searchUp);
             // Without undo composition, the following replacement is undone in two
             // steps: removing the selected text and adding the replacement text.
-            try (UndoRecording ur = Specman.instance().composeUndo()) {
+            try (UndoRecording ur = editor().composeUndo()) {
               this.monitor.replaceSelection(replacement);
             }
             this.setSelection(index, index + replacement.length(), this.searchUp);
@@ -675,7 +676,7 @@ public class TextFinderDialog extends JDialog {
    */
   public void updateContextState(JEditorPane editor) {
 //    System.out.println("updateContextState " + editor.getCaretPosition());
-//    editor = (JEditorPane)Specman.instance().getLastFocusedTextArea();
+//    editor = (JEditorPane)editor().getLastFocusedTextArea();
 //    initSearchCycle(editor);
   }
 

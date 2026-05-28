@@ -14,7 +14,7 @@ class SpecmanMenuBar extends JMenuBar {
   private JMenu aenderungsfarbenMenu;
 
   SpecmanMenuBar(Specman specman, HTMLEditorPane shefEditorPane) {
-    recentFiles = new RecentFiles(specman);
+    recentFiles = new RecentFiles();
 
     JMenuItem laden = new JMenuItem("Laden...");
     laden.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));

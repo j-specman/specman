@@ -25,9 +25,9 @@ public class CreateCaseBranchADBLOpButton extends AbstractADBLSpecmanOpButton {
       fehler("Kein Zweig ausgewählt");
       return;
     }
-    ZweigSchrittSequenzView neuerZweig = caseSchritt.neuenZweigHinzufuegen(context, ausgewaehlterZweig);
+    ZweigSchrittSequenzView neuerZweig = caseSchritt.neuenZweigHinzufuegen(ausgewaehlterZweig);
     resyncStepnumberStyleADBL();
-    addEdit(new UndoableZweigHinzugefuegt(context, neuerZweig, caseSchritt));
+    addEdit(new UndoableZweigHinzugefuegt(neuerZweig, caseSchritt));
     schritt.skalieren(getZoomFactor(), 100);
     diagrammAktualisieren(schritt.getFirstEditArea());
   }

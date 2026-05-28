@@ -5,6 +5,7 @@ import net.atlanticbb.tantlinger.ui.UIUtils;
 import net.atlanticbb.tantlinger.ui.text.actions.HTMLFontSizeAction;
 import net.atlanticbb.tantlinger.ui.text.actions.SpecmanFontSizeAction;
 import specman.Specman;
+import static specman.Specman.editor;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -193,7 +194,7 @@ public class SpecmanHTMLFontDialog extends HTMLOptionDialog {
   }
 
   private String swingFontsize2HTMLFontsize(int zoomedSwingFontsize) {
-    int swingFontsize = zoomedSwingFontsize * 100 / Specman.instance().getZoomFactor();
+    int swingFontsize = zoomedSwingFontsize * 100 / editor().getZoomFactor();
     for (int i = 0; i < HTMLFontSizeAction.FONT_SIZES.length; ++i) {
       if (SpecmanFontSizeAction.FONT_SIZES[i] == swingFontsize) {
         return HTMLFontSizeAction.SIZES[i];

@@ -10,12 +10,12 @@ import javax.swing.*;
 
 public class EinfacherSchrittView extends AbstractSchrittView {
 
-	public EinfacherSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
-		super(editor, parent, initialerText, id, changeInfo);
+	public EinfacherSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
+		super(parent, initialerText, id, changeInfo);
 	}
 
-	public EinfacherSchrittView(EditorI editor, SchrittSequenzView parent, EinfacherSchrittModel_V001 model) {
-		super(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
+	public EinfacherSchrittView(SchrittSequenzView parent, EinfacherSchrittModel_V001 model) {
+		super(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
 	}
 
 	@Override

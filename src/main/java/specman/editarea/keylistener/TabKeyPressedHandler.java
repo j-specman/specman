@@ -2,6 +2,7 @@ package specman.editarea.keylistener;
 
 import specman.Specman;
 import specman.editarea.TextEditArea;
+import static specman.Specman.editor;
 
 import javax.swing.*;
 import java.awt.event.KeyAdapter;
@@ -20,7 +21,7 @@ public class TabKeyPressedHandler extends AbstractKeyEventHandler {
 
       // Das hier klappt noch nicht: Wenn man CTRL drückt, dann kommt das TAB-Drücken hier nicht an
 
-      //SwingUtilities.invokeLater(() -> Specman.instance().scrollTo(800));
+      //SwingUtilities.invokeLater(() -> editor().scrollTo(800));
     }
   }
 }

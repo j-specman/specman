@@ -15,6 +15,7 @@ import java.awt.geom.RoundRectangle2D;
 
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
+import static specman.Specman.editor;
 
 public class RoundedBorderDecorator extends JPanel {
   private static final int INSET = 15;
@@ -39,7 +40,7 @@ public class RoundedBorderDecorator extends JPanel {
     add(componentToDecorate, CC.xy(2, 2));
     decoratedComponent = componentToDecorate;
     style = RoundedBorderDecorationStyle.Co;
-    skalieren(Specman.instance().getZoomFactor(), stepnumberTextheight);
+    skalieren(editor().getZoomFactor(), stepnumberTextheight);
   }
 
   public RoundedBorderDecorationStyle getStyle() { return style; }
@@ -103,8 +104,8 @@ public class RoundedBorderDecorator extends JPanel {
   private void drawNumberStepBackground(Graphics2D g2d, Shape innerShape) {
     g2d.setColor(Styles.SCHRITTNUMMER_FARBE.color);
 
-    double x = (innerShape.getBounds().getWidth() + Specman.instance().scale(INNER_BORDERLINE_WIDTH * 2));
-    double y = (innerShape.getBounds().getY() + Specman.instance().scale(1.5));
+    double x = (innerShape.getBounds().getWidth() + editor().scale(INNER_BORDERLINE_WIDTH * 2));
+    double y = (innerShape.getBounds().getY() + editor().scale(1.5));
     Rectangle2D.Double background = new Rectangle2D.Double(x, y, STEPNUMBER_BACKGROUND_WIDTH, stepnumberTextheight);
     g2d.fill(background);
   }

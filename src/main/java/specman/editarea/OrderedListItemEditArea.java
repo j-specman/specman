@@ -11,6 +11,7 @@ import java.awt.*;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
+import static specman.Specman.editor;
 
 public class OrderedListItemEditArea extends AbstractListItemEditArea {
   private static final int DEFAULT_RIGHT_GAP = 3;
@@ -22,7 +23,7 @@ public class OrderedListItemEditArea extends AbstractListItemEditArea {
   }
 
   private void initRightGap() {
-    rightGap = DEFAULT_RIGHT_GAP * Specman.instance().getZoomFactor() / 100;
+    rightGap = DEFAULT_RIGHT_GAP * editor().getZoomFactor() / 100;
   }
 
   public OrderedListItemEditArea(ListItemEditAreaModel_V001 model) {

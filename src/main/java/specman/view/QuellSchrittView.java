@@ -17,16 +17,16 @@ public class QuellSchrittView extends AbstractSchrittView {
 
     protected AbstractSchrittView zielschritt;
 
-    public QuellSchrittView(EditorI editor, SchrittSequenzView parent, SchrittID id) {
+    public QuellSchrittView(SchrittSequenzView parent, SchrittID id) {
         //TODO JL: der "." sorgt für eine Mindesthöhe des Quellschritts. Muss noch gesäubert werden.
         //Die Höhe des Schrittnummer-Labels sollte die Höhe bestimmen.
-        super(editor, parent, new EditorContentModel_V001(".", new ChangeInfo(Aenderungsart.Quellschritt, changeset())), id, new ChangeInfo(Aenderungsart.Quellschritt, changeset()));
+        super(parent, new EditorContentModel_V001(".", new ChangeInfo(Aenderungsart.Quellschritt, changeset())), id, new ChangeInfo(Aenderungsart.Quellschritt, changeset()));
         setQuellStil();
         setBackgroundUDBL(changeset().panelColor());
     }
 
-    public QuellSchrittView(EditorI editor, SchrittSequenzView parent, QuellSchrittModel_V001 model) {
-      super(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
+    public QuellSchrittView(SchrittSequenzView parent, QuellSchrittModel_V001 model) {
+      super(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
       setBackgroundUDBL(new Color(model.farbe));
     }
 

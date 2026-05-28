@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import specman.Specman;
 import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;
+import static specman.Specman.editor;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -72,7 +73,7 @@ public class TableDialog extends JDialog {
         int numColumns = Integer.parseInt(columns.getText());
         int numRows = Integer.parseInt(rows.getText());
         if (numColumns > 0 && numColumns < 21 && numRows > 0 && numRows < 21) {
-            Specman.instance().addTable(numColumns, numRows);
+            editor().addTable(numColumns, numRows);
             setVisible(false);
         }
     }

@@ -10,7 +10,7 @@ public class RejectChangesADBLOpButton extends AbstractADBLSpecmanOpButton {
 
   @Override
   void execute() throws EditException {
-    int changesRejected = getHauptSequenz().aenderungenVerwerfen(context);
+    int changesRejected = getHauptSequenz().aenderungenVerwerfen();
     if (changesRejected > 0) {
       diagrammAktualisieren(null);
     } else {

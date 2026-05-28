@@ -12,6 +12,7 @@ import java.awt.geom.Ellipse2D;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
+import static specman.Specman.editor;
 
 public class UnorderedListItemEditArea extends AbstractListItemEditArea {
   static final int DEFAULT_PROMPT_RADIUS = 3;
@@ -62,7 +63,7 @@ public class UnorderedListItemEditArea extends AbstractListItemEditArea {
   }
 
   private void initPromptRadius() {
-    promptRadius = DEFAULT_PROMPT_RADIUS * Specman.instance().getZoomFactor() / 100;
+    promptRadius = DEFAULT_PROMPT_RADIUS * editor().getZoomFactor() / 100;
   }
 
   @Override

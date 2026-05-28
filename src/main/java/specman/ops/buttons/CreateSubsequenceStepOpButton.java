@@ -13,11 +13,11 @@ public class CreateSubsequenceStepOpButton extends AbstractCreateStepOpButton {
   public CreateSubsequenceStepOpButton(SpecmanOpContext context) { super(context); }
 
   @Override AbstractSchrittView insertAfter(SchrittSequenzView seq, AbstractSchrittView ref) throws EditException {
-    return seq.subsequenzSchrittZwischenschieben(After, ref, context);
+    return seq.subsequenzSchrittZwischenschieben(After, ref);
   }
 
   @Override AbstractSchrittView append(SchrittSequenzView seq) throws EditException {
-    return seq.subsequenzSchrittAnhaengen(context);
+    return seq.subsequenzSchrittAnhaengen();
   }
 
 }

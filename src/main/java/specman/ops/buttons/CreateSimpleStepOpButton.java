@@ -13,11 +13,11 @@ public class CreateSimpleStepOpButton extends AbstractCreateStepOpButton {
   public CreateSimpleStepOpButton(SpecmanOpContext context) { super(context); }
 
   @Override AbstractSchrittView insertAfter(SchrittSequenzView seq, AbstractSchrittView ref) throws EditException {
-    return seq.einfachenSchrittZwischenschieben(After, ref, context);
+    return seq.einfachenSchrittZwischenschieben(After, ref);
   }
 
   @Override AbstractSchrittView append(SchrittSequenzView seq) throws EditException {
-    return seq.einfachenSchrittAnhaengen(context);
+    return seq.einfachenSchrittAnhaengen();
   }
 
 }

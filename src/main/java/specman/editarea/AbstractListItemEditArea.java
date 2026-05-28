@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static specman.ChangeInfo.fromModel;
+import static specman.Specman.editor;
 
 abstract public class AbstractListItemEditArea extends JPanel implements EditArea<ListItemEditAreaModel_V001> {
   static final int DEFAULT_PROMPT_SPACE = 20;
@@ -36,18 +37,18 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
 
   public AbstractListItemEditArea(TextEditArea initialContent, ChangeInfo changeInfo) {
     this.changeInfo = changeInfo;
-    this.content = new EditContainer(Specman.instance(), initialContent, null);
+    this.content = new EditContainer(initialContent, null);
     initLayout();
   }
 
   public AbstractListItemEditArea(ListItemEditAreaModel_V001 model) {
     this.changeInfo = fromModel(model.changeInfo, model.aenderungsart);
-    this.content = new EditContainer(Specman.instance(), model.content, null);
+    this.content = new EditContainer(model.content, null);
     initLayout();
   }
 
   protected void initLayout() {
-    this.promptSpace = DEFAULT_PROMPT_SPACE * Specman.instance().getZoomFactor() / 100;
+    this.promptSpace = DEFAULT_PROMPT_SPACE * editor().getZoomFactor() / 100;
 
     layout = new FormLayout(promptSpace + "px, default:grow", "fill:pref:grow");
     setLayout(layout);
@@ -157,7 +158,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   }
 
   public void split(TextEditArea initiatingEditArea) {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     try (UndoRecording ur = editor.composeUndo()) {
       WrappedPosition initiatingCaretPosition = initiatingEditArea.getWrappedCaretPosition();
       TextEditArea splitTextEditArea = initiatingEditArea.split(initiatingCaretPosition);

@@ -4,6 +4,7 @@ import specman.EditException;
 import specman.Specman;
 import specman.editarea.AbstractListItemEditArea;
 import specman.editarea.TextEditArea;
+import static specman.Specman.editor;
 
 public class UndoableListItemSplitted extends AbstractUndoableInteraction {
   private AbstractListItemEditArea initiatingArea, splitArea;
@@ -18,13 +19,13 @@ public class UndoableListItemSplitted extends AbstractUndoableInteraction {
   @Override
   protected void undoEdit() throws EditException {
     initiatingArea.getParent().mergeListItemAreasByUndoRedo(initiatingArea, splitArea);
-    Specman.instance().diagrammAktualisieren(initiatingArea);
+    editor().diagrammAktualisieren(initiatingArea);
   }
 
   @Override
   protected void redoEdit() throws EditException {
     initiatingArea.moveEditAreas(initiatingEditArea, splitArea);
-    Specman.instance().diagrammAktualisieren(splitArea);
+    editor().diagrammAktualisieren(splitArea);
   }
 
 }

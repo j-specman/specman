@@ -19,6 +19,7 @@ import java.awt.event.FocusEvent;
 
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
+import static specman.Specman.editor;
 
 /** Basisklasse für If, If/Else und Case */
 abstract public class VerzweigungSchrittView extends AbstractSchrittView implements SpaltenContainerI {
@@ -29,8 +30,8 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 	final KlappButton klappen;
 	FormLayout panelLayout;
 
-	public VerzweigungSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, FormLayout panelLayout) {
-		super(editor, parent, initialerText, id, changeInfo);
+	public VerzweigungSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, FormLayout panelLayout) {
+		super(parent, initialerText, id, changeInfo);
 		this.panelLayout = panelLayout;
 		panel = new JPanel() {
 			@Override
@@ -78,7 +79,7 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 	}
 
 	protected static String layoutRowSpec1() {
-		int aktuellerZoomfaktor = Specman.instance().getZoomFactor();
+		int aktuellerZoomfaktor = editor().getZoomFactor();
 		return "fill:[" + (1 * aktuellerZoomfaktor / 100) + "dlu,pref]";
 	}
 
@@ -90,8 +91,8 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 		return true;
 	}
 
-	protected void initialeSchritteAnhaengen(EditorI editor) {
-		unterSequenzen().forEach(sequenz -> sequenz.einfachenSchrittAnhaengen(editor));
+	protected void initialeSchritteAnhaengen() {
+		unterSequenzen().forEach(SchrittSequenzView::einfachenSchrittAnhaengen);
 	}
 
 	@Override
@@ -118,7 +119,7 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 
 	/** @author PVN */
 	public static double breiteLayoutspalteBerechnen() {
-		double breiteSpaltenLayout = 20*Specman.instance().getZoomFactor()/100;
+		double breiteSpaltenLayout = 20*editor().getZoomFactor()/100;
 		return breiteSpaltenLayout;
 	}
 

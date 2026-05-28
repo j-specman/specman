@@ -48,6 +48,7 @@ import specman.graphics.Styles;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.view.AbstractSchrittView.FORMLAYOUT_GAP;
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_SICHTBAR;
+import static specman.Specman.editor;
 
 /** The edit area itself is a surrounding panel which contains the actual table panel
  * with a little space in between to all sides. This space is for interactions to remove
@@ -101,7 +102,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   private void createColumnResizers(int columns, int rows) {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     int resizerHeight = rows * 2;
     // Resizer for the whole table
     tablePanel.add(new SpaltenResizer(this, WHOLETABLE_COLUMN_INDICATOR), CC.xywh(1 + columns * 2, 1, 1, resizerHeight));
@@ -113,7 +114,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   private int minimumBorderSize() {
-    return (int)((float)BORDER_THICKNESS * (float)Specman.instance().getZoomFactor() / 100f);
+    return (int)((float)BORDER_THICKNESS * (float)editor().getZoomFactor() / 100f);
   }
 
   private void refreshBorderSpaceGeometricsAndColor() {
@@ -158,7 +159,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       List<EditorContentModel_V001> rowModel = model.get(r);
       cells.add(new ArrayList<>());
       for (EditorContentModel_V001 cellModel: rowModel) {
-        addCell(r, new EditContainer(Specman.instance(), cellModel, null));
+        addCell(r, new EditContainer(cellModel, null));
       }
     }
   }
@@ -186,7 +187,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
 
   private void addCell(int rowIndex, String content, ChangeInfo changeInfo) {
     TextEditArea initialContentArea = new TextEditArea(new TextEditAreaModel_V001(content, content, new ArrayList<>(), changeInfo), Styles.DEFAULTFONT);
-    addCell(rowIndex, new EditContainer(Specman.instance(), initialContentArea, null));
+    addCell(rowIndex, new EditContainer(initialContentArea, null));
   }
 
   private void createTablePanelLayout(int columns, int rows) {
@@ -408,7 +409,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     }
     else {
       getParent().removeEditAreaUDBL(this); // Already includes undo recording
-      Specman.instance().diagrammAktualisieren(null);
+      editor().diagrammAktualisieren(null);
     }
   }
 
@@ -419,25 +420,25 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
 
   public void addRowUDBL(int rowIndex) {
     addEmptyRow(rowIndex);
-    Specman.instance().addEdit(new UndoableTableRowAdded(this, rowIndex, cells.get(rowIndex)));
+    editor().addEdit(new UndoableTableRowAdded(this, rowIndex, cells.get(rowIndex)));
   }
 
   public void addEmptyRow(int rowIndex) {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     List<EditContainer> row = new ArrayList<>();
     for (int c = 0; c < numColumns(); c++) {
-      row.add(new EditContainer(editor, TextInit.initialChangeInfo()));
+      row.add(new EditContainer(TextInit.initialChangeInfo()));
     }
     cells.add(rowIndex, row);
     recomputeLayout();
   }
 
   private boolean deletionsMustBeMarked() {
-    return Specman.instance().aenderungenVerfolgen() && changeInfo.isUntracked();
+    return editor().aenderungenVerfolgen() && changeInfo.isUntracked();
   }
 
   public void removeRowOrMarkAsDeletedUDBL(int rowIndex) {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     if (rowIsMarkedAs(rowIndex, Hinzugefuegt) || !editor.aenderungenVerfolgen()) {
       if (numRows() > 1) {
         List<EditContainer> row = cells.get(rowIndex);
@@ -468,17 +469,17 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
    * one. Otherwise, the new column will steal half of the width of the preceeding column
    * (respectively half of the <i>last</i> column when the new one is appended). */
   public void addColumnUDBL(int colIndex) {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     List<Integer> originalColumnsWidthPercent = addEmptyColumn(colIndex);
     editor.addEdit(new UndoableTableColumnAdded(this, colIndex, toColumn(colIndex), originalColumnsWidthPercent));
   }
 
   public List<Integer> addEmptyColumn(int colIndex) {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
 
     List<Integer> originalColumnsWidthPercent = allocPercent(colIndex, columnsWidthPercent);
     for (List<EditContainer> row : cells) {
-      row.add(colIndex, new EditContainer(editor, TextInit.initialChangeInfo()));
+      row.add(colIndex, new EditContainer(TextInit.initialChangeInfo()));
     }
     recomputeLayout();
     return originalColumnsWidthPercent;
@@ -499,7 +500,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
    * Otherwise, the removed column's width is added to the preceeding column's width
    * (respectively to the new <i>last</i> column's width when removing the last one). */
   public void removeColumnOrMarkAsDeletedUDBL(int colIndex) {
-    EditorI editor = Specman.instance();
+    EditorI editor = editor();
     if (columnIsMarkedAs(colIndex, Hinzugefuegt) || !editor.aenderungenVerfolgen()) {
       if (numColumns() > 1) {
         List<Integer> originalColumnsWidthPercent = copyOf(columnsWidthPercent);

@@ -13,11 +13,11 @@ public class CreateWhileStepOpButton extends AbstractCreateStepOpButton {
   public CreateWhileStepOpButton(SpecmanOpContext context) { super(context); }
 
   @Override AbstractSchrittView insertAfter(SchrittSequenzView seq, AbstractSchrittView ref) throws EditException {
-    return seq.whileSchrittZwischenschieben(After, ref, context);
+    return seq.whileSchrittZwischenschieben(After, ref);
   }
 
   @Override AbstractSchrittView append(SchrittSequenzView seq) throws EditException {
-    return seq.whileSchrittAnhaengen(context);
+    return seq.whileSchrittAnhaengen();
   }
 
 }

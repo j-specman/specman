@@ -4,6 +4,7 @@ import specman.ChangeInfo;
 import specman.SchrittID;
 import specman.Specman;
 import specman.view.RoundedBorderDecorationStyle;
+import static specman.Specman.editor;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class IfSchrittModel_V001 extends StrukturierterSchrittModel_V001 {
 	@Deprecated public IfSchrittModel_V001() { // For Jackson only
 		this.ifSequenz = new ZweigSchrittSequenzModel_V001();
 //		this.leerBreite = 0;
-		this.leerBreite = 20*Specman.instance().getZoomFactor()/100; /**@author PVN */
+		this.leerBreite = 20*editor().getZoomFactor()/100; /**@author PVN */
 	}
 
 	public IfSchrittModel_V001(
@@ -29,7 +30,7 @@ public class IfSchrittModel_V001 extends StrukturierterSchrittModel_V001 {
 		super(id, inhalt, farbe, changeInfo, zugeklappt, quellschrittID, decorationStyle);
 		this.ifSequenz = ifSequenz;
 //		this.leerBreite = leerBreite;
-		this.leerBreite = 20*Specman.instance().getZoomFactor()/100; /**@author PVN */
+		this.leerBreite = 20*editor().getZoomFactor()/100; /**@author PVN */
 	}
 
 	@Override public void addStepRecursively(List<AbstractSchrittModel_V001> allSteps) {

@@ -2,6 +2,7 @@ package net.atlanticbb.tantlinger.ui.text.actions;
 
 import net.atlanticbb.tantlinger.ui.text.HTMLUtils;
 import specman.Specman;
+import static specman.Specman.editor;
 
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
@@ -30,7 +31,7 @@ public class SpecmanFontSizeAction extends HTMLFontSizeAction {
     AttributeSet at = HTMLUtils.getCharacterAttributes(ed);
     if (at.isDefined(StyleConstants.FontSize)) {
       int zoomedFontSize = (Integer)at.getAttribute(StyleConstants.FontSize);
-      int unzoomedFontSize = zoomedFontSize * 100 / Specman.instance().getZoomFactor();
+      int unzoomedFontSize = zoomedFontSize * 100 / editor().getZoomFactor();
       this.setSelected(unzoomedFontSize == FONT_SIZES[this.size]);
     }
     else {

@@ -87,11 +87,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 		arbeitsbereich = new WorkingAreaPanel();
 
-		intro = new EditContainer(this);
+		intro = new EditContainer();
 		intro.setOpaque(false);
 		arbeitsbereich.add(intro, CC.xy(2, 2));
 
-		outro = new EditContainer(this);
+		outro = new EditContainer();
 		outro.setOpaque(false);
 		arbeitsbereich.add(outro, CC.xy(2, 4));
 
@@ -434,7 +434,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
     	undoManager.addEdit(edit);
 	}
 
-	public static EditorI instance() { return instance; }
+	public static EditorI editor() { return instance; }
 
 
 	public boolean aenderungenVerfolgen() {

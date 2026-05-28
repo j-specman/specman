@@ -5,6 +5,7 @@ import specman.Specman;
 import specman.undo.UndoableFlatNumberingToggled;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
+import static specman.Specman.editor;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -37,7 +38,7 @@ public class StepnumberContextMenu implements MouseListener {
 
   private JMenuItem createUpItem() {
     return createItem("Move up", "arrow-up", e -> {
-      try(UndoRecording ur = Specman.instance().composeUndo()) {
+      try(UndoRecording ur = editor().composeUndo()) {
         currentStep.moveCoCatchUpUDBL(initiatingLabel);
       }
     });
@@ -45,7 +46,7 @@ public class StepnumberContextMenu implements MouseListener {
 
   private JMenuItem createDownItem() {
     return createItem("Move down", "arrow-down", e -> {
-      try(UndoRecording ur = Specman.instance().composeUndo()) {
+      try(UndoRecording ur = editor().composeUndo()) {
         currentStep.moveCoCatchDownUDBL(initiatingLabel);
       }
     });
@@ -56,9 +57,9 @@ public class StepnumberContextMenu implements MouseListener {
     item.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        try (UndoRecording ur = Specman.instance().composeUndo()) {
+        try (UndoRecording ur = editor().composeUndo()) {
           currentStep.toggleFlatNumbering(toggleFlatNumbering.getState());
-          Specman.instance().addEdit(new UndoableFlatNumberingToggled(currentStep, toggleFlatNumbering.getState()));
+          editor().addEdit(new UndoableFlatNumberingToggled(currentStep, toggleFlatNumbering.getState()));
         }
       }
     });
@@ -76,17 +77,17 @@ public class StepnumberContextMenu implements MouseListener {
 
   private JMenuItem createDeleteItem() {
     return createItem("Löschen", "loeschen",
-      e -> Specman.instance().deleteStepADBL(currentStep, initiatingLabel));
+      e -> editor().deleteStepADBL(currentStep, initiatingLabel));
   }
 
   private JMenuItem createLeftItem() {
     return createItem("Move left", "arrow-left",
-      e -> Specman.instance().moveBranchSequenceLeftADBL(currentStep, initiatingLabel));
+      e -> editor().moveBranchSequenceLeftADBL(currentStep, initiatingLabel));
   }
 
   private JMenuItem createRightItem() {
     return createItem("Move right", "arrow-right",
-      e -> Specman.instance().moveBranchSequenceRightADBL(currentStep, initiatingLabel));
+      e -> editor().moveBranchSequenceRightADBL(currentStep, initiatingLabel));
   }
 
   private StepnumberLabel label(MouseEvent e) {
@@ -96,7 +97,7 @@ public class StepnumberContextMenu implements MouseListener {
   @Override
   public void mouseClicked(MouseEvent e) {
     if (SwingUtilities.isRightMouseButton(e)) {
-      AbstractSchrittView step = Specman.instance().findStep(label(e));
+      AbstractSchrittView step = editor().findStep(label(e));
       initMenuForStep(step, label(e));
       popup.show(e.getComponent(), e.getX(), e.getY());
     }

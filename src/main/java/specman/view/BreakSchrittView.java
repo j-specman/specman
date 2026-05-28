@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static specman.view.StepRemovalPurpose.Discard;
+import static specman.Specman.editor;
 
 public class BreakSchrittView extends AbstractSchrittView {
 	
@@ -30,8 +31,8 @@ public class BreakSchrittView extends AbstractSchrittView {
 	final FormLayout layout;
 	CatchUeberschrift catchHeading;
 
-	public BreakSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 content, SchrittID id, ChangeInfo changeInfo) {
-		super(editor, parent, content, id, changeInfo);
+	public BreakSchrittView(SchrittSequenzView parent, EditorContentModel_V001 content, SchrittID id, ChangeInfo changeInfo) {
+		super(parent, content, id, changeInfo);
 		panel = new JPanel() {
 			@Override
 			public void paint(Graphics g) {
@@ -48,8 +49,8 @@ public class BreakSchrittView extends AbstractSchrittView {
 		panel.add(editContainer, CC.xy(2, 1));
 	}
 
-	public BreakSchrittView(EditorI editor, SchrittSequenzView parent, BreakSchrittModel_V001 model) {
-		this(editor, parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
+	public BreakSchrittView(SchrittSequenzView parent, BreakSchrittModel_V001 model) {
+		this(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
 		setBackgroundUDBL(new Color(model.farbe));
 	}
 
@@ -118,7 +119,7 @@ public class BreakSchrittView extends AbstractSchrittView {
 	@Override
 	public void focusLost(FocusEvent e) {
 		if (catchHeading != null && changeInfo.art() != Aenderungsart.Geloescht) {
-      try(ScrollPause sp = Specman.instance().pauseScrolling()) {
+      try(ScrollPause sp = editor().pauseScrolling()) {
         catchHeading.updateFromBreakStepContent();
       }
 		}
@@ -178,7 +179,7 @@ public class BreakSchrittView extends AbstractSchrittView {
       // The user might not have focussed anything in the break step before he scrolled to
       // the catch sequence - so in case he want's to scroll back by CTRL+ALT+Left, we
       // explicitly add the break step to the edit history here.
-      Specman.instance().appendToEditHistory(editContainer);
+      editor().appendToEditHistory(editContainer);
       catchHeading.scrollTo();
     }
   }

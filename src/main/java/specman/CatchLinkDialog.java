@@ -6,6 +6,7 @@ import net.atlanticbb.tantlinger.ui.UIUtils;
 import org.apache.commons.lang.StringUtils;
 import specman.undo.manager.UndoRecording;
 import specman.view.*;
+import static specman.Specman.editor;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -98,7 +99,7 @@ public class CatchLinkDialog extends JDialog {
 
     private void listValueChanged(ListSelectionEvent e) {
       if (e.getValueIsAdjusting()) {
-        EditorI editor = Specman.instance();
+        EditorI editor = editor();
         try (UndoRecording ur = editor.composeUndo()) {
           BreakSchrittView breakStepToLink = ((JList<BreakSchrittView>) e.getSource()).getSelectedValue();
           CatchSchrittSequenzView catchSequence;

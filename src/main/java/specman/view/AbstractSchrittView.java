@@ -53,6 +53,7 @@ import static specman.view.StepRemovalPurpose.Accept;
 import static specman.view.StepRemovalPurpose.Discard;
 import static specman.view.StepRemovalPurpose.Move;
 import static specman.view.StepRemovalPurpose.Reject;
+import static specman.Specman.editor;
 
 abstract public class AbstractSchrittView implements KlappbarerBereichI, ComponentListener, FocusListener {
 	public static final int LINIENBREITE = 2;
@@ -72,10 +73,10 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	private final java.util.List<TextEditArea> referencedByTextEditAreas = new ArrayList<>();
 
-	public AbstractSchrittView(EditorI editor, SchrittSequenzView parent, EditorContentModel_V001 initialContent, SchrittID id, ChangeInfo changeInfo) {
+	public AbstractSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialContent, SchrittID id, ChangeInfo changeInfo) {
 		this.id = id;
 		this.changeInfo = changeInfo;
-		this.editContainer = new EditContainer(editor, initialContent, id);
+		this.editContainer = new EditContainer(initialContent, id);
 		this.parent = parent;
 		editContainer.addEditAreasFocusListener(this);
 		editContainer.addEditComponentListener(this);
@@ -154,34 +155,34 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	abstract public AbstractSchrittModel_V001 generiereModel(boolean formatierterText);
 
-	public static AbstractSchrittView baueSchrittView(EditorI editor, SchrittSequenzView parent, AbstractSchrittModel_V001 model) {
+	public static AbstractSchrittView baueSchrittView( SchrittSequenzView parent, AbstractSchrittModel_V001 model) {
 		if (model instanceof WhileWhileSchrittModel_V001) {
-			return new WhileWhileSchrittView(editor, parent, (WhileWhileSchrittModel_V001) model);
+			return new WhileWhileSchrittView(parent, (WhileWhileSchrittModel_V001) model);
 		}
 		if (model instanceof WhileSchrittModel_V001) {
-			return new WhileSchrittView(editor, parent, (WhileSchrittModel_V001) model);
+			return new WhileSchrittView(parent, (WhileSchrittModel_V001) model);
 		}
 		if (model instanceof IfElseSchrittModel_V001) {
-			return new IfElseSchrittView(editor, parent, (IfElseSchrittModel_V001) model);
+			return new IfElseSchrittView(parent, (IfElseSchrittModel_V001) model);
 		}
 		if (model instanceof IfSchrittModel_V001) {
-			return new IfSchrittView(editor, parent, (IfSchrittModel_V001) model);
+			return new IfSchrittView(parent, (IfSchrittModel_V001) model);
 		}
 		if (model instanceof CaseSchrittModel_V001) {
-			return new CaseSchrittView(editor, parent, (CaseSchrittModel_V001) model);
+			return new CaseSchrittView(parent, (CaseSchrittModel_V001) model);
 		}
 		if (model instanceof SubsequenzSchrittModel_V001) {
-			return new SubsequenzSchrittView(editor, parent, (SubsequenzSchrittModel_V001) model);
+			return new SubsequenzSchrittView(parent, (SubsequenzSchrittModel_V001) model);
 		}
 		if (model instanceof BreakSchrittModel_V001) {
-			return new BreakSchrittView(editor, parent, (BreakSchrittModel_V001) model);
+			return new BreakSchrittView(parent, (BreakSchrittModel_V001) model);
 		}
 		//TODO TEST
 		if (model instanceof QuellSchrittModel_V001){
-			return new QuellSchrittView(editor, parent, (QuellSchrittModel_V001) model);
+			return new QuellSchrittView(parent, (QuellSchrittModel_V001) model);
 		}
 		// TEST ENDE
-		return new EinfacherSchrittView(editor, parent, (EinfacherSchrittModel_V001)model);
+		return new EinfacherSchrittView(parent, (EinfacherSchrittModel_V001)model);
 	}
 
 	public void geklappt(boolean auf) {}
@@ -297,7 +298,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	static String umgehungLayout() {
-		return umgehungLayout(SPALTENLAYOUT_UMGEHUNG_GROESSE * Specman.instance().getZoomFactor() / 100);
+		return umgehungLayout(SPALTENLAYOUT_UMGEHUNG_GROESSE * editor().getZoomFactor() / 100);
 	}
 
 	static String umgehungLayout(int groesse) {
@@ -439,7 +440,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return result;
 	}
 
-	public int aenderungenUebernehmen(EditorI editor) throws EditException {
+	public int aenderungenUebernehmen() throws EditException {
 		int changesMade = editAenderungenUebernehmen() + changeInfo.numChanges();
 		switch (changeInfo.art()) {
 			case Geloescht:
@@ -460,7 +461,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return editContainer.aenderungenUebernehmen();
 	}
 
-	public int aenderungenVerwerfen(EditorI editor) throws EditException {
+	public int aenderungenVerwerfen() throws EditException {
 		int changesRejected = editAenderungenVerwerfen() + changeInfo.numChanges();
 		switch (changeInfo.art()) {
 			case Hinzugefuegt:

@@ -10,6 +10,7 @@ import specman.editarea.markups.MarkupBackgroundStyleInitializer;
 import specman.editarea.markups.MarkupRecovery;
 import specman.model.v001.Markup_V001;
 import specman.undo.manager.UndoRecording;
+import static specman.Specman.editor;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
@@ -37,7 +38,7 @@ abstract class AbstractKeyEventHandler extends AbstractKeyHandler {
 
   protected void backupMarkupsAndRecoverAfterDefaultKeyOperation() {
     MarkedCharSequence marksBackup = findMarkups();
-    UndoRecording ur = Specman.instance().composeUndo();
+    UndoRecording ur = editor().composeUndo();
     SwingUtilities.invokeLater(() -> {
       List<Markup_V001> recoveredChangemarks = new MarkupRecovery(getWrappedDocument(), marksBackup).recover();
       new MarkupBackgroundStyleInitializer(textArea, recoveredChangemarks).styleChangedTextSections();

@@ -8,8 +8,10 @@ import net.atlanticbb.tantlinger.ui.HeaderPanel;
 import net.atlanticbb.tantlinger.ui.UIUtils;
 import org.apache.commons.lang.StringUtils;
 import specman.Specman;
+import static specman.Specman.editor;
 import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;
+import static specman.Specman.editor;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -58,8 +60,7 @@ public class StepnumberLinkDialog extends JDialog {
     }
 
     private void init() {
-        steps = Specman
-          .instance()
+        steps = editor()
           .listAllSteps()
           .stream()
           .sorted(Comparator.comparing(AbstractSchrittView::getId))
@@ -148,12 +149,12 @@ public class StepnumberLinkDialog extends JDialog {
                 StepnumberLinkDialog.this.editor.requestFocusInWindow();
             }
 
-            TextEditArea lastFocusedTextArea = Specman.instance().getLastFocusedTextArea();
+            TextEditArea lastFocusedTextArea = editor().getLastFocusedTextArea();
             if (lastFocusedTextArea != null) {
                 AbstractSchrittView selectedStep = ((JList<AbstractSchrittView>) e.getSource()).getSelectedValue();
 
                 lastFocusedTextArea.addStepnumberLink(selectedStep);
-                Specman.instance().diagrammAktualisieren(null);
+                editor().diagrammAktualisieren(null);
             }
 
             StepnumberLinkDialog.this.setVisible(false);

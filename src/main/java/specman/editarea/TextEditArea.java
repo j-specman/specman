@@ -56,6 +56,7 @@ import static specman.graphics.Styles.ganzerSchrittGeloeschtStil;
 import static specman.ChangeSet.STEPNUMBER_LINK_COLOR;
 import static specman.editarea.markups.MarkupSearchPurpose.All;
 import static specman.editarea.markups.MarkupSearchPurpose.FirstChangeOnly;
+import static specman.Specman.editor;
 
 public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaModel_V001> {
     private static final String INITIAL_EMPTY_CONTENT_INDICATOR = "x";
@@ -67,7 +68,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     public TextEditArea(TextEditAreaModel_V001 model, Font font) {
         this.changeInfo = fromModel(model.changeInfo, model.aenderungsart);
         String initialText = model.isEmpty() ? INITIAL_EMPTY_CONTENT_INDICATOR : model.text;
-        Specman.instance().instrumentWysEditor(this, initialText, 0);
+        editor().instrumentWysEditor(this, initialText, 0);
         putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
         setFont(font);
         addKeyListener(new TextEditAreaKeyListener(this));
@@ -144,7 +145,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
         hoveredElement = getWrappedDocument().getCharacterElement(textPosition);
 
-        EditorI editor = Specman.instance();
+        EditorI editor = editor();
         Cursor cursorToUse;
         if (editor.isKeyPressed(KeyEvent.VK_CONTROL) && stepnumberLinkStyleSet(hoveredElement)) {
             cursorToUse = BreakCatchScrollMouseAdapter.SCROLL_CURSOR;
@@ -264,7 +265,6 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     // TODO JL: Muss mit aenderungsmarkierungenVerwerfen zusammengelegt werden
     public int aenderungenUebernehmen() {
-        EditorI editor = Specman.instance();
         WrappedDocument doc = getWrappedDocument();
         int changesMade = changeInfo.numChanges();
 
@@ -277,7 +277,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
             try {
                 WrappedPosition loeschungVon = doc.fromModel(loeschung.getVon());
                 WrappedPosition loeschungBis = doc.fromModel(loeschung.getBis());
-                removeTextAndUnregisterStepnumberLinks(loeschungVon, loeschungBis, editor);
+                removeTextAndUnregisterStepnumberLinks(loeschungVon, loeschungBis);
                 changesMade++;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -303,8 +303,6 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
           deletionBackup = null;
         }
         else {
-            EditorI editor = Specman.instance();
-
             WrappedDocument doc = getWrappedDocument();
             List<GeloeschtMarkierung_V001> loeschungen = new ArrayList<>();
             for (WrappedElement e : doc.getRootElements()) {
@@ -315,7 +313,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
                 try {
                     WrappedPosition loeschungVon = doc.fromModel(loeschung.getVon());
                     WrappedPosition loeschungBis = doc.fromModel(loeschung.getBis());
-                    removeTextAndUnregisterStepnumberLinks(loeschungVon, loeschungBis, editor);
+                    removeTextAndUnregisterStepnumberLinks(loeschungVon, loeschungBis);
                     changesRejected++;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -445,7 +443,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         return getParent().tryDissolveEditAreaUDBL(this);
     }
 
-    private void removeTextAndUnregisterStepnumberLinks(WrappedPosition startOffset, WrappedPosition endOffset, EditorI editor) {
+    private void removeTextAndUnregisterStepnumberLinks(WrappedPosition startOffset, WrappedPosition endOffset) {
         if (startOffset.greater(endOffset)) {
             throw new IllegalArgumentException("StartOffSet is greater than EndOffset - Make sure not to set the length as endOffset");
         }
@@ -460,9 +458,9 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
             if (stepnumberLinkStyleSet(element)) {
                 String stepnumberLinkID = getStepnumberLinkIDFromElement(currentOffset, currentEndOffset);
                 if (!StepnumberLink.isStepnumberLinkDefect(stepnumberLinkID)) {
-                    AbstractSchrittView step = editor.findStepByStepID(stepnumberLinkID);
+                    AbstractSchrittView step = editor().findStepByStepID(stepnumberLinkID);
                     step.unregisterStepnumberLink(this);
-                    editor.addEdit(new UndoableStepnumberLinkRemoved(step, this));
+                    editor().addEdit(new UndoableStepnumberLinkRemoved(step, this));
                 }
             }
 
@@ -620,7 +618,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     public void addStepnumberLink(AbstractSchrittView referencedStep) {
-        EditorI editor = Specman.instance();
+        EditorI editor = editor();
         try (UndoRecording ur = editor.composeUndo()) {
             String stepnumberText = referencedStep.getId().toString();
 
@@ -686,7 +684,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     public boolean isTrackingChanges() {
-        return Specman.instance().aenderungenVerfolgen() && isEditable();
+        return editor().aenderungenVerfolgen() && isEditable();
     }
 
     @Override
@@ -696,7 +694,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     private void scrollToStepnumber() {
-        EditorI editor = Specman.instance();
+        EditorI editor = editor();
 
         WrappedDocument doc = getWrappedDocument();
         WrappedElement element = doc.getCharacterElement(getCaretPosition());

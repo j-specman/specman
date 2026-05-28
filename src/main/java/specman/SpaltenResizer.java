@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
+import static specman.Specman.editor;
 
 public class SpaltenResizer extends JPanel implements MouseListener {
 	Integer dragX;
@@ -35,7 +36,7 @@ public class SpaltenResizer extends JPanel implements MouseListener {
 			@Override public void mouseDragged(MouseEvent e) {
 				if (!dragCancelled) {
 					dragX = e.getX();
-					Specman.instance().vertikalLinieSetzen(dragX, SpaltenResizer.this);
+					editor().vertikalLinieSetzen(dragX, SpaltenResizer.this);
 				}
 			}
 		});
@@ -43,7 +44,7 @@ public class SpaltenResizer extends JPanel implements MouseListener {
 			if (e.getID() == KeyEvent.KEY_PRESSED && e.getKeyCode() == KeyEvent.VK_ESCAPE && dragX != null) {
 				dragX = null;
 				dragCancelled = true;
-				Specman.instance().vertikalLinieSetzen(0, null);
+				editor().vertikalLinieSetzen(0, null);
 				return true;
 			}
 			return false;
@@ -67,21 +68,21 @@ public class SpaltenResizer extends JPanel implements MouseListener {
       if (dragX != null) {
         int ermoeglichteVeraenderung = container.spaltenbreitenAnpassenNachMausDragging(e.getX(), spalte);
         if (ermoeglichteVeraenderung != 0) {
-          Specman.instance().addEdit(new UndoableSpaltenbreiteAngepasst(container, ermoeglichteVeraenderung, spalte));
+          editor().addEdit(new UndoableSpaltenbreiteAngepasst(container, ermoeglichteVeraenderung, spalte));
         }
         dragX = null;
-        Specman.instance().vertikalLinieSetzen(0, null);
+        editor().vertikalLinieSetzen(0, null);
       }
   }
 
   @Override
   public void mouseEntered(MouseEvent e) {
-    Specman.instance().setCursor(leftRightCursor);
+    editor().setCursor(leftRightCursor);
   }
 
   @Override
   public void mouseExited(MouseEvent e) {
-    Specman.instance().setCursor(Cursor.getDefaultCursor());
+    editor().setCursor(Cursor.getDefaultCursor());
   }
 
   public Shape getShape() {

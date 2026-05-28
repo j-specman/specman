@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_SICHTBAR;
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_VERBORGEN;
+import static specman.Specman.editor;
 
 /**
  * Dieser Button dient dazu, unterstrukturierte Schritte auf und zuzuklappen.
@@ -56,7 +57,7 @@ public class KlappButton extends JLabel implements MouseMotionListener, MouseLis
     addMouseListener(this);
     parent.addMouseMotionListener(this);
     parent.add(this);
-    scale(Specman.instance().getZoomFactor(), 100);
+    scale(editor().getZoomFactor(), 100);
   }
 
   public boolean isSelected() {
@@ -155,8 +156,8 @@ public class KlappButton extends JLabel implements MouseMotionListener, MouseLis
   public static void scaleIcons(int newPercentage, int currentPercentage) {
     if (newPercentage != currentPercentage) {
       // Get width & height by scaling the initial Icon length
-      int targetWidth = (int) Specman.instance().scale(icon.getIconWidth());
-      int targetHeight = (int) Specman.instance().scale(icon.getIconHeight());
+      int targetWidth = (int) editor().scale(icon.getIconWidth());
+      int targetHeight = (int) editor().scale(icon.getIconHeight());
 
       // Use the initial icon to prevent bad image quality through upscaling (e.g. 50% -> 100%)
       // Also no need for scaling when returning to the initial Icon
@@ -197,7 +198,7 @@ public class KlappButton extends JLabel implements MouseMotionListener, MouseLis
 
   public void updateLocation(int remainingWidth) {
     if (remainingWidth > 0) {
-      int desiredSize = (int) Specman.instance().scale(MINIMUM_ICON_LENGTH);
+      int desiredSize = (int) editor().scale(MINIMUM_ICON_LENGTH);
       setBounds(remainingWidth - desiredSize, 0, desiredSize, desiredSize);
       int borderSize = (int) Math.round(desiredSize * 0.1);
       setBorder(new MatteBorder(borderSize, borderSize, borderSize, borderSize, borderColor));

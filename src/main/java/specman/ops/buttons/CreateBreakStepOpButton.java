@@ -13,11 +13,11 @@ public class CreateBreakStepOpButton extends AbstractCreateStepOpButton {
   public CreateBreakStepOpButton(SpecmanOpContext context) { super(context); }
 
   @Override AbstractSchrittView insertAfter(SchrittSequenzView seq, AbstractSchrittView ref) throws EditException {
-    return seq.breakSchrittZwischenschieben(After, ref, context);
+    return seq.breakSchrittZwischenschieben(After, ref);
   }
 
   @Override AbstractSchrittView append(SchrittSequenzView seq) throws EditException {
-    return seq.breakSchrittAnhaengen(context);
+    return seq.breakSchrittAnhaengen();
   }
 
 }
