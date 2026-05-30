@@ -1,4 +1,6 @@
 Multiple Changesets - Wichtig für nächste CR-Phase bei der ERSTEn
+- Aufräumen der Codeänderungen
+- Merge von Changesets
 x Markups auf Datei beschränken sich immer auf ein einzelnes Zeichen
 x Geerbter Fehler: Änderungen zurücknehmen auf einem neu angelegten Schleifenschritt führt zu Fehlermeldung beim Versuch, den letzten Schritt
    zu löschen, der ebenfalls as neu angelegt gekennzeichnet ist.
@@ -6,9 +8,8 @@ x Auswahl des Changesets im Menu
 x Einfärben der Änderungsbutton entsprechende des ausgewählten Changesets
 x Ausgewählten Changeset im Modell festhalten
 x Markups für Änderungen im Modell mit Changeset-Nummer anreichern
-- Annahme / Ablehnung von Änderungen auf aktuellen Changeset beschränken
+x Annahme / Ablehnung von Änderungen auf aktuellen Changeset beschränken
 x Editregeln bei konkurrierenden Änderungen
-- Merge von Changesets
 
 Aus aktueller Anwendung
 - Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.

@@ -27,7 +27,7 @@ public class ChangeSet {
   static {
     ALL = new LinkedHashMap<>();
     register("yellow", Color.yellow);
-    register("green",  new Color(150, 255, 150));
+    register("green",  new Color(150, 255, 150), new Color(30, 210, 30));
     register("cyan",   new Color(100, 255, 255));
     register("orange", new Color(255, 220, 150));
     register("pink",   new Color(255, 170, 170));
@@ -36,6 +36,10 @@ public class ChangeSet {
 
   private static void register(String name, Color color) {
     ALL.put(name, new ChangeSet(name, new ChangeColorSet(color, STEPNUMBER_LINK_COLOR.color)));
+  }
+
+  private static void register(String name, Color color, Color menuColor) {
+    ALL.put(name, new ChangeSet(name, new ChangeColorSet(color, STEPNUMBER_LINK_COLOR.color, menuColor)));
   }
 
   public final String name;
@@ -63,7 +67,7 @@ public class ChangeSet {
     StyleConstants.setStrikeThrough(deletedStepnumberLinkStyle, true);
   }
 
-  public Color menuColor() { return colors.text.color; }
+  public Color menuColor() { return colors.menuColor; }
 
   public Color panelColor() { return colors.panelColor; }
   public Color buttonColor() { return colors.panelColor; }

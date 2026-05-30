@@ -9,10 +9,16 @@ public class ChangeColorSet {
   public final ReadWriteColor text;
   public final Color panelColor;
   public final ReadWriteColor stepnumberLink;
+  public final Color menuColor;
 
   public ChangeColorSet(Color color, Color stepnumberLinkBaseColor) {
+    this(color, stepnumberLinkBaseColor, saturate(color));
+  }
+
+  public ChangeColorSet(Color color, Color stepnumberLinkBaseColor, Color menuColor) {
     this.text = new ReadWriteColor(color);
     this.panelColor = mixWithWhite(color, 0.8f);
+    this.menuColor = menuColor;
     this.stepnumberLink = new ReadWriteColor(combineColors(stepnumberLinkBaseColor, color));
   }
 
@@ -28,6 +34,12 @@ public class ChangeColorSet {
     int g = (int)(color.getGreen() + (255 - color.getGreen()) * whiteFraction);
     int b = (int)(color.getBlue()  + (255 - color.getBlue())  * whiteFraction);
     return new Color(r, g, b);
+  }
+
+  public static Color saturate(Color color) {
+    float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+    hsb[1] = 0.9f;
+    return Color.getHSBColor(hsb[0], hsb[1], hsb[2]);
   }
 
   public boolean isTextBackground(String cssColor) {
