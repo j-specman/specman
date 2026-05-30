@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static specman.ChangeInfo.fromModel;
+import static specman.ChangeSet.changeset;
 import static specman.Specman.editor;
 
 abstract public class AbstractListItemEditArea extends JPanel implements EditArea<ListItemEditAreaModel_V001> {
@@ -103,31 +104,37 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
 
   @Override
   public int aenderungenUebernehmen() {
-    int changesMade = changeInfo.numChanges();
-    if (changeInfo.isDeleted()) {
+    boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
+    int changesMade = ownChangeMatches ? changeInfo.numChanges() : 0;
+    if (ownChangeMatches && changeInfo.isDeleted()) {
       getParent().removeEditAreaUDBL(this);
       changesMade++;
     }
     else {
       changesMade += content.aenderungenUebernehmen();
     }
-    aenderungsmarkierungenEntfernen();
-    changeInfo = ChangeInfo.untracked();
+    if (ownChangeMatches) {
+      aenderungsmarkierungenEntfernen();
+      changeInfo = ChangeInfo.untracked();
+    }
     return changesMade;
   }
 
   @Override
   public int aenderungenVerwerfen() {
-    int changesMade = changeInfo.numChanges();
-    if (changeInfo.isAdded()) {
+    boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
+    int changesMade = ownChangeMatches ? changeInfo.numChanges() : 0;
+    if (ownChangeMatches && changeInfo.isAdded()) {
       getParent().removeEditAreaUDBL(this);
       changesMade++;
     }
     else {
       changesMade += content.aenderungenVerwerfen();
     }
-    aenderungsmarkierungenEntfernen();
-    changeInfo = ChangeInfo.untracked();
+    if (ownChangeMatches) {
+      aenderungsmarkierungenEntfernen();
+      changeInfo = ChangeInfo.untracked();
+    }
     return changesMade;
   }
 

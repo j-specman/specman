@@ -33,6 +33,7 @@ import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -227,40 +228,62 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   @Override
-  /** The logic in here has similarities to {@link AbstractSchrittView#aenderungenUebernehmen(EditorI)}
-   * as it is a similar situation of a container having multiple
+  /** The logic in here has similarities to {@link AbstractSchrittView#aenderungenUebernehmen()}
+   * as it is a similar situation of a container having multiple change aspects.
    */
   public int aenderungenUebernehmen() {
-    int changesMade = changeInfo.numChanges();
-    if (changeInfo.isDeleted() || allCellsMarkedAs(Geloescht)) {
+    boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
+    int changesMade = ownChangeMatches ? changeInfo.numChanges() : 0;
+    if (ownChangeMatches && (changeInfo.isDeleted() || allCellsMarkedAs(Geloescht))) {
       getParent().removeEditAreaUDBL(this);
       changesMade++;
     }
     else {
       changesMade += removeRowsMarkedAs(Geloescht);
       changesMade += removeColumnsMarkedAs(Geloescht);
-      changesMade += cellstream().mapToInt(cell -> cell.aenderungenUebernehmen()).sum();
+      changesMade += acceptOrRejectCellChanges(cell -> cell.aenderungenUebernehmen());
     }
-    aenderungsmarkierungenEntfernen();
-    changeInfo = ChangeInfo.untracked();
+    if (ownChangeMatches) {
+      aenderungsmarkierungenEntfernen();
+      changeInfo = ChangeInfo.untracked();
+    }
     return changesMade;
   }
 
   @Override
   public int aenderungenVerwerfen() {
-    int changesRejected = changeInfo.numChanges();
-    if (changeInfo.isAdded() || allCellsMarkedAs(Hinzugefuegt)) {
+    boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
+    int changesRejected = ownChangeMatches ? changeInfo.numChanges() : 0;
+    if (ownChangeMatches && (changeInfo.isAdded() || allCellsMarkedAs(Hinzugefuegt))) {
       getParent().removeEditAreaUDBL(this);
       changesRejected++;
     }
     else {
       changesRejected += removeRowsMarkedAs(Hinzugefuegt);
       changesRejected += removeColumnsMarkedAs(Hinzugefuegt);
-      changesRejected += cellstream().mapToInt(cell -> cell.aenderungenVerwerfen()).sum();
+      changesRejected += acceptOrRejectCellChanges(cell -> cell.aenderungenVerwerfen());
     }
-    aenderungsmarkierungenEntfernen();
-    changeInfo = ChangeInfo.untracked();
+    if (ownChangeMatches) {
+      aenderungsmarkierungenEntfernen();
+      changeInfo = ChangeInfo.untracked();
+    }
     return changesRejected;
+  }
+
+  private int acceptOrRejectCellChanges(java.util.function.ToIntFunction<EditContainer> operation) {
+    int changesMade = 0;
+    for (EditContainer cell : modifyableCells()) {
+      int cellChanges = operation.applyAsInt(cell);
+      if (cellChanges > 0) {
+        cell.setBackground(changeInfo.panelColor());
+        changesMade += cellChanges;
+      }
+    }
+    return changesMade;
+  }
+
+  private List<EditContainer> modifyableCells() {
+    return cellstream().collect(Collectors.toList());
   }
 
   private int removeColumnsMarkedAs(Aenderungsart aenderungsart) {
@@ -290,6 +313,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   @Override
   public void aenderungsmarkierungenEntfernen() {
     cellstream().forEach(cell -> cell.aenderungsmarkierungenEntfernen(null));
+    setBackgroundUDBL(Styles.BACKGROUND_COLOR_STANDARD);
   }
 
   @Override
@@ -545,11 +569,11 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
 
   public boolean rowIsMarkedAs(int rowIndex, Aenderungsart aenderungsart) { return rowIsMarkedAs(cells.get(rowIndex), aenderungsart); }
   private boolean rowIsMarkedAs(List<EditContainer> row, Aenderungsart aenderungsart) {
-    return row.stream().allMatch(cell -> cell.isMarkedAs(aenderungsart));
+    return row.stream().allMatch(cell -> cell.isMarkedAsForCurrentChangeSet(aenderungsart));
   }
 
   public boolean columnIsMarkedAs(int columnIndex, Aenderungsart aenderungsart) {
-    return toColumn(columnIndex).stream().allMatch(cell -> cell.isMarkedAs(aenderungsart));
+    return toColumn(columnIndex).stream().allMatch(cell -> cell.isMarkedAsForCurrentChangeSet(aenderungsart));
   }
 
   @Override

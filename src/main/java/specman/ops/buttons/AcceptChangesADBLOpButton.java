@@ -19,7 +19,7 @@ public class AcceptChangesADBLOpButton extends AbstractADBLSpecmanOpButton {
     if (changesMade > 0) {
       diagrammAktualisieren(null);
     } else {
-      showMessage("Das Diagramm enthält keine Änderungen.");
+      showMessage("Das Diagramm enthält keine Änderungen für das aktuelle ChangeSet.");
     }
   }
 

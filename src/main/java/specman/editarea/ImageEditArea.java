@@ -328,6 +328,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public int aenderungenUebernehmen() {
+    if (!changeInfo.isChange() || changeInfo.changeSet() != changeset()) return 0;
     int changesMade = changeInfo.numChanges();
     if (changeInfo.isAdded()) updateChangetypeAndDependentStylingUDBL(ChangeInfo.untracked());
     else if (changeInfo.isDeleted()) getParent().removeEditAreaUDBL(this);
@@ -337,6 +338,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public int aenderungenVerwerfen() {
+    if (!changeInfo.isChange() || changeInfo.changeSet() != changeset()) return 0;
     int changesRejected = changeInfo.numChanges();
     if (changeInfo.isAdded()) getParent().removeEditAreaUDBL(this);
     else if (changeInfo.isDeleted()) updateChangetypeAndDependentStylingUDBL(ChangeInfo.untracked());

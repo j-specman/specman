@@ -169,7 +169,8 @@ public class BreakSchrittView extends AbstractSchrittView {
 	}
 
 	public void updateContent(EditorContentModel_V001 content) {
-		editContainer.setEditorContent(content);
+		//editContainer.setEditorContent(content);
+		editContainer.updateTextContent(content);
 	}
 
   public boolean refersToOtherStep() { return catchHeading != null; }

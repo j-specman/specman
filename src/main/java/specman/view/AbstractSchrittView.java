@@ -441,19 +441,23 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public int aenderungenUebernehmen() throws EditException {
-		int changesMade = editAenderungenUebernehmen() + changeInfo.numChanges();
-		switch (changeInfo.art()) {
-			case Geloescht:
-			case Quellschritt:
-				markStepnumberLinksAsDefect();
-				getParent().schrittEntfernen(this, Accept);
-				break;
-			case Zielschritt:
-				setQuellschrittUDBL(null);
-				break;
+		boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
+		int changesMade = editAenderungenUebernehmen();
+		if (ownChangeMatches) {
+			changesMade += changeInfo.numChanges();
+			switch (changeInfo.art()) {
+				case Geloescht:
+				case Quellschritt:
+					markStepnumberLinksAsDefect();
+					getParent().schrittEntfernen(this, Accept);
+					break;
+				case Zielschritt:
+					setQuellschrittUDBL(null);
+					break;
+			}
+			aenderungsmarkierungenEntfernen();
+			changeInfo = ChangeInfo.untracked();
 		}
-		aenderungsmarkierungenEntfernen();
-		changeInfo = ChangeInfo.untracked();
 		return changesMade;
 	}
 
@@ -462,23 +466,27 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public int aenderungenVerwerfen() throws EditException {
-		int changesRejected = editAenderungenVerwerfen() + changeInfo.numChanges();
-		switch (changeInfo.art()) {
-			case Hinzugefuegt:
-				markStepnumberLinksAsDefect();
-				getParent().schrittEntfernen(this, Reject);
-				break;
-			case Zielschritt:
-				getParent().schrittEntfernen(this, Move);
-				setId(getQuellschritt().newStepIDInSameSequence(After));
-				setParent(getQuellschritt().getParent());
-				getQuellschritt().getParent().insertStep(this, After, getQuellschritt());
-				getQuellschritt().getParent().schrittEntfernen(getQuellschritt(), Discard);
-				setQuellschrittUDBL(null);
-				break;
+		boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
+		int changesRejected = editAenderungenVerwerfen();
+		if (ownChangeMatches) {
+			changesRejected += changeInfo.numChanges();
+			switch (changeInfo.art()) {
+				case Hinzugefuegt:
+					markStepnumberLinksAsDefect();
+					getParent().schrittEntfernen(this, Reject);
+					break;
+				case Zielschritt:
+					getParent().schrittEntfernen(this, Move);
+					setId(getQuellschritt().newStepIDInSameSequence(After));
+					setParent(getQuellschritt().getParent());
+					getQuellschritt().getParent().insertStep(this, After, getQuellschritt());
+					getQuellschritt().getParent().schrittEntfernen(getQuellschritt(), Discard);
+					setQuellschrittUDBL(null);
+					break;
+			}
+			aenderungsmarkierungenEntfernen();
+			changeInfo = ChangeInfo.untracked();
 		}
-		aenderungsmarkierungenEntfernen();
-		changeInfo = ChangeInfo.untracked();
 		return changesRejected;
 	}
 

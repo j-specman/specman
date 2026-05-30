@@ -515,7 +515,8 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		int changesMade = sonstSequenz.aenderungenUebernehmen();
 		List<ZweigSchrittSequenzView> caseSequenzen = new CopyOnWriteArrayList<ZweigSchrittSequenzView>(this.caseSequenzen);
 		for (ZweigSchrittSequenzView caseSequenz : caseSequenzen) {
-			if (caseSequenz.getChangeInfo().isDeleted()) {
+			ChangeInfo ci = caseSequenz.getChangeInfo();
+			if (ci.isDeleted() && ci.changeSet() == changeset()) {
 				zweigEntfernen(caseSequenz);
 				changesMade++;
 			}
@@ -541,7 +542,8 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		List<ZweigSchrittSequenzView> caseSequenzen = new CopyOnWriteArrayList<ZweigSchrittSequenzView>(this.caseSequenzen);
 		int changesRejected = sonstSequenz.aenderungenVerwerfen();
 		for (ZweigSchrittSequenzView caseSequenz : caseSequenzen) {
-			if(caseSequenz.getChangeInfo().isAdded()) {
+			ChangeInfo ci = caseSequenz.getChangeInfo();
+			if (ci.isAdded() && ci.changeSet() == changeset()) {
 				changesRejected += zweigEntfernen(caseSequenz);
 			}
 			else {

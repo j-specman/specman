@@ -259,7 +259,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
 
   @Override
   public int aenderungenUebernehmen() throws EditException {
-    if (changeInfo.isDeleted()) {
+    if (changeInfo.isDeleted() && changeInfo.changeSet() == changeset()) {
       removeUDBL();
       return 1;
     }
@@ -280,7 +280,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     for (CatchUeberschrift coCatchHeading : modifyableCoCatchHeadings()) {
       changesRejected += coCatchHeading.aenderungenVerwerfen();
     }
-    if (lastChangetype.isDeleted()) {
+    if (lastChangetype.isDeleted() && lastChangetype.changeSet() == changeset()) {
       // While the catch sequences was marked as deleted, its heading was not synchronized
       // with the linked break step's content. So when we have rolled back a deletion, we
       // might have to resynchronize
@@ -411,4 +411,5 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   public boolean allowsDeletion(CatchUeberschrift catchHeading) {
     return !isDeleted() && !catchHeading.isDeleted();
   }
+
 }

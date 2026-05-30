@@ -266,7 +266,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     // TODO JL: Muss mit aenderungsmarkierungenVerwerfen zusammengelegt werden
     public int aenderungenUebernehmen() {
         WrappedDocument doc = getWrappedDocument();
-        int changesMade = changeInfo.numChanges();
+        int changesMade = changeInfo.changeSet() == changeset() ? changeInfo.numChanges() : 0;
 
         List<GeloeschtMarkierung_V001> loeschungen = new ArrayList<>();
         for (WrappedElement e : doc.getRootElements()) {
@@ -284,25 +284,32 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
             }
         }
 
+        if (changeInfo.changeSet() == changeset()) {
+            changeInfo = ChangeInfo.untracked();
+        }
         return changesMade;
     }
 
     // TODO JL: Muss mit aenderungsmarkierungenUebernehmen zusammengelegt werden
     public int aenderungenVerwerfen() {
-        int changesRejected = changeInfo.numChanges();
-        if (changeInfo.isAdded()) {
-            if (!areaDetachedByMerge()) {
-                getParent().removeEditAreaUDBL(this);
+        boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
+        int changesRejected = 0;
+        if (ownChangeMatches) {
+            changesRejected += changeInfo.numChanges();
+            if (changeInfo.isAdded()) {
+                if (!areaDetachedByMerge()) {
+                    getParent().removeEditAreaUDBL(this);
+                }
+            }
+            else if (changeInfo.isDeleted()) {
+                if (deletionBackup != null) {
+                    setText(deletionBackup.text);
+                    setEditable(true);
+                }
+                deletionBackup = null;
             }
         }
-        else if (changeInfo.isDeleted()) {
-            if (deletionBackup != null) {
-                setText(deletionBackup.text);
-                setEditable(true);
-            }
-          deletionBackup = null;
-        }
-        else {
+        if (!(ownChangeMatches && changeInfo.isAdded())) {
             WrappedDocument doc = getWrappedDocument();
             List<GeloeschtMarkierung_V001> loeschungen = new ArrayList<>();
             for (WrappedElement e : doc.getRootElements()) {
@@ -320,7 +327,9 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
                 }
             }
         }
-        changeInfo = ChangeInfo.untracked();
+        if (ownChangeMatches) {
+            changeInfo = ChangeInfo.untracked();
+        }
         return changesRejected;
     }
 
@@ -335,48 +344,43 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         int changesMade = 0;
 
         WrappedDocument doc = e.getDocument();
-        if (elementHatAenderungshintergrund(e)) {
+        if (elementHatAenderungshintergrund(e, changeset())) {
             if (elementHatDurchgestrichenenText(e)) {
                 loeschungen.add(new GeloeschtMarkierung_V001(e.getStartOffset().toModel(), e.getEndOffset().toModel()));
             } else {
                 AttributeSet attribute = e.getAttributes();
                 MutableAttributeSet entfaerbt = new SimpleAttributeSet();
                 entfaerbt.addAttributes(attribute);
-                StyleConstants.setBackground(entfaerbt, stepnumberLinkChangedStyleSet(e) ? STEPNUMBER_LINK_COLOR.color : TEXT_BACKGROUND_COLOR_STANDARD);
+                StyleConstants.setBackground(entfaerbt, stepnumberLinkChangedStyleSet(e, changeset()) ? STEPNUMBER_LINK_COLOR.color : TEXT_BACKGROUND_COLOR_STANDARD);
                 doc.setCharacterAttributes(e.getStartOffset(), e.getEndOffset().distance(e.getStartOffset()), entfaerbt, true);
                 changesMade++;
             }
-
         }
 
         for (int i = 0; i < e.getElementCount(); i++) {
             changesMade += aenderungsmarkierungenUebernehmen(e.getElement(i), loeschungen);
         }
 
-        changeInfo = ChangeInfo.untracked();
         return changesMade;
     }
 
     // TODO JL: Muss mit aenderungsmarkierungenUebernehmen zusammengelegt werden
-    private int aenderungsmarkierungenVerwerfen(
-            WrappedElement e,
-            List<GeloeschtMarkierung_V001> loeschungen) {
+    private int aenderungsmarkierungenVerwerfen(WrappedElement e, List<GeloeschtMarkierung_V001> loeschungen) {
         int changesRejected = 0;
 
         WrappedDocument doc = getWrappedDocument();
-        if (elementHatAenderungshintergrund(e)) {
+        if (elementHatAenderungshintergrund(e, changeset())) {
             if (!elementHatDurchgestrichenenText(e)) {
                 loeschungen.add(new GeloeschtMarkierung_V001(e.getStartOffset().toModel(), e.getEndOffset().toModel()));
             } else {
                 AttributeSet attribute = e.getAttributes();
                 MutableAttributeSet entfaerbt = new SimpleAttributeSet();
                 entfaerbt.addAttributes(attribute);
-                StyleConstants.setBackground(entfaerbt, stepnumberLinkChangedStyleSet(e) ? STEPNUMBER_LINK_COLOR.color : TEXT_BACKGROUND_COLOR_STANDARD);
+                StyleConstants.setBackground(entfaerbt, stepnumberLinkChangedStyleSet(e, changeset()) ? STEPNUMBER_LINK_COLOR.color : TEXT_BACKGROUND_COLOR_STANDARD);
                 StyleConstants.setStrikeThrough(entfaerbt, false);
                 doc.setCharacterAttributes(e.getStartOffset(), e.getEndOffset().distance(e.getStartOffset()), entfaerbt, true);
                 changesRejected++;
             }
-
         }
         for (int i = 0; i < e.getElementCount(); i++) {
             changesRejected += aenderungsmarkierungenVerwerfen(e.getElement(i), loeschungen);
@@ -655,8 +659,12 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
 
     public boolean stepnumberLinkChangedStyleSet(WrappedElement element) {
+        return stepnumberLinkChangedStyleSet(element, changeset());
+    }
+
+    public boolean stepnumberLinkChangedStyleSet(WrappedElement element, ChangeSet cs) {
         String color = getBackgroundColorFromElement(element);
-        return color != null && color.equalsIgnoreCase(changeset().stepnumberLinkHtmlColor());
+        return color != null && color.equalsIgnoreCase(cs.stepnumberLinkHtmlColor());
     }
 
 

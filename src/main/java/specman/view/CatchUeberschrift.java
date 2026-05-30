@@ -83,14 +83,17 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   }
 
   public int aenderungenUebernehmen() {
-    int numChanges = changeInfo.numChanges();
-    if (isDeleted()) {
+    boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
+    int numChanges = ownChangeMatches ? changeInfo.numChanges() : 0;
+    if (ownChangeMatches && isDeleted()) {
       remove();
     }
     else {
       numChanges += ueberschrift.aenderungenUebernehmen();
     }
-    changeInfo = ChangeInfo.untracked();
+    if (ownChangeMatches) {
+      changeInfo = ChangeInfo.untracked();
+    }
     return numChanges;
   }
 
@@ -101,7 +104,7 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
 
   public int aenderungenVerwerfen() {
     int numChanges = 0;
-    if (changeInfo.isAdded()) {
+    if (changeInfo.isAdded() && changeInfo.changeSet() == changeset()) {
       catchSequence.removeUDBL(this);
       numChanges += changeInfo.numChanges();
       changeInfo = ChangeInfo.untracked();
@@ -140,7 +143,8 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   public void updateFromBreakStepContent() {
     if (!catchSequence.isDeleted() && !this.isDeleted()) {
       EditorContentModel_V001 breakStepContent = linkedBreakStep.getEditorContent(true);
-      ueberschrift.setEditorContent(breakStepContent);
+      //ueberschrift.setEditorContent(breakStepContent);
+      ueberschrift.updateTextContent(breakStepContent);
     }
   }
 

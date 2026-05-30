@@ -10,11 +10,16 @@ public class RejectChangesADBLOpButton extends AbstractADBLSpecmanOpButton {
 
   @Override
   void execute() throws EditException {
-    int changesRejected = getHauptSequenz().aenderungenVerwerfen();
+    int changesRejected = 0;
+    changesRejected += getIntro().aenderungenVerwerfen();
+    getIntro().aenderungsmarkierungenEntfernen(null);
+    changesRejected += getHauptSequenz().aenderungenVerwerfen();
+    changesRejected += getOutro().aenderungenVerwerfen();
+    getOutro().aenderungsmarkierungenEntfernen(null);
     if (changesRejected > 0) {
       diagrammAktualisieren(null);
     } else {
-      showMessage("Das Diagramm enthält keine Änderungen.");
+      showMessage("Das Diagramm enthält keine Änderungen für das aktuelle ChangeSet.");
     }
   }
 
