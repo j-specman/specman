@@ -568,9 +568,17 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     recomputeLayout();
   }
 
-  @Override public ChangeInfo getChangeInfo() { return changeInfo; }
-  @Override public void setChangeInfo(ChangeInfo changeInfo) { this.changeInfo = changeInfo; }
-  private void setChangeInfoUDBL(ChangeInfo changeInfo) { UDBL.setChangeInfo(this, changeInfo); }
+  @Override public ChangeInfo getChangeInfo() {
+    return changeInfo;
+  }
+
+  @Override public void setChangeInfo(ChangeInfo changeInfo) {
+    this.changeInfo = changeInfo;
+  }
+
+  private void setChangeInfoUDBL(ChangeInfo changeInfo) {
+    UDBL.setChangeInfo(this, changeInfo);
+  }
 
   public boolean isMarkedAsDeleted() { return changeInfo.isDeleted(); }
   private boolean allCellsMarkedAs(Aenderungsart aenderungsart) {

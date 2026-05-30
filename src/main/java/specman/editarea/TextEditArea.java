@@ -205,7 +205,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     @Override
     public void setGeloeschtMarkiertStilUDBL(ChangeSet triggerSet) {
-      aenderungenVerwerfen();
+      aenderungenVerwerfen(triggerSet);
       setChangeInfoUDBL(changeInfo.deleted(triggerSet));
       deletionBackup = getTextWithMarkups(true);
       setStyleUDBL(ganzerSchrittGeloeschtStil, triggerSet.panelColor(), false);
@@ -301,9 +301,18 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         return changesMade;
     }
 
-    // TODO JL: Muss mit aenderungsmarkierungenUebernehmen zusammengelegt werden
     public int aenderungenVerwerfen() {
-        boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
+        return aenderungenVerwerfen(changeset());
+    }
+
+    /** The triggerSet is the current change set if the rejection is initiated interactively by the user.
+     * Alternatively the method is called when initializing a deleted text on file load. In this case
+     * the triggerSet is the change set which text was deleted in. This is relevant because deleting
+     * a text also means that any changes are reverted so the deleted text is displayed with its original
+     * content. The <i>current</i> content with all potential changes is kept as a backup being persisted
+     * on file save. */
+    public int aenderungenVerwerfen(ChangeSet triggerSet) {
+        boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == triggerSet;
         int changesRejected = 0;
         if (ownChangeMatches) {
             changesRejected += changeInfo.numChanges();
@@ -830,14 +839,20 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     @Override
     public boolean enthaelt(InteractiveStepFragment fragment) { return this == fragment; }
 
-    @Override public ChangeInfo getChangeInfo() { return changeInfo; }
+    @Override public ChangeInfo getChangeInfo() {
+        return changeInfo;
+    }
+
     @Override public void setChangeInfo(ChangeInfo changeInfo) {
       this.changeInfo = changeInfo;
       if (!changeInfo.isDeleted()) {
         deletionBackup = null;
       }
     }
-    private void setChangeInfoUDBL(ChangeInfo changeInfo) { UDBL.setChangeInfo(this, changeInfo); }
+
+    private void setChangeInfoUDBL(ChangeInfo changeInfo) {
+        UDBL.setChangeInfo(this, changeInfo);
+    }
 
     public Shape getShape() {
         return new Shape(this).withText(new FormattedShapeText(this));
