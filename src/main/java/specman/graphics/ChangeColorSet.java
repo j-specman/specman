@@ -38,7 +38,7 @@ public class ChangeColorSet {
 
   public static Color saturate(Color color) {
     float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
-    hsb[1] = 0.9f;
+    hsb[1] = 0.8f;
     return Color.getHSBColor(hsb[0], hsb[1], hsb[2]);
   }
 
