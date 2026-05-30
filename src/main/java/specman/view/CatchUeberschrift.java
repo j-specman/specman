@@ -4,6 +4,7 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.ChangeInfo;
+import specman.ChangeSet;
 import specman.SchrittID;
 import static specman.ChangeSet.changeset;
 import specman.editarea.EditContainer;
@@ -136,15 +137,19 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   public void updateLinkedBreakStepContent() {
     if (!isDeleted()) {
       EditorContentModel_V001 content = ueberschrift.editorContent2Model(true);
-      linkedBreakStep.updateContent(content);
+      linkedBreakStep.updateContent(content, changeInfo.changeSet());
     }
   }
 
   public void updateFromBreakStepContent() {
     if (!catchSequence.isDeleted() && !this.isDeleted()) {
       EditorContentModel_V001 breakStepContent = linkedBreakStep.getEditorContent(true);
-      //ueberschrift.setEditorContent(breakStepContent);
-      ueberschrift.updateTextContent(breakStepContent);
+      ueberschrift.setEditorContent(breakStepContent);
+      ChangeSet breakStepChangeSet = linkedBreakStep.getChangeInfo().changeSet();
+      ChangeSet headingChangeSet = changeInfo.changeSet();
+      if (breakStepChangeSet != null && breakStepChangeSet != headingChangeSet) {
+        ueberschrift.mergeChangeSet(headingChangeSet, breakStepChangeSet, false);
+      }
     }
   }
 

@@ -54,6 +54,14 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     einfachenSchrittAnhaengen();
     init(linkedBreakStep, null, TextInit.initialChangeInfo());
     initHeadingsLayout();
+    initHeadingChangeSet(linkedBreakStep);
+  }
+
+  private void initHeadingChangeSet(BreakSchrittView linkedBreakStep) {
+    ChangeInfo breakStepChangeInfo = linkedBreakStep.getChangeInfo();
+    if (breakStepChangeInfo.isChange() && breakStepChangeInfo.changeSet() != changeset()) {
+      ueberschrift.mergeChangeSet(changeset(), breakStepChangeInfo.changeSet(), false);
+    }
   }
 
   public CatchSchrittSequenzView(AbstractSchrittView parent, CatchSchrittSequenzModel_V001 model) {

@@ -265,6 +265,15 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   }
 
   @Override
+  public void mergeChangeSet(ChangeSet target, ChangeSet source, boolean withMarkups) {
+    if (withMarkups) throw new IllegalArgumentException("withMarkups not yet supported");
+    if (changeInfo.isChange() && changeInfo.changeSet() == source) {
+      changeInfo = target != null ? new ChangeInfo(changeInfo.art(), target) : ChangeInfo.untracked();
+      setEditBackgroundUDBL(null);
+    }
+  }
+
+  @Override
   public void setGeloeschtMarkiertStilUDBL(ChangeSet triggerSet) {
     if (changeInfo.isUntracked()) {
       updateChangetypeAndDependentStylingUDBL(changeInfo.deleted(triggerSet));

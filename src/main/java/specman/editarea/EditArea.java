@@ -57,6 +57,8 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V001> extends Inte
 
   void aenderungsmarkierungenEntfernen();
 
+  void mergeChangeSet(ChangeSet target, ChangeSet source, boolean withMarkups);
+
   boolean enthaeltAenderungsmarkierungen();
 
   void findStepnumberLinkIDs(HashMap<TextEditArea, List<String>> stepnumberLinkMap);

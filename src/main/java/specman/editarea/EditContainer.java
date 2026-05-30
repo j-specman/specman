@@ -518,21 +518,8 @@ public class EditContainer extends JPanel {
 		initLayoutAndEditAreas(content);
 	}
 
-	public void updateTextContent(EditorContentModel_V001 sourceContent) {
-		if (hasSingleTextArea()
-				&& sourceContent.areas.size() == 1
-				&& sourceContent.areas.get(0) instanceof TextEditAreaModel_V001) {
-			TextEditAreaModel_V001 sourceModel = (TextEditAreaModel_V001) sourceContent.areas.get(0);
-			ChangeInfo preservedChangeInfo = editAreas.get(0).getChangeInfo();
-			setEditorContent(new EditorContentModel_V001(
-				new TextEditAreaModel_V001(sourceModel.text, sourceModel.plainText, sourceModel.markups, preservedChangeInfo)));
-		} else {
-			setEditorContent(sourceContent);
-		}
-	}
-
-	public boolean hasSingleTextArea() {
-		return editAreas.size() == 1 && editAreas.get(0).isTextArea();
+	public void mergeChangeSet(ChangeSet target, ChangeSet source, boolean withMarkups) {
+		editAreas.forEach(ea -> ea.mergeChangeSet(target, source, withMarkups));
 	}
 
 	public void addEditComponentListener(ComponentListener componentListener) {

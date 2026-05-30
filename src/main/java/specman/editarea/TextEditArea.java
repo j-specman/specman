@@ -193,6 +193,17 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     @Override
+    public void mergeChangeSet(ChangeSet target, ChangeSet source, boolean withMarkups) {
+        if (withMarkups) {
+            throw new IllegalArgumentException("withMarkups not yet implemented");
+        }
+        if (changeInfo.isChange() && changeInfo.changeSet() == source) {
+            changeInfo = target != null ? new ChangeInfo(changeInfo.art(), target) : ChangeInfo.untracked();
+            setBackgroundUDBL(changeInfo.panelColor());
+        }
+    }
+
+    @Override
     public void setGeloeschtMarkiertStilUDBL(ChangeSet triggerSet) {
       aenderungenVerwerfen();
       setChangeInfoUDBL(changeInfo.deleted(triggerSet));

@@ -168,9 +168,12 @@ public class BreakSchrittView extends AbstractSchrittView {
 		return (catchHeading == null) ? Arrays.asList(this) : Arrays.asList();
 	}
 
-	public void updateContent(EditorContentModel_V001 content) {
-		//editContainer.setEditorContent(content);
-		editContainer.updateTextContent(content);
+	public void updateContent(EditorContentModel_V001 content, ChangeSet sourceChangeSet) {
+		editContainer.setEditorContent(content);
+		ChangeSet breakStepChangeSet = changeInfo.changeSet();
+		if (sourceChangeSet != null && breakStepChangeSet != null && sourceChangeSet != breakStepChangeSet) {
+			editContainer.mergeChangeSet(breakStepChangeSet, sourceChangeSet, false);
+		}
 	}
 
   public boolean refersToOtherStep() { return catchHeading != null; }

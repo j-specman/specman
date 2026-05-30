@@ -99,14 +99,18 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 	@Override
 	public int aenderungenVerwerfen() throws EditException {
 		int changesRejected = super.aenderungenVerwerfen();
-		aenderungsmarkierungenEntfernen();
+		if (changeInfo.isUntracked()) {
+			aenderungsmarkierungenEntfernen();
+		}
 		return changesRejected;
 	}
 
 	@Override
 	public int aenderungenUebernehmen() throws EditException {
 		int changesCommitted = super.aenderungenUebernehmen();
-		aenderungsmarkierungenEntfernen();
+		if (changeInfo.isUntracked()) {
+			aenderungsmarkierungenEntfernen();
+		}
 		return changesCommitted;
 	}
 
