@@ -1,6 +1,7 @@
 package specman;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.jgoodies.forms.factories.CC;
@@ -744,6 +745,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI {
 			setDiagrammDatei(diagramFile);
 
 			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 			objectMapper.enableDefaultTyping();
 			ModelEnvelope envelope = objectMapper.readValue(diagrammDatei, ModelEnvelope.class);
 			StruktogrammModel_V001 model = (StruktogrammModel_V001)envelope.model;
