@@ -47,6 +47,10 @@ public class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
       verifyModelTypeAndSpecmanVersion(envelope);
       StruktogrammModel_V001 model = (StruktogrammModel_V001) envelope.model;
 
+      ChangeSet changeSet = ChangeSet.fromName(model.changeSetName);
+      if (changeSet != null) {
+        context.updateChangeSet(changeSet);
+      }
       setZoomFaktor(model.zoomFaktor);
       zoomFaktorAnzeigeAktualisieren(model.zoomFaktor);
       KlappButton.scaleIcons(model.zoomFaktor, 0);
@@ -65,10 +69,6 @@ public class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
       getOutro().viewsNachinitialisieren();
       getOutro().registerAllExistingStepnumbers();
       setChangeModeEnabled(model.changeModeenabled);
-      ChangeSet changeSet = ChangeSet.fromName(model.changeSetName);
-      if (changeSet != null) {
-        context.updateChangeSet(changeSet);
-      }
       addRecentFile(diagramFile);
       discardAllUndoEdits();
     }
