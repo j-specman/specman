@@ -8,7 +8,6 @@ import specman.Aenderungsart;
 import specman.ChangeSet;
 import specman.EditorI;
 import specman.SchrittID;
-import specman.Specman;
 import specman.TextInit;
 import specman.ChangeInfo;
 import static specman.ChangeSet.changeset;
@@ -557,10 +556,6 @@ public class EditContainer extends JPanel {
 	}
 
 	public boolean isMarkedAs(Aenderungsart aenderungsart) {
-		return editAreas.stream().allMatch(ea -> ea.getChangeInfo().art() == aenderungsart);
-	}
-
-	public boolean isMarkedAsForCurrentChangeSet(Aenderungsart aenderungsart) {
 		return editAreas.stream().allMatch(ea -> {
 			ChangeInfo ci = ea.getChangeInfo();
 			return ci.art() == aenderungsart && ci.changeSet() == changeset();

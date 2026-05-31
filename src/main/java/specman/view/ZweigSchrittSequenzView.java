@@ -1,5 +1,6 @@
 package specman.view;
 
+import static specman.ChangeSet.changeset;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
@@ -116,7 +117,7 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 
 	public void aenderungsmarkierungenEntfernen() {
 		ueberschrift.aenderungsmarkierungenEntfernen(null);
-		changeInfo = ChangeInfo.untracked();
+		changeInfo = changeInfo.untrack(changeset());
 	}
 
 	@Override

@@ -8,7 +8,6 @@ import specman.ChangeSet;
 import specman.EditorI;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
-import specman.Specman;
 import specman.TextInit;
 import specman.model.v001.ChangeInfo_V001;
 import static specman.ChangeSet.changeset;
@@ -33,7 +32,6 @@ import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -232,9 +230,9 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
    * as it is a similar situation of a container having multiple change aspects.
    */
   public int aenderungenUebernehmen() {
-    boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
-    int changesMade = ownChangeMatches ? changeInfo.numChanges() : 0;
-    if (ownChangeMatches && (changeInfo.isDeleted() || allCellsMarkedAs(Geloescht))) {
+    ChangeSet currentSet = changeset();
+    int changesMade = changeInfo.numChangesBy(currentSet);
+    if (changeInfo.deletedBy(currentSet) || allCellsMarkedAs(Geloescht)) {
       getParent().removeEditAreaUDBL(this);
       changesMade++;
     }
@@ -243,18 +241,18 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       changesMade += removeColumnsMarkedAs(Geloescht);
       changesMade += acceptOrRejectCellChanges(cell -> cell.aenderungenUebernehmen());
     }
-    if (ownChangeMatches) {
+    if (changeInfo.changedBy(currentSet)) {
       aenderungsmarkierungenEntfernen();
-      changeInfo = ChangeInfo.untracked();
     }
+    changeInfo = changeInfo.untrack(currentSet);
     return changesMade;
   }
 
   @Override
   public int aenderungenVerwerfen() {
-    boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
-    int changesRejected = ownChangeMatches ? changeInfo.numChanges() : 0;
-    if (ownChangeMatches && (changeInfo.isAdded() || allCellsMarkedAs(Hinzugefuegt))) {
+    ChangeSet currentSet = changeset();
+    int changesRejected = changeInfo.numChangesBy(currentSet);
+    if (changeInfo.addedBy(currentSet) || allCellsMarkedAs(Hinzugefuegt)) {
       getParent().removeEditAreaUDBL(this);
       changesRejected++;
     }
@@ -263,10 +261,10 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       changesRejected += removeColumnsMarkedAs(Hinzugefuegt);
       changesRejected += acceptOrRejectCellChanges(cell -> cell.aenderungenVerwerfen());
     }
-    if (ownChangeMatches) {
+    if (changeInfo.changedBy(currentSet)) {
       aenderungsmarkierungenEntfernen();
-      changeInfo = ChangeInfo.untracked();
     }
+    changeInfo = changeInfo.untrack(currentSet);
     return changesRejected;
   }
 
@@ -587,11 +585,11 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
 
   public boolean rowIsMarkedAs(int rowIndex, Aenderungsart aenderungsart) { return rowIsMarkedAs(cells.get(rowIndex), aenderungsart); }
   private boolean rowIsMarkedAs(List<EditContainer> row, Aenderungsart aenderungsart) {
-    return row.stream().allMatch(cell -> cell.isMarkedAsForCurrentChangeSet(aenderungsart));
+    return row.stream().allMatch(cell -> cell.isMarkedAs(aenderungsart));
   }
 
   public boolean columnIsMarkedAs(int columnIndex, Aenderungsart aenderungsart) {
-    return toColumn(columnIndex).stream().allMatch(cell -> cell.isMarkedAsForCurrentChangeSet(aenderungsart));
+    return toColumn(columnIndex).stream().allMatch(cell -> cell.isMarkedAs(aenderungsart));
   }
 
   @Override

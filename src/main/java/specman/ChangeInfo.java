@@ -104,4 +104,8 @@ public class ChangeInfo {
   public boolean changedBy(ChangeSet by) {
     return changeSet == by;
   }
+
+  public ChangeInfo untrack(ChangeSet by) {
+    return changedBy(by) ? UNTRACKED : this;
+  }
 }

@@ -104,37 +104,37 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
 
   @Override
   public int aenderungenUebernehmen() {
-    boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
-    int changesMade = ownChangeMatches ? changeInfo.numChanges() : 0;
-    if (ownChangeMatches && changeInfo.isDeleted()) {
+    ChangeSet currentSet = changeset();
+    int changesMade = changeInfo.numChangesBy(currentSet);
+    if (changeInfo.deletedBy(currentSet)) {
       getParent().removeEditAreaUDBL(this);
       changesMade++;
     }
     else {
       changesMade += content.aenderungenUebernehmen();
     }
-    if (ownChangeMatches) {
+    if (changeInfo.changedBy(currentSet)) {
       aenderungsmarkierungenEntfernen();
-      changeInfo = ChangeInfo.untracked();
     }
+    changeInfo = changeInfo.untrack(currentSet);
     return changesMade;
   }
 
   @Override
   public int aenderungenVerwerfen() {
-    boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
-    int changesMade = ownChangeMatches ? changeInfo.numChanges() : 0;
-    if (ownChangeMatches && changeInfo.isAdded()) {
+    ChangeSet currentSet = changeset();
+    int changesMade = changeInfo.numChangesBy(currentSet);
+    if (changeInfo.addedBy(currentSet)) {
       getParent().removeEditAreaUDBL(this);
       changesMade++;
     }
     else {
       changesMade += content.aenderungenVerwerfen();
     }
-    if (ownChangeMatches) {
+    if (changeInfo.changedBy(currentSet)) {
       aenderungsmarkierungenEntfernen();
-      changeInfo = ChangeInfo.untracked();
     }
+    changeInfo = changeInfo.untrack(currentSet);
     return changesMade;
   }
 

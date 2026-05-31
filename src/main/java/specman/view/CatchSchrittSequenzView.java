@@ -267,7 +267,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
 
   @Override
   public int aenderungenUebernehmen() throws EditException {
-    if (changeInfo.isDeleted() && changeInfo.changeSet() == changeset()) {
+    if (changeInfo.deletedBy(changeset())) {
       removeUDBL();
       return 1;
     }

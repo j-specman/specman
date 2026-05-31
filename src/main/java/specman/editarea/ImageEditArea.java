@@ -261,7 +261,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public void aenderungsmarkierungenEntfernen() {
-    changeInfo = ChangeInfo.untracked();
+    changeInfo = changeInfo.untrack(changeset());
   }
 
   @Override
@@ -337,21 +337,29 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public int aenderungenUebernehmen() {
-    if (!changeInfo.isChange() || changeInfo.changeSet() != changeset()) return 0;
-    int changesMade = changeInfo.numChanges();
-    if (changeInfo.isAdded()) updateChangetypeAndDependentStylingUDBL(ChangeInfo.untracked());
-    else if (changeInfo.isDeleted()) getParent().removeEditAreaUDBL(this);
-    changeInfo = ChangeInfo.untracked();
+    ChangeSet currentSet = changeset();
+    int changesMade = changeInfo.numChangesBy(currentSet);
+    if (changeInfo.addedBy(currentSet)) {
+      updateChangetypeAndDependentStylingUDBL(ChangeInfo.untracked());
+    }
+    else if (changeInfo.deletedBy(currentSet)) {
+      getParent().removeEditAreaUDBL(this);
+    }
+    changeInfo = changeInfo.untrack(currentSet);
     return changesMade;
   }
 
   @Override
   public int aenderungenVerwerfen() {
-    if (!changeInfo.isChange() || changeInfo.changeSet() != changeset()) return 0;
-    int changesRejected = changeInfo.numChanges();
-    if (changeInfo.isAdded()) getParent().removeEditAreaUDBL(this);
-    else if (changeInfo.isDeleted()) updateChangetypeAndDependentStylingUDBL(ChangeInfo.untracked());
-    changeInfo = ChangeInfo.untracked();
+    ChangeSet currentSet = changeset();
+    int changesRejected = changeInfo.numChangesBy(currentSet);
+    if (changeInfo.addedBy(currentSet)) {
+      getParent().removeEditAreaUDBL(this);
+    }
+    else if (changeInfo.deletedBy(currentSet)) {
+      updateChangetypeAndDependentStylingUDBL(ChangeInfo.untracked());
+    }
+    changeInfo = changeInfo.untrack(currentSet);
     return changesRejected;
   }
 

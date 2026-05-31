@@ -276,7 +276,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     public int aenderungenUebernehmen() {
         WrappedDocument doc = getWrappedDocument();
-        int changesMade = changeInfo.changeSet() == changeset() ? changeInfo.numChanges() : 0;
+        int changesMade = changeInfo.numChangesBy(changeset());
 
         List<GeloeschtMarkierung_V001> loeschungen = new ArrayList<>();
         for (WrappedElement e : doc.getRootElements()) {
@@ -284,9 +284,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         }
         changesMade += removeTextAndUnregisterStepnumberLinks(loeschungen, doc);
 
-        if (changeInfo.changeSet() == changeset()) {
-            changeInfo = ChangeInfo.untracked();
-        }
+        changeInfo = changeInfo.untrack(changeset());
         return changesMade;
     }
 
@@ -322,9 +320,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
             }
             changesRejected += removeTextAndUnregisterStepnumberLinks(loeschungen, doc);
         }
-        if (changeInfo.changedBy(triggerSet)) {
-            changeInfo = ChangeInfo.untracked();
-        }
+        changeInfo = changeInfo.untrack(triggerSet);
         return changesRejected;
     }
 

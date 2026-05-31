@@ -84,17 +84,15 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   }
 
   public int aenderungenUebernehmen() {
-    boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
-    int numChanges = ownChangeMatches ? changeInfo.numChanges() : 0;
-    if (ownChangeMatches && isDeleted()) {
+    ChangeSet currentSet = changeset();
+    int numChanges = changeInfo.numChangesBy(currentSet);
+    if (changeInfo.deletedBy(currentSet)) {
       remove();
     }
     else {
       numChanges += ueberschrift.aenderungenUebernehmen();
     }
-    if (ownChangeMatches) {
-      changeInfo = ChangeInfo.untracked();
-    }
+    changeInfo = changeInfo.untrack(currentSet);
     return numChanges;
   }
 
@@ -104,10 +102,10 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   }
 
   public int aenderungenVerwerfen() {
-    int numChanges = 0;
-    if (changeInfo.isAdded() && changeInfo.changeSet() == changeset()) {
+    ChangeSet currentSet = changeset();
+    int numChanges = changeInfo.numChangesBy(currentSet);
+    if (changeInfo.addedBy(currentSet)) {
       catchSequence.removeUDBL(this);
-      numChanges += changeInfo.numChanges();
       changeInfo = ChangeInfo.untracked();
     }
     return numChanges + ueberschrift.aenderungenVerwerfen();

@@ -491,20 +491,17 @@ public class SchrittSequenzView {
 		if (catchBereich != null) {
 			changesMade += catchBereich.aenderungenUebernehmen();
 		}
-		if (changeInfo.isChange() && changeInfo.changeSet() == changeset()) {
-			changeInfo = ChangeInfo.untracked();
-		}
+		changeInfo = changeInfo.untrack(changeset());
 		return changesMade;
 	}
 
 	public int aenderungenVerwerfen() throws EditException {
-		int changesRejected = changeInfo.isChange() && changeInfo.changeSet() == changeset() ? changeInfo.numChanges() : 0;
+		ChangeSet currentSet = changeset();
+		int changesRejected = changeInfo.numChangesBy(currentSet);
 		for (AbstractSchrittView schritt: schritte) {
 			changesRejected += schritt.aenderungenVerwerfen();
 		}
-		if (changeInfo.isChange() && changeInfo.changeSet() == changeset()) {
-			changeInfo = ChangeInfo.untracked();
-		}
+		changeInfo = changeInfo.untrack(currentSet);
 		if (catchBereich != null) {
 			changesRejected += catchBereich.aenderungenVerwerfen();
 		}

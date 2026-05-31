@@ -441,10 +441,10 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public int aenderungenUebernehmen() throws EditException {
-		boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
+		ChangeSet currentSet = changeset();
 		int changesMade = editAenderungenUebernehmen();
-		if (ownChangeMatches) {
-			changesMade += changeInfo.numChanges();
+		if (changeInfo.changedBy(currentSet)) {
+			changesMade += changeInfo.numChangesBy(currentSet);
 			switch (changeInfo.art()) {
 				case Geloescht:
 				case Quellschritt:
@@ -456,7 +456,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 					break;
 			}
 			aenderungsmarkierungenEntfernen();
-			changeInfo = ChangeInfo.untracked();
+			changeInfo = changeInfo.untrack(currentSet);
 		}
 		return changesMade;
 	}
@@ -466,10 +466,10 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public int aenderungenVerwerfen() throws EditException {
-		boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == changeset();
+		ChangeSet currentSet = changeset();
 		int changesRejected = editAenderungenVerwerfen();
-		if (ownChangeMatches) {
-			changesRejected += changeInfo.numChanges();
+		if (changeInfo.changedBy(currentSet)) {
+			changesRejected += changeInfo.numChangesBy(currentSet);
 			switch (changeInfo.art()) {
 				case Hinzugefuegt:
 					markStepnumberLinksAsDefect();
@@ -485,7 +485,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 					break;
 			}
 			aenderungsmarkierungenEntfernen();
-			changeInfo = ChangeInfo.untracked();
+			changeInfo = changeInfo.untrack(currentSet);
 		}
 		return changesRejected;
 	}
