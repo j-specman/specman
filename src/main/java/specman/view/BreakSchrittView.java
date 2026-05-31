@@ -172,7 +172,7 @@ public class BreakSchrittView extends AbstractSchrittView {
 		editContainer.setEditorContent(content);
 		ChangeSet breakStepChangeSet = changeInfo.changeSet();
 		if (sourceChangeSet != null && breakStepChangeSet != null && sourceChangeSet != breakStepChangeSet) {
-			editContainer.mergeChangeSet(breakStepChangeSet, sourceChangeSet, false);
+			editContainer.mergeChangeSetUDBL(breakStepChangeSet, sourceChangeSet, false);
 		}
 	}
 

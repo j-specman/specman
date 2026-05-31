@@ -7,6 +7,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
+import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
@@ -498,6 +499,12 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 
 	public JPanel getPanelFall1() {
 		return panelFall1;
+	}
+
+	@Override public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+		super.mergeChangeSetUDBL(target, source);
+		sonstSequenz.mergeChangeSetUDBL(target, source);
+		caseSequenzen.forEach(seq -> seq.mergeChangeSetUDBL(target, source));
 	}
 
 	@Override protected int editAenderungenUebernehmen() {

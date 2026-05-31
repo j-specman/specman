@@ -5,6 +5,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import specman.ChangeInfo;
+import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
@@ -211,6 +212,11 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 
 	@Override public AbstractSchrittView findeSchrittZuId(SchrittID id) {
 		return findeSchrittZuIdIncludingSubSequences(id, wiederholSequenz);
+	}
+
+	@Override public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+		super.mergeChangeSetUDBL(target, source);
+		wiederholSequenz.mergeChangeSetUDBL(target, source);
 	}
 
 	@Override public int aenderungenUebernehmen() throws EditException {

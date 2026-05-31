@@ -4,6 +4,7 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.ChangeInfo;
+import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
@@ -287,6 +288,12 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		super.aenderungsmarkierungenEntfernen();
 		elseSequenz.aenderungsmarkierungenEntfernen();
 		ifSequenz.aenderungsmarkierungenEntfernen();
+	}
+
+	@Override public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+		super.mergeChangeSetUDBL(target, source);
+		ifSequenz.mergeChangeSetUDBL(target, source);
+		elseSequenz.mergeChangeSetUDBL(target, source);
 	}
 
 	@Override protected int editAenderungenUebernehmen() {

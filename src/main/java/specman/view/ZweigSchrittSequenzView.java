@@ -1,5 +1,6 @@
 package specman.view;
 
+import specman.ChangeSet;
 import static specman.ChangeSet.changeset;
 import specman.EditException;
 import specman.EditorI;
@@ -95,6 +96,12 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 
 	protected void ueberschriftAlsGeloeschtMarkierenUDBL() {
 		ueberschrift.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet());
+	}
+
+	@Override
+	public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+		super.mergeChangeSetUDBL(target, source);
+		ueberschrift.mergeChangeSetUDBL(target, source, true);
 	}
 
 	@Override
