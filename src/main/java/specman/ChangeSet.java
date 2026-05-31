@@ -24,11 +24,13 @@ public class ChangeSet {
 
   public static final Map<String, ChangeSet> ALL;
 
+  /** The colors in the following palette have been carefully chosen to remain distinguishable
+   *  for users with common forms of color vision deficiency (deuteranopia, protanopia). */
   static {
     ALL = new LinkedHashMap<>();
     register("yellow", Color.yellow);
-    register("green",  new Color(150, 255, 150), new Color(30, 210, 30));
-    register("cyan",   new Color(100, 255, 255));
+    register("lilac",  new Color(200, 170, 240));
+    register("blue",   new Color(130, 210, 255));
     register("orange", new Color(255, 220, 150));
     register("pink",   new Color(255, 170, 170));
     DEFAULT = ALL.get("yellow");
