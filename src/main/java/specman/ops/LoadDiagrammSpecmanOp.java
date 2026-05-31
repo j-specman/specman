@@ -86,7 +86,8 @@ public class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
     String compatibilityVersionPrefix = SpecmanVersion.getCompatibilityVersionPrefix();
     if (!envelope.specmanVersion.startsWith(compatibilityVersionPrefix)) {
       showMessage("Die ausgewählte Datei wurde mit Version " + envelope.specmanVersion + " von Specman erstellt. " +
-        "Die aktuelle Version ist " + SpecmanVersion.getVersion() + ". Die Datei ist nach dem Speichern mit dieser Version u.U. in älteren Versionen nicht mehr lesbar.");
+        "Die aktuelle Version ist " + SpecmanVersion.getVersion() + ". Die Datei sollte nach dem Speichern mit dieser Version " +
+        "nicht mehr mit älteren Versionen weiterbearbeitet werden. Es könnte sonst zum Verlust von Informationen kommen.");
     }
   }
 

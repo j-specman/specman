@@ -273,7 +273,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	@Override
 	public void showMessage(String text) {
-		JOptionPane.showMessageDialog(this, text);
+		SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, text));
 	}
 
   @Override
