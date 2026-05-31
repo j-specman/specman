@@ -1,4 +1,6 @@
-package specman;
+package specman.menubar;
+
+import specman.Specman;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -8,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
+
 import static specman.Specman.editor;
 
 /** This class is responsible for remembering the last 5 diagramm files which have been opened

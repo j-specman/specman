@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
+import specman.menubar.SpecmanMenuBar;
 import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
 import specman.editarea.EditArea;
@@ -53,7 +54,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	int zoomFaktor = 100;
 	File diagrammDatei;
   FocusHistory focusHistory = new FocusHistory();
-  ChangeSet currentChangeSet = ChangeSet.DEFAULT;
+  private ChangeSet currentChangeSet = ChangeSet.DEFAULT;
 
 	private DiagramToolBar diagramToolBar;
 	private StepButtonBar stepButtonBar;
@@ -318,13 +319,16 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		diagramToolBar.updateZoomDisplay(prozent);
 	}
 
-	void diagrammSpeichern(boolean dateiauswahlErzwingen) {
+	@Override
+	public void diagrammSpeichern(boolean dateiauswahlErzwingen) {
 		new SaveDiagrammSpecmanOp(this).speichern(dateiauswahlErzwingen);
 	}
 
-	void diagrammLaden() {
+	@Override
+	public void diagrammLaden() {
 		new LoadDiagrammSpecmanOp(this).laden();
 	}
+
 
 	public void diagrammLaden(File diagramFile) {
 		new LoadDiagrammSpecmanOp(this).laden(diagramFile);
@@ -528,6 +532,12 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		return null;
 	}
 
+	@Override
+	public void exit() {
+		dispatchEvent(new java.awt.event.WindowEvent(this, java.awt.event.WindowEvent.WINDOW_CLOSING));
+	}
+
+	@Override
 	public void exportAsGraphviz() {
 		SchrittSequenzModel_V001 model = hauptSequenz.generiereSchrittSequenzModel(false);
 		try {

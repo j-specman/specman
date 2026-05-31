@@ -1,4 +1,6 @@
-package specman;
+package specman.menubar;
+
+import specman.ChangeSet;
 
 import javax.swing.*;
 import java.awt.*;
