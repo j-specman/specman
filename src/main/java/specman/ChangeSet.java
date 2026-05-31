@@ -25,7 +25,9 @@ public class ChangeSet {
   public static final Map<String, ChangeSet> ALL;
 
   /** The colors in the following palette have been deliberately chosen with color vision
-   *  deficiency (deuteranopia, protanopia) in mind. Please don't change them casually. */
+   *  deficiency in mind. They hold up well for most anomalous trichromacy cases; full
+   *  dichromacy (complete red or green blindness) remains challenging. Please don't change
+   *  them casually. */
   static {
     ALL = new LinkedHashMap<>();
     register("yellow", Color.yellow);
