@@ -10,6 +10,7 @@ import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.editarea.stepnumberlabel.StepnumberLabel.LabelStructure;
 import specman.undo.AbstractUndoableInteraction;
 import specman.view.AbstractSchrittView;
+import specman.view.CatchUeberschrift;
 import specman.view.QuellSchrittView;
 import specman.view.SchrittSequenzView;
 import static specman.Specman.editor;
@@ -84,6 +85,14 @@ public class UDBL {
     if (!Objects.equals(undoChangeInfo, changeInfo)) {
       schrittView.setChangeInfo(changeInfo);
       addEdit(new UndoableSetChangeInfoAbstractSchrittView(schrittView, undoChangeInfo));
+    }
+  }
+
+  public static void setChangeInfo(CatchUeberschrift catchUeberschrift, ChangeInfo changeInfo) {
+    ChangeInfo undoChangeInfo = catchUeberschrift.getChangeInfo();
+    if (!Objects.equals(undoChangeInfo, changeInfo)) {
+      catchUeberschrift.setChangeInfo(changeInfo);
+      addEdit(new UndoableSetChangeInfoCatchUeberschrift(catchUeberschrift, undoChangeInfo));
     }
   }
 

@@ -157,6 +157,11 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		return findeSchrittZuIdIncludingSubSequences(id, subsequenz);
 	}
 
+	@Override public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+		super.mergeChangeSetUDBL(target, source);
+		subsequenz.mergeChangeSetUDBL(target, source);
+	}
+
 	@Override public int aenderungenUebernehmen() throws EditException {
 		int changesMade = super.aenderungenUebernehmen();
 		changesMade += subsequenz.aenderungenUebernehmen();

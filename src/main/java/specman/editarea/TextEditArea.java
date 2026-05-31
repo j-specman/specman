@@ -193,13 +193,32 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     @Override
-    public void mergeChangeSet(ChangeSet target, ChangeSet source, boolean withMarkups) {
-        if (withMarkups) {
-            throw new IllegalArgumentException("withMarkups not yet implemented");
-        }
-        if (changeInfo.isChange() && changeInfo.changeSet() == source) {
-            changeInfo = target != null ? new ChangeInfo(changeInfo.art(), target) : ChangeInfo.untracked();
+    public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source, boolean withMarkups) {
+        if (changeInfo.changedBy(source)) {
+            setChangeInfoUDBL(target != null ? new ChangeInfo(changeInfo.art(), target) : ChangeInfo.untracked());
             setBackgroundUDBL(changeInfo.panelColor());
+        }
+        if (withMarkups) {
+            WrappedDocument doc = getWrappedDocument();
+            for (WrappedElement element : doc.getRootElements()) {
+                mergeChangeSetMarkups(element, target, source, doc);
+            }
+        }
+    }
+
+    private void mergeChangeSetMarkups(WrappedElement element, ChangeSet target, ChangeSet source, WrappedDocument doc) {
+        if (elementHatAenderungshintergrund(element, source)) {
+            AttributeSet attributes = element.getAttributes();
+            MutableAttributeSet recolored = new SimpleAttributeSet();
+            recolored.addAttributes(attributes);
+            Color newBackground = stepnumberLinkChangedStyleSet(element, source)
+                ? target.stepnumberLinkColor()
+                : target.textColor();
+            StyleConstants.setBackground(recolored, newBackground);
+            doc.setCharacterAttributes(element.getStartOffset(), element.getEndOffset().distance(element.getStartOffset()), recolored, true);
+        }
+        for (int i = 0; i < element.getElementCount(); i++) {
+            mergeChangeSetMarkups(element.getElement(i), target, source, doc);
         }
     }
 

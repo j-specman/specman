@@ -483,6 +483,16 @@ public class SchrittSequenzView {
 		return null;
 	}
 
+	public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+		if (changeInfo.changedBy(source)) {
+			UDBL.setChangeInfo(this, new ChangeInfo(changeInfo.art(), target));
+		}
+		schritte.forEach(s -> s.mergeChangeSetUDBL(target, source));
+		if (catchBereich != null) {
+			catchBereich.mergeChangeSetUDBL(target, source);
+		}
+	}
+
 	public int aenderungenUebernehmen() throws EditException {
 		int changesMade = 0;
 		for (AbstractSchrittView schritt: schritte) {

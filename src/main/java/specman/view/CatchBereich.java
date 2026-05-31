@@ -4,6 +4,7 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import specman.ChangeInfo;
+import specman.ChangeSet;
 import specman.ColumnSpecByPercent;
 import specman.EditException;
 import specman.EditorI;
@@ -235,6 +236,10 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
       .filter(Objects::nonNull)
       .findFirst()
       .orElse(null);
+  }
+
+  public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+    catchSequences.forEach(seq -> seq.mergeChangeSetUDBL(target, source));
   }
 
   public int aenderungenUebernehmen() throws EditException {

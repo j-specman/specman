@@ -5,11 +5,11 @@ import specman.ChangeSet;
 import javax.swing.*;
 import java.awt.*;
 
-class ChangeSetDotIcon implements Icon {
+public class ChangeSetDotIcon implements Icon {
   private static final int SIZE = 10;
   private final Color color;
 
-  ChangeSetDotIcon(ChangeSet changeSet) {
+  public ChangeSetDotIcon(ChangeSet changeSet) {
     this.color = changeSet.menuColor();
   }
 

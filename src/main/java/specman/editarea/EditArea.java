@@ -57,7 +57,7 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V001> extends Inte
 
   void aenderungsmarkierungenEntfernen();
 
-  void mergeChangeSet(ChangeSet target, ChangeSet source, boolean withMarkups);
+  void mergeChangeSetUDBL(ChangeSet target, ChangeSet source, boolean withMarkups);
 
   boolean enthaeltAenderungsmarkierungen();
 

@@ -26,6 +26,7 @@ import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import specman.undo.props.UDBL;
 import static specman.ColumnSpecByPercent.copyOf;
 import static specman.util.ObjectUtils.nvl;
 import static specman.view.AbstractSchrittView.*;
@@ -60,7 +61,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   private void initHeadingChangeSet(BreakSchrittView linkedBreakStep) {
     ChangeInfo breakStepChangeInfo = linkedBreakStep.getChangeInfo();
     if (breakStepChangeInfo.isChange() && breakStepChangeInfo.changeSet() != changeset()) {
-      ueberschrift.mergeChangeSet(changeset(), breakStepChangeInfo.changeSet(), false);
+      ueberschrift.mergeChangeSetUDBL(changeset(), breakStepChangeInfo.changeSet(), false);
     }
   }
 
@@ -263,6 +264,18 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
       CatchUeberschrift catchHeading = editArea.containingCatchHeading();
       catchHeading.updateLinkedBreakStepContent();
     }
+  }
+
+  @Override
+  public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+    boolean ownChangeAffected = changeInfo.changedBy(source);
+    super.mergeChangeSetUDBL(target, source);
+    if (ownChangeAffected) {
+      UDBL.setBackgroundUDBL(headingRightBarPanel, changeInfo.panelColor());
+      UDBL.setBackgroundUDBL(headingHeightEaterPanel, changeInfo.panelColor());
+    }
+    primaryCatchHeading.mergeChangeSetUDBL(target, source);
+    coCatchHeadings.forEach(h -> h.mergeChangeSetUDBL(target, source));
   }
 
   @Override

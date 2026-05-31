@@ -5,6 +5,7 @@ import specman.ops.buttons.AcceptChangesADBLOpButton;
 import specman.ops.buttons.BirdsViewSpecmanOpButton;
 import specman.ops.buttons.DeleteStepOpButton;
 import specman.ops.buttons.ExportPDFOpButton;
+import specman.ops.buttons.MergeChangeSetsADBLOpButton;
 import specman.ops.buttons.RejectChangesADBLOpButton;
 import specman.ops.buttons.ReviewOpButton;
 
@@ -19,6 +20,7 @@ public class DiagramToolBar extends JToolBar {
   private final JToggleButton aenderungenVerfolgen;
   private final AcceptChangesADBLOpButton aenderungenUebernehmen;
   private final RejectChangesADBLOpButton aenderungenVerwerfen;
+  private final MergeChangeSetsADBLOpButton mergeChangeSets;
   private final ZoomComboBox zoom;
 
   DiagramToolBar(Specman specman) {
@@ -31,6 +33,7 @@ public class DiagramToolBar extends JToolBar {
     aenderungenVerfolgen = new JToggleButton();
     aenderungenUebernehmen = new AcceptChangesADBLOpButton(specman);
     aenderungenVerwerfen = new RejectChangesADBLOpButton(specman);
+    mergeChangeSets = new MergeChangeSetsADBLOpButton(specman);
     updateChangeSetColor(specman.changeset());
     aenderungenVerfolgen.addChangeListener(e ->
         aenderungenVerfolgen.setBackground(aenderungenVerfolgen.isSelected()
@@ -49,6 +52,7 @@ public class DiagramToolBar extends JToolBar {
     addButton(aenderungenVerfolgen, "aenderungen", "Änderungen verfolgen");
     addButton(aenderungenUebernehmen, "uebernehmen", "Änderungen übernehmen");
     addButton(aenderungenVerwerfen, "verwerfen", "Änderungen verwerfen");
+    addButton(mergeChangeSets, "merge", "Change Sets zusammenführen");
     addButton(review, "review", "Für Review zusammenklappen");
     addSeparator();
     add(zoom);
@@ -81,6 +85,7 @@ public class DiagramToolBar extends JToolBar {
         : changeSet.buttonColor());
     aenderungenUebernehmen.setBackground(changeSet.buttonColor());
     aenderungenVerwerfen.setBackground(changeSet.buttonColor());
+    mergeChangeSets.setBackground(changeSet.buttonColor());
   }
 
   public void updateZoomDisplay(int prozent) {

@@ -315,13 +315,12 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   @Override
-  public void mergeChangeSet(ChangeSet target, ChangeSet source, boolean withMarkups) {
-    if (withMarkups) throw new IllegalArgumentException("withMarkups not yet supported");
-    if (changeInfo.isChange() && changeInfo.changeSet() == source) {
-      changeInfo = target != null ? new ChangeInfo(changeInfo.art(), target) : ChangeInfo.untracked();
+  public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source, boolean withMarkups) {
+    if (changeInfo.changedBy(source)) {
+      setChangeInfoUDBL(target != null ? new ChangeInfo(changeInfo.art(), target) : ChangeInfo.untracked());
       setEditBackgroundUDBL(null);
     }
-    cellstream().forEach(cell -> cell.mergeChangeSet(target, source, withMarkups));
+    cellstream().forEach(cell -> cell.mergeChangeSetUDBL(target, source, withMarkups));
   }
 
   @Override

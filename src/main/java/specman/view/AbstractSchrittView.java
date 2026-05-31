@@ -440,6 +440,14 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return result;
 	}
 
+	public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+		if (changeInfo.changedBy(source)) {
+			UDBL.setChangeInfo(this, new ChangeInfo(changeInfo.art(), target));
+			setBackgroundUDBL(changeInfo.panelColor());
+		}
+		editContainer.mergeChangeSetUDBL(target, source, true);
+	}
+
 	public int aenderungenUebernehmen() throws EditException {
 		ChangeSet currentSet = changeset();
 		int changesMade = editAenderungenUebernehmen();

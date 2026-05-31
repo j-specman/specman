@@ -33,6 +33,9 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   final FormLayout layout;
   ChangeInfo changeInfo;
 
+  public ChangeInfo getChangeInfo() { return changeInfo; }
+  public void setChangeInfo(ChangeInfo changeInfo) { this.changeInfo = changeInfo; }
+
   public CatchUeberschrift(EditContainer ueberschrift, BreakSchrittView linkedBreakStep, CatchSchrittSequenzView catchSequence, ChangeInfo changeInfo) {
     this.ueberschrift = ueberschrift;
     this.linkedBreakStep = linkedBreakStep;
@@ -81,6 +84,15 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   public void skalieren(int prozentNeu, int prozentAktuell) {
     ueberschrift.skalieren(prozentNeu, prozentAktuell);
     layout.setColumnSpec(1, ColumnSpec.decode(umgehungLayout()));
+  }
+
+  public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+    if (changeInfo.changedBy(source)) {
+      UDBL.setChangeInfo(this, new ChangeInfo(changeInfo.art(), target));
+      UDBL.setBackgroundUDBL(this, changeInfo.panelColor());
+      ueberschrift.setBackgroundUDBL(changeInfo.panelColor());
+    }
+    ueberschrift.mergeChangeSetUDBL(target, source, true);
   }
 
   public int aenderungenUebernehmen() {
@@ -146,7 +158,7 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
       ChangeSet breakStepChangeSet = linkedBreakStep.getChangeInfo().changeSet();
       ChangeSet headingChangeSet = changeInfo.changeSet();
       if (breakStepChangeSet != null && breakStepChangeSet != headingChangeSet) {
-        ueberschrift.mergeChangeSet(headingChangeSet, breakStepChangeSet, false);
+        ueberschrift.mergeChangeSetUDBL(headingChangeSet, breakStepChangeSet, false);
       }
     }
   }

@@ -517,8 +517,8 @@ public class EditContainer extends JPanel {
 		initLayoutAndEditAreas(content);
 	}
 
-	public void mergeChangeSet(ChangeSet target, ChangeSet source, boolean withMarkups) {
-		editAreas.forEach(ea -> ea.mergeChangeSet(target, source, withMarkups));
+	public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source, boolean withMarkups) {
+		editAreas.forEach(ea -> ea.mergeChangeSetUDBL(target, source, withMarkups));
 	}
 
 	public void addEditComponentListener(ComponentListener componentListener) {
