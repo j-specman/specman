@@ -5,7 +5,7 @@ import specman.ChangeInfo;
 
 import java.util.List;
 
-public class ListItemEditAreaModel_V001 extends AbstractEditAreaModel_V001 {
+public class ListItemEditAreaModel_V001 extends AbstractEditAreaModel_V001 implements ChangeInfoBackwardsCompatible_V001 {
   public final EditorContentModel_V001 content;
   public final boolean ordered;
   public final Aenderungsart aenderungsart; // kept for backwards compatibility
@@ -18,10 +18,10 @@ public class ListItemEditAreaModel_V001 extends AbstractEditAreaModel_V001 {
     this.changeInfo = null;
   }
 
-  public ListItemEditAreaModel_V001(EditorContentModel_V001 content, boolean ordered, ChangeInfo_V001 changeInfo) {
+  public ListItemEditAreaModel_V001(EditorContentModel_V001 content, boolean ordered, ChangeInfo changeInfo) {
     this.content = content;
     this.ordered = ordered;
-    this.aenderungsart = null;
-    this.changeInfo = changeInfo;
+    this.aenderungsart = asLegacyAenderungsart(changeInfo);
+    this.changeInfo = asChangeInfo(changeInfo);
   }
 }

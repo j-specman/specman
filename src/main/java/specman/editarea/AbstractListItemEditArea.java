@@ -90,7 +90,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   @Override
   public ListItemEditAreaModel_V001 toModel(boolean formatierterText) {
     EditorContentModel_V001 contentModel = content.editorContent2Model(formatierterText);
-    return new ListItemEditAreaModel_V001(contentModel, ordered(), new ChangeInfo_V001(changeInfo));
+    return new ListItemEditAreaModel_V001(contentModel, ordered(), changeInfo);
   }
 
   abstract protected boolean ordered();

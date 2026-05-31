@@ -7,7 +7,7 @@ import specman.ChangeInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TextEditAreaModel_V001 extends AbstractEditAreaModel_V001 {
+public class TextEditAreaModel_V001 extends AbstractEditAreaModel_V001 implements ChangeInfoBackwardsCompatible_V001 {
 	public final String text;
 	public final String plainText;
 	public final List<Markup_V001> markups;
@@ -22,24 +22,16 @@ public class TextEditAreaModel_V001 extends AbstractEditAreaModel_V001 {
 		changeInfo = null;
 	}
 
-	public TextEditAreaModel_V001(String text) { this(text, text, new ArrayList<>(), (ChangeInfo_V001) null); }
+	public TextEditAreaModel_V001(String text) { this(text, text, new ArrayList<>(), (ChangeInfo) null); }
 
 	public TextEditAreaModel_V001(String text, String plainText, List<Markup_V001> markups, ChangeInfo changeInfo) {
 		this.text = text;
 		this.plainText = plainText;
 		this.markups = markups;
-		this.aenderungsart = null;
-		this.changeInfo = new ChangeInfo_V001(changeInfo);
+		this.aenderungsart = asLegacyAenderungsart(changeInfo);
+		this.changeInfo = asChangeInfo(changeInfo);
 	}
 
-	public TextEditAreaModel_V001(String text, String plainText, List<Markup_V001> markups, ChangeInfo_V001 changeInfo) {
-		this.text = text;
-		this.plainText = plainText;
-		this.markups = markups;
-		this.aenderungsart = null;
-		this.changeInfo = changeInfo;
-	}
-
-  @JsonIgnore
+	@JsonIgnore
   public boolean isEmpty() { return text.isEmpty(); }
 }

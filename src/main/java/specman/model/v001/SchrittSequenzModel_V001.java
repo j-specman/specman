@@ -7,7 +7,7 @@ import specman.SchrittID;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SchrittSequenzModel_V001 {
+public class SchrittSequenzModel_V001 implements ChangeInfoBackwardsCompatible_V001 {
 	public final SchrittID id;
 	public final Aenderungsart aenderungsart; // kept for backwards compatibility
 	public final ChangeInfo_V001 changeInfo;
@@ -27,8 +27,8 @@ public class SchrittSequenzModel_V001 {
 		ChangeInfo changeInfo,
 		CatchBereichModel_V001 catchBereich) {
 		this.id = id;
-		this.aenderungsart = null;
-		this.changeInfo = changeInfo != null ? new ChangeInfo_V001(changeInfo) : null;
+		this.aenderungsart = asLegacyAenderungsart(changeInfo);
+		this.changeInfo = asChangeInfo(changeInfo);
 		this.schritte = new ArrayList<>();
 		this.catchBereich = catchBereich;
 	}

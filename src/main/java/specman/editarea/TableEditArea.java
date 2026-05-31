@@ -216,7 +216,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
         .collect(Collectors.toList());
       cellsModel.add(rowModel);
     }
-    return new TableEditAreaModel_V001(cellsModel, tableWidthPercent, columnsWidthPercent, new ChangeInfo_V001(changeInfo));
+    return new TableEditAreaModel_V001(cellsModel, tableWidthPercent, columnsWidthPercent, changeInfo);
   }
 
   @Override

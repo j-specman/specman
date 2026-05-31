@@ -320,7 +320,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     try {
       ByteArrayOutputStream bytes = new ByteArrayOutputStream();
       ImageIO.write(fullSizeImage, PERSISTED_IMAGETYPE, bytes);
-      return new ImageEditAreaModel_V001(bytes.toByteArray(), PERSISTED_IMAGETYPE, new ChangeInfo_V001(changeInfo), individualScalePercent);
+      return new ImageEditAreaModel_V001(bytes.toByteArray(), PERSISTED_IMAGETYPE, changeInfo, individualScalePercent);
     }
     catch (IOException iox) {
       throw new RuntimeException(iox);
