@@ -108,11 +108,11 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 
 	@Override
 	public int aenderungenUebernehmen() throws EditException {
-		int changesCommitted = super.aenderungenUebernehmen();
+		int changesAccepted = super.aenderungenUebernehmen();
 		if (changeInfo.isUntracked()) {
 			aenderungsmarkierungenEntfernen();
 		}
-		return changesCommitted;
+		return changesAccepted;
 	}
 
 	public void aenderungsmarkierungenEntfernen() {
