@@ -1,6 +1,7 @@
 Multiple Changesets - Wichtig für nächste CR-Phase bei der ERSTEn
-- Aufräumen der Codeänderungen
 - Merge von Changesets
+x Aufräumen der Codeänderungen
+x Aufräumen der Farben für Changesets in Hinblick auf Farbsehschwächen
 x Markups auf Datei beschränken sich immer auf ein einzelnes Zeichen
 x Geerbter Fehler: Änderungen zurücknehmen auf einem neu angelegten Schleifenschritt führt zu Fehlermeldung beim Versuch, den letzten Schritt
    zu löschen, der ebenfalls as neu angelegt gekennzeichnet ist.
