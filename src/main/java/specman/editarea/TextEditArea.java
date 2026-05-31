@@ -274,7 +274,6 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         }
     }
 
-    // TODO JL: Muss mit aenderungsmarkierungenVerwerfen zusammengelegt werden
     public int aenderungenUebernehmen() {
         WrappedDocument doc = getWrappedDocument();
         int changesMade = changeInfo.changeSet() == changeset() ? changeInfo.numChanges() : 0;
@@ -283,17 +282,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         for (WrappedElement e : doc.getRootElements()) {
             changesMade += aenderungsmarkierungenUebernehmen(e, loeschungen);
         }
-        for (int i = 0; i < loeschungen.size(); i++) {
-            GeloeschtMarkierung_V001 loeschung = loeschungen.get((loeschungen.size()) - 1 - i);
-            try {
-                WrappedPosition loeschungVon = doc.fromModel(loeschung.getVon());
-                WrappedPosition loeschungBis = doc.fromModel(loeschung.getBis());
-                removeTextAndUnregisterStepnumberLinks(loeschungVon, loeschungBis);
-                changesMade++;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        changesMade += removeTextAndUnregisterStepnumberLinks(loeschungen, doc);
 
         if (changeInfo.changeSet() == changeset()) {
             changeInfo = ChangeInfo.untracked();
@@ -312,42 +301,28 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
      * content. The <i>current</i> content with all potential changes is kept as a backup being persisted
      * on file save. */
     public int aenderungenVerwerfen(ChangeSet triggerSet) {
-        boolean ownChangeMatches = changeInfo.isChange() && changeInfo.changeSet() == triggerSet;
-        int changesRejected = 0;
-        if (ownChangeMatches) {
-            changesRejected += changeInfo.numChanges();
-            if (changeInfo.isAdded()) {
-                if (!areaDetachedByMerge()) {
-                    getParent().removeEditAreaUDBL(this);
-                }
-            }
-            else if (changeInfo.isDeleted()) {
-                if (deletionBackup != null) {
-                    setText(deletionBackup.text);
-                    setEditable(true);
-                }
-                deletionBackup = null;
+        int changesRejected = changeInfo.numChangesBy(triggerSet);
+        if (changeInfo.addedBy(triggerSet)) {
+            if (!areaDetachedByMerge()) {
+                getParent().removeEditAreaUDBL(this);
             }
         }
-        if (!(ownChangeMatches && changeInfo.isAdded())) {
+        else if (changeInfo.deletedBy(triggerSet)) {
+            if (deletionBackup != null) {
+                setText(deletionBackup.text);
+                setEditable(true);
+            }
+            deletionBackup = null;
+        }
+        else {
             WrappedDocument doc = getWrappedDocument();
             List<GeloeschtMarkierung_V001> loeschungen = new ArrayList<>();
             for (WrappedElement e : doc.getRootElements()) {
-                changesRejected += aenderungsmarkierungenVerwerfen(e, loeschungen);
+                changesRejected += aenderungsmarkierungenVerwerfen(e, loeschungen, triggerSet);
             }
-            for (int i = 0; i < loeschungen.size(); i++) {
-                GeloeschtMarkierung_V001 loeschung = loeschungen.get((loeschungen.size()) - 1 - i);
-                try {
-                    WrappedPosition loeschungVon = doc.fromModel(loeschung.getVon());
-                    WrappedPosition loeschungBis = doc.fromModel(loeschung.getBis());
-                    removeTextAndUnregisterStepnumberLinks(loeschungVon, loeschungBis);
-                    changesRejected++;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            changesRejected += removeTextAndUnregisterStepnumberLinks(loeschungen, doc);
         }
-        if (ownChangeMatches) {
+        if (changeInfo.changedBy(triggerSet)) {
             changeInfo = ChangeInfo.untracked();
         }
         return changesRejected;
@@ -385,25 +360,25 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     // TODO JL: Muss mit aenderungsmarkierungenUebernehmen zusammengelegt werden
-    private int aenderungsmarkierungenVerwerfen(WrappedElement e, List<GeloeschtMarkierung_V001> loeschungen) {
+    private int aenderungsmarkierungenVerwerfen(WrappedElement e, List<GeloeschtMarkierung_V001> loeschungen, ChangeSet triggerSet) {
         int changesRejected = 0;
 
         WrappedDocument doc = getWrappedDocument();
-        if (elementHatAenderungshintergrund(e, changeset())) {
+        if (elementHatAenderungshintergrund(e, triggerSet)) {
             if (!elementHatDurchgestrichenenText(e)) {
                 loeschungen.add(new GeloeschtMarkierung_V001(e.getStartOffset().toModel(), e.getEndOffset().toModel()));
             } else {
                 AttributeSet attribute = e.getAttributes();
                 MutableAttributeSet entfaerbt = new SimpleAttributeSet();
                 entfaerbt.addAttributes(attribute);
-                StyleConstants.setBackground(entfaerbt, stepnumberLinkChangedStyleSet(e, changeset()) ? STEPNUMBER_LINK_COLOR.color : TEXT_BACKGROUND_COLOR_STANDARD);
+                StyleConstants.setBackground(entfaerbt, stepnumberLinkChangedStyleSet(e, triggerSet) ? STEPNUMBER_LINK_COLOR.color : TEXT_BACKGROUND_COLOR_STANDARD);
                 StyleConstants.setStrikeThrough(entfaerbt, false);
                 doc.setCharacterAttributes(e.getStartOffset(), e.getEndOffset().distance(e.getStartOffset()), entfaerbt, true);
                 changesRejected++;
             }
         }
         for (int i = 0; i < e.getElementCount(); i++) {
-            changesRejected += aenderungsmarkierungenVerwerfen(e.getElement(i), loeschungen);
+            changesRejected += aenderungsmarkierungenVerwerfen(e.getElement(i), loeschungen, triggerSet);
         }
 
         return changesRejected;
@@ -465,6 +440,22 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
      * areas didn't change. */
     public EditArea dissolveEditArea() {
         return getParent().tryDissolveEditAreaUDBL(this);
+    }
+
+    private int removeTextAndUnregisterStepnumberLinks(List<GeloeschtMarkierung_V001> loeschungen, WrappedDocument doc) {
+        int numRemovals = 0;
+        for (int i = 0; i < loeschungen.size(); i++) {
+            GeloeschtMarkierung_V001 loeschung = loeschungen.get((loeschungen.size()) - 1 - i);
+            try {
+                WrappedPosition loeschungVon = doc.fromModel(loeschung.getVon());
+                WrappedPosition loeschungBis = doc.fromModel(loeschung.getBis());
+                removeTextAndUnregisterStepnumberLinks(loeschungVon, loeschungBis);
+                numRemovals++;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return numRemovals;
     }
 
     private void removeTextAndUnregisterStepnumberLinks(WrappedPosition startOffset, WrappedPosition endOffset) {

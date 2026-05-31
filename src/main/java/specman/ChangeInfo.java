@@ -89,4 +89,19 @@ public class ChangeInfo {
     return Objects.hash(art, changeSet);
   }
 
+  public int numChangesBy(ChangeSet by) {
+    return changedBy(by) ? art.asNumChanges() : 0;
+  }
+
+  public boolean addedBy(ChangeSet by) {
+    return changedBy(by) ? art == Hinzugefuegt : false;
+  }
+
+  public boolean deletedBy(ChangeSet by) {
+    return changedBy(by) ? art == Geloescht : false;
+  }
+
+  public boolean changedBy(ChangeSet by) {
+    return changeSet == by;
+  }
 }
