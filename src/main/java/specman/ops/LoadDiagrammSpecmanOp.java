@@ -1,5 +1,6 @@
 package specman.ops;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import specman.ChangeSet;
 import specman.EditException;
@@ -42,6 +43,7 @@ public class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
       setDiagrammDatei(diagramFile);
 
       ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
       objectMapper.enableDefaultTyping();
       ModelEnvelope envelope = objectMapper.readValue(getDiagrammDatei(), ModelEnvelope.class);
       verifyModelTypeAndSpecmanVersion(envelope);
