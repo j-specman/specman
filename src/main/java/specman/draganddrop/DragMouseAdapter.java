@@ -109,7 +109,7 @@ public class DragMouseAdapter extends MouseAdapter {
     private DragSource toDragSource(MouseEvent e) {
         if (e.getSource() instanceof StepnumberLabel label) {
             AbstractSchrittView step = specman.findStep(label);
-            return new DragSource.ExistingStep(label, step);
+            return new DragSource.StepMove(label, step);
         }
         return stepButtonBar.dragSourceFor((JButton) e.getSource());
     }

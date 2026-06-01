@@ -23,6 +23,6 @@ public class CreateBreakStepOpButton extends AbstractCreateStepOpButton {
   }
 
 
-  @Override public DragSource dragSource() { return new DragSource.NewStep(BreakSchrittView.class); }
+  @Override public DragSource dragSource() { return new DragSource.StepCreation(BreakSchrittView.class); }
 
 }

@@ -10,7 +10,6 @@ import java.util.List;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 import static specman.view.RelativeStepPosition.After;
 import static specman.view.RelativeStepPosition.Before;
@@ -43,10 +42,10 @@ public class DropTargetFinder {
     }
 
     private boolean isBlockedBySelf(Point cursor, DragSource dragSource) {
-        if (!(dragSource instanceof DragSource.ExistingStep existingStep)) {
+        if (!dragSource.isMove()) {
             return false;
         }
-        AbstractSchrittView step = existingStep.step();
+        AbstractSchrittView step = ((DragSource.StepMove) dragSource).step();
         if (step.getParent().schritte.size() <= 1) {
             return true;
         }
@@ -65,7 +64,7 @@ public class DropTargetFinder {
     }
 
     private DropTarget findInStep(Point cursor, AbstractSchrittView step, List<AbstractSchrittView> siblings, DragSource dragSource) {
-        if (!(dragSource instanceof DragSource.NewCaseBranch) && step == firstVisibleStep(siblings)) {
+        if (!(dragSource instanceof DragSource.CaseBranchCreation) && step == firstVisibleStep(siblings)) {
             DropTarget t = checkInsertBefore(cursor, step);
             if (t != null) {
                 return t;
@@ -73,7 +72,7 @@ public class DropTargetFinder {
         }
 
         Point localCursor = SwingUtilities.convertPoint(specman, cursor, step.getPanel());
-        DropTarget t = !(dragSource instanceof DragSource.NewCaseBranch)
+        DropTarget t = !(dragSource instanceof DragSource.CaseBranchCreation)
             ? step.findDropTarget(localCursor, dragSource)
             : null;
         if (t != null) {
@@ -82,15 +81,15 @@ public class DropTargetFinder {
 
         List<BranchHeadingZone> zones = step.getBranchHeadingZones(dragSource);
         for (BranchHeadingZone zone : zones) {
-            t = (dragSource instanceof DragSource.NewCaseBranch)
-                ? checkBranchHeadingForNewCaseBranch(cursor, zone.branch, zone.xOffset, step)
+            t = (dragSource instanceof DragSource.CaseBranchCreation)
+                ? checkBranchHeadingForCaseBranchCreation(cursor, zone.branch, zone.xOffset, step)
                 : checkBranchHeading(cursor, zone.branch, zone.xOffset);
             if (t != null) {
                 return t;
             }
         }
 
-        if (dragSource instanceof DragSource.NewCaseBranch) {
+        if (dragSource instanceof DragSource.CaseBranchCreation) {
             return null;
         }
 
@@ -137,7 +136,7 @@ public class DropTargetFinder {
         return null;
     }
 
-    private DropTarget checkBranchHeadingForNewCaseBranch(Point cursor, ZweigSchrittSequenzView branch, int xOffset, AbstractSchrittView parentStep) {
+    private DropTarget checkBranchHeadingForCaseBranchCreation(Point cursor, ZweigSchrittSequenzView branch, int xOffset, AbstractSchrittView parentStep) {
         Rectangle bounds = headingBoundsWithOffset(branch, xOffset);
         if (!bounds.contains(cursor)) {
             return null;

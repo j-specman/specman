@@ -40,24 +40,24 @@ public class DraggingLogic {
                 operation.execute(target, specman);
             }
         }
-        else if (dragSource instanceof DragSource.NewStep newStep) {
-            handleEmptySequenceDrop(newStep);
+        else if (dragSource instanceof DragSource.StepCreation stepCreation) {
+            handleEmptySequenceDrop(stepCreation);
         }
     }
 
     private DragOperation operationFor(DragSource dragSource) {
         return switch (dragSource) {
-            case DragSource.ExistingStep e -> new MoveStepOperation(e.label(), e.step(), specman);
-            case DragSource.NewCaseBranch ignored -> new InsertCaseBranchOperation(specman);
-            case DragSource.NewStep n -> new InsertStepOperation(n.stepClass(), specman);
+            case DragSource.StepMove e -> new MoveStepOperation(e.label(), e.step(), specman);
+            case DragSource.CaseBranchCreation ignored -> new InsertCaseBranchOperation(specman);
+            case DragSource.StepCreation n -> new InsertStepOperation(n.stepClass(), specman);
         };
     }
 
-    private void handleEmptySequenceDrop(DragSource.NewStep newStep) {
+    private void handleEmptySequenceDrop(DragSource.StepCreation stepCreation) {
         SchrittSequenzView root = specman.getHauptSequenz();
-        if (root.schritte.isEmpty() && newStep.stepClass() != CatchBereich.class) {
+        if (root.schritte.isEmpty() && stepCreation.stepClass() != CatchBereich.class) {
             specman.dropWelcomeMessage();
-            new InsertStepOperation(newStep.stepClass(), specman).executeAppend(root);
+            new InsertStepOperation(stepCreation.stepClass(), specman).executeAppend(root);
         }
     }
 

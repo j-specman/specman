@@ -23,6 +23,6 @@ public class CreateSubsequenceStepOpButton extends AbstractCreateStepOpButton {
   }
 
 
-  @Override public DragSource dragSource() { return new DragSource.NewStep(SubsequenzSchrittView.class); }
+  @Override public DragSource dragSource() { return new DragSource.StepCreation(SubsequenzSchrittView.class); }
 
 }

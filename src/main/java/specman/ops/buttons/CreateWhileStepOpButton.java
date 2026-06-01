@@ -23,6 +23,6 @@ public class CreateWhileStepOpButton extends AbstractCreateStepOpButton {
   }
 
 
-  @Override public DragSource dragSource() { return new DragSource.NewStep(WhileSchrittView.class); }
+  @Override public DragSource dragSource() { return new DragSource.StepCreation(WhileSchrittView.class); }
 
 }

@@ -7,8 +7,6 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 
 import specman.*;
-import specman.draganddrop.DragSource;
-import specman.draganddrop.DropTarget;
 import specman.model.v001.BreakSchrittModel_V001;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
@@ -20,9 +18,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
-import java.util.List;
-
-import static specman.view.RelativeStepPosition.After;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -157,14 +152,6 @@ public class BreakSchrittView extends AbstractSchrittView {
 	public void skalieren(int prozentNeu, int prozentAktuell) {
 		super.skalieren(prozentNeu, prozentAktuell);
 		layout.setColumnSpec(1, ColumnSpec.decode(umgehungLayout()));
-	}
-
-	@Override
-	public DropTarget findDropTarget(Point localCursor, DragSource dragSource) {
-		if (panel != null && panel.getVisibleRect().contains(localCursor)) {
-			return new DropTarget(getParent(), this, After);
-		}
-		return null;
 	}
 
 	@Override

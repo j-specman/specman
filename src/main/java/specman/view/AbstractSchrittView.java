@@ -570,7 +570,12 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
   public int dragIndicatorTopOffset(ZweigSchrittSequenzView branch) { return 0; }
 
-  public DropTarget findDropTarget(Point localCursor, DragSource dragSource) { return null; }
+  public DropTarget findDropTarget(Point localCursor, DragSource dragSource) {
+    if (getPanel().getVisibleRect().contains(localCursor)) {
+      return new DropTarget(getParent(), this, After);
+    }
+    return null;
+  }
 
   public List<BranchHeadingZone> getBranchHeadingZones(DragSource dragSource) { return List.of(); }
 

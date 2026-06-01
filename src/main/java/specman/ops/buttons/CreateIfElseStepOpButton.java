@@ -23,6 +23,6 @@ public class CreateIfElseStepOpButton extends AbstractCreateStepOpButton {
   }
 
 
-  @Override public DragSource dragSource() { return new DragSource.NewStep(IfElseSchrittView.class); }
+  @Override public DragSource dragSource() { return new DragSource.StepCreation(IfElseSchrittView.class); }
 
 }

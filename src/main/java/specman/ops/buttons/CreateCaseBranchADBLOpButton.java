@@ -12,7 +12,7 @@ public class CreateCaseBranchADBLOpButton extends AbstractADBLSpecmanOpButton im
 
   public CreateCaseBranchADBLOpButton(Specman specman) { super(specman); }
 
-  public DragSource dragSource() { return new DragSource.NewCaseBranch(); }
+  public DragSource dragSource() { return new DragSource.CaseBranchCreation(); }
 
   @Override
   void execute() throws EditException {

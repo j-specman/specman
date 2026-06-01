@@ -12,7 +12,7 @@ public class CreateCatchStepADBLOpButton extends AbstractADBLSpecmanOpButton imp
 
   public CreateCatchStepADBLOpButton(Specman specman) { super(specman); }
 
-  public DragSource dragSource() { return new DragSource.NewStep(CatchBereich.class); }
+  public DragSource dragSource() { return new DragSource.StepCreation(CatchBereich.class); }
 
   @Override
   void execute() throws EditException {

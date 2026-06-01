@@ -23,6 +23,6 @@ public class CreateCaseStepOpButton extends AbstractCreateStepOpButton {
   }
 
 
-  @Override public DragSource dragSource() { return new DragSource.NewStep(CaseSchrittView.class); }
+  @Override public DragSource dragSource() { return new DragSource.StepCreation(CaseSchrittView.class); }
 
 }

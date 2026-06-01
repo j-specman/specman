@@ -22,6 +22,6 @@ public class CreateSimpleStepOpButton extends AbstractCreateStepOpButton {
     return seq.einfachenSchrittAnhaengen();
   }
 
-  @Override public DragSource dragSource() { return new DragSource.NewStep(EinfacherSchrittView.class); }
+  @Override public DragSource dragSource() { return new DragSource.StepCreation(EinfacherSchrittView.class); }
 
 }
