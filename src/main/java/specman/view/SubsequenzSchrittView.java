@@ -2,6 +2,7 @@ package specman.view;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
+import org.jetbrains.annotations.NotNull;
 import specman.*;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
@@ -157,7 +158,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		return findeSchrittZuIdIncludingSubSequences(id, subsequenz);
 	}
 
-	@Override public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+	@Override public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
 		super.mergeChangeSetUDBL(target, source);
 		subsequenz.mergeChangeSetUDBL(target, source);
 	}

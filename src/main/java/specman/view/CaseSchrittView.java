@@ -5,6 +5,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.ChangeSet;
@@ -501,7 +502,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		return panelFall1;
 	}
 
-	@Override public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+	@Override public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
 		super.mergeChangeSetUDBL(target, source);
 		sonstSequenz.mergeChangeSetUDBL(target, source);
 		caseSequenzen.forEach(seq -> seq.mergeChangeSetUDBL(target, source));

@@ -3,6 +3,7 @@ package specman.view;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
+import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.EditException;
@@ -290,7 +291,7 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		ifSequenz.aenderungsmarkierungenEntfernen();
 	}
 
-	@Override public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+	@Override public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
 		super.mergeChangeSetUDBL(target, source);
 		ifSequenz.mergeChangeSetUDBL(target, source);
 		elseSequenz.mergeChangeSetUDBL(target, source);

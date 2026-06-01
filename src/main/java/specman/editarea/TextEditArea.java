@@ -2,6 +2,7 @@ package specman.editarea;
 
 import net.atlanticbb.tantlinger.ui.text.CompoundUndoManager;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 
 import static specman.ChangeInfo.fromModel;
@@ -193,9 +194,9 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     @Override
-    public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source, boolean withMarkups) {
+    public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
         if (changeInfo.changedBy(source)) {
-            setChangeInfoUDBL(target != null ? new ChangeInfo(changeInfo.art(), target) : ChangeInfo.untracked());
+            setChangeInfoUDBL(changeInfo.reassign(target));
             setBackgroundUDBL(changeInfo.panelColor());
         }
         if (withMarkups) {

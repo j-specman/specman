@@ -1,5 +1,6 @@
 package specman.editarea;
 
+import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
@@ -57,7 +58,7 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V001> extends Inte
 
   void aenderungsmarkierungenEntfernen();
 
-  void mergeChangeSetUDBL(ChangeSet target, ChangeSet source, boolean withMarkups);
+  void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups);
 
   boolean enthaeltAenderungsmarkierungen();
 

@@ -3,6 +3,7 @@ package specman.editarea;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
+import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.EditorI;
@@ -218,16 +219,17 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   @Override public synchronized void addComponentListener(ComponentListener l) { content.addEditComponentListener(l); }
   @Override public void requestFocus() { content.requestFocus(); }
 
-  //**************** canonical EditArea method implementations ************************
-  @Override public boolean enthaeltAenderungsmarkierungen() { return changeInfo.isChange() || content.enthaeltAenderungsmarkierungen(); }
-  @Override public void aenderungsmarkierungenEntfernen() { content.aenderungsmarkierungenEntfernen(null); }
-  @Override public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source, boolean withMarkups) {
+  @Override public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
     if (changeInfo.changedBy(source)) {
-      UDBL.setChangeInfo(this, target != null ? new ChangeInfo(changeInfo.art(), target) : ChangeInfo.untracked());
+      UDBL.setChangeInfo(this, changeInfo.reassign(target));
       setEditBackgroundUDBL(null);
     }
     content.mergeChangeSetUDBL(target, source, withMarkups);
   }
+
+  //**************** canonical EditArea method implementations ************************
+  @Override public boolean enthaeltAenderungsmarkierungen() { return changeInfo.isChange() || content.enthaeltAenderungsmarkierungen(); }
+  @Override public void aenderungsmarkierungenEntfernen() { content.aenderungsmarkierungenEntfernen(null); }
   @Override public void findStepnumberLinkIDs(HashMap<TextEditArea, List<String>> stepnumberLinkMap) { content.findStepnumberLinkIDs(stepnumberLinkMap); }
   @Override public boolean enthaelt(InteractiveStepFragment fragment) { return content.enthaelt(fragment); }
   @Override public ChangeInfo getChangeInfo() { return changeInfo; }

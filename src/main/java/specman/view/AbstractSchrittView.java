@@ -1,5 +1,6 @@
 package specman.view;
 
+import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.ChangeSet;
@@ -440,9 +441,9 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return result;
 	}
 
-	public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+	public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
 		if (changeInfo.changedBy(source)) {
-			UDBL.setChangeInfo(this, new ChangeInfo(changeInfo.art(), target));
+			UDBL.setChangeInfo(this, changeInfo.reassign(target));
 			setBackgroundUDBL(changeInfo.panelColor());
 		}
 		editContainer.mergeChangeSetUDBL(target, source, true);

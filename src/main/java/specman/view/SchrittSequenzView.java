@@ -4,6 +4,7 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.ChangeSet;
@@ -483,9 +484,9 @@ public class SchrittSequenzView {
 		return null;
 	}
 
-	public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+	public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
 		if (changeInfo.changedBy(source)) {
-			UDBL.setChangeInfo(this, new ChangeInfo(changeInfo.art(), target));
+			UDBL.setChangeInfo(this, changeInfo.reassign(target));
 		}
 		schritte.forEach(s -> s.mergeChangeSetUDBL(target, source));
 		if (catchBereich != null) {

@@ -1,5 +1,6 @@
 package specman.view;
 
+import org.jetbrains.annotations.NotNull;
 import specman.TextInit;
 
 import com.jgoodies.forms.factories.CC;
@@ -267,7 +268,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   }
 
   @Override
-  public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+  public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
     boolean ownChangeAffected = changeInfo.changedBy(source);
     super.mergeChangeSetUDBL(target, source);
     if (ownChangeAffected) {

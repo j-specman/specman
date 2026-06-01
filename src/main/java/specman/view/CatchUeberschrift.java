@@ -3,6 +3,7 @@ package specman.view;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
+import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.SchrittID;
@@ -86,9 +87,9 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
     layout.setColumnSpec(1, ColumnSpec.decode(umgehungLayout()));
   }
 
-  public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+  public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
     if (changeInfo.changedBy(source)) {
-      UDBL.setChangeInfo(this, new ChangeInfo(changeInfo.art(), target));
+      UDBL.setChangeInfo(this, changeInfo.reassign(target));
       UDBL.setBackgroundUDBL(this, changeInfo.panelColor());
       ueberschrift.setBackgroundUDBL(changeInfo.panelColor());
     }
