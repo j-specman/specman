@@ -564,6 +564,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
   public Boolean getFlatNumbering() { return null; }
 
+  public int dragIndicatorTopOffset(ZweigSchrittSequenzView branch) { return 0; }
+
   public void toggleFlatNumbering(boolean flatNumbering) {}
 
   /** Method being called by a step's sub-sequence when either a step has been added to or removed

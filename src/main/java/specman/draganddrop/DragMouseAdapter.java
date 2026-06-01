@@ -1,182 +1,159 @@
 package specman.draganddrop;
 
-import specman.Aenderungsart;
-import specman.SchrittID;
-import specman.editarea.stepnumberlabel.BreakCatchScrollMouseAdapter;
 import specman.EditException;
 import specman.Specman;
 import specman.StepButtonBar;
 import specman.editarea.InteractiveStepFragment;
+import specman.editarea.stepnumberlabel.BreakCatchScrollMouseAdapter;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.view.AbstractSchrittView;
 
-import javax.swing.JComponent;
-import javax.swing.JTextField;
-import javax.swing.JWindow;
-import javax.swing.SwingUtilities;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.Rectangle;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
-import static specman.draganddrop.InsertDecision.Insert;
-import static specman.draganddrop.InsertDecision.NoInsert;
-
-
 public class DragMouseAdapter extends MouseAdapter {
-	private final Specman specman;
-	private	JTextField dummy;
-	private final DraggingLogic draggingLogic;
-	private final JWindow window = new JWindow();
 
-	public DragMouseAdapter(Specman specman, StepButtonBar stepButtonBar) {
-		this.specman = specman;
-		this.draggingLogic = new DraggingLogic(specman, stepButtonBar);
-	}
+    private final Specman specman;
+    private final StepButtonBar stepButtonBar;
+    private final DraggingLogic draggingLogic;
+    private final JWindow floatingStepWindow = new JWindow();
+    private JTextField floatingLabel;
 
-  @Override
-	public void mousePressed(MouseEvent e) {
-    if (BreakCatchScrollMouseAdapter.userWantsToScroll(e)) { return; }
-		setDummy(e);
-		dummy.setBounds(new Rectangle(150, 15));
-	}
+    public DragMouseAdapter(Specman specman, StepButtonBar stepButtonBar) {
+        this.specman = specman;
+        this.stepButtonBar = stepButtonBar;
+        this.draggingLogic = new DraggingLogic(specman);
+    }
 
-  @Override
-	public void mouseDragged(MouseEvent e) {
-    if (BreakCatchScrollMouseAdapter.userWantsToScroll(e)) { return; }
-		try {
-			if(checkEinzigerSchritt(e)){
-				draggingLogic.showInvalidCursor();
-				return;
-			}
-			if(checkGeloeschterSchritt(e) || checkQuellSchritt(e)){
-				draggingLogic.showInvalidCursor();
-				return;
-			}
-			Point pt = e.getPoint();
-			JComponent parent = (JComponent) e.getComponent();
-			Point ptCon = SwingUtilities.convertPoint((Component)e.getSource(),(int) e.getPoint().getX(),(int)e.getPoint().getY(), specman);
-			if(!specman.getGlassPane().isVisible() ) {
-				specman.setCursor(Cursor.getDefaultCursor());
-			}
-			specman.getGlassPane().setVisible(false);
-			window.add(dummy);
-			window.pack();
-			updateWindowLocation(pt, parent);
-			window.setVisible(true);
-			draggingLogic.dragGlassPanePos(ptCon, specman.getHauptSequenz().schritte, NoInsert, e);
-		}
-		catch(EditException ex) {
-			specman.showError(ex);
-		}
-	}
+    @Override
+    public void mousePressed(MouseEvent e) {
+        if (BreakCatchScrollMouseAdapter.userWantsToScroll(e)) {
+            return;
+        }
+        floatingLabel = new JTextField(floatingLabelText(e));
+        floatingLabel.setBounds(new Rectangle(150, 15));
+    }
 
-	//Updates the Window Location
-	private void updateWindowLocation(Point pt, JComponent parent){
-		Point p = new Point(pt.x  +3, pt.y +3);
-		SwingUtilities.convertPointToScreen(p,parent);
-		window.setLocation(p);
-	}
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        if (BreakCatchScrollMouseAdapter.userWantsToScroll(e)) {
+            return;
+        }
+        if (isDragGuarded(e)) {
+            specman.setCursor(Cursor.getDefaultCursor());
+            return;
+        }
+        try {
+            Point cursor = toCursorInSpecman(e);
+            floatingStepWindow.add(floatingLabel);
+            floatingStepWindow.pack();
+            floatingStepWindow.setLocation(toScreenPoint(e));
+            floatingStepWindow.setVisible(true);
+            draggingLogic.onDrag(cursor, toDragSource(e));
+        }
+        catch (EditException ex) {
+            specman.showError(ex);
+        }
+    }
 
-  @Override
-	public void mouseReleased(MouseEvent e) {
-    if (BreakCatchScrollMouseAdapter.userWantsToScroll(e)) { return; }
-		try {
-			if(checkEinzigerSchritt(e)){
-				specman.setCursor(Cursor.getDefaultCursor());
-				return;
-			}
-			if(checkGeloeschterSchritt(e) || checkQuellSchritt(e)){
-				specman.setCursor(Cursor.getDefaultCursor());
-				return;
-			}
-			window.setVisible(false);
-			Point ptCon = SwingUtilities.convertPoint((Component)e.getSource(),(int) e.getPoint().getX(),(int)e.getPoint().getY()-2, specman);
-			draggingLogic.dragGlassPanePos(ptCon, specman.getHauptSequenz().schritte, Insert, e);
-			specman.getGlassPane().setVisible(false);
-			specman.setCursor(Cursor.getDefaultCursor());
-			window.remove(dummy);
-		}
-		catch(EditException ex) {
-			specman.showError(ex);
-		}
-	}
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if (BreakCatchScrollMouseAdapter.userWantsToScroll(e)) {
+            return;
+        }
+        if (isDragGuarded(e)) {
+            specman.setCursor(Cursor.getDefaultCursor());
+            return;
+        }
+        try {
+            floatingStepWindow.setVisible(false);
+            floatingStepWindow.remove(floatingLabel);
+            Point cursor = toCursorInSpecman(e, -2);
+            draggingLogic.onDrop(cursor, toDragSource(e));
+        }
+        catch (EditException ex) {
+            specman.showError(ex);
+        }
+        finally {
+            specman.getGlassPane().setVisible(false);
+            specman.setCursor(Cursor.getDefaultCursor());
+        }
+    }
 
-  @Override
-	public void mouseEntered(MouseEvent e) {
-    if (BreakCatchScrollMouseAdapter.userWantsToScroll(e)) { return; }
-		if(e.getSource() instanceof StepnumberLabel) {
-			if(checkEinzigerSchritt(e)) {
-				draggingLogic.showInvalidCursor();
-			}
-			if(checkGeloeschterSchritt(e) || checkQuellSchritt(e)){
-				draggingLogic.showInvalidCursor();
-			}
-		}
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        if (BreakCatchScrollMouseAdapter.userWantsToScroll(e)) {
+            return;
+        }
+        if (e.getSource() instanceof StepnumberLabel && isDragGuarded(e)) {
+            specman.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        }
+    }
 
-	}
+    @Override
+    public void mouseExited(MouseEvent e) {
+        if (BreakCatchScrollMouseAdapter.userWantsToScroll(e)) {
+            return;
+        }
+        specman.setCursor(Cursor.getDefaultCursor());
+    }
 
-  @Override
-	public void mouseExited(MouseEvent e) {
-    if (BreakCatchScrollMouseAdapter.userWantsToScroll(e)) { return; }
-		specman.setCursor(Cursor.getDefaultCursor());
-	}
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        specman.getGlassPane().setVisible(false);
+    }
 
-	//Letzter Schritt darf nicht verschoben werden
-	private boolean checkEinzigerSchritt(MouseEvent e) {
-		if(e.getSource() instanceof InteractiveStepFragment){
-			int counter = 0;
-			AbstractSchrittView step = labelToStep( (InteractiveStepFragment) e.getSource());
-			for(AbstractSchrittView Schritt: step.getParent().schritte) {
-				if(!(Schritt.getChangeInfo().isDeleted() || Schritt.getChangeInfo().isSourceStep())) {
-					counter++;
-				}
-			}
-			return counter <= 1;
-		}
-		return false;
-	}
+    private DragSource toDragSource(MouseEvent e) {
+        if (e.getSource() instanceof StepnumberLabel label) {
+            AbstractSchrittView step = specman.findStep(label);
+            return new DragSource.ExistingStep(label, step);
+        }
+        return stepButtonBar.dragSourceFor((JButton) e.getSource());
+    }
 
-	//gelöschter Schritt darf nicht verschoben werden
-	private boolean checkGeloeschterSchritt(MouseEvent e){
-		if(e.getSource() instanceof InteractiveStepFragment){
-			AbstractSchrittView step = labelToStep( (InteractiveStepFragment) e.getSource());
-			return step.getChangeInfo().isDeleted();
-		}
-		return false;
-	}
+    /** Guard: returns true when dragging should be blocked (sole step, deleted, source marker). */
+    private boolean isDragGuarded(MouseEvent e) {
+        if (!(e.getSource() instanceof InteractiveStepFragment)) {
+            return false;
+        }
+        AbstractSchrittView step = specman.findStep((InteractiveStepFragment) e.getSource());
+        if (step.getChangeInfo().isDeleted() || step.getChangeInfo().isSourceStep()) {
+            return true;
+        }
+        long movableCount = step.getParent().schritte.stream()
+            .filter(s -> !s.getChangeInfo().isDeleted() && !s.getChangeInfo().isSourceStep())
+            .count();
+        return movableCount <= 1;
+    }
 
-	private boolean checkQuellSchritt(MouseEvent e){
-		if(e.getSource() instanceof InteractiveStepFragment){
-			AbstractSchrittView step = labelToStep( (InteractiveStepFragment) e.getSource());
-			return step.getChangeInfo().isSourceStep();
-		}
-		return false;
-	}
+    private String floatingLabelText(MouseEvent e) {
+        if (e.getSource() instanceof InteractiveStepFragment) {
+            AbstractSchrittView step = specman.findStep((InteractiveStepFragment) e.getSource());
+            var id = step.getId();
+            return id != null ? "Schritt " + id : " ";
+        }
+        return "Neuer Schritt";
+    }
 
+    private Point toCursorInSpecman(MouseEvent e) {
+        return toCursorInSpecman(e, 0);
+    }
 
-	private AbstractSchrittView labelToStep(InteractiveStepFragment label) {
-		return specman.findStep(label);
-	}
+    private Point toCursorInSpecman(MouseEvent e, int yOffset) {
+        return SwingUtilities.convertPoint(
+            (Component) e.getSource(),
+            (int) e.getPoint().getX(),
+            (int) e.getPoint().getY() + yOffset,
+            specman
+        );
+    }
 
-	public void mouseWheelMoved(MouseWheelEvent e) {
-		specman.getGlassPane().setVisible(false);
-	}
-
-	//sets Dummy depending on new Step oder dragged Step
-	private void setDummy(MouseEvent e) {
-		if(e.getSource() instanceof InteractiveStepFragment){
-			AbstractSchrittView step = labelToStep((InteractiveStepFragment)e.getSource());
-      SchrittID id = step.getId();
-      // ID is null in case of a catch area
-      String idString = id != null ? "Schritt " + step.getId() : " ";
-			dummy = new JTextField(idString);
-		}else {
-			dummy = new JTextField("Neuer Schritt");
-		}
-	}
-
+    private Point toScreenPoint(MouseEvent e) {
+        Point p = new Point((int) e.getPoint().getX() + 3, (int) e.getPoint().getY() + 3);
+        SwingUtilities.convertPointToScreen(p, (Component) e.getSource());
+        return p;
+    }
 }

@@ -478,6 +478,11 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		return panelFall1;
 	}
 
+	@Override
+	public int dragIndicatorTopOffset(ZweigSchrittSequenzView branch) {
+		return (branch == sonstSequenz) ? (int) breiteLayoutspalteBerechnen() : 0;
+	}
+
 	@Override protected int editAenderungenUebernehmen() {
 		int changesMade = super.editAenderungenUebernehmen();
 		changesMade += sonstSequenz.ueberschriftAenderungenUebernehmen();

@@ -1,6 +1,7 @@
 package specman;
 
 import specman.draganddrop.DragMouseAdapter;
+import specman.draganddrop.DragSource;
 import specman.graphics.IconReader;
 import specman.ops.buttons.CreateBreakStepOpButton;
 import specman.ops.buttons.CreateCaseBranchADBLOpButton;
@@ -12,82 +13,40 @@ import specman.ops.buttons.CreateSimpleStepOpButton;
 import specman.ops.buttons.CreateSubsequenceStepOpButton;
 import specman.ops.buttons.CreateWhileStepOpButton;
 import specman.ops.buttons.CreateWhileWhileStepOpButton;
+import specman.ops.buttons.DragSourceProvider;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class StepButtonBar extends JToolBar {
 
-  private final CreateSimpleStepOpButton createSimpleStep;
-  private final CreateWhileStepOpButton createWhileStep;
-  private final CreateWhileWhileStepOpButton createWhileWhileStep;
-  private final CreateIfElseStepOpButton createIfElseStep;
-  private final CreateIfStepOpButton createIfStep;
-  private final CreateCaseStepOpButton createCaseStep;
-  private final CreateSubsequenceStepOpButton createSubsequenceStep;
-  private final CreateBreakStepOpButton createBreakStep;
-  private final CreateCatchStepADBLOpButton createCatchStep;
-  private final CreateCaseBranchADBLOpButton createCaseBranch;
-
   StepButtonBar(Specman specman) {
     super(JToolBar.VERTICAL);
 
-    createSimpleStep = new CreateSimpleStepOpButton(specman);
-    createWhileStep = new CreateWhileStepOpButton(specman);
-    createWhileWhileStep = new CreateWhileWhileStepOpButton(specman);
-    createIfElseStep = new CreateIfElseStepOpButton(specman);
-    createIfStep = new CreateIfStepOpButton(specman);
-    createCaseStep = new CreateCaseStepOpButton(specman);
-    createSubsequenceStep = new CreateSubsequenceStepOpButton(specman);
-    createBreakStep = new CreateBreakStepOpButton(specman);
-    createCatchStep = new CreateCatchStepADBLOpButton(specman);
-    createCaseBranch = new CreateCaseBranchADBLOpButton(specman);
-
-    addButton(createSimpleStep, "einfacher-schritt", "Create simple step");
-    addButton(createWhileStep, "while-schritt", "Create while step");
-    addButton(createWhileWhileStep, "whilewhile-schritt", "Create while-while step");
-    addButton(createIfElseStep, "ifelse-schritt", "Create if-else step");
-    addButton(createIfStep, "if-schritt", "Create if step");
-    addButton(createCaseStep, "case-schritt", "Create case step");
-    addButton(createSubsequenceStep, "subsequenz-schritt", "Create subsequence step");
-    addButton(createBreakStep, "break-schritt", "Create break step");
-    addButton(createCatchStep, "catch-schritt", "Create catch block");
-    addButton(createCaseBranch, "zweig", "Create case branch");
-
-    DragMouseAdapter dragAdapter = new DragMouseAdapter(specman, this);
-    wireUpDragAdapter(createSimpleStep, dragAdapter);
-    wireUpDragAdapter(createWhileStep, dragAdapter);
-    wireUpDragAdapter(createWhileWhileStep, dragAdapter);
-    wireUpDragAdapter(createIfElseStep, dragAdapter);
-    wireUpDragAdapter(createIfStep, dragAdapter);
-    wireUpDragAdapter(createCaseStep, dragAdapter);
-    wireUpDragAdapter(createSubsequenceStep, dragAdapter);
-    wireUpDragAdapter(createBreakStep, dragAdapter);
-    wireUpDragAdapter(createCatchStep, dragAdapter);
-    wireUpDragAdapter(createCaseBranch, dragAdapter);
+    addDragButton(new CreateSimpleStepOpButton(specman),      "einfacher-schritt",  "Create simple step",       specman);
+    addDragButton(new CreateWhileStepOpButton(specman),       "while-schritt",       "Create while step",        specman);
+    addDragButton(new CreateWhileWhileStepOpButton(specman),  "whilewhile-schritt",  "Create while-while step",  specman);
+    addDragButton(new CreateIfElseStepOpButton(specman),      "ifelse-schritt",      "Create if-else step",      specman);
+    addDragButton(new CreateIfStepOpButton(specman),          "if-schritt",          "Create if step",           specman);
+    addDragButton(new CreateCaseStepOpButton(specman),        "case-schritt",        "Create case step",         specman);
+    addDragButton(new CreateSubsequenceStepOpButton(specman), "subsequenz-schritt",  "Create subsequence step",  specman);
+    addDragButton(new CreateBreakStepOpButton(specman),       "break-schritt",       "Create break step",        specman);
+    addDragButton(new CreateCatchStepADBLOpButton(specman),   "catch-schritt",       "Create catch block",       specman);
+    addDragButton(new CreateCaseBranchADBLOpButton(specman),  "zweig",               "Create case branch",       specman);
   }
 
-  private void addButton(AbstractButton button, String iconBasename, String tooltip) {
+  private void addDragButton(JButton button, String iconBasename, String tooltip, Specman specman) {
     button.setIcon(IconReader.readImageIcon(iconBasename));
     button.setMargin(new Insets(0, 0, 0, 0));
     button.setToolTipText(tooltip);
     add(button);
+    DragMouseAdapter dragAdapter = new DragMouseAdapter(specman, this);
+    button.addMouseListener(dragAdapter);
+    button.addMouseMotionListener(dragAdapter);
   }
 
-  private void wireUpDragAdapter(JButton button, DragMouseAdapter adapter) {
-    button.addMouseListener(adapter);
-    button.addMouseMotionListener(adapter);
+  public DragSource dragSourceFor(JButton button) {
+    return ((DragSourceProvider) button).dragSource();
   }
-
-  public JButton getCreateSimpleStep() { return createSimpleStep; }
-  public JButton getCreateWhileStep() { return createWhileStep; }
-  public JButton getCreateWhileWhileStep() { return createWhileWhileStep; }
-  public JButton getCreateIfElseStep() { return createIfElseStep; }
-  public JButton getCreateIfStep() { return createIfStep; }
-  public JButton getCreateCaseStep() { return createCaseStep; }
-  public JButton getCreateSubsequenceStep() { return createSubsequenceStep; }
-  public JButton getCreateBreakStep() { return createBreakStep; }
-  public JButton getCreateCatchStep() { return createCatchStep; }
-  public JButton getCreateCaseBranch() { return createCaseBranch; }
 
 }

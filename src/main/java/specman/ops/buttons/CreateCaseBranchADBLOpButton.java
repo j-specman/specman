@@ -2,14 +2,17 @@ package specman.ops.buttons;
 
 import specman.*;
 
+import specman.draganddrop.DragSource;
 import specman.undo.UndoableZweigHinzugefuegt;
 import specman.view.AbstractSchrittView;
 import specman.view.CaseSchrittView;
 import specman.view.ZweigSchrittSequenzView;
 
-public class CreateCaseBranchADBLOpButton extends AbstractADBLSpecmanOpButton {
+public class CreateCaseBranchADBLOpButton extends AbstractADBLSpecmanOpButton implements DragSourceProvider {
 
   public CreateCaseBranchADBLOpButton(Specman specman) { super(specman); }
+
+  public DragSource dragSource() { return new DragSource.NewCaseBranch(); }
 
   @Override
   void execute() throws EditException {

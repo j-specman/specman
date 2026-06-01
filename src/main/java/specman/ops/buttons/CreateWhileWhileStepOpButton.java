@@ -2,7 +2,9 @@ package specman.ops.buttons;
 
 import specman.*;
 
+import specman.draganddrop.DragSource;
 import specman.ops.SpecmanOpContext;
+import specman.view.WhileWhileSchrittView;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
 
@@ -19,5 +21,8 @@ public class CreateWhileWhileStepOpButton extends AbstractCreateStepOpButton {
   @Override AbstractSchrittView append(SchrittSequenzView seq) throws EditException {
     return seq.whileWhileSchrittAnhaengen();
   }
+
+
+  @Override public DragSource dragSource() { return new DragSource.NewStep(WhileWhileSchrittView.class); }
 
 }
