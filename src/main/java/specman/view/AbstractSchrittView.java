@@ -188,7 +188,9 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	public void geklappt(boolean auf) {}
 
-	public void zusammenklappenFuerReview() {}
+	public void zusammenklappenFuerReview() {
+		unterSequenzen().forEach(SchrittSequenzView::zusammenklappenFuerReview);
+	}
 
 	public String ersteZeileExtraieren() {
 		String[] zeilen = editContainer.getPlainText().split("\n");
@@ -212,6 +214,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public void alsGeloeschtMarkierenUDBL() {
+		unterSequenzen().forEach(SchrittSequenzView::alsGeloeschtMarkierenUDBL);
 		setGeloeschtMarkiertStilUDBL();
 	}
 
@@ -398,6 +401,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		else if (changeInfo.isTargetStep()) {
 			editContainer.resyncStepnumberAsTargetUDBL(getQuellschritt().getId());
 		}
+		unterSequenzen().forEach(SchrittSequenzView::resyncStepnumberStyleADBL);
 	}
 
 	public void viewsNachinitialisieren() {
@@ -408,6 +412,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
     }
     editContainer.viewsNachinitialisieren();
 		registerAllExistingStepnumbers();
+		unterSequenzen().forEach(SchrittSequenzView::viewsNachinitialisieren);
 	}
 
 	/**
@@ -425,20 +430,12 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public AbstractSchrittView findeSchrittZuId(SchrittID id) {
-		return (this.id.equals(id)) ? this : null;
-	}
-
-	protected AbstractSchrittView findeSchrittZuIdIncludingSubSequences(SchrittID id, SchrittSequenzView... subsequenzen) {
-		AbstractSchrittView result = (this.id.equals(id)) ? this : null;
-		if (result == null) {
-			for (SchrittSequenzView subsequenz: subsequenzen) {
-				result = subsequenz.findeSchrittZuId(id);
-				if (result != null) {
-					break;
-				}
-			}
+		if (this.id.equals(id)) return this;
+		for (SchrittSequenzView seq : unterSequenzen()) {
+			AbstractSchrittView result = seq.findeSchrittZuId(id);
+			if (result != null) return result;
 		}
-		return result;
+		return null;
 	}
 
 	public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
@@ -447,6 +444,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 			setBackgroundUDBL(changeInfo.panelColor());
 		}
 		editContainer.mergeChangeSetUDBL(target, source, true);
+		unterSequenzen().forEach(seq -> seq.mergeChangeSetUDBL(target, source));
 	}
 
 	public int aenderungenUebernehmen() throws EditException {
@@ -550,9 +548,17 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return id + " - " + getTextShef().getPlainText();
 	}
 
-	public List<JTextComponent> getTextAreas() { return editContainer.getTextAreas(); }
+	public List<JTextComponent> getTextAreas() {
+		List<JTextComponent> result = editContainer.getTextAreas();
+		unterSequenzen().forEach(seq -> result.addAll(seq.getTextAreas()));
+		return result;
+	}
 
-	public List<BreakSchrittView> queryUnlinkedBreakSteps() { return new ArrayList<>(); }
+	public List<BreakSchrittView> queryUnlinkedBreakSteps() {
+		List<BreakSchrittView> result = new ArrayList<>();
+		unterSequenzen().forEach(seq -> result.addAll(seq.queryUnlinkedBreakSteps()));
+		return result;
+	}
 
   public boolean refersToOtherStep() { return false; }
 

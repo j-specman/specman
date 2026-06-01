@@ -4,9 +4,7 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
-import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
@@ -162,10 +160,10 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 		if (!enthaeltAenderungsmarkierungen()) {
 			klappen.init(true);
 		}
-		wiederholSequenz.zusammenklappenFuerReview();
+		super.zusammenklappenFuerReview();
 	}
 
-	public void skalieren(int prozentNeu, int prozentAktuell) {
+public void skalieren(int prozentNeu, int prozentAktuell) {
 		super.skalieren(prozentNeu, prozentAktuell);
 		int neueBalkenbreite = groesseUmrechnen(balkenbreite, prozentNeu, prozentAktuell);
 		balkenbreiteSetzen(neueBalkenbreite);
@@ -201,25 +199,6 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 		return model;
 	}
 
-	@Override public void resyncStepnumberStyleUDBL() {
-		super.resyncStepnumberStyleUDBL();
-		wiederholSequenz.resyncStepnumberStyleADBL();
-	}
-
-	@Override public void viewsNachinitialisieren() {
-		super.viewsNachinitialisieren();
-		wiederholSequenz.viewsNachinitialisieren();
-	}
-
-	@Override public AbstractSchrittView findeSchrittZuId(SchrittID id) {
-		return findeSchrittZuIdIncludingSubSequences(id, wiederholSequenz);
-	}
-
-	@Override public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
-		super.mergeChangeSetUDBL(target, source);
-		wiederholSequenz.mergeChangeSetUDBL(target, source);
-	}
-
 	@Override public int aenderungenUebernehmen() throws EditException {
 		int changesMade = super.aenderungenUebernehmen();
 		changesMade += wiederholSequenz.aenderungenUebernehmen();
@@ -232,12 +211,7 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 		return changesRejected;
 	}
 
-	@Override public void alsGeloeschtMarkierenUDBL() {
-		wiederholSequenz.alsGeloeschtMarkierenUDBL();
-		super.alsGeloeschtMarkierenUDBL();
-	}
-
-	@Override
+@Override
 	protected void updateTextfieldDecorationIndentions(Indentions indentions) {
 		super.updateTextfieldDecorationIndentions(indentions.withLeft(false));
 		// Subsequence does not need consideration because the loop panel forms

@@ -5,7 +5,6 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.ChangeSet;
@@ -387,23 +386,6 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		panel.remove(zweig.ueberschrift);
 	}
 
-	@Override public void resyncStepnumberStyleUDBL() {
-		super.resyncStepnumberStyleUDBL();
-		getSonstSequenz().resyncStepnumberStyleADBL();
-		for (ZweigSchrittSequenzView caseSequenz : caseSequenzen) {
-			caseSequenz.resyncStepnumberStyleADBL();
-		}
-
-	}
-
-	@Override public void viewsNachinitialisieren() {
-		super.viewsNachinitialisieren();
-		sonstSequenz.viewsNachinitialisieren();
-		for (ZweigSchrittSequenzView caseSequenz : caseSequenzen) {
-			caseSequenz.viewsNachinitialisieren();
-		}
-	}
-
 	@Override public void alsGeloeschtMarkierenUDBL() {
     EditorI editor = editor();
 		ZweigSchrittSequenzView zweig = headingToBranch(editor.getLastFocusedTextArea());
@@ -447,12 +429,6 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		for (ZweigSchrittSequenzView caseSequenz : caseSequenzen) {
 			caseSequenz.aenderungsmarkierungenEntfernen();
 		}
-	}
-
-	@Override public AbstractSchrittView findeSchrittZuId(SchrittID id) {
-		AbstractSchrittView result = findeSchrittZuIdIncludingSubSequences(
-				id, caseSequenzen.toArray(ZweigSchrittSequenzView[]::new));
-		return (result != null) ? result : sonstSequenz.findeSchrittZuId(id);
 	}
 
 	private void layoutConstraintsSetzen() {
@@ -500,12 +476,6 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 
 	public JPanel getPanelFall1() {
 		return panelFall1;
-	}
-
-	@Override public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
-		super.mergeChangeSetUDBL(target, source);
-		sonstSequenz.mergeChangeSetUDBL(target, source);
-		caseSequenzen.forEach(seq -> seq.mergeChangeSetUDBL(target, source));
 	}
 
 	@Override protected int editAenderungenUebernehmen() {
@@ -562,19 +532,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		return changesRejected;
 	}
 
-	@Override
-	public List<JTextComponent> getTextAreas() {
-		List<JTextComponent> result = super.getTextAreas();
-		result.addAll(sonstSequenz.getTextAreas());
-		caseSequenzen.forEach(seq -> result.addAll(seq.getTextAreas()));
-		return result;
-	}
 
-	public List<BreakSchrittView> queryUnlinkedBreakSteps() {
-		List<BreakSchrittView> result = sonstSequenz.queryUnlinkedBreakSteps();
-		caseSequenzen.forEach(seq -> result.addAll(seq.queryUnlinkedBreakSteps()));
-		return result;
-	}
 
 	@Override
 	public Shape getShape() {
