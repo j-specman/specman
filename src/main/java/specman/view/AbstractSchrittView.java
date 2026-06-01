@@ -24,6 +24,9 @@ import specman.model.v001.QuellSchrittModel_V001;
 import specman.model.v001.SubsequenzSchrittModel_V001;
 import specman.model.v001.WhileSchrittModel_V001;
 import specman.model.v001.WhileWhileSchrittModel_V001;
+import specman.draganddrop.BranchHeadingZone;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
 import specman.pdf.RoundedBorderShape;
 import specman.pdf.Shape;
 import specman.editarea.EditContainer;
@@ -35,6 +38,7 @@ import specman.undo.props.UDBL;
 import javax.swing.JComponent;
 import javax.swing.text.JTextComponent;
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusEvent;
@@ -128,8 +132,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
     editContainer.scrollTo();
 	}
 
-	public specman.pdf.Shape getShape() {
-		return decoratedShape(new specman.pdf.Shape(getPanel(), this)
+	public Shape getShape() {
+		return decoratedShape(new Shape(getPanel(), this)
 			.withBackgroundColor(editContainer.getBackground())
 			.add(editContainer.getShape()));
 	}
@@ -565,6 +569,10 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
   public Boolean getFlatNumbering() { return null; }
 
   public int dragIndicatorTopOffset(ZweigSchrittSequenzView branch) { return 0; }
+
+  public DropTarget findDropTarget(Point localCursor, DragSource dragSource) { return null; }
+
+  public List<BranchHeadingZone> getBranchHeadingZones(DragSource dragSource) { return List.of(); }
 
   public void toggleFlatNumbering(boolean flatNumbering) {}
 

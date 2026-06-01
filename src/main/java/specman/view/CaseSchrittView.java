@@ -11,6 +11,9 @@ import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
+import specman.draganddrop.BranchHeadingZone;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
 import specman.SpaltenResizer;
 import specman.Specman;
 import static specman.ChangeSet.changeset;
@@ -37,6 +40,7 @@ import java.util.stream.Collectors;
 import static specman.TextInit.initialtext;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.pdf.Shape.GAP_COLOR;
+import static specman.view.RelativeStepPosition.After;
 import static specman.Specman.editor;
 
 
@@ -538,6 +542,17 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	}
 
 
+
+	@Override
+	public List<BranchHeadingZone> getBranchHeadingZones(DragSource dragSource) {
+		int offset = (int) breiteLayoutspalteBerechnen();
+		List<BranchHeadingZone> zones = new ArrayList<>();
+		zones.add(new BranchHeadingZone(sonstSequenz, offset));
+		for (int i = 0; i < caseSequenzen.size(); i++) {
+			zones.add(new BranchHeadingZone(caseSequenzen.get(i), i == 0 ? -offset : 0));
+		}
+		return zones;
+	}
 
 	@Override
 	public Shape getShape() {

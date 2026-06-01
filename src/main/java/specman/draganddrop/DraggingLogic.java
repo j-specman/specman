@@ -2,6 +2,7 @@ package specman.draganddrop;
 
 import specman.EditException;
 import specman.Specman;
+import specman.undo.manager.UndoRecording;
 import specman.view.CatchBereich;
 import specman.view.SchrittSequenzView;
 import specman.view.ZweigSchrittSequenzView;
@@ -35,7 +36,9 @@ public class DraggingLogic {
 
         DragOperation operation = operationFor(dragSource);
         if (operation != null && operation.canDrop(target)) {
-            operation.execute(target, specman);
+            try (UndoRecording ur = specman.composeUndo()) {
+                operation.execute(target, specman);
+            }
         }
         else if (dragSource instanceof DragSource.NewStep newStep) {
             handleEmptySequenceDrop(newStep);

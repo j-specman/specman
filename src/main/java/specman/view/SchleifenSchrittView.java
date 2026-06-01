@@ -8,6 +8,8 @@ import specman.ChangeInfo;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
@@ -23,12 +25,15 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.text.JTextComponent;
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.event.ComponentEvent;
 import java.util.List;
 
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.pdf.Shape.GAP_COLOR;
 import static specman.Specman.editor;
+import static specman.view.RelativeStepPosition.After;
+import static specman.view.RelativeStepPosition.Before;
 
 public class SchleifenSchrittView extends AbstractSchrittView implements SpaltenContainerI {
   private static final int CONTENTROW = 3;
@@ -248,6 +253,21 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 
 	public List<BreakSchrittView> queryUnlinkedBreakSteps() {
 		return wiederholSequenz.queryUnlinkedBreakSteps();
+	}
+
+	@Override
+	public DropTarget findDropTarget(Point localCursor, DragSource dragSource) {
+		if (linkerBalken != null && linkerBalken.getBounds().contains(localCursor)) {
+			return new DropTarget(getParent(), this, After);
+		}
+		if (untererBalken != null && untererBalken.getBounds().contains(localCursor)) {
+			return new DropTarget(getParent(), this, After);
+		}
+		// Cursor on the loop text header: insert Before the first step in the loop body
+		if (getTextShef().getBounds().contains(localCursor)) {
+			return new DropTarget(wiederholSequenz, wiederholSequenz.schritte.get(0), Before);
+		}
+		return null;
 	}
 
 	@Override

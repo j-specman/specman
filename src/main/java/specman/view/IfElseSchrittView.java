@@ -8,6 +8,9 @@ import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
+import specman.draganddrop.BranchHeadingZone;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
@@ -315,6 +318,12 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
   public ZweigSchrittSequenzView getElseSequenz() {
         return elseSequenz;
     }
+
+	@Override
+	public List<BranchHeadingZone> getBranchHeadingZones(DragSource dragSource) {
+		int offset = (int) breiteLayoutspalteBerechnen();
+		return List.of(new BranchHeadingZone(ifSequenz, offset), new BranchHeadingZone(elseSequenz, -offset));
+	}
 
 	@Override
 	public Shape getShape() {

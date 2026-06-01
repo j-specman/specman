@@ -142,7 +142,7 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 		g.drawPolygon(polygonX, polygonY, polygonX.length);
 	}
 
-	protected specman.pdf.Shape createDiamond() {
+	protected Shape createDiamond() {
 		Point mittelpunktRaute = berechneRautenmittelpunkt(); //umbenannt
 		int layoutSpaltenbreite = (int)breiteLayoutspalteBerechnen();
 		int editContainerHeight = editContainer.getHeight();

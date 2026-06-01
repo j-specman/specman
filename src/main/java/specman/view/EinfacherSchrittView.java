@@ -3,10 +3,15 @@ package specman.view;
 import specman.ChangeInfo;
 import specman.EditorI;
 import specman.SchrittID;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.EinfacherSchrittModel_V001;
 
 import javax.swing.*;
+import java.awt.Point;
+
+import static specman.view.RelativeStepPosition.After;
 
 public class EinfacherSchrittView extends AbstractSchrittView {
 
@@ -32,6 +37,14 @@ public class EinfacherSchrittView extends AbstractSchrittView {
 			getDecorated()
 		);
 		return model;
+	}
+
+	@Override
+	public DropTarget findDropTarget(Point localCursor, DragSource dragSource) {
+		if (!getPanel().getVisibleRect().contains(localCursor)) {
+			return null;
+		}
+		return new DropTarget(getParent(), this, After);
 	}
 
 	@Override
