@@ -4,12 +4,14 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import org.jetbrains.annotations.Nullable;
 import specman.ChangeInfo;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
@@ -24,8 +26,7 @@ import specman.undo.props.UDBL;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.text.JTextComponent;
-import java.awt.Color;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.util.List;
 
@@ -231,12 +232,6 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 	public JPanel getPanel() {
 		return panel;
 	}
-	public JPanel getLinkerBalken(){
-		return linkerBalken;
-	}
-	public JPanel getUntererBalken(){
-		return untererBalken;
-	}
 
 	@Override
 	public void componentResized(ComponentEvent e) {
@@ -256,15 +251,12 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 	}
 
 	@Override
-	public DropTarget findDropTarget(Point localCursor, DragSource dragSource) {
-		if (linkerBalken != null && linkerBalken.getBounds().contains(localCursor)) {
-			return new DropTarget(getParent(), this, After);
-		}
-		if (untererBalken != null && untererBalken.getBounds().contains(localCursor)) {
+	public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) {
+		if (localCursor.isIn(linkerBalken) || localCursor.isIn(untererBalken)) {
 			return new DropTarget(getParent(), this, After);
 		}
 		// Cursor on the loop text header: insert Before the first step in the loop body
-		if (getTextShef().getBounds().contains(localCursor)) {
+		if (localCursor.isIn(getTextShef())) {
 			return new DropTarget(wiederholSequenz, wiederholSequenz.schritte.get(0), Before);
 		}
 		return null;

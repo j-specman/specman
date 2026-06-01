@@ -5,6 +5,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import specman.*;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.SubsequenzSchrittModel_V001;
@@ -179,9 +180,9 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 
 
 	@Override
-	public DropTarget findDropTarget(Point localCursor, DragSource dragSource) {
+	public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) {
 		// Cursor on the subsequence text header: insert Before the first body step
-		if (getTextShef().getBounds().contains(localCursor)) {
+		if (localCursor.isIn(getTextShef())) {
 			return new DropTarget(subsequenz, subsequenz.schritte.get(0), Before);
 		}
 		return null;
