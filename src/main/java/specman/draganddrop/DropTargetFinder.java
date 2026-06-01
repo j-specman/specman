@@ -4,7 +4,6 @@ import specman.Specman;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
 import specman.view.WhileWhileSchrittView;
-import specman.view.ZweigSchrittSequenzView;
 
 import java.util.List;
 
@@ -64,7 +63,7 @@ public class DropTargetFinder {
     }
 
     private DropTarget findInStep(Point cursor, AbstractSchrittView step, List<AbstractSchrittView> siblings, DragSource dragSource) {
-        if (!(dragSource instanceof DragSource.CaseBranchCreation) && step == firstVisibleStep(siblings)) {
+        if (!(dragSource.isCaseBranchCreation()) && step == firstVisibleStep(siblings)) {
             DropTarget t = checkInsertBefore(cursor, step);
             if (t != null) {
                 return t;
@@ -73,24 +72,19 @@ public class DropTargetFinder {
 
         LocalCursor localCursor = new LocalCursor(
             SwingUtilities.convertPoint(specman, cursor, step.getPanel()), step.getPanel());
-        DropTarget t = !(dragSource instanceof DragSource.CaseBranchCreation)
+        DropTarget t = !(dragSource.isCaseBranchCreation())
             ? step.findDropTarget(localCursor, dragSource)
             : null;
         if (t != null) {
             return t;
         }
 
-        List<BranchHeadingZone> zones = step.getBranchHeadingZones(dragSource);
-        for (BranchHeadingZone zone : zones) {
-            t = (dragSource instanceof DragSource.CaseBranchCreation)
-                ? checkBranchHeadingForCaseBranchCreation(cursor, zone.branch, zone.xOffset, step)
-                : checkBranchHeading(cursor, zone.branch, zone.xOffset);
-            if (t != null) {
-                return t;
-            }
+        t = step.findHeadingDropTarget(localCursor, dragSource);
+        if (t != null) {
+            return t;
         }
 
-        if (dragSource instanceof DragSource.CaseBranchCreation) {
+        if (dragSource.isCaseBranchCreation()) {
             return null;
         }
 
@@ -137,34 +131,6 @@ public class DropTargetFinder {
         return null;
     }
 
-    private DropTarget checkBranchHeadingForCaseBranchCreation(Point cursor, ZweigSchrittSequenzView branch, int xOffset, AbstractSchrittView parentStep) {
-        Rectangle bounds = headingBoundsWithOffset(branch, xOffset);
-        if (!bounds.contains(cursor)) {
-            return null;
-        }
-        return new DropTarget(branch, parentStep, After);
-    }
-
-    /** Hit-tests a branch heading. Returns a DropTarget for inserting Before the first step in the branch. */
-    private DropTarget checkBranchHeading(Point cursor, ZweigSchrittSequenzView branch, int xOffset) {
-        if (!headingBoundsWithOffset(branch, xOffset).contains(cursor)) {
-            return null;
-        }
-        return new DropTarget(branch, branch.schritte.get(0), Before);
-    }
-
-    private Rectangle headingBoundsWithOffset(ZweigSchrittSequenzView branch, int xOffset) {
-        Point origin = SwingUtilities.convertPoint(branch.getUeberschrift(), 0, 0, specman);
-        if (xOffset < 0) {
-            origin.x += xOffset;
-        }
-        Rectangle bounds = branch.getUeberschrift().getVisibleRect();
-        bounds.setLocation(origin);
-        bounds.width += Math.abs(xOffset);
-        return bounds;
-    }
-
-    /** Used by step views in checkHeadings to convert global cursor into component-local coords. */
     private Rectangle boundsInSpecman(JComponent comp) {
         Point origin = SwingUtilities.convertPoint(comp, 0, 0, specman);
         Rectangle bounds = comp.getVisibleRect();

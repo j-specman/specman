@@ -183,7 +183,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 	public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) {
 		// Cursor on the subsequence text header: insert Before the first body step
 		if (localCursor.isIn(getTextShef())) {
-			return new DropTarget(subsequenz, subsequenz.schritte.get(0), Before);
+			return new DropTarget(subsequenz);
 		}
 		return null;
 	}

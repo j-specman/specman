@@ -8,9 +8,9 @@ import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
-import specman.draganddrop.BranchHeadingZone;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
@@ -32,6 +32,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.List;
+
 
 import static specman.TextInit.initialtext;
 import static specman.Specman.editor;
@@ -320,9 +321,14 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
     }
 
 	@Override
-	public List<BranchHeadingZone> getBranchHeadingZones(DragSource dragSource) {
-		int offset = (int) breiteLayoutspalteBerechnen();
-		return List.of(new BranchHeadingZone(ifSequenz, offset), new BranchHeadingZone(elseSequenz, -offset));
+	public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) {
+		if (localCursor.isIn(ifSequenz.getUeberschrift())) {
+			return new DropTarget(ifSequenz);
+		}
+		if (localCursor.isIn(elseSequenz.getUeberschrift())) {
+			return new DropTarget(elseSequenz);
+		}
+		return null;
 	}
 
 	@Override

@@ -24,7 +24,6 @@ import specman.model.v001.QuellSchrittModel_V001;
 import specman.model.v001.SubsequenzSchrittModel_V001;
 import specman.model.v001.WhileSchrittModel_V001;
 import specman.model.v001.WhileWhileSchrittModel_V001;
-import specman.draganddrop.BranchHeadingZone;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
 import specman.draganddrop.LocalCursor;
@@ -578,7 +577,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
   }
 
 
-	public List<BranchHeadingZone> getBranchHeadingZones(DragSource dragSource) { return List.of(); }
+	public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) { return null; }
 
   public void toggleFlatNumbering(boolean flatNumbering) {}
 

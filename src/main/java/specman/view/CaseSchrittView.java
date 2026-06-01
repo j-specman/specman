@@ -11,9 +11,9 @@ import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
-import specman.draganddrop.BranchHeadingZone;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 import specman.SpaltenResizer;
 import specman.Specman;
 import static specman.ChangeSet.changeset;
@@ -544,14 +544,20 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 
 
 	@Override
-	public List<BranchHeadingZone> getBranchHeadingZones(DragSource dragSource) {
-		int offset = (int) breiteLayoutspalteBerechnen();
-		List<BranchHeadingZone> zones = new ArrayList<>();
-		zones.add(new BranchHeadingZone(sonstSequenz, offset));
-		for (int i = 0; i < caseSequenzen.size(); i++) {
-			zones.add(new BranchHeadingZone(caseSequenzen.get(i), i == 0 ? -offset : 0));
+	public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) {
+		if (localCursor.isIn(sonstSequenz.getUeberschrift())) {
+			return (dragSource.isCaseBranchCreation())
+				? new DropTarget(sonstSequenz, this, After)
+				: new DropTarget(sonstSequenz);
 		}
-		return zones;
+		for (ZweigSchrittSequenzView caseSeq : caseSequenzen) {
+			if (localCursor.isIn(caseSeq.getUeberschrift())) {
+				return (dragSource.isCaseBranchCreation())
+					? new DropTarget(caseSeq, this, After)
+					: new DropTarget(caseSeq);
+			}
+		}
+		return null;
 	}
 
 	@Override

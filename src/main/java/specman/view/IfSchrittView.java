@@ -13,12 +13,13 @@ import specman.model.v001.AbstractSchrittModel_V001;
 import specman.editarea.EditContainer;
 import specman.undo.props.UDBL;
 
-import specman.draganddrop.BranchHeadingZone;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 
 import java.awt.*;
 import java.util.List;
+
 
 import static specman.TextInit.schrittHintergrund;
 import static specman.model.v001.EditorContentModel_V001.empty;
@@ -115,8 +116,11 @@ public class IfSchrittView extends IfElseSchrittView {
 	}
 	
 	@Override
-	public List<BranchHeadingZone> getBranchHeadingZones(DragSource dragSource) {
-		return List.of(new BranchHeadingZone(elseSequenz, -(int) breiteLayoutspalteBerechnen()));
+	public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) {
+		if (localCursor.isIn(elseSequenz.getUeberschrift())) {
+			return new DropTarget(elseSequenz);
+		}
+		return null;
 	}
 
 	public void setBackgroundUDBL(Color bg) {

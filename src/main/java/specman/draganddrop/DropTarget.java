@@ -4,6 +4,8 @@ import specman.view.AbstractSchrittView;
 import specman.view.RelativeStepPosition;
 import specman.view.SchrittSequenzView;
 
+import static specman.view.RelativeStepPosition.Before;
+
 public class DropTarget {
     private final SchrittSequenzView sequence;
     private final AbstractSchrittView referenceStep;
@@ -13,6 +15,11 @@ public class DropTarget {
         this.sequence = sequence;
         this.referenceStep = referenceStep;
         this.position = position;
+    }
+
+    /** Drop target for inserting Before the first step in the given sequence. */
+    public DropTarget(SchrittSequenzView sequence) {
+        this(sequence, sequence.schritte.get(0), Before);
     }
 
     public SchrittSequenzView sequence() { return sequence; }

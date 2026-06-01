@@ -257,7 +257,7 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 		}
 		// Cursor on the loop text header: insert Before the first step in the loop body
 		if (localCursor.isIn(getTextShef())) {
-			return new DropTarget(wiederholSequenz, wiederholSequenz.schritte.get(0), Before);
+			return new DropTarget(wiederholSequenz);
 		}
 		return null;
 	}

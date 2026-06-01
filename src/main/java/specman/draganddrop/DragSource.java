@@ -6,6 +6,7 @@ import specman.view.AbstractSchrittView;
 public sealed interface DragSource {
 
     boolean isMove();
+    default boolean isCaseBranchCreation() { return false; }
 
     final class StepCreation implements DragSource {
         private final Class<? extends AbstractSchrittView> stepClass;
@@ -17,6 +18,7 @@ public sealed interface DragSource {
 
     final class CaseBranchCreation implements DragSource {
         @Override public boolean isMove() { return false; }
+        @Override public boolean isCaseBranchCreation() { return true; }
     }
 
     final class StepMove implements DragSource {
