@@ -1,5 +1,6 @@
 package specman;
 
+import org.jetbrains.annotations.NotNull;
 import specman.model.v001.ChangeInfo_V001;
 
 import java.awt.*;
@@ -107,5 +108,9 @@ public class ChangeInfo {
 
   public ChangeInfo untrack(ChangeSet by) {
     return changedBy(by) ? UNTRACKED : this;
+  }
+
+  public ChangeInfo reassign(@NotNull ChangeSet target) {
+    return new ChangeInfo(art, target);
   }
 }

@@ -2,6 +2,7 @@ package specman.editarea;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
+import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.ChangeSet;
@@ -315,9 +316,9 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   @Override
-  public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source, boolean withMarkups) {
+  public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
     if (changeInfo.changedBy(source)) {
-      setChangeInfoUDBL(target != null ? new ChangeInfo(changeInfo.art(), target) : ChangeInfo.untracked());
+      setChangeInfoUDBL(changeInfo.reassign(target));
       setEditBackgroundUDBL(null);
     }
     cellstream().forEach(cell -> cell.mergeChangeSetUDBL(target, source, withMarkups));

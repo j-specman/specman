@@ -2,6 +2,7 @@ package specman.editarea;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
+import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.EditorI;
 import specman.SpaltenContainerI;
@@ -265,9 +266,9 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   }
 
   @Override
-  public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source, boolean withMarkups) {
+  public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
     if (changeInfo.changedBy(source)) {
-      setChangeInfoUDBL(target != null ? new ChangeInfo(changeInfo.art(), target) : ChangeInfo.untracked());
+      setChangeInfoUDBL(changeInfo.reassign(target));
       setEditBackgroundUDBL(null);
     }
   }

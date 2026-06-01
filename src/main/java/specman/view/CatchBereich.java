@@ -3,6 +3,7 @@ package specman.view;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.ColumnSpecByPercent;
@@ -238,7 +239,7 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
       .orElse(null);
   }
 
-  public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source) {
+  public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
     catchSequences.forEach(seq -> seq.mergeChangeSetUDBL(target, source));
   }
 

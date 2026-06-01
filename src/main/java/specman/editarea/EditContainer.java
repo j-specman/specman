@@ -4,6 +4,7 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
+import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeSet;
 import specman.EditorI;
@@ -517,7 +518,7 @@ public class EditContainer extends JPanel {
 		initLayoutAndEditAreas(content);
 	}
 
-	public void mergeChangeSetUDBL(ChangeSet target, ChangeSet source, boolean withMarkups) {
+	public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
 		editAreas.forEach(ea -> ea.mergeChangeSetUDBL(target, source, withMarkups));
 	}
 
