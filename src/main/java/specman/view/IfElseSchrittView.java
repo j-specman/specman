@@ -3,7 +3,6 @@ package specman.view;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
-import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.EditException;
@@ -197,11 +196,10 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		if (!enthaeltAenderungsmarkierungen()) {
 			klappen.init(true);
 		}
-		ifSequenz.zusammenklappenFuerReview();
-		elseSequenz.zusammenklappenFuerReview();
+		super.zusammenklappenFuerReview();
 	}
 
-	/** @author PVN */
+/** @author PVN */
 	public static int spalteUmrechnen(int prozentNeu) {
 		int breiteSpaltenLayout = 20*prozentNeu/100;
 		return breiteSpaltenLayout;
@@ -267,34 +265,10 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 			elseSequenz.hatUeberschrift(fragment);
 	}
 
-	@Override public void resyncStepnumberStyleUDBL() {
-		super.resyncStepnumberStyleUDBL();
-		getElseSequenz().resyncStepnumberStyleADBL();
-		getIfSequenz().resyncStepnumberStyleADBL();
-	}
-
-	@Override public void viewsNachinitialisieren() {
-		super.viewsNachinitialisieren();
-		elseSequenz.viewsNachinitialisieren();
-		ifSequenz.viewsNachinitialisieren();
-	}
-
-	@Override public void alsGeloeschtMarkierenUDBL() {
-		elseSequenz.alsGeloeschtMarkierenUDBL();
-		ifSequenz.alsGeloeschtMarkierenUDBL();
-		super.alsGeloeschtMarkierenUDBL();
-	}
-
 	@Override public void aenderungsmarkierungenEntfernen() {
 		super.aenderungsmarkierungenEntfernen();
 		elseSequenz.aenderungsmarkierungenEntfernen();
 		ifSequenz.aenderungsmarkierungenEntfernen();
-	}
-
-	@Override public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
-		super.mergeChangeSetUDBL(target, source);
-		ifSequenz.mergeChangeSetUDBL(target, source);
-		elseSequenz.mergeChangeSetUDBL(target, source);
 	}
 
 	@Override protected int editAenderungenUebernehmen() {
@@ -325,10 +299,6 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		return changesRejected;
 	}
 
-	@Override public AbstractSchrittView findeSchrittZuId(SchrittID id) {
-		return findeSchrittZuIdIncludingSubSequences(id, elseSequenz, ifSequenz);
-	}
-
 	@Override
 	protected void updateTextfieldDecorationIndentions(Indentions indentions) {
 		super.updateTextfieldDecorationIndentions(indentions);
@@ -345,20 +315,6 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
   public ZweigSchrittSequenzView getElseSequenz() {
         return elseSequenz;
     }
-
-	@Override
-	public List<JTextComponent> getTextAreas() {
-		List<JTextComponent> result = super.getTextAreas();
-		result.addAll(ifSequenz.getTextAreas());
-		result.addAll(elseSequenz.getTextAreas());
-		return result;
-	}
-
-	public List<BreakSchrittView> queryUnlinkedBreakSteps() {
-		List<BreakSchrittView> result = ifSequenz.queryUnlinkedBreakSteps();
-		result.addAll(elseSequenz.queryUnlinkedBreakSteps());
-		return result;
-	}
 
 	@Override
 	public Shape getShape() {

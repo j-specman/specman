@@ -2,7 +2,6 @@ package specman.view;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
-import org.jetbrains.annotations.NotNull;
 import specman.*;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
@@ -115,10 +114,10 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		if (!enthaeltAenderungsmarkierungen()) {
 			klappen.init(true);
 		}
-		subsequenz.zusammenklappenFuerReview();
+		super.zusammenklappenFuerReview();
 	}
 
-	@Override
+@Override
 	public void skalieren(int prozent, int prozentAktuell) {
 		super.skalieren(prozent, prozentAktuell);
 		klappen.scale(prozent, prozentAktuell);
@@ -144,25 +143,6 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		return model;
 	}
 
-	@Override public void resyncStepnumberStyleUDBL() {
-		super.resyncStepnumberStyleUDBL();
-		subsequenz.resyncStepnumberStyleADBL();
-	}
-
-	@Override public void viewsNachinitialisieren() {
-		super.viewsNachinitialisieren();
-		subsequenz.viewsNachinitialisieren();
-	}
-
-	@Override public AbstractSchrittView findeSchrittZuId(SchrittID id) {
-		return findeSchrittZuIdIncludingSubSequences(id, subsequenz);
-	}
-
-	@Override public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
-		super.mergeChangeSetUDBL(target, source);
-		subsequenz.mergeChangeSetUDBL(target, source);
-	}
-
 	@Override public int aenderungenUebernehmen() throws EditException {
 		int changesMade = super.aenderungenUebernehmen();
 		changesMade += subsequenz.aenderungenUebernehmen();
@@ -173,11 +153,6 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		int changesRejected = super.aenderungenVerwerfen();
 		changesRejected += subsequenz.aenderungenVerwerfen();
 		return changesRejected;
-	}
-
-	@Override public void alsGeloeschtMarkierenUDBL() {
-		subsequenz.alsGeloeschtMarkierenUDBL();
-		super.alsGeloeschtMarkierenUDBL();
 	}
 
 	protected void updateTextfieldDecorationIndentions(Indentions indentions) {
@@ -198,16 +173,6 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		klappen.updateLocation(editContainer.getStepNumberBounds());
 	}
 
-	@Override
-	public List<JTextComponent> getTextAreas() {
-		List<JTextComponent> result = super.getTextAreas();
-		result.addAll(subsequenz.getTextAreas());
-		return result;
-	}
-
-	public List<BreakSchrittView> queryUnlinkedBreakSteps() {
-		return subsequenz.queryUnlinkedBreakSteps();
-	}
 
 	@Override
 	public Shape getShape() {
