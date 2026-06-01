@@ -23,16 +23,16 @@ public class StepButtonBar extends JToolBar {
   StepButtonBar(Specman specman) {
     super(JToolBar.VERTICAL);
 
-    addDragButton(new CreateSimpleStepOpButton(specman),      "einfacher-schritt",  "Create simple step",       specman);
-    addDragButton(new CreateWhileStepOpButton(specman),       "while-schritt",       "Create while step",        specman);
-    addDragButton(new CreateWhileWhileStepOpButton(specman),  "whilewhile-schritt",  "Create while-while step",  specman);
-    addDragButton(new CreateIfElseStepOpButton(specman),      "ifelse-schritt",      "Create if-else step",      specman);
-    addDragButton(new CreateIfStepOpButton(specman),          "if-schritt",          "Create if step",           specman);
-    addDragButton(new CreateCaseStepOpButton(specman),        "case-schritt",        "Create case step",         specman);
-    addDragButton(new CreateSubsequenceStepOpButton(specman), "subsequenz-schritt",  "Create subsequence step",  specman);
-    addDragButton(new CreateBreakStepOpButton(specman),       "break-schritt",       "Create break step",        specman);
-    addDragButton(new CreateCatchStepADBLOpButton(specman),   "catch-schritt",       "Create catch block",       specman);
-    addDragButton(new CreateCaseBranchADBLOpButton(specman),  "zweig",               "Create case branch",       specman);
+    addDragButton(new CreateSimpleStepOpButton(specman), "einfacher-schritt", "Create simple step", specman);
+    addDragButton(new CreateWhileStepOpButton(specman), "while-schritt", "Create while step", specman);
+    addDragButton(new CreateWhileWhileStepOpButton(specman), "whilewhile-schritt", "Create while-while step", specman);
+    addDragButton(new CreateIfElseStepOpButton(specman), "ifelse-schritt", "Create if-else step", specman);
+    addDragButton(new CreateIfStepOpButton(specman), "if-schritt", "Create if step", specman);
+    addDragButton(new CreateCaseStepOpButton(specman), "case-schritt", "Create case step", specman);
+    addDragButton(new CreateSubsequenceStepOpButton(specman), "subsequenz-schritt", "Create subsequence step", specman);
+    addDragButton(new CreateBreakStepOpButton(specman), "break-schritt", "Create break step", specman);
+    addDragButton(new CreateCatchStepADBLOpButton(specman), "catch-schritt", "Create catch block", specman);
+    addDragButton(new CreateCaseBranchADBLOpButton(specman), "zweig", "Create case branch", specman);
   }
 
   private void addDragButton(JButton button, String iconBasename, String tooltip, Specman specman) {
