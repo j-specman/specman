@@ -55,13 +55,7 @@ public class DropTargetFinder {
     }
 
     private DropTarget findInSequence(Point cursor, List<AbstractSchrittView> steps, DragSource dragSource) {
-        if (steps.isEmpty()) {
-            return null;
-        }
         for (AbstractSchrittView step : steps) {
-            if (step.getChangeInfo().isDeleted()) {
-                continue;
-            }
             DropTarget result = findInStep(cursor, step, steps, dragSource);
             if (result != null) {
                 return result;
@@ -113,9 +107,6 @@ public class DropTargetFinder {
             Point cursor, List<AbstractSchrittView> steps,
             AbstractSchrittView parentStep, List<AbstractSchrittView> parentSiblings,
             DragSource dragSource) {
-        if (steps.isEmpty()) {
-            return null;
-        }
         if (!(parentStep.getParent() != null &&
               parentStep.getParent().getParent() instanceof WhileWhileSchrittView)) {
             AbstractSchrittView lastStep = steps.get(steps.size() - 1);
