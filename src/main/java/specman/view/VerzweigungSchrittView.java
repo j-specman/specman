@@ -7,9 +7,14 @@ import specman.EditorI;
 import specman.SchrittID;
 import specman.SpaltenContainerI;
 import specman.Specman;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 import specman.model.v001.EditorContentModel_V001;
 import specman.pdf.Shape;
 import specman.undo.props.UDBL;
+
+import static specman.view.RelativeStepPosition.After;
 
 import javax.swing.*;
 import java.awt.*;
@@ -159,6 +164,19 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 	abstract protected int texteinrueckungNeuberechnen();
 
 	public JPanel getPanel() { return panel; }
+
+	@Override
+	public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) {
+		for (SchrittSequenzView seq : unterSequenzen()) {
+			ZweigSchrittSequenzView zweig = (ZweigSchrittSequenzView) seq;
+			if (localCursor.isIn(zweig.getUeberschrift())) {
+				return dragSource.isCaseBranchCreation()
+					? new DropTarget(zweig, this, After)
+					: new DropTarget(zweig);
+			}
+		}
+		return null;
+	}
 
 	public void skalieren(int prozentNeu, int prozentAktuell) {
 		super.skalieren(prozentNeu, prozentAktuell);

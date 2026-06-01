@@ -11,9 +11,6 @@ import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
-import specman.draganddrop.DragSource;
-import specman.draganddrop.DropTarget;
-import specman.draganddrop.LocalCursor;
 import specman.SpaltenResizer;
 import specman.Specman;
 import static specman.ChangeSet.changeset;
@@ -542,23 +539,6 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	}
 
 
-
-	@Override
-	public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) {
-		if (localCursor.isIn(sonstSequenz.getUeberschrift())) {
-			return (dragSource.isCaseBranchCreation())
-				? new DropTarget(sonstSequenz, this, After)
-				: new DropTarget(sonstSequenz);
-		}
-		for (ZweigSchrittSequenzView caseSeq : caseSequenzen) {
-			if (localCursor.isIn(caseSeq.getUeberschrift())) {
-				return (dragSource.isCaseBranchCreation())
-					? new DropTarget(caseSeq, this, After)
-					: new DropTarget(caseSeq);
-			}
-		}
-		return null;
-	}
 
 	@Override
 	public Shape getShape() {

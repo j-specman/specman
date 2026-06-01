@@ -4,6 +4,9 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 
 import specman.ChangeInfo;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 import specman.EditorI;
 import specman.SchrittID;
 import specman.Specman;
@@ -13,9 +16,6 @@ import specman.model.v001.AbstractSchrittModel_V001;
 import specman.editarea.EditContainer;
 import specman.undo.props.UDBL;
 
-import specman.draganddrop.DragSource;
-import specman.draganddrop.DropTarget;
-import specman.draganddrop.LocalCursor;
 
 import java.awt.*;
 import java.util.List;
@@ -115,14 +115,6 @@ public class IfSchrittView extends IfElseSchrittView {
 		return model;
 	}
 	
-	@Override
-	public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) {
-		if (localCursor.isIn(elseSequenz.getUeberschrift())) {
-			return new DropTarget(elseSequenz);
-		}
-		return null;
-	}
-
 	public void setBackgroundUDBL(Color bg) {
 		super.setBackgroundUDBL(bg);
 		UDBL.setBackgroundUDBL(ifSequenz.sequenzBereich, bg);

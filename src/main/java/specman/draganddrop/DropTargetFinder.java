@@ -101,8 +101,9 @@ public class DropTargetFinder {
             Point cursor, List<AbstractSchrittView> steps,
             AbstractSchrittView parentStep, List<AbstractSchrittView> parentSiblings,
             DragSource dragSource) {
-        if (!(parentStep.getParent() != null &&
-              parentStep.getParent().getParent() instanceof WhileWhileSchrittView)) {
+        if (!steps.isEmpty() &&
+              !(parentStep.getParent() != null &&
+                parentStep.getParent().getParent() instanceof WhileWhileSchrittView)) {
             AbstractSchrittView lastStep = steps.get(steps.size() - 1);
             DropTarget escapeUp = checkLastPixelsEscape(cursor, lastStep, parentStep);
             if (escapeUp != null) {

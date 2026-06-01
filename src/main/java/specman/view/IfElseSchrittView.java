@@ -5,12 +5,12 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.ChangeInfo;
 import specman.ChangeSet;
-import specman.EditException;
-import specman.EditorI;
-import specman.SchrittID;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
 import specman.draganddrop.LocalCursor;
+import specman.EditException;
+import specman.EditorI;
+import specman.SchrittID;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
@@ -322,13 +322,9 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 
 	@Override
 	public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) {
-		if (localCursor.isIn(ifSequenz.getUeberschrift())) {
-			return new DropTarget(ifSequenz);
-		}
-		if (localCursor.isIn(elseSequenz.getUeberschrift())) {
-			return new DropTarget(elseSequenz);
-		}
-		return null;
+		return dragSource.isCaseBranchCreation()
+			? null
+			: super.findHeadingDropTarget(localCursor, dragSource);
 	}
 
 	@Override
