@@ -24,7 +24,7 @@ public class DraggingLogic {
         glassPane.setVisible(false);
         DropTarget target = finder.find(cursor, dragSource);
         if (target != null) {
-            showIndicator(glassPane, target);
+            showIndicator(glassPane, target, dragSource);
         }
     }
 
@@ -50,6 +50,7 @@ public class DraggingLogic {
             case DragSource.StepMove e -> new MoveStepOperation(e.label(), e.step(), specman);
             case DragSource.CaseBranchCreation ignored -> new InsertCaseBranchOperation(specman);
             case DragSource.StepCreation n -> new InsertStepOperation(n.stepClass(), specman);
+            case DragSource.CatchSequenceCreation ignored -> new InsertCatchSequenceOperation(specman);
         };
     }
 
@@ -61,12 +62,12 @@ public class DraggingLogic {
         }
     }
 
-    private void showIndicator(GlassPane glassPane, DropTarget target) {
+    private void showIndicator(GlassPane glassPane, DropTarget target, DragSource dragSource) {
         if (target.referenceStep() == null) {
             return;
         }
-        if (target.sequence() instanceof ZweigSchrittSequenzView branch) {
-            showCaseBranchIndicator(glassPane, branch);
+        if (dragSource.isCaseBranchCreation()) {
+            showCaseBranchIndicator(glassPane, (ZweigSchrittSequenzView) target.sequence());
             return;
         }
         Component panel = target.referenceStep().getPanel();

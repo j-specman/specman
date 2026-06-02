@@ -8,11 +8,11 @@ import specman.view.AbstractSchrittView;
 import specman.view.CatchBereich;
 import specman.view.CatchUeberschrift;
 
-public class CreateCatchStepADBLOpButton extends AbstractADBLSpecmanOpButton implements DragSourceProvider {
+public class CreateCatchSequenceADBLOpButton extends AbstractADBLSpecmanOpButton implements DragSourceProvider {
 
-  public CreateCatchStepADBLOpButton(Specman specman) { super(specman); }
+  public CreateCatchSequenceADBLOpButton(Specman specman) { super(specman); }
 
-  public DragSource dragSource() { return new DragSource.StepCreation(CatchBereich.class); }
+  public DragSource dragSource() { return new DragSource.CatchSequenceCreation(); }
 
   @Override
   void execute() throws EditException {

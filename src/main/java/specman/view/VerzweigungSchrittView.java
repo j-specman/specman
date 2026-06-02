@@ -14,6 +14,7 @@ import specman.model.v001.EditorContentModel_V001;
 import specman.pdf.Shape;
 import specman.undo.props.UDBL;
 
+import static specman.draganddrop.DragSource.Type.CaseBranchCreation;
 import static specman.view.RelativeStepPosition.After;
 
 import javax.swing.*;
@@ -170,7 +171,7 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 		for (SchrittSequenzView seq : unterSequenzen()) {
 			ZweigSchrittSequenzView zweig = (ZweigSchrittSequenzView) seq;
 			if (localCursor.isIn(zweig.getUeberschrift())) {
-				return dragSource.isCaseBranchCreation()
+				return dragSource.type() == CaseBranchCreation
 					? new DropTarget(zweig, this, After)
 					: new DropTarget(zweig);
 			}

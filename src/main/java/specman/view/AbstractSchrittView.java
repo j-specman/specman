@@ -10,7 +10,13 @@ import specman.SchrittID;
 import specman.Specman;
 
 import static specman.ChangeSet.changeset;
+import static specman.draganddrop.DragSource.Type.CaseBranchCreation;
+import static specman.draganddrop.DragSource.Type.CatchSequenceCreation;
+import static specman.draganddrop.DragSource.Type.StepCreation;
+import static specman.draganddrop.DragSource.Type.StepMove;
 import static specman.util.ObjectUtils.nvl;
+
+import specman.draganddrop.UnsupportedDragSourceException;
 import specman.editarea.EditArea;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.AbstractSchrittModel_V001;
@@ -268,9 +274,9 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return KEINE_SEQUENZEN;
 	}
 
-	/** Bisschen Convenience, um die Funktion unterSequenz als Einzeler schreiben zu k�nnen */
+	/** Bisschen Convenience, um die Funktion unterSequenz als Einzeiler schreiben zu können */
 	protected static List<SchrittSequenzView> sequenzenAuflisten(List<? extends SchrittSequenzView> sequenzSammlung, SchrittSequenzView... einzelSequenzen) {
-		List<SchrittSequenzView> ergebnis = new ArrayList<SchrittSequenzView>();
+		List<SchrittSequenzView> ergebnis = new ArrayList<>();
 		if (sequenzSammlung != null)
 			ergebnis.addAll(sequenzSammlung);
 		ergebnis.addAll(Arrays.asList(einzelSequenzen));
@@ -569,10 +575,17 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
   public int dragIndicatorTopOffset(ZweigSchrittSequenzView branch) { return 0; }
 
-  public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) {
-    if (localCursor.isIn(getPanel())) {
-      return new DropTarget(getParent(), this, After);
-    }
+  public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) throws UnsupportedDragSourceException {
+		switch(dragSource.supported(CatchSequenceCreation, StepMove, StepCreation)) {
+			case CatchSequenceCreation:
+				if (parent.getLastStep() != this) { break; }
+				// Fall through
+			case StepMove:
+			case StepCreation:
+				if (localCursor.isIn(getPanel())) {
+					return new DropTarget(getParent(), this, After);
+				}
+		}
     return null;
   }
 

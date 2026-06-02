@@ -2,6 +2,7 @@ package specman.draganddrop;
 
 import specman.Specman;
 import specman.view.AbstractSchrittView;
+import specman.view.CatchBereich;
 import specman.view.SchrittSequenzView;
 
 import java.util.List;
@@ -9,6 +10,8 @@ import java.util.List;
 import javax.swing.*;
 import java.awt.*;
 
+import static specman.draganddrop.DragSource.Type.CaseBranchCreation;
+import static specman.draganddrop.DragSource.Type.StepMove;
 import static specman.view.RelativeStepPosition.After;
 import static specman.view.RelativeStepPosition.Before;
 
@@ -36,11 +39,11 @@ public class DropTargetFinder {
         if (isBlockedBySelf(cursor, dragSource)) {
             return null;
         }
-        return findInSequence(cursor, specman.getHauptSequenz().schritte, dragSource);
+        return findInSequence(cursor, specman.getHauptSequenz(), dragSource);
     }
 
     private boolean isBlockedBySelf(Point cursor, DragSource dragSource) {
-        if (!dragSource.isMove()) {
+        if (!dragSource.isStepMove()) {
             return false;
         }
         AbstractSchrittView step = ((DragSource.StepMove) dragSource).step();
@@ -51,11 +54,21 @@ public class DropTargetFinder {
         return bounds.contains(cursor);
     }
 
-    private DropTarget findInSequence(Point cursor, List<AbstractSchrittView> steps, DragSource dragSource) {
+    private DropTarget findInSequence(Point cursor, SchrittSequenzView seq, DragSource dragSource) {
+        List<AbstractSchrittView> steps = seq.schritte;
         for (AbstractSchrittView step : steps) {
             DropTarget result = findInStep(cursor, step, steps, dragSource);
             if (result != null) {
                 return result;
+            }
+        }
+        CatchBereich catchBereich = seq.getCatchBereich();
+        if (catchBereich != null) {
+            for (SchrittSequenzView catchSeq : catchBereich.unterSequenzen()) {
+                DropTarget result = findInSequence(cursor, catchSeq, dragSource);
+                if (result != null) {
+                    return result;
+                }
             }
         }
         return null;
@@ -69,11 +82,16 @@ public class DropTargetFinder {
 
         LocalCursor localCursor = new LocalCursor(
             SwingUtilities.convertPoint(specman, cursor, step.getPanel()), step.getPanel());
-        t = !(dragSource.isCaseBranchCreation())
-            ? step.findDropTarget(localCursor, dragSource)
-            : null;
-        if (t != null) {
-            return t;
+        try {
+            t = dragSource.type() != CaseBranchCreation
+              ? step.findDropTarget(localCursor, dragSource)
+              : null;
+            if (t != null) {
+                return t;
+            }
+        }
+        catch(UnsupportedDragSourceException udso) {
+            // That's perfectly fine, it just means that the step doesn't support dropping this type of thing on it, so we can continue searching.
         }
 
         t = step.findHeadingDropTarget(localCursor, dragSource);
@@ -86,7 +104,7 @@ public class DropTargetFinder {
         }
 
         for (SchrittSequenzView seq : step.unterSequenzen()) {
-            t = findInSequenceWithAscentToParent(cursor, seq.schritte, step, dragSource);
+            t = findInSequenceWithAscentToParent(cursor, seq, step, dragSource);
             if (t != null) {
                 return t;
             }
@@ -95,8 +113,9 @@ public class DropTargetFinder {
     }
 
     private DropTarget findInSequenceWithAscentToParent(
-            Point cursor, List<AbstractSchrittView> steps,
+            Point cursor, SchrittSequenzView seq,
             AbstractSchrittView parentStep, DragSource dragSource) {
+        List<AbstractSchrittView> steps = seq.schritte;
         if (!steps.isEmpty()) {
             AbstractSchrittView lastStep = steps.get(steps.size() - 1);
             DropTarget ascentToParent = checkLastPixelsAscentToParent(cursor, lastStep, parentStep);
@@ -104,7 +123,7 @@ public class DropTargetFinder {
                 return ascentToParent;
             }
         }
-        return findInSequence(cursor, steps, dragSource);
+        return findInSequence(cursor, seq, dragSource);
     }
 
     private DropTarget checkLastPixelsAscentToParent(Point cursor, AbstractSchrittView lastInSeq, AbstractSchrittView parentStep) {

@@ -13,6 +13,9 @@ import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
 import specman.TextInit;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.Styles;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
@@ -273,6 +276,11 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
    * in these cases. */
   private List<CatchSchrittSequenzView> modifyableCatchSequences() { return new ArrayList<>(catchSequences); }
 
+  @Override
+  public List<SchrittSequenzView> unterSequenzen() {
+    return sequenzenAuflisten(catchSequences);
+  }
+
   public CatchBereichModel_V001 generiereCatchBereichModel(boolean formatierterText) {
     CatchBereichModel_V001 model = new CatchBereichModel_V001(sequencesWidthPercent, klappen.isSelected());
     for (CatchSchrittSequenzView seq: catchSequences) {
@@ -402,4 +410,9 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
     return super.allowsDeletion(initiatingLabel);
   }
 
+  @Override
+  public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) {
+    System.out.println("Finding heading drop target in catch area");
+    return super.findHeadingDropTarget(localCursor, dragSource);
+  }
 }

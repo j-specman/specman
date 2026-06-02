@@ -16,6 +16,7 @@ import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
 import specman.TextInit;
+import specman.draganddrop.UnsupportedDragSourceException;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.WhileSchrittModel_V001;
@@ -30,6 +31,8 @@ import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.util.List;
 
+import static specman.draganddrop.DragSource.Type.StepCreation;
+import static specman.draganddrop.DragSource.Type.StepMove;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.pdf.Shape.GAP_COLOR;
 import static specman.Specman.editor;
@@ -251,7 +254,8 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 	}
 
 	@Override
-	public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) {
+	public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) throws UnsupportedDragSourceException {
+		dragSource.rejectAllBut(StepMove, StepCreation);
 		if (localCursor.isIn(linkerBalken) || localCursor.isIn(untererBalken)) {
 			return new DropTarget(getParent(), this, After);
 		}
