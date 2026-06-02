@@ -70,7 +70,9 @@ public class DraggingLogic {
             showCaseBranchIndicator(glassPane, (ZweigSchrittSequenzView) target.sequence());
             return;
         }
-        Component panel = target.referenceStep().getPanel();
+        Component panel = target.referenceCatch() != null
+          ? target.referenceCatch()
+          : target.referenceStep().getPanel();
         Point origin = javax.swing.SwingUtilities.convertPoint(panel, new Point(0, 0), specman);
         Rectangle bounds = panel.getBounds();
         bounds.setLocation(origin);
