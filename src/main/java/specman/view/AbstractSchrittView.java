@@ -579,6 +579,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) { return null; }
 
+  public boolean dropTargetSuppressesAscentToParent() { return false; }
+
   public void toggleFlatNumbering(boolean flatNumbering) {}
 
   /** Method being called by a step's sub-sequence when either a step has been added to or removed

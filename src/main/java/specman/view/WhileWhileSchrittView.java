@@ -31,6 +31,9 @@ public class WhileWhileSchrittView extends SchleifenSchrittView {
 		super(parent, model, true);
 	}
 
+	/** The bottom bar visually occupies the ascent-to-parent drop zone, so it handles that drop itself. */
+	@Override public boolean dropTargetSuppressesAscentToParent() { return true; }
+
 	@Override
 	public AbstractSchrittModel_V001 generiereModel(boolean formatierterText) {
 		WhileWhileSchrittModel_V001 model = new WhileWhileSchrittModel_V001(

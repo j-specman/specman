@@ -3,7 +3,6 @@ package specman.draganddrop;
 import specman.Specman;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
-import specman.view.WhileWhileSchrittView;
 
 import java.util.List;
 
@@ -63,16 +62,14 @@ public class DropTargetFinder {
     }
 
     private DropTarget findInStep(Point cursor, AbstractSchrittView step, List<AbstractSchrittView> siblings, DragSource dragSource) {
-        if (!(dragSource.isCaseBranchCreation()) && step == firstVisibleStep(siblings)) {
-            DropTarget t = checkInsertBefore(cursor, step);
-            if (t != null) {
-                return t;
-            }
+        DropTarget t = checkInsertBefore(cursor, step, siblings, dragSource);
+        if (t != null) {
+            return t;
         }
 
         LocalCursor localCursor = new LocalCursor(
             SwingUtilities.convertPoint(specman, cursor, step.getPanel()), step.getPanel());
-        DropTarget t = !(dragSource.isCaseBranchCreation())
+        t = !(dragSource.isCaseBranchCreation())
             ? step.findDropTarget(localCursor, dragSource)
             : null;
         if (t != null) {
@@ -89,7 +86,7 @@ public class DropTargetFinder {
         }
 
         for (SchrittSequenzView seq : step.unterSequenzen()) {
-            t = findInSequenceWithEscapeUp(cursor, seq.schritte, step, siblings, dragSource);
+            t = findInSequenceWithAscentToParent(cursor, seq.schritte, step, dragSource);
             if (t != null) {
                 return t;
             }
@@ -97,23 +94,23 @@ public class DropTargetFinder {
         return null;
     }
 
-    private DropTarget findInSequenceWithEscapeUp(
+    private DropTarget findInSequenceWithAscentToParent(
             Point cursor, List<AbstractSchrittView> steps,
-            AbstractSchrittView parentStep, List<AbstractSchrittView> parentSiblings,
-            DragSource dragSource) {
-        if (!steps.isEmpty() &&
-              !(parentStep.getParent() != null &&
-                parentStep.getParent().getParent() instanceof WhileWhileSchrittView)) {
+            AbstractSchrittView parentStep, DragSource dragSource) {
+        if (!steps.isEmpty()) {
             AbstractSchrittView lastStep = steps.get(steps.size() - 1);
-            DropTarget escapeUp = checkLastPixelsEscape(cursor, lastStep, parentStep);
-            if (escapeUp != null) {
-                return escapeUp;
+            DropTarget ascentToParent = checkLastPixelsAscentToParent(cursor, lastStep, parentStep);
+            if (ascentToParent != null) {
+                return ascentToParent;
             }
         }
         return findInSequence(cursor, steps, dragSource);
     }
 
-    private DropTarget checkLastPixelsEscape(Point cursor, AbstractSchrittView lastInSeq, AbstractSchrittView parentStep) {
+    private DropTarget checkLastPixelsAscentToParent(Point cursor, AbstractSchrittView lastInSeq, AbstractSchrittView parentStep) {
+        if (parentStep.dropTargetSuppressesAscentToParent()) {
+            return null;
+        }
         Rectangle bounds = boundsInSpecman(lastInSeq.getPanel());
         if (!bounds.contains(cursor)) {
             return null;
@@ -124,7 +121,10 @@ public class DropTargetFinder {
         return new DropTarget(parentStep.getParent(), parentStep, After);
     }
 
-    private DropTarget checkInsertBefore(Point cursor, AbstractSchrittView step) {
+    private DropTarget checkInsertBefore(Point cursor, AbstractSchrittView step, List<AbstractSchrittView> siblings, DragSource dragSource) {
+        if (dragSource.isCaseBranchCreation() || step != firstVisibleStep(siblings)) {
+            return null;
+        }
         Rectangle bounds = boundsInSpecman(step.getPanel());
         if (bounds.contains(cursor) && cursor.y < bounds.y + DROP_ZONE_HEIGHT) {
             return new DropTarget(step.getParent(), step, Before);
