@@ -21,7 +21,7 @@ public class LocalCursor {
     }
 
     public boolean isIn(Component component) {
-        if (component == null) {
+        if (component == null || component.getParent() == null) {
             return false;
         }
         if (component == reference) {

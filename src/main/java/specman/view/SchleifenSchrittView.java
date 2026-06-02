@@ -256,7 +256,7 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 	@Override
 	public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) throws UnsupportedDragSourceException {
 		dragSource.rejectAllBut(StepMove, StepCreation);
-		if (localCursor.isIn(linkerBalken) || localCursor.isIn(untererBalken)) {
+		if (localCursor.isInAny(linkerBalken, untererBalken)) {
 			return new DropTarget(getParent(), this, After);
 		}
 		// Cursor on the loop text header: insert Before the first step in the loop body
