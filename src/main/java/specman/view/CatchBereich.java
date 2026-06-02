@@ -418,7 +418,6 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
       for (CatchSchrittSequenzView seq: catchSequences) {
         CatchUeberschrift hoverHeading = seq.findCatchHeading(localCursor);
         if (hoverHeading != null) {
-          System.out.println("Found catch sequence creation drop target: " + hoverHeading.ueberschrift.getPlainText());
           return new DropTarget(getParent(), this, hoverHeading, After);
         }
       }
