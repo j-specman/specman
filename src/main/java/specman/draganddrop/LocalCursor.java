@@ -2,6 +2,7 @@ package specman.draganddrop;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 
 /** A cursor position in the local coordinate system of a specific reference
  * component. {@link #isIn(Component)} works for child components of that
@@ -13,6 +14,10 @@ public class LocalCursor {
     public LocalCursor(Point point, JComponent reference) {
         this.point = point;
         this.reference = reference;
+    }
+
+    public boolean isInAny(Component... components) {
+        return Arrays.stream(components).anyMatch(this::isIn);
     }
 
     public boolean isIn(Component component) {
@@ -45,11 +50,11 @@ public class LocalCursor {
         return new Rectangle(offsetX, offsetY, component.getWidth(), component.getHeight());
     }
 
-    private static void checkForWrongParent(Component component, Component c) {
+    private void checkForWrongParent(Component component, Component c) {
         if (c == null) {
             throw new IllegalArgumentException(
                 "Component " + component.getClass().getSimpleName() +
-                " is not in the hierarchy of the reference component");
+                " is not in the hierarchy of the reference component " + reference.getClass().getSimpleName());
         }
     }
 }

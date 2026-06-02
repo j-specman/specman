@@ -8,6 +8,10 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.*;
 import static specman.ChangeSet.changeset;
+
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TextEditArea;
@@ -434,4 +438,15 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     return !isDeleted() && !catchHeading.isDeleted();
   }
 
+  public CatchUeberschrift findCatchHeading(LocalCursor localCursor) {
+    if (localCursor.isInAny(primaryCatchHeading, headingRightBarPanel, headingHeightEaterPanel)) {
+      return primaryCatchHeading;
+    }
+    for (CatchUeberschrift coCatchHeading : coCatchHeadings) {
+      if (localCursor.isIn(coCatchHeading)) {
+        return coCatchHeading;
+      }
+    }
+    return null;
+  }
 }

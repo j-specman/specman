@@ -4,7 +4,7 @@ import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.view.AbstractSchrittView;
 
 public sealed interface DragSource {
-    enum Type {
+  enum Type {
         None,
         StepCreation,
         CaseBranchCreation,
@@ -31,6 +31,8 @@ public sealed interface DragSource {
 
     default boolean isCaseBranchCreation() { return type() == Type.CaseBranchCreation; }
     default boolean isStepMove() { return type() == Type.StepMove; }
+    default boolean isCatchSequenceCreation() { return type() == Type.CatchSequenceCreation; }
+
 
     final class StepCreation implements DragSource {
         private final Class<? extends AbstractSchrittView> stepClass;

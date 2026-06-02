@@ -16,6 +16,7 @@ import specman.TextInit;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
 import specman.draganddrop.LocalCursor;
+import specman.draganddrop.UnsupportedDragSourceException;
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.Styles;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
@@ -39,6 +40,7 @@ import static specman.ColumnSpecByPercent.releasePercent;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.pdf.Shape.GAP_COLOR;
 import static specman.Specman.editor;
+import static specman.view.RelativeStepPosition.After;
 
 public class CatchBereich extends AbstractSchrittView implements KlappbarerBereichI, ComponentListener, SpaltenContainerI {
   private static final int BOTTOMBAR_LAYOUTROW = 6;
@@ -412,7 +414,23 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
 
   @Override
   public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) {
-    System.out.println("Finding heading drop target in catch area");
-    return super.findHeadingDropTarget(localCursor, dragSource);
+    if (dragSource.isCatchSequenceCreation()) {
+      for (CatchSchrittSequenzView seq: catchSequences) {
+        CatchUeberschrift hoverHeading = seq.findCatchHeading(localCursor);
+        if (hoverHeading != null) {
+          System.out.println("Found catch sequence creation drop target: " + hoverHeading.ueberschrift.getPlainText());
+          return new DropTarget(getParent(), this, hoverHeading, After);
+        }
+      }
+    }
+    return null;
   }
+
+  @Override
+  public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) {
+    return null;
+  }
+
+  @Override
+  public boolean dropTargetSuppressesAscentToParent() { return true; }
 }

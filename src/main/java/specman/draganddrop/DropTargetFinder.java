@@ -64,11 +64,10 @@ public class DropTargetFinder {
         }
         CatchBereich catchBereich = seq.getCatchBereich();
         if (catchBereich != null) {
-            for (SchrittSequenzView catchSeq : catchBereich.unterSequenzen()) {
-                DropTarget result = findInSequence(cursor, catchSeq, dragSource);
-                if (result != null) {
-                    return result;
-                }
+            // The CatchBereich is a solitary step that doesn't have siblings, so we pass an empty list here.
+            DropTarget result = findInStep(cursor, catchBereich, List.of(), dragSource);
+            if (result != null) {
+                return result;
             }
         }
         return null;
