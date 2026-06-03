@@ -82,9 +82,7 @@ public class DropTargetFinder {
         LocalCursor localCursor = new LocalCursor(
             SwingUtilities.convertPoint(specman, cursor, step.getPanel()), step.getPanel());
         try {
-            t = dragSource.type() != CaseBranchCreation
-              ? step.findDropTarget(localCursor, dragSource)
-              : null;
+            t = step.findDropTarget(localCursor, dragSource);
             if (t != null) {
                 return t;
             }
