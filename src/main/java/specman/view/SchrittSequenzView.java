@@ -112,6 +112,8 @@ public class SchrittSequenzView {
 
 	public List<AbstractSchrittView> getSchritte() { return schritte; }
 
+	public CatchBereich getCatchBereich() { return catchBereich; }
+
 	public JPanel getContainer() { return panel; }
 
 	private SchrittID naechsteSchrittID() {

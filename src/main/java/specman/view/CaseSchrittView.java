@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import static specman.TextInit.initialtext;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.pdf.Shape.GAP_COLOR;
+import static specman.view.RelativeStepPosition.After;
 import static specman.Specman.editor;
 
 
@@ -476,6 +477,11 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 
 	public JPanel getPanelFall1() {
 		return panelFall1;
+	}
+
+	@Override
+	public int dragIndicatorTopOffset(ZweigSchrittSequenzView branch) {
+		return (branch == sonstSequenz) ? (int) breiteLayoutspalteBerechnen() : 0;
 	}
 
 	@Override protected int editAenderungenUebernehmen() {

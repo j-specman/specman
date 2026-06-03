@@ -151,4 +151,11 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 
   @Override
   public void scrollTo() { ueberschrift.scrollTo(); }
+
+  /** Y offset of the top of the drag indicator, relative to the top of the heading.
+   * For regular branches this is 0 (top of heading). For the sonstSequenz of a CaseSchrittView,
+   * the indicator must start below the diamond tip, so we offset by one diamond half-width. */
+  public int dragIndicatorTopOffset() {
+    return getParent().dragIndicatorTopOffset(this);
+  }
 }

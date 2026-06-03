@@ -13,6 +13,10 @@ import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
 import specman.TextInit;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
+import specman.draganddrop.UnsupportedDragSourceException;
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.Styles;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
@@ -24,6 +28,7 @@ import specman.pdf.Shape;
 import specman.undo.UndoableCatchSequenceAdded;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
@@ -36,6 +41,7 @@ import static specman.ColumnSpecByPercent.releasePercent;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.pdf.Shape.GAP_COLOR;
 import static specman.Specman.editor;
+import static specman.view.RelativeStepPosition.After;
 
 public class CatchBereich extends AbstractSchrittView implements KlappbarerBereichI, ComponentListener, SpaltenContainerI {
   private static final int BOTTOMBAR_LAYOUTROW = 6;
@@ -273,6 +279,11 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
    * in these cases. */
   private List<CatchSchrittSequenzView> modifyableCatchSequences() { return new ArrayList<>(catchSequences); }
 
+  @Override
+  public List<SchrittSequenzView> unterSequenzen() {
+    return sequenzenAuflisten(catchSequences);
+  }
+
   public CatchBereichModel_V001 generiereCatchBereichModel(boolean formatierterText) {
     CatchBereichModel_V001 model = new CatchBereichModel_V001(sequencesWidthPercent, klappen.isSelected());
     for (CatchSchrittSequenzView seq: catchSequences) {
@@ -402,4 +413,25 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
     return super.allowsDeletion(initiatingLabel);
   }
 
+  @Override
+  public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) {
+    if (dragSource.isCatchSequenceCreation()) {
+      for (CatchSchrittSequenzView seq: catchSequences) {
+        CatchUeberschrift hoverHeading = seq.findCatchHeading(localCursor);
+        if (hoverHeading != null) {
+          Component dropZone = seq.dropZoneBelow(hoverHeading);
+          return new DropTarget(getParent(), this, hoverHeading, dropZone, After);
+        }
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) {
+    return null;
+  }
+
+  @Override
+  public boolean dropTargetSuppressesAscentToParent() { return true; }
 }

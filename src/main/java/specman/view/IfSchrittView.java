@@ -4,6 +4,9 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 
 import specman.ChangeInfo;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 import specman.EditorI;
 import specman.SchrittID;
 import specman.Specman;
@@ -13,7 +16,10 @@ import specman.model.v001.AbstractSchrittModel_V001;
 import specman.editarea.EditContainer;
 import specman.undo.props.UDBL;
 
+
 import java.awt.*;
+import java.util.List;
+
 
 import static specman.TextInit.schrittHintergrund;
 import static specman.model.v001.EditorContentModel_V001.empty;

@@ -4,7 +4,6 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.ChangeInfo;
-import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
@@ -30,8 +29,10 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.List;
 
+
 import static specman.TextInit.initialtext;
 import static specman.Specman.editor;
+import static specman.draganddrop.DragSource.Type.CaseBranchCreation;
 
 public class IfElseSchrittView extends VerzweigungSchrittView implements ComponentListener, SpaltenContainerI {
 	ZweigSchrittSequenzView ifSequenz;
@@ -179,9 +180,8 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		elseSequenz.schrittnummerSichtbarkeitSetzen(sichtbar);
 	}
 
-
 	@Override
-    public List<SchrittSequenzView> unterSequenzen() {
+  public List<SchrittSequenzView> unterSequenzen() {
 		return sequenzenAuflisten(ifSequenz, elseSequenz);
 	}
 
@@ -315,6 +315,13 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
   public ZweigSchrittSequenzView getElseSequenz() {
         return elseSequenz;
     }
+
+	@Override
+	public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) {
+		return dragSource.type() == CaseBranchCreation
+			? null
+			: super.findHeadingDropTarget(localCursor, dragSource);
+	}
 
 	@Override
 	public Shape getShape() {

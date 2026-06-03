@@ -18,8 +18,8 @@
     </repositories>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <!-- Latest version is 8, but most example code in the web ist based on version 7 -->
         <itext.version>9.4.0</itext.version>
     </properties>

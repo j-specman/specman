@@ -3,6 +3,9 @@ package specman.view;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.*;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.SubsequenzSchrittModel_V001;
@@ -14,11 +17,13 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.text.JTextComponent;
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.event.ComponentEvent;
 import java.util.List;
 
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.Specman.editor;
+import static specman.view.RelativeStepPosition.Before;
 
 public class SubsequenzSchrittView extends AbstractSchrittView {
 	public static final int TEXTEINRUECKUNG = 18;
@@ -175,6 +180,15 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 
 
 	@Override
+	public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) {
+		// Cursor on the subsequence text header: insert Before the first body step
+		if (localCursor.isIn(getTextShef())) {
+			return new DropTarget(subsequenz);
+		}
+		return null;
+	}
+
+	@Override
 	public Shape getShape() {
 		return super.getShape()
 			.withBackgroundColor(panel.getBackground())
@@ -205,7 +219,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
   public SchrittID newStepIDInSameSequence(RelativeStepPosition direction) {
     // What about flatNumbering combined with Before? Anything special to do?
     // Up to now I just can't find a horse foot in that.
-    if (direction == RelativeStepPosition.Before || !flatNumbering) {
+    if (direction == Before || !flatNumbering) {
       return super.newStepIDInSameSequence(direction);
     }
     AbstractSchrittView lastStep = subsequenz.getLastStep();

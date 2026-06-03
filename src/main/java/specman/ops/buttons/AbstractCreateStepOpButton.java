@@ -2,11 +2,12 @@ package specman.ops.buttons;
 
 import specman.*;
 
+import specman.draganddrop.DragSource;
 import specman.ops.SpecmanOpContext;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
 
-public abstract class AbstractCreateStepOpButton extends AbstractADBLSpecmanOpButton {
+public abstract class AbstractCreateStepOpButton extends AbstractADBLSpecmanOpButton implements DragSourceProvider {
 
   public AbstractCreateStepOpButton(SpecmanOpContext context) {
     super(context);
@@ -25,5 +26,7 @@ public abstract class AbstractCreateStepOpButton extends AbstractADBLSpecmanOpBu
   abstract AbstractSchrittView insertAfter(SchrittSequenzView sequence, AbstractSchrittView referenceStep) throws EditException;
 
   abstract AbstractSchrittView append(SchrittSequenzView sequence) throws EditException;
+
+  public abstract DragSource dragSource();
 
 }

@@ -4,14 +4,19 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import org.jetbrains.annotations.Nullable;
 import specman.ChangeInfo;
 import specman.EditException;
 import specman.EditorI;
 import specman.SchrittID;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
 import specman.TextInit;
+import specman.draganddrop.UnsupportedDragSourceException;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.WhileSchrittModel_V001;
@@ -22,13 +27,17 @@ import specman.undo.props.UDBL;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.text.JTextComponent;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.util.List;
 
+import static specman.draganddrop.DragSource.Type.StepCreation;
+import static specman.draganddrop.DragSource.Type.StepMove;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.pdf.Shape.GAP_COLOR;
 import static specman.Specman.editor;
+import static specman.view.RelativeStepPosition.After;
+import static specman.view.RelativeStepPosition.Before;
 
 public class SchleifenSchrittView extends AbstractSchrittView implements SpaltenContainerI {
   private static final int CONTENTROW = 3;
@@ -226,12 +235,6 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 	public JPanel getPanel() {
 		return panel;
 	}
-	public JPanel getLinkerBalken(){
-		return linkerBalken;
-	}
-	public JPanel getUntererBalken(){
-		return untererBalken;
-	}
 
 	@Override
 	public void componentResized(ComponentEvent e) {
@@ -248,6 +251,19 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 
 	public List<BreakSchrittView> queryUnlinkedBreakSteps() {
 		return wiederholSequenz.queryUnlinkedBreakSteps();
+	}
+
+	@Override
+	public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) throws UnsupportedDragSourceException {
+		dragSource.supported(StepMove, StepCreation);
+		if (localCursor.isInAny(linkerBalken, untererBalken)) {
+			return new DropTarget(getParent(), this, After);
+		}
+		// Cursor on the loop text header: insert Before the first step in the loop body
+		if (localCursor.isIn(getTextShef())) {
+			return new DropTarget(wiederholSequenz);
+		}
+		return null;
 	}
 
 	@Override

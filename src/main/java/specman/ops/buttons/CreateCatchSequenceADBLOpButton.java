@@ -2,13 +2,17 @@ package specman.ops.buttons;
 
 import specman.*;
 
+import specman.draganddrop.DragSource;
 import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;
+import specman.view.CatchBereich;
 import specman.view.CatchUeberschrift;
 
-public class CreateCatchStepADBLOpButton extends AbstractADBLSpecmanOpButton {
+public class CreateCatchSequenceADBLOpButton extends AbstractADBLSpecmanOpButton implements DragSourceProvider {
 
-  public CreateCatchStepADBLOpButton(Specman specman) { super(specman); }
+  public CreateCatchSequenceADBLOpButton(Specman specman) { super(specman); }
+
+  public DragSource dragSource() { return new DragSource.CatchSequenceCreation(); }
 
   @Override
   void execute() throws EditException {

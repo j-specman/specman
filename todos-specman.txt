@@ -1,5 +1,5 @@
 Multiple Changesets - Wichtig für nächste CR-Phase bei der ERSTEn
-- Merge von Changesets
+x Merge von Changesets
 x Aufräumen der Codeänderungen
 x Aufräumen der Farben für Changesets in Hinblick auf Farbsehschwächen
 x Markups auf Datei beschränken sich immer auf ein einzelnes Zeichen
@@ -66,7 +66,6 @@ Abschluss für Go-Live
   - Wenn der Break-Schritt ohne Änderungsmodus angelegt wurde, die Catch-Sequence aber schon, dann hat die
      Überschrift der Case-Sequenz keine Änderungsmarkierung. Ist das richtig oder falsch?
   - Unterstützen wir abgesetzte Darstellung? Wäre nicht schlecht. Aber wie schaltet man um? Der Catchbereich selbst hat keinen Text.
-  - DraggingLogic#addNeuerSchritt: Catch-Schritt behandeln
     - Darf nur unter den letzten Schritt einer Sequenz gedragged werden.
   - Break-Schritte dürfen (noch) nicht in Catch-Sequenzen eingefügt werden. Vielleicht sollten wir insgesamt zunächst nur
      Einfache Schritte zulassen
@@ -76,6 +75,7 @@ Abschluss für Go-Live
      manchmal nur verzögert. Werden die FokusListener sauber an allen Tabellenzellen propagiert? Sieht auf den ersten Blick OK aus
   - Übertragung einer Inhaltsänderung bei FocusLost kommt als separate Aktion in die Undo-Historie. Das ist nicht schön
   - Nice to have: *eine* Catch-Sequenz für *mehrere* Breaks, die Behandlung für verschiedene Fehler innerhalb einer Sequenz oft gleich ist
+  x DraggingLogic#addNeuerSchritt: Catch-Schritt behandeln
   x Catch-Sequenzen in einem Catch-Bereich nac rechts und linkt schieben
   x PDF Export
   x Als gelöscht markierte Catch-Sequenz nicht mehr mit Breakschritt synchronisieren. Beim Zurücknehmen der Löschung ggf. resynchronisieren
@@ -105,13 +105,13 @@ x Tabellen als separate Elemente analog Bilder
 
 Bugs fixen
 - Ändern des Paragraphtypen lässt sich nicht zurücknehmen
-- Komplettes Rewrite von DraggingLogic
 - resyncSchrittnummerStil sollte nur beim Aufbau aus Modell verwendet werden. Ansonsten sollte beim (Neu-)Setzen der ID der Stil immer erhalten bleiben, abhängig von Geloescht und Quellschritt
 - Fokus setzen beim Entfernen des vorletzten Schritts
 - Löschen des vorletzten Zweigs erlauben
 - Abfangen des Löschens des letzten Zweigs im Case
 - NumberStepBackground in RoundedBorderDecorator schwarz färben wenn Schritt gelöscht ist
 - 'Cannot invoke "specman.SpaltenResizer.getShape()" because "this.breitenAnpasser" is null' in PDF-Export with no diagram
+x Komplettes Rewrite von DraggingLogic
 
 Auf längere Sicht - nicht notwendig für ersten Go-Live:
 - Schritt-Morphing: If/Else -> Case usw.

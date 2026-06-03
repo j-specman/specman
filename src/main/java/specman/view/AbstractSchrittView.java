@@ -10,7 +10,13 @@ import specman.SchrittID;
 import specman.Specman;
 
 import static specman.ChangeSet.changeset;
+import static specman.draganddrop.DragSource.Type.CaseBranchCreation;
+import static specman.draganddrop.DragSource.Type.CatchSequenceCreation;
+import static specman.draganddrop.DragSource.Type.StepCreation;
+import static specman.draganddrop.DragSource.Type.StepMove;
 import static specman.util.ObjectUtils.nvl;
+
+import specman.draganddrop.UnsupportedDragSourceException;
 import specman.editarea.EditArea;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.AbstractSchrittModel_V001;
@@ -24,6 +30,9 @@ import specman.model.v001.QuellSchrittModel_V001;
 import specman.model.v001.SubsequenzSchrittModel_V001;
 import specman.model.v001.WhileSchrittModel_V001;
 import specman.model.v001.WhileWhileSchrittModel_V001;
+import specman.draganddrop.DragSource;
+import specman.draganddrop.DropTarget;
+import specman.draganddrop.LocalCursor;
 import specman.pdf.RoundedBorderShape;
 import specman.pdf.Shape;
 import specman.editarea.EditContainer;
@@ -34,7 +43,7 @@ import specman.undo.props.UDBL;
 
 import javax.swing.JComponent;
 import javax.swing.text.JTextComponent;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusEvent;
@@ -128,8 +137,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
     editContainer.scrollTo();
 	}
 
-	public specman.pdf.Shape getShape() {
-		return decoratedShape(new specman.pdf.Shape(getPanel(), this)
+	public Shape getShape() {
+		return decoratedShape(new Shape(getPanel(), this)
 			.withBackgroundColor(editContainer.getBackground())
 			.add(editContainer.getShape()));
 	}
@@ -265,9 +274,9 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return KEINE_SEQUENZEN;
 	}
 
-	/** Bisschen Convenience, um die Funktion unterSequenz als Einzeler schreiben zu k�nnen */
+	/** Bisschen Convenience, um die Funktion unterSequenz als Einzeiler schreiben zu können */
 	protected static List<SchrittSequenzView> sequenzenAuflisten(List<? extends SchrittSequenzView> sequenzSammlung, SchrittSequenzView... einzelSequenzen) {
-		List<SchrittSequenzView> ergebnis = new ArrayList<SchrittSequenzView>();
+		List<SchrittSequenzView> ergebnis = new ArrayList<>();
 		if (sequenzSammlung != null)
 			ergebnis.addAll(sequenzSammlung);
 		ergebnis.addAll(Arrays.asList(einzelSequenzen));
@@ -563,6 +572,27 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
   public boolean refersToOtherStep() { return false; }
 
   public Boolean getFlatNumbering() { return null; }
+
+  public int dragIndicatorTopOffset(ZweigSchrittSequenzView branch) { return 0; }
+
+  public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) throws UnsupportedDragSourceException {
+		switch(dragSource.supported(CatchSequenceCreation, StepMove, StepCreation)) {
+			case CatchSequenceCreation:
+				if (parent.getLastStep() != this) { break; }
+				// Fall through
+			case StepMove:
+			case StepCreation:
+				if (localCursor.isIn(getPanel())) {
+					return new DropTarget(getParent(), this, After);
+				}
+		}
+    return null;
+  }
+
+
+	public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) { return null; }
+
+  public boolean dropTargetSuppressesAscentToParent() { return false; }
 
   public void toggleFlatNumbering(boolean flatNumbering) {}
 
