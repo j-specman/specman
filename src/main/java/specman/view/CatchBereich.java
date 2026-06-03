@@ -28,6 +28,7 @@ import specman.pdf.Shape;
 import specman.undo.UndoableCatchSequenceAdded;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
@@ -418,7 +419,8 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
       for (CatchSchrittSequenzView seq: catchSequences) {
         CatchUeberschrift hoverHeading = seq.findCatchHeading(localCursor);
         if (hoverHeading != null) {
-          return new DropTarget(getParent(), this, hoverHeading, After);
+          Component dropZone = seq.dropZoneBelow(hoverHeading);
+          return new DropTarget(getParent(), this, hoverHeading, dropZone, After);
         }
       }
     }

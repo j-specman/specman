@@ -449,4 +449,10 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     }
     return null;
   }
+
+  public Component dropZoneBelow(CatchUeberschrift hoverHeading) {
+    return hoverHeading == primaryCatchHeading
+      ? headingHeightEaterPanel
+      : hoverHeading;
+  }
 }

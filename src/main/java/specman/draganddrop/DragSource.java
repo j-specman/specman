@@ -14,19 +14,13 @@ public sealed interface DragSource {
 
     Type type();
 
-    default Type supported(Type... supportedTypes) {
+    default Type supported(Type... supportedTypes) throws UnsupportedDragSourceException {
         for (Type t : supportedTypes) {
             if (type() == t) {
                 return t;
             }
         }
-        return Type.None;
-    }
-
-    default void rejectAllBut(Type... supportedTypes) throws UnsupportedDragSourceException {
-        if (supported(supportedTypes) == null) {
-            throw new UnsupportedDragSourceException();
-        }
+        throw new UnsupportedDragSourceException();
     }
 
     default boolean isCaseBranchCreation() { return type() == Type.CaseBranchCreation; }

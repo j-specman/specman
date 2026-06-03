@@ -255,7 +255,7 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 
 	@Override
 	public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) throws UnsupportedDragSourceException {
-		dragSource.rejectAllBut(StepMove, StepCreation);
+		dragSource.supported(StepMove, StepCreation);
 		if (localCursor.isInAny(linkerBalken, untererBalken)) {
 			return new DropTarget(getParent(), this, After);
 		}

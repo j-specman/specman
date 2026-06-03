@@ -223,4 +223,8 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   public boolean isDeleted() {
     return changeInfo.isDeleted();
   }
+
+  public Component coCatchDropZone() {
+    return null;
+  }
 }
