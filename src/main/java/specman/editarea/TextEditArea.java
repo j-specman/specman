@@ -889,7 +889,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
   public List<JTextComponent> getTextAreas() { return List.of(this); }
 
   public CatchUeberschrift containingCatchHeading() {
-    return getParent().containingCatchHeading();
+    return getParent().getContainer(CatchUeberschrift.class);
   }
 
   @Override

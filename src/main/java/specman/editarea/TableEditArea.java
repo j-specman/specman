@@ -22,6 +22,7 @@ import specman.undo.UndoableTableColumnAdded;
 import specman.undo.UndoableTableColumnRemoved;
 import specman.undo.UndoableTableRowAdded;
 import specman.undo.UndoableTableRowRemoved;
+import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
 import specman.view.AbstractSchrittView;
 
@@ -450,9 +451,13 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     cells.get(0).get(0).requestFocus();
   }
 
-  public void addRowUDBL(int rowIndex) {
-    addEmptyRow(rowIndex);
-    editor().addEdit(new UndoableTableRowAdded(this, rowIndex, cells.get(rowIndex)));
+  public List<EditContainer> addRowUDBL(int rowIndex) {
+    EditorI editor = editor();
+    try (UndoRecording ur = editor.composeUndo()) {
+      addEmptyRow(rowIndex);
+      editor.addEdit(new UndoableTableRowAdded(this, rowIndex, cells.get(rowIndex)));
+    }
+    return cells.get(rowIndex);
   }
 
   public void addEmptyRow(int rowIndex) {
@@ -611,6 +616,22 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     for (List<EditContainer> row : cells) {
       row.stream().forEach(ec -> ec.viewsNachinitialisieren());
     }
+  }
+
+  /** Moves focus to the next cell. In the last cell of the last row, adds a new row instead.
+   * Returns true if the current text area is inside this table and focus was moved. */
+  public void focusNextCell(EditContainer currentCell) {
+    List<EditContainer> flatCells = cellstream().collect(Collectors.toList());
+    for (int i = 0; i < flatCells.size(); i++) {
+      if (flatCells.get(i) == currentCell) {
+        EditContainer nextCell = (i == flatCells.size() - 1)
+          ? addRowUDBL(numRows()).get(0)
+          : flatCells.get(i + 1);
+        nextCell.requestFocus();
+        return;
+      }
+    }
+    throw new IllegalArgumentException("Cell " + currentCell + " is not part of this table");
   }
 
   @Override public void setQuellStil(ChangeSet changeSet) { /* Not required for tables - source steps only contain an empty text area */ }

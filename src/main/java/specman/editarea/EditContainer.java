@@ -812,12 +812,14 @@ public class EditContainer extends JPanel {
     firstArea.requestFocus();
   }
 
-  public CatchUeberschrift containingCatchHeading() {
-    Container container = getParent();
-    if (container instanceof CatchUeberschrift ) {
-      return (CatchUeberschrift)container;
+  public <T> T getContainer(Class<T> containerClass) {
+    Container parent = getParent();
+    while (parent != null) {
+      if (containerClass.isInstance(parent)) {
+        return containerClass.cast(parent);
+      }
+      parent = parent.getParent();
     }
-    // TODO JL: check also for containing table edit area and list edit area and traverse upwards
     return null;
   }
 
