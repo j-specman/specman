@@ -10,11 +10,15 @@ import specman.Specman;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
 import specman.draganddrop.LocalCursor;
+import specman.draganddrop.UnsupportedDragSourceException;
 import specman.model.v001.EditorContentModel_V001;
 import specman.pdf.Shape;
 import specman.undo.props.UDBL;
 
 import static specman.draganddrop.DragSource.Type.CaseBranchCreation;
+import static specman.draganddrop.DragSource.Type.CatchSequenceCreation;
+import static specman.draganddrop.DragSource.Type.StepCreation;
+import static specman.draganddrop.DragSource.Type.StepMove;
 import static specman.view.RelativeStepPosition.After;
 
 import javax.swing.*;
@@ -165,6 +169,15 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 	abstract protected int texteinrueckungNeuberechnen();
 
 	public JPanel getPanel() { return panel; }
+
+	@Override
+	public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) throws UnsupportedDragSourceException {
+		dragSource.supported(CatchSequenceCreation, StepMove, StepCreation);
+		if (localCursor.isIn(filler)) {
+			return new DropTarget(getParent(), this, After);
+		}
+		return null;
+	}
 
 	@Override
 	public DropTarget findHeadingDropTarget(LocalCursor localCursor, DragSource dragSource) {

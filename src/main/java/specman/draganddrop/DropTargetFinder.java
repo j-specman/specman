@@ -27,7 +27,7 @@ import static specman.view.RelativeStepPosition.Before;
  */
 public class DropTargetFinder {
 
-    static final int DROP_ZONE_HEIGHT = 5;
+    static final int DROP_ZONE_HEIGHT = 6;
 
     private final Specman specman;
 

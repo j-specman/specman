@@ -7,8 +7,9 @@ import specman.Aenderungsart;
 import specman.ChangeInfo;
 
 import javax.swing.*;
+import java.awt.*;
 
-/** A bottom filler is a panel at the bottom of structured step which
+/** A bottom filler is a panel at the bottom of a structured step which
  * can be folded (see class {@link KlappButton}). The filler covers the
  * space below a folded step which is located at the very end of an
  * overlong sequence. Overlength can result from sister sequences in
@@ -23,5 +24,6 @@ public class BottomFiller extends JPanel {
     row = layout.getRowCount();
     parent.add(this, CC.xyw(1, row, layout.getColumnCount()));
     setBackground(changeInfo.panelColor());
+    setBackground(Color.red);
   }
 }
