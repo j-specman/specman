@@ -62,9 +62,7 @@ Abschluss für Go-Live
   x Unterscheidung nummeriert / nicht nummeriert
   x Undo / Redo für LI anlegen und LI entfernen
   - Irgendeine Idee für mehrstufige LIs?
-- Darstellung von Catch-Bereichen überarbeiten (siehe Powerpoint)
-  - Wenn der Break-Schritt ohne Änderungsmodus angelegt wurde, die Catch-Sequence aber schon, dann hat die
-     Überschrift der Case-Sequenz keine Änderungsmarkierung. Ist das richtig oder falsch?
+- Reste der Überarbeitung der Darstellung von Catch-Bereichen
   - Unterstützen wir abgesetzte Darstellung? Wäre nicht schlecht. Aber wie schaltet man um? Der Catchbereich selbst hat keinen Text.
     - Darf nur unter den letzten Schritt einer Sequenz gedragged werden.
   - Break-Schritte dürfen (noch) nicht in Catch-Sequenzen eingefügt werden. Vielleicht sollten wir insgesamt zunächst nur
@@ -74,12 +72,6 @@ Abschluss für Go-Live
   - Wenn man in einen Break-Schritt eine Tabelle reinsetzt, funktioniert die Inhaltsübertragung an die jeweils andere Stelle
      manchmal nur verzögert. Werden die FokusListener sauber an allen Tabellenzellen propagiert? Sieht auf den ersten Blick OK aus
   - Übertragung einer Inhaltsänderung bei FocusLost kommt als separate Aktion in die Undo-Historie. Das ist nicht schön
-  - Nice to have: *eine* Catch-Sequenz für *mehrere* Breaks, die Behandlung für verschiedene Fehler innerhalb einer Sequenz oft gleich ist
-  x DraggingLogic#addNeuerSchritt: Catch-Schritt behandeln
-  x Catch-Sequenzen in einem Catch-Bereich nac rechts und linkt schieben
-  x PDF Export
-  x Als gelöscht markierte Catch-Sequenz nicht mehr mit Breakschritt synchronisieren. Beim Zurücknehmen der Löschung ggf. resynchronisieren
-  x Resizing der Spalten
 - Suche über ganzes Modell
   - FindReplaceAction.updateContextState korrekt implementieren
     wird aufgerufen, wenn der User bei geöffnetem Dialog den Caret in einem Textfeld ändert
