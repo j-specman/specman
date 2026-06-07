@@ -87,13 +87,6 @@ x PDF-Export
 - Vielleicht eine kleiner Top-Inset für Schritt-Texte, um die Überschneidung mit den Labels zu verringern?
 - Doku aktualisieren
 - Beschriftungen internationalisieren
-x Tabellen als separate Elemente analog Bilder
-  - Nice to have: Einfärben von Zellen (statt Schritt), wenn Fokus in Tabellenzelle steht
-  - Nice to have: Springen in die nächste Zelle durch Drücken von TAB
-  - Nice to have: Hinzufügen von Zeilen durch Drücken von TAB in der letzten Zelle?
-  x Zurücknehmen hinzugefügter Zeilen und Spalten
-  x Löschen neu hinzugefügter Zeilen und Spalten muss direkt Wirkung zeigen
-  x Berücksichtigen von Änderungsmodus beim Hinzufügen / Löschen von Zeilen
 
 Bugs fixen
 - Ändern des Paragraphtypen lässt sich nicht zurücknehmen
