@@ -305,12 +305,6 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
   }
 
   @Override
-  public void viewsNachinitialisieren() {
-    super.viewsNachinitialisieren();
-    catchSequences.forEach(CatchSchrittSequenzView::viewsNachinitialisieren);
-  }
-
-  @Override
   public Shape getShape() {
     if (bereichPanel.isVisible()) {
       Shape shape = new Shape(getPanel(), this)

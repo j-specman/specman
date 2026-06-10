@@ -81,13 +81,14 @@ public class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
 
   private void verifyModelTypeAndSpecmanVersion(ModelEnvelope envelope) throws EditException {
     if (!StruktogrammModel_V001.class.getName().equals(envelope.modelType)) {
-      throw new EditException("Die ausgewählte Datei enthält kein Struktogramm-Modell oder ein Modell einer nicht unterstützten Specman-Version " + envelope.specmanVersion);
+      throw new EditException("The selected file does not contain an actogramm model or a model of an unsupported Specman version " + envelope.specmanVersion);
     }
     String compatibilityVersionPrefix = SpecmanVersion.getCompatibilityVersionPrefix();
     if (!envelope.specmanVersion.startsWith(compatibilityVersionPrefix)) {
-      showMessage("Die ausgewählte Datei wurde mit Version " + envelope.specmanVersion + " von Specman erstellt. " +
-        "Die aktuelle Version ist " + SpecmanVersion.getVersion() + ". Die Datei sollte nach dem Speichern mit dieser Version " +
-        "nicht mehr mit älteren Versionen weiterbearbeitet werden. Es könnte sonst zum Verlust von Informationen kommen.");
+      showMessage("The selected file was created from Specman version " + envelope.specmanVersion + ". " +
+        "The current version is " + SpecmanVersion.getVersion() + ". The file format is compatible. However, " +
+        "files being edited with a newer version should not be edited with older versions afterwards. " +
+        "This may cause the loss of meta information");
     }
   }
 

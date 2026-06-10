@@ -437,7 +437,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     // If the table is marked as created, it can simply be removed
     // If the table is already marked as removed, the method here should not have been called
     if (deletionsMustBeMarked()) {
-      setChangeInfoUDBL(changeInfo.deleted());
+      setChangeInfoUDBL(changeInfo.deleted(changeset()));
       setGeloeschtMarkiertStilUDBL(changeInfo.changeSet());
     }
     else {
