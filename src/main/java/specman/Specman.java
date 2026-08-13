@@ -63,6 +63,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	private KeyboardSpecmanOp keyboardOp;
 	private final ExportPDFSpecmanOp exportPDFOp = new ExportPDFSpecmanOp(this);
+  private AutoSave autoSave;
 
 	private static Specman instance;
 
@@ -112,6 +113,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		setupQuestionDialogWhenClosingWithoutSaving();
 
 		openInitialFile(fileToOpen);
+    autoSave = new AutoSave(this);
 	}
 
   private void openInitialFile(File fileToOpen) {
@@ -170,6 +172,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 						diagrammSpeichern(false);
 					}
 				}
+				AutoSave.deleteBackupFor(diagrammDatei);
 				dispose();
 				System.exit(0);
 			}
@@ -327,12 +330,12 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	@Override
 	public void diagrammLaden() {
-		new LoadDiagrammSpecmanOp(this).laden();
+		new LoadDiagrammSpecmanOp(this).load();
 	}
 
 
 	public void diagrammLaden(File diagramFile) {
-		new LoadDiagrammSpecmanOp(this).laden(diagramFile);
+		new LoadDiagrammSpecmanOp(this).loadFromDiagrammOrBackup(diagramFile);
 	}
 
 	private void diagrammbreiteSetzen(int breite) {
@@ -556,6 +559,16 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
   @Override
   public void openSettings() {
     new SettingsDialog(this).setVisible(true);
+  }
+
+  @Override
+  public boolean hasUnsavedChanges() {
+    return undoManager.hasUnsavedChanges();
+  }
+
+  @Override
+  public void markAsUnsavedBackup() {
+    undoManager.markAsUnsavedBackup();
   }
 
 	@Override

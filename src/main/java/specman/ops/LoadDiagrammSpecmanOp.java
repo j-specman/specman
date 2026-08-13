@@ -17,6 +17,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
@@ -25,17 +29,47 @@ public class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
     super(context);
   }
 
-  public void laden() {
+  public void load() {
     File verzeichnis = (getDiagrammDatei() != null) ? getDiagrammDatei().getParentFile() : null;
     JFileChooser fileChooser = new JFileChooser(verzeichnis);
     fileChooser.setFileFilter(new FileNameExtensionFilter("Nassi Diagramme", "nsd"));
     if (fileChooser.showOpenDialog(getScrollPane()) == JFileChooser.APPROVE_OPTION) {
-      laden(fileChooser.getSelectedFile());
+      loadFromDiagrammOrBackup(fileChooser.getSelectedFile());
       resetPdfExportChooser();
     }
   }
 
-  public void laden(File diagramFile) {
+  public void loadFromDiagrammOrBackup(File diagramFile) {
+    if (AutoSave.backupExistsFor(diagramFile)) {
+      File backupFile = AutoSave.backupFileFor(diagramFile);
+      int choice = showConfirmDialog(
+          "A backup for '" + diagramFile.getName() + "' is present.\n" +
+          "Specman may not have been closed properly in the last session.\n\n" +
+          "Model file: " + formatTimestamp(diagramFile) + "\n" +
+          "Backup file: " + formatTimestamp(backupFile) + "\n\n" +
+          "Restore from backup?",
+          "Backup found", JOptionPane.YES_NO_OPTION);
+      if (choice == JOptionPane.YES_OPTION) {
+        load(backupFile);
+        setDiagrammDatei(diagramFile);
+        markAsUnsavedBackup();
+      } else {
+        load(diagramFile);
+      }
+      AutoSave.deleteBackupFor(diagramFile);
+    } else {
+      load(diagramFile);
+    }
+    addRecentFile(diagramFile);
+  }
+
+  private static String formatTimestamp(File file) {
+    LocalDateTime dt = LocalDateTime.ofInstant(
+        Instant.ofEpochMilli(file.lastModified()), ZoneId.systemDefault());
+    return dt.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
+  }
+
+  private void load(File diagramFile) {
     try {
       clearFocusHistory();
       setChangeModeEnabled(false);
@@ -71,7 +105,6 @@ public class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
       getOutro().viewsNachinitialisieren();
       getOutro().registerAllExistingStepnumbers();
       setChangeModeEnabled(model.changeModeenabled);
-      addRecentFile(diagramFile);
       discardAllUndoEdits();
     }
     catch (EditException | IOException e) {

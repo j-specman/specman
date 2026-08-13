@@ -30,6 +30,8 @@ public interface SpecmanOpContext extends EditorI {
   void exportAsGraphviz();
   void exit();
   void openSettings();
+  boolean hasUnsavedChanges();
+  void markAsUnsavedBackup();
   void zusammenklappenFuerReview();
   void showMessage(String text);
   void dropWelcomeMessage();
