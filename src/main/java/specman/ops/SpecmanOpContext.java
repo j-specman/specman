@@ -25,6 +25,8 @@ import javax.swing.JScrollPane;
 public interface SpecmanOpContext extends EditorI {
 
   void diagrammLaden();
+  void diagrammNeu();
+  void initEmptyDiagram();
   void diagrammSpeichern(boolean dateiauswahlErzwingen);
   void exportAsPDF();
   void exportAsGraphviz();

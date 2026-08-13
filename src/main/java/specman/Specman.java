@@ -78,8 +78,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 		initShefController();
 
-		hauptSequenz = new SchrittSequenzView();
-
 		scrollPane = new JScrollPane();
     viewport = new PausableViewport();
     scrollPane.setViewport(viewport);
@@ -88,24 +86,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		scrollPane.addMouseWheelListener(createDragMouseAdapter());
 		contentPane.add(scrollPane, CC.xy(2, 3));
 
-		arbeitsbereich = new WorkingAreaPanel();
+		initEmptyDiagram();
 
-		intro = new EditContainer();
-		intro.setOpaque(false);
-		arbeitsbereich.add(intro, CC.xy(2, 2));
-
-		outro = new EditContainer();
-		outro.setOpaque(false);
-		arbeitsbereich.add(outro, CC.xy(2, 4));
-
-		scrollPane.setViewportView(arbeitsbereich);
 		setInitialWindowSizeAndScreenCenteredLocation();
 		setVisible(true);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-		// Falls jemand nicht aufgepasst hat und beim Initialisieren irgendwelche Funktionen verwendet hat,
-		// die schon etwas im Undo-Manager hinterlassen.
-		undoManager.discardAllEdits();
 
 		this.setGlassPane(new GlassPane(SwingUtilities.convertPoint(contentPane, 0, 0,this).y, getJMenuBar().getHeight()));
 
@@ -134,6 +119,25 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		int x = (dim.width-w)/2;
 		int y = (dim.height-h)/2;
 		this.setLocation(x, y);
+	}
+
+	@Override
+	public void initEmptyDiagram() {
+		hauptSequenz = new SchrittSequenzView();
+		arbeitsbereich = new WorkingAreaPanel();
+		intro = new EditContainer();
+		intro.setOpaque(false);
+		arbeitsbereich.add(intro, CC.xy(2, 2));
+		outro = new EditContainer();
+		outro.setOpaque(false);
+		arbeitsbereich.add(outro, CC.xy(2, 4));
+		scrollPane.setViewportView(arbeitsbereich);
+		hauptSequenzContainer = null;
+		diagrammbreite = WorkingAreaPanel.INITIAL_DIAGRAMM_WIDTH;
+		zoomFaktor = 100;
+		diagrammDatei = null;
+		setTitle(SPECMAN_TITLE);
+		undoManager.discardAllEdits();
 	}
 
 	/**
@@ -326,6 +330,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	@Override
 	public void diagrammSpeichern(boolean dateiauswahlErzwingen) {
 		new SaveDiagrammSpecmanOp(this).speichern(dateiauswahlErzwingen);
+	}
+
+	@Override
+	public void diagrammNeu() {
+		new NewDiagrammSpecmanOp(this).create();
 	}
 
 	@Override
