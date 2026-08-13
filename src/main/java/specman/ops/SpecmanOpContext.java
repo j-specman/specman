@@ -29,6 +29,7 @@ public interface SpecmanOpContext extends EditorI {
   void exportAsPDF();
   void exportAsGraphviz();
   void exit();
+  void openSettings();
   void zusammenklappenFuerReview();
   void showMessage(String text);
   void dropWelcomeMessage();

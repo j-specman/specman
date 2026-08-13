@@ -9,6 +9,7 @@ import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
 import specman.editarea.EditArea;
 import specman.ops.*;
+import specman.settings.SettingsDialog;
 
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.IconReader;
@@ -551,6 +552,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	public void exportAsPDF() {
 		exportPDFOp.export();
 	}
+
+  @Override
+  public void openSettings() {
+    new SettingsDialog(this).setVisible(true);
+  }
 
 	@Override
 	public void zusammenklappenFuerReview() {

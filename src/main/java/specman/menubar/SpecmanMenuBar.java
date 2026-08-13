@@ -53,6 +53,9 @@ public class SpecmanMenuBar extends JMenuBar {
     exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
     exit.addActionListener(e -> context.exit());
 
+    JMenuItem settings = new JMenuItem("Settings");
+    settings.addActionListener(e -> context.openSettings());
+
     JMenu dateiMenu = new JMenu("File");
     dateiMenu.add(laden);
     dateiMenu.add(recentFiles.menu());
@@ -60,6 +63,8 @@ public class SpecmanMenuBar extends JMenuBar {
     dateiMenu.add(speichernUnter);
     dateiMenu.add(exportAsPDF);
     dateiMenu.add(exportAsGraphviz);
+    dateiMenu.addSeparator();
+    dateiMenu.add(settings);
     dateiMenu.add(exit);
     return dateiMenu;
   }
