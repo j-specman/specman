@@ -7,6 +7,7 @@ import specman.pdf.Shape;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 
 public class ExportPDFSpecmanOp extends AbstractSpecmanOp {
@@ -37,8 +38,8 @@ public class ExportPDFSpecmanOp extends AbstractSpecmanOp {
     if (pdfExportChooser == null) {
       pdfExportChooser = new PDFExportChooser();
     }
-    pdfExportChooser.initFromModel(pdfExportOptions);
-    int result = pdfExportChooser.showSaveDialog(getScrollPane(), getDiagrammDatei());
+    pdfExportChooser.initFromModel(pdfExportOptions, getDiagrammDatei());
+    int result = pdfExportChooser.showSaveDialog(getScrollPane());
     if (result != JFileChooser.APPROVE_OPTION) {
       return;
     }
