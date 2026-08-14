@@ -33,7 +33,7 @@ public interface SpecmanOpContext extends EditorI {
   void exit();
   void openSettings();
   boolean hasUnsavedChanges();
-  void markAsUnsavedBackup();
+  void markAsUnsavedWorkingCopy();
   void zusammenklappenFuerReview();
   void showMessage(String text);
   void dropWelcomeMessage();

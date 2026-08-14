@@ -28,11 +28,11 @@ public class SpecmanUndoManager extends UndoManager {
     private final Specman specman;
     private final Stack<UndoRecordingMode> recordingMode = new Stack<>();
     private UndoableComposition recordingComposition;
-    /** Set when a model was restored from an auto-save backup. In that case the file on disk
-     * still holds the older pre-crash state, so the model must be treated as modified even
-     * though the undo stack is empty (all edits were discarded after loading the backup).
-     * Will be cleared by {@link #discardAllEdits()} when the user saves the model. */
-    private boolean unsavedBackup = false;
+    /** Set when a model was restored from an auto-save working copy. In that case the file
+     * on disk still holds the older pre-crash state, so the model must be treated as modified
+     * even though the undo stack is empty (all edits were discarded after loading the working
+     * copy). Will be cleared by {@link #discardAllEdits()} when the user saves the model. */
+    private boolean unsavedWorkingCopy = false;
 
     public SpecmanUndoManager(Specman specman) {
         this.specman = specman;
@@ -65,7 +65,7 @@ public class SpecmanUndoManager extends UndoManager {
     @Override
     public synchronized void discardAllEdits() {
         super.discardAllEdits();
-        unsavedBackup = false;
+        unsavedWorkingCopy = false;
         updateUnsavedChangesIndicatorInTitleBar();
     }
 
@@ -83,7 +83,7 @@ public class SpecmanUndoManager extends UndoManager {
 
     private void updateUnsavedChangesIndicatorInTitleBar() {
         String currentTitle = specman.getTitle();
-        if (canUndo() || unsavedBackup) {
+        if (canUndo() || unsavedWorkingCopy) {
             if (!hasUnsavedChanges()) {
                 specman.setTitle(UNSAVED_CHANGES_INDICATOR + currentTitle);
             }
@@ -117,8 +117,8 @@ public class SpecmanUndoManager extends UndoManager {
         return specman.getTitle().startsWith(UNSAVED_CHANGES_INDICATOR);
     }
 
-    public void markAsUnsavedBackup() {
-        unsavedBackup = true;
+    public void markAsUnsavedWorkingCopy() {
+        unsavedWorkingCopy = true;
         updateUnsavedChangesIndicatorInTitleBar();
     }
 }

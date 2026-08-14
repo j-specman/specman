@@ -16,7 +16,7 @@ public interface SpecmanOpContextMixin {
   // SpecmanOpContext
   default void exportAsPDF() { context().exportAsPDF(); }
   default boolean hasUnsavedChanges() { return context().hasUnsavedChanges(); }
-  default void markAsUnsavedBackup() { context().markAsUnsavedBackup(); }
+  default void markAsUnsavedWorkingCopy() { context().markAsUnsavedWorkingCopy(); }
   default void zusammenklappenFuerReview() { context().zusammenklappenFuerReview(); }
   default void showMessage(String text) { context().showMessage(text); }
   default EditContainer getIntro() { return context().getIntro(); }

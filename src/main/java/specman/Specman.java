@@ -63,7 +63,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	private KeyboardSpecmanOp keyboardOp;
 	private final ExportPDFSpecmanOp exportPDFOp = new ExportPDFSpecmanOp(this);
-  private AutoSave autoSave;
+  private AutoSaveOp autoSave;
+  private AutoLoadOp autoLoad;
 
 	private static Specman instance;
 
@@ -98,7 +99,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		setupQuestionDialogWhenClosingWithoutSaving();
 
 		openInitialFile(fileToOpen);
-    autoSave = new AutoSave(this);
+    autoSave = new AutoSaveOp(this);
+    autoLoad = new AutoLoadOp(this, autoSave);
 	}
 
   private void openInitialFile(File fileToOpen) {
@@ -176,7 +178,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 						diagrammSpeichern(false);
 					}
 				}
-				AutoSave.deleteWorkingCopyFor(diagrammDatei);
+				AutoSaveOp.deleteWorkingCopyFor(diagrammDatei);
 				dispose();
 				System.exit(0);
 			}
@@ -344,7 +346,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 
 	public void diagrammLaden(File diagramFile) {
-		new LoadDiagrammSpecmanOp(this).loadFromDiagrammOrBackup(diagramFile);
+		new LoadDiagrammSpecmanOp(this).loadFromDiagrammOrWorkingCopy(diagramFile);
 	}
 
 	private void diagrammbreiteSetzen(int breite) {
@@ -576,8 +578,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
   }
 
   @Override
-  public void markAsUnsavedBackup() {
-    undoManager.markAsUnsavedBackup();
+  public void markAsUnsavedWorkingCopy() {
+    undoManager.markAsUnsavedWorkingCopy();
   }
 
 	@Override

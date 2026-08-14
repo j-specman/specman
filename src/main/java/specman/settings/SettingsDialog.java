@@ -16,7 +16,8 @@ public class SettingsDialog extends JDialog {
   public SettingsDialog(Frame owner) {
     super(owner, "Settings", true);
     settings = List.of(
-        new SettingAutoSave()
+        new SettingAutoSave(),
+        new SettingAutoLoad()
     );
     initComponents();
   }
@@ -24,7 +25,10 @@ public class SettingsDialog extends JDialog {
   private void initComponents() {
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add(buildSettingsPanel(), BorderLayout.CENTER);
-    getContentPane().add(buildButtonPanel(), BorderLayout.SOUTH);
+    JPanel south = new JPanel(new BorderLayout());
+    south.add(new JSeparator(), BorderLayout.NORTH);
+    south.add(buildButtonPanel(), BorderLayout.CENTER);
+    getContentPane().add(south, BorderLayout.SOUTH);
     pack();
     setResizable(false);
     setLocationRelativeTo(getOwner());

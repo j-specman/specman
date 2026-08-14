@@ -46,7 +46,7 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         setDiagrammDatei(new File(ausgewaehlterDateiname));
       }
       saveToFile(getDiagrammDatei());
-      AutoSave.deleteWorkingCopyFor(getDiagrammDatei());
+      AutoSaveOp.deleteWorkingCopyFor(getDiagrammDatei());
       addRecentFile(getDiagrammDatei());
       discardAllUndoEdits();
     }
@@ -58,11 +58,18 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
   // Generating the model includes cleaning up text edit areas which in turn runs setText which
   // in turn causes the scroll position to be changed — callers must hold a ScrollPause.
   void saveToFile(File targetFile) throws IOException {
+    writeToFile(targetFile, generateBytes());
+  }
+
+  byte[] generateBytes() throws IOException {
     StruktogrammModel_V001 model = generiereStruktogrammModel(true);
     ModelEnvelope wrappedModel = wrapModel(model);
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.enableDefaultTyping();
-    byte[] json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(wrappedModel);
+    return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(wrappedModel);
+  }
+
+  void writeToFile(File targetFile, byte[] json) throws IOException {
     try (FileOutputStream fos = new FileOutputStream(targetFile)) {
       fos.write(json);
     }

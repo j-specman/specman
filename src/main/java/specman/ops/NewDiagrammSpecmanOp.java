@@ -12,7 +12,7 @@ public class NewDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     if (!confirmDiscardUnsavedChanges()) {
       return;
     }
-    AutoSave.deleteWorkingCopyFor(getDiagrammDatei());
+    AutoSaveOp.deleteWorkingCopyFor(getDiagrammDatei());
     clearFocusHistory();
     setChangeModeEnabled(false);
     context().initEmptyDiagram();
