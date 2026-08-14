@@ -3,6 +3,7 @@ package specman.pdf;
 import com.itextpdf.kernel.geom.PageSize;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
+import org.apache.commons.io.FilenameUtils;
 import specman.Specman;
 import specman.model.v001.PDFExportOptionsModel_V001;
 
@@ -12,6 +13,8 @@ import java.awt.*;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.prefs.Preferences;
+
+import static org.apache.commons.io.FilenameUtils.getBaseName;
 
 public class PDFExportChooser extends JFileChooser {
   public static final String PDF_EXTENSION = ".pdf";
@@ -26,6 +29,8 @@ public class PDFExportChooser extends JFileChooser {
   JRadioButton landscape = new JRadioButton("Landscape");
   JCheckBox paging = new JCheckBox("Paging");
   JCheckBox display = new JCheckBox("Display result");
+
+  File currentModelFile = null;
 
   public PDFExportChooser() {
     setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -64,13 +69,70 @@ public class PDFExportChooser extends JFileChooser {
     display.setSelected(prefs.getBoolean(PDF_DISPLAY_PREF, true));
   }
 
-  public void initFromModel(PDFExportOptionsModel_V001 pdfExportOptions) {
+  public void initFromModel(PDFExportOptionsModel_V001 pdfExportOptions, File currentModelFile) {
     if (pdfExportOptions != null) {
       setOrientation(pdfExportOptions.portrait);
-      paging.setSelected(pdfExportOptions.paging);
-      pageSize.setSelectedItem(pdfExportOptions.pageSize);
-      setSelectedFile(new File(pdfExportOptions.filename));
+      this.paging.setSelected(pdfExportOptions.paging);
+      this.pageSize.setSelectedItem(pdfExportOptions.pageSize);
+      this.currentModelFile = currentModelFile;
+      File exportFile = guessBestFilenameAndDirectory(pdfExportOptions, currentModelFile);
+      setSelectedFile(exportFile);
     }
+  }
+
+  /** Returns a reasonable PDF export file and directory by taking also the current
+   * diagramm file into account and the diagramm file which the last PDF has been exported
+   * for so that the export filename and location may reasonably move together with its
+   * diagramm file. The guess is based on the following rules:
+   * <ol>
+   *   <li>If there is no information present about the current model file (model has not been saved yet)
+   *   and the model file from the last PDF, we simply return the last PDF filename (if any).</li>
+   *   <li>If there is only information present about the current model file (model has been saved in the
+   *   meanwhile), and the last PDF export file has no path, we add the model files path to the PDF file.
+   *   This will also keep compatibility with older versions of Specman where the former model filename
+   *   was not persisted and the PDF filename was persisted without path.</li>
+   *   <li>If the PDF filename had the same basename as the former model filename (i.e. filename without path and extension),
+   *   we change the base name to the current model file's basename.</li>
+   *   <li>If the PDF file was located in the same directory as the former model file, we change the
+   *   directory to the current model file's directory.</li>
+   * </ol>
+   */
+  private File guessBestFilenameAndDirectory(PDFExportOptionsModel_V001 pdfExportOptions, File currentModelFile) {
+    File pdfFile = new File(pdfExportOptions.filename);
+    if (pdfExportOptions.modelFilename != null && currentModelFile != null) {
+      File formerModelFile = new File(pdfExportOptions.modelFilename);
+      String pdfExtension = FilenameUtils.getExtension(pdfFile.getName());
+      String pdfBasename = derivePDFBasename(pdfFile, formerModelFile, currentModelFile);
+      String pdfDirectory = derivePDFDirectory(pdfFile, formerModelFile, currentModelFile);
+      return new File(pdfDirectory, pdfBasename + "." + pdfExtension);
+    }
+    String pdfFilename = prependModelPath(pdfFile, currentModelFile);
+    return new File(pdfFilename);
+  }
+
+  private String prependModelPath(File pdfFile, File currentModelFile) {
+    if (currentModelFile != null && pdfFile.getParent() == null) {
+      return new File(currentModelFile.getParent(), pdfFile.getName()).getAbsolutePath();
+    }
+    return pdfFile.getAbsolutePath();
+  }
+
+  private String derivePDFDirectory(File pdfFile, File formerModelFile, File currentModelFile) {
+    String formerModelDirectory = formerModelFile.getParent();
+    String pdfDirectory = pdfFile.getParent();
+    if (pdfDirectory != null && pdfDirectory.equals(formerModelDirectory)) {
+      return currentModelFile.getParent();
+    }
+    return pdfDirectory;
+  }
+
+  private String derivePDFBasename(File pdfFile, File formerModelFile, File currentModelFile) {
+    String formerModelBasename = getBaseName(formerModelFile.getName());
+    String pdfBasename = getBaseName(pdfFile.getName());
+    if (pdfBasename.equals(formerModelBasename)) {
+      return getBaseName(currentModelFile.getName());
+    }
+    return pdfBasename;
   }
 
   private void setOrientation(boolean portraitOrientation) {
@@ -125,10 +187,25 @@ public class PDFExportChooser extends JFileChooser {
 
   public PDFExportOptionsModel_V001 getExportOptions() {
     return new PDFExportOptionsModel_V001(
-      getSelectedFile().getName(),
+      getSelectedFile().getAbsolutePath(),
+      currentModelFile != null ? currentModelFile.getAbsolutePath() : null,
       pageSize.getSelectedItem().toString(),
       portrait.isSelected(),
       paging.isSelected()
     );
   }
+
+  @Override
+  /** If the selected file is not an existing one and does not end with ".pdf", we append the extension ".pdf" */
+  public File getSelectedFile() {
+    File selectedFile = super.getSelectedFile();
+    if (selectedFile != null && !selectedFile.exists()) {
+      String filename = selectedFile.getAbsolutePath();
+      if (!filename.toLowerCase().endsWith(PDF_EXTENSION)) {
+        selectedFile = new File(filename + PDF_EXTENSION);
+      }
+    }
+    return selectedFile;
+  }
+
 }

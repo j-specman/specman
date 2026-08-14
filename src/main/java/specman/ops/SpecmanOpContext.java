@@ -25,10 +25,15 @@ import javax.swing.JScrollPane;
 public interface SpecmanOpContext extends EditorI {
 
   void diagrammLaden();
+  void diagrammNeu();
+  void initEmptyDiagram();
   void diagrammSpeichern(boolean dateiauswahlErzwingen);
   void exportAsPDF();
   void exportAsGraphviz();
   void exit();
+  void openSettings();
+  boolean hasUnsavedChanges();
+  void markAsUnsavedWorkingCopy();
   void zusammenklappenFuerReview();
   void showMessage(String text);
   void dropWelcomeMessage();

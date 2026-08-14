@@ -30,6 +30,10 @@ public class SpecmanMenuBar extends JMenuBar {
   }
 
   private @NotNull JMenu createFileMenu(SpecmanOpContext context) {
+    JMenuItem neu = new JMenuItem("Neu");
+    neu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK));
+    neu.addActionListener(e -> context.diagrammNeu());
+
     JMenuItem laden = new JMenuItem("Laden...");
     laden.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
     laden.addActionListener(e -> context.diagrammLaden());
@@ -53,13 +57,19 @@ public class SpecmanMenuBar extends JMenuBar {
     exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
     exit.addActionListener(e -> context.exit());
 
+    JMenuItem settings = new JMenuItem("Settings");
+    settings.addActionListener(e -> context.openSettings());
+
     JMenu dateiMenu = new JMenu("File");
+    dateiMenu.add(neu);
     dateiMenu.add(laden);
     dateiMenu.add(recentFiles.menu());
     dateiMenu.add(speichern);
     dateiMenu.add(speichernUnter);
     dateiMenu.add(exportAsPDF);
     dateiMenu.add(exportAsGraphviz);
+    dateiMenu.addSeparator();
+    dateiMenu.add(settings);
     dateiMenu.add(exit);
     return dateiMenu;
   }

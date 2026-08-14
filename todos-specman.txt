@@ -16,6 +16,7 @@ Aus aktueller Anwendung
 - Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
 - PDF-Option "Export beim Speichern"
 - Hoch/Runter über Grenzen von Schritten wäre cool
+x PDF-Export: schlauere Ableitung von PDF-Exportdateinamen aus ggf. geänderten / umgezogenen Diagrammdateinamen
 x Page-up / Page-down geht nicht
 x Scrollen mit Mausrad ist zu langsam
 x Fokus ist nach dem Öffnen auf der Zoom-Kombobox. Wenn man also noch dem Öffnen einer Datei auf Page-down / Page-up drückt, ändert man den Zoomfaktor, statt dass man auf dem Wege Scrollen kann
@@ -31,7 +32,7 @@ Reste Multi-Catch
 
 Abschluss für Go-Live
 - Wenn man zu einem Breakschritt bzw. einem Catch-Bereich springt oder einer Schrittreferenz folgt, dann kann sich das Ziel
-   der Navigationdieser sich in einem zusammengeklappten Bereich befinden. Was machen wir dann? Aufklappen?
+   der Navigation in einem zusammengeklappten Bereich befinden. Was machen wir dann? Aufklappen?
 - Wenn man aus einem Break-Schritt heraus einen neuen Schritt anlegt, dann ist das keine atomare Operation.
    Der BreakSchritt hat einen Fokus-Listener, der beim Fokusverlust den Inhalt des Steps (unnötig) neu aufbaut, und
    das liegt nicht in der Undo-Composition für die Neuanlage.

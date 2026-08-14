@@ -9,6 +9,7 @@ import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
 import specman.editarea.EditArea;
 import specman.ops.*;
+import specman.settings.SettingsDialog;
 
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.IconReader;
@@ -62,6 +63,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	private KeyboardSpecmanOp keyboardOp;
 	private final ExportPDFSpecmanOp exportPDFOp = new ExportPDFSpecmanOp(this);
+  private AutoSaveOp autoSave;
+  private AutoLoadOp autoLoad;
 
 	private static Specman instance;
 
@@ -76,8 +79,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 		initShefController();
 
-		hauptSequenz = new SchrittSequenzView();
-
 		scrollPane = new JScrollPane();
     viewport = new PausableViewport();
     scrollPane.setViewport(viewport);
@@ -86,24 +87,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		scrollPane.addMouseWheelListener(createDragMouseAdapter());
 		contentPane.add(scrollPane, CC.xy(2, 3));
 
-		arbeitsbereich = new WorkingAreaPanel();
+		initEmptyDiagram();
 
-		intro = new EditContainer();
-		intro.setOpaque(false);
-		arbeitsbereich.add(intro, CC.xy(2, 2));
-
-		outro = new EditContainer();
-		outro.setOpaque(false);
-		arbeitsbereich.add(outro, CC.xy(2, 4));
-
-		scrollPane.setViewportView(arbeitsbereich);
 		setInitialWindowSizeAndScreenCenteredLocation();
 		setVisible(true);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-		// Falls jemand nicht aufgepasst hat und beim Initialisieren irgendwelche Funktionen verwendet hat,
-		// die schon etwas im Undo-Manager hinterlassen.
-		undoManager.discardAllEdits();
 
 		this.setGlassPane(new GlassPane(SwingUtilities.convertPoint(contentPane, 0, 0,this).y, getJMenuBar().getHeight()));
 
@@ -111,6 +99,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		setupQuestionDialogWhenClosingWithoutSaving();
 
 		openInitialFile(fileToOpen);
+    autoSave = new AutoSaveOp(this);
+    autoLoad = new AutoLoadOp(this, autoSave);
 	}
 
   private void openInitialFile(File fileToOpen) {
@@ -131,6 +121,25 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		int x = (dim.width-w)/2;
 		int y = (dim.height-h)/2;
 		this.setLocation(x, y);
+	}
+
+	@Override
+	public void initEmptyDiagram() {
+		hauptSequenz = new SchrittSequenzView();
+		arbeitsbereich = new WorkingAreaPanel();
+		intro = new EditContainer();
+		intro.setOpaque(false);
+		arbeitsbereich.add(intro, CC.xy(2, 2));
+		outro = new EditContainer();
+		outro.setOpaque(false);
+		arbeitsbereich.add(outro, CC.xy(2, 4));
+		scrollPane.setViewportView(arbeitsbereich);
+		hauptSequenzContainer = null;
+		diagrammbreite = WorkingAreaPanel.INITIAL_DIAGRAMM_WIDTH;
+		zoomFaktor = 100;
+		diagrammDatei = null;
+		setTitle(SPECMAN_TITLE);
+		undoManager.discardAllEdits();
 	}
 
 	/**
@@ -169,6 +178,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 						diagrammSpeichern(false);
 					}
 				}
+				AutoSaveOp.deleteWorkingCopyFor(diagrammDatei);
 				dispose();
 				System.exit(0);
 			}
@@ -325,13 +335,18 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	}
 
 	@Override
+	public void diagrammNeu() {
+		new NewDiagrammSpecmanOp(this).create();
+	}
+
+	@Override
 	public void diagrammLaden() {
-		new LoadDiagrammSpecmanOp(this).laden();
+		new LoadDiagrammSpecmanOp(this).load();
 	}
 
 
 	public void diagrammLaden(File diagramFile) {
-		new LoadDiagrammSpecmanOp(this).laden(diagramFile);
+		new LoadDiagrammSpecmanOp(this).loadFromDiagrammOrWorkingCopy(diagramFile);
 	}
 
 	private void diagrammbreiteSetzen(int breite) {
@@ -551,6 +566,21 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	public void exportAsPDF() {
 		exportPDFOp.export();
 	}
+
+  @Override
+  public void openSettings() {
+    new SettingsDialog(this).setVisible(true);
+  }
+
+  @Override
+  public boolean hasUnsavedChanges() {
+    return undoManager.hasUnsavedChanges();
+  }
+
+  @Override
+  public void markAsUnsavedWorkingCopy() {
+    undoManager.markAsUnsavedWorkingCopy();
+  }
 
 	@Override
 	public void zusammenklappenFuerReview() {

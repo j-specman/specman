@@ -15,6 +15,8 @@ public interface SpecmanOpContextMixin {
 
   // SpecmanOpContext
   default void exportAsPDF() { context().exportAsPDF(); }
+  default boolean hasUnsavedChanges() { return context().hasUnsavedChanges(); }
+  default void markAsUnsavedWorkingCopy() { context().markAsUnsavedWorkingCopy(); }
   default void zusammenklappenFuerReview() { context().zusammenklappenFuerReview(); }
   default void showMessage(String text) { context().showMessage(text); }
   default EditContainer getIntro() { return context().getIntro(); }
@@ -43,6 +45,7 @@ public interface SpecmanOpContextMixin {
   default int getDiagrammbreite() { return context().getDiagrammbreite(); }
 
   // EditorI methods used by ops
+  default UndoRecording pauseUndo() { return context().pauseUndo(); }
   default UndoRecording composeUndo() { return context().composeUndo(); }
   default void diagrammAktualisieren(EditArea editArea) { context().diagrammAktualisieren(editArea); }
   default TextEditArea getLastFocusedTextArea() { return context().getLastFocusedTextArea(); }

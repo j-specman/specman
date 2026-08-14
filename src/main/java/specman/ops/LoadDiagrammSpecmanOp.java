@@ -17,66 +17,107 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class LoadDiagrammSpecmanOp extends AbstractSpecmanOp {
+public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
 
   public LoadDiagrammSpecmanOp(SpecmanOpContext context) {
     super(context);
   }
 
-  public void laden() {
+  public void load() {
     File verzeichnis = (getDiagrammDatei() != null) ? getDiagrammDatei().getParentFile() : null;
     JFileChooser fileChooser = new JFileChooser(verzeichnis);
     fileChooser.setFileFilter(new FileNameExtensionFilter("Nassi Diagramme", "nsd"));
     if (fileChooser.showOpenDialog(getScrollPane()) == JFileChooser.APPROVE_OPTION) {
-      laden(fileChooser.getSelectedFile());
+      loadFromDiagrammOrWorkingCopy(fileChooser.getSelectedFile());
       resetPdfExportChooser();
     }
   }
 
-  public void laden(File diagramFile) {
-    try {
-      clearFocusHistory();
-      setChangeModeEnabled(false);
-      dropWelcomeMessage();
-      setDiagrammDatei(diagramFile);
-
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-      objectMapper.enableDefaultTyping();
-      ModelEnvelope envelope = objectMapper.readValue(getDiagrammDatei(), ModelEnvelope.class);
-      verifyModelTypeAndSpecmanVersion(envelope);
-      StruktogrammModel_V001 model = (StruktogrammModel_V001) envelope.model;
-
-      ChangeSet changeSet = ChangeSet.fromName(model.changeSetName);
-      if (changeSet != null) {
-        context.updateChangeSet(changeSet);
+  public void loadFromDiagrammOrWorkingCopy(File diagramFile) {
+    if (!confirmDiscardUnsavedChanges()) {
+      return;
+    }
+    AutoSaveOp.deleteWorkingCopyFor(getDiagrammDatei());
+    if (AutoSaveOp.workingCopyExistsFor(diagramFile)) {
+      File workingCopy = AutoSaveOp.workingCopyFor(diagramFile);
+      int choice = showConfirmDialog(
+          "A working copy for '" + diagramFile.getName() + "' is present.\n" +
+          "Specman may not have been closed properly in the last session.\n\n" +
+          "Model file: " + formatTimestamp(diagramFile) + "\n" +
+          "Working copy: " + formatTimestamp(workingCopy) + "\n\n" +
+          "Restore from working copy?",
+          "Working copy found", JOptionPane.YES_NO_OPTION);
+      if (choice == JOptionPane.YES_OPTION) {
+        load(workingCopy);
+        setDiagrammDatei(diagramFile);
+        markAsUnsavedWorkingCopy();
+      } else {
+        load(diagramFile);
       }
-      setZoomFaktor(model.zoomFaktor);
-      zoomFaktorAnzeigeAktualisieren(model.zoomFaktor);
-      KlappButton.scaleIcons(model.zoomFaktor, 0);
-      setDiagrammbreite(model.breite);
-      getIntro().setEditorContent(model.intro);
-      getOutro().setEditorContent(model.outro);
-      setPdfExportOptions(model.pdfExportOptions);
-      setDiagrammName(model.name);
-      setHauptSequenz(new SchrittSequenzView(null, model.hauptSequenz));
+      AutoSaveOp.deleteWorkingCopyFor(diagramFile);
+    } else {
+      load(diagramFile);
+    }
+    addRecentFile(diagramFile);
+  }
 
-      hauptSequenzInitialisieren();
-      quellZielZuweisung(model.queryAllSteps());
-      getHauptSequenz().viewsNachinitialisieren();
-      getIntro().viewsNachinitialisieren();
-      getIntro().registerAllExistingStepnumbers();
-      getOutro().viewsNachinitialisieren();
-      getOutro().registerAllExistingStepnumbers();
-      setChangeModeEnabled(model.changeModeenabled);
-      addRecentFile(diagramFile);
-      discardAllUndoEdits();
+  private static String formatTimestamp(File file) {
+    LocalDateTime dt = LocalDateTime.ofInstant(
+        Instant.ofEpochMilli(file.lastModified()), ZoneId.systemDefault());
+    return dt.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
+  }
+
+  private void load(File diagramFile) {
+    try {
+      loadOrThrow(diagramFile);
     }
     catch (EditException | IOException e) {
       displayException(e);
     }
+  }
+
+  void loadOrThrow(File diagramFile) throws EditException, IOException {
+    clearFocusHistory();
+    setChangeModeEnabled(false);
+    dropWelcomeMessage();
+    setDiagrammDatei(diagramFile);
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    objectMapper.enableDefaultTyping();
+    ModelEnvelope envelope = objectMapper.readValue(getDiagrammDatei(), ModelEnvelope.class);
+    verifyModelTypeAndSpecmanVersion(envelope);
+    StruktogrammModel_V001 model = (StruktogrammModel_V001) envelope.model;
+
+    ChangeSet changeSet = ChangeSet.fromName(model.changeSetName);
+    if (changeSet != null) {
+      context.updateChangeSet(changeSet);
+    }
+    setZoomFaktor(model.zoomFaktor);
+    zoomFaktorAnzeigeAktualisieren(model.zoomFaktor);
+    KlappButton.scaleIcons(model.zoomFaktor, 0);
+    setDiagrammbreite(model.breite);
+    getIntro().setEditorContent(model.intro);
+    getOutro().setEditorContent(model.outro);
+    setPdfExportOptions(model.pdfExportOptions);
+    setDiagrammName(model.name);
+    setHauptSequenz(new SchrittSequenzView(null, model.hauptSequenz));
+
+    hauptSequenzInitialisieren();
+    quellZielZuweisung(model.queryAllSteps());
+    getHauptSequenz().viewsNachinitialisieren();
+    getIntro().viewsNachinitialisieren();
+    getIntro().registerAllExistingStepnumbers();
+    getOutro().viewsNachinitialisieren();
+    getOutro().registerAllExistingStepnumbers();
+    setChangeModeEnabled(model.changeModeenabled);
+    discardAllUndoEdits();
   }
 
   private void verifyModelTypeAndSpecmanVersion(ModelEnvelope envelope) throws EditException {
