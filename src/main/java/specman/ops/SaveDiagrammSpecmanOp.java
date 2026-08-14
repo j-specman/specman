@@ -46,7 +46,7 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         setDiagrammDatei(new File(ausgewaehlterDateiname));
       }
       saveToFile(getDiagrammDatei());
-      AutoSave.deleteBackupFor(getDiagrammDatei());
+      AutoSave.deleteWorkingCopyFor(getDiagrammDatei());
       addRecentFile(getDiagrammDatei());
       discardAllUndoEdits();
     }

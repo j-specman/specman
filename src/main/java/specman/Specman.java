@@ -176,7 +176,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 						diagrammSpeichern(false);
 					}
 				}
-				AutoSave.deleteBackupFor(diagrammDatei);
+				AutoSave.deleteWorkingCopyFor(diagrammDatei);
 				dispose();
 				System.exit(0);
 			}

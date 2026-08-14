@@ -43,24 +43,24 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     if (!confirmDiscardUnsavedChanges()) {
       return;
     }
-    AutoSave.deleteBackupFor(getDiagrammDatei());
-    if (AutoSave.backupExistsFor(diagramFile)) {
-      File backupFile = AutoSave.backupFileFor(diagramFile);
+    AutoSave.deleteWorkingCopyFor(getDiagrammDatei());
+    if (AutoSave.workingCopyExistsFor(diagramFile)) {
+      File workingCopy = AutoSave.workingCopyFor(diagramFile);
       int choice = showConfirmDialog(
-          "A backup for '" + diagramFile.getName() + "' is present.\n" +
+          "A working copy for '" + diagramFile.getName() + "' is present.\n" +
           "Specman may not have been closed properly in the last session.\n\n" +
           "Model file: " + formatTimestamp(diagramFile) + "\n" +
-          "Backup file: " + formatTimestamp(backupFile) + "\n\n" +
-          "Restore from backup?",
-          "Backup found", JOptionPane.YES_NO_OPTION);
+          "Working copy: " + formatTimestamp(workingCopy) + "\n\n" +
+          "Restore from working copy?",
+          "Working copy found", JOptionPane.YES_NO_OPTION);
       if (choice == JOptionPane.YES_OPTION) {
-        load(backupFile);
+        load(workingCopy);
         setDiagrammDatei(diagramFile);
         markAsUnsavedBackup();
       } else {
         load(diagramFile);
       }
-      AutoSave.deleteBackupFor(diagramFile);
+      AutoSave.deleteWorkingCopyFor(diagramFile);
     } else {
       load(diagramFile);
     }

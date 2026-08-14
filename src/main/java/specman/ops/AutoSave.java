@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class AutoSave extends AbstractSpecmanOp {
 
-  public static final String BACKUP_EXTENSION = ".bak";
+  public static final String WORKING_COPY_EXTENSION = ".wrk";
   private static final int INTERVAL_MS = 5 * 1000;
   //private static final int INTERVAL_MS = 5 * 60 * 1000;
 
@@ -36,25 +36,25 @@ public class AutoSave extends AbstractSpecmanOp {
     }
     try (UndoRecording ur = pauseUndo();
          ScrollPause sp = pauseScrolling()) {
-      saveOp.saveToFile(backupFileFor(diagramFile));
+      saveOp.saveToFile(workingCopyFor(diagramFile));
     }
     catch (IOException e) {
       displayException(e);
     }
   }
 
-  public static File backupFileFor(File nsdFile) {
-    return new File(nsdFile.getAbsolutePath() + BACKUP_EXTENSION);
+  public static File workingCopyFor(File nsdFile) {
+    return new File(nsdFile.getAbsolutePath() + WORKING_COPY_EXTENSION);
   }
 
-  public static void deleteBackupFor(File nsdFile) {
+  public static void deleteWorkingCopyFor(File nsdFile) {
     if (nsdFile != null) {
-      backupFileFor(nsdFile).delete();
+      workingCopyFor(nsdFile).delete();
     }
   }
 
-  public static boolean backupExistsFor(File nsdFile) {
-    return nsdFile != null && backupFileFor(nsdFile).exists();
+  public static boolean workingCopyExistsFor(File nsdFile) {
+    return nsdFile != null && workingCopyFor(nsdFile).exists();
   }
 
 }
