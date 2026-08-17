@@ -10,6 +10,7 @@ import specman.*;
 import specman.model.v001.BreakSchrittModel_V001;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
+import specman.model.v002.BreakStepModel_V002;
 import specman.pdf.LineShape;
 import specman.pdf.Shape;
 import specman.undo.props.UDBL;
@@ -100,16 +101,15 @@ public class BreakSchrittView extends AbstractSchrittView {
 	}
 
 	@Override
-	public AbstractSchrittModel_V001 generiereModel(boolean formatierterText) {
-		BreakSchrittModel_V001 model = new BreakSchrittModel_V001(
-			id,
+	public BreakStepModel_V002 generiereModel(boolean formatierterText) {
+		return new BreakStepModel_V002(
+			stepId,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,
-			getQuellschrittID(),
+			null,
 			getDecorated()
 		);
-		return model;
 	}
 
 	public void catchAnkoppeln(CatchUeberschrift catchHeading) {

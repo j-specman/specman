@@ -19,6 +19,8 @@ import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.Markup_V001;
 import specman.model.v001.GeloeschtMarkierung_V001;
 import specman.model.v001.TextEditAreaModel_V001;
+import specman.model.v002.Markup_V002;
+import specman.model.v002.TextEditAreaModel_V002;
 import specman.pdf.FormattedShapeText;
 import specman.pdf.Shape;
 import specman.undo.UndoableStepnumberLinkAdded;
@@ -59,12 +61,12 @@ import static specman.editarea.markups.MarkupSearchPurpose.All;
 import static specman.editarea.markups.MarkupSearchPurpose.FirstChangeOnly;
 import static specman.Specman.editor;
 
-public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaModel_V001> {
+public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaModel_V002> {
     private static final String INITIAL_EMPTY_CONTENT_INDICATOR = "x";
 
     private WrappedElement hoveredElement;
     private ChangeInfo changeInfo;
-    private TextEditAreaModel_V001 deletionBackup;
+    private TextEditAreaModel_V002 deletionBackup;
 
     public TextEditArea(TextEditAreaModel_V001 model, Font font) {
         this.changeInfo = fromModel(model.changeInfo, model.aenderungsart);
@@ -243,18 +245,20 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         }
     }
 
-    public TextEditAreaModel_V001 getTextWithMarkups(boolean formatierterText) {
+    public TextEditAreaModel_V002 getTextWithMarkups(boolean formatierterText) {
         String text;
-        java.util.List<Markup_V001> markups = null;
+        java.util.List<Markup_V002> markups = null;
         if (formatierterText) {
             cleanupText();
-            markups = findMarkups(All);
+            markups = findMarkups(All).stream()
+                .map(m -> new Markup_V002(m.getFrom(), m.getTo(), m.getType(), m.getChangeset()))
+                .collect(Collectors.toList());
             text = getText();
         }
         else {
             text = getPlainText().replace("\n", " ").trim();
         }
-        return new TextEditAreaModel_V001(text, getPlainText(), markups, changeInfo);
+        return new TextEditAreaModel_V002(text, getPlainText(), markups, changeInfo);
     }
 
     public void cleanupText() {
@@ -548,7 +552,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     @Override
-    public TextEditAreaModel_V001 toModel(boolean formatierterText) {
+    public TextEditAreaModel_V002 toModel(boolean formatierterText) {
       return changeInfo.isDeleted()
         ? deletionBackup
         : getTextWithMarkups(formatierterText);

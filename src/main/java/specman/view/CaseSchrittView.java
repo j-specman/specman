@@ -18,6 +18,7 @@ import specman.TextInit;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.CaseSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
+import specman.model.v002.CaseStepModel_V002;
 import specman.model.v001.ZweigSchrittSequenzModel_V001;
 import specman.pdf.Shape;
 import specman.editarea.Indentions;
@@ -260,18 +261,18 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	}
 
 	@Override
-	public AbstractSchrittModel_V001 generiereModel(boolean formatierterText) {
-		CaseSchrittModel_V001 model = new CaseSchrittModel_V001(
-			id,
+	public CaseStepModel_V002 generiereModel(boolean formatierterText) {
+		CaseStepModel_V002 model = new CaseStepModel_V002(
+			stepId,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,
 			klappen.isSelected(),
 			sonstSequenz.generiereZweigSchrittSequenzModel(formatierterText),
 			new ArrayList<Float>(spaltenbreitenAnteileBerechnen(spaltenbreitenErmitteln())),
-			getQuellschrittID(),
+			null,
 			getDecorated());
-		caseSequenzen.forEach(sequenz -> model.caseHinzufuegen(sequenz.generiereZweigSchrittSequenzModel(formatierterText)));
+		caseSequenzen.forEach(sequenz -> model.addCase(sequenz.generiereZweigSchrittSequenzModel(formatierterText)));
 		return model;
 	}
 

@@ -13,6 +13,8 @@ import specman.Specman;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.IfSchrittModel_V001;
 import specman.model.v001.AbstractSchrittModel_V001;
+import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.IfStepModel_V002;
 import specman.editarea.EditContainer;
 import specman.undo.props.UDBL;
 
@@ -102,17 +104,17 @@ public class IfSchrittView extends IfElseSchrittView {
 	}
 
 	@Override
-	public AbstractSchrittModel_V001 generiereModel(boolean formatierterText) {
-		IfSchrittModel_V001 model = new IfSchrittModel_V001(
-			id,
+	public AbstractStepModel_V002 generiereModel(boolean formatierterText) {
+		return new IfStepModel_V002(
+			stepId,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			getDecorated(),
 			klappen.isSelected(),
 			changeInfo,
 			elseSequenz.generiereZweigSchrittSequenzModel(formatierterText),
-			ifSequenz.ueberschrift.getWidth(), getQuellschrittID());
-		return model;
+			ifSequenz.ueberschrift.getWidth(),
+			null);
 	}
 	
 	public void setBackgroundUDBL(Color bg) {

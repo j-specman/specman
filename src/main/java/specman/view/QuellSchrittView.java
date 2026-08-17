@@ -8,6 +8,7 @@ import static specman.util.ObjectUtils.nvl;
 import specman.SchrittID;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.QuellSchrittModel_V001;
+import specman.model.v002.SourceStepModel_V002;
 import specman.undo.props.UDBL;
 
 import javax.swing.*;
@@ -34,16 +35,15 @@ public class QuellSchrittView extends AbstractSchrittView {
     public JComponent getDecoratedComponent() { return decorated(editContainer); }
 
     @Override
-    public QuellSchrittModel_V001 generiereModel(boolean formatierterText) {
-        QuellSchrittModel_V001 model = new QuellSchrittModel_V001(
-            id,
+    public SourceStepModel_V002 generiereModel(boolean formatierterText) {
+        return new SourceStepModel_V002(
+            stepId,
             getEditorContent(formatierterText),
             getBackground().getRGB(),
             changeInfo,
-            getZielschrittID(),
+            null,
             getDecorated()
         );
-        return model;
     }
 
     @Override

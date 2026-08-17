@@ -30,6 +30,9 @@ import specman.model.v001.QuellSchrittModel_V001;
 import specman.model.v001.SubsequenzSchrittModel_V001;
 import specman.model.v001.WhileSchrittModel_V001;
 import specman.model.v001.WhileWhileSchrittModel_V001;
+import specman.model.v001.EditorContentModel_V001;
+import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.EditorContentModel_V002;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
 import specman.draganddrop.LocalCursor;
@@ -51,6 +54,7 @@ import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Zielschritt;
@@ -76,6 +80,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	protected final EditContainer editContainer;
 	protected SchrittID id;
+	protected UUID stepId = UUID.randomUUID();
 	protected ChangeInfo changeInfo;
 	protected SchrittSequenzView parent;
 	protected RoundedBorderDecorator roundedBorderDecorator;
@@ -121,8 +126,13 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return direction == RelativeStepPosition.After ? id.naechsteID() : id.sameID();
 	}
 
-	protected EditorContentModel_V001 getEditorContent(boolean formatierterText) {
+	protected EditorContentModel_V002 getEditorContent(boolean formatierterText) {
 		return editContainer.editorContent2Model(formatierterText);
+	}
+
+	/** UI-sync bridge: returns V001 content for paths that still operate with V001 (e.g. catch heading ↔ break step). */
+	EditorContentModel_V001 getEditorContentV1(boolean formatierterText) {
+		return editContainer.editorContent2ModelV1(formatierterText);
 	}
 
 	public void setBackgroundUDBL(Color bg) {
@@ -163,7 +173,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		editContainer.schrittnummerAnzeigen(sichtbar);
 	}
 
-	abstract public AbstractSchrittModel_V001 generiereModel(boolean formatierterText);
+	abstract public AbstractStepModel_V002 generiereModel(boolean formatierterText);
 
 	public static AbstractSchrittView baueSchrittView( SchrittSequenzView parent, AbstractSchrittModel_V001 model) {
 		if (model instanceof WhileWhileSchrittModel_V001) {

@@ -19,6 +19,8 @@ import specman.graphics.Styles;
 import specman.model.v001.CatchSchrittSequenzModel_V001;
 import specman.model.v001.CoCatchModel_V001;
 import specman.model.v001.EditorContentModel_V001;
+import specman.model.v002.CatchSequenceModel_V002;
+import specman.model.v002.CoCatchModel_V002;
 import specman.pdf.Shape;
 import specman.undo.UndoableCatchSequenceRemoved;
 import specman.undo.UndoableCoCatchAdded;
@@ -56,7 +58,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   List<CatchUeberschrift> coCatchHeadings = new ArrayList<>();
 
   public CatchSchrittSequenzView(CatchBereich catchBereich, BreakSchrittView linkedBreakStep, ChangeInfo changeInfo) {
-    super(catchBereich, linkedBreakStep.id.naechsteEbene(), linkedBreakStep.getEditorContent(true), changeInfo);
+    super(catchBereich, linkedBreakStep.id.naechsteEbene(), linkedBreakStep.getEditorContentV1(true), changeInfo);
     einfachenSchrittAnhaengen();
     init(linkedBreakStep, null, TextInit.initialChangeInfo());
     initHeadingsLayout();
@@ -150,7 +152,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
 
   public void addCoCatchUDBL(CatchUeberschrift referenceCatchHeading, BreakSchrittView breakStepToLink) {
     int insertionIndex = coCatchHeadings.indexOf(referenceCatchHeading) + 1;
-    EditorContentModel_V001 breakStepContent = breakStepToLink.getEditorContent(true);
+    EditorContentModel_V001 breakStepContent = breakStepToLink.getEditorContentV1(true);
     CatchUeberschrift coCatchHeading = addCoCatch(insertionIndex, breakStepContent, breakStepToLink, TextInit.initialChangeInfo());
     initHeadingsLayout();
     editor().addEdit(new UndoableCoCatchAdded(this, breakStepToLink, insertionIndex, coCatchHeading));
@@ -336,10 +338,10 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     headingRightBarPanel.setBackground(Styles.BACKGROUND_COLOR_STANDARD);
   }
 
-  public CatchSchrittSequenzModel_V001 generiereModel(boolean formatierterText) {
-    List<CoCatchModel_V001> coCatches = generateCoCatchModels(formatierterText);
-    CatchSchrittSequenzModel_V001 model = new CatchSchrittSequenzModel_V001(
-      primaryCatchHeading.linkedBreakStepId(),
+  public CatchSequenceModel_V002 generiereModel(boolean formatierterText) {
+    List<CoCatchModel_V002> coCatches = generateCoCatchModels(formatierterText);
+    CatchSequenceModel_V002 model = new CatchSequenceModel_V002(
+      primaryCatchHeading.linkedBreakStepUUID(),
       changeInfo,
       ueberschrift.editorContent2Model(formatierterText),
       coCatches,
@@ -348,7 +350,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     return model;
   }
 
-  private List<CoCatchModel_V001> generateCoCatchModels(boolean formatierterText) {
+  private List<CoCatchModel_V002> generateCoCatchModels(boolean formatierterText) {
     return new ArrayList<>(coCatchHeadings
       .stream()
       .map(coCatchHeading -> coCatchHeading.toModel(formatierterText))

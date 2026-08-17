@@ -10,6 +10,7 @@ import specman.draganddrop.UnsupportedDragSourceException;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.SubsequenzSchrittModel_V001;
+import specman.model.v002.SubsequenceStepModel_V002;
 import specman.pdf.Shape;
 import specman.editarea.Indentions;
 import specman.undo.props.UDBL;
@@ -137,18 +138,17 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 	}
 
 	@Override
-	public AbstractSchrittModel_V001 generiereModel(boolean formatierterText) {
-		SubsequenzSchrittModel_V001 model = new SubsequenzSchrittModel_V001(
-			id,
+	public SubsequenceStepModel_V002 generiereModel(boolean formatierterText) {
+		return new SubsequenceStepModel_V002(
+			stepId,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,
 			klappen.isSelected(),
 			subsequenz.generiereSchrittSequenzModel(formatierterText),
-			getQuellschrittID(),
+			null,
 			getDecorated(),
-      flatNumbering);
-		return model;
+			flatNumbering);
 	}
 
 	@Override public int aenderungenUebernehmen() throws EditException {

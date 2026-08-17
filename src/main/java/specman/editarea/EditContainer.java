@@ -21,6 +21,8 @@ import specman.model.v001.ImageEditAreaModel_V001;
 import specman.model.v001.ListItemEditAreaModel_V001;
 import specman.model.v001.TableEditAreaModel_V001;
 import specman.model.v001.TextEditAreaModel_V001;
+import specman.model.v002.AbstractEditAreaModel_V002;
+import specman.model.v002.EditorContentModel_V002;
 import specman.undo.UndoableListItemDissolved;
 import specman.undo.props.UDBL;
 import specman.pdf.Shape;
@@ -228,8 +230,16 @@ public class EditContainer extends JPanel {
 		schrittNummer.setStepNumber(id);
 	}
 
-	public EditorContentModel_V001 editorContent2Model(boolean formatierterText) {
-		List<AbstractEditAreaModel_V001> areaModels = editAreas.stream().map(ea -> ea.toModel(formatierterText)).collect(Collectors.toList());
+	public EditorContentModel_V002 editorContent2Model(boolean formatierterText) {
+		List<AbstractEditAreaModel_V002> areaModels = editAreas.stream().map(ea -> ea.toModel(formatierterText)).collect(Collectors.toList());
+		return new EditorContentModel_V002(areaModels);
+	}
+
+	/** Used only for UI-sync paths (e.g. break step ↔ catch heading) that still operate with V001. */
+	public EditorContentModel_V001 editorContent2ModelV1(boolean formatierterText) {
+		List<AbstractEditAreaModel_V001> areaModels = editAreas.stream()
+			.map(ea -> (AbstractEditAreaModel_V001) new specman.model.v001.TextEditAreaModel_V001(ea.getPlainText()))
+			.collect(Collectors.toList());
 		return new EditorContentModel_V001(areaModels);
 	}
 

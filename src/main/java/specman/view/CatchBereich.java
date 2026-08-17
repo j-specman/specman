@@ -24,6 +24,8 @@ import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.CatchBereichModel_V001;
 import specman.model.v001.CatchSchrittSequenzModel_V001;
 import specman.model.v001.EditorContentModel_V001;
+import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.CatchAreaModel_V002;
 import specman.pdf.Shape;
 import specman.undo.UndoableCatchSequenceAdded;
 
@@ -86,7 +88,7 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
   }
 
   @Override
-  public AbstractSchrittModel_V001 generiereModel(boolean formatierterText) {
+  public AbstractStepModel_V002 generiereModel(boolean formatierterText) {
     return null;
   }
 
@@ -284,8 +286,8 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
     return sequenzenAuflisten(catchSequences);
   }
 
-  public CatchBereichModel_V001 generiereCatchBereichModel(boolean formatierterText) {
-    CatchBereichModel_V001 model = new CatchBereichModel_V001(sequencesWidthPercent, klappen.isSelected());
+  public CatchAreaModel_V002 generiereCatchBereichModel(boolean formatierterText) {
+    CatchAreaModel_V002 model = new CatchAreaModel_V002(sequencesWidthPercent, klappen.isSelected());
     for (CatchSchrittSequenzView seq: catchSequences) {
       model.catchSequences.add(seq.generiereModel(formatierterText));
     }

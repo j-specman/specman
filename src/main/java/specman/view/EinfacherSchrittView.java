@@ -5,6 +5,7 @@ import specman.EditorI;
 import specman.SchrittID;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.EinfacherSchrittModel_V001;
+import specman.model.v002.SimpleStepModel_V002;
 
 import javax.swing.*;
 
@@ -22,16 +23,15 @@ public class EinfacherSchrittView extends AbstractSchrittView {
 	public JComponent getDecoratedComponent() { return decorated(editContainer); }
 
 	@Override
-	public EinfacherSchrittModel_V001 generiereModel(boolean formatierterText) {
-		EinfacherSchrittModel_V001 model = new EinfacherSchrittModel_V001(
-			id,
+	public SimpleStepModel_V002 generiereModel(boolean formatierterText) {
+		return new SimpleStepModel_V002(
+			stepId,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,
-			getQuellschrittID(),
+			null,
 			getDecorated()
 		);
-		return model;
 	}
 
 	@Override

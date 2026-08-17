@@ -11,6 +11,7 @@ import static specman.ChangeSet.changeset;
 import specman.editarea.EditContainer;
 import specman.model.v001.CoCatchModel_V001;
 import specman.model.v001.EditorContentModel_V001;
+import specman.model.v002.CoCatchModel_V002;
 import specman.pdf.LineShape;
 import specman.pdf.Shape;
 import specman.undo.props.UDBL;
@@ -147,14 +148,14 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
 
   public void updateLinkedBreakStepContent() {
     if (!isDeleted()) {
-      EditorContentModel_V001 content = ueberschrift.editorContent2Model(true);
+      EditorContentModel_V001 content = ueberschrift.editorContent2ModelV1(true);
       linkedBreakStep.updateContent(content, changeInfo.changeSet());
     }
   }
 
   public void updateFromBreakStepContent() {
     if (!catchSequence.isDeleted() && !this.isDeleted()) {
-      EditorContentModel_V001 breakStepContent = linkedBreakStep.getEditorContent(true);
+      EditorContentModel_V001 breakStepContent = linkedBreakStep.getEditorContentV1(true);
       ueberschrift.setEditorContent(breakStepContent);
       ChangeSet breakStepChangeSet = linkedBreakStep.getChangeInfo().changeSet();
       ChangeSet headingChangeSet = changeInfo.changeSet();
@@ -166,6 +167,10 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
 
   public SchrittID linkedBreakStepId() {
     return linkedBreakStep.id;
+  }
+
+  public java.util.UUID linkedBreakStepUUID() {
+    return linkedBreakStep.stepId;
   }
 
   public void scrollToBreak() {
@@ -209,9 +214,9 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
 
   public void moveDownUDBL() { catchSequence.moveDownUDBL(this); }
 
-  public CoCatchModel_V001 toModel(boolean formatierterText) {
-    return new CoCatchModel_V001(
-      linkedBreakStepId(),
+  public CoCatchModel_V002 toModel(boolean formatierterText) {
+    return new CoCatchModel_V002(
+      linkedBreakStepUUID(),
       ueberschrift.editorContent2Model(formatierterText),
       changeInfo);
   }

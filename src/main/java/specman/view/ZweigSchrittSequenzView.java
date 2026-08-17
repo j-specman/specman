@@ -9,6 +9,7 @@ import specman.SchrittID;
 import specman.TextInit;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.ZweigSchrittSequenzModel_V001;
+import specman.model.v002.BranchSequenceModel_V002;
 import specman.editarea.EditContainer;
 import specman.editarea.Indentions;
 import specman.editarea.InteractiveStepFragment;
@@ -48,9 +49,9 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 		ueberschrift.skalieren(prozentNeu, prozentAktuell);
 	}
 
-	public ZweigSchrittSequenzModel_V001 generiereZweigSchrittSequenzModel(boolean formatierterText) {
-		ZweigSchrittSequenzModel_V001 model = new ZweigSchrittSequenzModel_V001(
-				sequenzBasisId,
+	public BranchSequenceModel_V002 generiereZweigSchrittSequenzModel(boolean formatierterText) {
+		BranchSequenceModel_V002 model = new BranchSequenceModel_V002(
+				sequenceId,
 				changeInfo,
 				catchBereich.generiereCatchBereichModel(formatierterText),
 				ueberschrift.editorContent2Model(formatierterText));

@@ -16,6 +16,7 @@ import specman.TextInit;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.SchrittSequenzModel_V001;
+import specman.model.v002.StepSequenceModel_V002;
 import specman.pdf.Shape;
 import specman.editarea.EditContainer;
 import specman.editarea.Indentions;
@@ -28,6 +29,7 @@ import javax.swing.text.JTextComponent;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static specman.Aenderungsart.Geloescht;
@@ -52,6 +54,7 @@ public class SchrittSequenzView {
 	public static final String ZEILENLAYOUT_CATCHBEREICH = "pref";
 
 	SchrittID sequenzBasisId;
+	protected UUID sequenceId = UUID.randomUUID();
 	ChangeInfo changeInfo = ChangeInfo.untracked();
 	final JPanel sequenzBereich;
 	CatchBereich catchBereich;
@@ -410,17 +413,17 @@ public class SchrittSequenzView {
 		return (catchBereich != null) ? catchBereich.findeSchritt(fragment) : null;
 	}
 
-	public SchrittSequenzModel_V001 generiereSchrittSequenzModel(boolean formatierterText) {
-		SchrittSequenzModel_V001 model = new SchrittSequenzModel_V001(
-			sequenzBasisId, changeInfo,
+	public StepSequenceModel_V002 generiereSchrittSequenzModel(boolean formatierterText) {
+		StepSequenceModel_V002 model = new StepSequenceModel_V002(
+			sequenceId, changeInfo,
 			catchBereich.generiereCatchBereichModel(formatierterText));
 		populateModel(model, formatierterText);
 		return model;
 	}
 
-	protected void populateModel(SchrittSequenzModel_V001 model, boolean formatierterText) {
+	protected void populateModel(StepSequenceModel_V002 model, boolean formatierterText) {
 		for (AbstractSchrittView view : schritte) {
-			model.schritte.add(view.generiereModel(formatierterText));
+			model.steps.add(view.generiereModel(formatierterText));
 		}
 	}
 

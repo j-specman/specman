@@ -18,6 +18,8 @@ import specman.TextInit;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.IfElseSchrittModel_V001;
+import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.IfElseStepModel_V002;
 import specman.pdf.Shape;
 import specman.editarea.EditContainer;
 import specman.editarea.Indentions;
@@ -226,9 +228,9 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 	}
 
 	@Override
-	public AbstractSchrittModel_V001 generiereModel(boolean formatierterText) {
-		IfElseSchrittModel_V001 model = new IfElseSchrittModel_V001(
-			id,
+	public AbstractStepModel_V002 generiereModel(boolean formatierterText) {
+		return new IfElseStepModel_V002(
+			stepId,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			getDecorated(),
@@ -236,8 +238,8 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 			changeInfo,
 			ifSequenz.generiereZweigSchrittSequenzModel(formatierterText),
 			elseSequenz.generiereZweigSchrittSequenzModel(formatierterText),
-			ifBreitenanteil(ifSequenz.ueberschrift.getWidth(), elseSequenz.ueberschrift.getWidth()), getQuellschrittID());
-		return model;
+			ifBreitenanteil(ifSequenz.ueberschrift.getWidth(), elseSequenz.ueberschrift.getWidth()),
+			null);
 	}
 
 	/**

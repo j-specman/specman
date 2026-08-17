@@ -17,6 +17,8 @@ import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.TableEditAreaModel_V001;
 import specman.model.v001.TextEditAreaModel_V001;
+import specman.model.v002.EditorContentModel_V002;
+import specman.model.v002.TableEditAreaModel_V002;
 import specman.pdf.Shape;
 import specman.undo.UndoableTableColumnAdded;
 import specman.undo.UndoableTableColumnRemoved;
@@ -58,7 +60,7 @@ import static specman.Specman.editor;
  * the panel itself is black and the table cells are placed as children with a little
  * gap between them. This causes the black panel background to shine through the gaps,
  * creating the impression of lines. */
-public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel_V001>, SpaltenContainerI {
+public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel_V002>, SpaltenContainerI {
   private static final int BORDER_THICKNESS = 7;
   private static final String TABLELINE_GAP = FORMLAYOUT_GAP;
   private static final String TABLELAYOUT_ROWSPEC = ZEILENLAYOUT_INHALT_SICHTBAR;
@@ -209,16 +211,16 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   @Override
-  public TableEditAreaModel_V001 toModel(boolean formatierterText) {
-    List<List<EditorContentModel_V001>> cellsModel = new ArrayList<>();
+  public TableEditAreaModel_V002 toModel(boolean formatierterText) {
+    List<List<EditorContentModel_V002>> cellsModel = new ArrayList<>();
     for (List<EditContainer> row: cells) {
-      List<EditorContentModel_V001> rowModel = row
+      List<EditorContentModel_V002> rowModel = row
         .stream()
         .map(ec -> ec.editorContent2Model(formatierterText))
         .collect(Collectors.toList());
       cellsModel.add(rowModel);
     }
-    return new TableEditAreaModel_V001(cellsModel, tableWidthPercent, columnsWidthPercent, changeInfo);
+    return new TableEditAreaModel_V002(cellsModel, tableWidthPercent, columnsWidthPercent, changeInfo);
   }
 
   @Override

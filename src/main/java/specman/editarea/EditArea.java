@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
-import specman.model.v001.AbstractEditAreaModel_V001;
+import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.pdf.Shape;
 
 import javax.swing.border.Border;
@@ -15,7 +15,7 @@ import java.awt.event.FocusListener;
 import java.util.HashMap;
 import java.util.List;
 
-public interface EditArea<MODEL extends AbstractEditAreaModel_V001> extends InteractiveStepFragment {
+public interface EditArea<MODEL extends AbstractEditAreaModel_V002> extends InteractiveStepFragment {
   void addSchrittnummer(StepnumberLabel schrittNummer);
 
   int getWidth();

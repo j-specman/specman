@@ -554,13 +554,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	@Override
 	public void exportAsGraphviz() {
-		SchrittSequenzModel_V001 model = hauptSequenz.generiereSchrittSequenzModel(false);
-		try {
-			new GraphvizExporter("export.gv").export(model);
-		}
-		catch(IOException iox) {
-      displayException(iox);
-		}
+		// TODO: GraphvizExporter auf V002 umstellen
 	}
 
 	public void exportAsPDF() {

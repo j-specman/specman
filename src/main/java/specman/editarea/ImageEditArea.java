@@ -12,6 +12,7 @@ import specman.editarea.focusmover.CrossEditAreaFocusMoverFromImage;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.ChangeInfo_V001;
 import specman.model.v001.ImageEditAreaModel_V001;
+import specman.model.v002.ImageEditAreaModel_V002;
 import specman.pdf.Shape;
 import specman.pdf.ShapeImage;
 import specman.undo.UndoableEditAreaAdded;
@@ -52,7 +53,7 @@ import static specman.view.AbstractSchrittView.FORMLAYOUT_GAP;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
 import static specman.Specman.editor;
 
-public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel_V001>,
+public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel_V002>,
   FocusListener, MouseListener, KeyListener, ComponentListener, SpaltenContainerI {
   public static final String PERSISTED_IMAGETYPE = "png";
 
@@ -316,11 +317,11 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   public Component asComponent() { return this; }
 
   @Override
-  public ImageEditAreaModel_V001 toModel(boolean formatierterText) {
+  public ImageEditAreaModel_V002 toModel(boolean formatierterText) {
     try {
       ByteArrayOutputStream bytes = new ByteArrayOutputStream();
       ImageIO.write(fullSizeImage, PERSISTED_IMAGETYPE, bytes);
-      return new ImageEditAreaModel_V001(bytes.toByteArray(), PERSISTED_IMAGETYPE, changeInfo, individualScalePercent);
+      return new ImageEditAreaModel_V002(bytes.toByteArray(), PERSISTED_IMAGETYPE, individualScalePercent, changeInfo);
     }
     catch (IOException iox) {
       throw new RuntimeException(iox);

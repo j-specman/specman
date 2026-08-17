@@ -1,11 +1,14 @@
 package specman.ops;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import specman.ScrollPause;
 import specman.SpecmanVersion;
 import static specman.ChangeSet.changeset;
 import specman.model.ModelEnvelope;
 import specman.model.v001.StruktogrammModel_V001;
+import specman.model.v002.DiagramModel_V002;
+import specman.model.v002.PdfExportOptionsModel_V002;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -62,10 +65,10 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
   }
 
   byte[] generateBytes() throws IOException {
-    StruktogrammModel_V001 model = generiereStruktogrammModel(true);
+    DiagramModel_V002 model = generiereStruktogrammModel(true);
     ModelEnvelope wrappedModel = wrapModel(model);
     ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.enableDefaultTyping();
+    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(wrappedModel);
   }
 
@@ -75,8 +78,8 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
     }
   }
 
-  private StruktogrammModel_V001 generiereStruktogrammModel(boolean formatierterText) {
-    return new StruktogrammModel_V001(
+  private DiagramModel_V002 generiereStruktogrammModel(boolean formatierterText) {
+    return new DiagramModel_V002(
         getDiagrammName(),
         getDiagrammbreite(),
         getZoomFactor(),
@@ -84,11 +87,11 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         getHauptSequenz().generiereSchrittSequenzModel(formatierterText),
         getIntro().editorContent2Model(formatierterText),
         getOutro().editorContent2Model(formatierterText),
-        getPdfExportOptions(),
+        PdfExportOptionsModel_V002.from(getPdfExportOptions()),
         changeset().name);
   }
 
-  private ModelEnvelope wrapModel(StruktogrammModel_V001 model) {
+  private ModelEnvelope wrapModel(DiagramModel_V002 model) {
     ModelEnvelope envelope = new ModelEnvelope();
     envelope.model = model;
     envelope.modelType = model.getClass().getName();

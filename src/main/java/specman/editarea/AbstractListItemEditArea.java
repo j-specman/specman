@@ -13,6 +13,8 @@ import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v001.ChangeInfo_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.ListItemEditAreaModel_V001;
+import specman.model.v002.EditorContentModel_V002;
+import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.undo.UndoableListItemSplitted;
 import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
@@ -29,7 +31,7 @@ import static specman.ChangeInfo.fromModel;
 import static specman.ChangeSet.changeset;
 import static specman.Specman.editor;
 
-abstract public class AbstractListItemEditArea extends JPanel implements EditArea<ListItemEditAreaModel_V001> {
+abstract public class AbstractListItemEditArea extends JPanel implements EditArea<ListItemEditAreaModel_V002> {
   static final int DEFAULT_PROMPT_SPACE = 20;
   protected EditContainer content;
   protected ChangeInfo changeInfo;
@@ -89,9 +91,9 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   }
 
   @Override
-  public ListItemEditAreaModel_V001 toModel(boolean formatierterText) {
-    EditorContentModel_V001 contentModel = content.editorContent2Model(formatierterText);
-    return new ListItemEditAreaModel_V001(contentModel, ordered(), changeInfo);
+  public ListItemEditAreaModel_V002 toModel(boolean formatierterText) {
+    EditorContentModel_V002 contentModel = content.editorContent2Model(formatierterText);
+    return new ListItemEditAreaModel_V002(contentModel, ordered(), changeInfo);
   }
 
   abstract protected boolean ordered();

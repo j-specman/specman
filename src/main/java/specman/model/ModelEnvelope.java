@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import specman.model.v001.StruktogrammModel_V001;
+import specman.model.v002.DiagramModel_V002;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -37,6 +38,7 @@ public class ModelEnvelope {
     @JsonTypeInfo(use = Id.CLASS, include = As.EXTERNAL_PROPERTY, property = "modelType")
     @JsonSubTypes(value = {
             @Type(value = StruktogrammModel_V001.class),
+            @Type(value = DiagramModel_V002.class),
     })
     public Object model;
 

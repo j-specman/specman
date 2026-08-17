@@ -6,6 +6,7 @@ import specman.SchrittID;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.WhileWhileSchrittModel_V001;
+import specman.model.v002.DoWhileStepModel_V002;
 
 /**
  * Spezielle Anzeige einer While-Schleife mit einem abschließenden unteren Balken.
@@ -35,18 +36,17 @@ public class WhileWhileSchrittView extends SchleifenSchrittView {
 	@Override public boolean dropTargetSuppressesAscentToParent() { return true; }
 
 	@Override
-	public AbstractSchrittModel_V001 generiereModel(boolean formatierterText) {
-		WhileWhileSchrittModel_V001 model = new WhileWhileSchrittModel_V001(
-			id,
+	public DoWhileStepModel_V002 generiereModel(boolean formatierterText) {
+		return new DoWhileStepModel_V002(
+			stepId,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,
 			klappen.isSelected(),
 			wiederholSequenz.generiereSchrittSequenzModel(formatierterText),
 			linkerBalken.getWidth(),
-			getQuellschrittID(),
+			null,
 			getDecorated());
-		return model;
 	}
 
 }

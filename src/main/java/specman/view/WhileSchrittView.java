@@ -6,6 +6,7 @@ import specman.SchrittID;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.EditorContentModel_V001;
 import specman.model.v001.WhileSchrittModel_V001;
+import specman.model.v002.WhileStepModel_V002;
 
 public class WhileSchrittView extends SchleifenSchrittView {
 	
@@ -29,18 +30,17 @@ public class WhileSchrittView extends SchleifenSchrittView {
 	}
 	
 	@Override
-	public AbstractSchrittModel_V001 generiereModel(boolean formatierterText) {
-		WhileSchrittModel_V001 model = new WhileSchrittModel_V001(
-			id,
+	public WhileStepModel_V002 generiereModel(boolean formatierterText) {
+		return new WhileStepModel_V002(
+			stepId,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,
 			klappen.isSelected(),
 			wiederholSequenz.generiereSchrittSequenzModel(formatierterText),
 			linkerBalken.getWidth(),
-			getQuellschrittID(),
+			null,
 			getDecorated());
-		return model;
 	}
 
 }
