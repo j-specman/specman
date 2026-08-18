@@ -1,9 +1,7 @@
 package specman.editarea.stepnumberlabel;
 
 import org.apache.commons.lang.math.IntRange;
-import specman.SchrittID;
-import specman.Specman;
-import static specman.ChangeSet.changeset;
+import specman.StepNumber;
 import specman.draganddrop.DragMouseAdapter;
 import specman.editarea.InteractiveStepFragment;
 import specman.pdf.LineShape;
@@ -16,10 +14,9 @@ import javax.swing.border.Border;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
 
-import static specman.SchrittID.asString;
+import static specman.StepNumber.asString;
 import specman.ChangeSet;
-import specman.Specman;
-import static specman.ChangeSet.changeset;
+
 import static specman.graphics.Styles.DELETED_BACKGROUND_COLOR;
 import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
 import static specman.graphics.Styles.SCHRITTNUMMER_VORDERGRUNDFARBE;
@@ -37,7 +34,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
 
   private LabelStructure structure;
 
-  public StepnumberLabel(SchrittID stepNumber) {
+  public StepnumberLabel(StepNumber stepNumber) {
     super(String.valueOf(stepNumber));
 
     structure = LabelStructure.Standard;
@@ -54,7 +51,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
     addMouseListener(StepnumberContextMenu.instance);
   }
 
-  public void setStepNumber(SchrittID stepNumber) {
+  public void setStepNumber(StepNumber stepNumber) {
     NumberPair numbers = splitText();
     setTextUDBL(stepNumber.toString(), numbers.related);
   }
@@ -133,7 +130,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
     return structure == LabelStructure.Standard && getBackground() == DELETED_BACKGROUND_COLOR.color;
   }
 
-  public void setStandardStyle(SchrittID id) {
+  public void setStandardStyle(StepNumber id) {
     setBorder(STANDARD_BORDER);
     setBackground(SCHRITTNUMMER_FARBE.color);
     setForeground(SCHRITTNUMMER_VORDERGRUNDFARBE);
@@ -141,7 +138,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
     setText(id.toString());
   }
 
-  public void setTargetStyleUDBL(SchrittID quellschrittId, ChangeSet changeset) {
+  public void setTargetStyleUDBL(StepNumber quellschrittId, ChangeSet changeset) {
     setStructureUDBL(LabelStructure.Target);
     setBorderUDBL(CHANGED_BORDER);
     setBackgroundUDBL(changeset.panelColor());
@@ -149,7 +146,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
     resyncSourceSuffixUDBL(quellschrittId);
   }
 
-  public void setSourceStyle(SchrittID zielschrittID) {
+  public void setSourceStyle(StepNumber zielschrittID) {
     setStructure(LabelStructure.Source);
     setBorder(DELETED_BORDER);
     setBackground(DELETED_BACKGROUND_COLOR.color);
@@ -168,20 +165,20 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
     }
   }
 
-  public void resyncTargetSuffixUDBL(SchrittID targetStepNumber) {
+  public void resyncTargetSuffixUDBL(StepNumber targetStepNumber) {
     resyncRelatedStepNumberUDBL(targetStepNumber);
   }
 
-  public void resyncSourceSuffixUDBL(SchrittID sourceStepNumber) {
+  public void resyncSourceSuffixUDBL(StepNumber sourceStepNumber) {
     resyncRelatedStepNumberUDBL(sourceStepNumber);
   }
 
-  private void resyncRelatedStepNumberUDBL(SchrittID relatedStepNumber) {
+  private void resyncRelatedStepNumberUDBL(StepNumber relatedStepNumber) {
     NumberPair numbers = splitText();
     setTextUDBL(numbers.own, relatedStepNumber.toString());
   }
 
-  public void setDeletedStyleUDBL(SchrittID id) {
+  public void setDeletedStyleUDBL(StepNumber id) {
     setStructureUDBL(LabelStructure.Standard);
     setBorderUDBL(DELETED_BORDER);
     setBackgroundUDBL(DELETED_BACKGROUND_COLOR.color);

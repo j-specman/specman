@@ -3,20 +3,15 @@ package specman.editarea;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import org.jetbrains.annotations.NotNull;
-import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.ChangeSet;
+import specman.Aenderungsart;
 import specman.EditorI;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.TextInit;
-import specman.model.v001.ChangeInfo_V001;
 import static specman.ChangeSet.changeset;
-import static specman.ChangeInfo.fromModel;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
-import specman.model.v001.EditorContentModel_V001;
-import specman.model.v001.TableEditAreaModel_V001;
-import specman.model.v001.TextEditAreaModel_V001;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.TableEditAreaModel_V002;
 import specman.pdf.Shape;
@@ -83,14 +78,14 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     addInitialCells(columns, rows);
   }
 
-  public TableEditArea(TableEditAreaModel_V001 model) {
-    this.changeInfo = fromModel(model.changeInfo, model.aenderungsart);
+  public TableEditArea(TableEditAreaModel_V002 model) {
+    this.changeInfo = model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED;
     this.tableWidthPercent = model.tableWidthPercent;
     this.columnsWidthPercent = model.columnsWidthPercent;
     int rows = model.cells.size();
     int columns = model.cells.get(0).size();
     initPanels(columns, rows);
-    addCells(model.cells);
+    addCellsV2(model.cells);
   }
 
   private Stream<EditContainer> cellstream() { return cells.stream().flatMap(l -> l.stream()); }
@@ -157,11 +152,11 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     cellstream().forEach(cell -> cell.addEditComponentListener(l));
   }
 
-  private void addCells(List<List<EditorContentModel_V001>> model) {
+  private void addCellsV2(List<List<EditorContentModel_V002>> model) {
     for (int r = 0; r < model.size(); r++) {
-      List<EditorContentModel_V001> rowModel = model.get(r);
+      List<EditorContentModel_V002> rowModel = model.get(r);
       cells.add(new ArrayList<>());
-      for (EditorContentModel_V001 cellModel: rowModel) {
+      for (EditorContentModel_V002 cellModel : rowModel) {
         addCell(r, new EditContainer(cellModel, null));
       }
     }
@@ -189,8 +184,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   private void addCell(int rowIndex, String content, ChangeInfo changeInfo) {
-    TextEditArea initialContentArea = new TextEditArea(new TextEditAreaModel_V001(content, content, new ArrayList<>(), changeInfo), Styles.DEFAULTFONT);
-    addCell(rowIndex, new EditContainer(initialContentArea, null));
+    addCell(rowIndex, new EditContainer(new EditorContentModel_V002(content, changeInfo), null));
   }
 
   private void createTablePanelLayout(int columns, int rows) {

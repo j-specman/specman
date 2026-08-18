@@ -2,7 +2,7 @@ package specman.editarea.markups;
 
 import specman.editarea.document.WrappedDocumentI;
 import specman.editarea.document.WrappedPosition;
-import specman.model.v001.Markup_V001;
+import specman.model.v002.Markup_V002;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,7 +24,7 @@ public class MarkupRecovery {
     this.sourceProgress = 0;
   }
 
-  public List<Markup_V001> recover() {
+  public List<Markup_V002> recover() {
     WrappedPosition nextTargetVisibleCharSeqStart;
     Integer nextSourceVisibleCharSeqStart;
     do {
@@ -89,15 +89,15 @@ public class MarkupRecovery {
     return null;
   }
 
-  private List<Markup_V001> assembleMarkupsFromMarkupsPerChar() {
-    List<Markup_V001> changemarks = new java.util.ArrayList<>();
+  private List<Markup_V002> assembleMarkupsFromMarkupsPerChar() {
+    List<Markup_V002> changemarks = new java.util.ArrayList<>();
     Integer markStart = null;
     TextMarkup lastMarkup = null;
     for (int i = 0; i < marksPerChar.length; i++) {
       TextMarkup currentType = marksPerChar[i];
       if (!Objects.equals(currentType, lastMarkup)) {
         if (markStart != null) {
-          changemarks.add(new Markup_V001(markStart, i - 1, lastMarkup));
+          changemarks.add(new Markup_V002(markStart, i - 1, lastMarkup));
           markStart = null;
         }
         if (currentType != null) {
@@ -107,7 +107,7 @@ public class MarkupRecovery {
       }
     }
     if (markStart != null) {
-      changemarks.add(new Markup_V001(markStart, marksPerChar.length - 1, lastMarkup));
+      changemarks.add(new Markup_V002(markStart, marksPerChar.length - 1, lastMarkup));
     }
     return changemarks;
   }

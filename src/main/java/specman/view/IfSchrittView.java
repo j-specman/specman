@@ -1,18 +1,10 @@
 package specman.view;
 
 import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormLayout;
 
 import specman.ChangeInfo;
-import specman.draganddrop.DragSource;
-import specman.draganddrop.DropTarget;
-import specman.draganddrop.LocalCursor;
-import specman.EditorI;
-import specman.SchrittID;
-import specman.Specman;
-import specman.model.v001.EditorContentModel_V001;
-import specman.model.v001.IfSchrittModel_V001;
-import specman.model.v001.AbstractSchrittModel_V001;
+import specman.StepNumber;
+import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.IfStepModel_V002;
 import specman.editarea.EditContainer;
@@ -20,11 +12,10 @@ import specman.undo.props.UDBL;
 
 
 import java.awt.*;
-import java.util.List;
 
 
 import static specman.TextInit.schrittHintergrund;
-import static specman.model.v001.EditorContentModel_V001.empty;
+
 import static specman.Specman.editor;
 
 /**
@@ -40,20 +31,21 @@ import static specman.Specman.editor;
 public class IfSchrittView extends IfElseSchrittView {
 	int ifBreite;
 	
-	public IfSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerString, SchrittID id, ChangeInfo changeInfo) {
+	public IfSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialerString, StepNumber id, ChangeInfo changeInfo) {
 		super(parent, initialerString, id, changeInfo, false);
-		initIfSequenz(new ZweigSchrittSequenzView(this, id.naechsteID().naechsteEbene(), empty(), changeInfo));
+		initIfSequenz(new ZweigSchrittSequenzView(this, id.naechsteID().naechsteEbene(), EditorContentModel_V002.empty(), changeInfo));
 		initElseSequenz(new ZweigSchrittSequenzView(this, id.naechsteEbene(), EditContainer.right("Ja"), changeInfo));
 		ifBreite = SPALTENLAYOUT_UMGEHUNG_GROESSE + 2; /**@author PVN, Dueck */ 
 	}
 
-	public IfSchrittView(SchrittSequenzView parent, IfSchrittModel_V001 model) {
-		super(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), false);
-		initIfSequenz(new ZweigSchrittSequenzView(this, new SchrittID(), empty(), this.changeInfo));
-		initElseSequenz(new ZweigSchrittSequenzView(this, model.ifSequenz));
-		this.setBackgroundUDBL(new Color(model.farbe));
-		ifBreiteSetzen(model.leerBreite);
-		klappen.init(model.zugeklappt);;
+	public IfSchrittView(SchrittSequenzView parent, IfStepModel_V002 model) {
+		super(parent, model.content, model.id, model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
+		initIfSequenz(new ZweigSchrittSequenzView(this, new StepNumber(0), EditorContentModel_V002.empty(), this.changeInfo));
+		initElseSequenz(new ZweigSchrittSequenzView(this, model.ifSequence));
+		this.setBackgroundUDBL(new Color(model.color));
+		ifBreiteSetzen(model.emptyWidth);
+		klappen.init(model.collapsed);
+		this.id = model.id;
 	}
 
 	@Override
@@ -68,14 +60,14 @@ public class IfSchrittView extends IfElseSchrittView {
 	}
 
 	@Override
-	public void setId(SchrittID id) {
-		super.setId(id);
-		SchrittID elseID = id.naechsteEbene();
+	public void setNumber(StepNumber number) {
+		super.setNumber(number);
+		StepNumber elseID = number.naechsteEbene();
 		elseSequenz.renummerieren(elseID);
 	}
 	
-	@Override public SchrittID newStepIDInSameSequence(RelativeStepPosition direction) {
-		return id.naechsteID();
+	@Override public StepNumber newStepIDInSameSequence(RelativeStepPosition direction) {
+		return number.naechsteID();
 	}
 
 	@Override
@@ -106,7 +98,7 @@ public class IfSchrittView extends IfElseSchrittView {
 	@Override
 	public AbstractStepModel_V002 generiereModel(boolean formatierterText) {
 		return new IfStepModel_V002(
-			stepId,
+			id,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			getDecorated(),

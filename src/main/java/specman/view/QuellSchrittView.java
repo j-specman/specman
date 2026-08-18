@@ -2,12 +2,11 @@ package specman.view;
 
 import specman.Aenderungsart;
 import specman.ChangeInfo;
-import specman.EditorI;
+
 import static specman.ChangeSet.changeset;
 import static specman.util.ObjectUtils.nvl;
-import specman.SchrittID;
-import specman.model.v001.EditorContentModel_V001;
-import specman.model.v001.QuellSchrittModel_V001;
+import specman.StepNumber;
+import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.SourceStepModel_V002;
 import specman.undo.props.UDBL;
 
@@ -18,17 +17,18 @@ public class QuellSchrittView extends AbstractSchrittView {
 
     protected AbstractSchrittView zielschritt;
 
-    public QuellSchrittView(SchrittSequenzView parent, SchrittID id) {
+    public QuellSchrittView(SchrittSequenzView parent, StepNumber id) {
         //TODO JL: der "." sorgt für eine Mindesthöhe des Quellschritts. Muss noch gesäubert werden.
         //Die Höhe des Schrittnummer-Labels sollte die Höhe bestimmen.
-        super(parent, new EditorContentModel_V001(".", new ChangeInfo(Aenderungsart.Quellschritt, changeset())), id, new ChangeInfo(Aenderungsart.Quellschritt, changeset()));
+        super(parent, new EditorContentModel_V002(".", new ChangeInfo(Aenderungsart.Quellschritt, changeset())), id, new ChangeInfo(Aenderungsart.Quellschritt, changeset()));
         setQuellStil();
         setBackgroundUDBL(changeset().panelColor());
     }
 
-    public QuellSchrittView(SchrittSequenzView parent, QuellSchrittModel_V001 model) {
-      super(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
-      setBackgroundUDBL(new Color(model.farbe));
+    public QuellSchrittView(SchrittSequenzView parent, SourceStepModel_V002 model) {
+      super(parent, model.content, model.id, model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
+      setBackgroundUDBL(new Color(model.color));
+      this.id = model.id;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class QuellSchrittView extends AbstractSchrittView {
     @Override
     public SourceStepModel_V002 generiereModel(boolean formatierterText) {
         return new SourceStepModel_V002(
-            stepId,
+          id,
             getEditorContent(formatierterText),
             getBackground().getRGB(),
             changeInfo,
@@ -49,8 +49,8 @@ public class QuellSchrittView extends AbstractSchrittView {
     @Override
     public JComponent getPanel() { return editContainer; }
 
-    public SchrittID getZielschrittID() {
-      return zielschritt != null ? zielschritt.getId() : null;
+    public StepNumber getZielschrittID() {
+      return zielschritt != null ? zielschritt.getNumber() : null;
     }
 
     public void setQuellStil() {
@@ -59,10 +59,10 @@ public class QuellSchrittView extends AbstractSchrittView {
     }
 
     @Override
-    public void setId(SchrittID id) {
-      SchrittID oldId = getId();
-      super.setId(id);
-      if (zielschritt != null && !oldId.equals(id)) {
+    public void setNumber(StepNumber number) {
+      StepNumber oldId = getNumber();
+      super.setNumber(number);
+      if (zielschritt != null && !oldId.equals(number)) {
         zielschritt.resyncStepnumberStyleUDBL();
       }
     }

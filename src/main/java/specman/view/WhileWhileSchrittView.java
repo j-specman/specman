@@ -1,11 +1,8 @@
 package specman.view;
 
 import specman.ChangeInfo;
-import specman.EditorI;
-import specman.SchrittID;
-import specman.model.v001.AbstractSchrittModel_V001;
-import specman.model.v001.EditorContentModel_V001;
-import specman.model.v001.WhileWhileSchrittModel_V001;
+import specman.StepNumber;
+import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.DoWhileStepModel_V002;
 
 /**
@@ -17,18 +14,18 @@ import specman.model.v002.DoWhileStepModel_V002;
  */
 public class WhileWhileSchrittView extends SchleifenSchrittView {
 
-	public WhileWhileSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, boolean withDefaultContent) {
+	public WhileWhileSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialerText, StepNumber id, ChangeInfo changeInfo, boolean withDefaultContent) {
 		super(parent, initialerText, id, changeInfo, true);
 		if (withDefaultContent) {
 			initWiederholsequenz(einschrittigeInitialsequenz(id.naechsteEbene(), changeInfo));
 		}
 	}
 
-	public WhileWhileSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
+	public WhileWhileSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialerText, StepNumber id, ChangeInfo changeInfo) {
 		this(parent, initialerText, id, changeInfo, true);
 	}
 
-	public WhileWhileSchrittView(SchrittSequenzView parent, WhileWhileSchrittModel_V001 model) {
+	public WhileWhileSchrittView(SchrittSequenzView parent, DoWhileStepModel_V002 model) {
 		super(parent, model, true);
 	}
 
@@ -38,7 +35,7 @@ public class WhileWhileSchrittView extends SchleifenSchrittView {
 	@Override
 	public DoWhileStepModel_V002 generiereModel(boolean formatierterText) {
 		return new DoWhileStepModel_V002(
-			stepId,
+			id,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,

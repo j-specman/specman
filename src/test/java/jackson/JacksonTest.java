@@ -3,7 +3,7 @@ package jackson;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import org.junit.jupiter.api.Test;
-import specman.SchrittID;
+import specman.StepNumber;
 import specman.model.ModelEnvelope;
 import specman.model.v001.EinfacherSchrittModel_V001;
 import specman.model.v001.SchrittSequenzModel_V001;
@@ -22,7 +22,7 @@ public class JacksonTest {
 	/** Jackson kann Typinformation im JSON unterbringen, so dass die Deserialisierung
 	 * auch mit Objekten abgeleiteter Klassen klar kommt */
 	void testDeserializationWithDerivedTypes() throws Exception {
-		SchrittID id = new SchrittID(0);
+		StepNumber id = new StepNumber(0);
 		SchrittSequenzModel_V001 writemodel = new SchrittSequenzModel_V001(id, null, null);
 		EinfacherSchrittModel_V001 step1 = new EinfacherSchrittModel_V001(id.naechsteID(), null, Color.white.getRGB(), null, null, None);
 		writemodel.schritte.add(step1);
@@ -37,7 +37,7 @@ public class JacksonTest {
 
 	@Test
 	void testEnvelope() throws Exception {
-		SchrittID id = new SchrittID(0);
+		StepNumber id = new StepNumber(0);
 		StruktogrammModel_V001 model = new StruktogrammModel_V001(null, 10, 100, false, null, null, null, null, null);
 		ModelEnvelope writeenvelope = new ModelEnvelope();
 		writeenvelope.model = model;

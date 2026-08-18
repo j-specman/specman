@@ -7,7 +7,7 @@ import specman.editarea.TextEditArea;
 import specman.editarea.markups.MarkedCharSequence;
 import specman.editarea.markups.MarkupBackgroundStyleInitializer;
 import specman.editarea.markups.MarkupRecovery;
-import specman.model.v001.Markup_V001;
+import specman.model.v002.Markup_V002;
 import specman.undo.manager.UndoRecording;
 import static specman.Specman.editor;
 
@@ -39,7 +39,7 @@ class EnterKeyPressedHandler extends AbstractKeyEventHandler {
       // - all changes required for changemark recovery
       UndoRecording ur = editor().composeUndo();
       SwingUtilities.invokeLater(() -> {
-        java.util.List<Markup_V001> recoveredChangemarks = new MarkupRecovery(getWrappedDocument(), changes).recover();
+        java.util.List<Markup_V002> recoveredChangemarks = new MarkupRecovery(getWrappedDocument(), changes).recover();
         new MarkupBackgroundStyleInitializer(textArea, recoveredChangemarks).styleChangedTextSections();
         ur.close();
       });

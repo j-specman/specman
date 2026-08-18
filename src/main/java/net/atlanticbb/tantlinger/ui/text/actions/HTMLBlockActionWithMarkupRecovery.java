@@ -7,7 +7,7 @@ import specman.editarea.TextEditArea;
 import specman.editarea.markups.MarkedCharSequence;
 import specman.editarea.markups.MarkupBackgroundStyleInitializer;
 import specman.editarea.markups.MarkupRecovery;
-import specman.model.v001.Markup_V001;
+import specman.model.v002.Markup_V002;
 import specman.undo.manager.UndoRecording;
 import static specman.Specman.editor;
 
@@ -53,7 +53,7 @@ public class HTMLBlockActionWithMarkupRecovery extends HTMLBlockAction {
   private void recoverMarkups(MarkedCharSequence marksBackup, JEditorPane jEditorPane) {
     if (marksBackup != null) {
       TextEditArea editArea = (TextEditArea) jEditorPane;
-      List<Markup_V001> recoveredChangemarks = new MarkupRecovery(editArea.getWrappedDocument(), marksBackup).recover();
+      List<Markup_V002> recoveredChangemarks = new MarkupRecovery(editArea.getWrappedDocument(), marksBackup).recover();
       new MarkupBackgroundStyleInitializer(editArea, recoveredChangemarks).styleChangedTextSections();
     }
   }

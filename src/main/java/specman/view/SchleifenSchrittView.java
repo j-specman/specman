@@ -4,23 +4,20 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import org.jetbrains.annotations.Nullable;
 import specman.ChangeInfo;
 import specman.EditException;
-import specman.EditorI;
-import specman.SchrittID;
+import specman.StepNumber;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
 import specman.draganddrop.LocalCursor;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
-import specman.Specman;
 import specman.TextInit;
 import specman.draganddrop.UnsupportedDragSourceException;
-import specman.model.v001.AbstractSchrittModel_V001;
-import specman.model.v001.EditorContentModel_V001;
-import specman.model.v001.WhileSchrittModel_V001;
+import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.WhileStepModel_V002;
+
+import java.util.UUID;
 import specman.pdf.Shape;
 import specman.editarea.Indentions;
 import specman.undo.props.UDBL;
@@ -38,22 +35,30 @@ import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.pdf.Shape.GAP_COLOR;
 import static specman.Specman.editor;
 import static specman.view.RelativeStepPosition.After;
-import static specman.view.RelativeStepPosition.Before;
 
 public class SchleifenSchrittView extends AbstractSchrittView implements SpaltenContainerI {
   private static final int CONTENTROW = 3;
 
-	final JPanel panel;
-	final JPanel linkerBalken;
-	final JPanel untererBalken;
-  final BottomFiller filler;
-	final KlappButton klappen;
-	final FormLayout layout;
+	JPanel panel;
+	JPanel linkerBalken;
+	JPanel untererBalken;
+	BottomFiller filler;
+	KlappButton klappen;
+	FormLayout layout;
 	SchrittSequenzView wiederholSequenz;
 	int balkenbreite;
 
-	public SchleifenSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, boolean mitUnteremBalken) {
+	public SchleifenSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialerText, StepNumber id, ChangeInfo changeInfo, boolean mitUnteremBalken) {
 		super(parent, initialerText, id, changeInfo);
+		initPanelAndLayout(mitUnteremBalken);
+	}
+
+	private SchleifenSchrittView(SchrittSequenzView parent, EditorContentModel_V002 content, UUID stepId, ChangeInfo changeInfo, boolean mitUnteremBalken) {
+		super(parent, content, stepId, changeInfo);
+		initPanelAndLayout(mitUnteremBalken);
+	}
+
+	private void initPanelAndLayout(boolean mitUnteremBalken) {
 		panel = new JPanel();
 		panel.setBackground(DIAGRAMM_LINE_COLOR);
 		balkenbreite = SPALTENLAYOUT_UMGEHUNG_GROESSE;
@@ -82,23 +87,23 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 			untererBalken = null;
 		}
 
-    panel.addComponentListener(this);
+		panel.addComponentListener(this);
 		panel.add(new SpaltenResizer(this), CC.xy(2, 3));
 
-    filler = new BottomFiller(panel, layout, changeInfo);
-    klappen = new KlappButton(this, editContainer.getKlappButtonParent(), layout, CONTENTROW, filler.row);
+		filler = new BottomFiller(panel, layout, changeInfo);
+		klappen = new KlappButton(this, editContainer.getKlappButtonParent(), layout, CONTENTROW, filler.row);
 	}
 
-	public SchleifenSchrittView(SchrittSequenzView parent, WhileSchrittModel_V001 model, boolean mitUnteremBalken) {
-		this(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), mitUnteremBalken);
+	protected SchleifenSchrittView(SchrittSequenzView parent, WhileStepModel_V002 model, boolean mitUnteremBalken) {
+		this(parent, model.content, model.id, model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED, mitUnteremBalken);
 		initWiederholsequenzFromModel(model);
 	}
 
-	protected void initWiederholsequenzFromModel(WhileSchrittModel_V001 model) {
-		initWiederholsequenz(new SchrittSequenzView(this, model.wiederholSequenz));
-		setBackgroundUDBL(new Color(model.farbe));
-		balkenbreiteSetzen(model.balkenbreite);
-		klappen.init(model.zugeklappt);
+	protected void initWiederholsequenzFromModel(WhileStepModel_V002 model) {
+		initWiederholsequenz(new SchrittSequenzView(this, model.loopSequence));
+		setBackgroundUDBL(new Color(model.color));
+		balkenbreiteSetzen(model.barWidth);
+		klappen.init(model.collapsed);
 	}
 
 	protected void initWiederholsequenz(SchrittSequenzView wiederholSequenz) {
@@ -119,16 +124,16 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 		layout.setColumnSpec(1, ColumnSpec.decode(balkenbreite + "px"));
 	}
 
-	protected SchrittSequenzView einschrittigeInitialsequenz(SchrittID id, ChangeInfo changeInfo) {
+	protected SchrittSequenzView einschrittigeInitialsequenz(StepNumber id, ChangeInfo changeInfo) {
 		SchrittSequenzView sequenz = new SchrittSequenzView(this, id, changeInfo);
 		sequenz.einfachenSchrittAnhaengen();
 		return sequenz;
 	}
 
 	@Override
-	public void setId(SchrittID id) {
-		super.setId(id);
-		wiederholSequenz.renummerieren(id.naechsteEbene());
+	public void setNumber(StepNumber number) {
+		super.setNumber(number);
+		wiederholSequenz.renummerieren(number.naechsteEbene());
 	}
 
 	@Override
@@ -197,7 +202,7 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 	@Override
 	public WhileStepModel_V002 generiereModel(boolean formatierterText) {
 		return new WhileStepModel_V002(
-			stepId,
+			id,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,

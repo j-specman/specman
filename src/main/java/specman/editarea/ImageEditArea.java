@@ -10,8 +10,6 @@ import specman.SpaltenResizer;
 import specman.Specman;
 import specman.editarea.focusmover.CrossEditAreaFocusMoverFromImage;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
-import specman.model.v001.ChangeInfo_V001;
-import specman.model.v001.ImageEditAreaModel_V001;
 import specman.model.v002.ImageEditAreaModel_V002;
 import specman.pdf.Shape;
 import specman.pdf.ShapeImage;
@@ -82,12 +80,12 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     postInit();
   }
 
-  public ImageEditArea(ImageEditAreaModel_V001 imageEditAreaModel) {
+  public ImageEditArea(ImageEditAreaModel_V002 model) {
     try {
-      InputStream input = new ByteArrayInputStream(imageEditAreaModel.imageData);
+      InputStream input = new ByteArrayInputStream(model.imageData);
       this.fullSizeImage = ImageIO.read(input);
-      this.changeInfo = ChangeInfo.fromModel(imageEditAreaModel.changeInfo, imageEditAreaModel.aenderungsart);
-      this.individualScalePercent = imageEditAreaModel.individualScalePercent;
+      this.changeInfo = model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED;
+      this.individualScalePercent = model.individualScalePercent;
       postInit();
     }
     catch(IOException iox) {

@@ -4,11 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import specman.ChangeSet;
 import static specman.ChangeSet.changeset;
 import specman.EditException;
-import specman.EditorI;
-import specman.SchrittID;
+import specman.StepNumber;
 import specman.TextInit;
-import specman.model.v001.EditorContentModel_V001;
-import specman.model.v001.ZweigSchrittSequenzModel_V001;
+import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.BranchSequenceModel_V002;
 import specman.editarea.EditContainer;
 import specman.editarea.Indentions;
@@ -28,19 +26,23 @@ import specman.ChangeInfo;
 public class ZweigSchrittSequenzView extends SchrittSequenzView {
 	EditContainer ueberschrift;
 
-	public ZweigSchrittSequenzView(AbstractSchrittView parent, ZweigSchrittSequenzModel_V001 model) {
+	public ZweigSchrittSequenzView(AbstractSchrittView parent, BranchSequenceModel_V002 model) {
 		super(parent, model);
-		ueberschriftInitialisieren(model.ueberschrift != null ? model.ueberschrift : null, null);
+		ueberschriftInitialisieren(model.heading);
 	}
 
-	public ZweigSchrittSequenzView(AbstractSchrittView parent, SchrittID sequenzBasisId, EditorContentModel_V001 initialerText, ChangeInfo changeInfo) {
+	public ZweigSchrittSequenzView(AbstractSchrittView parent, StepNumber sequenzBasisId, EditorContentModel_V002 initialerText, ChangeInfo changeInfo) {
 		super(parent, sequenzBasisId, changeInfo);
 		ueberschriftInitialisieren(initialerText, null);
 		this.changeInfo = TextInit.initialChangeInfo();
 	}
 
-	protected void ueberschriftInitialisieren( EditorContentModel_V001 initialerText, SchrittID initialeSchrittnummer) {
+	protected void ueberschriftInitialisieren( EditorContentModel_V002 initialerText, StepNumber initialeSchrittnummer) {
 		ueberschrift = new EditContainer(initialerText, initialeSchrittnummer);
+	}
+
+	protected void ueberschriftInitialisieren(EditorContentModel_V002 content) {
+		ueberschrift = new EditContainer(content, null);
 	}
 
 	@Override
@@ -71,7 +73,7 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 		return ueberschrift.enthaelt(fragment);
 	}
 
-	public SchrittID naechsteNachbarSequenzID() {
+	public StepNumber naechsteNachbarSequenzID() {
 		return sequenzBasisId.naechsteID();
 	}
 

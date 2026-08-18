@@ -3,7 +3,6 @@ package specman.editarea;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedElement;
 import specman.editarea.document.WrappedPosition;
-import specman.model.v001.TextEditAreaModel_V001;
 
 /** This class splits a TextEdiArea into multiple areas based on the current caret position.
  * In the maximum case, the caret position is placed in a paragraph with leading and trailing

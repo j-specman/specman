@@ -6,9 +6,7 @@ import specman.ScrollPause;
 import specman.SpecmanVersion;
 import static specman.ChangeSet.changeset;
 import specman.model.ModelEnvelope;
-import specman.model.v001.StruktogrammModel_V001;
 import specman.model.v002.DiagramModel_V002;
-import specman.model.v002.PdfExportOptionsModel_V002;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -87,7 +85,7 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         getHauptSequenz().generiereSchrittSequenzModel(formatierterText),
         getIntro().editorContent2Model(formatierterText),
         getOutro().editorContent2Model(formatierterText),
-        PdfExportOptionsModel_V002.from(getPdfExportOptions()),
+        getPdfExportOptions(),
         changeset().name);
   }
 

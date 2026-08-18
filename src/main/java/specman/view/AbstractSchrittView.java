@@ -5,12 +5,10 @@ import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.EditException;
-import specman.EditorI;
-import specman.SchrittID;
+import specman.StepNumber;
 import specman.Specman;
 
 import static specman.ChangeSet.changeset;
-import static specman.draganddrop.DragSource.Type.CaseBranchCreation;
 import static specman.draganddrop.DragSource.Type.CatchSequenceCreation;
 import static specman.draganddrop.DragSource.Type.StepCreation;
 import static specman.draganddrop.DragSource.Type.StepMove;
@@ -19,20 +17,17 @@ import static specman.util.ObjectUtils.nvl;
 import specman.draganddrop.UnsupportedDragSourceException;
 import specman.editarea.EditArea;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
-import specman.model.v001.AbstractSchrittModel_V001;
-import specman.model.v001.BreakSchrittModel_V001;
-import specman.model.v001.CaseSchrittModel_V001;
-import specman.model.v001.EditorContentModel_V001;
-import specman.model.v001.EinfacherSchrittModel_V001;
-import specman.model.v001.IfElseSchrittModel_V001;
-import specman.model.v001.IfSchrittModel_V001;
-import specman.model.v001.QuellSchrittModel_V001;
-import specman.model.v001.SubsequenzSchrittModel_V001;
-import specman.model.v001.WhileSchrittModel_V001;
-import specman.model.v001.WhileWhileSchrittModel_V001;
-import specman.model.v001.EditorContentModel_V001;
 import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.BreakStepModel_V002;
+import specman.model.v002.CaseStepModel_V002;
+import specman.model.v002.DoWhileStepModel_V002;
 import specman.model.v002.EditorContentModel_V002;
+import specman.model.v002.IfElseStepModel_V002;
+import specman.model.v002.IfStepModel_V002;
+import specman.model.v002.SimpleStepModel_V002;
+import specman.model.v002.SourceStepModel_V002;
+import specman.model.v002.SubsequenceStepModel_V002;
+import specman.model.v002.WhileStepModel_V002;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
 import specman.draganddrop.LocalCursor;
@@ -79,8 +74,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	protected static final List<SchrittSequenzView> KEINE_SEQUENZEN = new ArrayList<SchrittSequenzView>();
 
 	protected final EditContainer editContainer;
-	protected SchrittID id;
-	protected UUID stepId = UUID.randomUUID();
+	protected StepNumber number;
+	protected UUID id = UUID.randomUUID();
 	protected ChangeInfo changeInfo;
 	protected SchrittSequenzView parent;
 	protected RoundedBorderDecorator roundedBorderDecorator;
@@ -88,10 +83,20 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	private final java.util.List<TextEditArea> referencedByTextEditAreas = new ArrayList<>();
 
-	public AbstractSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialContent, SchrittID id, ChangeInfo changeInfo) {
+	public AbstractSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialContent, StepNumber number, ChangeInfo changeInfo) {
+		this.number = number;
+		this.changeInfo = changeInfo;
+		this.editContainer = new EditContainer(initialContent, number);
+		this.parent = parent;
+		editContainer.addEditAreasFocusListener(this);
+		editContainer.addEditComponentListener(this);
+	}
+
+	protected AbstractSchrittView(SchrittSequenzView parent, EditorContentModel_V002 content, UUID id, ChangeInfo changeInfo) {
+		this.number = new StepNumber(0);
 		this.id = id;
 		this.changeInfo = changeInfo;
-		this.editContainer = new EditContainer(initialContent, id);
+		this.editContainer = new EditContainer(content, this.number);
 		this.parent = parent;
 		editContainer.addEditAreasFocusListener(this);
 		editContainer.addEditComponentListener(this);
@@ -106,15 +111,15 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	public void setChangeInfo(ChangeInfo changeInfo) { this.changeInfo = changeInfo; }
 
-	public void setId(SchrittID id) {
-		SchrittID oldSchrittID = this.id;
+	public void setNumber(StepNumber number) {
+		StepNumber oldStepNumber = this.number;
 
-		this.id = id;
-		editContainer.setId(id);
+		this.number = number;
+		editContainer.setId(number);
 
-		if (!oldSchrittID.equals(id)) {
+		if (!oldStepNumber.equals(number)) {
 			for (TextEditArea textEditArea : referencedByTextEditAreas) {
-				textEditArea.updateStepnumberLink(oldSchrittID.toString(), id.toString());
+				textEditArea.updateStepnumberLink(oldStepNumber.toString(), number.toString());
 			}
       if (quellschritt != null) {
         quellschritt.resyncStepnumberStyleUDBL();
@@ -122,17 +127,12 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		}
 	}
 
-	public SchrittID newStepIDInSameSequence(RelativeStepPosition direction) {
-		return direction == RelativeStepPosition.After ? id.naechsteID() : id.sameID();
+	public StepNumber newStepIDInSameSequence(RelativeStepPosition direction) {
+		return direction == RelativeStepPosition.After ? number.naechsteID() : number.sameID();
 	}
 
 	protected EditorContentModel_V002 getEditorContent(boolean formatierterText) {
 		return editContainer.editorContent2Model(formatierterText);
-	}
-
-	/** UI-sync bridge: returns V001 content for paths that still operate with V001 (e.g. catch heading ↔ break step). */
-	EditorContentModel_V001 getEditorContentV1(boolean formatierterText) {
-		return editContainer.editorContent2ModelV1(formatierterText);
 	}
 
 	public void setBackgroundUDBL(Color bg) {
@@ -175,34 +175,32 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	abstract public AbstractStepModel_V002 generiereModel(boolean formatierterText);
 
-	public static AbstractSchrittView baueSchrittView( SchrittSequenzView parent, AbstractSchrittModel_V001 model) {
-		if (model instanceof WhileWhileSchrittModel_V001) {
-			return new WhileWhileSchrittView(parent, (WhileWhileSchrittModel_V001) model);
+	public static AbstractSchrittView baueSchrittViewFromV2(SchrittSequenzView parent, AbstractStepModel_V002 model) {
+		if (model instanceof DoWhileStepModel_V002) {
+			return new WhileWhileSchrittView(parent, (DoWhileStepModel_V002) model);
 		}
-		if (model instanceof WhileSchrittModel_V001) {
-			return new WhileSchrittView(parent, (WhileSchrittModel_V001) model);
+		if (model instanceof WhileStepModel_V002) {
+			return new WhileSchrittView(parent, (WhileStepModel_V002) model);
 		}
-		if (model instanceof IfElseSchrittModel_V001) {
-			return new IfElseSchrittView(parent, (IfElseSchrittModel_V001) model);
+		if (model instanceof IfElseStepModel_V002) {
+			return new IfElseSchrittView(parent, (IfElseStepModel_V002) model);
 		}
-		if (model instanceof IfSchrittModel_V001) {
-			return new IfSchrittView(parent, (IfSchrittModel_V001) model);
+		if (model instanceof IfStepModel_V002) {
+			return new IfSchrittView(parent, (IfStepModel_V002) model);
 		}
-		if (model instanceof CaseSchrittModel_V001) {
-			return new CaseSchrittView(parent, (CaseSchrittModel_V001) model);
+		if (model instanceof CaseStepModel_V002) {
+			return new CaseSchrittView(parent, (CaseStepModel_V002) model);
 		}
-		if (model instanceof SubsequenzSchrittModel_V001) {
-			return new SubsequenzSchrittView(parent, (SubsequenzSchrittModel_V001) model);
+		if (model instanceof SubsequenceStepModel_V002) {
+			return new SubsequenzSchrittView(parent, (SubsequenceStepModel_V002) model);
 		}
-		if (model instanceof BreakSchrittModel_V001) {
-			return new BreakSchrittView(parent, (BreakSchrittModel_V001) model);
+		if (model instanceof BreakStepModel_V002) {
+			return new BreakSchrittView(parent, (BreakStepModel_V002) model);
 		}
-		//TODO TEST
-		if (model instanceof QuellSchrittModel_V001){
-			return new QuellSchrittView(parent, (QuellSchrittModel_V001) model);
+		if (model instanceof SourceStepModel_V002) {
+			return new QuellSchrittView(parent, (SourceStepModel_V002) model);
 		}
-		// TEST ENDE
-		return new EinfacherSchrittView(parent, (EinfacherSchrittModel_V001)model);
+		return new EinfacherSchrittView(parent, (SimpleStepModel_V002) model);
 	}
 
 	public void geklappt(boolean auf) {}
@@ -224,12 +222,12 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	public void setGeloeschtMarkiertStilUDBL() {
 		setAenderungsartUDBL(Geloescht);
 		setBackgroundUDBL(changeInfo.changeSet().panelColor());
-		editContainer.setGeloeschtMarkiertStilUDBL(id, changeInfo.changeSet());
+		editContainer.setGeloeschtMarkiertStilUDBL(number, changeInfo.changeSet());
 	}
 
 	public void setZielschrittStilUDBL() {
 		setAenderungsartUDBL(Zielschritt);
-		editContainer.setZielschrittStilUDBL(getQuellschritt().getId(), changeInfo.changeSet());
+		editContainer.setZielschrittStilUDBL(getQuellschritt().getNumber(), changeInfo.changeSet());
 	}
 
 	public void alsGeloeschtMarkierenUDBL() {
@@ -253,7 +251,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	 * {@link #editAenderungenUebernehmen} bzw. {@link #editAenderungenVerwerfen()} entfernt. */
 	public void aenderungsmarkierungenEntfernen() {
 		setBackgroundUDBL(BACKGROUND_COLOR_STANDARD);
-		editContainer.aenderungsmarkierungenEntfernen(id);
+		editContainer.aenderungsmarkierungenEntfernen(number);
 	}
 
 	public boolean enthaeltAenderungsmarkierungen() {
@@ -393,8 +391,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return editContainer;
 	}
 
-	public SchrittID getId() {
-		return id;
+	public StepNumber getNumber() {
+		return number;
 	}
 
 	public abstract JComponent getPanel();
@@ -409,8 +407,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	public void setQuellschritt(QuellSchrittView quellschritt) { this.quellschritt = quellschritt; }
 
-	public SchrittID getQuellschrittID(){
-		return quellschritt != null ? quellschritt.getId() : null;
+	public StepNumber getQuellschrittID(){
+		return quellschritt != null ? quellschritt.getNumber() : null;
 	}
 
 	public void resyncStepnumberStyleUDBL() {
@@ -418,7 +416,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 			editContainer.resyncStepnumberAsSourceUDBL(((QuellSchrittView)this).getZielschrittID());
 		}
 		else if (changeInfo.isTargetStep()) {
-			editContainer.resyncStepnumberAsTargetUDBL(getQuellschritt().getId());
+			editContainer.resyncStepnumberAsTargetUDBL(getQuellschritt().getNumber());
 		}
 		unterSequenzen().forEach(SchrittSequenzView::resyncStepnumberStyleADBL);
 	}
@@ -448,8 +446,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
     editContainer.registerAllExistingStepnumbers();
 	}
 
-	public AbstractSchrittView findeSchrittZuId(SchrittID id) {
-		if (this.id.equals(id)) return this;
+	public AbstractSchrittView findeSchrittZuId(StepNumber id) {
+		if (this.number.equals(id)) return this;
 		for (SchrittSequenzView seq : unterSequenzen()) {
 			AbstractSchrittView result = seq.findeSchrittZuId(id);
 			if (result != null) return result;
@@ -503,7 +501,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 					break;
 				case Zielschritt:
 					getParent().schrittEntfernen(this, Move);
-					setId(getQuellschritt().newStepIDInSameSequence(After));
+					setNumber(getQuellschritt().newStepIDInSameSequence(After));
 					setParent(getQuellschritt().getParent());
 					getQuellschritt().getParent().insertStep(this, After, getQuellschritt());
 					getQuellschritt().getParent().schrittEntfernen(getQuellschritt(), Discard);
@@ -533,7 +531,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public void markStepnumberLinksAsDefect() {
-		String id = getId().toString();
+		String id = getNumber().toString();
         for (TextEditArea referencedByTextEditArea : referencedByTextEditAreas) {
             referencedByTextEditArea.markStepnumberLinkAsDefect(id);
         }
@@ -564,7 +562,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	@Override
 	public String toString() {
-		return id + " - " + getTextShef().getPlainText();
+		return number + " - " + getTextShef().getPlainText();
 	}
 
 	public List<JTextComponent> getTextAreas() {

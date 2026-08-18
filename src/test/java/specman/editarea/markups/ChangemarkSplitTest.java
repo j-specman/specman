@@ -1,7 +1,7 @@
 package specman.editarea.markups;
 
 import org.junit.jupiter.api.Test;
-import specman.model.v001.Markup_V001;
+import specman.model.v002.Markup_V002;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ public class ChangemarkSplitTest extends AbstractChangemarkRecoveryTest {
 
   @Test
   void testSimpleSplit() {
-    List<Markup_V001> marksAfterSplit = split(
+    List<Markup_V002> marksAfterSplit = split(
       " 0 1|2 3 ",
       " x x x x "
     );
@@ -20,7 +20,7 @@ public class ChangemarkSplitTest extends AbstractChangemarkRecoveryTest {
 
   @Test
   void testSplitAfterSingleBlank() {
-    List<Markup_V001> marksAfterSplit = split(
+    List<Markup_V002> marksAfterSplit = split(
       " 0 1 _|2 3 4 ",
       "   x x x x   "
     );
@@ -31,7 +31,7 @@ public class ChangemarkSplitTest extends AbstractChangemarkRecoveryTest {
 
   @Test
   void testCompleteWhitespaceRemovalOfCaretSequence() {
-    List<Markup_V001> marksAfterSplit = split(
+    List<Markup_V002> marksAfterSplit = split(
       " 0 1 2 _|_ _ 6 7 8",
       "             x    "
     );

@@ -1,17 +1,14 @@
 package specman.view;
 
 import com.jgoodies.forms.layout.FormLayout;
-import specman.Aenderungsart;
 import specman.ChangeInfo;
-import specman.EditorI;
-import specman.SchrittID;
+import specman.StepNumber;
 import specman.SpaltenContainerI;
-import specman.Specman;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
 import specman.draganddrop.LocalCursor;
 import specman.draganddrop.UnsupportedDragSourceException;
-import specman.model.v001.EditorContentModel_V001;
+import specman.model.v002.EditorContentModel_V002;
 import specman.pdf.Shape;
 import specman.undo.props.UDBL;
 
@@ -35,13 +32,22 @@ import static specman.Specman.editor;
 abstract public class VerzweigungSchrittView extends AbstractSchrittView implements SpaltenContainerI {
   protected static final int CONTENTROW = 5;
 
-	final JPanel panel;
-  final BottomFiller filler;
-	final KlappButton klappen;
+	JPanel panel;
+	BottomFiller filler;
+	KlappButton klappen;
 	FormLayout panelLayout;
 
-	public VerzweigungSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, FormLayout panelLayout) {
+	public VerzweigungSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialerText, StepNumber id, ChangeInfo changeInfo, FormLayout panelLayout) {
 		super(parent, initialerText, id, changeInfo);
+		initVerzweigungPanel(panelLayout);
+	}
+
+	protected VerzweigungSchrittView(SchrittSequenzView parent, specman.model.v002.EditorContentModel_V002 content, java.util.UUID stepId, ChangeInfo changeInfo, FormLayout panelLayout) {
+		super(parent, content, stepId, changeInfo);
+		initVerzweigungPanel(panelLayout);
+	}
+
+	private void initVerzweigungPanel(FormLayout panelLayout) {
 		this.panelLayout = panelLayout;
 		panel = new JPanel() {
 			@Override
@@ -57,13 +63,9 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 		panel.addComponentListener(this);
 		panel.setEnabled(false);
 
-    filler = new BottomFiller(panel, panelLayout, changeInfo);
-    klappen = new KlappButton(this, editContainer.getKlappButtonParent(), panelLayout, CONTENTROW, filler.row);
+		filler = new BottomFiller(panel, panelLayout, changeInfo);
+		klappen = new KlappButton(this, editContainer.getKlappButtonParent(), panelLayout, CONTENTROW, filler.row);
 		klappen.addComponentListener(new ComponentAdapter() {
-			// Kleine Sch�nheitsgeschichte: Der Klapp-Button liegt �ber der linken Dreieckslinie.
-			// Wenn der Button durch Mausbewegungen verschwindet, m�ssen wir daf�r sorgen, das dort,
-			// wo der Button war, die Linie nachgezogen wird. Sonst bleibt da eine h�ssliche wei�e
-			// L�cke stehen.
 			@Override public void componentHidden(ComponentEvent e) {
 				panel.repaint();
 			}

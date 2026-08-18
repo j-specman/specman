@@ -2,13 +2,13 @@ package specman.model.v001;
 
 import specman.Aenderungsart;
 import specman.ChangeInfo;
-import specman.SchrittID;
+import specman.StepNumber;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SchrittSequenzModel_V001 implements ChangeInfoBackwardsCompatible_V001 {
-	public final SchrittID id;
+	public final StepNumber id;
 	public final Aenderungsart aenderungsart; // kept for backwards compatibility
 	public final ChangeInfo_V001 changeInfo;
 	public final List<AbstractSchrittModel_V001> schritte;
@@ -23,7 +23,7 @@ public class SchrittSequenzModel_V001 implements ChangeInfoBackwardsCompatible_V
 	}
 
 	public SchrittSequenzModel_V001(
-		SchrittID id,
+		StepNumber id,
 		ChangeInfo changeInfo,
 		CatchBereichModel_V001 catchBereich) {
 		this.id = id;

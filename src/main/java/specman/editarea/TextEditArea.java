@@ -5,7 +5,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 
-import static specman.ChangeInfo.fromModel;
 import specman.EditorI;
 import specman.Specman;
 import static specman.ChangeSet.changeset;
@@ -16,9 +15,6 @@ import specman.editarea.document.WrappedElement;
 import specman.editarea.document.WrappedPosition;
 import specman.editarea.stepnumberlabel.BreakCatchScrollMouseAdapter;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
-import specman.model.v001.Markup_V001;
-import specman.model.v001.GeloeschtMarkierung_V001;
-import specman.model.v001.TextEditAreaModel_V001;
 import specman.model.v002.Markup_V002;
 import specman.model.v002.TextEditAreaModel_V002;
 import specman.pdf.FormattedShapeText;
@@ -68,9 +64,12 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     private ChangeInfo changeInfo;
     private TextEditAreaModel_V002 deletionBackup;
 
-    public TextEditArea(TextEditAreaModel_V001 model, Font font) {
-        this.changeInfo = fromModel(model.changeInfo, model.aenderungsart);
-        String initialText = model.isEmpty() ? INITIAL_EMPTY_CONTENT_INDICATOR : model.text;
+    private record DeletionRange(int von, int bis) {}
+
+    public TextEditArea(TextEditAreaModel_V002 model, Font font) {
+        this.changeInfo = model.changeInfo != null ? model.changeInfo.toChangeInfo() : specman.ChangeInfo.UNTRACKED;
+        boolean isEmpty = model.text == null || model.text.isEmpty();
+        String initialText = isEmpty ? INITIAL_EMPTY_CONTENT_INDICATOR : model.text;
         editor().instrumentWysEditor(this, initialText, 0);
         putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
         setFont(font);
@@ -79,9 +78,11 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         addMouseMotionListener();
         setBackground(changeInfo.panelColor());
         registerToolTipManager();
-        styleChangedTextSections(model);
-        if (model.isEmpty()) {
-          clear();
+        if (model.markups != null && !model.markups.isEmpty()) {
+            new MarkupBackgroundStyleInitializer(this, model.markups).styleChangedTextSections();
+        }
+        if (isEmpty) {
+            clear();
         }
     }
 
@@ -102,11 +103,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
      * <p>
      * the problem can still arise by <div>s, but the compensation here, already helps a lot. */
     public TextEditArea(Font font) {
-      this(new TextEditAreaModel_V001(""), font);
-    }
-
-    private void styleChangedTextSections(TextEditAreaModel_V001 model) {
-        new MarkupBackgroundStyleInitializer(this, model.markups).styleChangedTextSections();
+      this(new TextEditAreaModel_V002(""), font);
     }
 
     private void addMouseListener() {
@@ -250,9 +247,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         java.util.List<Markup_V002> markups = null;
         if (formatierterText) {
             cleanupText();
-            markups = findMarkups(All).stream()
-                .map(m -> new Markup_V002(m.getFrom(), m.getTo(), m.getType(), m.getChangeset()))
-                .collect(Collectors.toList());
+            markups = findMarkups(All);
             text = getText();
         }
         else {
@@ -264,12 +259,12 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     public void cleanupText() {
         MarkedCharSequence marksBackup = findMarkups();
         setText(getText());
-        List<Markup_V001> recoveredChangemarks = new MarkupRecovery(getWrappedDocument(), marksBackup).recover();
+        List<Markup_V002> recoveredChangemarks = new MarkupRecovery(getWrappedDocument(), marksBackup).recover();
         new MarkupBackgroundStyleInitializer(this, recoveredChangemarks).styleChangedTextSections();
     }
 
-    public java.util.List<Markup_V001> findMarkups(MarkupSearchPurpose searchPurpose) {
-        java.util.List<Markup_V001> ergebnis = new ArrayList<>();
+    public java.util.List<Markup_V002> findMarkups(MarkupSearchPurpose searchPurpose) {
+        java.util.List<Markup_V002> ergebnis = new ArrayList<>();
         WrappedDocument doc = getWrappedDocument();
         for (WrappedElement e : doc.getRootElements()) {
             findMarkups(e, ergebnis, searchPurpose);
@@ -280,10 +275,10 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         return ergebnis;
     }
 
-    private void findMarkups(WrappedElement e, java.util.List<Markup_V001> ergebnis, MarkupSearchPurpose searchPurpose) {
+    private void findMarkups(WrappedElement e, java.util.List<Markup_V002> ergebnis, MarkupSearchPurpose searchPurpose) {
         TextMarkup markup = TextMarkup.fromBackground(e);
         if (markup != null && markup.matches(searchPurpose)) {
-            ergebnis.add(new Markup_V001(e.getStartOffset().toModel(), e.getEndOffset().toModel()-1, markup));
+            ergebnis.add(new Markup_V002(e.getStartOffset().toModel(), e.getEndOffset().toModel()-1, markup));
             if (searchPurpose == FirstChangeOnly) {
                 return;
             }
@@ -302,7 +297,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         WrappedDocument doc = getWrappedDocument();
         int changesMade = changeInfo.numChangesBy(changeset());
 
-        List<GeloeschtMarkierung_V001> loeschungen = new ArrayList<>();
+        List<DeletionRange> loeschungen = new ArrayList<>();
         for (WrappedElement e : doc.getRootElements()) {
             changesMade += aenderungsmarkierungenUebernehmen(e, loeschungen);
         }
@@ -338,7 +333,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         }
         else {
             WrappedDocument doc = getWrappedDocument();
-            List<GeloeschtMarkierung_V001> loeschungen = new ArrayList<>();
+            List<DeletionRange> loeschungen = new ArrayList<>();
             for (WrappedElement e : doc.getRootElements()) {
                 changesRejected += aenderungsmarkierungenVerwerfen(e, loeschungen, triggerSet);
             }
@@ -355,13 +350,13 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     private boolean areaDetachedByMerge() { return getParent() == null; }
 
     // TODO JL: Muss mit aenderungsmarkierungenVerwerfen zusammengelegt werden
-    private int aenderungsmarkierungenUebernehmen(WrappedElement e, List<GeloeschtMarkierung_V001> loeschungen) {
+    private int aenderungsmarkierungenUebernehmen(WrappedElement e, List<DeletionRange> loeschungen) {
         int changesMade = 0;
 
         WrappedDocument doc = e.getDocument();
         if (elementHatAenderungshintergrund(e, changeset())) {
             if (elementHatDurchgestrichenenText(e)) {
-                loeschungen.add(new GeloeschtMarkierung_V001(e.getStartOffset().toModel(), e.getEndOffset().toModel()));
+                loeschungen.add(new DeletionRange(e.getStartOffset().toModel(), e.getEndOffset().toModel()));
             } else {
                 AttributeSet attribute = e.getAttributes();
                 MutableAttributeSet entfaerbt = new SimpleAttributeSet();
@@ -380,13 +375,13 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     // TODO JL: Muss mit aenderungsmarkierungenUebernehmen zusammengelegt werden
-    private int aenderungsmarkierungenVerwerfen(WrappedElement e, List<GeloeschtMarkierung_V001> loeschungen, ChangeSet triggerSet) {
+    private int aenderungsmarkierungenVerwerfen(WrappedElement e, List<DeletionRange> loeschungen, ChangeSet triggerSet) {
         int changesRejected = 0;
 
         WrappedDocument doc = getWrappedDocument();
         if (elementHatAenderungshintergrund(e, triggerSet)) {
             if (!elementHatDurchgestrichenenText(e)) {
-                loeschungen.add(new GeloeschtMarkierung_V001(e.getStartOffset().toModel(), e.getEndOffset().toModel()));
+                loeschungen.add(new DeletionRange(e.getStartOffset().toModel(), e.getEndOffset().toModel()));
             } else {
                 AttributeSet attribute = e.getAttributes();
                 MutableAttributeSet entfaerbt = new SimpleAttributeSet();
@@ -462,13 +457,13 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         return getParent().tryDissolveEditAreaUDBL(this);
     }
 
-    private int removeTextAndUnregisterStepnumberLinks(List<GeloeschtMarkierung_V001> loeschungen, WrappedDocument doc) {
+    private int removeTextAndUnregisterStepnumberLinks(List<DeletionRange> loeschungen, WrappedDocument doc) {
         int numRemovals = 0;
         for (int i = 0; i < loeschungen.size(); i++) {
-            GeloeschtMarkierung_V001 loeschung = loeschungen.get((loeschungen.size()) - 1 - i);
+            DeletionRange loeschung = loeschungen.get((loeschungen.size()) - 1 - i);
             try {
-                WrappedPosition loeschungVon = doc.fromModel(loeschung.getVon());
-                WrappedPosition loeschungBis = doc.fromModel(loeschung.getBis());
+                WrappedPosition loeschungVon = doc.fromModel(loeschung.von());
+                WrappedPosition loeschungBis = doc.fromModel(loeschung.bis());
                 removeTextAndUnregisterStepnumberLinks(loeschungVon, loeschungBis);
                 numRemovals++;
             } catch (Exception e) {
@@ -577,10 +572,10 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     public TextEditArea copyArea() {
-        TextEditAreaModel_V001 modelCopy = new TextEditAreaModel_V001(getText(), getPlainText(), new ArrayList<>(), changeInfo);
+        TextEditAreaModel_V002 modelCopy = new TextEditAreaModel_V002(getText(), getPlainText(), new ArrayList<>(), changeInfo);
         MarkedCharSequence marksBackup = findMarkups();
         TextEditArea areaCopy = new TextEditArea(modelCopy, this.getFont());
-        List<Markup_V001> recoveredChangemarks = new MarkupRecovery(getWrappedDocument(), marksBackup).recover();
+        List<Markup_V002> recoveredChangemarks = new MarkupRecovery(getWrappedDocument(), marksBackup).recover();
         new MarkupBackgroundStyleInitializer(areaCopy, recoveredChangemarks).styleChangedTextSections();
         return areaCopy;
     }
@@ -647,7 +642,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
             .replace(HEAD_INTRO, "")
             .trim();
         setText(newText);
-        List<Markup_V001> recoveredChangemarks = new MarkupRecovery(getWrappedDocument(), marksBackup).recover();
+        List<Markup_V002> recoveredChangemarks = new MarkupRecovery(getWrappedDocument(), marksBackup).recover();
         new MarkupBackgroundStyleInitializer(this, recoveredChangemarks).styleChangedTextSections();
         setCaretPosition(endOfOldText);
     }
@@ -655,7 +650,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     public void addStepnumberLink(AbstractSchrittView referencedStep) {
         EditorI editor = editor();
         try (UndoRecording ur = editor.composeUndo()) {
-            String stepnumberText = referencedStep.getId().toString();
+            String stepnumberText = referencedStep.getNumber().toString();
 
             WrappedDocument doc = getWrappedDocument();
             WrappedPosition caretPos = getWrappedCaretPosition();

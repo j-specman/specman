@@ -2,7 +2,7 @@ package specman.model.v001;
 
 import specman.Aenderungsart;
 import specman.ChangeInfo;
-import specman.SchrittID;
+import specman.StepNumber;
 import specman.view.RoundedBorderDecorationStyle;
 
 import java.util.List;
@@ -10,13 +10,13 @@ import java.util.List;
 import static specman.view.RoundedBorderDecorationStyle.None;
 
 public abstract class AbstractSchrittModel_V001 implements ChangeInfoBackwardsCompatible_V001 {
-	public final SchrittID id;
+	public final StepNumber id;
 	public final String nummer;
 	public final EditorContentModel_V001 inhalt;
 	public final int farbe;
 	public final Aenderungsart aenderungsart; // kept for backwards compatibility
 	public final ChangeInfo_V001 changeInfo;
-	public final SchrittID quellschrittID;
+	public final StepNumber quellschrittID;
 	public final RoundedBorderDecorationStyle decorationStyle;
 
 	@Deprecated AbstractSchrittModel_V001() { // For Jackson only
@@ -24,11 +24,11 @@ public abstract class AbstractSchrittModel_V001 implements ChangeInfoBackwardsCo
 	}
 
 	AbstractSchrittModel_V001(
-			SchrittID id,
+			StepNumber id,
 			EditorContentModel_V001 inhalt,
 			int farbe,
 			ChangeInfo changeInfo,
-			SchrittID quellschrittID,
+			StepNumber quellschrittID,
 			RoundedBorderDecorationStyle decorationStyle) {
 		this.id = id;
 		this.nummer = id != null ? id.toString() : null;

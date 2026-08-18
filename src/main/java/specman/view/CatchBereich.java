@@ -8,24 +8,20 @@ import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.ColumnSpecByPercent;
 import specman.EditException;
-import specman.EditorI;
+import specman.StepNumber;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
-import specman.Specman;
 import specman.TextInit;
 import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
 import specman.draganddrop.LocalCursor;
-import specman.draganddrop.UnsupportedDragSourceException;
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.Styles;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
-import specman.model.v001.AbstractSchrittModel_V001;
-import specman.model.v001.CatchBereichModel_V001;
-import specman.model.v001.CatchSchrittSequenzModel_V001;
-import specman.model.v001.EditorContentModel_V001;
+import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.CatchAreaModel_V002;
+import specman.model.v002.CatchSequenceModel_V002;
 import specman.pdf.Shape;
 import specman.undo.UndoableCatchSequenceAdded;
 
@@ -61,7 +57,7 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
   List<Integer> sequencesWidthPercent;
 
   public CatchBereich(SchrittSequenzView parent) {
-    super(parent, new EditorContentModel_V001(), null, ChangeInfo.untracked());
+    super(parent, new EditorContentModel_V002(), (StepNumber) null, ChangeInfo.untracked());
     computeBarRowSpec(editor().getZoomFactor());
     bereichLayout = new FormLayout("10px:grow",
       FORMLAYOUT_GAP + "," + barRowSpec + "," + FORMLAYOUT_GAP + ",fill:pref," + FORMLAYOUT_GAP + "," + barRowSpec);
@@ -294,16 +290,19 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
     return model;
   }
 
-  public void populate(CatchBereichModel_V001 model) {
-    for (CatchSchrittSequenzModel_V001 seqModel: model.catchSequences) {
-      CatchSchrittSequenzView view = new CatchSchrittSequenzView(this, seqModel);
-      addCatchSequence(view, null, null);
+  public void populate(CatchAreaModel_V002 model) {
+    if (model == null) return;
+    if (model.catchSequences != null) {
+      for (CatchSequenceModel_V002 seqModel : model.catchSequences) {
+        CatchSchrittSequenzView view = new CatchSchrittSequenzView(this, seqModel);
+        addCatchSequence(view, null, null);
+      }
     }
     if (model.sequencesWidthPercent != null) {
       sequencesWidthPercent = model.sequencesWidthPercent;
       recomputeLayout();
     }
-    klappen.init(model.zugeklappt);
+    klappen.init(model.collapsed);
   }
 
   @Override

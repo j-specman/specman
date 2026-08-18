@@ -7,9 +7,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 
 import specman.*;
-import specman.model.v001.BreakSchrittModel_V001;
-import specman.model.v001.AbstractSchrittModel_V001;
-import specman.model.v001.EditorContentModel_V001;
+import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.BreakStepModel_V002;
 import specman.pdf.LineShape;
 import specman.pdf.Shape;
@@ -28,12 +26,16 @@ import static specman.Specman.editor;
 
 public class BreakSchrittView extends AbstractSchrittView {
 	
-	final JPanel panel;
-	final FormLayout layout;
+	JPanel panel;
+	FormLayout layout;
 	CatchUeberschrift catchHeading;
 
-	public BreakSchrittView(SchrittSequenzView parent, EditorContentModel_V001 content, SchrittID id, ChangeInfo changeInfo) {
+	public BreakSchrittView(SchrittSequenzView parent, EditorContentModel_V002 content, StepNumber id, ChangeInfo changeInfo) {
 		super(parent, content, id, changeInfo);
+		initPanel();
+	}
+
+	private void initPanel() {
 		panel = new JPanel() {
 			@Override
 			public void paint(Graphics g) {
@@ -46,13 +48,14 @@ public class BreakSchrittView extends AbstractSchrittView {
 				umgehungLayout() + ", 10dlu:grow",
 				"fill:pref, " + AbstractSchrittView.ZEILENLAYOUT_INHALT_SICHTBAR);
 		panel.setLayout(layout);
-		
 		panel.add(editContainer, CC.xy(2, 1));
 	}
 
-	public BreakSchrittView(SchrittSequenzView parent, BreakSchrittModel_V001 model) {
-		this(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart));
-		setBackgroundUDBL(new Color(model.farbe));
+	public BreakSchrittView(SchrittSequenzView parent, BreakStepModel_V002 model) {
+		super(parent, model.content, model.id, model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
+		initPanel();
+		setBackgroundUDBL(new Color(model.color));
+		this.id = model.id;
 	}
 
 	private void dreieckZeichnen(Graphics2D g) {
@@ -103,7 +106,7 @@ public class BreakSchrittView extends AbstractSchrittView {
 	@Override
 	public BreakStepModel_V002 generiereModel(boolean formatierterText) {
 		return new BreakStepModel_V002(
-			stepId,
+			id,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,
@@ -126,10 +129,10 @@ public class BreakSchrittView extends AbstractSchrittView {
 	}
 
 	@Override
-	public void setId(SchrittID id) {
-		super.setId(id);
+	public void setNumber(StepNumber number) {
+		super.setNumber(number);
 		if (catchHeading != null) {
-			catchHeading.setId(id);
+			catchHeading.setId(number);
 		}
 	}
 
@@ -168,7 +171,7 @@ public class BreakSchrittView extends AbstractSchrittView {
 		return (catchHeading == null) ? Arrays.asList(this) : Arrays.asList();
 	}
 
-	public void updateContent(EditorContentModel_V001 content, ChangeSet sourceChangeSet) {
+	public void updateContent(EditorContentModel_V002 content, ChangeSet sourceChangeSet) {
 		editContainer.setEditorContent(content);
 		ChangeSet breakStepChangeSet = changeInfo.changeSet();
 		if (sourceChangeSet != null && breakStepChangeSet != null && sourceChangeSet != breakStepChangeSet) {

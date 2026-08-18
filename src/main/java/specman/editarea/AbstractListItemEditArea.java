@@ -10,9 +10,6 @@ import specman.EditorI;
 import specman.Specman;
 import specman.editarea.document.WrappedPosition;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
-import specman.model.v001.ChangeInfo_V001;
-import specman.model.v001.EditorContentModel_V001;
-import specman.model.v001.ListItemEditAreaModel_V001;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.undo.UndoableListItemSplitted;
@@ -27,7 +24,6 @@ import java.awt.event.FocusListener;
 import java.util.HashMap;
 import java.util.List;
 
-import static specman.ChangeInfo.fromModel;
 import static specman.ChangeSet.changeset;
 import static specman.Specman.editor;
 
@@ -45,8 +41,8 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
     initLayout();
   }
 
-  public AbstractListItemEditArea(ListItemEditAreaModel_V001 model) {
-    this.changeInfo = fromModel(model.changeInfo, model.aenderungsart);
+  public AbstractListItemEditArea(ListItemEditAreaModel_V002 model) {
+    this.changeInfo = model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED;
     this.content = new EditContainer(model.content, null);
     initLayout();
   }

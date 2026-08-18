@@ -3,9 +3,9 @@ package specman;
 import org.jetbrains.annotations.Nullable;
 import specman.editarea.markups.MarkupType;
 import specman.editarea.markups.TextMarkup;
-import specman.model.v001.EditorContentModel_V001;
-import specman.model.v001.Markup_V001;
-import specman.model.v001.TextEditAreaModel_V001;
+import specman.model.v002.EditorContentModel_V002;
+import specman.model.v002.Markup_V002;
+import specman.model.v002.TextEditAreaModel_V002;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -19,21 +19,21 @@ import static specman.Specman.editor;
 
 public class TextInit {
 
-  public static EditorContentModel_V001 initialtext(String text) {
+  public static EditorContentModel_V002 initialtext(String text) {
     return initialtext(text, null);
   }
 
-  public static EditorContentModel_V001 initialtext(String text, @Nullable String align) {
-    List<Markup_V001> markups = new ArrayList<>();
+  public static EditorContentModel_V002 initialtext(String text, @Nullable String align) {
+    List<Markup_V002> markups = new ArrayList<>();
     if (editor().aenderungenVerfolgen()) {
       TextMarkup markup = new TextMarkup(MarkupType.Changed, changeset());
-      markups.add(new Markup_V001(0, text.length() - 1, markup));
+      markups.add(new Markup_V002(0, text.length() - 1, markup));
     }
     String styledText = (align != null)
         ? "<div align='" + align + "'>" + text + "</div>"
         : text;
-    TextEditAreaModel_V001 textModel = new TextEditAreaModel_V001(styledText, text, markups, initialChangeInfo());
-    return new EditorContentModel_V001(textModel);
+    TextEditAreaModel_V002 textModel = new TextEditAreaModel_V002(styledText, text, markups, initialChangeInfo());
+    return new EditorContentModel_V002(textModel);
   }
 
   public static Color schrittHintergrund() {

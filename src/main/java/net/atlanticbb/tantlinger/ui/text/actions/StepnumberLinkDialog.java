@@ -2,16 +2,14 @@ package net.atlanticbb.tantlinger.ui.text.actions;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
-import jdk.security.jarsigner.JarSigner;
 import net.atlanticbb.tantlinger.i18n.I18n;
 import net.atlanticbb.tantlinger.ui.HeaderPanel;
 import net.atlanticbb.tantlinger.ui.UIUtils;
 import org.apache.commons.lang.StringUtils;
-import specman.Specman;
+
 import static specman.Specman.editor;
 import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;
-import static specman.Specman.editor;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -19,8 +17,6 @@ import javax.swing.border.MatteBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -63,7 +59,7 @@ public class StepnumberLinkDialog extends JDialog {
         steps = editor()
           .listAllSteps()
           .stream()
-          .sorted(Comparator.comparing(AbstractSchrittView::getId))
+          .sorted(Comparator.comparing(AbstractSchrittView::getNumber))
           .toList();
 
         JPanel headerPanel = new HeaderPanel(title, desc, icon);

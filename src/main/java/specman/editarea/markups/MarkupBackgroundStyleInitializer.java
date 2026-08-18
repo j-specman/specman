@@ -2,7 +2,7 @@ package specman.editarea.markups;
 
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedDocument;
-import specman.model.v001.Markup_V001;
+import specman.model.v002.Markup_V002;
 
 import javax.swing.text.AttributeSet;
 
@@ -20,23 +20,25 @@ import static specman.graphics.Styles.standardTextBackground;
  * on text background. So they do not destroy any foreground styling, font sizing and so on. */
 public class MarkupBackgroundStyleInitializer {
   private final WrappedDocument doc;
-  private final List<Markup_V001> model;
+  private final List<MarkupEntry> model;
 
-  public MarkupBackgroundStyleInitializer(TextEditArea textEditArea, List<Markup_V001> model) {
-    this(textEditArea.getWrappedDocument(), model);
+  private record MarkupEntry(int from, int length, String changeset, MarkupType type) {
+    static MarkupEntry from(Markup_V002 m) {
+      return new MarkupEntry(m.from, m.to - m.from + 1, m.changeset, m.type);
+    }
   }
 
-  public MarkupBackgroundStyleInitializer(WrappedDocument doc, List<Markup_V001> model) {
-    this.doc = doc;
-    this.model = model;
+  public MarkupBackgroundStyleInitializer(TextEditArea textEditArea, List<Markup_V002> markups) {
+    this.doc = textEditArea.getWrappedDocument();
+    this.model = markups.stream().map(MarkupEntry::from).toList();
   }
 
-  private List<StyledSection> model2StyledSections(List<Markup_V001> model) {
+  private List<StyledSection> model2StyledSections(List<MarkupEntry> model) {
     List<StyledSection> stylings = new ArrayList<>();
     for (int i = 0; i < model.size(); i++) {
-      Markup_V001 change = model.get(i);
-      AttributeSet style = TextMarkup.toBackground(change);
-      StyledSection changeSection = new StyledSection(change.getFrom(), change.laenge(), style);
+      MarkupEntry change = model.get(i);
+      AttributeSet style = TextMarkup.toBackground(change.type(), change.changeset());
+      StyledSection changeSection = new StyledSection(change.from(), change.length(), style);
       stylings.add(changeSection);
       StyledSection standardSection = followingStandardSection(model, i);
       if (standardSection != null) {
@@ -46,13 +48,13 @@ public class MarkupBackgroundStyleInitializer {
     return stylings;
   }
 
-  private StyledSection followingStandardSection(List<Markup_V001> model, int i) {
-    Markup_V001 lastChange = model.get(i);
-    int resetStart = lastChange.getFrom() + lastChange.laenge() + 1;
+  private StyledSection followingStandardSection(List<MarkupEntry> model, int i) {
+    MarkupEntry lastChange = model.get(i);
+    int resetStart = lastChange.from() + lastChange.length() + 1;
     int resetLength;
     if (model.size() > i+1) {
-      Markup_V001 nextChange = model.get(i+1);
-      resetLength = nextChange.getFrom() - 1 - resetStart;
+      MarkupEntry nextChange = model.get(i+1);
+      resetLength = nextChange.from() - 1 - resetStart;
     }
     else {
       resetLength = doc.getLength() - resetStart;

@@ -13,7 +13,7 @@ import specman.settings.SettingsDialog;
 
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.IconReader;
-import specman.model.v001.*;
+import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.editarea.EditContainer;
 import specman.editarea.TextEditArea;
 import specman.undo.UndoableSchrittHinzugefuegt;
@@ -501,12 +501,12 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	}
 
 	@Override
-	public void setPdfExportOptions(PDFExportOptionsModel_V001 options) {
+	public void setPdfExportOptions(PdfExportOptionsModel_V002 options) {
 		exportPDFOp.setPdfExportOptions(options);
 	}
 
 	@Override
-	public PDFExportOptionsModel_V001 getPdfExportOptions() {
+	public PdfExportOptionsModel_V002 getPdfExportOptions() {
 		return exportPDFOp.getPdfExportOptions();
 	}
 
@@ -554,7 +554,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	@Override
 	public void exportAsGraphviz() {
-		// TODO: GraphvizExporter auf V002 umstellen
+		// TODO: wire up file chooser and call GraphvizExporter.export(getHauptSequenz().generiereSchrittSequenzModel(...))
 	}
 
 	public void exportAsPDF() {

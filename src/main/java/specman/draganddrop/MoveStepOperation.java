@@ -42,7 +42,7 @@ public class MoveStepOperation implements DragOperation {
                 SchrittSequenzView sourceSequence = movingStep.getParent();
                 QuellSchrittView quellschritt;
                 if (movingStep.getQuellschritt() == null) {
-                    quellschritt = new QuellSchrittView(sourceSequence, movingStep.getId());
+                    quellschritt = new QuellSchrittView(sourceSequence, movingStep.getNumber());
                     sourceSequence.insertStep(quellschritt, Before, movingStep);
                 }
                 else {
@@ -50,7 +50,7 @@ public class MoveStepOperation implements DragOperation {
                 }
                 SchrittSequenzView originalParent = movingStep.getParent();
                 int originalIndex = originalParent.schrittEntfernen(movingStep, Move);
-                movingStep.setId(referenceStep.newStepIDInSameSequence(target.position()));
+                movingStep.setNumber(referenceStep.newStepIDInSameSequence(target.position()));
                 movingStep.setParent(targetSequence);
                 targetSequence.insertStep(movingStep, target.position(), referenceStep);
                 specman.addEdit(new UndoableSchrittVerschobenMarkiert(movingStep, originalParent, originalIndex, quellschritt));
@@ -62,7 +62,7 @@ public class MoveStepOperation implements DragOperation {
             else {
                 SchrittSequenzView originalParent = movingStep.getParent();
                 int originalIndex = originalParent.schrittEntfernen(movingStep, Move);
-                movingStep.setId(referenceStep.newStepIDInSameSequence(target.position()));
+                movingStep.setNumber(referenceStep.newStepIDInSameSequence(target.position()));
                 movingStep.setParent(targetSequence);
                 targetSequence.insertStep(movingStep, target.position(), referenceStep);
                 specman.addEdit(new UndoableSchrittVerschoben(movingStep, originalParent, originalIndex));

@@ -5,7 +5,7 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import org.apache.commons.io.FilenameUtils;
 import specman.Specman;
-import specman.model.v001.PDFExportOptionsModel_V001;
+import specman.model.v002.PdfExportOptionsModel_V002;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -69,7 +69,7 @@ public class PDFExportChooser extends JFileChooser {
     display.setSelected(prefs.getBoolean(PDF_DISPLAY_PREF, true));
   }
 
-  public void initFromModel(PDFExportOptionsModel_V001 pdfExportOptions, File currentModelFile) {
+  public void initFromModel(PdfExportOptionsModel_V002 pdfExportOptions, File currentModelFile) {
     if (pdfExportOptions != null) {
       setOrientation(pdfExportOptions.portrait);
       this.paging.setSelected(pdfExportOptions.paging);
@@ -97,7 +97,7 @@ public class PDFExportChooser extends JFileChooser {
    *   directory to the current model file's directory.</li>
    * </ol>
    */
-  private File guessBestFilenameAndDirectory(PDFExportOptionsModel_V001 pdfExportOptions, File currentModelFile) {
+  private File guessBestFilenameAndDirectory(PdfExportOptionsModel_V002 pdfExportOptions, File currentModelFile) {
     File pdfFile = new File(pdfExportOptions.filename);
     if (pdfExportOptions.modelFilename != null && currentModelFile != null) {
       File formerModelFile = new File(pdfExportOptions.modelFilename);
@@ -185,8 +185,8 @@ public class PDFExportChooser extends JFileChooser {
     return showSaveDialog(component);
   }
 
-  public PDFExportOptionsModel_V001 getExportOptions() {
-    return new PDFExportOptionsModel_V001(
+  public PdfExportOptionsModel_V002 getExportOptions() {
+    return new PdfExportOptionsModel_V002(
       getSelectedFile().getAbsolutePath(),
       currentModelFile != null ? currentModelFile.getAbsolutePath() : null,
       pageSize.getSelectedItem().toString(),

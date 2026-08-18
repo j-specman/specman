@@ -6,12 +6,11 @@ import com.jgoodies.forms.layout.FormLayout;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
-import specman.SchrittID;
+import specman.StepNumber;
 import static specman.ChangeSet.changeset;
 import specman.editarea.EditContainer;
-import specman.model.v001.CoCatchModel_V001;
-import specman.model.v001.EditorContentModel_V001;
 import specman.model.v002.CoCatchModel_V002;
+import specman.model.v002.EditorContentModel_V002;
 import specman.pdf.LineShape;
 import specman.pdf.Shape;
 import specman.undo.props.UDBL;
@@ -46,7 +45,7 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
     this.setBackground(changeInfo.panelColor());
     this.ueberschrift.setBackground(changeInfo.panelColor());
     if (isDeleted()) {
-      ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.id, changeInfo.changeSet());
+      ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.number, changeInfo.changeSet());
     }
     layout = new FormLayout(umgehungLayout() + ", 10px:grow", ZEILENLAYOUT_INHALT_SICHTBAR);
     setLayout(layout);
@@ -111,7 +110,7 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   }
 
   public void aenderungsmarkierungenEntfernen() {
-    ueberschrift.aenderungsmarkierungenEntfernen(linkedBreakStep.id);
+    ueberschrift.aenderungsmarkierungenEntfernen(linkedBreakStep.number);
     setBackground(BACKGROUND_COLOR_STANDARD);
   }
 
@@ -127,7 +126,7 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
 
   public void alsGeloeschtMarkierenUDBL() {
     changeInfo = changeInfo.deleted(changeset());
-    ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.id, changeInfo.changeSet());
+    ueberschrift.setGeloeschtMarkiertStilUDBL(linkedBreakStep.number, changeInfo.changeSet());
     UDBL.setBackgroundUDBL(this, changeset().panelColor());
   }
 
@@ -148,14 +147,14 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
 
   public void updateLinkedBreakStepContent() {
     if (!isDeleted()) {
-      EditorContentModel_V001 content = ueberschrift.editorContent2ModelV1(true);
+      EditorContentModel_V002 content = ueberschrift.editorContent2Model(true);
       linkedBreakStep.updateContent(content, changeInfo.changeSet());
     }
   }
 
   public void updateFromBreakStepContent() {
     if (!catchSequence.isDeleted() && !this.isDeleted()) {
-      EditorContentModel_V001 breakStepContent = linkedBreakStep.getEditorContentV1(true);
+      EditorContentModel_V002 breakStepContent = linkedBreakStep.getEditorContent(true);
       ueberschrift.setEditorContent(breakStepContent);
       ChangeSet breakStepChangeSet = linkedBreakStep.getChangeInfo().changeSet();
       ChangeSet headingChangeSet = changeInfo.changeSet();
@@ -165,12 +164,12 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
     }
   }
 
-  public SchrittID linkedBreakStepId() {
-    return linkedBreakStep.id;
+  public StepNumber linkedBreakStepId() {
+    return linkedBreakStep.number;
   }
 
   public java.util.UUID linkedBreakStepUUID() {
-    return linkedBreakStep.stepId;
+    return linkedBreakStep.id;
   }
 
   public void scrollToBreak() {
@@ -181,7 +180,7 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
     return catchSequence;
   }
 
-  public void setId(SchrittID id) {
+  public void setId(StepNumber id) {
     ueberschrift.setId(id);
     if (isPrimaryHeading()) {
       catchSequence.setId(id);

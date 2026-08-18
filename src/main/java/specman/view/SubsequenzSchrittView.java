@@ -7,9 +7,7 @@ import specman.draganddrop.DragSource;
 import specman.draganddrop.DropTarget;
 import specman.draganddrop.LocalCursor;
 import specman.draganddrop.UnsupportedDragSourceException;
-import specman.model.v001.AbstractSchrittModel_V001;
-import specman.model.v001.EditorContentModel_V001;
-import specman.model.v001.SubsequenzSchrittModel_V001;
+import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.SubsequenceStepModel_V002;
 import specman.pdf.Shape;
 import specman.editarea.Indentions;
@@ -17,9 +15,7 @@ import specman.undo.props.UDBL;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.text.JTextComponent;
 import java.awt.Color;
-import java.awt.Point;
 import java.awt.event.ComponentEvent;
 import java.util.List;
 
@@ -33,10 +29,10 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 	public static final int TEXTEINRUECKUNG = 18;
   private static final int CONTENTROW = 3;
 
-	final JPanel panel;
-  final BottomFiller filler;
-	final KlappButton klappen;
-	final FormLayout layout;
+	JPanel panel;
+	BottomFiller filler;
+	KlappButton klappen;
+	FormLayout layout;
 	SchrittSequenzView subsequenz;
   /** flat numbering means: the steps within this sub-sequence are not numbered on a lower level than this step itself
    * as it is usual in Specman. E.g. the steps in a sub-sequence step with number 2.3 have numbers 2.3.1, 2.3.2, and so on.
@@ -45,9 +41,20 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
    * other hand switching off the sub-numbering save a numbering level. Which variant is better depends on the situation. */
   boolean flatNumbering;
 
-	protected SubsequenzSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, boolean withDefaultContent) {
+	protected SubsequenzSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialerText, StepNumber id, ChangeInfo changeInfo, boolean withDefaultContent) {
 		super(parent, initialerText, id, changeInfo);
+		initSubsequenzPanel();
+		if (withDefaultContent) {
+			initSubsequenz(einschrittigeInitialsequenz(id.naechsteEbene(), changeInfo), false);
+		}
+	}
 
+	private SubsequenzSchrittView(SchrittSequenzView parent, specman.model.v002.EditorContentModel_V002 content, java.util.UUID stepId, ChangeInfo changeInfo) {
+		super(parent, content, stepId, changeInfo);
+		initSubsequenzPanel();
+	}
+
+	private void initSubsequenzPanel() {
 		editContainer.updateDecorationIndentions(new Indentions(TEXTEINRUECKUNG));
 
 		panel = new JPanel();
@@ -58,12 +65,16 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 
 		panel.add(editContainer, CC.xy(1, 1));
 
-    filler = new BottomFiller(panel, layout, changeInfo);
+		filler = new BottomFiller(panel, layout, changeInfo);
 		klappen = new KlappButton(this, editContainer.getKlappButtonParent(), layout, CONTENTROW, filler.row);
+	}
 
-		if (withDefaultContent) {
-      initSubsequenz(einschrittigeInitialsequenz(id.naechsteEbene(), changeInfo), false);
-		}
+	public SubsequenzSchrittView(SchrittSequenzView parent, SubsequenceStepModel_V002 model) {
+		this(parent, model.content, model.id, model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
+		initSubsequenz(new SchrittSequenzView(this, model.subsequence), model.flatNumbering);
+		setBackgroundUDBL(new Color(model.color));
+		klappen.init(model.collapsed);
+		this.id = model.id;
 	}
 
   @Override
@@ -72,18 +83,11 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
     UDBL.setBackgroundUDBL(filler, bg);
   }
 
-  public SubsequenzSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
+  public SubsequenzSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialerText, StepNumber id, ChangeInfo changeInfo) {
 		this(parent, initialerText, id, changeInfo, true);
 	}
 
-	public SubsequenzSchrittView(SchrittSequenzView parent, SubsequenzSchrittModel_V001 model) {
-		this(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), false);
-		initSubsequenz(new SchrittSequenzView(this, model.subsequenz), model.flatNumbering);
-		setBackgroundUDBL(new Color(model.farbe));
-		klappen.init(model.zugeklappt);
-	}
-
-	private SchrittSequenzView einschrittigeInitialsequenz(SchrittID id, ChangeInfo changeInfo) {
+	private SchrittSequenzView einschrittigeInitialsequenz(StepNumber id, ChangeInfo changeInfo) {
 		SchrittSequenzView sequenz = new SchrittSequenzView(this, id, changeInfo);
 		sequenz.einfachenSchrittAnhaengen();
 		return sequenz;
@@ -96,8 +100,8 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 	}
 
 	@Override
-	public void setId(SchrittID id) {
-		super.setId(id);
+	public void setNumber(StepNumber number) {
+		super.setNumber(number);
     renumberSubsequence();
 	}
 
@@ -140,7 +144,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 	@Override
 	public SubsequenceStepModel_V002 generiereModel(boolean formatierterText) {
 		return new SubsequenceStepModel_V002(
-			stepId,
+			id,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,
@@ -214,20 +218,20 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 
   private void renumberSubsequence() {
     if (flatNumbering) {
-      subsequenz.renummerieren(this.id.sameID());
+      subsequenz.renummerieren(this.number.sameID());
     } else {
-      subsequenz.renummerieren(this.id.naechsteEbene());
+      subsequenz.renummerieren(this.number.naechsteEbene());
     }
   }
 
-  public SchrittID newStepIDInSameSequence(RelativeStepPosition direction) {
+  public StepNumber newStepIDInSameSequence(RelativeStepPosition direction) {
     // What about flatNumbering combined with Before? Anything special to do?
     // Up to now I just can't find a horse foot in that.
     if (direction == Before || !flatNumbering) {
       return super.newStepIDInSameSequence(direction);
     }
     AbstractSchrittView lastStep = subsequenz.getLastStep();
-    return lastStep.getId().naechsteID();
+    return lastStep.getNumber().naechsteID();
   }
 
   @Override

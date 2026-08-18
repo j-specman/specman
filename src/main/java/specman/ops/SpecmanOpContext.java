@@ -6,7 +6,7 @@ import specman.ScrollPause;
 import specman.SpaltenResizer;
 import specman.Specman;
 import specman.editarea.EditContainer;
-import specman.model.v001.PDFExportOptionsModel_V001;
+import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
 
@@ -46,14 +46,14 @@ public interface SpecmanOpContext extends EditorI {
   SpaltenResizer getBreitenAnpasser();
   void setDiagrammDatei(File file);
   void addRecentFile(File file);
-  PDFExportOptionsModel_V001 getPdfExportOptions();
+  PdfExportOptionsModel_V002 getPdfExportOptions();
   void clearFocusHistory();
   void resetPdfExportChooser();
   void setChangeModeEnabled(boolean enabled);
   void setZoomFaktor(int prozent);
   void zoomFaktorAnzeigeAktualisieren(int prozent);
   void setDiagrammbreite(int breite);
-  void setPdfExportOptions(PDFExportOptionsModel_V001 options);
+  void setPdfExportOptions(PdfExportOptionsModel_V002 options);
   void setHauptSequenz(SchrittSequenzView seq);
   void hauptSequenzInitialisieren();
   void setDiagrammName(String name);

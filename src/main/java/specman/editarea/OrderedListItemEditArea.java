@@ -2,7 +2,7 @@ package specman.editarea;
 
 import specman.ChangeInfo;
 import specman.Specman;
-import specman.model.v001.ListItemEditAreaModel_V001;
+import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.pdf.LabelShapeText;
 import specman.pdf.Shape;
 
@@ -26,7 +26,7 @@ public class OrderedListItemEditArea extends AbstractListItemEditArea {
     rightGap = DEFAULT_RIGHT_GAP * editor().getZoomFactor() / 100;
   }
 
-  public OrderedListItemEditArea(ListItemEditAreaModel_V001 model) {
+  public OrderedListItemEditArea(ListItemEditAreaModel_V002 model) {
     super(model);
   }
 

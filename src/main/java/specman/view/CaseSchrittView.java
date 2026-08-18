@@ -5,21 +5,16 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import specman.Aenderungsart;
 import specman.ChangeInfo;
-import specman.ChangeSet;
 import specman.EditException;
 import specman.EditorI;
-import specman.SchrittID;
+import specman.StepNumber;
 import specman.SpaltenResizer;
-import specman.Specman;
+
 import static specman.ChangeSet.changeset;
 import specman.TextInit;
-import specman.model.v001.AbstractSchrittModel_V001;
-import specman.model.v001.CaseSchrittModel_V001;
-import specman.model.v001.EditorContentModel_V001;
+import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.CaseStepModel_V002;
-import specman.model.v001.ZweigSchrittSequenzModel_V001;
 import specman.pdf.Shape;
 import specman.editarea.Indentions;
 import specman.editarea.InteractiveStepFragment;
@@ -27,7 +22,6 @@ import specman.undo.UndoableZweigEntfernt;
 import specman.undo.props.UDBL;
 
 import javax.swing.JPanel;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,7 +32,6 @@ import java.util.stream.Collectors;
 import static specman.TextInit.initialtext;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.pdf.Shape.GAP_COLOR;
-import static specman.view.RelativeStepPosition.After;
 import static specman.Specman.editor;
 
 
@@ -55,10 +48,18 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	JPanel panelSonst; //neu
 	JPanel panelFall1; //neu
 
-	public CaseSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo, int numCases) {
+	public CaseSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialerText, StepNumber id, ChangeInfo changeInfo, int numCases) {
 		super(parent, initialerText, id, changeInfo, createPanelLayout(numCases));
+		initCasePanelComponents();
+	}
+
+	private CaseSchrittView(SchrittSequenzView parent, specman.model.v002.EditorContentModel_V002 content, java.util.UUID stepId, ChangeInfo changeInfo, int numCases) {
+		super(parent, content, stepId, changeInfo, createPanelLayout(numCases));
+		initCasePanelComponents();
+	}
+
+	private void initCasePanelComponents() {
 		panel.add(editContainer, INITIAL_DUMMY);
-		/** @author PVN */
 		lueckenFueller = new JPanel();
 		lueckenFueller.setBackground(TextInit.schrittHintergrund());
 		panel.add(lueckenFueller, CC.xy(1, 1));
@@ -79,6 +80,24 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		panel.add(panelFall1, CC.xy(3, 3));
 	}
 
+	public CaseSchrittView(SchrittSequenzView parent, CaseStepModel_V002 model) {
+		this(parent, model.content, model.id, model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED, model.caseSequences != null ? model.caseSequences.size() : 0);
+		initCases(
+			new ZweigSchrittSequenzView(this, model.defaultSequence),
+			caseSequenzenAufbauenV2(model.caseSequences));
+		setBackgroundUDBL(new Color(model.color));
+		spaltenbreitenAnteileSetzen(model.columnWidthRatios != null ? new ArrayList<>(model.columnWidthRatios) : null);
+		klappen.init(model.collapsed);
+		this.id = model.id;
+	}
+
+	private List<ZweigSchrittSequenzView> caseSequenzenAufbauenV2(List<specman.model.v002.BranchSequenceModel_V002> model) {
+		if (model == null) return new ArrayList<>();
+		return model.stream()
+			.map(sequenzModel -> new ZweigSchrittSequenzView(this, sequenzModel))
+			.collect(Collectors.toList());
+	}
+
 	protected void initCases(ZweigSchrittSequenzView sonstSequenz, List<ZweigSchrittSequenzView> caseSequenzen) {
 		sonstFallAnlegen(sonstSequenz);
 		casesAnlegen(caseSequenzen);
@@ -86,29 +105,13 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		spaltenResizerAnlegen();
 	}
 
-	public CaseSchrittView(SchrittSequenzView parent, EditorContentModel_V001 initialerText, SchrittID id, ChangeInfo changeInfo) {
+	public CaseSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialerText, StepNumber id, ChangeInfo changeInfo) {
 		this(parent, initialerText, id, changeInfo, 2);
 		initCases(
 				new ZweigSchrittSequenzView(this, id.naechsteEbene(), initialtext("Sonst"), changeInfo),
 				new ArrayList<ZweigSchrittSequenzView>(Arrays.asList(
 						new ZweigSchrittSequenzView(this, id.naechsteID().naechsteEbene(), initialtext("Fall 1"), changeInfo),
 						new ZweigSchrittSequenzView(this, id.naechsteID().naechsteID().naechsteEbene(), initialtext("Fall 2"), changeInfo))));
-	}
-
-	private List<ZweigSchrittSequenzView> caseSequenzenAufbauen(List<ZweigSchrittSequenzModel_V001> model) {
-		return model.stream()
-				.map(sequenzModel -> new ZweigSchrittSequenzView(this, sequenzModel))
-				.collect(Collectors.toList());
-	}
-
-	public CaseSchrittView(SchrittSequenzView parent, CaseSchrittModel_V001 model) {
-		this(parent, model.inhalt, model.id, ChangeInfo.fromModel(model.changeInfo, model.aenderungsart), model.caseSequenzen.size());
-		initCases(
-				new ZweigSchrittSequenzView(this, model.sonstSequenz),
-				caseSequenzenAufbauen(model.caseSequenzen));
-		setBackgroundUDBL(new Color(model.farbe));
-		spaltenbreitenAnteileSetzen(model.spaltenbreitenAnteile);
-		klappen.init(model.zugeklappt);
 	}
 
 	@Override
@@ -169,18 +172,18 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	}
 
 	@Override
-	public SchrittID newStepIDInSameSequence(RelativeStepPosition direction) {
-		SchrittID id = super.newStepIDInSameSequence(direction);
+	public StepNumber newStepIDInSameSequence(RelativeStepPosition direction) {
+		StepNumber id = super.newStepIDInSameSequence(direction);
 		for (int i = 0; i < caseSequenzen.size(); i++)
 			id = id.naechsteID();
 		return id;
 	}
 
 	@Override
-	public void setId(SchrittID id) {
-		super.setId(id);
-		sonstSequenz.renummerieren(id.naechsteEbene());
-		SchrittID naechsteId = id.naechsteID();
+	public void setNumber(StepNumber number) {
+		super.setNumber(number);
+		sonstSequenz.renummerieren(number.naechsteEbene());
+		StepNumber naechsteId = number.naechsteID();
 		for (SchrittSequenzView caseSequenz: caseSequenzen) {
 			caseSequenz.renummerieren(naechsteId.naechsteEbene());
 			naechsteId = naechsteId.naechsteID();
@@ -263,7 +266,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	@Override
 	public CaseStepModel_V002 generiereModel(boolean formatierterText) {
 		CaseStepModel_V002 model = new CaseStepModel_V002(
-			stepId,
+			id,
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,
@@ -348,7 +351,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		spaltenbreitenAnteileSetzen(spaltenbreitenAnteileBerechnen(spaltenBreiten));
 		spaltenResizerAnlegen();
 
-		setId(id);
+		setNumber(number);
 		parent.renumberFollowingSteps(this);
 		klappen.refreshGeklappt();
 

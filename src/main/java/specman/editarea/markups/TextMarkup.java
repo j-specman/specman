@@ -3,7 +3,6 @@ package specman.editarea.markups;
 import org.jetbrains.annotations.Nullable;
 import specman.ChangeSet;
 import specman.editarea.document.WrappedElement;
-import specman.model.v001.Markup_V001;
 import specman.util.ObjectUtils;
 
 import javax.swing.text.AttributeSet;
@@ -30,9 +29,9 @@ public class TextMarkup {
     return ChangeSet.textMarkupFromBackground(cssColor);
   }
 
-  public static AttributeSet toBackground(Markup_V001 change) {
-    ChangeSet changeSet = nvl(ChangeSet.fromName(change.getChangeset()), changeset());
-    switch (change.getType()) {
+  public static AttributeSet toBackground(MarkupType type, String changesetName) {
+    ChangeSet changeSet = nvl(ChangeSet.fromName(changesetName), changeset());
+    switch (type) {
       case Changed:
         return changeSet.textBackground();
       case ChangedSteplink:

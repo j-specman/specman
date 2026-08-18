@@ -1,13 +1,16 @@
 package specman.ops;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import specman.ChangeSet;
 import specman.EditException;
 import specman.SpecmanVersion;
 import specman.model.ModelEnvelope;
+import specman.model.ModelConverterV001V002;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.StruktogrammModel_V001;
+import specman.model.v002.DiagramModel_V002;
 import specman.view.KlappButton;
 import specman.view.QuellSchrittView;
 import specman.view.SchrittSequenzView;
@@ -88,40 +91,49 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     dropWelcomeMessage();
     setDiagrammDatei(diagramFile);
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-    objectMapper.enableDefaultTyping();
-    ModelEnvelope envelope = objectMapper.readValue(getDiagrammDatei(), ModelEnvelope.class);
-    verifyModelTypeAndSpecmanVersion(envelope);
-    StruktogrammModel_V001 model = (StruktogrammModel_V001) envelope.model;
+    ModelEnvelope meta = readMeta(getDiagrammDatei());
+    verifyModelTypeAndSpecmanVersion(meta);
+    ModelEnvelope envelope = readFull(getDiagrammDatei(), meta.modelType);
+
+    DiagramModel_V002 model = resolveModel(envelope);
 
     ChangeSet changeSet = ChangeSet.fromName(model.changeSetName);
     if (changeSet != null) {
       context.updateChangeSet(changeSet);
     }
-    setZoomFaktor(model.zoomFaktor);
-    zoomFaktorAnzeigeAktualisieren(model.zoomFaktor);
-    KlappButton.scaleIcons(model.zoomFaktor, 0);
-    setDiagrammbreite(model.breite);
+    setZoomFaktor(model.zoomFactor);
+    zoomFaktorAnzeigeAktualisieren(model.zoomFactor);
+    KlappButton.scaleIcons(model.zoomFactor, 0);
+    setDiagrammbreite(model.width);
     getIntro().setEditorContent(model.intro);
     getOutro().setEditorContent(model.outro);
     setPdfExportOptions(model.pdfExportOptions);
     setDiagrammName(model.name);
-    setHauptSequenz(new SchrittSequenzView(null, model.hauptSequenz));
+    setHauptSequenz(new SchrittSequenzView(null, model.mainSequence));
 
     hauptSequenzInitialisieren();
-    quellZielZuweisung(model.queryAllSteps());
+    getHauptSequenz().renummerieren();
+    // quellZielZuweisung: step references handled via UUID in a future step
     getHauptSequenz().viewsNachinitialisieren();
     getIntro().viewsNachinitialisieren();
     getIntro().registerAllExistingStepnumbers();
     getOutro().viewsNachinitialisieren();
     getOutro().registerAllExistingStepnumbers();
-    setChangeModeEnabled(model.changeModeenabled);
+    setChangeModeEnabled(model.changeModeEnabled);
     discardAllUndoEdits();
   }
 
+  private DiagramModel_V002 resolveModel(ModelEnvelope envelope) {
+    if (envelope.model instanceof DiagramModel_V002) {
+      return (DiagramModel_V002) envelope.model;
+    }
+    return ModelConverterV001V002.convert((StruktogrammModel_V001) envelope.model);
+  }
+
   private void verifyModelTypeAndSpecmanVersion(ModelEnvelope envelope) throws EditException {
-    if (!StruktogrammModel_V001.class.getName().equals(envelope.modelType)) {
+    boolean isV1 = StruktogrammModel_V001.class.getName().equals(envelope.modelType);
+    boolean isV2 = DiagramModel_V002.class.getName().equals(envelope.modelType);
+    if (!isV1 && !isV2) {
       throw new EditException("The selected file does not contain an actogramm model or a model of an unsupported Specman version " + envelope.specmanVersion);
     }
     String compatibilityVersionPrefix = SpecmanVersion.getCompatibilityVersionPrefix();
@@ -131,6 +143,28 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
         "files being edited with a newer version should not be edited with older versions afterwards. " +
         "This may cause the loss of meta information");
     }
+  }
+
+  /** Reads only the meta information from the envelope without making any
+   * assumptions about the structure of the actual nested model representation.
+   * This is important because model type and Specman version may have an impact
+   * about how exactly to read the rest. */
+  private ModelEnvelope readMeta(File diagramFile) throws IOException {
+    ObjectMapper metaMapper = new ObjectMapper();
+    JsonNode root = metaMapper.readTree(diagramFile);
+    ModelEnvelope meta = new ModelEnvelope();
+    meta.modelType = root.path("modelType").asText(null);
+    meta.specmanVersion = root.path("specmanVersion").asText(null);
+    return meta;
+  }
+
+  private ModelEnvelope readFull(File diagramFile, String modelType) throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    if (StruktogrammModel_V001.class.getName().equals(modelType)) {
+      mapper.enableDefaultTyping();
+    }
+    return mapper.readValue(diagramFile, ModelEnvelope.class);
   }
 
   private void quellZielZuweisung(List<AbstractSchrittModel_V001> allModelSteps) {

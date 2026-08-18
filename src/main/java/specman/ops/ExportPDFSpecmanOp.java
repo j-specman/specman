@@ -1,6 +1,6 @@
 package specman.ops;
 
-import specman.model.v001.PDFExportOptionsModel_V001;
+import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.pdf.PDFExportChooser;
 import specman.pdf.PDFRenderer;
 import specman.pdf.Shape;
@@ -13,11 +13,11 @@ import java.io.IOException;
 public class ExportPDFSpecmanOp extends AbstractSpecmanOp {
 
   private PDFExportChooser pdfExportChooser;
-  private PDFExportOptionsModel_V001 pdfExportOptions;
+  private PdfExportOptionsModel_V002 pdfExportOptions;
 
   public void resetChooser() { pdfExportChooser = null; }
-  public void setPdfExportOptions(PDFExportOptionsModel_V001 options) { pdfExportOptions = options; }
-  public PDFExportOptionsModel_V001 getPdfExportOptions() { return pdfExportOptions; }
+  public void setPdfExportOptions(PdfExportOptionsModel_V002 options) { pdfExportOptions = options; }
+  public PdfExportOptionsModel_V002 getPdfExportOptions() { return pdfExportOptions; }
 
   public ExportPDFSpecmanOp(SpecmanOpContext context) {
     super(context);

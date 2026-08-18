@@ -1,7 +1,7 @@
 package specman;
 
 import org.apache.commons.lang.StringUtils;
-import specman.model.v001.*;
+import specman.model.v002.*;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -16,7 +16,7 @@ public class GraphvizExporter {
 		out = new PrintStream(exportDateiname);
 	}
 
-	public void export(SchrittSequenzModel_V001 model) throws IOException {
+	public void export(StepSequenceModel_V002 model) throws IOException {
 		out.println(
 				"digraph G {\n" +
 				"  graph [fontname = \"Helvetica-Oblique\", fontsize = 10];\n" +
@@ -27,7 +27,7 @@ public class GraphvizExporter {
 
 		List<Haken> letzteSchritte = sequenzExportieren(model, new Haken("begin"));
 		verbinden(letzteSchritte, "end");
-			
+
 		out.println("}");
 		out.close();
 	}
@@ -52,15 +52,15 @@ public class GraphvizExporter {
 		return (s.length() == 1) ? "" : s.substring(0, s.length()-1) + "]";
 	}
 
-	private List<Haken> sequenzExportieren(SchrittSequenzModel_V001 sequenz, Haken obererAnschluss) throws IOException {
+	private List<Haken> sequenzExportieren(StepSequenceModel_V002 sequenz, Haken obererAnschluss) throws IOException {
 		return sequenzExportieren(sequenz, hakenliste(obererAnschluss));
 	}
-	
-	private List<Haken> sequenzExportieren(SchrittSequenzModel_V001 sequenz, List<Haken> obereAnschluesse) throws IOException {
-		for (AbstractSchrittModel_V001 schritt: sequenz.schritte) {
-			String schrittExportName = "schritt_" + schritt.id.toString().replace(".", "_");
-			if (schritt instanceof WhileSchrittModel_V001) {
-				WhileSchrittModel_V001 whileSchritt = (WhileSchrittModel_V001)schritt;
+
+	private List<Haken> sequenzExportieren(StepSequenceModel_V002 sequenz, List<Haken> obereAnschluesse) throws IOException {
+		for (AbstractStepModel_V002 schritt: sequenz.steps) {
+			String schrittExportName = "schritt_" + schritt.id.toString().replace("-", "_");
+			if (schritt instanceof WhileStepModel_V002) {
+				WhileStepModel_V002 whileSchritt = (WhileStepModel_V002)schritt;
 				Haken whileBeginnAnschluss = new Haken(schrittExportName + "_begin");
 				Haken whileEndAnschluss = new Haken(schrittExportName + "_end");
 				out.println(
@@ -69,15 +69,14 @@ public class GraphvizExporter {
 						"    label=\"" + textFuerAktivitaetsboxAufbereiten(whileSchritt) + "\"\n" +
 						"    " + whileBeginnAnschluss + " [shape = circle, label=\"\", fillcolor=black, height=0.1]\n" +
 						"    " + whileEndAnschluss + " [shape = doublecircle, label=\"\", fillcolor=black, height=0.1]");
-				List<Haken> letzteUnterschritte = sequenzExportieren(whileSchritt.wiederholSequenz, whileBeginnAnschluss);
+				List<Haken> letzteUnterschritte = sequenzExportieren(whileSchritt.loopSequence, whileBeginnAnschluss);
 				verbinden(letzteUnterschritte, whileEndAnschluss);
 				out.println("}");
 				verbinden(obereAnschluesse, whileBeginnAnschluss);
 				obereAnschluesse = hakenliste(whileEndAnschluss);
 			}
-			if (schritt instanceof SubsequenzSchrittModel_V001) {
-				// Machen wir grafisch erst mal genau wie einen While-Schritt
-				SubsequenzSchrittModel_V001 subsequenzSchritt = (SubsequenzSchrittModel_V001)schritt;
+			if (schritt instanceof SubsequenceStepModel_V002) {
+				SubsequenceStepModel_V002 subsequenzSchritt = (SubsequenceStepModel_V002)schritt;
 				Haken subBeginnAnschluss = new Haken(schrittExportName + "_begin");
 				Haken subEndAnschluss = new Haken(schrittExportName + "_end");
 				out.println(
@@ -86,43 +85,43 @@ public class GraphvizExporter {
 						"    label=\"" + textFuerAktivitaetsboxAufbereiten(subsequenzSchritt) + "\"\n" +
 						"    " + subBeginnAnschluss + " [shape = circle, label=\"\", fillcolor=black, height=0.1]\n" +
 						"    " + subEndAnschluss + " [shape = doublecircle, label=\"\", fillcolor=black, height=0.1]");
-				List<Haken> letzteUnterschritte = sequenzExportieren(subsequenzSchritt.subsequenz, subBeginnAnschluss);
+				List<Haken> letzteUnterschritte = sequenzExportieren(subsequenzSchritt.subsequence, subBeginnAnschluss);
 				verbinden(letzteUnterschritte, subEndAnschluss);
 				out.println("}");
 				verbinden(obereAnschluesse, subBeginnAnschluss);
 				obereAnschluesse = hakenliste(subEndAnschluss);
 			}
-			else if (schritt instanceof IfElseSchrittModel_V001) {
-				IfElseSchrittModel_V001 ifSchritt = (IfElseSchrittModel_V001)schritt;
+			else if (schritt instanceof IfElseStepModel_V002) {
+				IfElseStepModel_V002 ifSchritt = (IfElseStepModel_V002)schritt;
 				out.println(
 						schrittExportName + "[label=\"" + textFuerBedingungAufbereiten(schritt) + "\"\n" +
 						"shape = diamond; style=filled; fillcolor=gray94; fixedsize=shape; height=0.3; width=0.3 ]");
 				verbinden(obereAnschluesse, schrittExportName);
-				Haken ifHaken = new Haken(schrittExportName, ifSchritt.ifSequenz.ueberschrift.getFirstAreaAsText().text, ifSchritt.ifBreitenanteil > 0.6 ? 5 : 1);
-				Haken elseHaken = new Haken(schrittExportName, ifSchritt.elseSequenz.ueberschrift.getFirstAreaAsText().text, ifSchritt.ifBreitenanteil < 0.4 ? 5 : 1);
-				List<Haken> letzteUnterschritteIfSequenz = sequenzExportieren(ifSchritt.ifSequenz, ifHaken);
+				Haken ifHaken = new Haken(schrittExportName, ifSchritt.ifSequence.heading.getFirstAreaAsText().text, ifSchritt.ifWidthRatio > 0.6 ? 5 : 1);
+				Haken elseHaken = new Haken(schrittExportName, ifSchritt.elseSequence.heading.getFirstAreaAsText().text, ifSchritt.ifWidthRatio < 0.4 ? 5 : 1);
+				List<Haken> letzteUnterschritteIfSequenz = sequenzExportieren(ifSchritt.ifSequence, ifHaken);
 				gewichtUebernehmen(ifHaken, letzteUnterschritteIfSequenz);
-				List<Haken> letzteUnterschritteElseSequenz = sequenzExportieren(ifSchritt.elseSequenz, elseHaken);
+				List<Haken> letzteUnterschritteElseSequenz = sequenzExportieren(ifSchritt.elseSequence, elseHaken);
 				gewichtUebernehmen(elseHaken, letzteUnterschritteElseSequenz);
 				obereAnschluesse = hakenliste(letzteUnterschritteIfSequenz, letzteUnterschritteElseSequenz);
 			}
-			else if (schritt instanceof IfSchrittModel_V001) {
-				IfSchrittModel_V001 ifSchritt = (IfSchrittModel_V001)schritt;
+			else if (schritt instanceof IfStepModel_V002) {
+				IfStepModel_V002 ifSchritt = (IfStepModel_V002)schritt;
 				out.println(
 						schrittExportName + "[label=\"" + textFuerBedingungAufbereiten(schritt) + "\"\n" +
 						"shape = diamond; style=filled; fillcolor=gray94; fixedsize=shape; height=0.3; width=0.3 ]");
 				verbinden(obereAnschluesse, schrittExportName);
-				Haken ifHaken = new Haken(schrittExportName, ifSchritt.ifSequenz.ueberschrift.getFirstAreaAsText().text, 5);
+				Haken ifHaken = new Haken(schrittExportName, ifSchritt.ifSequence.heading.getFirstAreaAsText().text, 5);
 				Haken umgehungHaken = new Haken(schrittExportName, "", 1);
 				List<Haken> umgehungHakenAlsListe = new ArrayList<Haken>();
 				umgehungHakenAlsListe.add(umgehungHaken);
-				List<Haken> letzteUnterschritteIfSequenz = sequenzExportieren(ifSchritt.ifSequenz, ifHaken);
+				List<Haken> letzteUnterschritteIfSequenz = sequenzExportieren(ifSchritt.ifSequence, ifHaken);
 				gewichtUebernehmen(ifHaken, letzteUnterschritteIfSequenz);
 				obereAnschluesse = hakenliste(letzteUnterschritteIfSequenz, umgehungHakenAlsListe);
 			}
 			else {
 				String aufbereiteterText = textFuerAktivitaetsboxAufbereiten(schritt);
-				if (!StringUtils.isEmpty(aufbereiteterText.trim())) { // Eigentlich unsch�n. Ist nur, weil If noch als If-Else mit leerem Schritt modelliert wird.
+				if (!StringUtils.isEmpty(aufbereiteterText.trim())) {
 					out.println(schrittExportName + "[label=\"" + textFuerAktivitaetsboxAufbereiten(schritt) + "\"];");
 					verbinden(obereAnschluesse, schrittExportName);
 					obereAnschluesse = hakenliste(new Haken(schrittExportName));
@@ -149,15 +148,15 @@ public class GraphvizExporter {
 		return liste;
 	}
 
-	private String textFuerAktivitaetsboxAufbereiten(AbstractSchrittModel_V001 schritt ) {
+	private String textFuerAktivitaetsboxAufbereiten(AbstractStepModel_V002 schritt) {
 		return textFuerAktivitaetsboxAufbereiten(
-			schritt.inhalt.getFirstAreaAsText().text,
+			schritt.content.getFirstAreaAsText().text,
 			schritt.id.toString() + " :",
 			"");
 	}
 
-	private String textFuerBedingungAufbereiten(AbstractSchrittModel_V001 schritt) {
-		return textFuerAktivitaetsboxAufbereiten(schritt.inhalt.getFirstAreaAsText().text,
+	private String textFuerBedingungAufbereiten(AbstractStepModel_V002 schritt) {
+		return textFuerAktivitaetsboxAufbereiten(schritt.content.getFirstAreaAsText().text,
 			schritt.id.toString() + " :",
 			"\t\t\t\t\t\t");
 	}
@@ -183,12 +182,12 @@ public class GraphvizExporter {
 			ergebnis += "...";
 		return ergebnis;
 	}
-	
+
 	public static void main(String[] args) {
 		System.out.println("'" + textFuerAktivitaetsboxAufbereiten("In Rom ist es im Sommer entschieden zu heiß.", "", "") + "'");
 		System.out.println("'" + textFuerAktivitaetsboxAufbereiten("Solange ich noch nicht richtig wach bin und noch wenigstens 5 Minuten Zeit bleiben", "", "") + "'");
 	}
-	
+
 	/**
 	 * Ein Haken ist ein Knoten im Graphen, der einen Schritt repr�sentiert, erg�nzt um Label-
 	 * und Gewichtsinformation f�r den n�chsten sich anschlie�enenden Knoten im Graphen.
@@ -198,7 +197,7 @@ public class GraphvizExporter {
 		final String schritt;
 		final String verbindungsLabel;
 		Integer verbindungsGewicht;
-		
+
 		public Haken(String schritt, String verbindungsLabel, Integer verbindungsGewicht) {
 			this.schritt = schritt;
 			this.verbindungsLabel = verbindungsLabel;
@@ -208,7 +207,7 @@ public class GraphvizExporter {
 		public String verbindungsProperties() {
 			return propertyString(
 					(verbindungsLabel == null) ? null : "label=\"" + verbindungsLabel + "\"",
-					(verbindungsGewicht == null) ? null : "weight=" + verbindungsGewicht	
+					(verbindungsGewicht == null) ? null : "weight=" + verbindungsGewicht
 					);
 		}
 

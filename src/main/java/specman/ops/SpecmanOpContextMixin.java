@@ -3,6 +3,7 @@ package specman.ops;
 import specman.ScrollPause;
 import specman.SpaltenResizer;
 import specman.editarea.EditArea;
+import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.undo.manager.UndoRecording;
 import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
@@ -28,14 +29,14 @@ public interface SpecmanOpContextMixin {
   default SpaltenResizer getBreitenAnpasser() { return context().getBreitenAnpasser(); }
   default void setDiagrammDatei(java.io.File file) { context().setDiagrammDatei(file); }
   default void addRecentFile(java.io.File file) { context().addRecentFile(file); }
-  default specman.model.v001.PDFExportOptionsModel_V001 getPdfExportOptions() { return context().getPdfExportOptions(); }
+  default PdfExportOptionsModel_V002 getPdfExportOptions() { return context().getPdfExportOptions(); }
   default void clearFocusHistory() { context().clearFocusHistory(); }
   default void resetPdfExportChooser() { context().resetPdfExportChooser(); }
   default void setChangeModeEnabled(boolean enabled) { context().setChangeModeEnabled(enabled); }
   default void setZoomFaktor(int prozent) { context().setZoomFaktor(prozent); }
   default void zoomFaktorAnzeigeAktualisieren(int prozent) { context().zoomFaktorAnzeigeAktualisieren(prozent); }
   default void setDiagrammbreite(int breite) { context().setDiagrammbreite(breite); }
-  default void setPdfExportOptions(specman.model.v001.PDFExportOptionsModel_V001 options) { context().setPdfExportOptions(options); }
+  default void setPdfExportOptions(PdfExportOptionsModel_V002 options) { context().setPdfExportOptions(options); }
   default void setHauptSequenz(specman.view.SchrittSequenzView seq) { context().setHauptSequenz(seq); }
   default void hauptSequenzInitialisieren() { context().hauptSequenzInitialisieren(); }
   default void setDiagrammName(String name) { context().setDiagrammName(name); }

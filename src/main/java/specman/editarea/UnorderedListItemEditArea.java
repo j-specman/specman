@@ -3,7 +3,7 @@ package specman.editarea;
 import specman.ChangeInfo;
 import specman.Specman;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
-import specman.model.v001.ListItemEditAreaModel_V001;
+import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.pdf.CircleShape;
 
 import java.awt.*;
@@ -22,7 +22,7 @@ public class UnorderedListItemEditArea extends AbstractListItemEditArea {
     super(initialContent, changeInfo);
   }
 
-  public UnorderedListItemEditArea(ListItemEditAreaModel_V001 model) {
+  public UnorderedListItemEditArea(ListItemEditAreaModel_V002 model) {
     super(model);
   }
 

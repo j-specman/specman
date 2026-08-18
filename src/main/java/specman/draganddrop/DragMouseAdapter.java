@@ -132,7 +132,7 @@ public class DragMouseAdapter extends MouseAdapter {
     private String floatingLabelText(MouseEvent e) {
         if (e.getSource() instanceof InteractiveStepFragment) {
             AbstractSchrittView step = specman.findStep((InteractiveStepFragment) e.getSource());
-            var id = step.getId();
+            var id = step.getNumber();
             return id != null ? "Schritt " + id : " ";
         }
         return "Neuer Schritt";

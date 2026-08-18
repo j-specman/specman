@@ -8,21 +8,19 @@ import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeSet;
 import specman.EditorI;
-import specman.SchrittID;
+import specman.StepNumber;
 import specman.TextInit;
 import specman.ChangeInfo;
 import static specman.ChangeSet.changeset;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
-import specman.model.v001.AbstractEditAreaModel_V001;
-import specman.model.v001.EditorContentModel_V001;
-import specman.model.v001.ImageEditAreaModel_V001;
-import specman.model.v001.ListItemEditAreaModel_V001;
-import specman.model.v001.TableEditAreaModel_V001;
-import specman.model.v001.TextEditAreaModel_V001;
 import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.EditorContentModel_V002;
+import specman.model.v002.ImageEditAreaModel_V002;
+import specman.model.v002.ListItemEditAreaModel_V002;
+import specman.model.v002.TableEditAreaModel_V002;
+import specman.model.v002.TextEditAreaModel_V002;
 import specman.undo.UndoableListItemDissolved;
 import specman.undo.props.UDBL;
 import specman.pdf.Shape;
@@ -30,7 +28,6 @@ import specman.undo.UndoableEditAreaRemoved;
 import specman.undo.UndoableEditAreaAdded;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
-import specman.view.CatchUeberschrift;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -48,7 +45,6 @@ import specman.graphics.Styles;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
 import static specman.graphics.Styles.labelFont;
-import static specman.model.v001.EditorContentModel_V001.empty;
 import static specman.Specman.editor;
 
 /** Zentrales grafisches Containerpanel für einen zusammenhängenden Text mit einem Nummernlabel
@@ -109,60 +105,57 @@ public class EditContainer extends JPanel {
 	private Indentions indentions;
 	private boolean schrittNummerSichtbar = true;
 
-	public EditContainer(TextEditArea initialContent, SchrittID schrittId) {
-		this(new EditorContentModel_V001(), schrittId);
+	public EditContainer(TextEditArea initialContent, StepNumber stepNumber) {
+		this(new EditorContentModel_V002(), stepNumber);
 		addEditArea(initialContent, 0);
     skalieren(editor().getZoomFactor(), 0);
 	}
 
-	public EditContainer(EditorContentModel_V001 initialContent, SchrittID schrittId) {
-		if (schrittId != null) {
-			schrittNummer = new StepnumberLabel(schrittId);
+	public EditContainer(EditorContentModel_V002 initialContent, StepNumber stepNumber) {
+		if (stepNumber != null) {
+			schrittNummer = new StepnumberLabel(stepNumber);
 			setEnabled(false);
 		} else {
 			schrittNummer = null;
 		}
 
-		initLayoutAndEditAreas(initialContent);
+		initLayoutAndEditAreasV2(initialContent);
 		updateDecorationIndentions(new Indentions());
 
-    skalieren(editor().getZoomFactor(), 0);
+		skalieren(editor().getZoomFactor(), 0);
 
-    addEditAreasFocusListener(editor());
-  }
+		addEditAreasFocusListener(editor());
+	}
 
-	private void initLayout(EditorContentModel_V001 content) {
+	private void initLayoutV2() {
 		layout = new FormLayout("0px,10px:grow,0px", "0px,0px");
 		setLayout(layout);
 	}
 
-	private void initLayoutAndEditAreas(EditorContentModel_V001 content) {
+	private void initLayoutAndEditAreasV2(EditorContentModel_V002 content) {
 		editAreas.stream().forEach(ea -> remove(ea.asComponent()));
 		editAreas.clear();
-		initLayout(content);
+		initLayoutV2();
 		int index = 0;
-		for (AbstractEditAreaModel_V001 editAreaModel: content.areas) {
+		for (AbstractEditAreaModel_V002 editAreaModel : content.areas) {
 			EditArea editArea;
-			if (editAreaModel instanceof TextEditAreaModel_V001) {
-				TextEditAreaModel_V001 textEditAreaModel = (TextEditAreaModel_V001)editAreaModel;
-				editArea = new TextEditArea(textEditAreaModel, Styles.DEFAULTFONT);
+			if (editAreaModel instanceof TextEditAreaModel_V002) {
+				editArea = new TextEditArea((TextEditAreaModel_V002) editAreaModel, Styles.DEFAULTFONT);
 			}
-			else if (editAreaModel instanceof ImageEditAreaModel_V001) {
-				ImageEditAreaModel_V001 imageEditAreaModel = (ImageEditAreaModel_V001)editAreaModel;
-				editArea = new ImageEditArea(imageEditAreaModel);
+			else if (editAreaModel instanceof ImageEditAreaModel_V002) {
+				editArea = new ImageEditArea((ImageEditAreaModel_V002) editAreaModel);
 			}
-			else if (editAreaModel instanceof TableEditAreaModel_V001) {
-				TableEditAreaModel_V001 tableEditAreaModel = (TableEditAreaModel_V001)editAreaModel;
-				editArea = new TableEditArea(tableEditAreaModel);
+			else if (editAreaModel instanceof TableEditAreaModel_V002) {
+				editArea = new TableEditArea((TableEditAreaModel_V002) editAreaModel);
 			}
-			else if (editAreaModel instanceof ListItemEditAreaModel_V001) {
-				ListItemEditAreaModel_V001 listItemEditAreaModel = (ListItemEditAreaModel_V001)editAreaModel;
-				editArea = listItemEditAreaModel.ordered
-					? new OrderedListItemEditArea(listItemEditAreaModel)
-					: new UnorderedListItemEditArea(listItemEditAreaModel);
+			else if (editAreaModel instanceof ListItemEditAreaModel_V002) {
+				ListItemEditAreaModel_V002 listItem = (ListItemEditAreaModel_V002) editAreaModel;
+				editArea = listItem.ordered
+					? new OrderedListItemEditArea(listItem)
+					: new UnorderedListItemEditArea(listItem);
 			}
 			else {
-				throw new RuntimeException("Was soll das denn sein? " + editAreaModel);
+				throw new RuntimeException("Unknown V002 edit area type: " + editAreaModel);
 			}
 			addEditArea(editArea, index++);
 		}
@@ -178,11 +171,11 @@ public class EditContainer extends JPanel {
 	}
 
 	public EditContainer() {
-		this(empty(), null);
+		this(EditorContentModel_V002.empty(), null);
 	}
 
 	public EditContainer(ChangeInfo changeInfo) {
-		this(new EditorContentModel_V001("", changeInfo), null);
+		this(new EditorContentModel_V002("", changeInfo), null);
 	}
 
 	/** Entfernt im Rahmen der Übernahme oder Rücknahme von Änderungen alle Einfärbungen,
@@ -200,7 +193,7 @@ public class EditContainer extends JPanel {
 	 * Einfärbungen für <i>inhaltliche</i> Änderungen spielen hier keine Rolle. Diese werden
 	 * bereits <i>vor</i> dem Aufruf der Methode hier über {@link #aenderungenUebernehmen}
 	 * bzw. {@link #aenderungenVerwerfen()} behandelt. */
-	public void aenderungsmarkierungenEntfernen(SchrittID id) {
+	public void aenderungsmarkierungenEntfernen(StepNumber id) {
 		editAreas.forEach(EditArea::aenderungsmarkierungenEntfernen);
 		setBackground(BACKGROUND_COLOR_STANDARD);
 		if (schrittNummer != null) {
@@ -208,17 +201,17 @@ public class EditContainer extends JPanel {
 		}
 	}
 
-	public void setZielschrittStilUDBL(SchrittID quellschrittId, ChangeSet changeSet) {
+	public void setZielschrittStilUDBL(StepNumber quellschrittId, ChangeSet changeSet) {
 		schrittNummer.setTargetStyleUDBL(quellschrittId, changeSet);
 	}
 
-	public void setQuellStil(SchrittID zielschrittID, ChangeSet changeSet) {
+	public void setQuellStil(StepNumber zielschrittID, ChangeSet changeSet) {
 		editAreas.forEach(ea -> ea.setQuellStil(changeSet));
 		setBackground(changeSet.panelColor());
 		schrittNummer.setSourceStyle(zielschrittID);
 	}
 
-	public void setGeloeschtMarkiertStilUDBL(SchrittID id, ChangeSet changeSet) {
+	public void setGeloeschtMarkiertStilUDBL(StepNumber id, ChangeSet changeSet) {
 		setBackgroundUDBL(changeSet.panelColor());
 		modifyableEditAreas().forEach(ea -> ea.setGeloeschtMarkiertStilUDBL(changeSet));
 		if (schrittNummer != null) {
@@ -226,21 +219,13 @@ public class EditContainer extends JPanel {
 		}
 	}
 
-	public void setId(SchrittID id) {
+	public void setId(StepNumber id) {
 		schrittNummer.setStepNumber(id);
 	}
 
 	public EditorContentModel_V002 editorContent2Model(boolean formatierterText) {
 		List<AbstractEditAreaModel_V002> areaModels = editAreas.stream().map(ea -> ea.toModel(formatierterText)).collect(Collectors.toList());
 		return new EditorContentModel_V002(areaModels);
-	}
-
-	/** Used only for UI-sync paths (e.g. break step ↔ catch heading) that still operate with V001. */
-	public EditorContentModel_V001 editorContent2ModelV1(boolean formatierterText) {
-		List<AbstractEditAreaModel_V001> areaModels = editAreas.stream()
-			.map(ea -> (AbstractEditAreaModel_V001) new specman.model.v001.TextEditAreaModel_V001(ea.getPlainText()))
-			.collect(Collectors.toList());
-		return new EditorContentModel_V001(areaModels);
 	}
 
 	public String getPlainText() {
@@ -296,11 +281,11 @@ public class EditContainer extends JPanel {
 		}
 	}
 
-	public static EditorContentModel_V001 right(String text) {
+	public static EditorContentModel_V002 right(String text) {
 		return TextInit.initialtext(text, "right");
 	}
 
-	public static EditorContentModel_V001 center(String text) {
+	public static EditorContentModel_V002 center(String text) {
 		return TextInit.initialtext(text, "center");
 	}
 
@@ -351,8 +336,8 @@ public class EditContainer extends JPanel {
 
 	public Rectangle getStepNumberBounds() { return schrittNummer.getBounds(); }
 
-	public void resyncStepnumberAsTargetUDBL(SchrittID quellschrittId) { schrittNummer.resyncSourceSuffixUDBL(quellschrittId); }
-	public void resyncStepnumberAsSourceUDBL(SchrittID zielschrittID) { schrittNummer.resyncTargetSuffixUDBL(zielschrittID); }
+	public void resyncStepnumberAsTargetUDBL(StepNumber quellschrittId) { schrittNummer.resyncSourceSuffixUDBL(quellschrittId); }
+	public void resyncStepnumberAsSourceUDBL(StepNumber zielschrittID) { schrittNummer.resyncTargetSuffixUDBL(zielschrittID); }
 
 	/** Required for iterations that may modify the list of edit areas. Working directly on the
 	 * list whould cause concurrent operation exceptions in these cases. The usage of this method
@@ -445,8 +430,7 @@ public class EditContainer extends JPanel {
 
 	public TextEditArea addTextEditArea(ImageEditArea initiatingImageEditArea) {
 		int initiatingIndex = indexOf(initiatingImageEditArea);
-		TextEditAreaModel_V001 addedModel = new TextEditAreaModel_V001("", "", new ArrayList<>(), TextInit.initialChangeInfo());
-		TextEditArea newEditArea = new TextEditArea(addedModel, getFont());
+		TextEditArea newEditArea = new TextEditArea(new TextEditAreaModel_V002("", "", new ArrayList<>(), TextInit.initialChangeInfo()), getFont());
 		addEditArea(newEditArea, initiatingIndex+1);
 		return newEditArea;
 	}
@@ -524,8 +508,8 @@ public class EditContainer extends JPanel {
 		return index;
 	}
 
-	public void setEditorContent(EditorContentModel_V001 content) {
-		initLayoutAndEditAreas(content);
+	public void setEditorContent(EditorContentModel_V002 content) {
+		initLayoutAndEditAreasV2(content);
 	}
 
 	public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
