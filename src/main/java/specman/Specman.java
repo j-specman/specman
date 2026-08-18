@@ -344,7 +344,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		new LoadDiagrammSpecmanOp(this).load();
 	}
 
-
 	public void diagrammLaden(File diagramFile) {
 		new LoadDiagrammSpecmanOp(this).loadFromDiagrammOrWorkingCopy(diagramFile);
 	}
@@ -554,7 +553,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	@Override
 	public void exportAsGraphviz() {
-		// TODO: wire up file chooser and call GraphvizExporter.export(getHauptSequenz().generiereSchrittSequenzModel(...))
+		new ExportGraphvizSpecmanOp(this).export();
 	}
 
 	public void exportAsPDF() {
