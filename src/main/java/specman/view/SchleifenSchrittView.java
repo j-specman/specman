@@ -24,7 +24,6 @@ import specman.undo.props.UDBL;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.util.List;
@@ -245,13 +244,6 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 	public void componentResized(ComponentEvent e) {
 		super.componentResized(e);
 		klappen.updateLocation(editContainer.getStepNumberBounds());
-	}
-
-	@Override
-	public List<JTextComponent> getTextAreas() {
-		List<JTextComponent> result = super.getTextAreas();
-		result.addAll(wiederholSequenz.getTextAreas());
-		return result;
 	}
 
 	public List<BreakSchrittView> queryUnlinkedBreakSteps() {
