@@ -65,7 +65,7 @@ public class SchrittSequenzView {
 	final AbstractSchrittView parent;
 
 	public SchrittSequenzView() {
-		this(null, new StepNumber(0), TextInit.initialChangeInfo());
+		this(null, StepNumber.EMPTY, TextInit.initialChangeInfo());
 	}
 
 	public SchrittSequenzView(AbstractSchrittView parent, StepNumber sequenzBasisId, ChangeInfo changeInfo) {
@@ -90,7 +90,7 @@ public class SchrittSequenzView {
 	}
 
 	public SchrittSequenzView(AbstractSchrittView parent, StepSequenceModel_V002 model) {
-		this(parent, new StepNumber(0), model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
+		this(parent, StepNumber.EMPTY, model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
 		this.sequenceId = model.id;
 		if (model.steps != null) {
 			for (AbstractStepModel_V002 step : model.steps) {
@@ -667,6 +667,11 @@ public class SchrittSequenzView {
 		List<JTextComponent> result = new ArrayList<>();
 		for (AbstractSchrittView schritt : schritte) {
 			result.addAll(schritt.getTextAreas());
+		}
+		if (catchBereich != null) {
+			for (SchrittSequenzView catchSeq : catchBereich.unterSequenzen()) {
+				result.addAll(catchSeq.getTextAreas());
+			}
 		}
 		return result;
 	}

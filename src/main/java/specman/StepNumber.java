@@ -13,6 +13,10 @@ import java.util.Objects;
 public class StepNumber implements Comparable<StepNumber> {
 	public final List<Integer> numbers = new ArrayList<Integer>();
 
+	/** Placeholder used where a step number is required structurally but the real number
+	 *  is not yet known (e.g. before {@code renummerieren()} runs). */
+	public static final StepNumber EMPTY = new StepNumber(0);
+
 	public StepNumber() {} // For Jackson only
 
 	// V1 JSON files used "nummern" instead of "numbers"

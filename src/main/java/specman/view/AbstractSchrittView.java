@@ -93,7 +93,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	protected AbstractSchrittView(SchrittSequenzView parent, EditorContentModel_V002 content, UUID id, ChangeInfo changeInfo) {
-		this.number = new StepNumber(0);
+		this.number = StepNumber.EMPTY;
 		this.id = id;
 		this.changeInfo = changeInfo;
 		this.editContainer = new EditContainer(content, this.number);

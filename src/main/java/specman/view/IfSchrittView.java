@@ -40,7 +40,7 @@ public class IfSchrittView extends IfElseSchrittView {
 
 	public IfSchrittView(SchrittSequenzView parent, IfStepModel_V002 model) {
 		super(parent, model.content, model.id, model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
-		initIfSequenz(new ZweigSchrittSequenzView(this, new StepNumber(0), EditorContentModel_V002.empty(), this.changeInfo));
+		initIfSequenz(new ZweigSchrittSequenzView(this, StepNumber.EMPTY, EditorContentModel_V002.empty(), this.changeInfo));
 		initElseSequenz(new ZweigSchrittSequenzView(this, model.ifSequence));
 		this.setBackgroundUDBL(new Color(model.color));
 		ifBreiteSetzen(model.emptyWidth);

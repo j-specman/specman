@@ -175,8 +175,13 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   }
 
   @Override
+  protected void ueberschriftInitialisieren(EditorContentModel_V002 content, StepNumber initialeSchrittnummer) {
+    ueberschrift = new EditContainer(content, StepNumber.EMPTY);
+  }
+
+  @Override
   protected void ueberschriftInitialisieren(EditorContentModel_V002 content) {
-    ueberschrift = new EditContainer(content, new StepNumber(0));
+    ueberschrift = new EditContainer(content, StepNumber.EMPTY);
   }
 
   @Override
