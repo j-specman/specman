@@ -25,7 +25,9 @@ import javax.swing.JPanel;
 import javax.swing.text.JTextComponent;
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -113,6 +115,29 @@ public class SchrittSequenzView {
 			}
 		}
 		return null;
+	}
+
+	public Map<UUID, String> buildStepNumberIndex() {
+		Map<UUID, String> index = new LinkedHashMap<>();
+		collectStepNumbers(index);
+		return index;
+	}
+
+	private void collectStepNumbers(Map<UUID, String> result) {
+		for (AbstractSchrittView step : schritte) {
+			StepNumber number = step.getNumber();
+			if (number != null) {
+				result.put(step.id, number.toString());
+			}
+			for (SchrittSequenzView seq : step.unterSequenzen()) {
+				seq.collectStepNumbers(result);
+			}
+		}
+		if (catchBereich != null) {
+			for (SchrittSequenzView catchSeq : catchBereich.unterSequenzen()) {
+				catchSeq.collectStepNumbers(result);
+			}
+		}
 	}
 
 	public ChangeInfo getChangeInfo() { return changeInfo; }

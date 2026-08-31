@@ -24,7 +24,8 @@ public class ModelConverterV001V002 {
             convertContent(v1.intro),
             convertContent(v1.outro),
             convertPdfOptions(v1.pdfExportOptions),
-            v1.changeSetName
+            v1.changeSetName,
+            null
         );
     }
 

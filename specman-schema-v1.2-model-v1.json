@@ -1,0 +1,520 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "specman-nsd-v001",
+  "title": "Specman NSD File Format v1",
+  "description": "JSON schema for Specman actogram (.nsd) and working copy (.wrk) files. All arrays are wrapped in Jackson's default typing format: [\"java.util.ArrayList\", [...items...]]. Typed objects (steps, edit areas) are wrapped as [\"fullyQualifiedClassName\", {object}]. IDs and step numbers are managed automatically by Specman on load — only content matters for AI edits.",
+
+  "$defs": {
+
+    "jacksonList": {
+      "description": "Jackson-serialized ArrayList. Always a 2-element array: the class name string and the actual array.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "java.util.ArrayList" },
+        { "type": "array" }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+
+    "stepId": {
+      "description": "Hierarchical step identifier. nummern contains the integer path, e.g. [2, 1] for step 2.1. Managed by Specman — use any unique values when inserting.",
+      "type": "object",
+      "required": ["nummern"],
+      "properties": {
+        "nummern": {
+          "description": "Jackson ArrayList of integers forming the ID path.",
+          "type": "array",
+          "prefixItems": [
+            { "const": "java.util.ArrayList" },
+            { "type": "array", "items": { "type": "integer" } }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+
+    "changeType": {
+      "description": "Change tracking state of an element.",
+      "type": "string",
+      "enum": ["Untracked", "Hinzugefuegt", "Geloescht"]
+    },
+
+    "changeInfo": {
+      "type": "object",
+      "required": ["changetype", "changeset"],
+      "properties": {
+        "changetype": { "$ref": "#/$defs/changeType" },
+        "changeset": {
+          "description": "Name of the changeset this element belongs to. null for Untracked.",
+          "type": ["string", "null"],
+          "enum": ["yellow", "lilac", "blue", "orange", "pink", null]
+        }
+      }
+    },
+
+    "markup": {
+      "description": "Character-level markup on a text range within plainText.",
+      "type": "object",
+      "required": ["from", "to", "type", "changeset"],
+      "properties": {
+        "from": { "type": "integer", "description": "Start character offset (inclusive) in plainText." },
+        "to":   { "type": "integer", "description": "End character offset (inclusive) in plainText." },
+        "type": {
+          "type": "string",
+          "enum": ["Steplink", "Changed", "ChangedSteplink"],
+          "description": "Steplink: reference to another step number. Changed: text changed in a changeset. ChangedSteplink: changed step reference."
+        },
+        "changeset": { "type": ["string", "null"] }
+      }
+    },
+
+    "textEditArea": {
+      "description": "A rich text edit area. HTML is the canonical representation. plainText is derived. IMPORTANT: the first area in every editContent must always be a textEditArea, even if empty.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "specman.model.v001.TextEditAreaModel_V001" },
+        {
+          "type": "object",
+          "required": ["text", "plainText", "markups", "aenderungsart", "changeInfo"],
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "Full HTML content. Supported tags: <b>, <i>, <u>, <strike>, <div>, <div align='center'|'right'>, <h1>–<h6>, <font size='1'–'7'>, <font face='Roboto'|'CourierPrime'>, <pre>, <br>. Default font is Sitka (serif). Multiple whitespace outside <pre> is collapsed on save."
+            },
+            "plainText": {
+              "type": "string",
+              "description": "Plain text rendition of the HTML, used for search. Should match the visible text of the HTML field."
+            },
+            "markups": {
+              "description": "Jackson ArrayList of markup objects.",
+              "type": "array",
+              "prefixItems": [
+                { "const": "java.util.ArrayList" },
+                { "type": "array", "items": { "$ref": "#/$defs/markup" } }
+              ],
+              "minItems": 2, "maxItems": 2
+            },
+            "aenderungsart": { "$ref": "#/$defs/changeType" },
+            "changeInfo": { "$ref": "#/$defs/changeInfo" }
+          }
+        }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "listItemEditArea": {
+      "description": "A bullet or numbered list item. Cannot be nested inside other list items.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "specman.model.v001.ListItemEditAreaModel_V001" },
+        {
+          "type": "object",
+          "required": ["content", "ordered", "aenderungsart", "changeInfo"],
+          "properties": {
+            "content": { "$ref": "#/$defs/editContent" },
+            "ordered": { "type": "boolean", "description": "true = numbered list, false = bullet list." },
+            "aenderungsart": { "$ref": "#/$defs/changeType" },
+            "changeInfo": { "$ref": "#/$defs/changeInfo" }
+          }
+        }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "tableCell": {
+      "description": "A single table cell, which is an editContent (may contain text, list items).",
+      "$ref": "#/$defs/editContent"
+    },
+
+    "tableRow": {
+      "description": "Jackson ArrayList of cells.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "java.util.ArrayList" },
+        { "type": "array", "items": { "$ref": "#/$defs/tableCell" } }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "tableEditArea": {
+      "description": "A table. All rows must have the same number of columns.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "specman.model.v001.TableEditAreaModel_V001" },
+        {
+          "type": "object",
+          "required": ["cells", "tableWidthPercent", "columnsWidthPercent", "aenderungsart", "changeInfo"],
+          "properties": {
+            "cells": {
+              "description": "Jackson ArrayList of rows, each row is a Jackson ArrayList of cells.",
+              "type": "array",
+              "prefixItems": [
+                { "const": "java.util.ArrayList" },
+                { "type": "array", "items": { "$ref": "#/$defs/tableRow" } }
+              ],
+              "minItems": 2, "maxItems": 2
+            },
+            "tableWidthPercent": { "type": "integer", "description": "Width of table as percentage of step width. Typically 100." },
+            "columnsWidthPercent": { "type": ["array", "null"], "items": { "type": "number" } },
+            "aenderungsart": { "$ref": "#/$defs/changeType" },
+            "changeInfo": { "$ref": "#/$defs/changeInfo" }
+          }
+        }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "editArea": {
+      "description": "One of the supported edit area types.",
+      "oneOf": [
+        { "$ref": "#/$defs/textEditArea" },
+        { "$ref": "#/$defs/listItemEditArea" },
+        { "$ref": "#/$defs/tableEditArea" }
+      ]
+    },
+
+    "editContent": {
+      "description": "Content container holding an ordered list of edit areas. The FIRST area MUST always be a textEditArea, even if empty (text: '<html>...<body></body></html>').",
+      "type": "object",
+      "required": ["areas"],
+      "properties": {
+        "areas": {
+          "type": "array",
+          "prefixItems": [
+            { "const": "java.util.ArrayList" },
+            { "type": "array", "items": { "$ref": "#/$defs/editArea" } }
+          ],
+          "minItems": 2, "maxItems": 2
+        }
+      }
+    },
+
+    "catchBereich": {
+      "description": "Container for exception handling (catch) sequences at the end of a step sequence.",
+      "type": "object",
+      "required": ["catchSequences", "sequencesWidthPercent", "zugeklappt"],
+      "properties": {
+        "catchSequences": {
+          "type": "array",
+          "prefixItems": [
+            { "const": "java.util.ArrayList" },
+            { "type": "array", "items": { "$ref": "#/$defs/catchSequenz" } }
+          ],
+          "minItems": 2, "maxItems": 2
+        },
+        "sequencesWidthPercent": { "type": ["number", "null"] },
+        "zugeklappt": { "type": "boolean" }
+      }
+    },
+
+    "coCatch": {
+      "description": "A co-catch adds an additional Break step to an existing catch sequence, sharing the same handler.",
+      "type": "object",
+      "required": ["breakStepId", "heading", "changetype", "changeInfo"],
+      "properties": {
+        "breakStepId": { "$ref": "#/$defs/stepId" },
+        "heading": { "$ref": "#/$defs/editContent" },
+        "changetype": { "$ref": "#/$defs/changeType" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" }
+      }
+    },
+
+    "catchSequenz": {
+      "description": "Handles exceptions thrown by one or more Break steps. The id matches the primary Break step's id. catchBereich is null (no nested catches). May occur at the end of the sequence containing the Break step, or at any higher level.",
+      "type": "object",
+      "required": ["id", "aenderungsart", "changeInfo", "schritte", "catchBereich", "ueberschrift", "coCatches", "headingRightBarWidth"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stepId", "description": "Must match the id of the primary Break step." },
+        "aenderungsart": { "$ref": "#/$defs/changeType" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "schritte": { "$ref": "#/$defs/stepList" },
+        "catchBereich": { "type": "null" },
+        "ueberschrift": { "$ref": "#/$defs/editContent" },
+        "coCatches": {
+          "type": "array",
+          "prefixItems": [
+            { "const": "java.util.ArrayList" },
+            { "type": "array", "items": { "$ref": "#/$defs/coCatch" } }
+          ],
+          "minItems": 2, "maxItems": 2
+        },
+        "headingRightBarWidth": { "type": "integer", "description": "Visual bar width. Typically 18." }
+      }
+    },
+
+    "schrittSequenz": {
+      "description": "A sequence of steps, optionally followed by catch sequences.",
+      "type": "object",
+      "required": ["id", "aenderungsart", "changeInfo", "schritte", "catchBereich"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stepId" },
+        "aenderungsart": { "$ref": "#/$defs/changeType" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "schritte": { "$ref": "#/$defs/stepList" },
+        "catchBereich": { "$ref": "#/$defs/catchBereich" },
+        "ueberschrift": {
+          "description": "Optional heading shown above this sequence (used in if/else branches and case branches).",
+          "$ref": "#/$defs/editContent"
+        }
+      }
+    },
+
+    "stepList": {
+      "description": "Jackson ArrayList of typed step tuples.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "java.util.ArrayList" },
+        { "type": "array", "items": { "$ref": "#/$defs/anyStep" } }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "commonStepFields": {
+      "description": "Fields shared by all step types.",
+      "type": "object",
+      "required": ["id", "nummer", "inhalt", "farbe", "aenderungsart", "changeInfo", "quellschrittID", "decorationStyle"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stepId" },
+        "nummer": { "type": "string", "description": "Display number, e.g. '1', '2.1'. Auto-managed by Specman." },
+        "inhalt": { "$ref": "#/$defs/editContent" },
+        "farbe": {
+          "type": "integer",
+          "description": "Background color as Java RGB integer. -1 = default (white). Set automatically based on changeset. Do not set manually."
+        },
+        "aenderungsart": { "$ref": "#/$defs/changeType" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "quellschrittID": {
+          "description": "ID of the source step when this step references another (step link). null if none.",
+          "oneOf": [{ "$ref": "#/$defs/stepId" }, { "type": "null" }]
+        },
+        "decorationStyle": {
+          "type": "string",
+          "enum": ["None"],
+          "description": "Visual decoration. Use 'None' for standard appearance."
+        }
+      }
+    },
+
+    "einfacherSchritt": {
+      "description": "Simple step — the basic building block. No sub-sequences.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "specman.model.v001.EinfacherSchrittModel_V001" },
+        { "$ref": "#/$defs/commonStepFields" }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "breakSchritt": {
+      "description": "Break/exception step. Marks a point where an exception can be thrown. Optionally has a corresponding catch sequence (with matching id) in an enclosing sequence — but a Break without a catch is also valid.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "specman.model.v001.BreakSchrittModel_V001" },
+        { "$ref": "#/$defs/commonStepFields" }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "loopStepFields": {
+      "description": "Fields common to While and WhileWhile loops.",
+      "allOf": [
+        { "$ref": "#/$defs/commonStepFields" },
+        {
+          "required": ["zugeklappt", "wiederholSequenz", "balkenbreite"],
+          "properties": {
+            "zugeklappt": { "type": "boolean", "description": "Whether the loop body is collapsed in the UI." },
+            "wiederholSequenz": { "$ref": "#/$defs/schrittSequenz" },
+            "balkenbreite": { "type": "integer", "description": "Visual bar width. Typically 18." }
+          }
+        }
+      ]
+    },
+
+    "whileSchritt": {
+      "description": "While loop. The condition is in inhalt; the loop body is in wiederholSequenz.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "specman.model.v001.WhileSchrittModel_V001" },
+        { "$ref": "#/$defs/loopStepFields" }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "whileWhileSchritt": {
+      "description": "While-While loop. Semantically identical to While but rendered with an extra bottom bar. Matter of preference.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "specman.model.v001.WhileWhileSchrittModel_V001" },
+        { "$ref": "#/$defs/loopStepFields" }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "ifElseSchritt": {
+      "description": "If-Else step. The condition goes in inhalt (centered text recommended). ifSequenz = Yes-branch, elseSequenz = No-branch. Each sequence has a ueberschrift heading.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "specman.model.v001.IfElseSchrittModel_V001" },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/commonStepFields" },
+            {
+              "required": ["zugeklappt", "ifSequenz", "elseSequenz", "ifBreitenanteil"],
+              "properties": {
+                "zugeklappt": { "type": "boolean" },
+                "ifSequenz": { "$ref": "#/$defs/schrittSequenz" },
+                "elseSequenz": { "$ref": "#/$defs/schrittSequenz" },
+                "ifBreitenanteil": { "type": "number", "description": "Width ratio of the Yes-branch. 0.5 = equal split." }
+              }
+            }
+          ]
+        }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "ifSchritt": {
+      "description": "If step — an If-Else without a No-branch. The condition goes in inhalt (centered text recommended).",
+      "type": "array",
+      "prefixItems": [
+        { "const": "specman.model.v001.IfSchrittModel_V001" },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/commonStepFields" },
+            {
+              "required": ["zugeklappt", "ifSequenz", "leerBreite"],
+              "properties": {
+                "zugeklappt": { "type": "boolean" },
+                "ifSequenz": { "$ref": "#/$defs/schrittSequenz" },
+                "leerBreite": { "type": "integer", "description": "Width of the empty No-side placeholder. Typically 20." }
+              }
+            }
+          ]
+        }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "caseSchritt": {
+      "description": "Switch-Case step. The switched expression goes in inhalt. Requires at least 2 caseSequenzen plus the sonstSequenz (else). Use If-Else or If for fewer branches.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "specman.model.v001.CaseSchrittModel_V001" },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/commonStepFields" },
+            {
+              "required": ["zugeklappt", "sonstSequenz", "caseSequenzen", "spaltenbreitenAnteile"],
+              "properties": {
+                "zugeklappt": { "type": "boolean" },
+                "sonstSequenz": {
+                  "$ref": "#/$defs/schrittSequenz",
+                  "description": "The else/default case sequence. Must have a ueberschrift."
+                },
+                "caseSequenzen": {
+                  "description": "Jackson ArrayList of case sequences. Minimum 2. Each must have a ueberschrift.",
+                  "type": "array",
+                  "prefixItems": [
+                    { "const": "java.util.ArrayList" },
+                    { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/schrittSequenz" } }
+                  ],
+                  "minItems": 2, "maxItems": 2
+                },
+                "spaltenbreitenAnteile": {
+                  "type": "array",
+                  "items": { "type": "number" },
+                  "description": "Width ratios for all columns (sonstSequenz + caseSequenzen). Must sum to 1.0. Length = 1 + caseSequenzen.length."
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "subsequenzSchritt": {
+      "description": "Subsequence step — a named group of steps displayed as a nested block.",
+      "type": "array",
+      "prefixItems": [
+        { "const": "specman.model.v001.SubsequenzSchrittModel_V001" },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/commonStepFields" },
+            {
+              "required": ["zugeklappt", "subsequenz", "flatNumbering"],
+              "properties": {
+                "zugeklappt": { "type": "boolean" },
+                "subsequenz": { "$ref": "#/$defs/schrittSequenz" },
+                "flatNumbering": {
+                  "type": "boolean",
+                  "description": "If true, sub-steps continue the parent numbering instead of using dotted sub-numbers."
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "minItems": 2, "maxItems": 2
+    },
+
+    "anyStep": {
+      "description": "Any step type. Each step is a 2-element tuple: [className, stepObject].",
+      "oneOf": [
+        { "$ref": "#/$defs/einfacherSchritt" },
+        { "$ref": "#/$defs/breakSchritt" },
+        { "$ref": "#/$defs/whileSchritt" },
+        { "$ref": "#/$defs/whileWhileSchritt" },
+        { "$ref": "#/$defs/ifElseSchritt" },
+        { "$ref": "#/$defs/ifSchritt" },
+        { "$ref": "#/$defs/caseSchritt" },
+        { "$ref": "#/$defs/subsequenzSchritt" }
+      ]
+    }
+
+  },
+
+  "type": "object",
+  "required": ["specmanVersion", "modelType", "model"],
+  "properties": {
+    "specmanVersion": {
+      "type": "string",
+      "description": "Specman version that created the file, e.g. '1.2.1'. Do not change."
+    },
+    "modelType": {
+      "const": "specman.model.v001.StruktogrammModel_V001"
+    },
+    "model": {
+      "type": "object",
+      "required": ["name", "breite", "zoomFaktor", "changeModeenabled", "hauptSequenz", "intro", "outro", "pdfExportOptions", "changeSetName"],
+      "properties": {
+        "name": { "type": "string", "description": "Diagram name, displayed in the title bar." },
+        "breite": { "type": "integer", "description": "Diagram width in pixels. Typically 700." },
+        "zoomFaktor": { "type": "integer", "description": "Zoom level in percent. Typically 100." },
+        "changeModeenabled": { "type": "boolean", "description": "Whether change tracking mode is currently active." },
+        "hauptSequenz": { "$ref": "#/$defs/schrittSequenz" },
+        "intro": { "$ref": "#/$defs/editContent", "description": "Text area displayed above the main sequence (use case intro)." },
+        "outro": { "$ref": "#/$defs/editContent", "description": "Text area displayed below the main sequence (use case outro)." },
+        "pdfExportOptions": { "type": ["object", "null"] },
+        "changeSetName": {
+          "type": "string",
+          "description": "Currently active change set. New changes are attributed to this set.",
+          "enum": ["yellow", "lilac", "blue", "orange", "pink"]
+        }
+      }
+    }
+  },
+
+  "x-usage-notes": {
+    "ids": "Step IDs (nummern) must be unique within the file. Specman renumbers all steps on load, so new IDs only need to be unique within your edit. Hierarchical IDs follow the pattern [parentId..., localIndex], e.g. [2, 1] for the first child of step 2.",
+    "numbers": "The 'nummer' field (e.g. '2.1') is auto-recalculated by Specman. Set a plausible value but it will be corrected.",
+    "html": "Use plain HTML for 'text' fields. Prefer <div> for paragraphs. Center condition text with <div align='center'>. Wrap exception/break labels in <b>. Do NOT use CSS classes or <span> tags.",
+    "plainText": "The 'plainText' field should be the plain text rendition of 'text', with a leading newline. Used for search only.",
+    "firstArea": "The first element in every 'areas' array MUST be a TextEditAreaModel_V001, even if its text is empty.",
+    "changeset": "When inserting new steps without change tracking intent, set aenderungsart='Untracked', changeInfo={changetype:'Untracked', changeset:null}, farbe=-1.",
+    "breakCatch": "A BreakSchrittModel_V001 may optionally have a corresponding catchSequenz somewhere in an enclosing schrittSequenz's catchBereich — but a Break without a catch is also valid. When a catchSequenz is used, its id must match the Break step id.",
+    "coCatch": "To share one catch handler for multiple Break steps, use coCatches in the primary catchSequenz."
+  }
+}

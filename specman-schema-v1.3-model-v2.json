@@ -1,0 +1,576 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "specman-schema-v1.3-model-v2.json",
+  "title": "Specman NSD File – Model V2",
+  "description": "JSON schema for Specman Nassi-Shneiderman diagram files using model version V2 (DiagramModel_V002).",
+  "type": "object",
+  "required": ["specmanVersion", "modelType", "model"],
+  "additionalProperties": false,
+  "properties": {
+    "specmanVersion": {
+      "type": "string",
+      "description": "Specman version that wrote this file, e.g. \"1.2.1\""
+    },
+    "modelType": {
+      "type": "string",
+      "const": "specman.model.v002.DiagramModel_V002"
+    },
+    "model": { "$ref": "#/$defs/diagramModel" }
+  },
+
+  "$defs": {
+
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "UUID in standard lowercase hyphenated format"
+    },
+
+    "changeInfo": {
+      "type": "object",
+      "required": ["changetype"],
+      "additionalProperties": false,
+      "properties": {
+        "changetype": {
+          "type": "string",
+          "enum": ["Untracked", "Hinzugefuegt", "Geloescht", "Quellschritt", "Zielschritt"],
+          "description": "Untracked: no tracked change; Hinzugefuegt: added; Geloescht: deleted; Quellschritt/Zielschritt: source/target of a copy link"
+        },
+        "changeset": {
+          "type": "string",
+          "description": "Name of the change set; omitted when changetype is Untracked"
+        }
+      }
+    },
+
+    "markup": {
+      "type": "object",
+      "required": ["from", "to", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "integer",
+          "description": "Start character offset of the markup range (inclusive)"
+        },
+        "to": {
+          "type": "integer",
+          "description": "End character offset of the markup range (inclusive)"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["Changed", "Steplink", "ChangedSteplink"],
+          "description": "Changed: text changed in a change set; Steplink: step number cross-reference; ChangedSteplink: a changed step-number cross-reference"
+        },
+        "changeset": {
+          "type": "string",
+          "description": "Name of the change set; present only for Changed and ChangedSteplink"
+        }
+      }
+    },
+
+    "editorContent": {
+      "type": "object",
+      "required": ["areas"],
+      "additionalProperties": false,
+      "properties": {
+        "areas": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/editArea" },
+          "description": "The first element must always be a text edit area"
+        }
+      }
+    },
+
+    "editArea": {
+      "oneOf": [
+        { "$ref": "#/$defs/textEditArea" },
+        { "$ref": "#/$defs/listItemEditArea" },
+        { "$ref": "#/$defs/imageEditArea" },
+        { "$ref": "#/$defs/tableEditArea" }
+      ]
+    },
+
+    "textEditArea": {
+      "type": "object",
+      "required": ["type", "text", "plainText", "markups"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "text" },
+        "text": {
+          "type": "string",
+          "description": "HTML content of the text area"
+        },
+        "plainText": {
+          "type": "string",
+          "description": "Plain-text rendering of the HTML content used for search and export"
+        },
+        "markups": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/markup" }
+        },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" }
+      }
+    },
+
+    "listItemEditArea": {
+      "type": "object",
+      "required": ["type", "content", "ordered"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "listItem" },
+        "content": { "$ref": "#/$defs/editorContent" },
+        "ordered": {
+          "type": "boolean",
+          "description": "true for numbered lists, false for bullet lists"
+        },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" }
+      }
+    },
+
+    "imageEditArea": {
+      "type": "object",
+      "required": ["type", "imageData", "imageType", "individualScalePercent"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "image" },
+        "imageData": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "description": "Base64-encoded image bytes"
+        },
+        "imageType": {
+          "type": "string",
+          "description": "MIME type, e.g. \"image/png\" or \"image/jpeg\""
+        },
+        "individualScalePercent": {
+          "type": "number",
+          "description": "Per-image scale in percent; 0 means use the global diagram zoom factor"
+        },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" }
+      }
+    },
+
+    "tableEditArea": {
+      "type": "object",
+      "required": ["type", "cells", "tableWidthPercent"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "table" },
+        "cells": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/editorContent" }
+          },
+          "description": "2-D cell array: outer dimension = rows, inner dimension = columns"
+        },
+        "tableWidthPercent": {
+          "type": "integer",
+          "description": "Table width as a percentage of the available step width"
+        },
+        "columnsWidthPercent": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "description": "Per-column width shares in percent; omitted when not explicitly resized"
+        },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" }
+      }
+    },
+
+    "catchArea": {
+      "type": "object",
+      "required": ["catchSequences", "collapsed"],
+      "additionalProperties": false,
+      "properties": {
+        "catchSequences": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/catchSequence" }
+        },
+        "collapsed": {
+          "type": "boolean",
+          "description": "Whether the catch area is collapsed in the UI"
+        }
+      }
+    },
+
+    "coCatch": {
+      "description": "An additional break step that shares the same catch sequence with the primary break step (multi-exception catch).",
+      "type": "object",
+      "required": ["breakStepId", "heading"],
+      "additionalProperties": false,
+      "properties": {
+        "breakStepId": {
+          "$ref": "#/$defs/uuid",
+          "description": "UUID of the co-catch's linked break step"
+        },
+        "heading": { "$ref": "#/$defs/editorContent" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" }
+      }
+    },
+
+    "stepSequence": {
+      "description": "A linear sequence of steps. Used for the main sequence, loop bodies, and subsequences.",
+      "type": "object",
+      "required": ["id", "changeInfo", "steps"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/step" }
+        },
+        "catchArea": { "$ref": "#/$defs/catchArea" }
+      }
+    },
+
+    "branchSequence": {
+      "description": "A step sequence that forms one branch of a structured step (if, if-else, case). Has a heading label.",
+      "type": "object",
+      "required": ["id", "changeInfo", "steps", "heading"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/step" }
+        },
+        "catchArea": { "$ref": "#/$defs/catchArea" },
+        "heading": { "$ref": "#/$defs/editorContent" }
+      }
+    },
+
+    "catchSequence": {
+      "description": "A catch-handling sequence. Its id equals the UUID of its primary linked break step. It has no catchArea of its own.",
+      "type": "object",
+      "required": ["id", "changeInfo", "steps", "heading"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid",
+          "description": "UUID of the primary linked break step"
+        },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/step" }
+        },
+        "heading": {
+          "$ref": "#/$defs/editorContent",
+          "description": "Label shown in the catch sequence heading bar (mirrors the primary break step's content)"
+        },
+        "coCatches": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/coCatch" },
+          "description": "Additional break steps that share this catch sequence"
+        },
+        "headingRightBarWidth": {
+          "type": "integer",
+          "description": "Width of the divider bar between primary and co-catch headings (pixels at 100% zoom)"
+        }
+      }
+    },
+
+    "step": {
+      "description": "Any step in a step sequence. Discriminated by the \"type\" property.",
+      "oneOf": [
+        { "$ref": "#/$defs/simpleStep" },
+        { "$ref": "#/$defs/breakStep" },
+        { "$ref": "#/$defs/sourceStep" },
+        { "$ref": "#/$defs/whileStep" },
+        { "$ref": "#/$defs/doWhileStep" },
+        { "$ref": "#/$defs/ifStep" },
+        { "$ref": "#/$defs/ifElseStep" },
+        { "$ref": "#/$defs/caseStep" },
+        { "$ref": "#/$defs/subsequenceStep" }
+      ]
+    },
+
+    "simpleStep": {
+      "description": "A plain action or instruction step with no sub-structure.",
+      "type": "object",
+      "required": ["type", "id", "content", "color", "changeInfo", "decorationStyle"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "simple" },
+        "id": { "$ref": "#/$defs/uuid" },
+        "content": { "$ref": "#/$defs/editorContent" },
+        "color": { "$ref": "#/$defs/color" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "sourceStepId": { "$ref": "#/$defs/uuid" },
+        "decorationStyle": { "$ref": "#/$defs/decorationStyle" }
+      }
+    },
+
+    "breakStep": {
+      "description": "A break (exception-throw) step. May be linked to one or more catch sequences.",
+      "type": "object",
+      "required": ["type", "id", "content", "color", "changeInfo", "decorationStyle"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "break" },
+        "id": { "$ref": "#/$defs/uuid" },
+        "content": { "$ref": "#/$defs/editorContent" },
+        "color": { "$ref": "#/$defs/color" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "sourceStepId": { "$ref": "#/$defs/uuid" },
+        "decorationStyle": { "$ref": "#/$defs/decorationStyle" }
+      }
+    },
+
+    "sourceStep": {
+      "description": "A source step that acts as a copy source for a target step elsewhere in the diagram.",
+      "type": "object",
+      "required": ["type", "id", "content", "color", "changeInfo", "decorationStyle"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "source" },
+        "id": { "$ref": "#/$defs/uuid" },
+        "content": { "$ref": "#/$defs/editorContent" },
+        "color": { "$ref": "#/$defs/color" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "sourceStepId": { "$ref": "#/$defs/uuid" },
+        "decorationStyle": { "$ref": "#/$defs/decorationStyle" }
+      }
+    },
+
+    "whileStep": {
+      "description": "A while loop (condition checked at the top).",
+      "type": "object",
+      "required": ["type", "id", "content", "color", "changeInfo", "decorationStyle", "collapsed", "loopSequence", "barWidth"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "while" },
+        "id": { "$ref": "#/$defs/uuid" },
+        "content": { "$ref": "#/$defs/editorContent" },
+        "color": { "$ref": "#/$defs/color" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "sourceStepId": { "$ref": "#/$defs/uuid" },
+        "decorationStyle": { "$ref": "#/$defs/decorationStyle" },
+        "collapsed": { "$ref": "#/$defs/collapsed" },
+        "loopSequence": { "$ref": "#/$defs/stepSequence" },
+        "barWidth": {
+          "type": "integer",
+          "description": "Width of the left loop bar (pixels at 100% zoom)"
+        }
+      }
+    },
+
+    "doWhileStep": {
+      "description": "A do-while loop (condition checked at the bottom, shown with an extra bottom bar).",
+      "type": "object",
+      "required": ["type", "id", "content", "color", "changeInfo", "decorationStyle", "collapsed", "loopSequence", "barWidth"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "doWhile" },
+        "id": { "$ref": "#/$defs/uuid" },
+        "content": { "$ref": "#/$defs/editorContent" },
+        "color": { "$ref": "#/$defs/color" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "sourceStepId": { "$ref": "#/$defs/uuid" },
+        "decorationStyle": { "$ref": "#/$defs/decorationStyle" },
+        "collapsed": { "$ref": "#/$defs/collapsed" },
+        "loopSequence": { "$ref": "#/$defs/stepSequence" },
+        "barWidth": {
+          "type": "integer",
+          "description": "Width of the left loop bar (pixels at 100% zoom)"
+        }
+      }
+    },
+
+    "ifStep": {
+      "description": "A single-branch conditional (if without else). The \"no\" side is an empty placeholder column.",
+      "type": "object",
+      "required": ["type", "id", "content", "color", "changeInfo", "decorationStyle", "collapsed", "ifSequence", "emptyWidth"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "if" },
+        "id": { "$ref": "#/$defs/uuid" },
+        "content": { "$ref": "#/$defs/editorContent" },
+        "color": { "$ref": "#/$defs/color" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "sourceStepId": { "$ref": "#/$defs/uuid" },
+        "decorationStyle": { "$ref": "#/$defs/decorationStyle" },
+        "collapsed": { "$ref": "#/$defs/collapsed" },
+        "ifSequence": { "$ref": "#/$defs/branchSequence" },
+        "emptyWidth": {
+          "type": "integer",
+          "description": "Width of the empty no-case placeholder column (pixels at 100% zoom)"
+        }
+      }
+    },
+
+    "ifElseStep": {
+      "description": "A two-branch conditional (if-else).",
+      "type": "object",
+      "required": ["type", "id", "content", "color", "changeInfo", "decorationStyle", "collapsed", "ifSequence", "elseSequence", "ifWidthRatio"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "ifElse" },
+        "id": { "$ref": "#/$defs/uuid" },
+        "content": { "$ref": "#/$defs/editorContent" },
+        "color": { "$ref": "#/$defs/color" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "sourceStepId": { "$ref": "#/$defs/uuid" },
+        "decorationStyle": { "$ref": "#/$defs/decorationStyle" },
+        "collapsed": { "$ref": "#/$defs/collapsed" },
+        "ifSequence": { "$ref": "#/$defs/branchSequence" },
+        "elseSequence": { "$ref": "#/$defs/branchSequence" },
+        "ifWidthRatio": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Width ratio of the if-sequence column relative to the total step width"
+        }
+      }
+    },
+
+    "caseStep": {
+      "description": "A switch-case step with a default (else) sequence and at least two case sequences.",
+      "type": "object",
+      "required": ["type", "id", "content", "color", "changeInfo", "decorationStyle", "collapsed", "defaultSequence", "caseSequences", "columnWidthRatios"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "case" },
+        "id": { "$ref": "#/$defs/uuid" },
+        "content": { "$ref": "#/$defs/editorContent" },
+        "color": { "$ref": "#/$defs/color" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "sourceStepId": { "$ref": "#/$defs/uuid" },
+        "decorationStyle": { "$ref": "#/$defs/decorationStyle" },
+        "collapsed": { "$ref": "#/$defs/collapsed" },
+        "defaultSequence": {
+          "$ref": "#/$defs/branchSequence",
+          "description": "The else/default sequence (last column)"
+        },
+        "caseSequences": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/branchSequence" },
+          "minItems": 2,
+          "description": "The case branches in display order (left to right, before the default column)"
+        },
+        "columnWidthRatios": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "Width ratios for every column (case sequences + default), in display order; values sum to approximately 1.0"
+        }
+      }
+    },
+
+    "subsequenceStep": {
+      "description": "A collapsible sub-sequence step that groups a set of steps under a single label.",
+      "type": "object",
+      "required": ["type", "id", "content", "color", "changeInfo", "decorationStyle", "collapsed", "subsequence", "flatNumbering"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "subsequence" },
+        "id": { "$ref": "#/$defs/uuid" },
+        "content": { "$ref": "#/$defs/editorContent" },
+        "color": { "$ref": "#/$defs/color" },
+        "changeInfo": { "$ref": "#/$defs/changeInfo" },
+        "sourceStepId": { "$ref": "#/$defs/uuid" },
+        "decorationStyle": { "$ref": "#/$defs/decorationStyle" },
+        "collapsed": { "$ref": "#/$defs/collapsed" },
+        "subsequence": { "$ref": "#/$defs/stepSequence" },
+        "flatNumbering": {
+          "type": "boolean",
+          "description": "true: steps inside the subsequence are numbered at the same level as the parent sequence; false: they form a nested level"
+        }
+      }
+    },
+
+    "diagramModel": {
+      "type": "object",
+      "required": ["name", "width", "zoomFactor", "changeModeEnabled", "mainSequence"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Diagram name shown in the title bar"
+        },
+        "stepNumberIndex": {
+          "type": "object",
+          "description": "Index mapping each step UUID to its step number at the time the file was saved. Allows readers to locate a step by number without traversing the full model tree.",
+          "patternProperties": {
+            "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+)*$",
+              "description": "Step number in dot notation, e.g. \"1\", \"2.3\", \"10.1.2\""
+            }
+          },
+          "additionalProperties": false
+        },
+        "width": {
+          "type": "integer",
+          "description": "Diagram width in pixels at 100% zoom"
+        },
+        "zoomFactor": {
+          "type": "integer",
+          "description": "Zoom level in percent (100 = original size)"
+        },
+        "changeModeEnabled": {
+          "type": "boolean",
+          "description": "Whether change-tracking mode is currently active"
+        },
+        "changeSetName": {
+          "type": "string",
+          "description": "Name of the currently active change set"
+        },
+        "mainSequence": { "$ref": "#/$defs/stepSequence" },
+        "intro": {
+          "$ref": "#/$defs/editorContent",
+          "description": "Free-text introduction shown above the diagram"
+        },
+        "outro": {
+          "$ref": "#/$defs/editorContent",
+          "description": "Free-text conclusion shown below the diagram"
+        },
+        "pdfExportOptions": { "$ref": "#/$defs/pdfExportOptions" }
+      }
+    },
+
+    "pdfExportOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "filename": {
+          "type": "string",
+          "description": "Default output PDF file name"
+        },
+        "modelFilename": {
+          "type": "string",
+          "description": "NSD source file name embedded in the PDF metadata"
+        },
+        "pageSize": {
+          "type": "string",
+          "description": "Paper size, e.g. \"A4\" or \"Letter\""
+        },
+        "portrait": {
+          "type": "boolean",
+          "description": "true for portrait orientation, false for landscape"
+        },
+        "paging": {
+          "type": "boolean",
+          "description": "true to split the output across multiple pages"
+        }
+      }
+    },
+
+    "color": {
+      "type": "integer",
+      "description": "Background color as a packed Java ARGB int. -1 (0xFFFFFFFF) is the default white background."
+    },
+
+    "collapsed": {
+      "type": "boolean",
+      "description": "Whether the step's sub-structure is collapsed in the UI"
+    },
+
+    "decorationStyle": {
+      "type": "string",
+      "enum": ["None", "Full", "Co"],
+      "description": "Rounded border decoration: None = no decoration; Full = full rounded border; Co = co-step decoration"
+    }
+  }
+}

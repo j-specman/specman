@@ -86,7 +86,8 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         getIntro().editorContent2Model(formatierterText),
         getOutro().editorContent2Model(formatierterText),
         getPdfExportOptions(),
-        changeset().name);
+        changeset().name,
+        getHauptSequenz().buildStepNumberIndex());
   }
 
   private ModelEnvelope wrapModel(DiagramModel_V002 model) {
