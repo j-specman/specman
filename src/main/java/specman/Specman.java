@@ -575,6 +575,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
     undoManager.markAsUnsavedWorkingCopy();
   }
 
+  @Override
+  public void notifyWorkingCopyInitialized(long timestamp) {
+    autoLoad.workingCopyInitialized(timestamp);
+  }
+
 	@Override
 	public void zusammenklappenFuerReview() {
 		getHauptSequenz().zusammenklappenFuerReview();

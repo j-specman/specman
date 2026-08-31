@@ -7,6 +7,8 @@ import specman.undo.manager.UndoRecording;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
 public class AutoSaveOp extends AbstractSpecmanOp {
@@ -62,6 +64,21 @@ public class AutoSaveOp extends AbstractSpecmanOp {
   public static void deleteWorkingCopyFor(File nsdFile) {
     if (nsdFile != null) {
       workingCopyFor(nsdFile).delete();
+    }
+  }
+
+  public static long createWorkingCopyFor(File nsdFile) {
+    if (nsdFile == null) {
+      return 0;
+    }
+    try {
+      File wc = workingCopyFor(nsdFile);
+      Files.copy(nsdFile.toPath(), wc.toPath(), StandardCopyOption.REPLACE_EXISTING);
+      return wc.lastModified();
+    }
+    catch (IOException ignored) {
+      // Best-effort: AutoSave will create the working copy on the next save cycle
+      return 0;
     }
   }
 

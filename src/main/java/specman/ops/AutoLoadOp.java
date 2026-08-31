@@ -22,6 +22,10 @@ public class AutoLoadOp extends AbstractSpecmanOp {
     timer.start();
   }
 
+  public void workingCopyInitialized(long timestamp) {
+    lastLoadedFileTimestamp = timestamp;
+  }
+
   private void loadIfNeeded() {
     timer.setDelay(timerDelay());
     if (SettingAutoLoad.getIntervalSeconds() == null) {

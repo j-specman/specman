@@ -75,6 +75,10 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
       load(diagramFile);
     }
     addRecentFile(diagramFile);
+    if (!hasUnsavedChanges()) {
+      long wcTimestamp = AutoSaveOp.createWorkingCopyFor(diagramFile);
+      context().notifyWorkingCopyInitialized(wcTimestamp);
+    }
   }
 
   private static String formatTimestamp(File file) {
