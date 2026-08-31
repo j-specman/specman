@@ -40,7 +40,6 @@ import specman.editarea.TextEditArea;
 import specman.undo.props.UDBL;
 
 import javax.swing.JComponent;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -565,8 +564,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return number + " - " + getTextShef().getPlainText();
 	}
 
-	public List<JTextComponent> getTextAreas() {
-		List<JTextComponent> result = editContainer.getTextAreas();
+	public List<TextEditArea> getTextAreas() {
+		List<TextEditArea> result = editContainer.getTextAreas();
 		unterSequenzen().forEach(seq -> result.addAll(seq.getTextAreas()));
 		return result;
 	}

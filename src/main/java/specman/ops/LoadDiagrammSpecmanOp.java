@@ -29,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.swing.text.JTextComponent;
 import specman.editarea.StepnumberLink;
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedElement;
@@ -121,7 +120,7 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
 
     hauptSequenzInitialisieren();
     getHauptSequenz().renummerieren();
-    reconcileStepNumberReferences(model);
+    rewriteStaleStepNumberLinks(model);
     // quellZielZuweisung: step references handled via UUID in a future step
     getHauptSequenz().viewsNachinitialisieren();
     getIntro().viewsNachinitialisieren();
@@ -176,28 +175,44 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     return mapper.readValue(diagramFile, ModelEnvelope.class);
   }
 
-  private void reconcileStepNumberReferences(DiagramModel_V002 model) {
-    if (model.stepNumberIndex == null) {
-      return;
+  /** Rewrites stale step-number cross-references after loading a V2 model that was edited outside
+   * Specman, especially by an AI agent. Agents are instructed not to maintain {@code stepNumberIndex}
+   * themselves because Specman does that faster and without errors. As a result, after an agent
+   * reorders or inserts steps, the step numbers embedded as Steplink-styled text runs in the diagram
+   * content may no longer match the numbers that {@code renummerieren()} just assigned. This method
+   * compares the saved index against the freshly computed numbers and rewrites every affected Steplink
+   * run in place, before {@code viewsNachinitialisieren()} rebuilds the reference graph via
+   * {@code registerAllExistingStepnumbers()}. */
+  private void rewriteStaleStepNumberLinks(DiagramModel_V002 model) {
+    if (model.stepNumberIndex != null) {
+      Map<UUID, String> computedIndex = getHauptSequenz().buildStepNumberIndex();
+      Map<String, String> changedNumbers = queryChangedNumbers(model, computedIndex);
+      if (!changedNumbers.isEmpty()) {
+        List<TextEditArea> allAreas = collectAllTextAreas();
+        for (TextEditArea area : allAreas) {
+          remapStepNumberLinksInArea(area, changedNumbers);
+        }
+      }
     }
-    Map<UUID, String> newIndex = getHauptSequenz().buildStepNumberIndex();
+  }
+
+  private List<TextEditArea> collectAllTextAreas() {
+    List<TextEditArea> allAreas = new ArrayList<>();
+    allAreas.addAll(getIntro().getTextAreas());
+    allAreas.addAll(getHauptSequenz().getTextAreas());
+    allAreas.addAll(getOutro().getTextAreas());
+    return allAreas;
+  }
+
+  private Map<String, String> queryChangedNumbers(DiagramModel_V002 model, Map<UUID, String> computedIndex) {
     Map<String, String> changedNumbers = new LinkedHashMap<>();
-    for (Map.Entry<UUID, String> entry : newIndex.entrySet()) {
+    for (Map.Entry<UUID, String> entry : computedIndex.entrySet()) {
       String savedNumber = model.stepNumberIndex.get(entry.getKey());
       if (savedNumber != null && !savedNumber.equals(entry.getValue())) {
         changedNumbers.put(savedNumber, entry.getValue());
       }
     }
-    if (changedNumbers.isEmpty()) {
-      return;
-    }
-    List<JTextComponent> allAreas = new ArrayList<>();
-    allAreas.addAll(getIntro().getTextAreas());
-    allAreas.addAll(getHauptSequenz().getTextAreas());
-    allAreas.addAll(getOutro().getTextAreas());
-    for (JTextComponent area : allAreas) {
-      remapStepNumberLinksInArea((TextEditArea) area, changedNumbers);
-    }
+    return changedNumbers;
   }
 
   private void remapStepNumberLinksInArea(TextEditArea area, Map<String, String> changedNumbers) {

@@ -24,7 +24,6 @@ import specman.undo.props.UDBL;
 import specman.view.AbstractSchrittView;
 
 import javax.swing.*;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusListener;
@@ -594,8 +593,8 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   @Override
-  public List<JTextComponent> getTextAreas() {
-    List<JTextComponent> result = new ArrayList<>();
+  public List<TextEditArea> getTextAreas() {
+    List<TextEditArea> result = new ArrayList<>();
     for (List<EditContainer> row : cells) {
       row.stream().forEach(ec -> result.addAll(ec.getTextAreas()));
     }

@@ -11,8 +11,8 @@ import specman.model.v002.BranchSequenceModel_V002;
 import specman.editarea.EditContainer;
 import specman.editarea.Indentions;
 import specman.editarea.InteractiveStepFragment;
+import specman.editarea.TextEditArea;
 
-import javax.swing.text.JTextComponent;
 import java.awt.Color;
 import java.util.List;
 
@@ -146,8 +146,8 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 	}
 
 	@Override
-	public List<JTextComponent> getTextAreas() {
-		List<JTextComponent> result = ueberschrift.getTextAreas();
+	public List<TextEditArea> getTextAreas() {
+		List<TextEditArea> result = ueberschrift.getTextAreas();
 		result.addAll(super.getTextAreas());
 		return result;
 	}

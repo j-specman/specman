@@ -30,7 +30,6 @@ import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
 
 import javax.swing.*;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusListener;
@@ -557,8 +556,8 @@ public class EditContainer extends JPanel {
 		});
 	}
 
-	public List<JTextComponent> getTextAreas() {
-    List<JTextComponent> result = new ArrayList<>();
+	public List<TextEditArea> getTextAreas() {
+    List<TextEditArea> result = new ArrayList<>();
     editAreas.stream().forEach(ea -> result.addAll(ea.getTextAreas()));
     return result;
 	}

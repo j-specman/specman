@@ -18,11 +18,11 @@ import specman.pdf.Shape;
 import specman.editarea.EditContainer;
 import specman.editarea.Indentions;
 import specman.editarea.InteractiveStepFragment;
+import specman.editarea.TextEditArea;
 import specman.undo.props.UDBL;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.text.JTextComponent;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -663,8 +663,8 @@ public class SchrittSequenzView {
 		return Co;
 	}
 
-	public List<JTextComponent> getTextAreas() {
-		List<JTextComponent> result = new ArrayList<>();
+	public List<TextEditArea> getTextAreas() {
+		List<TextEditArea> result = new ArrayList<>();
 		for (AbstractSchrittView schritt : schritte) {
 			result.addAll(schritt.getTextAreas());
 		}
