@@ -1,5 +1,7 @@
 package specman;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +14,15 @@ public class StepNumber implements Comparable<StepNumber> {
 	public final List<Integer> numbers = new ArrayList<Integer>();
 
 	public StepNumber() {} // For Jackson only
+
+	// V1 JSON files used "nummern" instead of "numbers"
+	@JsonProperty("nummern")
+	private void readNummern(List<Integer> nummern) {
+		if (nummern != null) {
+			numbers.clear();
+			numbers.addAll(nummern);
+		}
+	}
 
 	public StepNumber(Integer... numbers) {
 		this.numbers.addAll(Arrays.asList(numbers));
