@@ -767,6 +767,13 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
                 + " This indicates a missing unregisterStepnumberLink() call.");
     }
 
+    /** Replaces the text of a specific steplink element by position, not by text-match.
+     *  Used during load-time reconciliation to avoid aliasing when multiple links change numbers. */
+    public void replaceStepnumberLinkElement(WrappedElement element, String newID) {
+        String currentID = getStepnumberLinkIDFromElement(element);
+        replaceStepnumberLink(element, currentID, newID);
+    }
+
     private boolean replaceStepnumberLink(WrappedElement e, String oldID, String newID) {
         WrappedDocument doc = getWrappedDocument();
         if (stepnumberLinkStyleSet(e)) {

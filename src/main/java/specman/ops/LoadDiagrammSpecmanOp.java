@@ -24,7 +24,15 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import javax.swing.text.JTextComponent;
+import specman.editarea.StepnumberLink;
+import specman.editarea.TextEditArea;
+import specman.editarea.document.WrappedElement;
 
 public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
 
@@ -113,6 +121,7 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
 
     hauptSequenzInitialisieren();
     getHauptSequenz().renummerieren();
+    reconcileStepNumberReferences(model);
     // quellZielZuweisung: step references handled via UUID in a future step
     getHauptSequenz().viewsNachinitialisieren();
     getIntro().viewsNachinitialisieren();
@@ -165,6 +174,50 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
       mapper.enableDefaultTyping();
     }
     return mapper.readValue(diagramFile, ModelEnvelope.class);
+  }
+
+  private void reconcileStepNumberReferences(DiagramModel_V002 model) {
+    if (model.stepNumberIndex == null) {
+      return;
+    }
+    Map<UUID, String> newIndex = getHauptSequenz().buildStepNumberIndex();
+    Map<String, String> changedNumbers = new LinkedHashMap<>();
+    for (Map.Entry<UUID, String> entry : newIndex.entrySet()) {
+      String savedNumber = model.stepNumberIndex.get(entry.getKey());
+      if (savedNumber != null && !savedNumber.equals(entry.getValue())) {
+        changedNumbers.put(savedNumber, entry.getValue());
+      }
+    }
+    if (changedNumbers.isEmpty()) {
+      return;
+    }
+    List<JTextComponent> allAreas = new ArrayList<>();
+    allAreas.addAll(getIntro().getTextAreas());
+    allAreas.addAll(getHauptSequenz().getTextAreas());
+    allAreas.addAll(getOutro().getTextAreas());
+    for (JTextComponent area : allAreas) {
+      remapStepNumberLinksInArea((TextEditArea) area, changedNumbers);
+    }
+  }
+
+  private void remapStepNumberLinksInArea(TextEditArea area, Map<String, String> changedNumbers) {
+    List<WrappedElement> links = area.findStepnumberLinks();
+    List<WrappedElement> elementsToUpdate = new ArrayList<>();
+    List<String> newIDs = new ArrayList<>();
+    for (WrappedElement link : links) {
+      String currentID = area.getStepnumberLinkIDFromElement(link.getStartOffset(), link.getEndOffset());
+      if (!StepnumberLink.isStepnumberLinkDefect(currentID)) {
+        String newID = changedNumbers.get(currentID);
+        if (newID != null) {
+          elementsToUpdate.add(link);
+          newIDs.add(newID);
+        }
+      }
+    }
+    // Apply back-to-front so earlier offsets are not shifted by later replacements
+    for (int i = elementsToUpdate.size() - 1; i >= 0; i--) {
+      area.replaceStepnumberLinkElement(elementsToUpdate.get(i), newIDs.get(i));
+    }
   }
 
   private void quellZielZuweisung(List<AbstractSchrittModel_V001> allModelSteps) {
