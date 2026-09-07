@@ -101,11 +101,24 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     setChangeModeEnabled(false);
     dropWelcomeMessage();
     setDiagrammDatei(diagramFile);
-
-    ModelEnvelope meta = readMeta(getDiagrammDatei());
+    ModelEnvelope meta = readMeta(diagramFile);
     verifyModelTypeAndSpecmanVersion(meta);
-    ModelEnvelope envelope = readFull(getDiagrammDatei(), meta.modelType);
+    ModelEnvelope envelope = readFull(diagramFile, meta.modelType);
+    applyEnvelope(envelope);
+  }
 
+  void loadOrThrow(byte[] snapshot) throws EditException, IOException {
+    clearFocusHistory();
+    setChangeModeEnabled(false);
+    dropWelcomeMessage();
+    // setDiagrammDatei intentionally omitted — caller manages the file reference
+    ModelEnvelope meta = readMeta(snapshot);
+    verifyModelTypeAndSpecmanVersion(meta);
+    ModelEnvelope envelope = readFull(snapshot, meta.modelType);
+    applyEnvelope(envelope);
+  }
+
+  private void applyEnvelope(ModelEnvelope envelope) throws EditException {
     DiagramModel_V002 model = resolveModel(envelope);
 
     ChangeSet changeSet = ChangeSet.fromName(model.changeSetName);
@@ -164,6 +177,16 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
   private ModelEnvelope readMeta(File diagramFile) throws IOException {
     ObjectMapper metaMapper = new ObjectMapper();
     JsonNode root = metaMapper.readTree(diagramFile);
+    return extractMeta(root);
+  }
+
+  private ModelEnvelope readMeta(byte[] data) throws IOException {
+    ObjectMapper metaMapper = new ObjectMapper();
+    JsonNode root = metaMapper.readTree(data);
+    return extractMeta(root);
+  }
+
+  private ModelEnvelope extractMeta(JsonNode root) {
     ModelEnvelope meta = new ModelEnvelope();
     meta.modelType = root.path("modelType").asText(null);
     meta.specmanVersion = root.path("specmanVersion").asText(null);
@@ -171,12 +194,22 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
   }
 
   private ModelEnvelope readFull(File diagramFile, String modelType) throws IOException {
+    ObjectMapper mapper = buildMapper(modelType);
+    return mapper.readValue(diagramFile, ModelEnvelope.class);
+  }
+
+  private ModelEnvelope readFull(byte[] data, String modelType) throws IOException {
+    ObjectMapper mapper = buildMapper(modelType);
+    return mapper.readValue(data, ModelEnvelope.class);
+  }
+
+  private ObjectMapper buildMapper(String modelType) {
     ObjectMapper mapper = new ObjectMapper();
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     if (StruktogrammModel_V001.class.getName().equals(modelType)) {
       mapper.enableDefaultTyping();
     }
-    return mapper.readValue(diagramFile, ModelEnvelope.class);
+    return mapper;
   }
 
   /** Rewrites stale step-number cross-references after loading a V2 model that was edited outside

@@ -1,11 +1,13 @@
 package specman.ops;
 
+import specman.EditException;
 import specman.ScrollPause;
 import specman.settings.SettingAutoLoad;
 import specman.undo.manager.UndoRecording;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.IOException;
 
 public class AutoLoadOp extends AbstractSpecmanOp {
 
@@ -43,26 +45,42 @@ public class AutoLoadOp extends AbstractSpecmanOp {
     if (wcTimestamp <= Math.max(lastLoadedFileTimestamp, autoSave.getLastSaveTime())) {
       return;
     }
+    lastLoadedFileTimestamp = wcTimestamp;
+
+    loadWorkingCopy(workingCopy, diagramFile);
+  }
+
+  /** Loads the working copy if possible and restores the last state if not. */
+  private void loadWorkingCopy(File workingCopy, File diagramFile) {
     try (ScrollPause sp = pauseScrolling();
          UndoRecording ur = pauseUndo()) {
-      loadOp.loadOrThrow(workingCopy);
-      setDiagrammDatei(diagramFile);
-      lastLoadedFileTimestamp = wcTimestamp;
-      markAsUnsavedWorkingCopy();
+      byte[] snapshot = takeSnapshot();
+      try {
+        loadOp.loadOrThrow(workingCopy);
+        setDiagrammDatei(diagramFile);
+        markAsUnsavedWorkingCopy();
+      }
+      catch (Exception x) {
+        showMessage(
+          "Die Arbeitskopie '" + workingCopy.getName() + "' konnte nicht geladen werden und scheint defekt zu sein:\n\n" +
+            x.getMessage() + "\n\n" +
+            "Der zuletzt geladene Stand wird beibehalten.");
+        restoreFromSnapshot(snapshot, diagramFile);
+      }
     }
     catch (Exception e) {
-      lastLoadedFileTimestamp = wcTimestamp;
-      showMessage(
-          "Die Arbeitskopie '" + workingCopy.getName() + "' konnte nicht geladen werden und scheint defekt zu sein.\n" +
-          "Das Originalmodell wird wiederhergestellt.");
-      try (ScrollPause sp = pauseScrolling();
-           UndoRecording ur = pauseUndo()) {
-        loadOp.loadOrThrow(diagramFile);
-      }
-      catch (Exception ex) {
-        displayException(ex);
-      }
+      displayException(e);
     }
+  }
+
+  private byte[] takeSnapshot() throws IOException {
+    return autoSave.generateSnapshot();
+  }
+
+  private void restoreFromSnapshot(byte[] snapshot, File diagramFile) throws EditException, IOException {
+    loadOp.loadOrThrow(snapshot);
+    setDiagrammDatei(diagramFile);
+    markAsUnsavedWorkingCopy();
   }
 
   private static int timerDelay() {

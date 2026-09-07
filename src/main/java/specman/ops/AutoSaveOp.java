@@ -52,6 +52,10 @@ public class AutoSaveOp extends AbstractSpecmanOp {
 
   public long getLastSaveTime() { return lastSaveTime; }
 
+  public byte[] generateSnapshot() throws IOException {
+    return saveOp.generateBytes();
+  }
+
   private static int timerDelay() {
     Integer intervalSeconds = SettingAutoSave.getIntervalSeconds();
     return intervalSeconds != null ? intervalSeconds * 1000 : OFF_CHECK_INTERVAL_MS;
