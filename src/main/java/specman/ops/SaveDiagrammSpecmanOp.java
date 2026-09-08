@@ -1,18 +1,16 @@
 package specman.ops;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import specman.ScrollPause;
-import specman.SpecmanVersion;
-import static specman.ChangeSet.changeset;
-import specman.model.ModelEnvelope;
 import specman.model.v002.DiagramModel_V002;
+import specman.model.v002.io.ModelSerializer_V002;
+import static specman.ChangeSet.changeset;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
 
@@ -65,15 +63,13 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
 
   byte[] generateBytes() throws IOException {
     DiagramModel_V002 model = generiereStruktogrammModel(true);
-    ModelEnvelope wrappedModel = wrapModel(model);
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(wrappedModel);
+    String text = new ModelSerializer_V002().serialize(model);
+    return text.getBytes(StandardCharsets.UTF_8);
   }
 
-  void writeToFile(File targetFile, byte[] json) throws IOException {
+  void writeToFile(File targetFile, byte[] content) throws IOException {
     try (FileOutputStream fos = new FileOutputStream(targetFile)) {
-      fos.write(json);
+      fos.write(content);
     }
   }
 
@@ -89,14 +85,6 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         getPdfExportOptions(),
         changeset().name);
     return model;
-  }
-
-  private ModelEnvelope wrapModel(DiagramModel_V002 model) {
-    ModelEnvelope envelope = new ModelEnvelope();
-    envelope.model = model;
-    envelope.modelType = model.getClass().getName();
-    envelope.specmanVersion = SpecmanVersion.getVersion();
-    return envelope;
   }
 
 }

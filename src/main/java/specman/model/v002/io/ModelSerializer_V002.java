@@ -327,9 +327,11 @@ public class ModelSerializer_V002 {
         if (step instanceof BreakStepModel_V002) {
             appendLeafStep(sb, "break", step, indent);
         } else if (step instanceof DoWhileStepModel_V002 doWhile) {
-            appendLoopStep(sb, "doWhile", doWhile.loopSequence, step, indent, idToNum, false);
+            appendLoopStep(sb, "doWhile", doWhile.loopSequence, step, indent, idToNum, false,
+                ", barWidth=" + doWhile.barWidth);
         } else if (step instanceof WhileStepModel_V002 whileStep) {
-            appendLoopStep(sb, "while", whileStep.loopSequence, step, indent, idToNum, true);
+            appendLoopStep(sb, "while", whileStep.loopSequence, step, indent, idToNum, true,
+                ", barWidth=" + whileStep.barWidth);
         } else if (step instanceof IfElseStepModel_V002 ifElse) {
             appendIfElseStep(sb, ifElse, indent, idToNum);
         } else if (step instanceof IfStepModel_V002 ifStep) {
@@ -369,11 +371,11 @@ public class ModelSerializer_V002 {
 
     private void appendLoopStep(StringBuilder sb, String keyword, StepSequenceModel_V002 loopSeq,
                                 AbstractStepModel_V002 step, String indent,
-                                Map<String, String> idToNum, boolean withCatch) {
+                                Map<String, String> idToNum, boolean withCatch, String extraParam) {
         sb.append(indent).append(keyword).append("(")
           .append(stepNum(step)).append(", ")
           .append(stepId(step)).append(", ")
-          .append(editContainerHead(step.content)).append(") {\n");
+          .append(editContainerHead(step.content)).append(extraParam).append(") {\n");
 
         appendEditContainerTail(sb, step.content, indent + "    ", 1);
         appendSteps(sb, loopSeq, indent + "    ", idToNum);
@@ -388,7 +390,9 @@ public class ModelSerializer_V002 {
         sb.append(indent).append("ifElse(")
           .append(stepNum(step)).append(", ")
           .append(stepId(step)).append(", ")
-          .append(editContainerHead(step.content)).append(") {\n");
+          .append(editContainerHead(step.content))
+          .append(String.format(java.util.Locale.US, ", ifRatio=%.2f%%", step.ifWidthRatio * 100))
+          .append(") {\n");
 
         appendEditContainerTail(sb, step.content, indent + "    ", 1);
         appendBranch(sb, "if_branch", step.ifSequence, indent + "    ", idToNum, true);
@@ -401,7 +405,9 @@ public class ModelSerializer_V002 {
         sb.append(indent).append("if(")
           .append(stepNum(step)).append(", ")
           .append(stepId(step)).append(", ")
-          .append(editContainerHead(step.content)).append(") {\n");
+          .append(editContainerHead(step.content))
+          .append(", emptyWidth=").append(step.emptyWidth)
+          .append(") {\n");
 
         appendEditContainerTail(sb, step.content, indent + "    ", 1);
         appendBranch(sb, "if_branch", step.ifSequence, indent + "    ", idToNum, true);
@@ -413,7 +419,16 @@ public class ModelSerializer_V002 {
         sb.append(indent).append("case(")
           .append(stepNum(step)).append(", ")
           .append(stepId(step)).append(", ")
-          .append(editContainerHead(step.content)).append(") {\n");
+          .append(editContainerHead(step.content));
+        if (step.columnWidthRatios != null && !step.columnWidthRatios.isEmpty()) {
+            sb.append(", cols=[");
+            for (int i = 0; i < step.columnWidthRatios.size(); i++) {
+                if (i > 0) { sb.append(", "); }
+                sb.append(String.format(java.util.Locale.US, "%.2f", step.columnWidthRatios.get(i) * 100)).append("%");
+            }
+            sb.append("]");
+        }
+        sb.append(") {\n");
 
         appendEditContainerTail(sb, step.content, indent + "    ", 1);
         appendBranch(sb, "default_branch", step.defaultSequence, indent + "    ", idToNum, false);

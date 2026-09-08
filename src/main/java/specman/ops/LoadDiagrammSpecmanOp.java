@@ -11,6 +11,8 @@ import specman.model.ModelConverterV001V002;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.StruktogrammModel_V001;
 import specman.model.v002.DiagramModel_V002;
+import specman.model.v002.io.ModelParser_V002;
+import specman.model.v002.io.ModelParseException;
 import specman.model.v002.io.ModelRenumberer_V002;
 import specman.view.KlappButton;
 import specman.view.QuellSchrittView;
@@ -21,6 +23,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -170,20 +174,27 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     }
   }
 
+  private static boolean isTextFormat(byte[] data) {
+    return data.length >= 2 && data[0] == '/' && data[1] == '/';
+  }
+
   /** Reads only the meta information from the envelope without making any
    * assumptions about the structure of the actual nested model representation.
    * This is important because model type and Specman version may have an impact
    * about how exactly to read the rest. */
   private ModelEnvelope readMeta(File diagramFile) throws IOException {
-    ObjectMapper metaMapper = new ObjectMapper();
-    JsonNode root = metaMapper.readTree(diagramFile);
-    return extractMeta(root);
+    byte[] data = Files.readAllBytes(diagramFile.toPath());
+    return readMeta(data);
   }
 
   private ModelEnvelope readMeta(byte[] data) throws IOException {
     ObjectMapper metaMapper = new ObjectMapper();
-    JsonNode root = metaMapper.readTree(data);
-    return extractMeta(root);
+    if (isTextFormat(data)) {
+      String firstLine = new String(data, StandardCharsets.UTF_8).lines().findFirst().orElse("");
+      String json = firstLine.replaceFirst("^//\\s*", "");
+      return extractMeta(metaMapper.readTree(json));
+    }
+    return extractMeta(metaMapper.readTree(data));
   }
 
   private ModelEnvelope extractMeta(JsonNode root) {
@@ -194,11 +205,25 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
   }
 
   private ModelEnvelope readFull(File diagramFile, String modelType) throws IOException {
-    ObjectMapper mapper = buildMapper(modelType);
-    return mapper.readValue(diagramFile, ModelEnvelope.class);
+    byte[] data = Files.readAllBytes(diagramFile.toPath());
+    return readFull(data, modelType);
   }
 
   private ModelEnvelope readFull(byte[] data, String modelType) throws IOException {
+    if (isTextFormat(data) && DiagramModel_V002.class.getName().equals(modelType)) {
+      String content = new String(data, StandardCharsets.UTF_8);
+      try {
+        DiagramModel_V002 model = new ModelParser_V002().parse(content);
+        ModelEnvelope envelope = new ModelEnvelope();
+        envelope.model = model;
+        envelope.modelType = modelType;
+        envelope.specmanVersion = SpecmanVersion.getVersion();
+        return envelope;
+      }
+      catch (ModelParseException e) {
+        throw new IOException("Failed to parse V2 text model: " + e.getMessage(), e);
+      }
+    }
     ObjectMapper mapper = buildMapper(modelType);
     return mapper.readValue(data, ModelEnvelope.class);
   }

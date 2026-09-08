@@ -105,26 +105,31 @@ breakStep
     : 'break' '(' stepNum ',' stepId ',' editContainerHead ')' changeAnno? (';' | '{' editContainerTail '}')
     ;
 
+// barWidth preserves the user-set width of the loop bar in pixels.
 whileStep
-    : 'while' '(' stepNum ',' stepId ',' editContainerHead ')' '{' editContainerTail step+ catchBlock* '}'
+    : 'while' '(' stepNum ',' stepId ',' editContainerHead (',' 'barWidth' '=' STEP_NUM)? ')' '{' editContainerTail step+ catchBlock* '}'
     ;
 
 doWhileStep
-    : 'doWhile' '(' stepNum ',' stepId ',' editContainerHead ')' '{' editContainerTail step+ '}'
+    : 'doWhile' '(' stepNum ',' stepId ',' editContainerHead (',' 'barWidth' '=' STEP_NUM)? ')' '{' editContainerTail step+ '}'
     ;
 
+// ifRatio preserves the user-set width ratio of the if-branch vs. total (as percentage).
 ifElseStep
-    : 'ifElse' '(' stepNum ',' stepId ',' editContainerHead ')' '{' editContainerTail ifBranch elseBranch '}'
+    : 'ifElse' '(' stepNum ',' stepId ',' editContainerHead (',' 'ifRatio' '=' PERCENT)? ')' '{' editContainerTail ifBranch elseBranch '}'
     ;
 
+// emptyWidth preserves the user-set width of the empty else area in pixels.
 ifStep
-    : 'if' '(' stepNum ',' stepId ',' editContainerHead ')' '{' editContainerTail ifBranch '}'
+    : 'if' '(' stepNum ',' stepId ',' editContainerHead (',' 'emptyWidth' '=' STEP_NUM)? ')' '{' editContainerTail ifBranch '}'
     ;
 
 // editContainerTail covers extra areas of the condition content (e.g. a condition list).
 // Requires exactly one defaultBranch and at least two caseBranches.
+// cols=[...] preserves the user-set column width ratios (one entry per branch incl. default).
 caseStep
-    : 'case' '(' stepNum ',' stepId ',' editContainerHead ')' '{' editContainerTail defaultBranch caseBranch caseBranch+ '}'
+    : 'case' '(' stepNum ',' stepId ',' editContainerHead (',' 'cols' '=' '[' PERCENT (',' PERCENT)* ']')? ')'
+      '{' editContainerTail defaultBranch caseBranch caseBranch+ '}'
     ;
 
 subsequenceStep

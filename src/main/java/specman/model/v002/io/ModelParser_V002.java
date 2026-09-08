@@ -324,6 +324,8 @@ public class ModelParser_V002 {
     }
 
     private WhileStepModel_V002 buildWhileStep(SpecmanModel_V002Parser.WhileStepContext ctx) {
+        org.antlr.v4.runtime.tree.TerminalNode barWidthNode = ctx.STEP_NUM();
+        int barWidth = barWidthNode == null ? 18 : Integer.parseInt(barWidthNode.getText());
         return new WhileStepModel_V002(
             ctx.stepId().getText(),
             ctx.stepNum().getText(),
@@ -332,12 +334,14 @@ public class ModelParser_V002 {
             ChangeInfo.untracked(),
             false,
             buildLoopSequence(ctx.step(), ctx.catchBlock()),
-            18,
+            barWidth,
             null,
             RoundedBorderDecorationStyle.None);
     }
 
     private DoWhileStepModel_V002 buildDoWhileStep(SpecmanModel_V002Parser.DoWhileStepContext ctx) {
+        org.antlr.v4.runtime.tree.TerminalNode barWidthNode = ctx.STEP_NUM();
+        int barWidth = barWidthNode == null ? 18 : Integer.parseInt(barWidthNode.getText());
         return new DoWhileStepModel_V002(
             ctx.stepId().getText(),
             ctx.stepNum().getText(),
@@ -346,7 +350,7 @@ public class ModelParser_V002 {
             ChangeInfo.untracked(),
             false,
             buildLoopSequence(ctx.step(), List.of()),
-            18,
+            barWidth,
             null,
             RoundedBorderDecorationStyle.None);
     }
@@ -358,7 +362,9 @@ public class ModelParser_V002 {
             ifCtx.editContainerHead(), ifCtx.editContainerTail(), ifCtx.step(), ifCtx.catchBlock());
         BranchSequenceModel_V002 elseSeq = buildBranch(
             elseCtx.editContainerHead(), elseCtx.editContainerTail(), elseCtx.step(), elseCtx.catchBlock());
-        return new IfElseStepModel_V002(
+        org.antlr.v4.runtime.tree.TerminalNode percentNode = ctx.PERCENT();
+        float ifWidthRatio = percentNode == null ? 0.5f
+            : Float.parseFloat(percentNode.getText().replace("%", "")) / 100.0f;        return new IfElseStepModel_V002(
             ctx.stepId().getText(),
             ctx.stepNum().getText(),
             buildStepContent(ctx.editContainerHead(), ctx.editContainerTail()),
@@ -368,7 +374,7 @@ public class ModelParser_V002 {
             ChangeInfo.untracked(),
             ifSeq,
             elseSeq,
-            0.5f,
+            ifWidthRatio,
             null);
     }
 
@@ -376,6 +382,8 @@ public class ModelParser_V002 {
         SpecmanModel_V002Parser.IfBranchContext ifCtx = ctx.ifBranch();
         BranchSequenceModel_V002 ifSeq = buildBranch(
             ifCtx.editContainerHead(), ifCtx.editContainerTail(), ifCtx.step(), ifCtx.catchBlock());
+        org.antlr.v4.runtime.tree.TerminalNode emptyWidthNode = ctx.STEP_NUM();
+        int emptyWidth = emptyWidthNode == null ? 20 : Integer.parseInt(emptyWidthNode.getText());
         return new IfStepModel_V002(
             ctx.stepId().getText(),
             ctx.stepNum().getText(),
@@ -385,7 +393,7 @@ public class ModelParser_V002 {
             false,
             ChangeInfo.untracked(),
             ifSeq,
-            20,
+            emptyWidth,
             null);
     }
 
@@ -393,6 +401,22 @@ public class ModelParser_V002 {
         SpecmanModel_V002Parser.DefaultBranchContext defCtx = ctx.defaultBranch();
         BranchSequenceModel_V002 defaultSeq = buildBranch(
             defCtx.editContainerHead(), defCtx.editContainerTail(), defCtx.step(), List.of());
+        List<Float> columnWidthRatios;
+        List<org.antlr.v4.runtime.tree.TerminalNode> percents = ctx.PERCENT();
+        if (!percents.isEmpty()) {
+            columnWidthRatios = new ArrayList<>();
+            for (org.antlr.v4.runtime.tree.TerminalNode p : percents) {
+                float val = Float.parseFloat(p.getText().replace("%", "")) / 100.0f;
+                columnWidthRatios.add(val);
+            }
+        } else {
+            int numBranches = 1 + ctx.caseBranch().size();
+            float equalShare = 1.0f / numBranches;
+            columnWidthRatios = new ArrayList<>();
+            for (int i = 0; i < numBranches; i++) {
+                columnWidthRatios.add(equalShare);
+            }
+        }
         CaseStepModel_V002 step = new CaseStepModel_V002(
             ctx.stepId().getText(),
             ctx.stepNum().getText(),
@@ -401,7 +425,7 @@ public class ModelParser_V002 {
             ChangeInfo.untracked(),
             false,
             defaultSeq,
-            null,
+            columnWidthRatios,
             null,
             RoundedBorderDecorationStyle.None);
         for (SpecmanModel_V002Parser.CaseBranchContext cb : ctx.caseBranch()) {
