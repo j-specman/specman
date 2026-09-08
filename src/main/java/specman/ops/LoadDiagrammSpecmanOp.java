@@ -11,7 +11,7 @@ import specman.model.ModelConverterV001V002;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.StruktogrammModel_V001;
 import specman.model.v002.DiagramModel_V002;
-import specman.model.v002.ModelRenumberer_V002;
+import specman.model.v002.io.ModelRenumberer_V002;
 import specman.view.KlappButton;
 import specman.view.QuellSchrittView;
 import specman.view.SchrittSequenzView;

@@ -2,6 +2,7 @@ package specman.model.v002;
 
 import specman.ChangeInfo;
 import specman.StepNumber;
+import specman.model.v002.io.NumberedSubSequence_V002;
 import specman.view.RoundedBorderDecorationStyle;
 
 import java.util.List;

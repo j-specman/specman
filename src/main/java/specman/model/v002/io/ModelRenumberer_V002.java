@@ -1,6 +1,9 @@
-package specman.model.v002;
+package specman.model.v002.io;
 
 import specman.StepNumber;
+import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.CatchSequenceModel_V002;
+import specman.model.v002.StepSequenceModel_V002;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

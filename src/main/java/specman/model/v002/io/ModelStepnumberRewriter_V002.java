@@ -1,8 +1,20 @@
-package specman.model.v002;
+package specman.model.v002.io;
 
 import specman.StepNumber;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
+import specman.model.v002.AbstractEditAreaModel_V002;
+import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.BranchSequenceModel_V002;
+import specman.model.v002.CatchSequenceModel_V002;
+import specman.model.v002.CoCatchModel_V002;
+import specman.model.v002.DiagramModel_V002;
+import specman.model.v002.EditorContentModel_V002;
+import specman.model.v002.ListItemEditAreaModel_V002;
+import specman.model.v002.Markup_V002;
+import specman.model.v002.StepSequenceModel_V002;
+import specman.model.v002.TableEditAreaModel_V002;
+import specman.model.v002.TextEditAreaModel_V002;
 
 import javax.swing.*;
 import javax.swing.text.StyledDocument;
@@ -40,7 +52,7 @@ public class ModelStepnumberRewriter_V002 {
   }
 
   private static void rewriteSequence(
-      StepSequenceModel_V002 seq, Map<String, String> numberMapping, List<String> brokenRefs) throws Exception {
+    StepSequenceModel_V002 seq, Map<String, String> numberMapping, List<String> brokenRefs) throws Exception {
 
     for (AbstractStepModel_V002 step : seq.steps) {
       rewriteContent(step.content, numberMapping, brokenRefs);
@@ -65,7 +77,7 @@ public class ModelStepnumberRewriter_V002 {
   }
 
   private static void rewriteContent(
-      EditorContentModel_V002 content, Map<String, String> numberMapping, List<String> brokenRefs) throws Exception {
+    EditorContentModel_V002 content, Map<String, String> numberMapping, List<String> brokenRefs) throws Exception {
 
     if (content == null) {
       return;

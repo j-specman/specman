@@ -30,7 +30,7 @@ public class TextEditAreaModel_V002 extends AbstractEditAreaModel_V002 {
         this.changeInfo = ChangeInfoModel_V002.from(changeInfo);
     }
 
-    TextEditAreaModel_V002(String text, String plainText, List<Markup_V002> markups, ChangeInfoModel_V002 changeInfo) {
+    public TextEditAreaModel_V002(String text, String plainText, List<Markup_V002> markups, ChangeInfoModel_V002 changeInfo) {
         this.text = text;
         this.plainText = plainText;
         this.markups = markups;
