@@ -49,7 +49,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		}
 	}
 
-	private SubsequenzSchrittView(SchrittSequenzView parent, specman.model.v002.EditorContentModel_V002 content, java.util.UUID stepId, ChangeInfo changeInfo) {
+	private SubsequenzSchrittView(SchrittSequenzView parent, specman.model.v002.EditorContentModel_V002 content, String stepId, ChangeInfo changeInfo) {
 		super(parent, content, stepId, changeInfo);
 		initSubsequenzPanel();
 	}

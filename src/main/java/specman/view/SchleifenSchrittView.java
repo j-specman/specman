@@ -17,7 +17,6 @@ import specman.draganddrop.UnsupportedDragSourceException;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.WhileStepModel_V002;
 
-import java.util.UUID;
 import specman.pdf.Shape;
 import specman.editarea.Indentions;
 import specman.undo.props.UDBL;
@@ -52,7 +51,7 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 		initPanelAndLayout(mitUnteremBalken);
 	}
 
-	private SchleifenSchrittView(SchrittSequenzView parent, EditorContentModel_V002 content, UUID stepId, ChangeInfo changeInfo, boolean mitUnteremBalken) {
+	private SchleifenSchrittView(SchrittSequenzView parent, EditorContentModel_V002 content, String stepId, ChangeInfo changeInfo, boolean mitUnteremBalken) {
 		super(parent, content, stepId, changeInfo);
 		initPanelAndLayout(mitUnteremBalken);
 	}

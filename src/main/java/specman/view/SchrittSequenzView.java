@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static specman.Aenderungsart.Geloescht;
@@ -51,7 +50,7 @@ public class SchrittSequenzView {
 	public static final String ZEILENLAYOUT_CATCHBEREICH = "pref";
 
 	StepNumber sequenzBasisId;
-	protected UUID sequenceId = UUID.randomUUID();
+	protected String sequenceId = AbstractStepModel_V002.generateId();
 	ChangeInfo changeInfo = ChangeInfo.untracked();
 	final JPanel sequenzBereich;
 	CatchBereich catchBereich;
@@ -106,24 +105,28 @@ public class SchrittSequenzView {
 		}
 	}
 
-	public AbstractSchrittView findStepByUUID(UUID uuid) {
+	public AbstractSchrittView findStepById(String id) {
 		for (AbstractSchrittView schritt : schritte) {
-			if (uuid.equals(schritt.id)) return schritt;
+			if (id.equals(schritt.id)) {
+				return schritt;
+			}
 			for (SchrittSequenzView seq : schritt.unterSequenzen()) {
-				AbstractSchrittView result = seq.findStepByUUID(uuid);
-				if (result != null) return result;
+				AbstractSchrittView result = seq.findStepById(id);
+				if (result != null) {
+					return result;
+				}
 			}
 		}
 		return null;
 	}
 
-	public Map<UUID, String> buildStepNumberIndex() {
-		Map<UUID, String> index = new LinkedHashMap<>();
+	public Map<String, String> buildStepNumberIndex() {
+		Map<String, String> index = new LinkedHashMap<>();
 		collectStepNumbers(index);
 		return index;
 	}
 
-	private void collectStepNumbers(Map<UUID, String> result) {
+	private void collectStepNumbers(Map<String, String> result) {
 		for (AbstractSchrittView step : schritte) {
 			StepNumber number = step.getNumber();
 			if (number != null) {

@@ -3,7 +3,6 @@ package specman.model.v002;
 import specman.ChangeInfo;
 
 import java.util.List;
-import java.util.UUID;
 
 public class CatchSequenceModel_V002 extends BranchSequenceModel_V002 {
     public final List<CoCatchModel_V002> coCatches;
@@ -14,7 +13,7 @@ public class CatchSequenceModel_V002 extends BranchSequenceModel_V002 {
         headingRightBarWidth = null;
     }
 
-    public CatchSequenceModel_V002(UUID breakStepId, ChangeInfo changeInfo, EditorContentModel_V002 heading, List<CoCatchModel_V002> coCatches, Integer headingRightBarWidth) {
+    public CatchSequenceModel_V002(String breakStepId, ChangeInfo changeInfo, EditorContentModel_V002 heading, List<CoCatchModel_V002> coCatches, Integer headingRightBarWidth) {
         super(breakStepId, changeInfo, null, heading);
         this.coCatches = coCatches;
         this.headingRightBarWidth = headingRightBarWidth;

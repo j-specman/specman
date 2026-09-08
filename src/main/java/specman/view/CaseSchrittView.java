@@ -53,7 +53,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		initCasePanelComponents();
 	}
 
-	private CaseSchrittView(SchrittSequenzView parent, specman.model.v002.EditorContentModel_V002 content, java.util.UUID stepId, ChangeInfo changeInfo, int numCases) {
+	private CaseSchrittView(SchrittSequenzView parent, specman.model.v002.EditorContentModel_V002 content, String stepId, ChangeInfo changeInfo, int numCases) {
 		super(parent, content, stepId, changeInfo, createPanelLayout(numCases));
 		initCasePanelComponents();
 	}

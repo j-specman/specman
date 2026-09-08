@@ -4,10 +4,9 @@ import specman.ChangeInfo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class StepSequenceModel_V002 {
-    public final UUID id;
+    public final String id;
     public final ChangeInfoModel_V002 changeInfo;
     public final List<AbstractStepModel_V002> steps;
     public final CatchAreaModel_V002 catchArea;
@@ -19,7 +18,7 @@ public class StepSequenceModel_V002 {
         catchArea = null;
     }
 
-    public StepSequenceModel_V002(UUID id, ChangeInfo changeInfo, CatchAreaModel_V002 catchArea) {
+    public StepSequenceModel_V002(String id, ChangeInfo changeInfo, CatchAreaModel_V002 catchArea) {
         this.id = id;
         this.changeInfo = ChangeInfoModel_V002.from(changeInfo);
         this.steps = new ArrayList<>();

@@ -168,7 +168,7 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
     return linkedBreakStep.number;
   }
 
-  public java.util.UUID linkedBreakStepUUID() {
+  public String linkedBreakStepUUID() {
     return linkedBreakStep.id;
   }
 

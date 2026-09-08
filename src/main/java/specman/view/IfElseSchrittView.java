@@ -48,7 +48,7 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		initIfElsePanel(withDefaultContent ? id : null, withDefaultContent ? changeInfo : null);
 	}
 
-	protected IfElseSchrittView(SchrittSequenzView parent, specman.model.v002.EditorContentModel_V002 content, java.util.UUID stepId, ChangeInfo changeInfo) {
+	protected IfElseSchrittView(SchrittSequenzView parent, specman.model.v002.EditorContentModel_V002 content, String stepId, ChangeInfo changeInfo) {
 		super(parent, content, stepId, changeInfo, createPanelLayout());
 		initIfElsePanel(null, null);
 		this.id = stepId;

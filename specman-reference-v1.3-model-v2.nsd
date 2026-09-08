@@ -1,5 +1,5 @@
 {
-  "specmanVersion" : "1.2.1",
+  "specmanVersion" : "1.3.0",
   "modelType" : "specman.model.v002.DiagramModel_V002",
   "model" : {
     "name" : "frame0",
@@ -619,7 +619,7 @@
             } ]
           }
         },
-        "emptyWidth" : 20
+        "emptyWidth" : 10
       }, {
         "type" : "break",
         "id" : "028e448c-50c4-432e-bc12-aebe70f018a6",

@@ -1,10 +1,11 @@
 package specman.model.v002;
 
 import specman.ChangeInfo;
+import specman.StepNumber;
 import specman.view.RoundedBorderDecorationStyle;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 public class IfElseStepModel_V002 extends StructuredStepModel_V002 {
     public final BranchSequenceModel_V002 ifSequence;
@@ -17,7 +18,7 @@ public class IfElseStepModel_V002 extends StructuredStepModel_V002 {
         ifWidthRatio = 0.0f;
     }
 
-    public IfElseStepModel_V002(UUID id, EditorContentModel_V002 content, int color, RoundedBorderDecorationStyle decorationStyle, boolean collapsed, ChangeInfo changeInfo, BranchSequenceModel_V002 ifSequence, BranchSequenceModel_V002 elseSequence, float ifWidthRatio, UUID sourceStepId) {
+    public IfElseStepModel_V002(String id, EditorContentModel_V002 content, int color, RoundedBorderDecorationStyle decorationStyle, boolean collapsed, ChangeInfo changeInfo, BranchSequenceModel_V002 ifSequence, BranchSequenceModel_V002 elseSequence, float ifWidthRatio, String sourceStepId) {
         super(id, content, color, changeInfo, collapsed, sourceStepId, decorationStyle);
         this.ifSequence = ifSequence;
         this.elseSequence = elseSequence;
@@ -28,5 +29,15 @@ public class IfElseStepModel_V002 extends StructuredStepModel_V002 {
         super.addStepRecursively(allSteps);
         ifSequence.addStepsRecursively(allSteps);
         elseSequence.addStepsRecursively(allSteps);
+    }
+
+    @Override public List<NumberedSubSequence_V002> subSequencesFor(StepNumber myNumber) {
+        return List.of(
+            new NumberedSubSequence_V002(ifSequence,   myNumber.naechsteEbene()),
+            new NumberedSubSequence_V002(elseSequence, myNumber.naechsteID().naechsteEbene()));
+    }
+
+    @Override public StepNumber nextSlotInOuterSequence(StepNumber myNumber, Map<String, StepNumber> stepNumbers) {
+        return myNumber.naechsteID(); // else-branch occupies the next slot
     }
 }

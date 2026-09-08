@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import specman.editarea.StepnumberLink;
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedElement;
@@ -222,7 +221,7 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
    * {@code registerAllExistingStepnumbers()}. */
   private void rewriteStaleStepNumberLinks(DiagramModel_V002 model) {
     if (model.stepNumberIndex != null) {
-      Map<UUID, String> computedIndex = getHauptSequenz().buildStepNumberIndex();
+      Map<String, String> computedIndex = getHauptSequenz().buildStepNumberIndex();
       Map<String, String> changedNumbers = queryChangedNumbers(model, computedIndex);
       if (!changedNumbers.isEmpty()) {
         List<TextEditArea> allAreas = collectAllTextAreas();
@@ -241,9 +240,9 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     return allAreas;
   }
 
-  private Map<String, String> queryChangedNumbers(DiagramModel_V002 model, Map<UUID, String> computedIndex) {
+  private Map<String, String> queryChangedNumbers(DiagramModel_V002 model, Map<String, String> computedIndex) {
     Map<String, String> changedNumbers = new LinkedHashMap<>();
-    for (Map.Entry<UUID, String> entry : computedIndex.entrySet()) {
+    for (Map.Entry<String, String> entry : computedIndex.entrySet()) {
       String savedNumber = model.stepNumberIndex.get(entry.getKey());
       if (savedNumber != null && !savedNumber.equals(entry.getValue())) {
         changedNumbers.put(savedNumber, entry.getValue());

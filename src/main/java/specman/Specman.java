@@ -31,7 +31,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -517,6 +516,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	 * before the window is fully initialized.
 	 */
 	public static void main(String[] args) throws Exception {
+    if (args.length > 0 && args[0].equals("--validate")) {
+      System.setProperty("java.awt.headless", "true");
+      SpecmanCLI.run(args);
+      return;
+    }
     setLookAndFeel();
 		File initialFileToOpen = readFileFromArgs(args);
 		SwingUtilities.invokeAndWait(() -> {

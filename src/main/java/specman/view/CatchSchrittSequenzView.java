@@ -70,7 +70,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
 
   public CatchSchrittSequenzView(AbstractSchrittView parent, CatchSequenceModel_V002 model) {
     super(parent, model);
-    BreakSchrittView linkedBreakStep = (BreakSchrittView) parent.getParent().findStepByUUID(model.id);
+    BreakSchrittView linkedBreakStep = (BreakSchrittView) parent.getParent().findStepById(model.id);
     init(linkedBreakStep, model.headingRightBarWidth, model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
     initCoCatchesV2(model.coCatches);
     initHeadingsLayout();
@@ -140,7 +140,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     int insertionIndex = 0;
     for (CoCatchModel_V002 coCatchModel : coCatches) {
       if (coCatchModel.breakStepId == null) continue;
-      BreakSchrittView breakStepToLink = (BreakSchrittView) parent.getParent().findStepByUUID(coCatchModel.breakStepId);
+      BreakSchrittView breakStepToLink = (BreakSchrittView) parent.getParent().findStepById(coCatchModel.breakStepId);
       if (breakStepToLink != null) {
         addCoCatch(insertionIndex, coCatchModel.heading, breakStepToLink,
             coCatchModel.changeInfo != null ? coCatchModel.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);

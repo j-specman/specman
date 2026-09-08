@@ -48,7 +48,7 @@ import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
+
 
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Zielschritt;
@@ -74,7 +74,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	protected final EditContainer editContainer;
 	protected StepNumber number;
-	protected UUID id = UUID.randomUUID();
+	protected String id = AbstractStepModel_V002.generateId();
 	protected ChangeInfo changeInfo;
 	protected SchrittSequenzView parent;
 	protected RoundedBorderDecorator roundedBorderDecorator;
@@ -91,7 +91,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		editContainer.addEditComponentListener(this);
 	}
 
-	protected AbstractSchrittView(SchrittSequenzView parent, EditorContentModel_V002 content, UUID id, ChangeInfo changeInfo) {
+	protected AbstractSchrittView(SchrittSequenzView parent, EditorContentModel_V002 content, String id, ChangeInfo changeInfo) {
 		this.number = StepNumber.EMPTY;
 		this.id = id;
 		this.changeInfo = changeInfo;

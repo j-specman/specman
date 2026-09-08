@@ -7,20 +7,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ModelConverterV001V002 {
 
     public static DiagramModel_V002 convert(StruktogrammModel_V001 v1) {
-        Map<String, UUID> stepUuidMap = new HashMap<>();
-        buildStepUuidMap(v1.hauptSequenz, stepUuidMap);
+        Map<String, String> stepIdMap = new HashMap<>();
+        buildStepIdMap(v1.hauptSequenz, stepIdMap);
         return new DiagramModel_V002(
             v1.name,
             v1.breite,
             v1.zoomFaktor,
             v1.changeModeenabled,
-            convertSequence(v1.hauptSequenz, stepUuidMap),
+            convertSequence(v1.hauptSequenz, stepIdMap),
             convertContent(v1.intro),
             convertContent(v1.outro),
             convertPdfOptions(v1.pdfExportOptions),
@@ -29,58 +28,66 @@ public class ModelConverterV001V002 {
         );
     }
 
-    // First pass: walk the entire step tree and assign a UUID to every step,
-    // keyed by SchrittID.toString(). Catch sequences share the UUID of their
-    // linked break step (same SchrittID), so they get the same UUID here too.
-    private static void buildStepUuidMap(SchrittSequenzModel_V001 seq, Map<String, UUID> map) {
-        if (seq == null || seq.schritte == null) return;
+    // First pass: walk the entire step tree and assign an 8-char hex ID to every step,
+    // keyed by SchrittID.toString(). Catch sequences share the ID of their
+    // linked break step (same SchrittID), so they get the same ID here too.
+    private static void buildStepIdMap(SchrittSequenzModel_V001 seq, Map<String, String> map) {
+        if (seq == null || seq.schritte == null) {
+            return;
+        }
         for (AbstractSchrittModel_V001 step : seq.schritte) {
             if (step.id != null && !step.id.numbers.isEmpty()) {
-                map.put(step.id.toString(), UUID.randomUUID());
+                map.put(step.id.toString(), AbstractStepModel_V002.generateId());
             }
-            buildSubSequenceUuids(step, map);
+            buildSubSequenceIds(step, map);
         }
-        buildCatchSequenceUuids(seq, map);
+        buildCatchSequenceIds(seq, map);
     }
 
-    private static void buildSubSequenceUuids(AbstractSchrittModel_V001 step, Map<String, UUID> map) {
+    private static void buildSubSequenceIds(AbstractSchrittModel_V001 step, Map<String, String> map) {
         if (step instanceof IfElseSchrittModel_V001) {
             IfElseSchrittModel_V001 s = (IfElseSchrittModel_V001) step;
-            buildStepUuidMap(s.ifSequenz, map);
-            buildStepUuidMap(s.elseSequenz, map);
+            buildStepIdMap(s.ifSequenz, map);
+            buildStepIdMap(s.elseSequenz, map);
         } else if (step instanceof IfSchrittModel_V001) {
             IfSchrittModel_V001 s = (IfSchrittModel_V001) step;
-            buildStepUuidMap(s.ifSequenz, map);
+            buildStepIdMap(s.ifSequenz, map);
         } else if (step instanceof CaseSchrittModel_V001) {
             CaseSchrittModel_V001 s = (CaseSchrittModel_V001) step;
-            buildStepUuidMap(s.sonstSequenz, map);
-            if (s.caseSequenzen != null) s.caseSequenzen.forEach(cs -> buildStepUuidMap(cs, map));
-        } else if (step instanceof WhileWhileSchrittModel_V001) {
-            buildStepUuidMap(((WhileSchrittModel_V001) step).wiederholSequenz, map);
-        } else if (step instanceof WhileSchrittModel_V001) {
-            buildStepUuidMap(((WhileSchrittModel_V001) step).wiederholSequenz, map);
-        } else if (step instanceof SubsequenzSchrittModel_V001) {
-            buildStepUuidMap(((SubsequenzSchrittModel_V001) step).subsequenz, map);
-        }
-    }
-
-    private static void buildCatchSequenceUuids(SchrittSequenzModel_V001 seq, Map<String, UUID> map) {
-        if (seq.catchBereich == null || seq.catchBereich.catchSequences == null) return;
-        for (CatchSchrittSequenzModel_V001 catchSeq : seq.catchBereich.catchSequences) {
-            // Catch sequence id equals its linked break step's id — reuse that UUID
-            if (catchSeq.id != null && !catchSeq.id.numbers.isEmpty()) {
-                map.computeIfAbsent(catchSeq.id.toString(), k -> UUID.randomUUID());
+            buildStepIdMap(s.sonstSequenz, map);
+            if (s.caseSequenzen != null) {
+                s.caseSequenzen.forEach(cs -> buildStepIdMap(cs, map));
             }
-            buildStepUuidMap(catchSeq, map);
+        } else if (step instanceof WhileWhileSchrittModel_V001) {
+            buildStepIdMap(((WhileSchrittModel_V001) step).wiederholSequenz, map);
+        } else if (step instanceof WhileSchrittModel_V001) {
+            buildStepIdMap(((WhileSchrittModel_V001) step).wiederholSequenz, map);
+        } else if (step instanceof SubsequenzSchrittModel_V001) {
+            buildStepIdMap(((SubsequenzSchrittModel_V001) step).subsequenz, map);
         }
     }
 
-    // Second pass: convert using the pre-built UUID map
+    private static void buildCatchSequenceIds(SchrittSequenzModel_V001 seq, Map<String, String> map) {
+        if (seq.catchBereich == null || seq.catchBereich.catchSequences == null) {
+            return;
+        }
+        for (CatchSchrittSequenzModel_V001 catchSeq : seq.catchBereich.catchSequences) {
+            // Catch sequence id equals its linked break step's id — reuse that ID
+            if (catchSeq.id != null && !catchSeq.id.numbers.isEmpty()) {
+                map.computeIfAbsent(catchSeq.id.toString(), k -> AbstractStepModel_V002.generateId());
+            }
+            buildStepIdMap(catchSeq, map);
+        }
+    }
 
-    private static StepSequenceModel_V002 convertSequence(SchrittSequenzModel_V001 v1, Map<String, UUID> map) {
-        if (v1 == null) return null;
+    // Second pass: convert using the pre-built ID map
+
+    private static StepSequenceModel_V002 convertSequence(SchrittSequenzModel_V001 v1, Map<String, String> map) {
+        if (v1 == null) {
+            return null;
+        }
         StepSequenceModel_V002 v2 = new StepSequenceModel_V002(
-            UUID.randomUUID(),
+            AbstractStepModel_V002.generateId(),
             v1.changeInfo != null ? v1.changeInfo.toChangeInfo() : null,
             convertCatchArea(v1.catchBereich, map)
         );
@@ -90,10 +97,12 @@ public class ModelConverterV001V002 {
         return v2;
     }
 
-    private static BranchSequenceModel_V002 convertBranchSequence(ZweigSchrittSequenzModel_V001 v1, Map<String, UUID> map) {
-        if (v1 == null) return null;
+    private static BranchSequenceModel_V002 convertBranchSequence(ZweigSchrittSequenzModel_V001 v1, Map<String, String> map) {
+        if (v1 == null) {
+            return null;
+        }
         BranchSequenceModel_V002 v2 = new BranchSequenceModel_V002(
-            UUID.randomUUID(),
+            AbstractStepModel_V002.generateId(),
             v1.changeInfo != null ? v1.changeInfo.toChangeInfo() : null,
             convertCatchArea(v1.catchBereich, map),
             convertContent(v1.ueberschrift)
@@ -104,10 +113,14 @@ public class ModelConverterV001V002 {
         return v2;
     }
 
-    private static CatchSequenceModel_V002 convertCatchSequence(CatchSchrittSequenzModel_V001 v1, Map<String, UUID> map) {
-        if (v1 == null) return null;
-        // Use the same UUID as the linked break step so the view can find the break step by UUID
-        UUID id = v1.id != null ? map.getOrDefault(v1.id.toString(), UUID.randomUUID()) : UUID.randomUUID();
+    private static CatchSequenceModel_V002 convertCatchSequence(CatchSchrittSequenzModel_V001 v1, Map<String, String> map) {
+        if (v1 == null) {
+            return null;
+        }
+        // Use the same ID as the linked break step so the view can find the break step by ID
+        String id = v1.id != null
+            ? map.getOrDefault(v1.id.toString(), AbstractStepModel_V002.generateId())
+            : AbstractStepModel_V002.generateId();
         List<CoCatchModel_V002> coCatches = new ArrayList<>();
         if (v1.coCatches != null) {
             v1.coCatches.forEach(cc -> coCatches.add(convertCoCatch(cc, map)));
@@ -125,8 +138,10 @@ public class ModelConverterV001V002 {
         return v2;
     }
 
-    private static CatchAreaModel_V002 convertCatchArea(CatchBereichModel_V001 v1, Map<String, UUID> map) {
-        if (v1 == null) return null;
+    private static CatchAreaModel_V002 convertCatchArea(CatchBereichModel_V001 v1, Map<String, String> map) {
+        if (v1 == null) {
+            return null;
+        }
         CatchAreaModel_V002 v2 = new CatchAreaModel_V002(v1.sequencesWidthPercent, v1.zugeklappt);
         if (v1.catchSequences != null) {
             v1.catchSequences.forEach(cs -> v2.catchSequences.add(convertCatchSequence(cs, map)));
@@ -134,9 +149,9 @@ public class ModelConverterV001V002 {
         return v2;
     }
 
-    private static CoCatchModel_V002 convertCoCatch(CoCatchModel_V001 v1, Map<String, UUID> map) {
-        UUID breakStepId = v1.breakStepId != null
-            ? map.getOrDefault(v1.breakStepId.toString(), UUID.randomUUID())
+    private static CoCatchModel_V002 convertCoCatch(CoCatchModel_V001 v1, Map<String, String> map) {
+        String breakStepId = v1.breakStepId != null
+            ? map.getOrDefault(v1.breakStepId.toString(), AbstractStepModel_V002.generateId())
             : null;
         return new CoCatchModel_V002(
             breakStepId,
@@ -145,8 +160,10 @@ public class ModelConverterV001V002 {
         );
     }
 
-    public static AbstractStepModel_V002 convertStep(AbstractSchrittModel_V001 v1, Map<String, UUID> map) {
-        UUID id = v1.id != null ? map.getOrDefault(v1.id.toString(), UUID.randomUUID()) : UUID.randomUUID();
+    public static AbstractStepModel_V002 convertStep(AbstractSchrittModel_V001 v1, Map<String, String> map) {
+        String id = v1.id != null
+            ? map.getOrDefault(v1.id.toString(), AbstractStepModel_V002.generateId())
+            : AbstractStepModel_V002.generateId();
         if (v1 instanceof WhileWhileSchrittModel_V001) {
             WhileWhileSchrittModel_V001 s = (WhileWhileSchrittModel_V001) v1;
             return new DoWhileStepModel_V002(id, convertContent(s.inhalt), s.farbe,
@@ -211,8 +228,12 @@ public class ModelConverterV001V002 {
     }
 
     public static EditorContentModel_V002 convertContent(EditorContentModel_V001 v1) {
-        if (v1 == null) return null;
-        if (v1.areas == null) return new EditorContentModel_V002();
+        if (v1 == null) {
+            return null;
+        }
+        if (v1.areas == null) {
+            return new EditorContentModel_V002();
+        }
         List<AbstractEditAreaModel_V002> areas = v1.areas.stream()
             .map(ModelConverterV001V002::convertEditArea)
             .collect(Collectors.toList());
@@ -220,10 +241,18 @@ public class ModelConverterV001V002 {
     }
 
     private static AbstractEditAreaModel_V002 convertEditArea(AbstractEditAreaModel_V001 v1) {
-        if (v1 instanceof TextEditAreaModel_V001) return convertTextArea((TextEditAreaModel_V001) v1);
-        if (v1 instanceof ImageEditAreaModel_V001) return convertImageArea((ImageEditAreaModel_V001) v1);
-        if (v1 instanceof TableEditAreaModel_V001) return convertTableArea((TableEditAreaModel_V001) v1);
-        if (v1 instanceof ListItemEditAreaModel_V001) return convertListItem((ListItemEditAreaModel_V001) v1);
+        if (v1 instanceof TextEditAreaModel_V001) {
+            return convertTextArea((TextEditAreaModel_V001) v1);
+        }
+        if (v1 instanceof ImageEditAreaModel_V001) {
+            return convertImageArea((ImageEditAreaModel_V001) v1);
+        }
+        if (v1 instanceof TableEditAreaModel_V001) {
+            return convertTableArea((TableEditAreaModel_V001) v1);
+        }
+        if (v1 instanceof ListItemEditAreaModel_V001) {
+            return convertListItem((ListItemEditAreaModel_V001) v1);
+        }
         throw new RuntimeException("Unknown edit area type: " + v1.getClass());
     }
 
@@ -266,7 +295,9 @@ public class ModelConverterV001V002 {
     }
 
     private static PdfExportOptionsModel_V002 convertPdfOptions(PDFExportOptionsModel_V001 v1) {
-        if (v1 == null) return null;
+        if (v1 == null) {
+            return null;
+        }
         return new PdfExportOptionsModel_V002(v1.filename, v1.modelFilename, v1.pageSize, v1.portrait, v1.paging);
     }
 }

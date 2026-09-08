@@ -3,11 +3,10 @@ package specman.model.v002;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class DiagramModel_V002 {
     public final String name;
-    public final Map<UUID, String> stepNumberIndex;
+    public final Map<String, String> stepNumberIndex;
     public final int width;
     public final int zoomFactor;
     public final boolean changeModeEnabled;
@@ -30,7 +29,7 @@ public class DiagramModel_V002 {
         pdfExportOptions = null;
     }
 
-    public DiagramModel_V002(String name, int width, int zoomFactor, boolean changeModeEnabled, StepSequenceModel_V002 mainSequence, EditorContentModel_V002 intro, EditorContentModel_V002 outro, PdfExportOptionsModel_V002 pdfExportOptions, String changeSetName, Map<UUID, String> stepNumberIndex) {
+    public DiagramModel_V002(String name, int width, int zoomFactor, boolean changeModeEnabled, StepSequenceModel_V002 mainSequence, EditorContentModel_V002 intro, EditorContentModel_V002 outro, PdfExportOptionsModel_V002 pdfExportOptions, String changeSetName, Map<String, String> stepNumberIndex) {
         this.name = name;
         this.width = width;
         this.zoomFactor = zoomFactor;

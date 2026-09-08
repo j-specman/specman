@@ -42,7 +42,7 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 		initVerzweigungPanel(panelLayout);
 	}
 
-	protected VerzweigungSchrittView(SchrittSequenzView parent, specman.model.v002.EditorContentModel_V002 content, java.util.UUID stepId, ChangeInfo changeInfo, FormLayout panelLayout) {
+	protected VerzweigungSchrittView(SchrittSequenzView parent, specman.model.v002.EditorContentModel_V002 content, String stepId, ChangeInfo changeInfo, FormLayout panelLayout) {
 		super(parent, content, stepId, changeInfo);
 		initVerzweigungPanel(panelLayout);
 	}
