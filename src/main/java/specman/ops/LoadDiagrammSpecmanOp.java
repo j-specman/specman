@@ -11,6 +11,7 @@ import specman.model.ModelConverterV001V002;
 import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.StruktogrammModel_V001;
 import specman.model.v002.DiagramModel_V002;
+import specman.model.v002.ModelRenumberer_V002;
 import specman.view.KlappButton;
 import specman.view.QuellSchrittView;
 import specman.view.SchrittSequenzView;
@@ -212,17 +213,17 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
   }
 
   /** Rewrites stale step-number cross-references after loading a V2 model that was edited outside
-   * Specman, especially by an AI agent. Agents are instructed not to maintain {@code stepNumberIndex}
-   * themselves because Specman does that faster and without errors. As a result, after an agent
-   * reorders or inserts steps, the step numbers embedded as Steplink-styled text runs in the diagram
-   * content may no longer match the numbers that {@code renummerieren()} just assigned. This method
-   * compares the saved index against the freshly computed numbers and rewrites every affected Steplink
-   * run in place, before {@code viewsNachinitialisieren()} rebuilds the reference graph via
-   * {@code registerAllExistingStepnumbers()}. */
+   * Specman, especially by an AI agent. After an agent reorders or inserts steps, the step numbers
+   * embedded as Steplink-styled text runs in the diagram content may no longer match the numbers
+   * that {@code renummerieren()} just assigned. This method compares the saved step numbers (stored
+   * in each step's {@code stepNumber} field) against the freshly computed numbers from the view and
+   * rewrites every affected Steplink run in place, before {@code viewsNachinitialisieren()} rebuilds
+   * the reference graph via {@code registerAllExistingStepnumbers()}. */
   private void rewriteStaleStepNumberLinks(DiagramModel_V002 model) {
-    if (model.stepNumberIndex != null) {
+    Map<String, String> savedNumbers = ModelRenumberer_V002.collectNumbers(model.mainSequence);
+    if (!savedNumbers.isEmpty()) {
       Map<String, String> computedIndex = getHauptSequenz().buildStepNumberIndex();
-      Map<String, String> changedNumbers = queryChangedNumbers(model, computedIndex);
+      Map<String, String> changedNumbers = queryChangedNumbers(savedNumbers, computedIndex);
       if (!changedNumbers.isEmpty()) {
         List<TextEditArea> allAreas = collectAllTextAreas();
         for (TextEditArea area : allAreas) {
@@ -240,10 +241,10 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     return allAreas;
   }
 
-  private Map<String, String> queryChangedNumbers(DiagramModel_V002 model, Map<String, String> computedIndex) {
+  private Map<String, String> queryChangedNumbers(Map<String, String> savedNumbers, Map<String, String> computedIndex) {
     Map<String, String> changedNumbers = new LinkedHashMap<>();
     for (Map.Entry<String, String> entry : computedIndex.entrySet()) {
-      String savedNumber = model.stepNumberIndex.get(entry.getKey());
+      String savedNumber = savedNumbers.get(entry.getKey());
       if (savedNumber != null && !savedNumber.equals(entry.getValue())) {
         changedNumbers.put(savedNumber, entry.getValue());
       }

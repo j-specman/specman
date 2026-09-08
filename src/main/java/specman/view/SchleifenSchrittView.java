@@ -201,6 +201,7 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 	public WhileStepModel_V002 generiereModel(boolean formatierterText) {
 		return new WhileStepModel_V002(
 			id,
+			currentStepNumber(),
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,

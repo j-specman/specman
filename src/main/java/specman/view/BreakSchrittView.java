@@ -107,6 +107,7 @@ public class BreakSchrittView extends AbstractSchrittView {
 	public BreakStepModel_V002 generiereModel(boolean formatierterText) {
 		return new BreakStepModel_V002(
 			id,
+			currentStepNumber(),
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,

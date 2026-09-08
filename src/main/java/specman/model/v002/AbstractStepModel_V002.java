@@ -35,6 +35,8 @@ public abstract class AbstractStepModel_V002 {
     public final ChangeInfoModel_V002 changeInfo;
     public final String sourceStepId;
     public final RoundedBorderDecorationStyle decorationStyle;
+    /** Computed by ModelRenumberer_V002; not part of step identity. */
+    public String stepNumber;
 
     @Deprecated AbstractStepModel_V002() { // For Jackson only
         id = null;
@@ -43,16 +45,19 @@ public abstract class AbstractStepModel_V002 {
         changeInfo = null;
         sourceStepId = null;
         decorationStyle = null;
+        stepNumber = null;
     }
 
     AbstractStepModel_V002(
             String id,
+            String stepNumber,
             EditorContentModel_V002 content,
             int color,
             ChangeInfo changeInfo,
             String sourceStepId,
             RoundedBorderDecorationStyle decorationStyle) {
         this.id = id;
+        this.stepNumber = stepNumber;
         this.content = content;
         this.color = color;
         this.changeInfo = ChangeInfoModel_V002.from(changeInfo);

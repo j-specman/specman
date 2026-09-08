@@ -394,6 +394,11 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return number;
 	}
 
+	protected String currentStepNumber() {
+		String num = number.toString();
+		return num.isEmpty() ? null : num;
+	}
+
 	public abstract JComponent getPanel();
 
 	public void setQuellschrittUDBL(QuellSchrittView quellschritt){

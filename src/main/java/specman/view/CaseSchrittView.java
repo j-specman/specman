@@ -267,6 +267,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	public CaseStepModel_V002 generiereModel(boolean formatierterText) {
 		CaseStepModel_V002 model = new CaseStepModel_V002(
 			id,
+			currentStepNumber(),
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,

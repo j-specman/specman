@@ -38,6 +38,7 @@ public class QuellSchrittView extends AbstractSchrittView {
     public SourceStepModel_V002 generiereModel(boolean formatierterText) {
         return new SourceStepModel_V002(
           id,
+            currentStepNumber(),
             getEditorContent(formatierterText),
             getBackground().getRGB(),
             changeInfo,

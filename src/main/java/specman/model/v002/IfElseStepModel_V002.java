@@ -18,8 +18,8 @@ public class IfElseStepModel_V002 extends StructuredStepModel_V002 {
         ifWidthRatio = 0.0f;
     }
 
-    public IfElseStepModel_V002(String id, EditorContentModel_V002 content, int color, RoundedBorderDecorationStyle decorationStyle, boolean collapsed, ChangeInfo changeInfo, BranchSequenceModel_V002 ifSequence, BranchSequenceModel_V002 elseSequence, float ifWidthRatio, String sourceStepId) {
-        super(id, content, color, changeInfo, collapsed, sourceStepId, decorationStyle);
+    public IfElseStepModel_V002(String id, String stepNumber, EditorContentModel_V002 content, int color, RoundedBorderDecorationStyle decorationStyle, boolean collapsed, ChangeInfo changeInfo, BranchSequenceModel_V002 ifSequence, BranchSequenceModel_V002 elseSequence, float ifWidthRatio, String sourceStepId) {
+        super(id, stepNumber, content, color, changeInfo, collapsed, sourceStepId, decorationStyle);
         this.ifSequence = ifSequence;
         this.elseSequence = elseSequence;
         this.ifWidthRatio = ifWidthRatio;

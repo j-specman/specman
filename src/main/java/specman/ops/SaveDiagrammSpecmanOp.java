@@ -78,7 +78,7 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
   }
 
   private DiagramModel_V002 generiereStruktogrammModel(boolean formatierterText) {
-    return new DiagramModel_V002(
+    DiagramModel_V002 model = new DiagramModel_V002(
         getDiagrammName(),
         getDiagrammbreite(),
         getZoomFactor(),
@@ -87,8 +87,8 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         getIntro().editorContent2Model(formatierterText),
         getOutro().editorContent2Model(formatierterText),
         getPdfExportOptions(),
-        changeset().name,
-        getHauptSequenz().buildStepNumberIndex());
+        changeset().name);
+    return model;
   }
 
   private ModelEnvelope wrapModel(DiagramModel_V002 model) {

@@ -23,8 +23,7 @@ public class ModelConverterV001V002 {
             convertContent(v1.intro),
             convertContent(v1.outro),
             convertPdfOptions(v1.pdfExportOptions),
-            v1.changeSetName,
-            null
+            v1.changeSetName
         );
     }
 
@@ -166,19 +165,19 @@ public class ModelConverterV001V002 {
             : AbstractStepModel_V002.generateId();
         if (v1 instanceof WhileWhileSchrittModel_V001) {
             WhileWhileSchrittModel_V001 s = (WhileWhileSchrittModel_V001) v1;
-            return new DoWhileStepModel_V002(id, convertContent(s.inhalt), s.farbe,
+            return new DoWhileStepModel_V002(id, null, convertContent(s.inhalt), s.farbe,
                 changeInfo(s), s.zugeklappt,
                 convertSequence(s.wiederholSequenz, map), s.balkenbreite, null, s.decorationStyle);
         }
         if (v1 instanceof WhileSchrittModel_V001) {
             WhileSchrittModel_V001 s = (WhileSchrittModel_V001) v1;
-            return new WhileStepModel_V002(id, convertContent(s.inhalt), s.farbe,
+            return new WhileStepModel_V002(id, null, convertContent(s.inhalt), s.farbe,
                 changeInfo(s), s.zugeklappt,
                 convertSequence(s.wiederholSequenz, map), s.balkenbreite, null, s.decorationStyle);
         }
         if (v1 instanceof IfElseSchrittModel_V001) {
             IfElseSchrittModel_V001 s = (IfElseSchrittModel_V001) v1;
-            return new IfElseStepModel_V002(id, convertContent(s.inhalt), s.farbe, s.decorationStyle,
+            return new IfElseStepModel_V002(id, null, convertContent(s.inhalt), s.farbe, s.decorationStyle,
                 s.zugeklappt, changeInfo(s),
                 convertBranchSequence(s.ifSequenz, map),
                 convertBranchSequence(s.elseSequenz, map),
@@ -186,14 +185,14 @@ public class ModelConverterV001V002 {
         }
         if (v1 instanceof IfSchrittModel_V001) {
             IfSchrittModel_V001 s = (IfSchrittModel_V001) v1;
-            return new IfStepModel_V002(id, convertContent(s.inhalt), s.farbe, s.decorationStyle,
+            return new IfStepModel_V002(id, null, convertContent(s.inhalt), s.farbe, s.decorationStyle,
                 s.zugeklappt, changeInfo(s),
                 convertBranchSequence(s.ifSequenz, map),
                 s.leerBreite, null);
         }
         if (v1 instanceof CaseSchrittModel_V001) {
             CaseSchrittModel_V001 s = (CaseSchrittModel_V001) v1;
-            CaseStepModel_V002 caseStep = new CaseStepModel_V002(id, convertContent(s.inhalt), s.farbe,
+            CaseStepModel_V002 caseStep = new CaseStepModel_V002(id, null, convertContent(s.inhalt), s.farbe,
                 changeInfo(s), s.zugeklappt,
                 convertBranchSequence(s.sonstSequenz, map),
                 s.spaltenbreitenAnteile != null ? new ArrayList<>(s.spaltenbreitenAnteile) : null,
@@ -205,21 +204,21 @@ public class ModelConverterV001V002 {
         }
         if (v1 instanceof SubsequenzSchrittModel_V001) {
             SubsequenzSchrittModel_V001 s = (SubsequenzSchrittModel_V001) v1;
-            return new SubsequenceStepModel_V002(id, convertContent(s.inhalt), s.farbe,
+            return new SubsequenceStepModel_V002(id, null, convertContent(s.inhalt), s.farbe,
                 changeInfo(s), s.zugeklappt,
                 convertSequence(s.subsequenz, map),
                 null, s.decorationStyle, s.flatNumbering);
         }
         if (v1 instanceof QuellSchrittModel_V001) {
-            return new SourceStepModel_V002(id, convertContent(v1.inhalt), v1.farbe,
+            return new SourceStepModel_V002(id, null, convertContent(v1.inhalt), v1.farbe,
                 changeInfo(v1), null, v1.decorationStyle);
         }
         if (v1 instanceof BreakSchrittModel_V001) {
-            return new BreakStepModel_V002(id, convertContent(v1.inhalt), v1.farbe,
+            return new BreakStepModel_V002(id, null, convertContent(v1.inhalt), v1.farbe,
                 changeInfo(v1), null, v1.decorationStyle);
         }
         // EinfacherSchrittModel_V001 and StrukturierterSchrittModel_V001 fallback
-        return new SimpleStepModel_V002(id, convertContent(v1.inhalt), v1.farbe,
+        return new SimpleStepModel_V002(id, null, convertContent(v1.inhalt), v1.farbe,
             changeInfo(v1), null, v1.decorationStyle);
     }
 

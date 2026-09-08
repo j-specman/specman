@@ -10,8 +10,8 @@ public class StructuredStepModel_V002 extends AbstractStepModel_V002 {
         collapsed = false;
     }
 
-    StructuredStepModel_V002(String id, EditorContentModel_V002 content, int color, ChangeInfo changeInfo, boolean collapsed, String sourceStepId, RoundedBorderDecorationStyle decorationStyle) {
-        super(id, content, color, changeInfo, sourceStepId, decorationStyle);
+    StructuredStepModel_V002(String id, String stepNumber, EditorContentModel_V002 content, int color, ChangeInfo changeInfo, boolean collapsed, String sourceStepId, RoundedBorderDecorationStyle decorationStyle) {
+        super(id, stepNumber, content, color, changeInfo, sourceStepId, decorationStyle);
         this.collapsed = collapsed;
     }
 }

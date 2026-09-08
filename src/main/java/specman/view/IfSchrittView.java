@@ -99,6 +99,7 @@ public class IfSchrittView extends IfElseSchrittView {
 	public AbstractStepModel_V002 generiereModel(boolean formatierterText) {
 		return new IfStepModel_V002(
 			id,
+			currentStepNumber(),
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			getDecorated(),

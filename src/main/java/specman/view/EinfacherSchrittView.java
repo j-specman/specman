@@ -25,6 +25,7 @@ public class EinfacherSchrittView extends AbstractSchrittView {
 	public SimpleStepModel_V002 generiereModel(boolean formatierterText) {
 		return new SimpleStepModel_V002(
 			id,
+			currentStepNumber(),
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,

@@ -19,8 +19,8 @@ public class CaseStepModel_V002 extends StructuredStepModel_V002 {
         columnWidthRatios = null;
     }
 
-    public CaseStepModel_V002(String id, EditorContentModel_V002 content, int color, ChangeInfo changeInfo, boolean collapsed, BranchSequenceModel_V002 defaultSequence, List<Float> columnWidthRatios, String sourceStepId, RoundedBorderDecorationStyle decorationStyle) {
-        super(id, content, color, changeInfo, collapsed, sourceStepId, decorationStyle);
+    public CaseStepModel_V002(String id, String stepNumber, EditorContentModel_V002 content, int color, ChangeInfo changeInfo, boolean collapsed, BranchSequenceModel_V002 defaultSequence, List<Float> columnWidthRatios, String sourceStepId, RoundedBorderDecorationStyle decorationStyle) {
+        super(id, stepNumber, content, color, changeInfo, collapsed, sourceStepId, decorationStyle);
         this.defaultSequence = defaultSequence;
         this.caseSequences = new ArrayList<>();
         this.columnWidthRatios = columnWidthRatios;

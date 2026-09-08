@@ -145,6 +145,7 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 	public SubsequenceStepModel_V002 generiereModel(boolean formatierterText) {
 		return new SubsequenceStepModel_V002(
 			id,
+			currentStepNumber(),
 			getEditorContent(formatierterText),
 			getBackground().getRGB(),
 			changeInfo,

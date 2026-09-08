@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Computes a fresh stepNumberIndex from the model tree without Swing.
+ * Assigns step numbers directly to each step's {@code stepNumber} field without Swing.
  * Mirrors the polymorphic setNumber() dispatch in the view classes.
  * Step-type-specific logic (which sub-sequences exist, how many slots each
  * occupies in the outer sequence) lives in the model classes via
@@ -14,11 +14,37 @@ import java.util.Map;
  */
 public class ModelRenumberer_V002 {
 
-  public static Map<String, String> renumber(StepSequenceModel_V002 mainSequence) {
-    Map<String, String> index = new LinkedHashMap<>();
+  /** Sets {@code step.stepNumber} on every step in the tree in-place. */
+  public static void renumber(StepSequenceModel_V002 mainSequence) {
     Map<String, StepNumber> stepNumbers = new LinkedHashMap<>();
-    renumberSequence(mainSequence, StepNumber.EMPTY, index, stepNumbers);
-    return index;
+    renumberSequence(mainSequence, StepNumber.EMPTY, stepNumbers);
+  }
+
+  /** Collects the current {@code stepNumber} of every step in the tree as id → stepNumber map.
+   *  Steps with a null stepNumber are omitted. */
+  public static Map<String, String> collectNumbers(StepSequenceModel_V002 seq) {
+    Map<String, String> result = new LinkedHashMap<>();
+    collectNumbersRecursively(seq, result);
+    return result;
+  }
+
+  private static void collectNumbersRecursively(StepSequenceModel_V002 seq, Map<String, String> result) {
+    if (seq == null || seq.steps == null) {
+      return;
+    }
+    for (AbstractStepModel_V002 step : seq.steps) {
+      if (step.stepNumber != null) {
+        result.put(step.id, step.stepNumber);
+      }
+      for (NumberedSubSequence_V002 sub : step.subSequencesFor(StepNumber.EMPTY)) {
+        collectNumbersRecursively(sub.sequence, result);
+      }
+    }
+    if (seq.catchArea != null && seq.catchArea.catchSequences != null) {
+      for (CatchSequenceModel_V002 catchSeq : seq.catchArea.catchSequences) {
+        collectNumbersRecursively(catchSeq, result);
+      }
+    }
   }
 
   /** Builds a mapping from each step's saved number to its newly computed number.
@@ -41,30 +67,26 @@ public class ModelRenumberer_V002 {
   private static void renumberSequence(
       StepSequenceModel_V002 seq,
       StepNumber base,
-      Map<String, String> index,
       Map<String, StepNumber> stepNumbers) {
 
     StepNumber current = base;
     for (AbstractStepModel_V002 step : seq.steps) {
       StepNumber stepNum = current.naechsteID();
-      index.put(step.id, stepNum.toString());
+      step.stepNumber = stepNum.toString();
       stepNumbers.put(step.id, stepNum);
       for (NumberedSubSequence_V002 sub : step.subSequencesFor(stepNum)) {
-        renumberSequence(sub.sequence, sub.base, index, stepNumbers);
+        renumberSequence(sub.sequence, sub.base, stepNumbers);
       }
       current = step.nextSlotInOuterSequence(stepNum, stepNumbers);
     }
 
     // Catch sequences: their base is break step's number.naechsteEbene().
-    // The catch sequences may be linked to break steps from this sequence OR from
-    // any nested sub-sequence. Since sub-sequences are processed recursively above
-    // (depth-first), all break steps are already in stepNumbers by now, regardless
-    // of how deeply nested they are.
+    // All break steps are already in stepNumbers by now (depth-first traversal above).
     if (seq.catchArea != null && seq.catchArea.catchSequences != null) {
       for (CatchSequenceModel_V002 catchSeq : seq.catchArea.catchSequences) {
         StepNumber breakStepNum = stepNumbers.get(catchSeq.id);
         if (breakStepNum != null) {
-          renumberSequence(catchSeq, breakStepNum.naechsteEbene(), index, stepNumbers);
+          renumberSequence(catchSeq, breakStepNum.naechsteEbene(), stepNumbers);
         }
       }
     }
