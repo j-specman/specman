@@ -21,6 +21,7 @@ import javax.swing.text.StyledDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,45 +40,69 @@ public class ModelStepnumberRewriter_V002 {
   /** Rewrites all stale steplink texts in the model.
    * @param numberMapping maps each step's saved number to its newly computed number
    *                      (built by ModelRenumberer_V002.buildNumberMapping)
-   * @return list of steplink texts that could not be resolved (step was deleted) */
-  public static List<String> rewrite(DiagramModel_V002 model, Map<String, String> numberMapping) throws Exception {
+   * @return SanitizeResult containing broken refs and steplink updates with locations */
+  public static SanitizeResult rewrite(DiagramModel_V002 model, Map<String, String> numberMapping) throws Exception {
     List<String> brokenRefs = new ArrayList<>();
-    if (numberMapping.isEmpty()) {
-      return brokenRefs;
+    // location → (oldNum → newNum)
+    Map<String, Map<String, String>> locationUpdates = new LinkedHashMap<>();
+
+    if (!numberMapping.isEmpty()) {
+      rewriteContent(model.intro, "intro", numberMapping, brokenRefs, locationUpdates);
+      rewriteContent(model.outro, "outro", numberMapping, brokenRefs, locationUpdates);
+      rewriteSequence(model.mainSequence, numberMapping, brokenRefs, locationUpdates);
     }
-    rewriteContent(model.intro, numberMapping, brokenRefs);
-    rewriteContent(model.outro, numberMapping, brokenRefs);
-    rewriteSequence(model.mainSequence, numberMapping, brokenRefs);
-    return brokenRefs;
+
+    List<SteplinkUpdate> steplinkUpdates = flattenUpdates(locationUpdates);
+    return new SanitizeResult(steplinkUpdates, brokenRefs);
+  }
+
+  private static List<SteplinkUpdate> flattenUpdates(Map<String, Map<String, String>> locationUpdates) {
+    List<SteplinkUpdate> result = new ArrayList<>();
+    for (Map.Entry<String, Map<String, String>> locEntry : locationUpdates.entrySet()) {
+      String location = locEntry.getKey();
+      for (Map.Entry<String, String> numEntry : locEntry.getValue().entrySet()) {
+        result.add(new SteplinkUpdate(location, numEntry.getKey(), numEntry.getValue()));
+      }
+    }
+    return result;
   }
 
   private static void rewriteSequence(
-    StepSequenceModel_V002 seq, Map<String, String> numberMapping, List<String> brokenRefs) throws Exception {
+      StepSequenceModel_V002 seq,
+      Map<String, String> numberMapping,
+      List<String> brokenRefs,
+      Map<String, Map<String, String>> locationUpdates) throws Exception {
 
     for (AbstractStepModel_V002 step : seq.steps) {
-      rewriteContent(step.content, numberMapping, brokenRefs);
+      String location = "Step " + step.stepNumber + " (" + ModelRenumberer_V002.stepType(step) + ")";
+      rewriteContent(step.content, location, numberMapping, brokenRefs, locationUpdates);
       for (NumberedSubSequence_V002 sub : step.subSequencesFor(StepNumber.EMPTY)) {
         if (sub.sequence instanceof BranchSequenceModel_V002 branch) {
-          rewriteContent(branch.heading, numberMapping, brokenRefs);
+          rewriteContent(branch.heading, location, numberMapping, brokenRefs, locationUpdates);
         }
-        rewriteSequence(sub.sequence, numberMapping, brokenRefs);
+        rewriteSequence(sub.sequence, numberMapping, brokenRefs, locationUpdates);
       }
     }
     if (seq.catchArea != null && seq.catchArea.catchSequences != null) {
       for (CatchSequenceModel_V002 catchSeq : seq.catchArea.catchSequences) {
-        rewriteContent(catchSeq.heading, numberMapping, brokenRefs);
+        // Use catch sequence's own step numbering from steps within it
+        rewriteContent(catchSeq.heading, "catch", numberMapping, brokenRefs, locationUpdates);
         if (catchSeq.coCatches != null) {
           for (CoCatchModel_V002 coCatch : catchSeq.coCatches) {
-            rewriteContent(coCatch.heading, numberMapping, brokenRefs);
+            rewriteContent(coCatch.heading, "catch", numberMapping, brokenRefs, locationUpdates);
           }
         }
-        rewriteSequence(catchSeq, numberMapping, brokenRefs);
+        rewriteSequence(catchSeq, numberMapping, brokenRefs, locationUpdates);
       }
     }
   }
 
   private static void rewriteContent(
-    EditorContentModel_V002 content, Map<String, String> numberMapping, List<String> brokenRefs) throws Exception {
+      EditorContentModel_V002 content,
+      String location,
+      Map<String, String> numberMapping,
+      List<String> brokenRefs,
+      Map<String, Map<String, String>> locationUpdates) throws Exception {
 
     if (content == null) {
       return;
@@ -85,7 +110,7 @@ public class ModelStepnumberRewriter_V002 {
     for (int i = 0; i < content.areas.size(); i++) {
       AbstractEditAreaModel_V002 area = content.areas.get(i);
       if (area instanceof TextEditAreaModel_V002 textArea) {
-        TextEditAreaModel_V002 updated = rewriteTextArea(textArea, numberMapping, brokenRefs);
+        TextEditAreaModel_V002 updated = rewriteTextArea(textArea, location, numberMapping, brokenRefs, locationUpdates);
         if (updated != textArea) {
           content.areas.set(i, updated);
         }
@@ -93,18 +118,22 @@ public class ModelStepnumberRewriter_V002 {
       else if (area instanceof TableEditAreaModel_V002 tableArea) {
         for (List<EditorContentModel_V002> row : tableArea.cells) {
           for (EditorContentModel_V002 cell : row) {
-            rewriteContent(cell, numberMapping, brokenRefs);
+            rewriteContent(cell, location, numberMapping, brokenRefs, locationUpdates);
           }
         }
       }
       else if (area instanceof ListItemEditAreaModel_V002 listItem) {
-        rewriteContent(listItem.content, numberMapping, brokenRefs);
+        rewriteContent(listItem.content, location, numberMapping, brokenRefs, locationUpdates);
       }
     }
   }
 
   private static TextEditAreaModel_V002 rewriteTextArea(
-      TextEditAreaModel_V002 model, Map<String, String> numberMapping, List<String> brokenRefs) throws Exception {
+      TextEditAreaModel_V002 model,
+      String location,
+      Map<String, String> numberMapping,
+      List<String> brokenRefs,
+      Map<String, Map<String, String>> locationUpdates) throws Exception {
 
     if (model.markups == null || model.markups.isEmpty()) {
       return model;
@@ -122,7 +151,7 @@ public class ModelStepnumberRewriter_V002 {
     WrappedDocument doc = new WrappedDocument((StyledDocument) ed.getDocument());
     List<Markup_V002> markups = new ArrayList<>(model.markups);
 
-    if (!rewriteSteplinksInDocument(doc, markups, numberMapping, brokenRefs)) {
+    if (!rewriteSteplinksInDocument(doc, markups, location, numberMapping, brokenRefs, locationUpdates)) {
       return model;
     }
 
@@ -135,19 +164,28 @@ public class ModelStepnumberRewriter_V002 {
   }
 
   private static boolean rewriteSteplinksInDocument(
-      WrappedDocument doc, List<Markup_V002> markups,
-      Map<String, String> numberMapping, List<String> brokenRefs) {
+      WrappedDocument doc,
+      List<Markup_V002> markups,
+      String location,
+      Map<String, String> numberMapping,
+      List<String> brokenRefs,
+      Map<String, Map<String, String>> locationUpdates) {
 
     boolean anyChanged = false;
     for (int i = markups.size() - 1; i >= 0; i--) {
-      anyChanged |= rewriteSteplinkAt(i, doc, markups, numberMapping, brokenRefs);
+      anyChanged |= rewriteSteplinkAt(i, doc, markups, location, numberMapping, brokenRefs, locationUpdates);
     }
     return anyChanged;
   }
 
   private static boolean rewriteSteplinkAt(
-      int i, WrappedDocument doc, List<Markup_V002> markups,
-      Map<String, String> numberMapping, List<String> brokenRefs) {
+      int i,
+      WrappedDocument doc,
+      List<Markup_V002> markups,
+      String location,
+      Map<String, String> numberMapping,
+      List<String> brokenRefs,
+      Map<String, Map<String, String>> locationUpdates) {
 
     Markup_V002 m = markups.get(i);
     if (!m.type.isSteplink()) {
@@ -174,6 +212,9 @@ public class ModelStepnumberRewriter_V002 {
       Markup_V002 mj = markups.get(j);
       markups.set(j, new Markup_V002(mj.from + delta, mj.to + delta, mj.type, mj.changeset));
     }
+
+    // Record the successful update grouped by location
+    locationUpdates.computeIfAbsent(location, k -> new LinkedHashMap<>()).put(currentNum, newNum);
     return true;
   }
 }

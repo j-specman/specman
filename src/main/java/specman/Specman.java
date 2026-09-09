@@ -516,7 +516,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	 * before the window is fully initialized.
 	 */
 	public static void main(String[] args) throws Exception {
-    if (args.length > 0 && args[0].equals("--validate")) {
+    if (args.length > 0 && args[0].equals("--sanitize")) {
       System.setProperty("java.awt.headless", "true");
       SpecmanCLI.run(args);
       return;

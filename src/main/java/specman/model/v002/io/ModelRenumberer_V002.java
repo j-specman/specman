@@ -2,10 +2,21 @@ package specman.model.v002.io;
 
 import specman.StepNumber;
 import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.BreakStepModel_V002;
+import specman.model.v002.CaseStepModel_V002;
 import specman.model.v002.CatchSequenceModel_V002;
+import specman.model.v002.DoWhileStepModel_V002;
+import specman.model.v002.IfElseStepModel_V002;
+import specman.model.v002.IfStepModel_V002;
+import specman.model.v002.SimpleStepModel_V002;
 import specman.model.v002.StepSequenceModel_V002;
+import specman.model.v002.SubsequenceStepModel_V002;
+import specman.model.v002.TextEditAreaModel_V002;
+import specman.model.v002.WhileStepModel_V002;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,6 +27,8 @@ import java.util.Map;
  * subSequencesFor() and nextSlotInOuterSequence().
  */
 public class ModelRenumberer_V002 {
+
+  private static final int PLAIN_TEXT_MAX = 60;
 
   /** Sets {@code step.stepNumber} on every step in the tree in-place. */
   public static void renumber(StepSequenceModel_V002 mainSequence) {
@@ -67,6 +80,75 @@ public class ModelRenumberer_V002 {
     return result;
   }
 
+  /** Builds the list of step number changes by comparing saved and computed numbers.
+   *  Includes step type and truncated plain text for human/agent orientation. */
+  public static List<StepNumberChange> buildStepNumberChanges(
+      StepSequenceModel_V002 mainSequence,
+      Map<String, String> savedNumbers,
+      Map<String, String> computedNumbers) {
+
+    List<StepNumberChange> changes = new ArrayList<>();
+    List<AbstractStepModel_V002> allSteps = new ArrayList<>();
+    collectAllSteps(mainSequence, allSteps);
+
+    for (AbstractStepModel_V002 step : allSteps) {
+      String oldNum = savedNumbers.get(step.id);
+      String newNum = computedNumbers.get(step.id);
+      if (oldNum != null && newNum != null && !oldNum.equals(newNum)) {
+        changes.add(new StepNumberChange(oldNum, newNum, stepType(step), extractPlainText(step)));
+      }
+    }
+    return changes;
+  }
+
+  /** Returns the grammar keyword for this step type. */
+  public static String stepType(AbstractStepModel_V002 step) {
+    if (step instanceof DoWhileStepModel_V002)      { return "doWhile"; }
+    if (step instanceof WhileStepModel_V002)         { return "while"; }
+    if (step instanceof IfElseStepModel_V002)        { return "ifElse"; }
+    if (step instanceof IfStepModel_V002)            { return "if"; }
+    if (step instanceof CaseStepModel_V002)          { return "case"; }
+    if (step instanceof SubsequenceStepModel_V002)   { return "subsequence"; }
+    if (step instanceof BreakStepModel_V002)         { return "break"; }
+    if (step instanceof SimpleStepModel_V002)        { return "simple"; }
+    return "step";
+  }
+
+  private static String extractPlainText(AbstractStepModel_V002 step) {
+    if (step.content == null || step.content.areas == null || step.content.areas.isEmpty()) {
+      return "";
+    }
+    if (!(step.content.areas.get(0) instanceof TextEditAreaModel_V002 textArea)) {
+      return "";
+    }
+    String plain = textArea.plainText;
+    if (plain == null || plain.isEmpty()) {
+      return "";
+    }
+    plain = plain.replace("\n", " ").trim();
+    if (plain.length() > PLAIN_TEXT_MAX) {
+      return plain.substring(0, PLAIN_TEXT_MAX) + "...";
+    }
+    return plain;
+  }
+
+  private static void collectAllSteps(StepSequenceModel_V002 seq, List<AbstractStepModel_V002> result) {
+    if (seq == null || seq.steps == null) {
+      return;
+    }
+    for (AbstractStepModel_V002 step : seq.steps) {
+      result.add(step);
+      for (NumberedSubSequence_V002 sub : step.subSequencesFor(StepNumber.EMPTY)) {
+        collectAllSteps(sub.sequence, result);
+      }
+    }
+    if (seq.catchArea != null && seq.catchArea.catchSequences != null) {
+      for (CatchSequenceModel_V002 catchSeq : seq.catchArea.catchSequences) {
+        collectAllSteps(catchSeq, result);
+      }
+    }
+  }
+
   private static void renumberSequence(
       StepSequenceModel_V002 seq,
       StepNumber base,
@@ -95,3 +177,4 @@ public class ModelRenumberer_V002 {
     }
   }
 }
+
