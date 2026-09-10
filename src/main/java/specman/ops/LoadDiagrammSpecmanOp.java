@@ -14,6 +14,7 @@ import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.io.ModelParser_V002;
 import specman.model.v002.io.ModelParseException;
 import specman.model.v002.io.ModelRenumberer_V002;
+import specman.model.v002.io.ModelSerializer_V002;
 import specman.view.KlappButton;
 import specman.view.QuellSchrittView;
 import specman.view.SchrittSequenzView;
@@ -167,15 +168,24 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     }
     String compatibilityVersionPrefix = SpecmanVersion.getCompatibilityVersionPrefix();
     if (!envelope.specmanVersion.startsWith(compatibilityVersionPrefix)) {
-      showMessage("The selected file was created from Specman version " + envelope.specmanVersion + ". " +
-        "The current version is " + SpecmanVersion.getVersion() + ". The file format is compatible. However, " +
-        "files being edited with a newer version should not be edited with older versions afterwards. " +
-        "This may cause the loss of meta information");
+      String message = "The selected file was created from Specman version " + envelope.specmanVersion + ".\n" +
+          "The current version is " + SpecmanVersion.getVersion() + ".\n";
+      if (isV1) {
+        message += "The file format is incompatible but will be ported to the current format. It will " +
+          "no longer be accessible from the Specman version it was created with.";
+      }
+      else {
+        message += "The file format is compatible. However, files being edited with a newer version " +
+          "should not be edited with older versions afterwards. This may cause the loss of meta information";
+      }
+      showMessage(message);
     }
   }
 
-  private static boolean isTextFormat(byte[] data) {
-    return data.length >= 2 && data[0] == '/' && data[1] == '/';
+  public static boolean isTextFormat(byte[] data) {
+    String prefix = ModelSerializer_V002.COMMENT_INTRO;
+    return data.length >= prefix.length() &&
+      new String(data, 0, prefix.length()).equals(prefix);
   }
 
   /** Reads only the meta information from the envelope without making any
@@ -187,6 +197,13 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     return readMeta(data);
   }
 
+  /** Extracting the envelope is a bit more complicated than expected. V1 models used
+   * a JSON format and the envelope simply was a most outer JSON element of the model
+   * files. Since V2, the models follow a pseudo-code like syntax and the envelope
+   * is a JSON-like comment string on the very first line (see writer method
+   * {@link ModelSerializer_V002#serialize(DiagramModel_V002)}). So we first check,
+   * if this file starts with a code-like comment trailer "//" in the first line, and if
+   * so, we take the rest of that line as the envelope information (without content). */
   private ModelEnvelope readMeta(byte[] data) throws IOException {
     ObjectMapper metaMapper = new ObjectMapper();
     if (isTextFormat(data)) {

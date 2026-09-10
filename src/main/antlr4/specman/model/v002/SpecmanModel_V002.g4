@@ -77,7 +77,7 @@ outro
     ;
 
 mainSequence
-    : 'sequence' 'main' '{' step+ catchBlock* '}'
+    : 'mainSequence' '{' step+ catchBlock* '}'
     ;
 
 // --- Steps ---
@@ -96,13 +96,14 @@ step
     | subsequenceStep
     ;
 
+// change=(type, changeset) is an optional inline parameter for ChangeInfoModel_V002.
 simpleStep
-    : 'simple' '(' stepNum ',' stepId ',' editContainerHead ')' changeAnno? (';' | '{' editContainerTail '}')
+    : 'simple' '(' stepNum ',' stepId ',' editContainerHead (',' changeParam)? ')' (';' | '{' editContainerTail '}')
     ;
 
 // UI convention: break text is single-line, but the model allows extra areas.
 breakStep
-    : 'break' '(' stepNum ',' stepId ',' editContainerHead ')' changeAnno? (';' | '{' editContainerTail '}')
+    : 'break' '(' stepNum ',' stepId ',' editContainerHead (',' changeParam)? ')' (';' | '{' editContainerTail '}')
     ;
 
 // barWidth preserves the user-set width of the loop bar in pixels.
@@ -132,12 +133,9 @@ caseStep
       '{' editContainerTail defaultBranch caseBranch caseBranch+ '}'
     ;
 
+// flat=true preserves the flat-numbering flag as an inline parameter, consistent with other optionals.
 subsequenceStep
-    : 'subsequence' '(' stepNum ',' stepId ',' editContainerHead ')' flatFlag? '{' editContainerTail step+ catchBlock* '}'
-    ;
-
-flatFlag
-    : ',' 'flat' '=' 'true'
+    : 'subsequence' '(' stepNum ',' stepId ',' editContainerHead (',' 'flat' '=' 'true')? ')' '{' editContainerTail step+ catchBlock* '}'
     ;
 
 // Branch headings are EditorContentModel_V002 — full EditContainer pattern.
@@ -196,8 +194,7 @@ listBlock
 // List item content is EditorContentModel_V002 — EditContainer pattern applies.
 // Nested lists are not supported by Specman, so listBlock is excluded from the tail.
 listItem
-    : 'item' '(' editContainerHead ')' changeAnno?
-    | 'item' '(' editContainerHead ')' changeAnno? '{' listItemTail '}'
+    : 'item' '(' editContainerHead (',' changeParam)? ')' ('{' listItemTail '}')?
     ;
 
 // Restricted tail for list items: no nested listBlock per Specman constraint.
@@ -256,10 +253,11 @@ markupType
     | 'ChangedSteplink'
     ;
 
-// --- ChangeInfoModel_V002 on steps and areas ---
+// --- ChangeInfoModel_V002 as inline parameter ---
 
-changeAnno
-    : '[' 'change' '=' changeType ',' 'changeset' '=' ID ']'
+// change=(type, changeset) — inline, consistent with other optional parameters.
+changeParam
+    : 'change' '=' '(' changeType ',' ID ')'
     ;
 
 changeType
@@ -296,6 +294,55 @@ STEP_NUM    : [0-9]+ [a-z]? ('.' [0-9]+ [a-z]?)* ;
 
 // Percentage value, e.g. 100%, 39.07%
 PERCENT     : [0-9]+ ('.' [0-9]+)? '%' ;
+
+// Keywords — named so that SpecmanKeywords can reference them via the lexer VOCABULARY.
+// Must be defined before ID so they take precedence over the general identifier rule.
+KW_SIMPLE          : 'simple' ;
+KW_BREAK           : 'break' ;
+KW_WHILE           : 'while' ;
+KW_DO_WHILE        : 'doWhile' ;
+KW_IF_ELSE         : 'ifElse' ;
+KW_IF              : 'if' ;
+KW_CASE            : 'case' ;
+KW_SUBSEQUENCE     : 'subsequence' ;
+KW_MAIN_SEQUENCE   : 'mainSequence' ;
+KW_INTRO           : 'intro' ;
+KW_OUTRO           : 'outro' ;
+KW_SETTINGS        : 'settings' ;
+KW_IF_BRANCH       : 'if_branch' ;
+KW_ELSE_BRANCH     : 'else_branch' ;
+KW_DEFAULT_BRANCH  : 'default_branch' ;
+KW_CASE_BRANCH     : 'case_branch' ;
+KW_CATCH           : 'catch' ;
+KW_CO_CATCH        : 'coCatch' ;
+KW_LIST            : 'list' ;
+KW_ITEM            : 'item' ;
+KW_TABLE           : 'table' ;
+KW_ROW             : 'row' ;
+KW_CELL            : 'cell' ;
+KW_IMAGE           : 'image' ;
+KW_TEXT            : 'text' ;
+KW_ORDERED         : 'ordered' ;
+KW_FLAT            : 'flat' ;
+KW_COLS            : 'cols' ;
+KW_WIDTH           : 'width' ;
+KW_ZOOM            : 'zoom' ;
+KW_BAR_WIDTH       : 'barWidth' ;
+KW_IF_RATIO        : 'ifRatio' ;
+KW_EMPTY_WIDTH     : 'emptyWidth' ;
+KW_PLAIN           : 'plain' ;
+KW_MARKUPS         : 'markups' ;
+KW_SCALE           : 'scale' ;
+KW_TYPE            : 'type' ;
+KW_CHANGE          : 'change' ;
+KW_CHANGE_MODE     : 'changeModeEnabled' ;
+KW_CHANGESET_NAME  : 'changeSetName' ;
+KW_PDF_OPTIONS     : 'pdfOptions' ;
+KW_FILENAME        : 'filename' ;
+KW_MODEL_FILENAME  : 'modelFilename' ;
+KW_PAGE_SIZE       : 'pageSize' ;
+KW_PORTRAIT        : 'portrait' ;
+KW_PAGING          : 'paging' ;
 
 // Identifiers: changeset names (yellow, blue), image types (png)
 ID          : [a-zA-Z][a-zA-Z0-9_-]* ;

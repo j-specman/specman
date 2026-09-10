@@ -303,7 +303,7 @@ public class ModelParser_V002 {
             ctx.stepNum().getText(),
             buildStepContent(ctx.editContainerHead(), ctx.editContainerTail()),
             -1,
-            buildChangeInfo(ctx.changeAnno()),
+            buildChangeInfo(ctx.changeParam()),
             null,
             RoundedBorderDecorationStyle.None);
     }
@@ -318,7 +318,7 @@ public class ModelParser_V002 {
             stepNum,
             buildStepContent(ctx.editContainerHead(), ctx.editContainerTail()),
             -1,
-            buildChangeInfo(ctx.changeAnno()),
+            buildChangeInfo(ctx.changeParam()),
             null,
             RoundedBorderDecorationStyle.None);
     }
@@ -435,7 +435,7 @@ public class ModelParser_V002 {
     }
 
     private SubsequenceStepModel_V002 buildSubsequenceStep(SpecmanModel_V002Parser.SubsequenceStepContext ctx) {
-        boolean flat = ctx.flatFlag() != null;
+        boolean flat = ctx.KW_FLAT() != null;
         return new SubsequenceStepModel_V002(
             ctx.stepId().getText(),
             ctx.stepNum().getText(),
@@ -492,7 +492,7 @@ public class ModelParser_V002 {
                         itemContent.areas.add(buildImage(ib));
                     }
                 }
-                result.add(new ListItemEditAreaModel_V002(itemContent, ordered, buildChangeInfo(item.changeAnno())));
+                result.add(new ListItemEditAreaModel_V002(itemContent, ordered, buildChangeInfo(item.changeParam())));
             }
         } else if (ctx.textArea() != null) {
             result.add(buildText(ctx.textArea().htmlContent()));
@@ -583,7 +583,7 @@ public class ModelParser_V002 {
     // ChangeInfo
     // -----------------------------------------------------------------------
 
-    private ChangeInfo buildChangeInfo(SpecmanModel_V002Parser.ChangeAnnoContext ctx) {
+    private ChangeInfo buildChangeInfo(SpecmanModel_V002Parser.ChangeParamContext ctx) {
         if (ctx == null) {
             return ChangeInfo.untracked();
         }

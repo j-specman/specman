@@ -15,11 +15,14 @@ import specman.model.v002.io.SteplinkUpdate;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import specman.ops.LoadDiagrammSpecmanOp;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static specman.ops.LoadDiagrammSpecmanOp.isTextFormat;
 
 /**
  * Headless sanitizer for model files written by AI agents.
@@ -97,10 +100,6 @@ public class SpecmanCLI {
         System.out.println("  " + entry.getKey() + ": " + String.join(", ", entry.getValue()));
       }
     }
-  }
-
-  private static boolean isTextFormat(byte[] data) {
-    return data.length >= 2 && data[0] == '/' && data[1] == '/';
   }
 
   private static SanitizeResult sanitize(File file) throws Exception {
