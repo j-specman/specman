@@ -37,6 +37,8 @@ import specman.model.v002.TextEditAreaModel_V002;
 import specman.model.v002.WhileStepModel_V002;
 import specman.view.RoundedBorderDecorationStyle;
 
+import static specman.model.v002.io.ModelKeyword_V002.*;
+
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -115,15 +117,15 @@ public class ModelParser_V002 {
         }
         for (SpecmanModel_V002Parser.SettingEntryContext entry : ctx.settingEntry()) {
             String keyword = entry.start.getText();
-            if ("width".equals(keyword)) {
+            if (WIDTH.toString().equals(keyword)) {
                 s.width = Integer.parseInt(entry.STEP_NUM().getText());
-            } else if ("zoom".equals(keyword)) {
+            } else if (ZOOM.toString().equals(keyword)) {
                 s.zoomFactor = Integer.parseInt(entry.STEP_NUM().getText());
-            } else if ("changeModeEnabled".equals(keyword)) {
+            } else if (CHANGE_MODE.toString().equals(keyword)) {
                 s.changeModeEnabled = Boolean.parseBoolean(entry.boolVal().getText());
-            } else if ("changeSetName".equals(keyword)) {
+            } else if (CHANGESET_NAME.toString().equals(keyword)) {
                 s.changeSetName = entry.ID().getText();
-            } else if ("pdfOptions".equals(keyword)) {
+            } else if (PDF_OPTIONS.toString().equals(keyword)) {
                 s.pdfOptions = buildPdfOptions(entry.pdfOptionEntry());
             }
         }
@@ -138,15 +140,15 @@ public class ModelParser_V002 {
         boolean paging = false;
         for (SpecmanModel_V002Parser.PdfOptionEntryContext entry : entries) {
             String keyword = entry.start.getText();
-            if ("filename".equals(keyword)) {
+            if (FILENAME.toString().equals(keyword)) {
                 filename = stripBackticks(entry.BACKTICK_STRING().getText());
-            } else if ("modelFilename".equals(keyword)) {
+            } else if (MODEL_FILENAME.toString().equals(keyword)) {
                 modelFilename = stripBackticks(entry.BACKTICK_STRING().getText());
-            } else if ("pageSize".equals(keyword)) {
+            } else if (PAGE_SIZE.toString().equals(keyword)) {
                 pageSize = entry.ID().getText();
-            } else if ("portrait".equals(keyword)) {
+            } else if (PORTRAIT.toString().equals(keyword)) {
                 portrait = Boolean.parseBoolean(entry.boolVal().getText());
-            } else if ("paging".equals(keyword)) {
+            } else if (PAGING.toString().equals(keyword)) {
                 paging = Boolean.parseBoolean(entry.boolVal().getText());
             }
         }
@@ -364,7 +366,8 @@ public class ModelParser_V002 {
             elseCtx.editContainerHead(), elseCtx.editContainerTail(), elseCtx.step(), elseCtx.catchBlock());
         org.antlr.v4.runtime.tree.TerminalNode percentNode = ctx.PERCENT();
         float ifWidthRatio = percentNode == null ? 0.5f
-            : Float.parseFloat(percentNode.getText().replace("%", "")) / 100.0f;        return new IfElseStepModel_V002(
+            : Float.parseFloat(percentNode.getText().replace("%", "")) / 100.0f;
+        return new IfElseStepModel_V002(
             ctx.stepId().getText(),
             ctx.stepNum().getText(),
             buildStepContent(ctx.editContainerHead(), ctx.editContainerTail()),
