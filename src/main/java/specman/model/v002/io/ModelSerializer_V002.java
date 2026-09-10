@@ -99,24 +99,24 @@ public class ModelSerializer_V002 {
     private void appendSettings(DiagramModel_V002 model) {
         sb.append("\n");
         blockOpen(SETTINGS);
-        sb.append(indent()).append(WIDTH).append(": ").append(model.width).append("\n");
-        sb.append(indent()).append(ZOOM).append(": ").append(model.zoomFactor).append("\n");
-        sb.append(indent()).append(CHANGE_MODE).append(": ").append(model.changeModeEnabled).append("\n");
-        sb.append(indent()).append(CHANGESET_NAME).append(": ").append(model.changeSetName != null ? model.changeSetName : "yellow").append("\n");
+        sb.append(indent()).append(WIDTH).append("=").append(model.width).append("\n");
+        sb.append(indent()).append(ZOOM).append("=").append(model.zoomFactor).append("\n");
+        sb.append(indent()).append(CHANGE_MODE).append("=").append(model.changeModeEnabled).append("\n");
+        sb.append(indent()).append(CHANGESET_NAME).append("=").append(model.changeSetName != null ? model.changeSetName : "yellow").append("\n");
         if (model.pdfExportOptions != null) {
             PdfExportOptionsModel_V002 pdf = model.pdfExportOptions;
             blockOpen(PDF_OPTIONS);
             if (pdf.filename != null) {
-                sb.append(indent()).append(FILENAME).append(": `").append(pdf.filename).append("`\n");
+                sb.append(indent()).append(FILENAME).append("=`").append(pdf.filename).append("`\n");
             }
             if (pdf.modelFilename != null) {
-                sb.append(indent()).append(MODEL_FILENAME).append(": `").append(pdf.modelFilename).append("`\n");
+                sb.append(indent()).append(MODEL_FILENAME).append("=`").append(pdf.modelFilename).append("`\n");
             }
             if (pdf.pageSize != null) {
-                sb.append(indent()).append(PAGE_SIZE).append(": ").append(pdf.pageSize).append("\n");
+                sb.append(indent()).append(PAGE_SIZE).append("=").append(pdf.pageSize).append("\n");
             }
-            sb.append(indent()).append(PORTRAIT).append(": ").append(pdf.portrait).append("\n");
-            sb.append(indent()).append(PAGING).append(": ").append(pdf.paging).append("\n");
+            sb.append(indent()).append(PORTRAIT).append("=").append(pdf.portrait).append("\n");
+            sb.append(indent()).append(PAGING).append("=").append(pdf.paging).append("\n");
             blockClose();
         }
         blockClose();

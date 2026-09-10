@@ -6,10 +6,10 @@
 // AI AGENTS: image(...) { [base64:...] } blocks — ignore them.
 
 settings {
-    width: 700
-    zoom: 100
-    changeModeEnabled: true
-    changeSetName: yellow
+    width=700
+    zoom=100
+    changeModeEnabled=true
+    changeSetName=yellow
 }
 
 intro(`<h1>
@@ -27,25 +27,25 @@ This section is the intro of a usecase.`) {
 }
 
 mainSequence {
-    simple(1, 31e3c84e, `Simple step. Every step has an ID which is automatically modified when the 
+    simple(1, 0075cec3, `Simple step. Every step has an ID which is automatically modified when the 
     step changes its position within the step sequence. The IDs always make up 
     a gapless number sequence. Specman immediately renumbers steps when they 
     are moved or steps are inserted before.`, plain=`Simple step. Every step has an ID which is automatically modified when the step changes its position within the step sequence. The IDs always make up a gapless number sequence. Specman immediately renumbers steps when they are moved or steps are inserted before.`);
-    while(2, 039c6074, `While loop`, plain=`While loop`, barWidth=18) {
-        simple(2.1, 6f4eb647, `Steps being run with every repetition of the loop.`, plain=`Steps being run with every repetition of the loop.`);
+    while(2, c951046f, `While loop`, plain=`While loop`, barWidth=18) {
+        simple(2.1, 1eb0e6d3, `Steps being run with every repetition of the loop.`, plain=`Steps being run with every repetition of the loop.`);
     }
-    doWhile(3, 6b5fd471, `While while loop. There is no sementical difference to the while loop. Its 
+    doWhile(3, c0a5d3c7, `While while loop. There is no sementical difference to the while loop. Its 
     more a matter of preference, if things become clearer by the extra bottom 
     bar.`, plain=`While while loop. There is no sementical difference to the while loop. Its more a matter of preference, if things become clearer by the extra bottom bar.`, barWidth=18) {
-        simple(3.1, 7b5e69c5, `Steps being run with every repetition of the loop.`, plain=`Steps being run with every repetition of the loop.`);
+        simple(3.1, 1b505354, `Steps being run with every repetition of the loop.`, plain=`Steps being run with every repetition of the loop.`);
     }
-    simple(4, 767e04c7, `As step refering to another step by its number 1. The reference number is 
+    simple(4, 4148014c, `As step refering to another step by its number 1. The reference number is 
     automatically updated, when the refered step changes its number.`, plain=`As step refering to another step by its number 1. The reference number is automatically updated, when the refered step changes its number.`, markups=[(47,47,Steplink)]);
-    simple(5, bde85952, `A step being added in the yellow change set. Step reference to step 2.`, plain=`A step being added in the yellow change set. Step reference to step 2.`, markups=[(0,67,Changed,yellow)(68,68,ChangedSteplink,yellow)(69,69,Changed,yellow)], change=(added, yellow));
-    simple(6, 44464489, `A step with text being added and <strike>text being deleted </strike>in 
+    simple(5, 77db5cc1, `A step being added in the yellow change set. Step reference to step 2.`, plain=`A step being added in the yellow change set. Step reference to step 2.`, markups=[(0,67,Changed,yellow)(68,68,ChangedSteplink,yellow)(69,69,Changed,yellow)], change=(added, yellow));
+    simple(6, 0509631e, `A step with text being added and <strike>text being deleted </strike>in 
     the yellow change set.`, plain=`A step with text being added and text being deleted in the yellow change set.`, markups=[(12,32,Changed,yellow)(33,51,Changed,yellow)(52,75,Changed,yellow)]);
-    simple(7, f14d531f, `This step has been removed in the blue changeset`, plain=`This step has been removed in the blue changeset`, change=(removed, blue));
-    simple(8, eac06339, `<div>
+    simple(7, ef2dc26e, `This step has been removed in the blue changeset`, plain=`This step has been removed in the blue changeset`, change=(removed, blue));
+    simple(8, 3774fe29, `<div>
       Available change sets are:
     </div>`, plain=`Available change sets are:`) {
         list(ordered=false) {
@@ -55,52 +55,52 @@ mainSequence {
             item(`orange`, plain=`orange`, markups=[(0,5,Changed,orange)], change=(added, yellow))
             item(`pink`, plain=`pink`, markups=[(0,3,Changed,pink)], change=(added, yellow))
         }
-        text(`Trailing text from yellow change set.`, plain=`Trailing text from yellow change set.`, markups=[(0,36,Changed,yellow)])
+        text(`Trailing text from yellow change set`, plain=`Trailing text from yellow change set`, markups=[(0,35,Changed,yellow)])
     }
-    break(9, 4739563c, `<b>Exception 1 - should have single line text</b>`, plain=`Exception 1 - should have single line text`);
-    ifElse(10, b32a2882, `<div align="center">
+    break(9, e3547212, `<b>Exception 1 - should have single line text</b>`, plain=`Exception 1 - should have single line text`);
+    ifElse(10, 8a6eb15a, `<div align="center">
       If-Else-Step. The field in here contains the condition to check for. 
       Might by expressed as a question.
     </div>`, plain=`If-Else-Step. The field in here contains the condition to check for. Might by expressed as a question.`, ifRatio=50.00%) {
         if_branch(`Heading of the Yes-Sequence, of the question can be answered by &quot;yes&quot; or 
     &quot;no&quot;. However, it is recommended not to work with Yes-No-Questions.`, plain=`Heading of the Yes-Sequence, of the question can be answered by "yes" or "no". However, it is recommended not to work with Yes-No-Questions.`) {
-            simple(10.1, 1ee0b542, `Steps being run in the Yes-Case`, plain=`Steps being run in the Yes-Case`);
+            simple(10.1, b4da1e51, `Steps being run in the Yes-Case`, plain=`Steps being run in the Yes-Case`);
         }
         else_branch(`<div align="right">
       Heading of the No-Sequence
     </div>`, plain=`Heading of the No-Sequence`) {
-            simple(11.1, b06a4890, `Steps to be run in the No-Case`, plain=`Steps to be run in the No-Case`);
+            simple(11.1, dc2da4b5, `Steps to be run in the No-Case`, plain=`Steps to be run in the No-Case`);
         }
     }
-    break(12, e54b2c0f, `<b>Exception 2</b>`, plain=`Exception 2`);
-    if(13, f7f9a0d5, `<div align="center">
+    break(12, 6eed7dbc, `<b>Exception 2</b>`, plain=`Exception 2`);
+    if(13, 9786d65d, `<div align="center">
       If-Step as a special form of an If-Else-Step which simply has no 
       No-Sequence
     </div>`, plain=`If-Step as a special form of an If-Else-Step which simply has no No-Sequence`, emptyWidth=20) {
         if_branch(`<div align="right">
       Heading of the Yes-Sequence
     </div>`, plain=`Heading of the Yes-Sequence`) {
-            simple(13.1, b1235b4c, `Steps being run in the Yes-Case`, plain=`Steps being run in the Yes-Case`);
+            simple(13.1, 48c71f93, `Steps being run in the Yes-Case`, plain=`Steps being run in the Yes-Case`);
         }
     }
-    break(14, 4ad9d074, `<b>Exception 3</b>`, plain=`Exception 3`);
-    case(15, be603ae6, `Switch-Case-Step. At least the Else-Sequence and two other cases are 
+    break(14, 5f004642, `<b>Exception 3</b>`, plain=`Exception 3`);
+    case(15, 731e8176, `Switch-Case-Step. At least the Else-Sequence and two other cases are 
     mandatory. Otherwise use If-Else or If.`, plain=`Switch-Case-Step. At least the Else-Sequence and two other cases are mandatory. Otherwise use If-Else or If.`, cols=[33.09%, 33.24%, 33.09%]) {
         default_branch(`Heading of the Else-Sequence`, plain=`Heading of the Else-Sequence`) {
-            simple(15.1, 824fa79c, `Steps being run in the Else-Case`, plain=`Steps being run in the Else-Case`);
+            simple(15.1, a3fc57d4, `Steps being run in the Else-Case`, plain=`Steps being run in the Else-Case`);
         }
         case_branch(`Heading if the Case 1 sequence`, plain=`Heading if the Case 1 sequence`) {
-            simple(16.1, ea3da272, `Steps being run in case 1`, plain=`Steps being run in case 1`);
+            simple(16.1, bef9dbbe, `Steps being run in case 1`, plain=`Steps being run in case 1`);
         }
         case_branch(`Heading if the Case 2 sequence`, plain=`Heading if the Case 2 sequence`) {
-            simple(17.1, fc00d8be, `Steps being run in case 2`, plain=`Steps being run in case 2`);
+            simple(17.1, 332a2e2b, `Steps being run in case 2`, plain=`Steps being run in case 2`);
         }
     }
-    subsequence(18, edb38bc4, `<b>Subsequence</b>`, plain=`Subsequence`) {
-        simple(18.1, 31b6f80c, `Steps being run in this subsequence`, plain=`Steps being run in this subsequence`);
+    subsequence(18, 7b800c5d, `<b>Subsequence</b>`, plain=`Subsequence`) {
+        simple(18.1, f9b2810e, `Steps being run in this subsequence`, plain=`Steps being run in this subsequence`);
     }
-    break(19, 6f1b8a0c, `<b>Exception 4 - no catch - this is allowed</b>`, plain=`Exception 4 - no catch - this is allowed`);
-    simple(20, be28a180, `<div>
+    break(19, 12590cab, `<b>Exception 4 - no catch - this is allowed</b>`, plain=`Exception 4 - no catch - this is allowed`);
+    simple(20, 59fab8aa, `<div>
       This step illustrates complex formatting. In general, text size and 
       weight is expressed by HTML formatting like
     </div>
@@ -138,7 +138,7 @@ Lists are not expressed by HTML but by appropriate edit areas like that for unor
         }
         text(`Lists cannot be nested`, plain=`Lists cannot be nested`)
     }
-    simple(21, f4a74510, `<div>
+    simple(21, 426f105b, `<div>
       As for list items, also tables are not expressed by HTML but by special 
       edit areas like this. However, the first edit area in every edit 
       container must be a text edit area, even if it is empty!
@@ -148,7 +148,7 @@ Lists are not expressed by HTML but by appropriate edit areas like that for unor
             row { cell(`You might place nested tables or list items in the cells of a table`, plain=`You might place nested tables or list items in the cells of a table`) | cell(`Zelle 2.1`, plain=`Zelle 2.1`) | cell(`Zelle 3.1`, plain=`Zelle 3.1`) }
         }
     }
-    simple(22, 11bee232, `<div>
+    simple(22, 1894f4f7, `<div>
       Supported headings
     </div>
     <h1>
@@ -175,7 +175,7 @@ Heading 3
 Heading 4
 Heading 5
 Heading 6`);
-    simple(23, 699f5f20, `<div>
+    simple(23, 6765c96f, `<div>
       Supported font sizes
     </div>
     <div>
@@ -206,7 +206,7 @@ middle (default)
 big
 x-big
 xx-big`);
-    simple(24, c8aa3099, `<div>
+    simple(24, 97bfe462, `<div>
       Supported fonts are
     </div>
     <div>
@@ -221,7 +221,7 @@ xx-big`);
 Sitka - Serif (default font)
 Roboto - Sans Serif
 Courier - Monospace`);
-    simple(25, 07a119b5, `<div>
+    simple(25, 13613fa7, `<div>
       Text might have a pre-formatted text section. Only preformatted text 
       keeps all its whitespaces while multiple whitespaces in other text 
       sections are eliminated when saving. Pre-formatted text is always 
@@ -231,15 +231,15 @@ Courier - Monospace`);
 This   text     is   pre  -  formatted `);
     catch(9, `<b>Exception 1 - should have single line text</b>`, plain=`Exception 1 - should have single line text`) {
         coCatch(14, `<b>Exception 3</b>`, plain=`Exception 3`);
-        simple(9.1, 66e15dd5, `Sequence for handling the exception in case it occured in break step 9 The 
+        simple(9.1, c82db4ff, `Sequence for handling the exception in case it occured in break step 9 The 
     catch step has the same number as the break step. Catch sequences may 
     occur at the end of the sequence where the break step is in or at the end 
     of any sequence on a higher level.`, plain=`Sequence for handling the exception in case it occured in break step 9 The catch step has the same number as the break step. Catch sequences may occur at the end of the sequence where the break step is in or at the end of any sequence on a higher level.`, markups=[(69,69,Steplink)]);
-        simple(9.2, 3c256dcf, `Exception 3 shares the same exception handling with Exception 1, so it was 
+        simple(9.2, 6a42346b, `Exception 3 shares the same exception handling with Exception 1, so it was 
     added as a &quot;Co-Catch&quot; in the same handling sequence.`, plain=`Exception 3 shares the same exception handling with Exception 1, so it was added as a "Co-Catch" in the same handling sequence.`);
     }
     catch(12, `<b>Exception 2</b>`, plain=`Exception 2`) {
-        simple(12.1, 58ddbf79, `Sequence for handling the second exception`, plain=`Sequence for handling the second exception`);
+        simple(12.1, e55d0883, `Sequence for handling the second exception`, plain=`Sequence for handling the second exception`);
     }
 }
 

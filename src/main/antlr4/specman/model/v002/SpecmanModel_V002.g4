@@ -52,19 +52,19 @@ settings
     ;
 
 settingEntry
-    : 'width'             ':' STEP_NUM
-    | 'zoom'              ':' STEP_NUM
-    | 'changeModeEnabled' ':' boolVal
-    | 'changeSetName'     ':' ID
+    : 'width'             '=' STEP_NUM
+    | 'zoom'              '=' STEP_NUM
+    | 'changeModeEnabled' '=' boolVal
+    | 'changeSetName'     '=' ID
     | 'pdfOptions'        '{' pdfOptionEntry* '}'
     ;
 
 pdfOptionEntry
-    : 'filename'      ':' BACKTICK_STRING
-    | 'modelFilename' ':' BACKTICK_STRING
-    | 'pageSize'      ':' ID
-    | 'portrait'      ':' boolVal
-    | 'paging'        ':' boolVal
+    : 'filename'      '=' BACKTICK_STRING
+    | 'modelFilename' '=' BACKTICK_STRING
+    | 'pageSize'      '=' ID
+    | 'portrait'      '=' boolVal
+    | 'paging'        '=' boolVal
     ;
 
 // Intro and outro are EditorContentModel_V002 — full EditContainer pattern.
