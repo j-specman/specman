@@ -22,6 +22,7 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
 
   public void speichern(boolean dateiauswahlErzwingen) {
     try (ScrollPause sp = pauseScrolling()) {
+      File previousFile = getDiagrammDatei();
       if (getDiagrammDatei() == null || dateiauswahlErzwingen) {
         File verzeichnis = (getDiagrammDatei() != null) ? getDiagrammDatei().getParentFile() : null;
         JFileChooser fileChooser = new JFileChooser(verzeichnis);
@@ -46,6 +47,9 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
       }
       saveToFile(getDiagrammDatei());
       long wcTimestamp = AutoSaveOp.createWorkingCopyFor(getDiagrammDatei());
+      if (!getDiagrammDatei().equals(previousFile)) {
+        AutoSaveOp.deleteWorkingCopyFor(previousFile);
+      }
       context().notifyWorkingCopyInitialized(wcTimestamp);
       addRecentFile(getDiagrammDatei());
       discardAllUndoEdits();
