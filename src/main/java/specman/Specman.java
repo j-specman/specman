@@ -285,6 +285,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, text));
 	}
 
+	@Override
+	public void showToast(String briefMessage, String detailMessage) {
+		SwingUtilities.invokeLater(() -> ToastNotification.show(this, briefMessage, detailMessage));
+	}
+
   @Override
 	public void resyncStepnumberStyleADBL() {
     hauptSequenz.resyncStepnumberStyleADBL();

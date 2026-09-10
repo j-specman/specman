@@ -21,6 +21,7 @@ public interface SpecmanOpContextMixin {
   default void notifyWorkingCopyInitialized(long timestamp) { context().notifyWorkingCopyInitialized(timestamp); }
   default void zusammenklappenFuerReview() { context().zusammenklappenFuerReview(); }
   default void showMessage(String text) { context().showMessage(text); }
+  default void showToast(String briefMessage, String detailMessage) { context().showToast(briefMessage, detailMessage); }
   default EditContainer getIntro() { return context().getIntro(); }
   default EditContainer getOutro() { return context().getOutro(); }
   default SchrittSequenzView getHauptSequenz() { return context().getHauptSequenz(); }
