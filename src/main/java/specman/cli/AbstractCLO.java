@@ -2,12 +2,10 @@ package specman.cli;
 
 abstract class AbstractCLO {
 
-  abstract void run();
+  abstract void run() throws CLIException;
 
-  protected static void error(String message) {
-    System.err.println("ERROR");
-    System.err.println(message);
-    System.exit(1);
+  protected static CLIException error(String message) throws CLIException {
+    throw new CLIException(message);
   }
 
 }

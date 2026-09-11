@@ -41,9 +41,9 @@ public class SanitizeCLO extends AbstractCLO {
 
   private final String filename;
 
-  SanitizeCLO(String[] args) {
+  SanitizeCLO(String[] args) throws CLIException {
     if (args.length < 2) {
-      error("Usage: specman " + CLIOperation.SANITIZE + " <file>");
+      throw error("Usage: specman " + CLIOperation.SANITIZE + " <file>");
     }
     this.filename = args[1];
   }
@@ -51,12 +51,12 @@ public class SanitizeCLO extends AbstractCLO {
   void run() {
     File file = new File(filename);
     if (!file.exists()) {
-      error("File not found: " + file.getAbsolutePath());
+      throw error("File not found: " + file.getAbsolutePath());
     }
     try {
       SanitizeResult result = sanitize(file);
       if (!result.brokenRefs.isEmpty()) {
-        error("Unresolvable steplink references: " + result.brokenRefs);
+        throw error("Unresolvable steplink references: " + result.brokenRefs);
       }
       if (result.hasChanges()) {
         System.out.println("SANITIZED");
@@ -65,10 +65,9 @@ public class SanitizeCLO extends AbstractCLO {
       else {
         System.out.println("OK");
       }
-      System.exit(0);
     }
     catch (Exception e) {
-      error(e.getMessage());
+      throw error(e.getMessage());
     }
   }
 
