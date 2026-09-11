@@ -18,7 +18,6 @@ import specman.model.v002.TextEditAreaModel_V002;
 
 import javax.swing.*;
 import javax.swing.text.StyledDocument;
-import javax.swing.text.html.HTMLEditorKit;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -34,8 +33,6 @@ import java.util.Map;
  * Must be called with java.awt.headless=true already set before any AWT class is loaded.
  */
 public class ModelStepnumberRewriter_V002 {
-
-  private static final HTMLEditorKit HTML_EDITOR_KIT = new HTMLEditorKit();
 
   /** Rewrites all stale steplink texts in the model.
    * @param numberMapping maps each step's saved number to its newly computed number
@@ -144,7 +141,7 @@ public class ModelStepnumberRewriter_V002 {
     }
 
     JEditorPane ed = new JEditorPane();
-    ed.setEditorKit(HTML_EDITOR_KIT);
+    ed.setEditorKit(HtmlToPlainText.HTML_EDITOR_KIT);
     ed.setText(model.text);
     SwingUtilities.invokeAndWait(() -> {});
 
@@ -156,7 +153,7 @@ public class ModelStepnumberRewriter_V002 {
     }
 
     StringWriter sw = new StringWriter();
-    HTML_EDITOR_KIT.write(sw, ed.getDocument(), 0, ed.getDocument().getLength());
+    HtmlToPlainText.HTML_EDITOR_KIT.write(sw, ed.getDocument(), 0, ed.getDocument().getLength());
     String newText = sw.toString();
     String newPlainText = ed.getDocument().getText(0, ed.getDocument().getLength());
 

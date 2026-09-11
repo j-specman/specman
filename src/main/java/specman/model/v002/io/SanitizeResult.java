@@ -7,6 +7,7 @@ public class SanitizeResult {
     public List<StepNumberChange> stepNumberChanges = new ArrayList<>();
     public final List<SteplinkUpdate> steplinkUpdates;
     public final List<String> brokenRefs;
+    public int plainTextUpdates = 0;
 
     public SanitizeResult(List<SteplinkUpdate> steplinkUpdates, List<String> brokenRefs) {
         this.steplinkUpdates = steplinkUpdates;
@@ -14,6 +15,6 @@ public class SanitizeResult {
     }
 
     public boolean hasChanges() {
-        return !stepNumberChanges.isEmpty() || !steplinkUpdates.isEmpty();
+        return !stepNumberChanges.isEmpty() || !steplinkUpdates.isEmpty() || plainTextUpdates > 0;
     }
 }

@@ -9,6 +9,7 @@ import specman.model.v002.io.ModelParseException;
 import specman.model.v002.io.ModelRenumberer_V002;
 import specman.model.v002.io.ModelSerializer_V002;
 import specman.model.v002.io.ModelStepnumberRewriter_V002;
+import specman.model.v002.io.PlainTextSynchronizer_V002;
 import specman.model.v002.io.SanitizeResult;
 import specman.model.v002.io.StepNumberChange;
 import specman.model.v002.io.SteplinkUpdate;
@@ -100,6 +101,10 @@ public class SpecmanCLI {
         System.out.println("  " + entry.getKey() + ": " + String.join(", ", entry.getValue()));
       }
     }
+    if (result.plainTextUpdates > 0) {
+      System.out.println();
+      System.out.println("Plain text fields refreshed: " + result.plainTextUpdates);
+    }
   }
 
   private static SanitizeResult sanitize(File file) throws Exception {
@@ -136,6 +141,7 @@ public class SpecmanCLI {
 
     result.stepNumberChanges = ModelRenumberer_V002.buildStepNumberChanges(
         model.mainSequence, savedNumbers, computedNumbers);
+    result.plainTextUpdates = PlainTextSynchronizer_V002.updateAllPlainTexts(model);
 
     if (result.hasChanges()) {
       String corrected = new ModelSerializer_V002().serialize(model);
