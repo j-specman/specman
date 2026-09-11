@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import specman.model.ModelEnvelope;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.DiagramModel_V002;
-import specman.model.v002.io.ModelParseException;
 import specman.model.v002.io.ModelParser_V002;
 import specman.model.v002.io.ModelRenumberer_V002;
 import specman.model.v002.io.ModelSerializer_V002;
@@ -38,7 +37,7 @@ import static specman.ops.LoadDiagrammSpecmanOp.isTextFormat;
  * Exit code 0 = OK or SANITIZED.
  * Exit code 1 = ERROR.
  */
-public class SanitizeCLO {
+public class SanitizeCLO extends AbstractCLO {
 
   private final String filename;
 
@@ -166,9 +165,4 @@ public class SanitizeCLO {
     return mapper;
   }
 
-  private static void error(String message) {
-    System.err.println("ERROR");
-    System.err.println(message);
-    System.exit(1);
-  }
 }
