@@ -1,11 +1,12 @@
-package specman;
+package specman.cli;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import specman.model.ModelEnvelope;
-import specman.model.v002.*;
-import specman.model.v002.io.ModelParser_V002;
+import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.io.ModelParseException;
+import specman.model.v002.io.ModelParser_V002;
 import specman.model.v002.io.ModelRenumberer_V002;
 import specman.model.v002.io.ModelSerializer_V002;
 import specman.model.v002.io.ModelStepnumberRewriter_V002;
@@ -16,7 +17,6 @@ import specman.model.v002.io.SteplinkUpdate;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import specman.ops.LoadDiagrammSpecmanOp;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -38,25 +38,26 @@ import static specman.ops.LoadDiagrammSpecmanOp.isTextFormat;
  * Exit code 0 = OK or SANITIZED.
  * Exit code 1 = ERROR.
  */
-public class SpecmanCLI {
+public class SanitizeCLO {
 
-  public static void run(String[] args) {
+  private final String filename;
+
+  SanitizeCLO(String[] args) {
     if (args.length < 2) {
-      System.err.println("Usage: specman --sanitize <file.nsd>");
-      System.exit(1);
+      error("Usage: specman " + CLIOperation.SANITIZE + " <file>");
     }
-    File file = new File(args[1]);
+    this.filename = args[1];
+  }
+
+  void run() {
+    File file = new File(filename);
     if (!file.exists()) {
-      System.err.println("ERROR");
-      System.err.println("File not found: " + file.getAbsolutePath());
-      System.exit(1);
+      error("File not found: " + file.getAbsolutePath());
     }
     try {
       SanitizeResult result = sanitize(file);
       if (!result.brokenRefs.isEmpty()) {
-        System.err.println("ERROR");
-        System.err.println("Unresolvable steplink references: " + result.brokenRefs);
-        System.exit(1);
+        error("Unresolvable steplink references: " + result.brokenRefs);
       }
       if (result.hasChanges()) {
         System.out.println("SANITIZED");
@@ -67,15 +68,8 @@ public class SpecmanCLI {
       }
       System.exit(0);
     }
-    catch (ModelParseException e) {
-      System.err.println("ERROR");
-      System.err.println(e.getMessage());
-      System.exit(1);
-    }
     catch (Exception e) {
-      System.err.println("ERROR");
-      System.err.println(e.getMessage());
-      System.exit(1);
+      error(e.getMessage());
     }
   }
 
@@ -93,7 +87,7 @@ public class SpecmanCLI {
       java.util.LinkedHashMap<String, java.util.List<String>> byLocation = new java.util.LinkedHashMap<>();
       for (SteplinkUpdate u : result.steplinkUpdates) {
         byLocation.computeIfAbsent(u.location, k -> new java.util.ArrayList<>())
-            .add(u.oldNumber + " -> " + u.newNumber);
+          .add(u.oldNumber + " -> " + u.newNumber);
       }
       System.out.println();
       System.out.println("Steplink references updated (" + result.steplinkUpdates.size() + "):");
@@ -128,11 +122,12 @@ public class SpecmanCLI {
       throw new Exception("Duplicate step IDs:\n  " + String.join("\n  ", idErrors));
     }
 
-    Map<String, String> savedNumbers = ModelRenumberer_V002.collectNumbers(model.mainSequence);    ModelRenumberer_V002.renumber(model.mainSequence);
+    Map<String, String> savedNumbers = ModelRenumberer_V002.collectNumbers(model.mainSequence);
+    ModelRenumberer_V002.renumber(model.mainSequence);
     Map<String, String> computedNumbers = ModelRenumberer_V002.collectNumbers(model.mainSequence);
     Map<String, String> numberMapping = ModelRenumberer_V002.buildNumberMapping(
-        savedNumbers.isEmpty() ? computedNumbers : savedNumbers,
-        computedNumbers);
+      savedNumbers.isEmpty() ? computedNumbers : savedNumbers,
+      computedNumbers);
 
     SanitizeResult result = ModelStepnumberRewriter_V002.rewrite(model, numberMapping);
     if (!result.brokenRefs.isEmpty()) {
@@ -140,7 +135,7 @@ public class SpecmanCLI {
     }
 
     result.stepNumberChanges = ModelRenumberer_V002.buildStepNumberChanges(
-        model.mainSequence, savedNumbers, computedNumbers);
+      model.mainSequence, savedNumbers, computedNumbers);
     result.plainTextUpdates = PlainTextSynchronizer_V002.updateAllPlainTexts(model);
 
     if (result.hasChanges()) {
@@ -154,7 +149,7 @@ public class SpecmanCLI {
     Map<String, List<String>> idToStepNumbers = new LinkedHashMap<>();
     for (AbstractStepModel_V002 step : model.queryAllSteps()) {
       idToStepNumbers.computeIfAbsent(step.id, k -> new ArrayList<>())
-          .add(step.stepNumber != null ? step.stepNumber : "?");
+        .add(step.stepNumber != null ? step.stepNumber : "?");
     }
     List<String> errors = new ArrayList<>();
     for (Map.Entry<String, List<String>> entry : idToStepNumbers.entrySet()) {
@@ -169,5 +164,11 @@ public class SpecmanCLI {
     ObjectMapper mapper = new ObjectMapper();
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     return mapper;
+  }
+
+  private static void error(String message) {
+    System.err.println("ERROR");
+    System.err.println(message);
+    System.exit(1);
   }
 }

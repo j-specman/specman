@@ -4,6 +4,8 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
+import specman.cli.CLIOperation;
+import specman.cli.SpecmanCLI;
 import specman.menubar.SpecmanMenuBar;
 import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
@@ -521,11 +523,10 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	 * before the window is fully initialized.
 	 */
 	public static void main(String[] args) throws Exception {
-    if (args.length > 0 && args[0].equals("--sanitize")) {
-      System.setProperty("java.awt.headless", "true");
-      SpecmanCLI.run(args);
-      return;
-    }
+		if (CLIOperation.fromArgs(args) != null) {
+			SpecmanCLI.run(args);
+			return;
+		}
     setLookAndFeel();
 		File initialFileToOpen = readFileFromArgs(args);
 		SwingUtilities.invokeAndWait(() -> {
