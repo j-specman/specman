@@ -1,0 +1,1529 @@
+{
+  "specmanVersion" : "1.2.1",
+  "modelType" : "specman.model.v001.StruktogrammModel_V001",
+  "model" : {
+    "name" : "frame0",
+    "breite" : 700,
+    "zoomFaktor" : 100,
+    "changeModeenabled" : false,
+    "hauptSequenz" : {
+      "id" : {
+        "nummern" : [ "java.util.ArrayList", [ 0 ] ]
+      },
+      "aenderungsart" : "Untracked",
+      "changeInfo" : {
+        "changetype" : "Untracked",
+        "changeset" : null
+      },
+      "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 1 ] ]
+        },
+        "nummer" : "1",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Simple step. Every step has an ID which is automatically modified when the \n    step changes its position within the step sequence. The IDs always make up \n    a gapless number sequence. Specman immediately renumbers steps when they \n    are moved or steps are inserted before.\n  </body>\n</html>\n",
+            "plainText" : "\nSimple step. Every step has an ID which is automatically modified when the step changes its position within the step sequence. The IDs always make up a gapless number sequence. Specman immediately renumbers steps when they are moved or steps are inserted before.",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.WhileSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 2 ] ]
+        },
+        "nummer" : "2",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    While loop\n  </body>\n</html>\n",
+            "plainText" : "\nWhile loop",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None",
+        "zugeklappt" : false,
+        "wiederholSequenz" : {
+          "id" : {
+            "nummern" : [ "java.util.ArrayList", [ 2, 0 ] ]
+          },
+          "aenderungsart" : "Untracked",
+          "changeInfo" : {
+            "changetype" : "Untracked",
+            "changeset" : null
+          },
+          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
+            "id" : {
+              "nummern" : [ "java.util.ArrayList", [ 2, 1 ] ]
+            },
+            "nummer" : "2.1",
+            "inhalt" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Steps being run with every repetition of the loop.\n  </body>\n</html>\n",
+                "plainText" : "\nSteps being run with every repetition of the loop.",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "farbe" : -1,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            },
+            "quellschrittID" : null,
+            "decorationStyle" : "None"
+          } ] ] ],
+          "catchBereich" : {
+            "catchSequences" : [ "java.util.ArrayList", [ ] ],
+            "sequencesWidthPercent" : null,
+            "zugeklappt" : false
+          }
+        },
+        "balkenbreite" : 18
+      } ], [ "specman.model.v001.WhileWhileSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 3 ] ]
+        },
+        "nummer" : "3",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    While while loop. There is no sementical difference to the while loop. Its \n    more a matter of preference, if things become clearer by the extra bottom \n    bar.\n  </body>\n</html>\n",
+            "plainText" : "\nWhile while loop. There is no sementical difference to the while loop. Its more a matter of preference, if things become clearer by the extra bottom bar.",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None",
+        "zugeklappt" : false,
+        "wiederholSequenz" : {
+          "id" : {
+            "nummern" : [ "java.util.ArrayList", [ 3, 0 ] ]
+          },
+          "aenderungsart" : "Untracked",
+          "changeInfo" : {
+            "changetype" : "Untracked",
+            "changeset" : null
+          },
+          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
+            "id" : {
+              "nummern" : [ "java.util.ArrayList", [ 3, 1 ] ]
+            },
+            "nummer" : "3.1",
+            "inhalt" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Steps being run with every repetition of the loop.\n  </body>\n</html>\n",
+                "plainText" : "\nSteps being run with every repetition of the loop.",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "farbe" : -1,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            },
+            "quellschrittID" : null,
+            "decorationStyle" : "None"
+          } ] ] ],
+          "catchBereich" : {
+            "catchSequences" : [ "java.util.ArrayList", [ ] ],
+            "sequencesWidthPercent" : null,
+            "zugeklappt" : false
+          }
+        },
+        "balkenbreite" : 18
+      } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 4 ] ]
+        },
+        "nummer" : "4",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    As step refering to another step by its number 1. The reference number is \n    automatically updated, when the refered step changes its number.\n  </body>\n</html>\n",
+            "plainText" : "\nAs step refering to another step by its number 1. The reference number is automatically updated, when the refered step changes its number.",
+            "markups" : [ "java.util.ArrayList", [ {
+              "from" : 47,
+              "to" : 47,
+              "type" : "Steplink",
+              "changeset" : null
+            } ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 5 ] ]
+        },
+        "nummer" : "5",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    A step being added in the yellow change set. Step reference to step 2.\n  </body>\n</html>\n",
+            "plainText" : "\nA step being added in the yellow change set. Step reference to step 2.",
+            "markups" : [ "java.util.ArrayList", [ {
+              "from" : 0,
+              "to" : 67,
+              "type" : "Changed",
+              "changeset" : "yellow"
+            }, {
+              "from" : 68,
+              "to" : 68,
+              "type" : "ChangedSteplink",
+              "changeset" : "yellow"
+            }, {
+              "from" : 69,
+              "to" : 69,
+              "type" : "Changed",
+              "changeset" : "yellow"
+            } ] ],
+            "aenderungsart" : "Hinzugefuegt",
+            "changeInfo" : {
+              "changetype" : "Hinzugefuegt",
+              "changeset" : "yellow"
+            }
+          } ] ] ]
+        },
+        "farbe" : -52,
+        "aenderungsart" : "Hinzugefuegt",
+        "changeInfo" : {
+          "changetype" : "Hinzugefuegt",
+          "changeset" : "yellow"
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 6 ] ]
+        },
+        "nummer" : "6",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    A step with text being added and <strike>text being deleted </strike>in \n    the yellow change set.\n  </body>\n</html>\n",
+            "plainText" : "\nA step with text being added and text being deleted in the yellow change set.",
+            "markups" : [ "java.util.ArrayList", [ {
+              "from" : 12,
+              "to" : 32,
+              "type" : "Changed",
+              "changeset" : "yellow"
+            }, {
+              "from" : 33,
+              "to" : 51,
+              "type" : "Changed",
+              "changeset" : "yellow"
+            }, {
+              "from" : 52,
+              "to" : 75,
+              "type" : "Changed",
+              "changeset" : "yellow"
+            } ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 7 ] ]
+        },
+        "nummer" : "7",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    This step has been removed in the blue changeset\n  </body>\n</html>\n",
+            "plainText" : "\nThis step has been removed in the blue changeset",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Geloescht",
+            "changeInfo" : {
+              "changetype" : "Geloescht",
+              "changeset" : "blue"
+            }
+          } ] ] ]
+        },
+        "farbe" : -1640705,
+        "aenderungsart" : "Geloescht",
+        "changeInfo" : {
+          "changetype" : "Geloescht",
+          "changeset" : "blue"
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 8 ] ]
+        },
+        "nummer" : "8",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div>\n      Available change sets are:\n    </div>\n  </body>\n</html>\n",
+            "plainText" : "\nAvailable change sets are:",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ], [ "specman.model.v001.ListItemEditAreaModel_V001", {
+            "content" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    yellow\n  </body>\n</html>\n",
+                "plainText" : "\nyellow",
+                "markups" : [ "java.util.ArrayList", [ {
+                  "from" : 0,
+                  "to" : 5,
+                  "type" : "Changed",
+                  "changeset" : "yellow"
+                } ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "ordered" : false,
+            "aenderungsart" : "Hinzugefuegt",
+            "changeInfo" : {
+              "changetype" : "Hinzugefuegt",
+              "changeset" : "yellow"
+            }
+          } ], [ "specman.model.v001.ListItemEditAreaModel_V001", {
+            "content" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    lilac\n  </body>\n</html>\n",
+                "plainText" : "\nlilac",
+                "markups" : [ "java.util.ArrayList", [ {
+                  "from" : 0,
+                  "to" : 4,
+                  "type" : "Changed",
+                  "changeset" : "lilac"
+                } ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "ordered" : false,
+            "aenderungsart" : "Hinzugefuegt",
+            "changeInfo" : {
+              "changetype" : "Hinzugefuegt",
+              "changeset" : "yellow"
+            }
+          } ], [ "specman.model.v001.ListItemEditAreaModel_V001", {
+            "content" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    blue\n  </body>\n</html>\n",
+                "plainText" : "\nblue",
+                "markups" : [ "java.util.ArrayList", [ {
+                  "from" : 0,
+                  "to" : 3,
+                  "type" : "Changed",
+                  "changeset" : "blue"
+                } ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "ordered" : false,
+            "aenderungsart" : "Hinzugefuegt",
+            "changeInfo" : {
+              "changetype" : "Hinzugefuegt",
+              "changeset" : "yellow"
+            }
+          } ], [ "specman.model.v001.ListItemEditAreaModel_V001", {
+            "content" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    orange\n  </body>\n</html>\n",
+                "plainText" : "\norange",
+                "markups" : [ "java.util.ArrayList", [ {
+                  "from" : 0,
+                  "to" : 5,
+                  "type" : "Changed",
+                  "changeset" : "orange"
+                } ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "ordered" : false,
+            "aenderungsart" : "Hinzugefuegt",
+            "changeInfo" : {
+              "changetype" : "Hinzugefuegt",
+              "changeset" : "yellow"
+            }
+          } ], [ "specman.model.v001.ListItemEditAreaModel_V001", {
+            "content" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    pink\n  </body>\n</html>\n",
+                "plainText" : "\npink",
+                "markups" : [ "java.util.ArrayList", [ {
+                  "from" : 0,
+                  "to" : 3,
+                  "type" : "Changed",
+                  "changeset" : "pink"
+                } ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "ordered" : false,
+            "aenderungsart" : "Hinzugefuegt",
+            "changeInfo" : {
+              "changetype" : "Hinzugefuegt",
+              "changeset" : "yellow"
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.BreakSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 9 ] ]
+        },
+        "nummer" : "9",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <b>Exception 1 - should have single line text</b>\n  </body>\n</html>\n",
+            "plainText" : "\nException 1 - should have single line text",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.IfElseSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 10 ] ]
+        },
+        "nummer" : "10",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div align=\"center\">\n      If-Else-Step. The field in here contains the condition to check for. \n      Might by expressed as a question.\n    </div>\n  </body>\n</html>\n",
+            "plainText" : "\nIf-Else-Step. The field in here contains the condition to check for. Might by expressed as a question.",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None",
+        "zugeklappt" : false,
+        "ifSequenz" : {
+          "id" : {
+            "nummern" : [ "java.util.ArrayList", [ 10, 0 ] ]
+          },
+          "aenderungsart" : "Untracked",
+          "changeInfo" : {
+            "changetype" : "Untracked",
+            "changeset" : null
+          },
+          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
+            "id" : {
+              "nummern" : [ "java.util.ArrayList", [ 10, 1 ] ]
+            },
+            "nummer" : "10.1",
+            "inhalt" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Steps being run in the Yes-Case\n  </body>\n</html>\n",
+                "plainText" : "\nSteps being run in the Yes-Case",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "farbe" : -1,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            },
+            "quellschrittID" : null,
+            "decorationStyle" : "None"
+          } ] ] ],
+          "catchBereich" : {
+            "catchSequences" : [ "java.util.ArrayList", [ ] ],
+            "sequencesWidthPercent" : null,
+            "zugeklappt" : false
+          },
+          "ueberschrift" : {
+            "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+              "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Heading of the Yes-Sequence, of the question can be answered by &quot;yes&quot; or \n    &quot;no&quot;. However, it is recommended not to work with Yes-No-Questions.\n  </body>\n</html>\n",
+              "plainText" : "\nHeading of the Yes-Sequence, of the question can be answered by \"yes\" or \"no\". However, it is recommended not to work with Yes-No-Questions.",
+              "markups" : [ "java.util.ArrayList", [ ] ],
+              "aenderungsart" : "Untracked",
+              "changeInfo" : {
+                "changetype" : "Untracked",
+                "changeset" : null
+              }
+            } ] ] ]
+          }
+        },
+        "elseSequenz" : {
+          "id" : {
+            "nummern" : [ "java.util.ArrayList", [ 11, 0 ] ]
+          },
+          "aenderungsart" : "Untracked",
+          "changeInfo" : {
+            "changetype" : "Untracked",
+            "changeset" : null
+          },
+          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
+            "id" : {
+              "nummern" : [ "java.util.ArrayList", [ 11, 1 ] ]
+            },
+            "nummer" : "11.1",
+            "inhalt" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Steps to be run in the No-Case\n  </body>\n</html>\n",
+                "plainText" : "\nSteps to be run in the No-Case",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "farbe" : -1,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            },
+            "quellschrittID" : null,
+            "decorationStyle" : "None"
+          } ] ] ],
+          "catchBereich" : {
+            "catchSequences" : [ "java.util.ArrayList", [ ] ],
+            "sequencesWidthPercent" : null,
+            "zugeklappt" : false
+          },
+          "ueberschrift" : {
+            "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+              "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div align=\"right\">\n      Heading of the No-Sequence\n    </div>\n  </body>\n</html>\n",
+              "plainText" : "\nHeading of the No-Sequence",
+              "markups" : [ "java.util.ArrayList", [ ] ],
+              "aenderungsart" : "Untracked",
+              "changeInfo" : {
+                "changetype" : "Untracked",
+                "changeset" : null
+              }
+            } ] ] ]
+          }
+        },
+        "ifBreitenanteil" : 0.5
+      } ], [ "specman.model.v001.BreakSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 12 ] ]
+        },
+        "nummer" : "12",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <b>Exception 2</b>\n  </body>\n</html>\n",
+            "plainText" : "\nException 2",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.IfSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 13 ] ]
+        },
+        "nummer" : "13",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div align=\"center\">\n      If-Step as a special form of an If-Else-Step which simply has no \n      No-Sequence\n    </div>\n  </body>\n</html>\n",
+            "plainText" : "\nIf-Step as a special form of an If-Else-Step which simply has no No-Sequence",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None",
+        "zugeklappt" : false,
+        "ifSequenz" : {
+          "id" : {
+            "nummern" : [ "java.util.ArrayList", [ 13, 0 ] ]
+          },
+          "aenderungsart" : "Untracked",
+          "changeInfo" : {
+            "changetype" : "Untracked",
+            "changeset" : null
+          },
+          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
+            "id" : {
+              "nummern" : [ "java.util.ArrayList", [ 13, 1 ] ]
+            },
+            "nummer" : "13.1",
+            "inhalt" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Steps being run in the Yes-Case\n  </body>\n</html>\n",
+                "plainText" : "\nSteps being run in the Yes-Case",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "farbe" : -1,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            },
+            "quellschrittID" : null,
+            "decorationStyle" : "None"
+          } ] ] ],
+          "catchBereich" : {
+            "catchSequences" : [ "java.util.ArrayList", [ ] ],
+            "sequencesWidthPercent" : null,
+            "zugeklappt" : false
+          },
+          "ueberschrift" : {
+            "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+              "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div align=\"right\">\n      Heading of the Yes-Sequence\n    </div>\n  </body>\n</html>\n",
+              "plainText" : "\nHeading of the Yes-Sequence",
+              "markups" : [ "java.util.ArrayList", [ ] ],
+              "aenderungsart" : "Untracked",
+              "changeInfo" : {
+                "changetype" : "Untracked",
+                "changeset" : null
+              }
+            } ] ] ]
+          }
+        },
+        "leerBreite" : 20
+      } ], [ "specman.model.v001.BreakSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 14 ] ]
+        },
+        "nummer" : "14",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <b>Exception 3</b>\n  </body>\n</html>\n",
+            "plainText" : "\nException 3",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.CaseSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 15 ] ]
+        },
+        "nummer" : "15",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Switch-Case-Step. At least the Else-Sequence and two other cases are \n    mandatory. Otherwise use If-Else or If.\n  </body>\n</html>\n",
+            "plainText" : "\nSwitch-Case-Step. At least the Else-Sequence and two other cases are mandatory. Otherwise use If-Else or If.",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None",
+        "zugeklappt" : false,
+        "sonstSequenz" : {
+          "id" : {
+            "nummern" : [ "java.util.ArrayList", [ 15, 0 ] ]
+          },
+          "aenderungsart" : "Untracked",
+          "changeInfo" : {
+            "changetype" : "Untracked",
+            "changeset" : null
+          },
+          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
+            "id" : {
+              "nummern" : [ "java.util.ArrayList", [ 15, 1 ] ]
+            },
+            "nummer" : "15.1",
+            "inhalt" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Steps being run in the Else-Case\n  </body>\n</html>\n",
+                "plainText" : "\nSteps being run in the Else-Case",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "farbe" : -1,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            },
+            "quellschrittID" : null,
+            "decorationStyle" : "None"
+          } ] ] ],
+          "catchBereich" : {
+            "catchSequences" : [ "java.util.ArrayList", [ ] ],
+            "sequencesWidthPercent" : null,
+            "zugeklappt" : false
+          },
+          "ueberschrift" : {
+            "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+              "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Heading of the Else-Sequence\n  </body>\n</html>\n",
+              "plainText" : "\nHeading of the Else-Sequence",
+              "markups" : [ "java.util.ArrayList", [ ] ],
+              "aenderungsart" : "Untracked",
+              "changeInfo" : {
+                "changetype" : "Untracked",
+                "changeset" : null
+              }
+            } ] ] ]
+          }
+        },
+        "caseSequenzen" : [ "java.util.ArrayList", [ {
+          "id" : {
+            "nummern" : [ "java.util.ArrayList", [ 16, 0 ] ]
+          },
+          "aenderungsart" : "Untracked",
+          "changeInfo" : {
+            "changetype" : "Untracked",
+            "changeset" : null
+          },
+          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
+            "id" : {
+              "nummern" : [ "java.util.ArrayList", [ 16, 1 ] ]
+            },
+            "nummer" : "16.1",
+            "inhalt" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Steps being run in case 1\n  </body>\n</html>\n",
+                "plainText" : "\nSteps being run in case 1",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "farbe" : -1,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            },
+            "quellschrittID" : null,
+            "decorationStyle" : "None"
+          } ] ] ],
+          "catchBereich" : {
+            "catchSequences" : [ "java.util.ArrayList", [ ] ],
+            "sequencesWidthPercent" : null,
+            "zugeklappt" : false
+          },
+          "ueberschrift" : {
+            "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+              "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Heading if the Case 1 sequence\n  </body>\n</html>\n",
+              "plainText" : "\nHeading if the Case 1 sequence",
+              "markups" : [ "java.util.ArrayList", [ ] ],
+              "aenderungsart" : "Untracked",
+              "changeInfo" : {
+                "changetype" : "Untracked",
+                "changeset" : null
+              }
+            } ] ] ]
+          }
+        }, {
+          "id" : {
+            "nummern" : [ "java.util.ArrayList", [ 17, 0 ] ]
+          },
+          "aenderungsart" : "Untracked",
+          "changeInfo" : {
+            "changetype" : "Untracked",
+            "changeset" : null
+          },
+          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
+            "id" : {
+              "nummern" : [ "java.util.ArrayList", [ 17, 1 ] ]
+            },
+            "nummer" : "17.1",
+            "inhalt" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Steps being run in case 2\n  </body>\n</html>\n",
+                "plainText" : "\nSteps being run in case 2",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "farbe" : -1,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            },
+            "quellschrittID" : null,
+            "decorationStyle" : "None"
+          } ] ] ],
+          "catchBereich" : {
+            "catchSequences" : [ "java.util.ArrayList", [ ] ],
+            "sequencesWidthPercent" : null,
+            "zugeklappt" : false
+          },
+          "ueberschrift" : {
+            "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+              "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Heading if the Case 2 sequence\n  </body>\n</html>\n",
+              "plainText" : "\nHeading if the Case 2 sequence",
+              "markups" : [ "java.util.ArrayList", [ ] ],
+              "aenderungsart" : "Untracked",
+              "changeInfo" : {
+                "changetype" : "Untracked",
+                "changeset" : null
+              }
+            } ] ] ]
+          }
+        } ] ],
+        "spaltenbreitenAnteile" : [ 0.33094555, 0.3323782, 0.33094555 ]
+      } ], [ "specman.model.v001.SubsequenzSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 18 ] ]
+        },
+        "nummer" : "18",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <b>Subsequence</b>\n  </body>\n</html>\n",
+            "plainText" : "\nSubsequence",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None",
+        "zugeklappt" : false,
+        "subsequenz" : {
+          "id" : {
+            "nummern" : [ "java.util.ArrayList", [ 18, 0 ] ]
+          },
+          "aenderungsart" : "Untracked",
+          "changeInfo" : {
+            "changetype" : "Untracked",
+            "changeset" : null
+          },
+          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
+            "id" : {
+              "nummern" : [ "java.util.ArrayList", [ 18, 1 ] ]
+            },
+            "nummer" : "18.1",
+            "inhalt" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Steps being run in this subsequence\n  </body>\n</html>\n",
+                "plainText" : "\nSteps being run in this subsequence",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "farbe" : -1,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            },
+            "quellschrittID" : null,
+            "decorationStyle" : "None"
+          } ] ] ],
+          "catchBereich" : {
+            "catchSequences" : [ "java.util.ArrayList", [ ] ],
+            "sequencesWidthPercent" : null,
+            "zugeklappt" : false
+          }
+        },
+        "flatNumbering" : false
+      } ], [ "specman.model.v001.BreakSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 19 ] ]
+        },
+        "nummer" : "19",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <b>Exception 4 - no catch - this is allowed</b>\n  </body>\n</html>\n",
+            "plainText" : "\nException 4 - no catch - this is allowed",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 20 ] ]
+        },
+        "nummer" : "20",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div>\n      This step illustrates complex formatting. In general, text size and \n      weight is expressed by HTML formatting like\n    </div>\n    <div>\n      <b>bold</b>\n    </div>\n    <div>\n      <i>italic</i>\n    </div>\n    <div>\n      <u>underlined</u>\n    </div>\n    <div>\n      \n    </div>\n    <div>\n      Lists are not expressed by HTML but by appropriate edit areas like that \n      for unordered lists:\n    </div>\n  </body>\n</html>\n",
+            "plainText" : "\nThis step illustrates complex formatting. In general, text size and weight is expressed by HTML formatting like\nbold\nitalic\nunderlined\n\nLists are not expressed by HTML but by appropriate edit areas like that for unordered lists:",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ], [ "specman.model.v001.ListItemEditAreaModel_V001", {
+            "content" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    unordered list item 1\n  </body>\n</html>\n",
+                "plainText" : "\nunordered list item 1",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "ordered" : false,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ], [ "specman.model.v001.ListItemEditAreaModel_V001", {
+            "content" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    unordered list item 2\n  </body>\n</html>\n",
+                "plainText" : "\nunordered list item 2",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "ordered" : false,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ], [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div>\n      For ordered lists:\n    </div>\n  </body>\n</html>\n",
+            "plainText" : "\nFor ordered lists:",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ], [ "specman.model.v001.ListItemEditAreaModel_V001", {
+            "content" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    ordered list item 1\n  </body>\n</html>\n",
+                "plainText" : "\nordered list item 1",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "ordered" : true,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ], [ "specman.model.v001.ListItemEditAreaModel_V001", {
+            "content" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    ordered list item 2\n  </body>\n</html>\n",
+                "plainText" : "\nordered list item 2",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "ordered" : true,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ], [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Lists cannot be nested\n  </body>\n</html>\n",
+            "plainText" : "\nLists cannot be nested",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 21 ] ]
+        },
+        "nummer" : "21",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div>\n      As for list items, also tables are not expressed by HTML but by special \n      edit areas like this. However, the first edit area in every edit \n      container must be a text edit area, even if it is empty!\n    </div>\n  </body>\n</html>\n",
+            "plainText" : "\nAs for list items, also tables are not expressed by HTML but by special edit areas like this. However, the first edit area in every edit container must be a text edit area, even if it is empty!",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ], [ "specman.model.v001.TableEditAreaModel_V001", {
+            "cells" : [ "java.util.ArrayList", [ [ "java.util.ArrayList", [ {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <b>Spalte 1</b>\n  </body>\n</html>\n",
+                "plainText" : "\nSpalte 1",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            }, {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <b>Spalte 2</b>\n  </body>\n</html>\n",
+                "plainText" : "\nSpalte 2",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            }, {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <b>Spalte 3</b>\n  </body>\n</html>\n",
+                "plainText" : "\nSpalte 3",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            } ] ], [ "java.util.ArrayList", [ {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    You might place nested tables or list items in the cells of a table\n  </body>\n</html>\n",
+                "plainText" : "\nYou might place nested tables or list items in the cells of a table",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            }, {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Zelle 2.1\n  </body>\n</html>\n",
+                "plainText" : "\nZelle 2.1",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            }, {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Zelle 3.1\n  </body>\n</html>\n",
+                "plainText" : "\nZelle 3.1",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            } ] ] ] ],
+            "tableWidthPercent" : 100,
+            "columnsWidthPercent" : null,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 22 ] ]
+        },
+        "nummer" : "22",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div>\n      Supported headings\n    </div>\n    <h1>\n      Heading 1\n    </h1>\n    <h2>\n      Heading 2\n    </h2>\n    <h3>\n      Heading 3\n    </h3>\n    <h4>\n      Heading 4\n    </h4>\n    <h5>\n      Heading 5\n    </h5>\n    <h6>\n      Heading 6\n    </h6>\n  </body>\n</html>\n",
+            "plainText" : "\nSupported headings\nHeading 1\nHeading 2\nHeading 3\nHeading 4\nHeading 5\nHeading 6",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 23 ] ]
+        },
+        "nummer" : "23",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div>\n      Supported font sizes\n    </div>\n    <div>\n      <font size=\"1\">xx-small</font>\n    </div>\n    <div>\n      <font size=\"2\">x-smal</font>\n    </div>\n    <div>\n      <font size=\"3\">small</font>\n    </div>\n    <div>\n      <font size=\"4\">middle (default)</font>\n    </div>\n    <div>\n      <font size=\"5\">big</font>\n    </div>\n    <div>\n      <font size=\"6\">x-big</font>\n    </div>\n    <div>\n      <font size=\"7\">xx-big</font>\n    </div>\n  </body>\n</html>\n",
+            "plainText" : "\nSupported font sizes\nxx-small\nx-smal\nsmall\nmiddle (default)\nbig\nx-big\nxx-big",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 24 ] ]
+        },
+        "nummer" : "24",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div>\n      Supported fonts are\n    </div>\n    <div>\n      Sitka - Serif (default font)\n    </div>\n    <div>\n      <font face=\"Roboto\">Roboto - Sans Serif</font>\n    </div>\n    <div>\n      <font face=\"CourierPrime\">Courier - Monospace</font>\n    </div>\n  </body>\n</html>\n",
+            "plainText" : "\nSupported fonts are\nSitka - Serif (default font)\nRoboto - Sans Serif\nCourier - Monospace",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
+        "id" : {
+          "nummern" : [ "java.util.ArrayList", [ 25 ] ]
+        },
+        "nummer" : "25",
+        "inhalt" : {
+          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div>\n      Text might have a pre-formatted text section. Only preformatted text \n      keeps all its whitespaces while multiple whitespaces in other text \n      sections are eliminated when saving. Pre-formatted text is always \n      displayed in a monospaced font.\n    </div>\n    <pre>This<br>  text<br>    is<br>  pre  -  formatted<br></pre>\n  </body>\n</html>\n",
+            "plainText" : "\nText might have a pre-formatted text section. Only preformatted text keeps all its whitespaces while multiple whitespaces in other text sections are eliminated when saving. Pre-formatted text is always displayed in a monospaced font.\nThis   text     is   pre  -  formatted ",
+            "markups" : [ "java.util.ArrayList", [ ] ],
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ] ]
+        },
+        "farbe" : -1,
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        },
+        "quellschrittID" : null,
+        "decorationStyle" : "None"
+      } ] ] ],
+      "catchBereich" : {
+        "catchSequences" : [ "java.util.ArrayList", [ {
+          "id" : {
+            "nummern" : [ "java.util.ArrayList", [ 9 ] ]
+          },
+          "aenderungsart" : "Untracked",
+          "changeInfo" : {
+            "changetype" : "Untracked",
+            "changeset" : null
+          },
+          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
+            "id" : {
+              "nummern" : [ "java.util.ArrayList", [ 9, 1 ] ]
+            },
+            "nummer" : "9.1",
+            "inhalt" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Sequence for handling the exception in case it occured in break step 9 The \n    catch step has the same number as the break step. Catch sequences may \n    occur at the end of the sequence where the break step is in or at the end \n    of any sequence on a higher level.\n  </body>\n</html>\n",
+                "plainText" : "\nSequence for handling the exception in case it occured in break step 9 The catch step has the same number as the break step. Catch sequences may occur at the end of the sequence where the break step is in or at the end of any sequence on a higher level.",
+                "markups" : [ "java.util.ArrayList", [ {
+                  "from" : 69,
+                  "to" : 69,
+                  "type" : "Steplink",
+                  "changeset" : null
+                } ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "farbe" : -1,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            },
+            "quellschrittID" : null,
+            "decorationStyle" : "None"
+          } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
+            "id" : {
+              "nummern" : [ "java.util.ArrayList", [ 9, 2 ] ]
+            },
+            "nummer" : "9.2",
+            "inhalt" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Exception 3 shares the same exception handling with Exception 1, so it was \n    added as a &quot;Co-Catch&quot; in the same handling sequence.\n  </body>\n</html>\n",
+                "plainText" : "\nException 3 shares the same exception handling with Exception 1, so it was added as a \"Co-Catch\" in the same handling sequence.",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "farbe" : -1,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            },
+            "quellschrittID" : null,
+            "decorationStyle" : "None"
+          } ] ] ],
+          "catchBereich" : null,
+          "ueberschrift" : {
+            "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+              "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <b>Exception 1 - should have single line text</b>\n  </body>\n</html>\n",
+              "plainText" : "\nException 1 - should have single line text",
+              "markups" : [ "java.util.ArrayList", [ ] ],
+              "aenderungsart" : "Untracked",
+              "changeInfo" : {
+                "changetype" : "Untracked",
+                "changeset" : null
+              }
+            } ] ] ]
+          },
+          "coCatches" : [ "java.util.ArrayList", [ {
+            "breakStepId" : {
+              "nummern" : [ "java.util.ArrayList", [ 14 ] ]
+            },
+            "heading" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <b>Exception 3</b>\n  </body>\n</html>\n",
+                "plainText" : "\nException 3",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "changetype" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            }
+          } ] ],
+          "headingRightBarWidth" : 18
+        }, {
+          "id" : {
+            "nummern" : [ "java.util.ArrayList", [ 12 ] ]
+          },
+          "aenderungsart" : "Untracked",
+          "changeInfo" : {
+            "changetype" : "Untracked",
+            "changeset" : null
+          },
+          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
+            "id" : {
+              "nummern" : [ "java.util.ArrayList", [ 12, 1 ] ]
+            },
+            "nummer" : "12.1",
+            "inhalt" : {
+              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    Sequence for handling the second exception\n  </body>\n</html>\n",
+                "plainText" : "\nSequence for handling the second exception",
+                "markups" : [ "java.util.ArrayList", [ ] ],
+                "aenderungsart" : "Untracked",
+                "changeInfo" : {
+                  "changetype" : "Untracked",
+                  "changeset" : null
+                }
+              } ] ] ]
+            },
+            "farbe" : -1,
+            "aenderungsart" : "Untracked",
+            "changeInfo" : {
+              "changetype" : "Untracked",
+              "changeset" : null
+            },
+            "quellschrittID" : null,
+            "decorationStyle" : "None"
+          } ] ] ],
+          "catchBereich" : null,
+          "ueberschrift" : {
+            "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+              "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <b>Exception 2</b>\n  </body>\n</html>\n",
+              "plainText" : "\nException 2",
+              "markups" : [ "java.util.ArrayList", [ ] ],
+              "aenderungsart" : "Untracked",
+              "changeInfo" : {
+                "changetype" : "Untracked",
+                "changeset" : null
+              }
+            } ] ] ]
+          },
+          "coCatches" : [ "java.util.ArrayList", [ ] ],
+          "headingRightBarWidth" : 18
+        } ] ],
+        "sequencesWidthPercent" : null,
+        "zugeklappt" : false
+      }
+    },
+    "intro" : {
+      "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+        "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <h1>\n      Specman Reference\n    </h1>\n    <div>\n      This modell includes all modelling elements supported by Specman, mainly \n      to derive a JSON schema from it.\n    </div>\n    <div>\n      This section is the intro of a usecase.\n    </div>\n  </body>\n</html>\n",
+        "plainText" : "\nSpecman Reference\nThis modell includes all modelling elements supported by Specman, mainly to derive a JSON schema from it.\nThis section is the intro of a usecase.",
+        "markups" : [ "java.util.ArrayList", [ ] ],
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        }
+      } ] ] ]
+    },
+    "outro" : {
+      "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
+        "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    This is the outro of a usecase\n  </body>\n</html>\n",
+        "plainText" : "\nThis is the outro of a usecase",
+        "markups" : [ "java.util.ArrayList", [ ] ],
+        "aenderungsart" : "Untracked",
+        "changeInfo" : {
+          "changetype" : "Untracked",
+          "changeset" : null
+        }
+      } ] ] ]
+    },
+    "pdfExportOptions" : null,
+    "changeSetName" : "yellow"
+  }
+}
