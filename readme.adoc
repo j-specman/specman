@@ -28,6 +28,34 @@ The yellow highlighting in the screenshot above indicates changes which were mad
 
 Folding up a structured step which includes any change marks will cause the unfold-button beside the step number to be displayed with a yellow background. I.e. even if details are hidden, it is still visible that there are changes in the folded up section.
 
+### Windows installer
+Besides the plain executable JAR, Specman can be packaged as a Windows MSI installer with a bundled Java runtime, so end users don't need a JRE installed. Building the installer requires JDK 17+ (for `jpackage`) and the https://wixtoolset.org/[WiX Toolset] 3.14 on the `PATH`:
+
+[source,shell]
+----
+mvn -P windows-installer clean package
+----
+
+The resulting `Specman-<version>.msi` is written to `target/installer/`. It installs per-user (no admin rights required), adds a Start menu entry and desktop shortcut, associates `.nsd` files with Specman, and adds a `specman-cli` console launcher for the link:src/main/java/specman/cli/SpecmanCLI.java[command-line operations]. Bumping `<version>` in `pom.xml` between releases lets a new installer upgrade an existing installation in place.
+
+The installer also puts a `specman` command on the user's `PATH` (a small `specman.cmd` forwarder to `specman-cli.exe`, installed into its own `bin` subdirectory so it can't clash with `Specman.exe` — Windows filenames are case-insensitive). Open a *new* terminal after installing (PATH changes only apply to newly started processes) and run e.g. `specman --sanitize <file>`.
+
+#### Known limitations
+* *Build machine antivirus/EDR can block the build.* Some products (observed with Windows Defender) deny read access to `klist.exe`, a Kerberos tool bundled in the `java.security.jgss` module that gets pulled into the runtime image transitively (likely via asciidoctorj/JRuby or iText). This fails the WiX linking step with `light.exe : error LGHT0001 ... UnauthorizedAccessException`. Workaround: add a temporary exclusion for the jpackage temp directory before building, e.g. from an elevated PowerShell: `Add-MpPreference -ExclusionPath "$env:LOCALAPPDATA\Temp"`. Excluding the `java.security.jgss` module itself (Specman doesn't use Kerberos/SSO) would be a cleaner fix but hasn't been implemented/verified yet.
+* *The installer and `Specman.exe`/`specman-cli.exe` are not code-signed.* On first run, Windows SmartScreen (and/or Defender) may block the unsigned executable ("Windows hat den PC geschützt"). For local testing: `Unblock-File <path-to-exe>`, or click "Weitere Informationen" → "Trotzdem ausführen" in the SmartScreen dialog, or add a Defender exclusion for the install directory. For real-world distribution this should be replaced by signing the MSI/EXE with an Authenticode certificate (`signtool sign /fd sha256 /tr <timestamp-url> ...`) so end users don't hit this at all.
+* *Migrating from a manual `SPECMAN_HOME` + `specman.bat` setup does not automatically take over the `.nsd` file association.* Windows remembers an explicit prior choice (`HKCU\...\FileExts\.nsd\UserChoice`) and, in setups where the association was registered directly rather than picked via "Open with", also a plain `HKCU\Software\Classes\.nsd` entry pointing at the old ProgId/batch file — neither is overwritten by the new installer. After installing, reset both if `.nsd` files still open the old way:
++
+[source,powershell]
+----
+Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.nsd" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "HKCU:\Software\Classes\.nsd" -Force -ErrorAction SilentlyContinue
+----
++
+(the second command's target ProgId name depends on how the old install registered itself, e.g. `nsd_auto_file`; inspect `HKCU:\Software\Classes\.nsd` first to find it, and remove that ProgId key too). Then pick the new `Specman.exe` once via "Open with" → "Always use this app".
+* *The bundled runtime is not module-trimmed.* jpackage's automatic `jdeps`-based module detection is used as-is (plus `--strip-debug`/`--no-header-files`/`--no-man-pages`), so the MSI is relatively large (~90 MB). A curated `--add-modules` list could shrink this but needs testing against every feature (PDF export, Asciidoc export, etc.) to avoid removing something actually required.
+* *`src/main/jpackage/wix/main.wxs` is a hand-maintained copy of jpackage's internal WiX template* (extended with the `JpCliShim` component that adds `specman` to `PATH`). It was extracted from jpackage's own output via `jpackage --temp <dir> ...` (which leaves the generated WiX sources in `<dir>/config` instead of a throwaway temp folder) and is used via `--resource-dir`, which replaces only same-named resource files — everything else jpackage generates by default is unaffected. If the build JDK's jpackage version changes, re-extract the default template the same way and diff it against this file to pick up upstream changes. If the installer is ever switched from `--win-per-user-install` to a machine-wide install, `System="no"` on the `JpPathEnv` environment entry must become `System="yes"` (then admin rights are needed for the PATH change too).
+* *End-to-end runtime testing is partially done.* PDF export from the packaged app has been confirmed working. Opening `.nsd` files via the file association and Asciidoc export have not yet been confirmed in this environment.
+
 ## Manual
 The complete manual is available at link:doc/specman-manual.adoc[Specman Manual].
 

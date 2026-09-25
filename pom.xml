@@ -267,4 +267,130 @@
 
     </build>
 
+    <profiles>
+        <!--
+            Builds a Windows MSI installer with a bundled Java runtime via jpackage.
+            Requires JDK 17+ (jpackage) and the WiX Toolset (v3.14) on the PATH.
+            Usage: mvn -P windows-installer clean package
+        -->
+        <profile>
+            <id>windows-installer</id>
+            <properties>
+                <specman.installer.vendor>Specman</specman.installer.vendor>
+                <!-- Fixed on purpose: jpackage needs a stable upgrade code so that installing
+                     a newer version replaces the older one instead of installing side by side. -->
+                <specman.installer.upgradeUuid>866b19a6-d061-4d12-bb20-89c895cc9f48</specman.installer.upgradeUuid>
+                <specman.installer.input>${project.build.directory}/jpackage-input</specman.installer.input>
+                <specman.installer.dest>${project.build.directory}/installer</specman.installer.dest>
+                <specman.installer.wixResourceDir>${project.build.directory}/jpackage-wix</specman.installer.wixResourceDir>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>stage-jpackage-input</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <mkdir dir="${specman.installer.input}"/>
+                                        <copy
+                                            file="${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar"
+                                            todir="${specman.installer.input}"/>
+
+                                        <!--
+                                            Stage the WiX resource-dir override: main.wxs adds a File element
+                                            for specman.cmd, but jpackage copies main.wxs into its own temp
+                                            directory before compiling it, so WiX's sys.SOURCEFILEDIR can't be
+                                            used to locate specman.cmd relative to it. Instead, copy both files
+                                            into a build-local directory and bake the absolute path to
+                                            specman.cmd into main.wxs here, before jpackage/candle ever run.
+                                        -->
+                                        <mkdir dir="${specman.installer.wixResourceDir}"/>
+                                        <copy
+                                            file="${project.basedir}/src/main/jpackage/wix/specman.cmd"
+                                            todir="${specman.installer.wixResourceDir}"/>
+                                        <copy
+                                            file="${project.basedir}/src/main/jpackage/wix/main.wxs"
+                                            todir="${specman.installer.wixResourceDir}"
+                                            overwrite="true">
+                                            <filterset>
+                                                <filter
+                                                    token="specman.cmd.absolute.path"
+                                                    value="${specman.installer.wixResourceDir}/specman.cmd"/>
+                                            </filterset>
+                                        </copy>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.6.4</version>
+                        <executions>
+                            <execution>
+                                <id>jpackage-windows-msi</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${java.home}/bin/jpackage</executable>
+                                    <workingDirectory>${project.basedir}</workingDirectory>
+                                    <arguments>
+                                        <argument>--type</argument>
+                                        <argument>msi</argument>
+                                        <argument>--name</argument>
+                                        <argument>Specman</argument>
+                                        <argument>--app-version</argument>
+                                        <argument>${project.version}</argument>
+                                        <argument>--vendor</argument>
+                                        <argument>${specman.installer.vendor}</argument>
+                                        <argument>--dest</argument>
+                                        <argument>${specman.installer.dest}</argument>
+                                        <argument>--input</argument>
+                                        <argument>${specman.installer.input}</argument>
+                                        <argument>--main-jar</argument>
+                                        <argument>${project.artifactId}-${project.version}-jar-with-dependencies.jar</argument>
+                                        <argument>--main-class</argument>
+                                        <argument>specman.Specman</argument>
+                                        <argument>--icon</argument>
+                                        <argument>${project.basedir}/src/main/resources/images/specman.ico</argument>
+                                        <argument>--win-menu</argument>
+                                        <argument>--win-menu-group</argument>
+                                        <argument>Specman</argument>
+                                        <argument>--win-shortcut</argument>
+                                        <argument>--win-dir-chooser</argument>
+                                        <argument>--win-per-user-install</argument>
+                                        <argument>--win-upgrade-uuid</argument>
+                                        <argument>${specman.installer.upgradeUuid}</argument>
+                                        <argument>--file-associations</argument>
+                                        <argument>${project.basedir}/src/main/jpackage/nsd.properties</argument>
+                                        <argument>--add-launcher</argument>
+                                        <argument>specman-cli=${project.basedir}/src/main/jpackage/cli.properties</argument>
+                                        <argument>--resource-dir</argument>
+                                        <argument>${specman.installer.wixResourceDir}</argument>
+                                        <argument>--java-options</argument>
+                                        <argument>-Dfile.encoding=UTF-8</argument>
+                                        <argument>--jlink-options</argument>
+                                        <argument>--strip-debug --no-header-files --no-man-pages</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
