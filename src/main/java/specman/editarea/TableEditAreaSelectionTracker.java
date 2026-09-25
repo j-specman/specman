@@ -5,6 +5,7 @@ import specman.undo.manager.UndoRecording;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -19,7 +20,7 @@ import static specman.CursorFactory.createCursor;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
 import static specman.Specman.editor;
 
-public class TableEditAreaSelectionTracker implements MouseListener, MouseMotionListener {
+public class TableEditAreaSelectionTracker implements MouseListener, MouseMotionListener, KeyEventDispatcher {
   private static final Color SELECTION_COLOR = new Color(200, 200, 200, 150);
   private static final int SELEECTION_GAP_SIZE = 4 * LINIENBREITE;
   public static final Cursor ADD_COLUMN_CURSOR = createCursor("add-column-cursor", Bottom);
@@ -45,6 +46,7 @@ public class TableEditAreaSelectionTracker implements MouseListener, MouseMotion
   private Rectangle selectionHighlight;
   private Integer selectionIndex;
   private Operation selectionOperation;
+  private boolean keyDispatcherRegistered;
 
   public TableEditAreaSelectionTracker(TableEditArea editArea) {
     this.editArea = editArea;
@@ -84,6 +86,46 @@ public class TableEditAreaSelectionTracker implements MouseListener, MouseMotion
     selectionHighlight = null;
     selectionOperation = null;
     setEditAreaCursor(null);
+    unregisterKeyDispatcher();
+  }
+
+  private void unregisterKeyDispatcher() {
+    if (keyDispatcherRegistered) {
+      KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(this);
+      keyDispatcherRegistered = false;
+    }
+  }
+
+  private void updateKeyDispatcherRegistration() {
+    if (selectionHighlight != null && selectionOperation == Operation.RemoveTable && !keyDispatcherRegistered) {
+      KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
+      keyDispatcherRegistered = true;
+    }
+    else if (selectionHighlight == null || selectionOperation != Operation.RemoveTable) {
+      unregisterKeyDispatcher();
+    }
+  }
+
+  @Override
+  public boolean dispatchKeyEvent(KeyEvent e) {
+    if (e.getID() != KeyEvent.KEY_PRESSED || !e.isControlDown() || selectionOperation != Operation.RemoveTable) {
+      return false;
+    }
+    if (e.getKeyCode() == KeyEvent.VK_C) {
+      // TODO: copyTable()
+      resetSelection();
+      editArea.repaint();
+      e.consume();
+      return true;
+    }
+    if (e.getKeyCode() == KeyEvent.VK_X) {
+      // TODO: cutTable()
+      resetSelection();
+      editArea.repaint();
+      e.consume();
+      return true;
+    }
+    return false;
   }
 
   /** Found this little trick at https://coderanch.com/t/710608/java/set-cursor-JButton
@@ -123,6 +165,7 @@ public class TableEditAreaSelectionTracker implements MouseListener, MouseMotion
       setEditAreaCursor(selectionHighlight != null ? selectionOperation.toCursor() : null);
       editArea.repaint();
     }
+    updateKeyDispatcherRegistration();
   }
 
   private Rectangle wholeTableSelected(Point mousePos) {
