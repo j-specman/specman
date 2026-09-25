@@ -1,15 +1,3 @@
-Copy / Cut / Paste ganzer Schritte
-x Copy
-x Paste
-  x Referenzen auf nicht existierende Schritte als ungültig markieren
-  x Undo / Redo
-  x Für Schritte aus derselben Instanz
-  x Für Schritte aus einer anderen Instanz
-x Cut
-  x Warnmeldung bei drohendem Verlust von Catchs
-  x Undo / Redo
-- Icons für Kontextmenüpunkte
-
 Aus aktueller Anwendung
 - beim Öffnen und einer vorhandenen .wrk, *drei* Optionen: 1) nicht laden, 2) laden, 3) ist in Arbeit - nicht laden aber auch nicht überschreiben und beim Schließen löschen
 x .wrk entsteht auch, wenn man weder Autosave noch Autoload eingeschaltet hat
@@ -30,6 +18,18 @@ Reste Multi-Catch
   Das Klicken auf den Lösch-Button löst eine FocusLost und eine Synchronisation der Texte zwischen Catch und Break aus
   Diese Aktionen landen in der Undo-Historie vor dem eigentlichen Löschen des Co-Catchs.
   Man muss dann mehrfach klicken, um das eigentliche Undo auszulösen
+
+x Copy / Cut / Paste ganzer Schritte
+x Copy
+x Paste
+  x Referenzen auf nicht existierende Schritte als ungültig markieren
+  x Undo / Redo
+  x Für Schritte aus derselben Instanz
+  x Für Schritte aus einer anderen Instanz
+x Cut
+  x Warnmeldung bei drohendem Verlust von Catchs
+  x Undo / Redo
+x Icons für Kontextmenüpunkte
 
 Abschluss für Go-Live
 - Wenn man zu einem Breakschritt bzw. einem Catch-Bereich springt oder einer Schrittreferenz folgt, dann kann sich das Ziel
