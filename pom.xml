@@ -252,7 +252,7 @@
                                     message="@echo off${line.separator}javaw -jar %SPECMAN_HOME%\specman-${project.version}-jar-with-dependencies.jar %*${line.separator}"/>
                                 <echo
                                     file="target/specman.sh"
-                                    message="#!/bin/sh${line.separator}javaw -jar $SPECMAN_HOME/specman-${project.version}-jar-with-dependencies.jar &quot;$@&quot;${line.separator}"/>
+                                    message="#!/bin/sh${line.separator}java -jar $SPECMAN_HOME/specman-${project.version}-jar-with-dependencies.jar &quot;$@&quot;${line.separator}"/>
                             </target>
                         </configuration>
                         <goals>
