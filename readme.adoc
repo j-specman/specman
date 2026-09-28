@@ -29,7 +29,12 @@ The yellow highlighting in the screenshot above indicates changes which were mad
 Folding up a structured step which includes any change marks will cause the unfold-button beside the step number to be displayed with a yellow background. I.e. even if details are hidden, it is still visible that there are changes in the folded up section.
 
 ### Windows installer
-Besides the plain executable JAR, Specman can be packaged as a Windows MSI installer with a bundled Java runtime, so end users don't need a JRE installed. Building the installer requires JDK 17+ (for `jpackage`) and the https://wixtoolset.org/[WiX Toolset] 3.14 on the `PATH`:
+Besides the plain executable JAR, Specman can be packaged as a Windows MSI installer with a bundled Java runtime, so end users don't need a JRE installed. Building the installer requires JDK 17+ (for `jpackage`) and the https://wixtoolset.org/[WiX Toolset] 3.14 on the `PATH`, e.g. via winget:
+
+[source,shell]
+----
+winget install WiXToolset.WiXToolset
+----
 
 [source,shell]
 ----

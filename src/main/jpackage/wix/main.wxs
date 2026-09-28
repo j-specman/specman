@@ -133,6 +133,17 @@
     <Icon Id="JpARPPRODUCTICON" SourceFile="$(var.JpIcon)"/>
     <?endif?>
 
+    <!--
+      Branding: JpUI (below) is jpackage's stock UIRef to WixUI_InstallDir, which itself does
+      not set WixUIBannerBmp/WixUIDialogBmp, so without this it falls back to WiX's generic
+      default artwork. banner.bmp/dialog.bmp are baked into this file as absolute paths by the
+      same antrun filterset that resolves @specman.cmd.absolute.path@ (see stage-jpackage-input
+      in pom.xml), for the same reason: jpackage copies this file into its own temp directory
+      before compiling it, so a relative path wouldn't resolve.
+    -->
+    <WixVariable Id="WixUIBannerBmp" Value="@wix.banner.bmp.absolute.path@"/>
+    <WixVariable Id="WixUIDialogBmp" Value="@wix.dialog.bmp.absolute.path@"/>
+
     <UIRef Id="JpUI"/>
 
     <InstallExecuteSequence>

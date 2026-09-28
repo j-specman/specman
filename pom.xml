@@ -305,16 +305,52 @@
                                             todir="${specman.installer.input}"/>
 
                                         <!--
+                                            Also install the grammar and a matching reference model, so users can
+                                            open both without cloning the repo. The reference model to ship is
+                                            picked by the project's own major.minor version (e.g. 1.3.1 -> 1.3),
+                                            so a version bump without a matching specman-reference-vX.Y-*.nsd file
+                                            in the repo root fails the build instead of shipping a stale/missing
+                                            reference silently.
+                                        -->
+                                        <loadresource property="specman.reference.version">
+                                            <string value="${project.version}"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <replaceregex pattern="^(\d+\.\d+).*$" replace="\1"/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </loadresource>
+                                        <fail message="No specman-reference-v${specman.reference.version}-*.nsd found in ${project.basedir} for version ${project.version}">
+                                            <condition>
+                                                <resourcecount count="0">
+                                                    <fileset dir="${project.basedir}" includes="specman-reference-v${specman.reference.version}-*.nsd"/>
+                                                </resourcecount>
+                                            </condition>
+                                        </fail>
+                                        <mkdir dir="${specman.installer.input}/docs"/>
+                                        <copy todir="${specman.installer.input}/docs" flatten="true">
+                                            <fileset file="${project.basedir}/src/main/antlr4/specman/model/v002/SpecmanModel_V002.g4"/>
+                                            <fileset dir="${project.basedir}" includes="specman-reference-v${specman.reference.version}-*.nsd"/>
+                                        </copy>
+
+                                        <!--
                                             Stage the WiX resource-dir override: main.wxs adds a File element
-                                            for specman.cmd, but jpackage copies main.wxs into its own temp
-                                            directory before compiling it, so WiX's sys.SOURCEFILEDIR can't be
-                                            used to locate specman.cmd relative to it. Instead, copy both files
-                                            into a build-local directory and bake the absolute path to
-                                            specman.cmd into main.wxs here, before jpackage/candle ever run.
+                                            for specman.cmd and WixVariables pointing at the branding bitmaps,
+                                            but jpackage copies main.wxs into its own temp directory before
+                                            compiling it, so WiX's sys.SOURCEFILEDIR can't be used to locate
+                                            these files relative to it. Instead, copy them all into a
+                                            build-local directory and bake their absolute paths into main.wxs
+                                            here, before jpackage/candle ever run.
                                         -->
                                         <mkdir dir="${specman.installer.wixResourceDir}"/>
                                         <copy
                                             file="${project.basedir}/src/main/jpackage/wix/specman.cmd"
+                                            todir="${specman.installer.wixResourceDir}"/>
+                                        <copy
+                                            file="${project.basedir}/src/main/jpackage/wix/banner.bmp"
+                                            todir="${specman.installer.wixResourceDir}"/>
+                                        <copy
+                                            file="${project.basedir}/src/main/jpackage/wix/dialog.bmp"
                                             todir="${specman.installer.wixResourceDir}"/>
                                         <copy
                                             file="${project.basedir}/src/main/jpackage/wix/main.wxs"
@@ -324,6 +360,12 @@
                                                 <filter
                                                     token="specman.cmd.absolute.path"
                                                     value="${specman.installer.wixResourceDir}/specman.cmd"/>
+                                                <filter
+                                                    token="wix.banner.bmp.absolute.path"
+                                                    value="${specman.installer.wixResourceDir}/banner.bmp"/>
+                                                <filter
+                                                    token="wix.dialog.bmp.absolute.path"
+                                                    value="${specman.installer.wixResourceDir}/dialog.bmp"/>
                                             </filterset>
                                         </copy>
                                     </target>
