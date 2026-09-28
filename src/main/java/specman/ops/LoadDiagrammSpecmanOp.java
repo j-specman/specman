@@ -87,6 +87,9 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
           ? AutoSaveOp.createWorkingCopyFor(diagramFile)
           : 0;
       context().notifyWorkingCopyInitialized(wcTimestamp);
+    } else {
+      // E.g. restored from working copy: the next working copy comes from auto save
+      context().notifyWorkingCopyInitialized(0);
     }
   }
 

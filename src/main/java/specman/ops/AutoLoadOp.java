@@ -12,25 +12,48 @@ import java.io.IOException;
 
 public class AutoLoadOp extends AbstractSpecmanOp {
 
+  private static final int DEBOUNCE_MS = 500;
+
   private final AutoSaveOp autoSave;
   private final LoadDiagrammSpecmanOp loadOp;
   private final Timer timer;
+  private final WorkingCopyWatcher watcher;
   private long lastLoadedFileTimestamp = 0;
 
   public AutoLoadOp(SpecmanOpContext context, AutoSaveOp autoSave) {
     super(context);
     this.autoSave = autoSave;
     loadOp = new LoadDiagrammSpecmanOp(context);
-    timer = new Timer(timerDelay(), e -> loadIfNeeded());
-    timer.start();
+    // One-shot timer to debounce the change events, e.g. truncate + write of the working copy
+    timer = new Timer(DEBOUNCE_MS, e -> loadIfNeeded());
+    timer.setRepeats(false);
+    watcher = new WorkingCopyWatcher(() -> SwingUtilities.invokeLater(timer::restart));
   }
 
   public void workingCopyInitialized(long timestamp) {
     lastLoadedFileTimestamp = timestamp;
+    watchWorkingCopy();
+    // Catches changes which happened before the watcher was (re)targeted
+    timer.restart();
+  }
+
+  private void watchWorkingCopy() {
+    File diagramFile = getDiagrammDatei();
+    if (diagramFile == null) {
+      return;
+    }
+    try {
+      watcher.watch(AutoSaveOp.workingCopyFor(diagramFile));
+    }
+    catch (IOException e) {
+      if (SettingAutoLoad.getIntervalSeconds() != null) {
+        showToast("Automatisches Laden ist nicht möglich.",
+          "Die Arbeitskopie kann nicht überwacht werden:\n\n" + e.getMessage());
+      }
+    }
   }
 
   private void loadIfNeeded() {
-    timer.setDelay(timerDelay());
     if (SettingAutoLoad.getIntervalSeconds() == null) {
       return;
     }
@@ -93,11 +116,6 @@ public class AutoLoadOp extends AbstractSpecmanOp {
 
   private byte[] takeSnapshot() throws IOException {
     return autoSave.generateSnapshot();
-  }
-
-  private static int timerDelay() {
-    Integer intervalSeconds = SettingAutoLoad.getIntervalSeconds();
-    return intervalSeconds != null ? intervalSeconds * 1000 : AutoSaveOp.OFF_CHECK_INTERVAL_MS;
   }
 
 }
