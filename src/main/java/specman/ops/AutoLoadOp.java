@@ -46,7 +46,7 @@ public class AutoLoadOp extends AbstractSpecmanOp {
       watcher.watch(AutoSaveOp.workingCopyFor(diagramFile));
     }
     catch (IOException e) {
-      if (SettingAutoLoad.getIntervalSeconds() != null) {
+      if (SettingAutoLoad.isEnabled()) {
         showToast("Automatisches Laden ist nicht möglich.",
           "Die Arbeitskopie kann nicht überwacht werden:\n\n" + e.getMessage());
       }
@@ -54,7 +54,7 @@ public class AutoLoadOp extends AbstractSpecmanOp {
   }
 
   private void loadIfNeeded() {
-    if (SettingAutoLoad.getIntervalSeconds() == null) {
+    if (!SettingAutoLoad.isEnabled()) {
       return;
     }
     File diagramFile = getDiagrammDatei();

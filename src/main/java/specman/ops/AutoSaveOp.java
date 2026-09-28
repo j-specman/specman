@@ -63,7 +63,7 @@ public class AutoSaveOp extends AbstractSpecmanOp {
   }
 
   public static boolean isWorkingCopyNeeded() {
-    return SettingAutoSave.getIntervalSeconds() != null || SettingAutoLoad.getIntervalSeconds() != null;
+    return SettingAutoSave.getIntervalSeconds() != null || SettingAutoLoad.isEnabled();
   }
 
   public static File workingCopyFor(File nsdFile) {
