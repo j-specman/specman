@@ -15,34 +15,34 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 
-/** Watches a single file for creation and modification. A {@link WatchService} can only watch
+/** Watches a single file for modification. A {@link WatchService} can only watch
  * directories, so the file's parent directory is registered and the events are filtered by file name.
  * The callback runs on the watcher thread, so callers must hand over to the EDT themselves. It may be
  * called several times for a single change (e.g. truncate + write) and even without a change of the
- * file (e.g. on {@link java.nio.file.StandardWatchEventKinds#OVERFLOW}). */
+ * file (e.g. on {@link java.nio.file.StandardWatchEventKinds#OVERFLOW}).
+ * <p>
+ * For technical reasons, file creation must be watched too, not just modification: on Windows,
+ * an atomic replace of an already-existing file (write to a temp file, then rename over the target —
+ * the safe way many tools, including editors that write the working copy externally, avoid leaving
+ * a corrupt partial write) is reported as {@code ENTRY_CREATE}, not {@code ENTRY_MODIFY}. See
+ * {@code WorkingCopyWatcherTest.atomicReplaceIsReported}. */
 class WorkingCopyWatcher implements Closeable {
 
   private record Target(WatchKey key, Path directory, Path fileName) {}
 
-  private final Runnable onChange;
+  private final Runnable onWorkingCopyChanged;
   private WatchService watchService;
   private volatile Target target;
 
-  WorkingCopyWatcher(Runnable onChange) {
-    this.onChange = onChange;
+  WorkingCopyWatcher(Runnable onWorkingCopyChanged) {
+    this.onWorkingCopyChanged = onWorkingCopyChanged;
   }
 
   /** Watches the passed file instead of the previously watched one. The file need not exist yet. */
   synchronized void watch(File file) throws IOException {
+    createWatchServiceThread();
     Path path = file.toPath().toAbsolutePath();
     Path directory = path.getParent();
-    if (watchService == null) {
-      watchService = FileSystems.getDefault().newWatchService();
-      WatchService service = watchService;
-      Thread thread = new Thread(() -> processEvents(service), "working-copy-watcher");
-      thread.setDaemon(true);
-      thread.start();
-    }
     Target previous = target;
     WatchKey key = (previous != null && previous.directory().equals(directory) && previous.key().isValid())
         ? previous.key()
@@ -50,6 +50,16 @@ class WorkingCopyWatcher implements Closeable {
     target = new Target(key, directory, path.getFileName());
     if (previous != null && previous.key() != key) {
       previous.key().cancel();
+    }
+  }
+
+  private void createWatchServiceThread() throws IOException {
+    if (watchService == null) {
+      watchService = FileSystems.getDefault().newWatchService();
+      WatchService service = watchService;
+      Thread thread = new Thread(() -> processEvents(service), "working-copy-watcher");
+      thread.setDaemon(true);
+      thread.start();
     }
   }
 
@@ -66,7 +76,7 @@ class WorkingCopyWatcher implements Closeable {
       List<WatchEvent<?>> events = key.pollEvents();
       try {
         if (concernsTarget(key, events)) {
-          onChange.run();
+          onWorkingCopyChanged.run();
         }
       }
       catch (RuntimeException e) {

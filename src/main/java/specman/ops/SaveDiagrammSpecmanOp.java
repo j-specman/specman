@@ -37,8 +37,8 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         File ausgewaehlteDatei = new File(ausgewaehlterDateiname);
         if (!ausgewaehlteDatei.equals(getDiagrammDatei()) && ausgewaehlteDatei.exists()) {
           int confirmErgebnis = showConfirmDialog(
-              "Die ausgewählte Datei existiert bereits.\nSoll die Datei überschrieben werden?",
-              "Datei überschreiben?", JOptionPane.OK_CANCEL_OPTION);
+              "The selected file already exists.\nShould the file be overwritten?",
+              "Overwrite file?", JOptionPane.OK_CANCEL_OPTION);
           if (confirmErgebnis == JOptionPane.CANCEL_OPTION) {
             return;
           }
@@ -46,9 +46,17 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         setDiagrammDatei(new File(ausgewaehlterDateiname));
       }
       saveToFile(getDiagrammDatei());
-      long wcTimestamp = AutoSaveOp.isWorkingCopyNeeded()
-          ? AutoSaveOp.createWorkingCopyFor(getDiagrammDatei())
-          : 0;
+      long wcTimestamp = 0;
+      if (AutoSaveOp.isWorkingCopyNeeded()) {
+        try {
+          wcTimestamp = AutoSaveOp.createWorkingCopyFor(getDiagrammDatei());
+        }
+        catch (IOException e) {
+          showToast("Working copy could not be created.",
+            "Auto-load/auto-save are unavailable for this file until it is loaded or saved " +
+            "again:\n\n" + e.getMessage());
+        }
+      }
       if (!getDiagrammDatei().equals(previousFile)) {
         AutoSaveOp.deleteWorkingCopyFor(previousFile);
       }

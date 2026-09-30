@@ -74,22 +74,37 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
         load(workingCopy);
         setDiagrammDatei(diagramFile);
         markAsUnsavedWorkingCopy();
-      } else {
-        load(diagramFile);
+        if (!AutoSaveOp.isWorkingCopyNeeded()) {
+          AutoSaveOp.deleteWorkingCopyFor(diagramFile);
+        }
       }
-      AutoSaveOp.deleteWorkingCopyFor(diagramFile);
-    } else {
+      else {
+        load(diagramFile);
+        AutoSaveOp.deleteWorkingCopyFor(diagramFile);
+      }
+    }
+    else {
       load(diagramFile);
     }
     addRecentFile(diagramFile);
     if (!hasUnsavedChanges()) {
-      long wcTimestamp = AutoSaveOp.isWorkingCopyNeeded()
-          ? AutoSaveOp.createWorkingCopyFor(diagramFile)
-          : 0;
+      long wcTimestamp = 0;
+      if (AutoSaveOp.isWorkingCopyNeeded()) {
+        try {
+          wcTimestamp = AutoSaveOp.createWorkingCopyFor(diagramFile);
+        }
+        catch (IOException e) {
+          showToast("Working copy could not be created.",
+            "Auto-load/auto-save are unavailable for this file until it is loaded or saved " +
+            "again:\n\n" + e.getMessage());
+        }
+      }
       context().notifyWorkingCopyInitialized(wcTimestamp);
-    } else {
-      // E.g. restored from working copy: the next working copy comes from auto save
-      context().notifyWorkingCopyInitialized(0);
+    }
+    else {
+      // Restored from working copy: it was kept on disk when needed (still matches the
+      // just-loaded state), so AutoLoad can watch it immediately without a spurious reload.
+      context().notifyWorkingCopyInitialized(AutoSaveOp.workingCopyFor(diagramFile).lastModified());
     }
   }
 
@@ -332,19 +347,4 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
       }
     }
   }
-
-  private void quellZielZuweisung(List<AbstractSchrittModel_V001> allModelSteps) {
-    for (AbstractSchrittModel_V001 modelStep : allModelSteps) {
-      if (modelStep.quellschrittID != null) {
-        AbstractSchrittView zielschritt = getHauptSequenz().findeSchrittZuId(modelStep.id);
-        if (zielschritt instanceof QuellSchrittView) {
-          continue;
-        }
-        QuellSchrittView quellSchritt = (QuellSchrittView) getHauptSequenz().findeSchrittZuId(modelStep.quellschrittID);
-        zielschritt.setQuellschrittUDBL(quellSchritt);
-        quellSchritt.setZielschritt(zielschritt);
-      }
-    }
-  }
-
 }
