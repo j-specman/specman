@@ -31,6 +31,6 @@ Folding up a structured step which includes any change marks will cause the unfo
 ## Manual
 The complete manual is available at link:doc/specman-manual.adoc[Specman Manual].
 
-For maintainers, the manual process for creating a GitHub release is described in link:doc/howto-github-release.adoc[How-to: Create a GitHub release].
+For maintainers, the manual process for creating a GitHub release is described in link:doc/howto-github-release.adoc[How-to: Einen GitHub-Release manuell anlegen].
 
 For an impression how real-world specifications look like in Specman, see the link:doc/usecase-birdsview.png[bird's view] on a mid-size system usecase specification from ongoing project development.
