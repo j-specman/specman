@@ -1,4 +1,4 @@
-= How-to: Einen GitHub-Release manuell anlegen
+= How-to: GitHub-Releases manuell anlegen
 :toc:
 :sectnums:
 
