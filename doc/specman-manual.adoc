@@ -1,6 +1,6 @@
 :toc:
 
-# Specman 1.1 Manual
+# Specman 1.3 Manual
 
 ## Introduction
 // tag::readme[] - this region is copied into readme.adoc by the 'generate-readme' execution in pom.xml (mvn package, or standalone: mvn antrun:run@generate-readme)
