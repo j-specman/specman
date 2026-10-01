@@ -62,6 +62,22 @@ public class ExternalPasteChangemarksAdjuster implements PasteChangemarksAdjuste
     return steps;
   }
 
+  /** Same rules as {@link #adjust} applied to a standalone copied/cut table (not nested inside
+   * a pasted step): a table marked as deleted aborts the paste, otherwise every changemark in
+   * the table and its cells is set to added/untracked and existing changeset HTML coloring is
+   * cleaned up. */
+  public TableEditAreaModel_V002 adjustTable(TableEditAreaModel_V002 table, boolean trackingOn) throws EditException {
+    if (isDeleted(table.changeInfo)) {
+      throw new EditException(
+          "The table in the clipboard is marked as deleted and cannot be pasted. " +
+          "Remove deleted content in a text editor before pasting.");
+    }
+    target = ChangeInfoModel_V002.from(trackingOn ? ChangeInfo.added() : ChangeInfo.UNTRACKED);
+    table.changeInfo = target;
+    table.cells.forEach(row -> row.forEach(this::adjustContent));
+    return table;
+  }
+
   private static boolean isDeleted(ChangeInfoModel_V002 ci) {
     return ci != null && ci.changetype == Aenderungsart.Geloescht;
   }

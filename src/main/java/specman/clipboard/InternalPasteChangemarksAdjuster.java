@@ -35,6 +35,19 @@ public class InternalPasteChangemarksAdjuster implements PasteChangemarksAdjuste
     return steps;
   }
 
+  /** Marks a standalone copied/cut table (not nested inside a pasted step) and all its cell
+   * content as added in the current changeset - the same rule applied to tables nested inside
+   * a pasted step, see {@link #adjustTableCells}. No-op when change tracking is off, mirroring
+   * {@link #adjust}. */
+  public static TableEditAreaModel_V002 adjustTable(TableEditAreaModel_V002 table, boolean trackingOn) {
+    if (trackingOn) {
+      ChangeInfoModel_V002 target = ChangeInfoModel_V002.from(ChangeInfo.added());
+      table.changeInfo = target;
+      adjustTableCells(table, target);
+    }
+    return table;
+  }
+
   private static void adjustStep(AbstractStepModel_V002 step) {
     ChangeInfoModel_V002 target = ChangeInfoModel_V002.from(ChangeInfo.added());
     step.changeInfo = target;

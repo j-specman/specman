@@ -385,6 +385,30 @@ public class EditContainer extends JPanel {
 		return tableEditArea;
 	}
 
+	/** Inserts a table pasted from the clipboard (already a fully built model, e.g. with
+	 * pre-existing cell content and change markings) at the initiating text area's caret
+	 * position - the pasted counterpart to the columns/rows overload above, which always
+	 * creates a fresh blank table instead. */
+	public EditArea addTableUDBL(TextEditArea initiatingTextArea, TableEditAreaModel_V002 model) {
+		EditorI editor = editor();
+		TableEditArea tableEditArea;
+		try (UndoRecording ur = editor.composeUndo()) {
+			int initiatingTextAreaIndex = indexOf(initiatingTextArea);
+			WrappedPosition initiatingCaretPosition = initiatingTextArea.getWrappedCaretPosition();
+			tableEditArea = new TableEditArea(model);
+			addEditArea(tableEditArea, initiatingTextAreaIndex+1);
+			TextEditArea cutOffTextArea = initiatingTextArea.split(initiatingCaretPosition);
+			if (cutOffTextArea != null) {
+				addEditArea(cutOffTextArea, initiatingTextAreaIndex+2);
+			}
+			editor.addEdit(new UndoableEditAreaAdded(this, initiatingTextArea, tableEditArea, cutOffTextArea));
+			editor.diagrammAktualisieren(initiatingTextArea);
+		}
+		updateBounds();
+		return tableEditArea;
+	}
+
+
 	public void addImageUDBL(BufferedImage image, TextEditArea initiatingTextArea) {
 		EditorI editor = editor();
 		try (UndoRecording ur = editor.composeUndo()) {

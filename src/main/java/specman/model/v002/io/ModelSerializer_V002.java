@@ -82,6 +82,14 @@ public class ModelSerializer_V002 {
         return serializeSteps(List.of(step));
     }
 
+    /** Serializes a single table to the SpecmanModel_V002 fragment format for clipboard use. */
+    public String serializeTable(TableEditAreaModel_V002 table) {
+        sb.setLength(0);
+        indentionLevel = 0;
+        appendTable(table);
+        return sb.toString();
+    }
+
 
     /** Serializes a DiagramModel_V002 to SpecmanModel_V002 text format. */
     public String serialize(DiagramModel_V002 model) {

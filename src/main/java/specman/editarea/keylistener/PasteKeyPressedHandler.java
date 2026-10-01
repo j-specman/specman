@@ -2,6 +2,7 @@ package specman.editarea.keylistener;
 
 import specman.ChangeSet;
 import specman.clipboard.SpecmanTextTransferable;
+import specman.clipboard.SpecmanTableTransferable;
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedElement;
@@ -47,6 +48,14 @@ class PasteKeyPressedHandler extends AbstractKeyEventHandler {
           TextEditAreaModel_V002 model = (TextEditAreaModel_V002)
               contents.getTransferData(SpecmanTextTransferable.SPECMAN_TEXT_FLAVOR);
           pasteFormatted(model, contents, clipboard);
+          return;
+        }
+        // Checked before the stringFlavor fallback below, which would otherwise swallow a
+        // copied table as its raw serialized text (SpecmanTableTransferable also supports
+        // stringFlavor, for interop with pasting into a plain text editor).
+        if (contents.isDataFlavorSupported(SpecmanTableTransferable.SPECMAN_TABLE_FLAVOR)) {
+          event.consume();
+          editor().pasteTableInto(textArea);
           return;
         }
         // External content (Word etc.): strip to plain text to avoid messy HTML,

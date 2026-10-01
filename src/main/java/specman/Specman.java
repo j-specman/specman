@@ -17,6 +17,7 @@ import specman.editarea.InteractiveStepFragment;
 import specman.graphics.IconReader;
 import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.editarea.EditContainer;
+import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.undo.UndoableSchrittHinzugefuegt;
 import specman.undo.manager.SpecmanUndoManager;
@@ -726,6 +727,10 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
   @Override public void cutStepToClipboard(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) { new CutStepOp(this, step, initiatingFragment).run(); }
 
   @Override public void pasteStepsAfter(AbstractSchrittView referenceStep) { new PasteStepsOp(this, referenceStep).run(); }
+
+  @Override public void copyTableToClipboard(TableEditArea table) { new CopyTableOp(table).run(); }
+  @Override public void cutTableToClipboard(TableEditArea table) { new CutTableOp(this, table).run(); }
+  @Override public void pasteTableInto(TextEditArea initiatingTextArea) { new PasteTableOp(this, initiatingTextArea).run(); }
 
   @Override
   public void moveBranchSequenceLeftADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {

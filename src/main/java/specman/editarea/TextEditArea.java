@@ -18,6 +18,7 @@ import specman.editarea.document.WrappedPosition;
 import specman.editarea.stepnumberlabel.BreakCatchScrollMouseAdapter;
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.Markup_V002;
+import specman.model.v002.TableEditAreaModel_V002;
 import specman.model.v002.TextEditAreaModel_V002;
 import specman.pdf.FormattedShapeText;
 import specman.pdf.Shape;
@@ -461,6 +462,10 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     public EditArea addTable(int columns, int rows) {
         return getParent().addTableUDBL(this, columns, rows);
+    }
+
+    public EditArea addTable(TableEditAreaModel_V002 model) {
+        return getParent().addTableUDBL(this, model);
     }
 
     public EditArea toggleListItemUDBL(boolean ordered) {

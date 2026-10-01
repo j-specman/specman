@@ -4,6 +4,7 @@ import specman.draganddrop.DragMouseAdapter;
 import specman.editarea.EditArea;
 import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
+import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
@@ -56,6 +57,9 @@ public interface EditorI extends FocusListener {
   void copyStepToClipboard(AbstractSchrittView step);
   void cutStepToClipboard(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   void pasteStepsAfter(AbstractSchrittView referenceStep);
+  void copyTableToClipboard(TableEditArea table);
+  void cutTableToClipboard(TableEditArea table);
+  void pasteTableInto(TextEditArea initiatingTextArea);
   void moveBranchSequenceLeftADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   void moveBranchSequenceRightADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   DragMouseAdapter createDragMouseAdapter();

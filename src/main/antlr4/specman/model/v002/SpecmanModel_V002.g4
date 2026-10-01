@@ -50,6 +50,11 @@ stepFragment
     : step+ EOF
     ;
 
+// Entry point for a single copied/cut table (table clipboard fragment).
+tableFragment
+    : tableBlock EOF
+    ;
+
 // Diagram-level settings (DiagramModel_V002 scalar fields + PdfExportOptionsModel_V002).
 // All entries are optional; absent entries fall back to defaults when parsing.
 settings

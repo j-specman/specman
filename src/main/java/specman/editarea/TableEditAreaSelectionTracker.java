@@ -112,20 +112,24 @@ public class TableEditAreaSelectionTracker implements MouseListener, MouseMotion
       return false;
     }
     if (e.getKeyCode() == KeyEvent.VK_C) {
-      // TODO: copyTable()
-      resetSelection();
-      editArea.repaint();
-      e.consume();
-      return true;
+      return performAndConsume(e, () -> editor().copyTableToClipboard(editArea));
     }
     if (e.getKeyCode() == KeyEvent.VK_X) {
-      // TODO: cutTable()
-      resetSelection();
-      editArea.repaint();
-      e.consume();
-      return true;
+      return performAndConsume(e, () -> editor().cutTableToClipboard(editArea));
     }
     return false;
+  }
+
+  /** Cursor must be reset before the action runs: without change tracking, cutting detaches
+   * editArea from its parent, so resetSelection()'s own cursor reset would find a null root
+   * pane afterward and silently do nothing, leaving the "remove table" cursor stuck. */
+  private boolean performAndConsume(KeyEvent e, Runnable action) {
+    setEditAreaCursor(null);
+    action.run();
+    resetSelection();
+    editArea.repaint();
+    e.consume();
+    return true;
   }
 
   /** Found this little trick at https://coderanch.com/t/710608/java/set-cursor-JButton
