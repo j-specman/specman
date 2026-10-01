@@ -368,21 +368,8 @@ public class EditContainer extends JPanel {
 	public InteractiveStepFragment asInteractiveFragment() { return editAreas.get(0); }
 
 	public EditArea addTableUDBL(TextEditArea initiatingTextArea, int columns, int rows) {
-		EditorI editor = editor();
-		TableEditArea tableEditArea;
-		try (UndoRecording ur = editor.composeUndo()) {
-			int initiatingTextAreaIndex = indexOf(initiatingTextArea);
-			WrappedPosition initiatingCaretPosition = initiatingTextArea.getWrappedCaretPosition();
-			tableEditArea = new TableEditArea(columns, rows, TextInit.initialChangeInfo());
-			addEditArea(tableEditArea, initiatingTextAreaIndex+1);
-			TextEditArea cutOffTextArea = initiatingTextArea.split(initiatingCaretPosition);
-			if (cutOffTextArea != null) {
-				addEditArea(cutOffTextArea, initiatingTextAreaIndex+2);
-			}
-			editor.addEdit(new UndoableEditAreaAdded(this, initiatingTextArea, tableEditArea, cutOffTextArea));
-		}
-		updateBounds();
-		return tableEditArea;
+		TableEditArea tableEditArea = new TableEditArea(columns, rows, TextInit.initialChangeInfo());
+		return addTableUDBL(initiatingTextArea, tableEditArea, false);
 	}
 
 	/** Inserts a table pasted from the clipboard (already a fully built model, e.g. with
@@ -390,19 +377,28 @@ public class EditContainer extends JPanel {
 	 * position - the pasted counterpart to the columns/rows overload above, which always
 	 * creates a fresh blank table instead. */
 	public EditArea addTableUDBL(TextEditArea initiatingTextArea, TableEditAreaModel_V002 model) {
+		TableEditArea tableEditArea = new TableEditArea(model);
+		return addTableUDBL(initiatingTextArea, tableEditArea, true);
+	}
+
+	/** Shared insertion logic for both addTableUDBL overloads above: splits the initiating text
+	 * area at the caret and inserts the already-constructed table in between. refreshDiagram is
+	 * only needed for the pasted-model case, where the table may bring sizeable pre-existing
+	 * content that affects diagram layout - a freshly created blank table never does. */
+	private EditArea addTableUDBL(TextEditArea initiatingTextArea, TableEditArea tableEditArea, boolean refreshDiagram) {
 		EditorI editor = editor();
-		TableEditArea tableEditArea;
 		try (UndoRecording ur = editor.composeUndo()) {
 			int initiatingTextAreaIndex = indexOf(initiatingTextArea);
 			WrappedPosition initiatingCaretPosition = initiatingTextArea.getWrappedCaretPosition();
-			tableEditArea = new TableEditArea(model);
 			addEditArea(tableEditArea, initiatingTextAreaIndex+1);
 			TextEditArea cutOffTextArea = initiatingTextArea.split(initiatingCaretPosition);
 			if (cutOffTextArea != null) {
 				addEditArea(cutOffTextArea, initiatingTextAreaIndex+2);
 			}
 			editor.addEdit(new UndoableEditAreaAdded(this, initiatingTextArea, tableEditArea, cutOffTextArea));
-			editor.diagrammAktualisieren(initiatingTextArea);
+			if (refreshDiagram) {
+				editor.diagrammAktualisieren(initiatingTextArea);
+			}
 		}
 		updateBounds();
 		return tableEditArea;
