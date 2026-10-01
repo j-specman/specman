@@ -260,6 +260,61 @@
                         </goals>
                     </execution>
 
+                    <!--
+                        Generates readme.adoc from howto/readme-template.adoc and the region between
+                        '// tag::readme[]' and '// end::readme[]' in doc/specman-manual.adoc.
+                        GitHub doesn't resolve AsciiDoc includes, so the readme must be a real copy.
+                        Standalone usage: mvn antrun:run@generate-readme
+                        The regular expressions below are vibe-coded, so don't expect them to be human-readable
+                        tag::ID[] / end::ID[] is AsciiDoc's own tagged-region syntax (normally used with include::[tags=ID]);
+                        we reuse it here for a familiar, tool-recognizable marker, even though AsciiDoc includes are not applicable here.
+                    -->
+                    <execution>
+                        <id>generate-readme</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <fail message="Tag markers '// tag::readme[]' / '// end::readme[]' missing in doc/specman-manual.adoc">
+                                    <condition>
+                                        <not>
+                                            <and>
+                                                <resourcecontains resource="${project.basedir}/doc/specman-manual.adoc" substring="// tag::readme[]"/>
+                                                <resourcecontains resource="${project.basedir}/doc/specman-manual.adoc" substring="// end::readme[]"/>
+                                            </and>
+                                        </not>
+                                    </condition>
+                                </fail>
+                                <loadfile property="manual.excerpt" srcFile="${project.basedir}/doc/specman-manual.adoc" encoding="UTF-8">
+                                    <filterchain>
+                                        <!-- Extracts everything between the tag::readme[] and end::readme[] marker comments -->
+                                        <tokenfilter>
+                                            <filetokenizer/>
+                                            <replaceregex pattern="^.*// tag::readme\[\][^\r\n]*\R(.*?)\R*// end::readme\[\].*$" replace="\1" flags="s"/>
+                                        </tokenfilter>
+                                        <!-- The readme lives in the project root, so relative image and link targets need the doc/ prefix -->
+                                        <tokenfilter>
+                                            <replaceregex pattern="(image::?|link:)(?!https?:)([^\[\s]+)\[" replace="\1doc/\2[" flags="g"/>
+                                        </tokenfilter>
+                                    </filterchain>
+                                </loadfile>
+                                <copy file="${project.basedir}/howto/readme-template.adoc" tofile="${project.basedir}/readme.adoc"
+                                      overwrite="true" encoding="UTF-8">
+                                    <filterset>
+                                        <!--
+                                            manual.excerpt is an Ant property set above by <loadfile>, not a Maven property -
+                                            it only exists at Ant runtime within this target. IDEs that check ${...} against
+                                            Maven properties (e.g. IntelliJ) will flag it as unresolvable; that is a false positive.
+                                        -->
+                                        <filter token="MANUAL_EXCERPT" value="${manual.excerpt}"/>
+                                    </filterset>
+                                </copy>
+                            </target>
+                        </configuration>
+                    </execution>
+
                 </executions>
             </plugin>
 

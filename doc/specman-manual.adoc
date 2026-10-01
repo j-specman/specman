@@ -3,6 +3,7 @@
 # Specman 1.1 Manual
 
 ## Introduction
+// tag::readme[] - this region is copied into readme.adoc by the 'generate-readme' execution in pom.xml (mvn package, or standalone: mvn antrun:run@generate-readme)
 Specman is a WYSIWYG editor for actogramms, which are basically Nassi-Shneiderman-like diagrams with some graphical aspects taken over from UML activity diagrams. Specman is designed for the specification of procedural workflows in software systems, and came out of more than 15 years of experience in software engineering based on standard tools like Microsoft Word, Confluence and UML.
 
 Microsoft Word is a perfect word processor with change tracking (a crucial aspect for iterative / agile development), but control structures like loops and branches are difficult to visualize. UML activity diagrams on the other hand are very good at visualizing control structures, but change tracking and diagram layout stability in iterative development are poor. Specman makes a difference by combining various tooling aspects in a unique way which turned out to be crucial for highly efficient, iterative software development.
@@ -35,8 +36,7 @@ Since version 1.2.1, Specman supports multiple change sets, which is of interest
 
 ### Real world use case specifications
 For an impression how real-world specifications look like in Specman, see the link:usecase-birdsview.png[bird's view] on a mid-size system usecase specification from ongoing project development.
-
-
+// end::readme[] - see tag::readme[] above
 
 ## Specman Main Window structure
 Starting Specman brings up an empty window with the following areas.
