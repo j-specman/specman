@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Specman @VERSION@ (portable)</title>
+<style>
+  body { font-family: sans-serif; line-height: 1.5; max-width: 40em; margin: 2em auto; padding: 0 1em; color: #222; }
+  code { background: #f0f0f0; padding: 0.1em 0.3em; border-radius: 3px; }
+  a { color: #998200; }
+  h1 { display: flex; align-items: center; gap: 0.4em; }
+</style>
+</head>
+<body>
+<h1><img src="specman.png" alt="" width="32" height="32">Specman @VERSION@ (portable)</h1>
+
+<p>This directory contains everything needed to run Specman without installing anything:</p>
+
+<ul>
+  <li><code>specman.bat</code> / <code>specman.sh</code> - starts Specman (Windows / Linux)</li>
+  <li><code>specman-@VERSION@-jar-with-dependencies.jar</code> - the application itself</li>
+  <li><code>SpecmanModel_V002.g4</code> - the grammar of the <code>.nsd</code> file format, for AI-agent-assisted spec authoring</li>
+  <li><code>specman-reference-*.nsd</code> - a reference model matching this grammar version</li>
+</ul>
+
+<p>The full manual is maintained online and keeps growing:<br>
+<a href="https://github.com/j-specman/specman/blob/master/doc/specman-manual.adoc">https://github.com/j-specman/specman/blob/master/doc/specman-manual.adoc</a></p>
+
+<p><strong>Note:</strong> that link always points to the latest state on the <code>master</code> branch, which may already describe features newer than this Specman @VERSION@ release.</p>
+</body>
+</html>

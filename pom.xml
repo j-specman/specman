@@ -570,8 +570,16 @@
                                             <fileset file="${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar"/>
                                             <fileset file="${project.basedir}/src/main/antlr4/specman/model/v002/SpecmanModel_V002.g4"/>
                                             <fileset dir="${project.basedir}" includes="specman-reference-v${specman.release.version}-*.nsd"/>
+                                            <fileset file="${project.basedir}/src/main/resources/images/specman.png"/>
                                         </copy>
                                         <chmod file="${specman.releaseBundle.dir}/specman.sh" perm="755"/>
+                                        <!-- Doc entry point for the zip: just a pointer to the manual on GitHub, not a copy of doc/ -->
+                                        <copy file="${project.basedir}/howto/template-specman-readme.html" tofile="${specman.releaseBundle.dir}/specman-readme.html"
+                                              overwrite="true" encoding="UTF-8">
+                                            <filterset>
+                                                <filter token="VERSION" value="${project.version}"/>
+                                            </filterset>
+                                        </copy>
 
                                         <!--
                                             Zip the files at archive root (no specman-installation/<version>/ wrapper
