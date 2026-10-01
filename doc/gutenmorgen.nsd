@@ -1,368 +1,76 @@
-{
-  "specmanVersion" : "0.0.1",
-  "modelType" : "specman.model.v001.StruktogrammModel_V001",
-  "model" : {
-    "name" : "frame0",
-    "breite" : 483,
-    "zoomFaktor" : 100,
-    "changeModeenabled" : false,
-    "hauptSequenz" : {
-      "id" : {
-        "nummern" : [ "java.util.ArrayList", [ 0 ] ]
-      },
-      "aenderungsart" : null,
-      "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
-        "id" : {
-          "nummern" : [ "java.util.ArrayList", [ 1 ] ]
-        },
-        "nummer" : "1",
-        "inhalt" : {
-          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    W<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">ecker \n    klingelt</font></span>\n  </body>\n</html>\n",
-            "plainText" : "\nWecker klingelt",
-            "markups" : [ "java.util.ArrayList", [ ] ],
-            "aenderungsart" : "Untracked"
-          } ] ] ]
-        },
-        "farbe" : -1,
-        "aenderungsart" : "Untracked",
-        "quellschrittID" : null,
-        "decorationStyle" : "None"
-      } ], [ "specman.model.v001.IfElseSchrittModel_V001", {
-        "id" : {
-          "nummern" : [ "java.util.ArrayList", [ 2 ] ]
-        },
-        "nummer" : "2",
-        "inhalt" : {
-          "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-            "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div align=\"center\">\n      W<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">ochentag \n      pr&#252;fen</font></span>\n    </div>\n  </body>\n</html>\n",
-            "plainText" : "\nWochentag prüfen",
-            "markups" : [ "java.util.ArrayList", [ ] ],
-            "aenderungsart" : "Untracked"
-          } ] ] ]
-        },
-        "farbe" : -1,
-        "aenderungsart" : "Untracked",
-        "quellschrittID" : null,
-        "decorationStyle" : "None",
-        "zugeklappt" : false,
-        "ifSequenz" : {
-          "id" : {
-            "nummern" : [ "java.util.ArrayList", [ 2, 0 ] ]
-          },
-          "aenderungsart" : "Untracked",
-          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
-            "id" : {
-              "nummern" : [ "java.util.ArrayList", [ 2, 1 ] ]
-            },
-            "nummer" : "2.1",
-            "inhalt" : {
-              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">Wecker \n    ausmachen</font></span>\n  </body>\n</html>\n",
-                "plainText" : "\nWecker ausmachen",
-                "markups" : [ "java.util.ArrayList", [ ] ],
-                "aenderungsart" : "Untracked"
-              } ] ] ]
-            },
-            "farbe" : -1,
-            "aenderungsart" : "Untracked",
-            "quellschrittID" : null,
-            "decorationStyle" : "None"
-          } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
-            "id" : {
-              "nummern" : [ "java.util.ArrayList", [ 2, 2 ] ]
-            },
-            "nummer" : "2.2",
-            "inhalt" : {
-              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    W<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">ieder \n    umdrehen</font></span>\n  </body>\n</html>\n",
-                "plainText" : "\nWieder umdrehen",
-                "markups" : [ "java.util.ArrayList", [ ] ],
-                "aenderungsart" : "Untracked"
-              } ] ] ]
-            },
-            "farbe" : -1,
-            "aenderungsart" : "Untracked",
-            "quellschrittID" : null,
-            "decorationStyle" : "None"
-          } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
-            "id" : {
-              "nummern" : [ "java.util.ArrayList", [ 2, 3 ] ]
-            },
-            "nummer" : "2.3",
-            "inhalt" : {
-              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    W<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">eiterschlafen</font></span>\n  </body>\n</html>\n",
-                "plainText" : "\nWeiterschlafen",
-                "markups" : [ "java.util.ArrayList", [ ] ],
-                "aenderungsart" : "Untracked"
-              } ] ] ]
-            },
-            "farbe" : -1,
-            "aenderungsart" : "Untracked",
-            "quellschrittID" : null,
-            "decorationStyle" : "None"
-          } ] ] ],
-          "catchBereich" : {
-            "catchSequences" : [ "java.util.ArrayList", [ ] ],
-            "sequencesWidthPercent" : null,
-            "zugeklappt" : false
-          },
-          "ueberschrift" : {
-            "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-              "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    S<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">amstag \n    oder Sonntag</font></span>\n  </body>\n</html>\n",
-              "plainText" : "\nSamstag oder Sonntag",
-              "markups" : [ "java.util.ArrayList", [ ] ],
-              "aenderungsart" : "Untracked"
-            } ] ] ]
-          }
-        },
-        "elseSequenz" : {
-          "id" : {
-            "nummern" : [ "java.util.ArrayList", [ 3, 0 ] ]
-          },
-          "aenderungsart" : "Untracked",
-          "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.WhileSchrittModel_V001", {
-            "id" : {
-              "nummern" : [ "java.util.ArrayList", [ 3, 1 ] ]
-            },
-            "nummer" : "3.1",
-            "inhalt" : {
-              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    S<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">olange \n    ich noch nicht richtig wach bin und noch wenigstens 5 Minuten Zeit bleiben</font></span>\n  </body>\n</html>\n",
-                "plainText" : "\nSolange ich noch nicht richtig wach bin und noch wenigstens 5 Minuten Zeit bleiben",
-                "markups" : [ "java.util.ArrayList", [ ] ],
-                "aenderungsart" : "Untracked"
-              } ] ] ]
-            },
-            "farbe" : -1,
-            "aenderungsart" : "Untracked",
-            "quellschrittID" : null,
-            "decorationStyle" : "None",
-            "zugeklappt" : false,
-            "wiederholSequenz" : {
-              "id" : {
-                "nummern" : [ "java.util.ArrayList", [ 3, 1, 0 ] ]
-              },
-              "aenderungsart" : null,
-              "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
-                "id" : {
-                  "nummern" : [ "java.util.ArrayList", [ 3, 1, 1 ] ]
-                },
-                "nummer" : "3.1.1",
-                "inhalt" : {
-                  "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                    "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    W<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">ecker \n    <strike>ausmachen</strike> auf &quot;Snooze&quot; stellen</font></span>\n  </body>\n</html>\n",
-                    "plainText" : "\nWecker ausmachen auf \"Snooze\" stellen",
-                    "markups" : [ "java.util.ArrayList", [ {
-                      "from" : 7,
-                      "to" : 15,
-                      "type" : "Changed"
-                    }, {
-                      "from" : 16,
-                      "to" : 36,
-                      "type" : "Changed"
-                    } ] ],
-                    "aenderungsart" : "Untracked"
-                  } ] ] ]
-                },
-                "farbe" : -1,
-                "aenderungsart" : "Untracked",
-                "quellschrittID" : null,
-                "decorationStyle" : "None"
-              } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
-                "id" : {
-                  "nummern" : [ "java.util.ArrayList", [ 3, 1, 2 ] ]
-                },
-                "nummer" : "3.1.2",
-                "inhalt" : {
-                  "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                    "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    A<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">ugen \n    wieder schlie&#223;en</font></span>\n  </body>\n</html>\n",
-                    "plainText" : "\nAugen wieder schließen",
-                    "markups" : [ "java.util.ArrayList", [ ] ],
-                    "aenderungsart" : "Untracked"
-                  } ] ] ]
-                },
-                "farbe" : -1,
-                "aenderungsart" : "Untracked",
-                "quellschrittID" : null,
-                "decorationStyle" : "None"
-              } ] ] ],
-              "catchBereich" : {
-                "catchSequences" : [ "java.util.ArrayList", [ ] ],
-                "sequencesWidthPercent" : null,
-                "zugeklappt" : false
-              }
-            },
-            "balkenbreite" : 18
-          } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
-            "id" : {
-              "nummern" : [ "java.util.ArrayList", [ 3, 2 ] ]
-            },
-            "nummer" : "3.2",
-            "inhalt" : {
-              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    W<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">ecker \n    ausmachen</font></span>\n  </body>\n</html>\n",
-                "plainText" : "\nWecker ausmachen",
-                "markups" : [ "java.util.ArrayList", [ ] ],
-                "aenderungsart" : "Untracked"
-              } ] ] ]
-            },
-            "farbe" : -1,
-            "aenderungsart" : "Untracked",
-            "quellschrittID" : null,
-            "decorationStyle" : "None"
-          } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
-            "id" : {
-              "nummern" : [ "java.util.ArrayList", [ 3, 3 ] ]
-            },
-            "nummer" : "3.3",
-            "inhalt" : {
-              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    A<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">ufstehen</font></span>\n  </body>\n</html>\n",
-                "plainText" : "\nAufstehen",
-                "markups" : [ "java.util.ArrayList", [ ] ],
-                "aenderungsart" : "Untracked"
-              } ] ] ]
-            },
-            "farbe" : -1,
-            "aenderungsart" : "Untracked",
-            "quellschrittID" : null,
-            "decorationStyle" : "None"
-          } ], [ "specman.model.v001.IfSchrittModel_V001", {
-            "id" : {
-              "nummern" : [ "java.util.ArrayList", [ 3, 4 ] ]
-            },
-            "nummer" : "3.4",
-            "inhalt" : {
-              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div align=\"center\">\n      L<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">ust \n      auf einen Kaffee?</font></span>\n    </div>\n  </body>\n</html>\n",
-                "plainText" : "\nLust auf einen Kaffee?",
-                "markups" : [ "java.util.ArrayList", [ ] ],
-                "aenderungsart" : "Untracked"
-              } ] ] ]
-            },
-            "farbe" : -1,
-            "aenderungsart" : "Untracked",
-            "quellschrittID" : null,
-            "decorationStyle" : "None",
-            "zugeklappt" : false,
-            "ifSequenz" : {
-              "id" : {
-                "nummern" : [ "java.util.ArrayList", [ 3, 4, 0 ] ]
-              },
-              "aenderungsart" : "Untracked",
-              "schritte" : [ "java.util.ArrayList", [ [ "specman.model.v001.EinfacherSchrittModel_V001", {
-                "id" : {
-                  "nummern" : [ "java.util.ArrayList", [ 3, 4, 1 ] ]
-                },
-                "nummer" : "3.4.1",
-                "inhalt" : {
-                  "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                    "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    K<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">affeemaschine \n    einschalten</font></span>\n  </body>\n</html>\n",
-                    "plainText" : "\nKaffeemaschine einschalten",
-                    "markups" : [ "java.util.ArrayList", [ ] ],
-                    "aenderungsart" : "Untracked"
-                  } ] ] ]
-                },
-                "farbe" : -1,
-                "aenderungsart" : "Untracked",
-                "quellschrittID" : null,
-                "decorationStyle" : "None"
-              } ] ] ],
-              "catchBereich" : {
-                "catchSequences" : [ "java.util.ArrayList", [ ] ],
-                "sequencesWidthPercent" : null,
-                "zugeklappt" : false
-              },
-              "ueberschrift" : {
-                "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                  "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div align=\"right\">\n      Ja\n    </div>\n  </body>\n</html>\n",
-                  "plainText" : "\nJa",
-                  "markups" : [ "java.util.ArrayList", [ ] ],
-                  "aenderungsart" : "Untracked"
-                } ] ] ]
-              }
-            },
-            "leerBreite" : 20
-          } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
-            "id" : {
-              "nummern" : [ "java.util.ArrayList", [ 3, 5 ] ]
-            },
-            "nummer" : "3.5",
-            "inhalt" : {
-              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    D<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">uschen \n    gehen</font></span>\n  </body>\n</html>\n",
-                "plainText" : "\nDuschen gehen",
-                "markups" : [ "java.util.ArrayList", [ ] ],
-                "aenderungsart" : "Untracked"
-              } ] ] ]
-            },
-            "farbe" : -1,
-            "aenderungsart" : "Untracked",
-            "quellschrittID" : null,
-            "decorationStyle" : "None"
-          } ], [ "specman.model.v001.EinfacherSchrittModel_V001", {
-            "id" : {
-              "nummern" : [ "java.util.ArrayList", [ 3, 6 ] ]
-            },
-            "nummer" : "3.6",
-            "inhalt" : {
-              "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-                "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    e<span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">tc. \n    etc.</font></span>\n  </body>\n</html>\n",
-                "plainText" : "\netc. etc.",
-                "markups" : [ "java.util.ArrayList", [ ] ],
-                "aenderungsart" : "Untracked"
-              } ] ] ]
-            },
-            "farbe" : -1,
-            "aenderungsart" : "Untracked",
-            "quellschrittID" : null,
-            "decorationStyle" : "None"
-          } ] ] ],
-          "catchBereich" : {
-            "catchSequences" : [ "java.util.ArrayList", [ ] ],
-            "sequencesWidthPercent" : null,
-            "zugeklappt" : false
-          },
-          "ueberschrift" : {
-            "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-              "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <div align=\"right\">\n      <span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">Werktag</font></span>\n    </div>\n  </body>\n</html>\n",
-              "plainText" : "\nWerktag",
-              "markups" : [ "java.util.ArrayList", [ ] ],
-              "aenderungsart" : "Untracked"
-            } ] ] ]
-          }
-        },
-        "ifBreitenanteil" : 0.24829157
-      } ] ] ],
-      "catchBereich" : {
-        "catchSequences" : [ "java.util.ArrayList", [ ] ],
-        "sequencesWidthPercent" : null,
-        "zugeklappt" : false
-      }
-    },
-    "intro" : {
-      "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-        "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n    <h1>\n      <span style=\"background-color: rgba(255, 255, 255, 0.0)\"><font color=\"#000000\">Guten \n      Morgen</font></span>\n    </h1>\n  </body>\n</html>\n",
-        "plainText" : "\nGuten Morgen",
-        "markups" : [ "java.util.ArrayList", [ ] ],
-        "aenderungsart" : "Untracked"
-      } ] ] ]
-    },
-    "outro" : {
-      "areas" : [ "java.util.ArrayList", [ [ "specman.model.v001.TextEditAreaModel_V001", {
-        "text" : "<html>\n  <head>\n    \n  </head>\n  <body>\n  </body>\n</html>\n",
-        "plainText" : "\n",
-        "markups" : [ "java.util.ArrayList", [ ] ],
-        "aenderungsart" : "Untracked"
-      } ] ] ]
-    },
-    "pdfExportOptions" : {
-      "filename" : "gutenmorgen-export.pdf",
-      "pageSize" : "A4",
-      "portrait" : true,
-      "paging" : false
+// {"specmanVersion":"1.3.1","modelType":"specman.model.v002.DiagramModel_V002"}
+// Specman: frame0
+// Format defined by grammar: SpecmanModel_V002.g4
+// Step numbers (first parameter of each step): unique diagram-wide; referenced by catch blocks and step links in text; sanitizer renumbers consistently
+// plain=`...` fields: plain-text rendition, regenerated by Specman on every sanitize run
+// markups=[...] fields: change-tracking annotations, maintained by Specman
+// image(...) { [base64:...] } blocks: embedded binary image data (base64-encoded)
+
+settings {
+    width=483
+    zoom=100
+    changeModeEnabled=false
+    changeSetName=yellow
+    pdfOptions {
+        filename=`gutenmorgen-export.pdf`
+        pageSize=A4
+        portrait=true
+        paging=false
     }
-  }
+}
+
+intro(`<h1>
+      <span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">Guten 
+      Morgen</font></span>
+    </h1>`, plain=`Guten Morgen`) {
+}
+
+mainSequence {
+    simple(1, fcee183f, `W<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">ecker 
+    klingelt</font></span>`, plain=`Wecker klingelt`, shade=#ffffff);
+    ifElse(2, 3553aa8b, `<div align="center">
+      W<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">ochentag 
+      pr&#252;fen</font></span>
+    </div>`, plain=`Wochentag prüfen`, ifRatio=23.69%, shade=#ffffff) {
+        if_branch(`S<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">amstag 
+    oder Sonntag</font></span>`, plain=`Samstag oder Sonntag`) {
+            simple(2.1, 3410819d, `<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">Wecker 
+    ausmachen</font></span>`, plain=`Wecker ausmachen`, shade=#ffffff);
+            simple(2.2, afce49e5, `W<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">ieder 
+    umdrehen</font></span>`, plain=`Wieder umdrehen`, shade=#ffffff);
+            simple(2.3, c7a9a7ec, `W<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">eiterschlafen</font></span>`, plain=`Weiterschlafen`, shade=#ffffff);
+        }
+        else_branch(`<div align="right">
+      <span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">Werktag</font></span>
+    </div>`, plain=`Werktag`) {
+            while(3.1, b2273919, `S<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">olange 
+    ich noch nicht richtig wach bin und noch wenigstens 5 Minuten Zeit bleiben</font></span>`, plain=`Solange ich noch nicht richtig wach bin und noch wenigstens 5 Minuten Zeit bleiben`, barWidth=18, shade=#ffffff) {
+                simple(3.1.1, edae09be, `W<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">ecker 
+    <strike>ausmachen</strike> auf &quot;Snooze&quot; stellen</font></span>`, plain=`Wecker ausmachen auf "Snooze" stellen`, markups=[(7,15,Changed,yellow)(16,36,Changed,yellow)], shade=#ffffff);
+                simple(3.1.2, 4a72e245, `A<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">ugen 
+    wieder schlie&#223;en</font></span>`, plain=`Augen wieder schließen`, shade=#ffffff);
+            }
+            simple(3.2, ec738318, `W<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">ecker 
+    ausmachen</font></span>`, plain=`Wecker ausmachen`, shade=#ffffff);
+            simple(3.3, 1b535ee9, `A<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">ufstehen</font></span>`, plain=`Aufstehen`, shade=#ffffff);
+            if(3.4, 9ea5860a, `<div align="center">
+      L<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">ust 
+      auf einen Kaffee?</font></span>
+    </div>`, plain=`Lust auf einen Kaffee?`, emptyWidth=20, shade=#ffffff) {
+                if_branch(`<div align="right">
+      Ja
+    </div>`, plain=`Ja`) {
+                    simple(3.4.1, 4360bd84, `K<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">affeemaschine 
+    einschalten</font></span>`, plain=`Kaffeemaschine einschalten`, shade=#ffffff);
+                }
+            }
+            simple(3.5, fee94d27, `D<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">uschen 
+    gehen</font></span>`, plain=`Duschen gehen`, shade=#ffffff);
+            simple(3.6, 1d45b9a5, `e<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">tc. 
+    etc.</font></span>`, plain=`etc. etc.`, shade=#ffffff);
+        }
+    }
+}
+
+outro(``, plain=``) {
 }
