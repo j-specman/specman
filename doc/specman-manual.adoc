@@ -3,93 +3,93 @@
 # Specman 1.1 Manual
 
 ## Introduction
-Specman is a WYSIWYG editor for actogramms, which are basically Nassi-Shneiderman-like diagramms with some graphical aspects taken over from UML activity diagramms. Specman is designed for the specification of procedural workflows in software systems, and came out of more than 15 years of experience in software engineering based on standard tools like Microsoft Word, Confluence and UML.
+Specman is a WYSIWYG editor for actogramms, which are basically Nassi-Shneiderman-like diagrams with some graphical aspects taken over from UML activity diagrams. Specman is designed for the specification of procedural workflows in software systems, and came out of more than 15 years of experience in software engineering based on standard tools like Microsoft Word, Confluence and UML.
 
-Microsoft Word is a perfect word processor with change tracking (a crucial aspect for iterative / agile development), but control structures like loops and branches are difficult to visualize. UML activity diagramms on the other hand are very good on visualizing control structures, but change tracking and diagramm layout stability in iterative development are poor. Specman makes a difference by combining various tooling aspects in a unique way which turned out to be crucial for highly efficient, iterative software development.
+Microsoft Word is a perfect word processor with change tracking (a crucial aspect for iterative / agile development), but control structures like loops and branches are difficult to visualize. UML activity diagrams on the other hand are very good at visualizing control structures, but change tracking and diagram layout stability in iterative development are poor. Specman makes a difference by combining various tooling aspects in a unique way which turned out to be crucial for highly efficient, iterative software development.
 
 ## Hello Specman
-Specman is a small Java 2D / Swing application, which builds to an executable JAR file using Maven. To run Specman, you need a Java Runtime Environment (JRE) version 17 or higher installed. The main class is specman.Specman. Opening the file link:anagramms.nsd[anagramms.nsd] in Specman brings up the following diagramm on the screen
+Specman is a small Java 2D / Swing application, which is built into an executable JAR file using Maven. To run Specman, you need a Java Runtime Environment (JRE) version 17 or higher installed. The main class is specman.Specman. Opening the file link:anagramms.nsd[anagramms.nsd] in Specman brings up the following diagram on the screen:
 
-image::anagramms-screenshot.png[Two Word Anagramms Specman Diagramm]
+image::anagramms-screenshot.png[Two Word Anagrams Specman Diagram]
 
-A significant graphical difference to Nassi-Shneiderman diagramms is the representation of decisions nodes by diamonds as they are known from UML activity diagramms. The original Nassi-Shneiderman notation uses triangles which causes a little messy impression when they occur repeatedly in a diagramm.
+A significant graphical difference to Nassi-Shneiderman diagrams is the representation of decision nodes by diamonds as they are known from UML activity diagrams. The original Nassi-Shneiderman notation uses triangles which causes a little messy impression when they occur repeatedly in a diagram.
 
-Every structured step within a diagramm may be folded up, to hide the details of its inner structure. The following screenhot shows how the "Two Word Anagramms" diagramm looks like when all steps are folded up:
+Every structured step within a diagram may be folded up, to hide the details of its inner structure. The following screenshot shows what the "Two Word Anagrams" diagram looks like when all steps are folded up:
 
-image::anagramms-folded-screenshot.png[Two Word Anagramms Folded]
+image::anagramms-folded-screenshot.png[Two Word Anagrams Folded]
 
-The requirement in the description of the example is taken from a link:https://codingdojo.org/kata/Anagram/[code kata] published on codingdojo.org which perfectly illustrates what Specman and actogramms are made for: up-front design - both structured and change-friendly - rather than "design a little, code a little", which is a wide-spread antipattern. Check out link:https://clean-code-developer.com/[clean-code-developer.com] why it's anti. Writing code directly from the business requirements has a high risk to end up in spaghetti code even though the task doesn't sound too complicated at first glance. No big problem in one-shot coding, but a nightmare in iterative development where requirements are constantly in change.
+The requirement in the description of the example is taken from a link:https://codingdojo.org/kata/Anagram/[code kata] published on codingdojo.org which perfectly illustrates what Specman and actogramms are made for: up-front design - both structured and change-friendly - rather than "design a little, code a little", which is a widespread antipattern. Check out link:https://clean-code-developer.com/[clean-code-developer.com] to see why it's an antipattern. Writing code directly from the business requirements has a high risk of ending up in spaghetti code even though the task doesn't sound too complicated at first glance. No big problem in one-shot coding, but a nightmare in iterative development where requirements are constantly changing.
 
-### AI-ready File format
-Since version 1.3, the diagramm files have a pseudocode like format which makes them machine-readable e.g. to feed code generators or AI agent based programming pipelines. The file structure follows an EBNF grammar definied in SpecmanModel_V002.g4, which is part of the delivery. It is explicitly designed to also integrate AI support in the process of creating specifications. Using Specman's autoload mode and its headless sanitizer allows to set up a collaborative environment where the user is working with the WYSIWYG UI while an AI agent is supporting in the background. Specifications are supposed to be designed as both human-readable and technically exact, using a natural but precise language according to basic clean code development principles and the central ideas of Domain-Driven Design. The result is a document with structure and textual content which is perfectly understandable for AI agents.
+### AI-ready file format
+Since version 1.3, the diagram files have a pseudocode-like format which makes them machine-readable e.g. to feed code generators or AI agent based programming pipelines. The file structure follows an EBNF grammar defined in SpecmanModel_V002.g4, which is part of the delivery. It is explicitly designed to also integrate AI support in the process of creating specifications. Using Specman's autoload mode and its headless sanitizer makes it possible to set up a collaborative environment where the user is working with the WYSIWYG UI while an AI agent is supporting in the background. Specifications are supposed to be designed as both human-readable and technically exact, using a natural but precise language according to basic clean code development principles and the central ideas of Domain-Driven Design. The result is a document with structure and textual content which is perfectly understandable for AI agents.
 
 ### PDF export
-Specman provides a high-quality PDF export, so that the diagramms can be shared easily with everybody involved in the software engineering process. Reviewers only need a standard tool like Adobe's Acrobat Reader to open and comment the exported diagramms. See link:anagramms-export.pdf[anagramms-export.pdf] for an example of a PDF export of the "Anagrams" diagramm.
+Specman provides a high-quality PDF export, so that the diagrams can be shared easily with everybody involved in the software engineering process. Reviewers only need a standard tool like Adobe's Acrobat Reader to open and comment on the exported diagrams. See link:anagramms-export.pdf[anagramms-export.pdf] for an example of a PDF export of the "Anagrams" diagram.
 
 ### Change tracking
-The yellow highlighting in the screenshot above indicates changes which were made in change mode. Similar to Microsoft Word, e.g. deleting text in change mode does not actually cause the text do disappear but displayed as crossed out with a yellow background as if someone had marked the section with a text marker. Changes in a model are therefore immediately recognizable by everybody. This is a crucial aspect in iterative development where specifications evolve over time.
+The yellow highlighting in the screenshot above indicates changes which were made in change mode. Similar to Microsoft Word, e.g. deleting text in change mode does not actually cause the text to disappear but displayed as crossed out with a yellow background as if someone had marked the section with a text marker. Changes in a model are therefore immediately recognizable by everybody. This is a crucial aspect in iterative development where specifications evolve over time.
 
 Folding up a structured step which includes any change marks will cause the unfold-button beside the step number to be displayed with a yellow background. I.e. even if details are hidden, it is still visible that there are changes in the folded up section.
 
-Since version 1.2.1, Specman supports multiple change sets, which is of interest e.g. if there are multiple change request to be considered in parallel within a single development iteration.
+Since version 1.2.1, Specman supports multiple change sets, which is of interest e.g. if there are multiple change requests to be considered in parallel within a single development iteration.
 
 ## Specman Main Window structure
 Starting Specman brings up an empty window with the following areas.
 
 image::specman-window.png[Specman Toolbars]
 
-The diagramm area is initially empty as well as the intro and outro sections above and below. These sections are important in real-world applications where they contain additional context information like preconditions, postconditions, actors, references to related documents etc. For an impression how this may look like, see the link:usecase-birdsview.png[bird's view] on a mid-size system usecase specification from ongoing project development.
+The diagram area is initially empty as well as the intro and outro sections above and below. These sections are important in real-world applications where they contain additional context information like preconditions, postconditions, actors, references to related documents etc. For an impression of how this may look, see the link:usecase-birdsview.png[bird's view] on a mid-size system usecase specification from ongoing project development.
 
-## Populating the diagramm
-The diagramm gets populated by using the steps creation toolbar at the left of the window. Pressing a button in the toolbar creates a new step of the corresponding type in the diagramm area. The new step is always created below the step which the currently focused edit area is in. If the current focus is not within a step's edit area, the new step is created at the end of the diagramm.
+## Populating the diagram
+The diagram gets populated by using the steps creation toolbar at the left of the window. Pressing a button in the toolbar creates a new step of the corresponding type in the diagram area. The new step is always created below the step which the currently focused edit area is in. If the current focus is not within a step's edit area, the new step is created at the end of the diagram.
 
-As an alternative, most steps can be created by drag & drop by pressing the corresponding button from the toolbar, keeping the mouse pressed, moving it to the right place in the diagramm and releasing the mouse button there. A half-transparent grey insertion bar indicates where the new step will be created when the mouse button is released.
+As an alternative, most steps can be created by drag & drop by pressing the corresponding button from the toolbar, keeping the mouse pressed, moving it to the right place in the diagram and releasing the mouse button there. A half-transparent gray insertion bar indicates where the new step will be created when the mouse button is released.
 
 The steps creation bar provides the following buttons:
 
 image::../src/main/resources/images/einfacher-schritt.png[Simple Step]
-Creates a simple step in the diagramm. The new step is immediately focused, i.e. pressing the button multiple times creates multiple steps one after the other.
+Creates a simple step in the diagram. The new step is immediately focused, i.e. pressing the button multiple times creates multiple steps one after the other.
 
 image::../src/main/resources/images/subsequenz-schritt.png[Sub Sequence Step]
-Creates a subsequence of steps with an initial simple step immediately added within. Subsequences are not part of original Nassi-Shneidermann diagrammens. They bring structure into larger sequences like chapters in a book. These sub structure may be directly used as a reasonable indicator for how to structure the code when implementing the specification.
+Creates a subsequence of steps with an initial simple step immediately added within. Subsequences are not part of original Nassi-Shneiderman diagrams. They bring structure into larger sequences like chapters in a book. These substructures may be directly used as a reasonable indicator for how to structure the code when implementing the specification.
 
 The steps within the subsequence are numbered on a lower level, e.g. step 2.1, 2.2, 2.3 within subsequence step 2.
 
-Subsequences can be folded up to hide its content when the details are currently not of interest. Placing the mouse directly right of the subsequence's step number brings up a small button with a minus sign. Pressing this button folds up the subsequence. The button then shows a plus sign for unfolding the subsequence again.
+Subsequences can be folded up to hide their content when the details are currently not of interest. Placing the mouse directly right of the subsequence's step number brings up a small button with a minus sign. Pressing this button folds up the subsequence. The button then shows a plus sign for unfolding the subsequence again.
 
 image::../src/main/resources/images/while-schritt.png[While Step]
-Creates a loop step with an initial simple step in its repetition sequence immediately added. The repetitions sequence must not be empty. So if the first step must be a different one than a simple step, add a step of the required type and remove the initial first step afterward.
+Creates a loop step with an initial simple step in its repetition sequence immediately added. The repetition sequence must not be empty. So if the first step must be a different one than a simple step, add a step of the required type and remove the initial first step afterward.
 
 image::../src/main/resources/images/whilewhile-schritt.png[While While Step]
 Creates a loop step with an additional horizontal empty bar at the bottom. This is functionally identical with the loop step, but sometimes it is optically clearer to understand of a loop as an easily recognizable graphical boundary at the bottom. E.g. if there are catch steps at the end of the loop's repetition sequence.
 
 image::../src/main/resources/images/ifelse-schritt.png[If Else Step]
-Creates an if-else step with an initial simple step in its if and else branch. The division ratio of the branches may be changed by clicking on the separating line between the branches and moving it right or left.
+Creates an if-else step with an initial simple step in its if and else branches. The division ratio of the branches may be changed by clicking on the separating line between the branches and moving it right or left.
 
 image::../src/main/resources/images/if-schritt.png[If Step]
-Creates an if step. As a difference to the if-else step, the left branch is empty and its width cannot be modified.
+Creates an if step. Unlike the if-else step, the left branch is empty and its width cannot be modified.
 
 image::../src/main/resources/images/case-schritt.png[Case Step]
-Creates a case step which the default branch on the left and two initial other case branches on the right. Additional branches can be added by pressing the the corresponding button from the steps creation toolbar (see below). Branch removal is achieved by placing the cursor in the branch's heading / resp. condition edit area and pressing the delete button from the step & document properties toolbar. However, two case branches and the default branch are the minimum which a case step has to provide. Otherwise it's an if or if-else step.
+Creates a case step which has the default branch on the left and two initial other case branches on the right. Additional branches can be added by pressing the corresponding button from the steps creation toolbar (see below). Branch removal is achieved by placing the cursor in the branch's heading or condition edit area and pressing the delete button from the step & document properties toolbar. However, two case branches and the default branch are the minimum which a case step has to provide. Otherwise it's an if or if-else step.
 
 image::../src/main/resources/images/zweig.png[New Branch]
-Creates a new branch in a previously created case step. The creation by button click requires to place the cursor into an existing branch's heading edit area first. The new branch is then added _left_ from the cursor-selected branch. Alternatively the new branch can be created by drag & drop which requires to drag into an existing branch's heading. A vertical insertion bar indicates where the new branch will be created when releasing the mouse button.
+Creates a new branch in a previously created case step. The creation by button click requires placing the cursor into an existing branch's heading edit area first. The new branch is then added _left_ from the cursor-selected branch. Alternatively the new branch can be created by drag & drop which requires dragging into an existing branch's heading. A vertical insertion bar indicates where the new branch will be created when releasing the mouse button.
 
 image::../src/main/resources/images/break-schritt.png[Break Step]
-Creates a break step which can be understood as the occurence of business exception. It causes the following steps to be skipped down to the place where the exceptions gets caught. If it is not caught anywhere the exceptions causes the complete usecase to be aborted which is described in the diagramm. Whoever, this is usually not a good idea as it makes the reader wonder if this was designed by intention or if the design is not yet complete.
+Creates a break step which can be understood as the occurrence of a business exception. It causes the following steps to be skipped down to the place where the exception gets caught. If it is not caught anywhere the exception causes the complete usecase to be aborted which is described in the diagram. However, this is usually not a good idea as it makes the reader wonder if this was designed by intention or if the design is not yet complete.
 
-There are two flavours for using break steps: The compact form is the one being used in the anagramm example: The preceding step describes some system functionality and the break step simply mentions an exceptional situation which may occur in the step before. An appropriate check for the situation is implicitly assumed to be included in the described functionality. The more comprehensive form includes a preceding step which _explicitly_ consists of nothing else but the check for a particular exceptional situation where the break step(s) then expresses the abortion of the step sequence in case the situation is present. This form is recommended, if the situation takes some more text to be described or if it is of particular importance in the overall context. The actual system functionality is then described in a step following the break step(s).
+There are two flavours for using break steps: The compact form is the one being used in the anagram example: The preceding step describes some system functionality and the break step simply mentions an exceptional situation which may occur in the step before. An appropriate check for the situation is implicitly assumed to be included in the described functionality. The more comprehensive form includes a preceding step which _explicitly_ consists of nothing else but the check for a particular exceptional situation where the break step(s) then expresses the abortion of the step sequence in case the situation is present. This form is recommended, if the situation takes some more text to be described or if it is of particular importance in the overall context. The actual system functionality is then described in a step following the break step(s).
 
 image::../src/main/resources/images/catch-schritt.png[Catch Step]
 Creates a catch step for a previously defined break step. This is the only kind of step which unfortunately cannot be created by drag & drop yet and the creation takes the following steps.
 
-* Place the cursor into any step of the sequence which the catch step is supposed to be added at the very end.
-* Press the catch step button from the steps creation toolbar. This brings up a dialog for break step selection. The dialog allows to choose from all break steps
+* Place the cursor into any step of the sequence to which the catch step is to be added at the very end.
+* Press the catch step button from the steps creation toolbar. This brings up a dialog for break step selection. The dialog allows you to choose from all break steps
 ** which are not already coupled with a catch step yet and
-** which are present in the step sequence which the catch step is about to be attached to, resp. in any of its nested sequences
+** which are present in the step sequence to which the catch step is about to be attached, or in any of its nested sequences
 * After break step selection, the coupled catch step is added, including a handling sequence with an initial simple step.
-* The break step's content makes up the heading of the catch step, and the text content of both are now always kept in sync automatically.
+* The break step's content makes up the heading of the catch step, and the text content of both is now always kept in sync automatically.
 
-If a development project is working with a programming language that supports exceptions, it is strongly recommended to represent break and catch by throwing and catching exceptions in the code. In this case, it is a good idea to use relatively short expressions in the break step text which allows to directly derive exception type names from.
+If a development project is working with a programming language that supports exceptions, it is strongly recommended to represent break and catch by throwing and catching exceptions in the code. In this case, it is a good idea to use relatively short expressions in the break step text, from which exception type names can be directly derived.
 
-Catch steps are displayed in an optically separated sections with a gray bar above and below, making clear that this is not part of the normal control flow. Multiple catch steps for the same sequence are usually placed side by side which is
+Catch steps are displayed in optically separated sections with a gray bar above and below, making clear that this is not part of the normal control flow. Multiple catch steps for the same sequence are usually placed side by side which is
