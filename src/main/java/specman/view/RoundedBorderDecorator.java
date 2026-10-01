@@ -68,7 +68,6 @@ public class RoundedBorderDecorator extends JPanel {
 
       antialiasingOn(g2d);
       Shape innerShape = createInnerShape();
-      drawNumberStepBackground(g2d, innerShape);
       drawOuterBorderArea(g2d, innerShape);
       drawInnerBorderLine(g2d, innerShape);
 
@@ -95,19 +94,6 @@ public class RoundedBorderDecorator extends JPanel {
         (float)(getWidth() - borderWidthMinus),
         (float)(getHeight() - borderHeightMinus),
         arc, arc);
-  }
-
-  /**
-   * Draws a rectangle to fill the space between the stepNumber and innerBorder
-   * TODO Rework magic numbers in x and y
-   */
-  private void drawNumberStepBackground(Graphics2D g2d, Shape innerShape) {
-    g2d.setColor(Styles.SCHRITTNUMMER_FARBE.color);
-
-    double x = (innerShape.getBounds().getWidth() + editor().scale(INNER_BORDERLINE_WIDTH * 2));
-    double y = (innerShape.getBounds().getY() + editor().scale(1.5));
-    Rectangle2D.Double background = new Rectangle2D.Double(x, y, STEPNUMBER_BACKGROUND_WIDTH, stepnumberTextheight);
-    g2d.fill(background);
   }
 
   private void drawInnerBorderLine(Graphics2D g2d, Shape innerShape) {
