@@ -108,16 +108,28 @@ public class TableEditAreaSelectionTracker implements MouseListener, MouseMotion
 
   @Override
   public boolean dispatchKeyEvent(KeyEvent e) {
-    if (e.getID() != KeyEvent.KEY_PRESSED || !e.isControlDown() || selectionOperation != Operation.RemoveTable) {
+    if (e.getID() != KeyEvent.KEY_PRESSED || selectionOperation != Operation.RemoveTable) {
       return false;
     }
-    if (e.getKeyCode() == KeyEvent.VK_C) {
+    if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_C) {
       return performAndConsume(e, () -> editor().copyTableToClipboard(editArea));
     }
-    if (e.getKeyCode() == KeyEvent.VK_X) {
+    if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_X) {
       return performAndConsume(e, () -> editor().cutTableToClipboard(editArea));
     }
+    if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+      return performAndConsume(e, this::removeTableWithUndo);
+    }
     return false;
+  }
+
+  /** Composes the table removal (and its change-tracking side effects: changeInfo, background,
+   * per-cell markings) into a single atomic undo step, matching the mouse-click "remove whole
+   * table" gesture. */
+  private void removeTableWithUndo() {
+    try (UndoRecording ur = editor().composeUndo()) {
+      editArea.removeTableOrMarkAsDeletedUDBL();
+    }
   }
 
   /** Cursor must be reset before the action runs: without change tracking, cutting detaches
