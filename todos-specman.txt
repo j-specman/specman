@@ -30,6 +30,7 @@ x Cut
   x Warnmeldung bei drohendem Verlust von Catchs
   x Undo / Redo
 x Icons für Kontextmenüpunkte
+x Copy / Cut / Paste von Tabellen
 
 Abschluss für Go-Live
 - Wenn man zu einem Breakschritt bzw. einem Catch-Bereich springt oder einer Schrittreferenz folgt, dann kann sich das Ziel
