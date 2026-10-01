@@ -1,19 +1,31 @@
 package specman.settings;
 
-import java.util.List;
+import specman.Specman;
 
-public class SettingAutoLoad extends AbstractSelectSetting<Integer> {
+import java.util.prefs.Preferences;
+
+public class SettingAutoLoad extends AbstractBooleanSetting {
 
   public static final String AUTOLOAD_PREF = "autoload";
 
-  static final List<SettingOption<Integer>> OPTIONS = SettingAutoSave.OPTIONS;
-
-  public SettingAutoLoad() {
-    super("Automatisches Laden", AUTOLOAD_PREF, OPTIONS);
+  static {
+    migrateLegacyIntervalValue();
   }
 
-  public static Integer getIntervalSeconds() {
-    return loadValue(AUTOLOAD_PREF, OPTIONS, null);
+  public SettingAutoLoad() {
+    super("Automatisches Laden", AUTOLOAD_PREF, false);
+  }
+
+  public static boolean isEnabled() {
+    return isSet(AUTOLOAD_PREF, false);
+  }
+
+  /** Up to version 1.3.1, auto load was polling and the preference held the interval in seconds. */
+  static void migrateLegacyIntervalValue() {
+    Preferences prefs = Preferences.userNodeForPackage(Specman.class);
+    if (prefs.get(AUTOLOAD_PREF, "").matches("\\d+")) {
+      prefs.putBoolean(AUTOLOAD_PREF, true);
+    }
   }
 
 }

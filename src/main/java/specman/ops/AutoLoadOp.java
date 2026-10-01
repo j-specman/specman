@@ -14,24 +14,47 @@ public class AutoLoadOp extends AbstractSpecmanOp {
 
   private final AutoSaveOp autoSave;
   private final LoadDiagrammSpecmanOp loadOp;
-  private final Timer timer;
+  private final WorkingCopyWatcher watcher;
   private long lastLoadedFileTimestamp = 0;
+
+  /** One-shot timer to debounce the change events, e.g. truncate + write of a working copy file before actually loading it */
+  private final Timer loadWorkingCopy_Debounced;
+  private static final int DEBOUNCE_MS = 500;
 
   public AutoLoadOp(SpecmanOpContext context, AutoSaveOp autoSave) {
     super(context);
     this.autoSave = autoSave;
-    loadOp = new LoadDiagrammSpecmanOp(context);
-    timer = new Timer(timerDelay(), e -> loadIfNeeded());
-    timer.start();
+    this.loadOp = new LoadDiagrammSpecmanOp(context);
+    this.loadWorkingCopy_Debounced = new Timer(DEBOUNCE_MS, e -> loadIfNeeded());
+    this.loadWorkingCopy_Debounced.setRepeats(false);
+    this.watcher = new WorkingCopyWatcher(() -> SwingUtilities.invokeLater(loadWorkingCopy_Debounced::restart));
   }
 
   public void workingCopyInitialized(long timestamp) {
     lastLoadedFileTimestamp = timestamp;
+    watchWorkingCopy();
+    // Catches changes which happened before the watcher was (re)targeted
+    loadWorkingCopy_Debounced.restart();
+  }
+
+  private void watchWorkingCopy() {
+    File diagramFile = getDiagrammDatei();
+    if (diagramFile == null) {
+      return;
+    }
+    try {
+      watcher.watch(AutoSaveOp.workingCopyFor(diagramFile));
+    }
+    catch (IOException e) {
+      if (SettingAutoLoad.isEnabled()) {
+        showToast("Auto-load is not possible.",
+          "The working copy cannot be watched:\n\n" + e.getMessage());
+      }
+    }
   }
 
   private void loadIfNeeded() {
-    timer.setDelay(timerDelay());
-    if (SettingAutoLoad.getIntervalSeconds() == null) {
+    if (!SettingAutoLoad.isEnabled()) {
       return;
     }
     File diagramFile = getDiagrammDatei();
@@ -65,9 +88,9 @@ public class AutoLoadOp extends AbstractSpecmanOp {
       }
       catch (Exception x) {
         showToast(
-          workingCopy.getName() + " konnte nicht geladen werden.",
-          "Die Arbeitskopie scheint defekt zu sein:\n\n" + x.getMessage() +
-          "\n\nDer zuletzt geladene Stand wird beibehalten.");
+          workingCopy.getName() + " could not be loaded.",
+          "The working copy appears to be corrupt:\n\n" + x.getMessage() +
+          "\n\nThe last loaded state is kept.");
         recoverFromFailedLoad(snapshot, diagramFile, x);
         setDiagrammDatei(diagramFile);
         markAsUnsavedWorkingCopy();
@@ -93,11 +116,6 @@ public class AutoLoadOp extends AbstractSpecmanOp {
 
   private byte[] takeSnapshot() throws IOException {
     return autoSave.generateSnapshot();
-  }
-
-  private static int timerDelay() {
-    Integer intervalSeconds = SettingAutoLoad.getIntervalSeconds();
-    return intervalSeconds != null ? intervalSeconds * 1000 : AutoSaveOp.OFF_CHECK_INTERVAL_MS;
   }
 
 }

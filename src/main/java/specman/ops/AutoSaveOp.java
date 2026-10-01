@@ -63,7 +63,7 @@ public class AutoSaveOp extends AbstractSpecmanOp {
   }
 
   public static boolean isWorkingCopyNeeded() {
-    return SettingAutoSave.getIntervalSeconds() != null || SettingAutoLoad.getIntervalSeconds() != null;
+    return SettingAutoSave.getIntervalSeconds() != null || SettingAutoLoad.isEnabled();
   }
 
   public static File workingCopyFor(File nsdFile) {
@@ -76,19 +76,15 @@ public class AutoSaveOp extends AbstractSpecmanOp {
     }
   }
 
-  public static long createWorkingCopyFor(File nsdFile) {
+  /** Copies the file on disk into its working copy. Throws on failure — the caller must surface
+   * this immediately, since nothing else creates the working copy AutoLoad needs to watch. */
+  public static long createWorkingCopyFor(File nsdFile) throws IOException {
     if (nsdFile == null) {
       return 0;
     }
-    try {
-      File wc = workingCopyFor(nsdFile);
-      Files.copy(nsdFile.toPath(), wc.toPath(), StandardCopyOption.REPLACE_EXISTING);
-      return wc.lastModified();
-    }
-    catch (IOException ignored) {
-      // Best-effort: AutoSave will create the working copy on the next save cycle
-      return 0;
-    }
+    File wc = workingCopyFor(nsdFile);
+    Files.copy(nsdFile.toPath(), wc.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    return wc.lastModified();
   }
 
   public static boolean workingCopyExistsFor(File nsdFile) {
