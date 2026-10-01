@@ -16,7 +16,10 @@ set "SCRIPT_DIR=%~dp0"
 where java >nul 2>nul
 if errorlevel 1 goto :no_java
 
-for /f "tokens=2" %%v in ('java --version 2^>^&1') do set "JAVA_VERSION_FULL=%%v"
+REM 'java --version' prints several lines on some JDKs (e.g. OpenJDK also prints the runtime and VM
+REM lines) - only the first line has the version, so only let the first iteration set the variable,
+REM otherwise JAVA_VERSION_FULL would end up holding a fragment of a later, unrelated line.
+for /f "tokens=2" %%v in ('java --version 2^>^&1') do if not defined JAVA_VERSION_FULL set "JAVA_VERSION_FULL=%%v"
 for /f "delims=." %%m in ("%JAVA_VERSION_FULL%") do set "JAVA_MAJOR=%%m"
 
 if %JAVA_MAJOR% LSS %MIN_JAVA_VERSION% goto :java_too_old
