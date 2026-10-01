@@ -243,16 +243,40 @@
                     <execution>
                         <phase>validate</phase>
                         <configuration>
+                            <exportAntProperties>true</exportAntProperties>
                             <target>
                                 <echo
                                     file="src/main/resources/specman-version.properties"
                                     message="version=${project.version}${line.separator}by=${user.name}${line.separator}"/>
-                                <echo
-                                    file="target/specman.bat"
-                                    message="@echo off${line.separator}javaw -jar %SPECMAN_HOME%\specman-${project.version}-jar-with-dependencies.jar %*${line.separator}"/>
-                                <echo
-                                    file="target/specman.sh"
-                                    message="#!/bin/sh${line.separator}java -jar $SPECMAN_HOME/specman-${project.version}-jar-with-dependencies.jar &quot;$@&quot;${line.separator}"/>
+                                <!--
+                                    Minor-version slice of project.version (e.g. 1.3.1 -> 1.3), exported as a real Maven
+                                    property via exportAntProperties so it is usable from other executions/profiles too
+                                    (e.g. the windows-installer profile and the release-bundle profile), instead of each
+                                    recomputing it locally.
+                                -->
+                                <loadresource property="specman.release.version">
+                                    <string value="${project.version}"/>
+                                    <filterchain>
+                                        <tokenfilter>
+                                            <replaceregex pattern="^(\d+\.\d+).*$" replace="\1"/>
+                                        </tokenfilter>
+                                    </filterchain>
+                                </loadresource>
+                                <copy file="${project.basedir}/howto/template-specman.bat" tofile="${project.build.directory}/specman.bat"
+                                      overwrite="true" encoding="UTF-8">
+                                    <filterset>
+                                        <filter token="VERSION" value="${project.version}"/>
+                                        <filter token="MIN_JAVA_VERSION" value="${maven.compiler.target}"/>
+                                    </filterset>
+                                </copy>
+                                <copy file="${project.basedir}/howto/template-specman.sh" tofile="${project.build.directory}/specman.sh"
+                                      overwrite="true" encoding="UTF-8">
+                                    <filterset>
+                                        <filter token="VERSION" value="${project.version}"/>
+                                        <filter token="MIN_JAVA_VERSION" value="${maven.compiler.target}"/>
+                                    </filterset>
+                                </copy>
+                                <chmod file="${project.build.directory}/specman.sh" perm="755"/>
                             </target>
                         </configuration>
                         <goals>
@@ -261,7 +285,7 @@
                     </execution>
 
                     <!--
-                        Generates readme.adoc from howto/readme-template.adoc and the region between
+                        Generates readme.adoc from howto/template-readme.adoc and the region between
                         '// tag::readme[]' and '// end::readme[]' in doc/specman-manual.adoc.
                         GitHub doesn't resolve AsciiDoc includes, so the readme must be a real copy.
                         Standalone usage: mvn antrun:run@generate-readme
@@ -300,7 +324,7 @@
                                         </tokenfilter>
                                     </filterchain>
                                 </loadfile>
-                                <copy file="${project.basedir}/howto/readme-template.adoc" tofile="${project.basedir}/readme.adoc"
+                                <copy file="${project.basedir}/howto/template-readme.adoc" tofile="${project.basedir}/readme.adoc"
                                       overwrite="true" encoding="UTF-8">
                                     <filterset>
                                         <!--
@@ -326,7 +350,7 @@
         <!--
             Builds a Windows MSI installer with a bundled Java runtime via jpackage.
             Requires JDK 17+ (jpackage) and the WiX Toolset (v3.14) on the PATH.
-            Usage: mvn -P windows-installer clean package
+            Usage: mvn -P windows-installer clean verify
         -->
         <profile>
             <id>windows-installer</id>
@@ -336,7 +360,7 @@
                      a newer version replaces the older one instead of installing side by side. -->
                 <specman.installer.upgradeUuid>866b19a6-d061-4d12-bb20-89c895cc9f48</specman.installer.upgradeUuid>
                 <specman.installer.input>${project.build.directory}/jpackage-input</specman.installer.input>
-                <specman.installer.dest>${project.build.directory}/installer</specman.installer.dest>
+                <specman.installer.dest>${project.build.directory}</specman.installer.dest>
                 <specman.installer.wixResourceDir>${project.build.directory}/jpackage-wix</specman.installer.wixResourceDir>
             </properties>
             <build>
@@ -362,30 +386,23 @@
                                         <!--
                                             Also install the grammar and a matching reference model, so users can
                                             open both without cloning the repo. The reference model to ship is
-                                            picked by the project's own major.minor version (e.g. 1.3.1 -> 1.3),
+                                            picked by the project's own major.minor version (e.g. 1.3.1 -> 1.3,
+                                            computed once as specman.release.version in the validate-phase execution),
                                             so a version bump without a matching specman-reference-vX.Y-*.nsd file
                                             in the repo root fails the build instead of shipping a stale/missing
                                             reference silently.
                                         -->
-                                        <loadresource property="specman.reference.version">
-                                            <string value="${project.version}"/>
-                                            <filterchain>
-                                                <tokenfilter>
-                                                    <replaceregex pattern="^(\d+\.\d+).*$" replace="\1"/>
-                                                </tokenfilter>
-                                            </filterchain>
-                                        </loadresource>
-                                        <fail message="No specman-reference-v${specman.reference.version}-*.nsd found in ${project.basedir} for version ${project.version}">
+                                        <fail message="No specman-reference-v${specman.release.version}-*.nsd found in ${project.basedir} for version ${project.version}">
                                             <condition>
                                                 <resourcecount count="0">
-                                                    <fileset dir="${project.basedir}" includes="specman-reference-v${specman.reference.version}-*.nsd"/>
+                                                    <fileset dir="${project.basedir}" includes="specman-reference-v${specman.release.version}-*.nsd"/>
                                                 </resourcecount>
                                             </condition>
                                         </fail>
                                         <mkdir dir="${specman.installer.input}/docs"/>
                                         <copy todir="${specman.installer.input}/docs" flatten="true">
                                             <fileset file="${project.basedir}/src/main/antlr4/specman/model/v002/SpecmanModel_V002.g4"/>
-                                            <fileset dir="${project.basedir}" includes="specman-reference-v${specman.reference.version}-*.nsd"/>
+                                            <fileset dir="${project.basedir}" includes="specman-reference-v${specman.release.version}-*.nsd"/>
                                         </copy>
 
                                         <!--
@@ -423,6 +440,30 @@
                                                     value="${specman.installer.wixResourceDir}/dialog.bmp"/>
                                             </filterset>
                                         </copy>
+                                    </target>
+                                </configuration>
+                            </execution>
+
+                            <!--
+                                jpackage derives the output filename from the "name" argument (Specman), which
+                                must stay capitalized because it also becomes the Start Menu entry, the
+                                "Apps & Features" display name and the window title - jpackage has no separate
+                                switch for just the filename. Renaming after the fact keeps the lowercase
+                                "specman-<version>.msi" convention matching specman-<version>-portable.zip from
+                                the release-bundle profile, without touching anything user-visible inside the
+                                installed app. Bound to verify (runs after package, where jpackage produces the
+                                file) so it doesn't depend on plugin declaration order within the package phase.
+                            -->
+                            <execution>
+                                <id>lowercase-msi-filename</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <move file="${project.build.directory}/Specman-${project.version}.msi"
+                                              tofile="${project.build.directory}/specman-${project.version}-windows.msi"/>
                                     </target>
                                 </configuration>
                             </execution>
@@ -481,6 +522,69 @@
                                         <argument>--jlink-options</argument>
                                         <argument>--strip-debug --no-header-files --no-man-pages</argument>
                                     </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!--
+            Assembles a portable release bundle: target/specman-installation/<major.minor>/ (the same
+            layout that gets copied onto the fileserver by hand today) plus a matching zip for e.g. a
+            GitHub release. Contains specman.bat/.sh, the jar *with* dependencies (the plain jar is
+            useless without them on the classpath), the grammar and the matching reference model - the
+            latter two are first-class artifacts for AI-agent-assisted spec authoring, not just dev extras.
+            Usage: mvn -P release-bundle package
+        -->
+        <profile>
+            <id>release-bundle</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>assemble-release-bundle</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <fail message="No specman-reference-v${specman.release.version}-*.nsd found in ${project.basedir} for version ${project.version}">
+                                            <condition>
+                                                <resourcecount count="0">
+                                                    <fileset dir="${project.basedir}" includes="specman-reference-v${specman.release.version}-*.nsd"/>
+                                                </resourcecount>
+                                            </condition>
+                                        </fail>
+                                        <property name="specman.releaseBundle.dir" value="${project.build.directory}/specman-installation/${specman.release.version}"/>
+                                        <mkdir dir="${specman.releaseBundle.dir}"/>
+                                        <copy todir="${specman.releaseBundle.dir}" flatten="true">
+                                            <fileset file="${project.build.directory}/specman.bat"/>
+                                            <fileset file="${project.build.directory}/specman.sh"/>
+                                            <fileset file="${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar"/>
+                                            <fileset file="${project.basedir}/src/main/antlr4/specman/model/v002/SpecmanModel_V002.g4"/>
+                                            <fileset dir="${project.basedir}" includes="specman-reference-v${specman.release.version}-*.nsd"/>
+                                        </copy>
+                                        <chmod file="${specman.releaseBundle.dir}/specman.sh" perm="755"/>
+
+                                        <!--
+                                            Zip the files at archive root (no specman-installation/<version>/ wrapper
+                                            folder) - nicer "unzip and run" experience for a GitHub release than for
+                                            the fileserver copy. specman.sh needs an explicit filemode, since Ant only
+                                            carries over real Unix permissions when the build itself runs on Unix -
+                                            on this Windows build host it would otherwise lose its executable bit.
+                                        -->
+                                        <zip destfile="${project.build.directory}/specman-${project.version}-portable.zip">
+                                            <zipfileset dir="${specman.releaseBundle.dir}" excludes="specman.sh"/>
+                                            <zipfileset dir="${specman.releaseBundle.dir}" includes="specman.sh" filemode="755"/>
+                                        </zip>
+                                    </target>
                                 </configuration>
                             </execution>
                         </executions>

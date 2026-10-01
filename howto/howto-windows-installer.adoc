@@ -8,10 +8,10 @@ winget install WiXToolset.WiXToolset
 
 [source,shell]
 ----
-mvn -P windows-installer clean package
+mvn -P windows-installer clean verify
 ----
 
-The resulting `Specman-<version>.msi` is written to `target/installer/`. It installs per-user (no admin rights required), adds a Start menu entry and desktop shortcut, associates `.nsd` files with Specman, and adds a `specman-cli` console launcher for the link:src/main/java/specman/cli/SpecmanCLI.java[command-line operations]. Bumping `<version>` in `pom.xml` between releases lets a new installer upgrade an existing installation in place.
+The resulting `specman-<version>-windows.msi` is written directly to `target/`, next to the portable zip from `mvn -P release-bundle package` (if built). It installs per-user (no admin rights required), adds a Start menu entry and desktop shortcut, associates `.nsd` files with Specman, and adds a `specman-cli` console launcher for the link:src/main/java/specman/cli/SpecmanCLI.java[command-line operations]. Bumping `<version>` in `pom.xml` between releases lets a new installer upgrade an existing installation in place.
 
 The installer also puts a `specman` command on the user's `PATH` (a small `specman.cmd` forwarder to `specman-cli.exe`, installed into its own `bin` subdirectory so it can't clash with `Specman.exe` — Windows filenames are case-insensitive). Open a *new* terminal after installing (PATH changes only apply to newly started processes) and run e.g. `specman --sanitize <file>`.
 

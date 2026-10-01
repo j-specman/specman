@@ -1,4 +1,4 @@
-// Generated from howto/readme-template.adoc and doc/specman-manual.adoc by 'mvn package' - do not edit
+// Generated from howto/template-readme.adoc and doc/specman-manual.adoc by 'mvn package' - do not edit
 # Specman Diagram Editor
 
 Specman is a WYSIWYG editor for actogramms, which are basically Nassi-Shneiderman-like diagrams with some graphical aspects taken over from UML activity diagrams. Specman is designed for the specification of procedural workflows in software systems, and came out of more than 15 years of experience in software engineering based on standard tools like Microsoft Word, Confluence and UML.
@@ -6,7 +6,7 @@ Specman is a WYSIWYG editor for actogramms, which are basically Nassi-Shneiderma
 Microsoft Word is a perfect word processor with change tracking (a crucial aspect for iterative / agile development), but control structures like loops and branches are difficult to visualize. UML activity diagrams on the other hand are very good at visualizing control structures, but change tracking and diagram layout stability in iterative development are poor. Specman makes a difference by combining various tooling aspects in a unique way which turned out to be crucial for highly efficient, iterative software development.
 
 ## Hello Specman
-Specman is a small Java 2D / Swing application, which is built into an executable JAR file using Maven. To run Specman, you need a Java Runtime Environment (JRE) version 17 or higher installed. The main class is specman.Specman. Opening the file link:doc/anagramms.nsd[anagramms.nsd] in Specman brings up the following diagram on the screen:
+Specman is a small Java 2D / Swing application, which is built into an executable JAR file using Maven. To run Specman, you need a Java Runtime Environment (JRE) version 21 or higher installed. The main class is specman.Specman, and the delivery package includes launcher scripts for Windows (`specman.bat`) and Linux (`specman.sh`) that check the Java installation and locate the jar before starting the application. Opening the file link:doc/anagramms.nsd[anagramms.nsd] in Specman brings up the following diagram on the screen:
 
 image::doc/anagramms-screenshot.png[Two Word Anagrams Specman Diagram]
 
