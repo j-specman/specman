@@ -33,6 +33,11 @@ Folding up a structured step which includes any change marks will cause the unfo
 
 Since version 1.2.1, Specman supports multiple change sets, which is of interest e.g. if there are multiple change requests to be considered in parallel within a single development iteration.
 
+### Real world use case specifications
+For an impression how real-world specifications look like in Specman, see the link:usecase-birdsview.png[bird's view] on a mid-size system usecase specification from ongoing project development.
+
+
+
 ## Specman Main Window structure
 Starting Specman brings up an empty window with the following areas.
 
