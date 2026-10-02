@@ -66,6 +66,7 @@ public class ExternalPasteChangemarksAdjuster implements PasteChangemarksAdjuste
    * a pasted step): a table marked as deleted aborts the paste, otherwise every changemark in
    * the table and its cells is set to added/untracked and existing changeset HTML coloring is
    * cleaned up. */
+  @Override
   public TableEditAreaModel_V002 adjustTable(TableEditAreaModel_V002 table, boolean trackingOn) throws EditException {
     if (isDeleted(table.changeInfo)) {
       throw new EditException(

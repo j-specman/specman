@@ -39,7 +39,8 @@ public class InternalPasteChangemarksAdjuster implements PasteChangemarksAdjuste
    * content as added in the current changeset - the same rule applied to tables nested inside
    * a pasted step, see {@link #adjustTableCells}. No-op when change tracking is off, mirroring
    * {@link #adjust}. */
-  public static TableEditAreaModel_V002 adjustTable(TableEditAreaModel_V002 table, boolean trackingOn) {
+  @Override
+  public TableEditAreaModel_V002 adjustTable(TableEditAreaModel_V002 table, boolean trackingOn) {
     if (trackingOn) {
       ChangeInfoModel_V002 target = ChangeInfoModel_V002.from(ChangeInfo.added());
       table.changeInfo = target;

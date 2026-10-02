@@ -3,6 +3,7 @@ package specman.ops;
 import specman.EditException;
 import specman.clipboard.ExternalPasteChangemarksAdjuster;
 import specman.clipboard.InternalPasteChangemarksAdjuster;
+import specman.clipboard.PasteChangemarksAdjusterI;
 import specman.clipboard.SpecmanTableClipboardContent;
 import specman.clipboard.SpecmanTableTransferable;
 import specman.editarea.TextEditArea;
@@ -32,9 +33,10 @@ public class PasteTableOp extends AbstractADBLSpecmanOp {
       if (content != null) {
         TableEditAreaModel_V002 tableModel = new ModelParser_V002().parseTable(content.serializedTable);
         boolean sameInstance = editor().instanceId().equals(content.instanceId);
-        tableModel = sameInstance
-            ? InternalPasteChangemarksAdjuster.adjustTable(tableModel, aenderungenVerfolgen())
-            : new ExternalPasteChangemarksAdjuster().adjustTable(tableModel, aenderungenVerfolgen());
+        PasteChangemarksAdjusterI adjuster = sameInstance
+            ? new InternalPasteChangemarksAdjuster()
+            : new ExternalPasteChangemarksAdjuster();
+        tableModel = adjuster.adjustTable(tableModel, aenderungenVerfolgen());
         initiatingTextArea.addTable(tableModel);
       }
     }
