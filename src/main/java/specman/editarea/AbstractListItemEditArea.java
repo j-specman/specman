@@ -9,7 +9,6 @@ import specman.ChangeSet;
 import specman.EditorI;
 import specman.Specman;
 import specman.editarea.document.WrappedPosition;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.undo.UndoableListItemSplitted;
@@ -241,7 +240,6 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   @Override public void setQuellStil(ChangeSet changeSet) { /* Not required for list items - source steps only contain an empty text area */ }
   @Override public void setEditDecorationIndentions(Indentions indentions) { /* Nothing to do here */ }
   @Override public String getText() { return "list item"; }
-  @Override public void addSchrittnummer(StepnumberLabel schrittNummer) {}
   @Override public List<TextEditArea> getTextAreas() { return content.getTextAreas(); }
 
 }

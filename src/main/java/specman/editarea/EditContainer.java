@@ -94,12 +94,18 @@ import static specman.Specman.editor;
  */
 public class EditContainer extends JPanel {
 	private final static RowSpec EDITAREA_LAYOUT_ROWSPEC = RowSpec.decode("fill:pref");
+	// Row 2 reserved for the meta-label header strip (step number et al.), always present but
+	// only given actual height (scaled with zoom, see updateMetaLabelStripHeight()) when this
+	// container has a step number. The overlay panel spans this strip plus the first edit area's
+	// row, so the label starts in the strip and overlaps down into the text below it.
+	private static final int META_STRIP_PANEL_HEIGHT = 5;
 
 	// ACHTUNG: Das ist hier noch auf halbem Wege. Später wird es eine Liste von EditAreas geben
 	private final List<EditArea> editAreas = new ArrayList<>();
 	private final List<FocusListener> editAreasFocusListeners = new ArrayList<>();
 	private final List<ComponentListener> editAreasComponentListeners = new ArrayList<>();
 	private final StepnumberLabel schrittNummer;
+	private final MetaStripPanel metaPanel = new MetaStripPanel();
 	private FormLayout layout;
 	private Indentions indentions;
 	private boolean schrittNummerSichtbar = true;
@@ -127,7 +133,7 @@ public class EditContainer extends JPanel {
 	}
 
 	private void initLayoutV2() {
-		layout = new FormLayout("0px,10px:grow,0px", "0px,0px");
+		layout = new FormLayout("0px,10px:grow,0px", "0px,0px,0px");
 		setLayout(layout);
 	}
 
@@ -163,7 +169,11 @@ public class EditContainer extends JPanel {
 				System.err.println("Can't set step number in " + schrittNummer);
 			}
 			else {
-				editAreas.get(0).addSchrittnummer(schrittNummer);
+				// metaPanel spans the header strip (row 2) and the first edit area's cell
+				// (row 3), top-aligned by construction, so it stays identical to the first edit
+				// area's x/width (same column) while reaching from the strip down into the text.
+				metaPanel.add(schrittNummer);
+				add(metaPanel, CC.xywh(2, 2, 1, 2, CC.FILL, CC.FILL), 0);
 			}
 		}
 		skalieren(editor().getZoomFactor(), 0);
@@ -275,9 +285,15 @@ public class EditContainer extends JPanel {
 		if (schrittNummer != null) {
 			schrittNummer.setFont(labelFont.deriveFont((float) SCHRITTNR_FONTSIZE * prozentNeu / 100));
 		}
+		updateMetaStripHeight(prozentNeu);
 		if (indentions != null) {
 			updateDecorationIndentions(indentions);
 		}
+	}
+
+	private void updateMetaStripHeight(int zoomPercent) {
+		int height = schrittNummer != null ? (META_STRIP_PANEL_HEIGHT * zoomPercent) / 100 : 0;
+		layout.setRowSpec(2, RowSpec.decode(height + "px"));
 	}
 
 	public static EditorContentModel_V002 right(String text) {
@@ -288,11 +304,23 @@ public class EditContainer extends JPanel {
 		return TextInit.initialtext(text, "center");
 	}
 
-	public Container getKlappButtonParent() { return schrittNummer.getParent(); }
+	// KlappButton lives in metaPanel too, to the left of the step number - metaPanel's
+	// contains() override keeps it mouse-transparent everywhere except its children's actual
+	// bounds, so KlappButton's own MouseMotionListener (registered on this parent for its
+	// hover-to-reveal behaviour, see KlappButton's constructor) doesn't block clicks elsewhere.
+	public Container getKlappButtonParent() { return metaPanel; }
 
 	public void addEditAreasFocusListener(FocusListener focusListener) {
 		editAreasFocusListeners.add(focusListener);
 		editAreas.forEach(ea -> ea.addFocusListener(focusListener));
+	}
+
+	@Override
+	public boolean isOptimizedDrawingEnabled() {
+		// metaPanel overlaps the first edit area - without this override Swing assumes
+		// siblings never overlap and the edit area's own repaints (caret blink, typing) would
+		// paint over the label instead of under it.
+		return false;
 	}
 
 	@Override
@@ -317,6 +345,10 @@ public class EditContainer extends JPanel {
 		super.setBackground(bg);
 		if (editAreas != null) {
 			editAreas.forEach(ea -> ea.setEditBackgroundUDBL(bg));
+			// Keeps KlappButton's hintergrundfarbeVonParentUebernehmen() (it reads its parent's
+			// background, and its parent is metaPanel since the button moved there) in sync with
+			// the step's actual background, even though metaPanel itself stays non-opaque/invisible.
+			metaPanel.setBackground(bg);
 		}
 	}
 
@@ -324,7 +356,7 @@ public class EditContainer extends JPanel {
 		this.indentions = indentions.withIndividuals(this.indentions);
 
 		layout.setRowSpec(1, indentions.topInset());
-		layout.setRowSpec(editAreas.size()+2, indentions.bottomInset());
+		layout.setRowSpec(editAreas.size()+3, indentions.bottomInset());
 		layout.setColumnSpec(1, indentions.leftInset());
 		layout.setColumnSpec(3, indentions.rightInset());
 
@@ -462,12 +494,12 @@ public class EditContainer extends JPanel {
 		editAreasFocusListeners.forEach(fl -> editArea.asComponent().addFocusListener(fl));
 		editAreasComponentListeners.forEach(cl -> editArea.asComponent().addComponentListener(cl));
 		editAreas.add(index, editArea);
-		layout.setRowSpec(index+2, EDITAREA_LAYOUT_ROWSPEC);
-		add(editArea.asComponent(), CC.xy(2, index+2));
+		layout.setRowSpec(index+3, EDITAREA_LAYOUT_ROWSPEC);
+		add(editArea.asComponent(), CC.xy(2, index+3));
 		for (int followerIndex = index+1; followerIndex < editAreas.size(); followerIndex++) {
 			EditArea followerArea = editAreas.get(followerIndex);
-			layout.setRowSpec(followerIndex+2, EDITAREA_LAYOUT_ROWSPEC);
-			layout.setConstraints(followerArea.asComponent(), CC.xy(2, followerIndex + 2));
+			layout.setRowSpec(followerIndex+3, EDITAREA_LAYOUT_ROWSPEC);
+			layout.setConstraints(followerArea.asComponent(), CC.xy(2, followerIndex + 3));
 		}
 		layout.appendRow(RowSpec.decode("0px"));
 	}
@@ -521,9 +553,9 @@ public class EditContainer extends JPanel {
 		remove(area.asComponent());
 		for (int followerIndex = index; followerIndex < editAreas.size(); followerIndex++) {
 			EditArea followerArea = editAreas.get(followerIndex);
-			layout.setConstraints(followerArea.asComponent(), CC.xy(2, followerIndex + 2));
+			layout.setConstraints(followerArea.asComponent(), CC.xy(2, followerIndex + 3));
 		}
-		layout.removeRow(editAreas.size()+3);
+		layout.removeRow(editAreas.size()+4);
 		return index;
 	}
 
@@ -546,12 +578,13 @@ public class EditContainer extends JPanel {
 
 	public specman.pdf.Shape getShape() {
 		Shape shape = new Shape(this);
-		for (int i = 0; i < editAreas.size(); i++) {
-			Shape areaShape = editAreas.get(i).getShape();
-			if (i == 0 && schrittNummer != null && schrittNummerSichtbar) {
-				areaShape.add(schrittNummer.getShape());
-			}
-			shape.add(areaShape);
+		editAreas.forEach(ea -> shape.add(ea.getShape()));
+		if (schrittNummer != null && schrittNummerSichtbar) {
+			// schrittNummer's real Swing parent is metaPanel, a sibling of the edit areas
+			// (not nested inside the first one) - its shape must nest the same way, via a shape
+			// for metaPanel itself, or its position would be off by metaPanel's own
+			// offset within EditContainer (most visibly the header strip height from step 2).
+			shape.add(new Shape(metaPanel).add(schrittNummer.getShape()));
 		}
 		return shape;
 	}
@@ -566,6 +599,7 @@ public class EditContainer extends JPanel {
 		UDBL.setBackgroundUDBL(this, bg);
 		if (editAreas != null) {
 			editAreas.forEach(ea -> ea.setEditBackgroundUDBL(bg));
+			metaPanel.setBackground(bg);
 		}
 	}
 

@@ -2,7 +2,6 @@ package specman.editarea;
 
 import specman.ChangeInfo;
 import specman.Specman;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.pdf.CircleShape;
 
@@ -50,10 +49,6 @@ public class UnorderedListItemEditArea extends AbstractListItemEditArea {
       promptSpace / 2 + DEFAULT_PROMPT_RADIUS,
       firstLineHeight / 2 + DEFAULT_PROMPT_RADIUS
     );
-  }
-
-  @Override
-  public void addSchrittnummer(StepnumberLabel schrittNummer) {
   }
 
   @Override

@@ -11,7 +11,6 @@ import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.TextInit;
 import static specman.ChangeSet.changeset;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.TableEditAreaModel_V002;
 import specman.pdf.Shape;
@@ -630,7 +629,6 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   @Override public void setQuellStil(ChangeSet changeSet) { /* Not required for tables - source steps only contain an empty text area */ }
-  @Override public void addSchrittnummer(StepnumberLabel schrittNummer) { add(schrittNummer); }
   @Override public Component asComponent() { return this; }
   @Override public String getPlainText() { return ""; }
   @Override public TextEditArea asTextArea() { return null; }
