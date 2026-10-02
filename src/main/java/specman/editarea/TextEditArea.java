@@ -174,6 +174,11 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     @Override
     public void addSchrittnummer(StepnumberLabel schrittNummer) {
+        // No longer called by EditContainer - the step number is now placed directly in
+        // EditContainer's own FormLayout instead of as an overlay child of the first edit area
+        // (margin-based attempts to reserve space for it here had no effect: the WYSIWYG HTML
+        // rendering pipeline doesn't respect JEditorPane's standard margin/insets). Left in place
+        // only because other EditArea implementations still have a similar method.
         add(schrittNummer);
     }
 

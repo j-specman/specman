@@ -244,10 +244,12 @@ public class EditContainer extends JPanel {
 			if (schrittNummer != null) {
 				if (schrittNummerSichtbar) {
 					Dimension schrittnummerGroesse = schrittNummer.getPreferredSize();
-					schrittNummer.setBounds(maxEditWidth - schrittnummerGroesse.width,
+					// Quick and dirty: small right margin so the rounded bottom corners aren't flush with the edge
+					int rechterRand = 3;
+					schrittNummer.setBounds(maxEditWidth - schrittnummerGroesse.width - rechterRand,
 						0,
 						schrittnummerGroesse.width,
-						schrittnummerGroesse.height - 2);
+						schrittnummerGroesse.height - 2 - StepnumberLabel.TEXT_LIFT_BOTTOM_INSET);
 				} else {
 					schrittNummer.setBounds(0, 0, 0, 0);
 				}
