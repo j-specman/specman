@@ -1,5 +1,6 @@
 Release notes Specman 1.3.2
 - Copy / Cut / Paste von Tabellen
+- Design for step number labels modified to avoid overlapping with step text
 
 Aus aktueller Anwendung
 - beim Öffnen und einer vorhandenen .wrk, *drei* Optionen: 1) nicht laden, 2) laden, 3) ist in Arbeit - nicht laden aber auch nicht überschreiben und beim Schließen löschen
