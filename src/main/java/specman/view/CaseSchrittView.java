@@ -84,13 +84,13 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		this(parent, model.content, model.id, model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED, model.shade, model.caseSequences != null ? model.caseSequences.size() : 0);
 		initCases(
 			new ZweigSchrittSequenzView(this, model.defaultSequence),
-			caseSequenzenAufbauenV2(model.caseSequences));
+			caseSequenzenAufbauen(model.caseSequences));
 		spaltenbreitenAnteileSetzen(model.columnWidthRatios != null ? new ArrayList<>(model.columnWidthRatios) : null);
 		klappen.init(model.collapsed);
 		this.id = model.id;
 	}
 
-	private List<ZweigSchrittSequenzView> caseSequenzenAufbauenV2(List<specman.model.v002.BranchSequenceModel_V002> model) {
+	private List<ZweigSchrittSequenzView> caseSequenzenAufbauen(List<specman.model.v002.BranchSequenceModel_V002> model) {
 		if (model == null) return new ArrayList<>();
 		return model.stream()
 			.map(sequenzModel -> new ZweigSchrittSequenzView(this, sequenzModel))

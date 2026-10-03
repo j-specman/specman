@@ -79,6 +79,15 @@
             <version>3.5</version>
         </dependency>
 
+        <!-- Pure-Java, zero-dependency SVG renderer - used for crisp, zoom-proof vector icons
+             (e.g. KlappButton's plus/minus), as opposed to the bitmap icons under images/*.png
+             which pixelate when scaled. -->
+        <dependency>
+            <groupId>com.github.weisj</groupId>
+            <artifactId>jsvg</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
         <!-- always needed -->
         <dependency>
             <groupId>com.itextpdf</groupId>

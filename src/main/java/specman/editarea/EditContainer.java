@@ -124,7 +124,7 @@ public class EditContainer extends JPanel {
 			schrittNummer = null;
 		}
 
-		initLayoutAndEditAreasV2(initialContent);
+		initLayoutAndEditAreas(initialContent);
 		updateDecorationIndentions(new Indentions());
 
 		skalieren(editor().getZoomFactor(), 0);
@@ -132,15 +132,15 @@ public class EditContainer extends JPanel {
 		addEditAreasFocusListener(editor());
 	}
 
-	private void initLayoutV2() {
+	private void initLayout() {
 		layout = new FormLayout("0px,10px:grow,0px", "0px,0px,0px");
 		setLayout(layout);
 	}
 
-	private void initLayoutAndEditAreasV2(EditorContentModel_V002 content) {
+	private void initLayoutAndEditAreas(EditorContentModel_V002 content) {
 		editAreas.stream().forEach(ea -> remove(ea.asComponent()));
 		editAreas.clear();
-		initLayoutV2();
+		initLayout();
 		int index = 0;
 		for (AbstractEditAreaModel_V002 editAreaModel : content.areas) {
 			EditArea editArea;
@@ -175,6 +175,15 @@ public class EditContainer extends JPanel {
 				// unused top margin, so the label doesn't overlap the text itself.
 				metaPanel.add(schrittNummer);
 				add(metaPanel, CC.xywh(2, 2, 1, 2, CC.FILL, CC.FILL), 0);
+					// getBackground() is overridden below to mirror the first edit area's own (changeset-
+					// derived) background, since this container's own background field is otherwise never
+					// explicitly set at construction - but metaPanel.setBackground() (which KlappButton reads
+					// via its parent) is only kept in sync from the *setter* override, which nothing calls at
+					// construction time. Push the already-correct getBackground() value into metaPanel
+					// directly here, without going through the full setBackground(Color) override, which
+					// would also force every edit area to this single color - only metaPanel needs updating,
+					// not the (possibly per-area-varied) edit areas themselves.
+					metaPanel.setBackground(getBackground());
 			}
 		}
 		skalieren(editor().getZoomFactor(), 0);
@@ -258,7 +267,7 @@ public class EditContainer extends JPanel {
 					int rightMargin = (int) editor().scale(MetaStripPanel.RIGHT_MARGIN);
 					int heightTrim = (int) editor().scale(MetaStripPanel.HEIGHT_TRIM);
 					// schrittNummer already reaches the very top of the step via row 2 alone (see
-					// initLayoutAndEditAreasV2()) - but RoundedBorderDecorator paints its
+					// initLayoutAndEditAreas()) - but RoundedBorderDecorator paints its
 					// antialiased border line on top of everything inside it, overdrawing a few
 					// pixels off the label's top edge in "abgesetzte" (rounded-border) steps.
 					// Making the label taller by that same (fixed, not zoom-scaled - see
@@ -578,7 +587,7 @@ public class EditContainer extends JPanel {
 	}
 
 	public void setEditorContent(EditorContentModel_V002 content) {
-		initLayoutAndEditAreasV2(content);
+		initLayoutAndEditAreas(content);
 	}
 
 	public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {

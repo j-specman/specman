@@ -3,20 +3,19 @@ package specman.view;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import specman.editarea.MetaStripPanel;
-import specman.graphics.HangingTabShape;
-import specman.graphics.IconReader;
+import specman.graphics.HangingTab;
+import specman.graphics.SvgIcon;
 import specman.Specman;
 
 import javax.swing.*;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
 
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_SICHTBAR;
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_VERBORGEN;
+import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
 import static specman.Specman.editor;
 
 /**
@@ -30,21 +29,29 @@ import static specman.Specman.editor;
  *
  * @author less02
  */
-public class KlappButton extends JLabel implements MouseMotionListener, MouseListener {
-  private static final Icon icon = IconReader.readImageIcon("minus");
-  private static final Icon selectedIcon = IconReader.readImageIcon("plus");
-  private static Icon iconScaled = icon;
-  private static Icon selectedIconScaled = selectedIcon;
-  public static final int MINIMUM_ICON_LENGTH = icon.getIconHeight() + 2; // The minimum border is 1px top + bottom each
+public class KlappButton extends HangingTab implements MouseMotionListener, MouseListener {
+  // Base (100% zoom) size of the square button - also used by CatchBereich to size an unrelated
+  // row spec, independent of any button instance, hence public and static.
+  public static final int MINIMUM_ICON_LENGTH = 12;
   public static final String ZEILENLAYOUT_FILLER_VISIBLE = "fill:0px:grow";
   public static final String ZEILENLAYOUT_FILLER_HIDDEN = ZEILENLAYOUT_INHALT_VERBORGEN;
+  // Base (100% zoom) size of the plus/minus glyph itself, distinct from MINIMUM_ICON_LENGTH
+  // (the button's own box size) - the glyph is drawn smaller than its box so it doesn't crowd the
+  // rounded corners.
+  private static final int ICON_GLYPH_SIZE = 10;
+  // Narrower than HangingTab's default SIDE_PADDING: unlike StepnumberLabel's digits, the
+  // plus/minus glyph is known never to reach wide enough to collide with the rounded bottom
+  // corners, so it can sit closer to the button's own left/right edges.
+  private static final int ICON_SIDE_PADDING = 2;
 
   private final FormLayout layout;
   private final int contentrow;
   private final Integer fillerrow;
   private final KlappbarerBereichI klappbarerBereich;
   private final Container parent;
-  private Color borderColor;
+  private final SvgIcon collapseIcon = new SvgIcon("minus", ICON_GLYPH_SIZE);
+  private final SvgIcon expandIcon = new SvgIcon("plus", ICON_GLYPH_SIZE);
+  private Color currentColor;
   private boolean selected;
 
   public KlappButton(KlappbarerBereichI klappbarerBereich, Container parent, FormLayout layout, int contentrow, Integer fillerrow) {
@@ -53,9 +60,10 @@ public class KlappButton extends JLabel implements MouseMotionListener, MouseLis
     this.contentrow = contentrow;
     this.fillerrow = fillerrow;
     this.klappbarerBereich = klappbarerBereich;
-    setOpaque(true);
     setHorizontalAlignment(SwingConstants.CENTER);
-    hintergrundfarbeVonParentUebernehmen();
+    setIcon(collapseIcon);
+    resetToDefaultBackground();
+    setBorderColor(SCHRITTNUMMER_FARBE.color);
     setVisible(false);
     addMouseListener(this);
     parent.addMouseMotionListener(this);
@@ -69,7 +77,7 @@ public class KlappButton extends JLabel implements MouseMotionListener, MouseLis
 
   private void setSelected(boolean selected) {
     this.selected = selected;
-    setIcon(selected ? selectedIconScaled : iconScaled);
+    setIcon(selected ? expandIcon : collapseIcon);
   }
 
   public void init(boolean zugeklappt) {
@@ -79,17 +87,23 @@ public class KlappButton extends JLabel implements MouseMotionListener, MouseLis
     }
   }
 
-  /**
-   * Diese etwas eigenartige Übernahme der Hintergrundfarbe stellt sicher, dass es nicht
-   * zu unerwarteten Farbeffekten kommt. Ist der Parent nämlich z.B. nur weis, weil die
-   * Farbe aus dem Farbschema des Look & Feels kommt, dann wird der Button auf Basis
-   * dieser Farbe nicht unbedingt in gleicher Farbe angezeigt. Also bauen wir eine neue
-   * Farbe aus der Übernahme der RGB-Werte. Dann klappt es auf jeden Fall
-   */
-  private void hintergrundfarbeVonParentUebernehmen() {
-    Color backgroundColor = new Color(parent.getBackground().getRGB());
-    setBackground(backgroundColor);
-    borderColor = backgroundColor.darker();
+  /** Default look: takes on the step's actual background color (possibly changeset-tinted)
+   * rather than being transparent - transparency let whatever happened to be painted underneath
+   * (e.g. a text selection highlight in the first edit area, which the metaPanel overlaps) show
+   * through the button, which looked broken. parent is metaPanel, kept in sync with the step's own
+   * background by EditContainer#setBackground()/setBackgroundUDBL(). */
+  private void resetToDefaultBackground() {
+    setColor(parent.getBackground());
+  }
+
+  /** Same padding/lift trick as StepnumberLabel's own border (see HangingTab#scaledBorder) - this
+   * MatteBorder only ever reserves space, it's never meant to be seen itself (same color as the
+   * background), unlike HangingTab's own setBorderColor() line which is the one actually painted. */
+  private void setColor(Color color) {
+    currentColor = color;
+    setOpaque(true);
+    setBackground(color);
+    setBorder(scaledBorder(color, 0, ICON_SIDE_PADDING));
   }
 
   public void refreshGeklappt() {
@@ -139,10 +153,10 @@ public class KlappButton extends JLabel implements MouseMotionListener, MouseLis
     if (isSelected()) {
       boolean zuklappenVerbirgtAenderungen = klappbarerBereich.enthaeltAenderungsmarkierungen();
       if (zuklappenVerbirgtAenderungen) {
-        setBackground(Color.yellow);
+        setColor(Color.yellow);
       }
     } else {
-      hintergrundfarbeVonParentUebernehmen();
+      resetToDefaultBackground();
     }
     refreshGeklappt();
   }
@@ -156,64 +170,45 @@ public class KlappButton extends JLabel implements MouseMotionListener, MouseLis
   @Override public void mouseEntered(MouseEvent e) {
   }
 
-  public static void scaleIcons(int newPercentage, int currentPercentage) {
-    if (newPercentage != currentPercentage) {
-      // Get width & height by scaling the initial Icon length
-      int targetWidth = (int) editor().scale(icon.getIconWidth());
-      int targetHeight = (int) editor().scale(icon.getIconHeight());
-
-      // Use the initial icon to prevent bad image quality through upscaling (e.g. 50% -> 100%)
-      // Also no need for scaling when returning to the initial Icon
-      if (targetWidth == icon.getIconWidth() && targetHeight == icon.getIconHeight()) {
-        iconScaled = icon;
-        selectedIconScaled = selectedIcon;
-      } else {
-        iconScaled = resizeImage(icon, targetWidth, targetHeight);
-        selectedIconScaled = resizeImage(selectedIcon, targetWidth, targetHeight);
-      }
+  public void scale(int newPercentage, int currentPercentage) {
+    int iconSize = (int) editor().scale(ICON_GLYPH_SIZE);
+    collapseIcon.setSize(iconSize);
+    expandIcon.setSize(iconSize);
+    if (currentColor != null) {
+      setBorder(scaledBorder(currentColor, 0, ICON_SIDE_PADDING));
     }
   }
 
-  public void scale(int newPercentage, int currentPercentage) {
-    setIcon(selected ? selectedIconScaled : iconScaled);
-  }
-
-  /**
-   * Transforms an Icon into a BufferedImage to be able to scale the image to the desired dimensions.
-   * Afterwards transforms it back for further usage.
-   */
-  private static Icon resizeImage(Icon icon, int targetWidth, int targetHeight) {
-    BufferedImage bufferedImage = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-
-    Graphics graphic = bufferedImage.createGraphics();
-    icon.paintIcon(null, graphic, 0, 0);
-    graphic.dispose();
-
-    Image resultingImage = bufferedImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_DEFAULT);
-    BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
-    outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);
-    return new ImageIcon(outputImage);
-  }
-
+  /** Matches StepnumberLabel's own width/height recipe exactly - borrows the step number's
+   * already-computed height (see EditContainer#updateBounds()) rather than independently
+   * recomputing it, so the two meta-strip widgets are guaranteed to end up the same height
+   * instead of relying on two separate formulas staying in sync by hand. */
   public void updateLocation(Rectangle stepnumberBounds) {
-    updateLocation(stepnumberBounds.x);
+    if (stepnumberBounds.height > 0) {
+      int gap = (int) editor().scale(MetaStripPanel.WIDGET_GAP);
+      int width = getPreferredSize().width;
+      setBounds(stepnumberBounds.x - gap - width, 0, width, stepnumberBounds.height);
+    }
   }
 
+  /** For KlappButtons not paired with a step number (CatchBereich's "collapse catch sequences"
+   * button) - there's no StepnumberLabel bounds to borrow a height from, so this falls back to
+   * the fixed MINIMUM_ICON_LENGTH as a plain square. */
   public void updateLocation(int remainingWidth) {
     if (remainingWidth > 0) {
       int desiredSize = (int) editor().scale(MINIMUM_ICON_LENGTH);
-      int gap = (int) editor().scale(MetaStripPanel.WIDGET_GAP);
-      int sidePadding = (int) editor().scale(MetaStripPanel.SIDE_PADDING);
-      int width = desiredSize + 2 * sidePadding;
-      setBounds(remainingWidth - gap - width, 0, width, desiredSize);
-      int borderSize = (int) Math.round(desiredSize * 0.1);
-      setBorder(new MatteBorder(borderSize, borderSize, borderSize, borderSize, borderColor));
+      setBounds(remainingWidth - desiredSize, 0, desiredSize, desiredSize);
     }
   }
 
   @Override
-  public void paint(Graphics g) {
-    HangingTabShape.paint(this, g, (int) editor().scale(MetaStripPanel.CORNER_ARC), super::paint);
+  protected int arc() {
+    return (int) editor().scale(CORNER_ARC);
+  }
+
+  @Override
+  protected float borderStrokeWidth() {
+    return (float) editor().scale(1.5);
   }
 
 }

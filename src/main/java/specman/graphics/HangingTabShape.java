@@ -5,10 +5,11 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
@@ -61,9 +62,36 @@ public final class HangingTabShape {
     g2.dispose();
   }
 
-  private static Shape bottomRoundedShape(int width, int height, int arc) {
-    Area area = new Area(new RoundRectangle2D.Float(0, 0, width, height, arc, arc));
-    area.add(new Area(new Rectangle(0, 0, width, height / 2))); // square the top corners off again
+  private static Shape bottomRoundedShape(float x, float y, float width, float height, float arc) {
+    Area area = new Area(new RoundRectangle2D.Float(x, y, width, height, arc, arc));
+    area.add(new Area(new Rectangle2D.Float(x, y, width, height / 2))); // square the top corners off again
     return area;
+  }
+
+  private static Shape bottomRoundedShape(int width, int height, int arc) {
+    return bottomRoundedShape(0, 0, width, height, arc);
+  }
+
+  /** Open path tracing the hanging-tab shape's bottom/left/right edges only - starting at the
+   * top-left corner, down, around the rounded bottom, and back up to the top-right corner,
+   * deliberately never closing back across the top. Meant to be stroked (not filled): an open
+   * path has free ends at the top, so there is no join/cap there to clean up, unlike a closed
+   * shape's stroke which would need the top edge's contribution cut out after the fact.
+   * <p>
+   * The corner curves use the same quadratic-with-sharp-corner-as-control-point construction as
+   * {@link RoundRectangle2D}, with start/end points offset from each corner by arc/2 - the "arc"
+   * parameter there is the corner's full diameter, not its radius - so this lines up pixel-for-
+   * pixel with {@link #bottomRoundedShape}'s own rounding instead of drawing its own, differently
+   * sized curve. */
+  public static Shape outline(float width, float height, float arc) {
+    float r = arc / 2;
+    Path2D.Float path = new Path2D.Float();
+    path.moveTo(0, 0);
+    path.lineTo(0, height - r);
+    path.quadTo(0, height, r, height);
+    path.lineTo(width - r, height);
+    path.quadTo(width, height, width, height - r);
+    path.lineTo(width, 0);
+    return path;
   }
 }

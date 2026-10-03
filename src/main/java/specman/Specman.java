@@ -315,7 +315,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		int bisherigerFaktor = zoomFaktor;
 		zoomFaktor = prozent;
 		zoomFaktorAnzeigeAktualisieren(prozent);
-    KlappButton.scaleIcons(prozent, bisherigerFaktor);
 		float diagrammbreite100Prozent = (float)diagrammbreite / bisherigerFaktor * 100;
 		int neueDiagrammbreite = (int)(diagrammbreite100Prozent * prozent / 100);
 		spaltenbreitenAnpassenNachMausDragging(neueDiagrammbreite - diagrammbreite, 0);

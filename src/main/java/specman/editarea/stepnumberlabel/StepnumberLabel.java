@@ -4,8 +4,7 @@ import org.apache.commons.lang.math.IntRange;
 import specman.StepNumber;
 import specman.draganddrop.DragMouseAdapter;
 import specman.editarea.InteractiveStepFragment;
-import specman.editarea.MetaStripPanel;
-import specman.graphics.HangingTabShape;
+import specman.graphics.HangingTab;
 import specman.pdf.LineShape;
 import specman.undo.props.UDBL;
 import specman.pdf.LabelShapeText;
@@ -13,7 +12,6 @@ import specman.pdf.Shape;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
 
 import static specman.StepNumber.asString;
@@ -26,7 +24,7 @@ import static specman.graphics.Styles.Schriftfarbe_Geloescht;
 import static specman.graphics.Styles.labelFont;
 import static specman.Specman.editor;
 
-public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
+public class StepnumberLabel extends HangingTab implements InteractiveStepFragment {
   private static final String SPACER = " ";
   private static final String TO_TARGET_ARROW = SPACER + ">" + SPACER;
   private static final String FROM_SOURCE_ARROW = SPACER + "<" + SPACER;
@@ -59,9 +57,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
   /** Border insets scale with zoom just like the widget's font/size do - rebuilt here (rather
    * than cached as a static constant) because MatteBorder insets are fixed at construction time. */
   private Border scaledBorder(Color color) {
-    int padding = (int) editor().scale(MetaStripPanel.SIDE_PADDING);
-    int lift = (int) editor().scale(MetaStripPanel.CONTENT_LIFT) - heightGrowthCompensation;
-    return new MatteBorder(0, padding, lift, padding, color);
+    return scaledBorder(color, heightGrowthCompensation);
   }
 
   private void setBorderForColor(Color color) {
@@ -116,8 +112,12 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
   }
 
   @Override
-  public void paint(Graphics g) {
-    HangingTabShape.paint(this, g, (int) editor().scale(MetaStripPanel.CORNER_ARC), super::paint);
+  protected int arc() {
+    return (int) editor().scale(CORNER_ARC);
+  }
+
+  @Override
+  protected void paintUnmasked(Graphics g) {
     drawDeletionLine(g);
   }
 

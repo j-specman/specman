@@ -72,7 +72,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     super(parent, model);
     BreakSchrittView linkedBreakStep = (BreakSchrittView) parent.getParent().findStepById(model.id);
     init(linkedBreakStep, model.headingRightBarWidth, model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
-    initCoCatchesV2(model.coCatches);
+    initCoCatches(model.coCatches);
     initHeadingsLayout();
   }
 
@@ -135,7 +135,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     ueberschrift.addEditAreasFocusListener(this);
   }
 
-  private void initCoCatchesV2(List<CoCatchModel_V002> coCatches) {
+  private void initCoCatches(List<CoCatchModel_V002> coCatches) {
     if (coCatches == null) return;
     int insertionIndex = 0;
     for (CoCatchModel_V002 coCatchModel : coCatches) {

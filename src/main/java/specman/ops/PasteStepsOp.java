@@ -56,7 +56,7 @@ public class PasteStepsOp extends AbstractADBLSpecmanOp {
     SchrittSequenzView parent = referenceStep.getParent();
     AbstractSchrittView reference = referenceStep;
     for (AbstractStepModel_V002 stepModel : stepModels) {
-      AbstractSchrittView newStep = AbstractSchrittView.baueSchrittViewFromV2(parent, stepModel);
+      AbstractSchrittView newStep = AbstractSchrittView.baueSchrittViewFrom(parent, stepModel);
       parent.insertStep(newStep, After, reference);
       parent.renumberFollowingSteps(reference);
       newStep.viewsNachinitialisieren();

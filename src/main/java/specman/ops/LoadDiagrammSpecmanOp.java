@@ -15,7 +15,6 @@ import specman.model.v002.io.ModelParser_V002;
 import specman.model.v002.io.ModelParseException;
 import specman.model.v002.io.ModelRenumberer_V002;
 import specman.model.v002.io.ModelSerializer_V002;
-import specman.view.KlappButton;
 import specman.view.QuellSchrittView;
 import specman.view.SchrittSequenzView;
 import specman.view.AbstractSchrittView;
@@ -154,7 +153,6 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     }
     setZoomFaktor(model.zoomFactor);
     zoomFaktorAnzeigeAktualisieren(model.zoomFactor);
-    KlappButton.scaleIcons(model.zoomFactor, 0);
     setDiagrammbreite(model.width);
     getIntro().setEditorContent(model.intro);
     getOutro().setEditorContent(model.outro);
