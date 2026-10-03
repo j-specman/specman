@@ -173,6 +173,7 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     getOutro().registerAllExistingStepnumbers();
     setChangeModeEnabled(model.changeModeEnabled);
     discardAllUndoEdits();
+    diagrammAktualisieren(null);
   }
 
   private DiagramModel_V002 resolveModel(ModelEnvelope envelope) {

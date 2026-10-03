@@ -12,6 +12,11 @@ import static specman.Specman.editor;
 public class Indentions {
     public static final int JEDITORPANE_DEFAULT_BORDER_THICKNESS = 3;
     private static final int LEFTRIGHT_INSET_FOR_DECORATION = 10;
+    // Originally sized to avoid colliding with RoundedBorderDecorator's antialiased border line
+    // during text-field focus repaints - confirmed no longer needed for that now that
+    // Specman.diagrammAktualisieren() settles stale repaints after structural changes. Now purely
+    // cosmetic: a bit of breathing room above/below the content in "abgesetzte" (rounded-border)
+    // steps, most visibly for the step number label.
     private static final int TOPBOTTOM_INSET_FOR_DECORATION = 1;
 
     final boolean top, left, bottom, right;
@@ -41,8 +46,11 @@ public class Indentions {
     }
 
     private RowSpec toRowSpec(boolean indent) {
-        int px = indent ? (TOPBOTTOM_INSET_FOR_DECORATION * zoomPercent() / 100) : 0;
-        return RowSpec.decode(px + "px");
+        return RowSpec.decode(pxFor(indent) + "px");
+    }
+
+    private int pxFor(boolean indent) {
+        return indent ? (TOPBOTTOM_INSET_FOR_DECORATION * zoomPercent() / 100) : 0;
     }
 
     private ColumnSpec toColumnSpec(boolean indent, int additional) {

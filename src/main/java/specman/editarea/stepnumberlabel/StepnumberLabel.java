@@ -35,6 +35,9 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
   // Tracks which color the current border was built from, so zoom changes can rebuild it at the
   // new scale (see refreshMetaWidgetScale()) without needing to know which style is active.
   private Color borderColor;
+  // See setHeightGrowthCompensation() - subtracted from the bottom inset to counteract
+  // EditContainer#updateBounds() growing this label's height in "abgesetzte" steps.
+  private int heightGrowthCompensation;
 
   public StepnumberLabel(StepNumber stepNumber) {
     super(String.valueOf(stepNumber));
@@ -57,7 +60,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
    * than cached as a static constant) because MatteBorder insets are fixed at construction time. */
   private Border scaledBorder(Color color) {
     int padding = (int) editor().scale(MetaStripPanel.SIDE_PADDING);
-    int lift = (int) editor().scale(MetaStripPanel.CONTENT_LIFT);
+    int lift = (int) editor().scale(MetaStripPanel.CONTENT_LIFT) - heightGrowthCompensation;
     return new MatteBorder(0, padding, lift, padding, color);
   }
 
@@ -75,6 +78,21 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
    * not only the next time the label's style (standard/target/source/deleted) changes. */
   public void refreshMetaWidgetScale() {
     setBorder(scaledBorder(borderColor));
+  }
+
+  /** Called from EditContainer#updateDecorationIndentions() whenever this step's "abgesetzt"
+   * (rounded-border) state changes. Swing centers this label's text within (height - insets), so
+   * growing the label's total height in updateBounds() without also shrinking the bottom inset by
+   * the same amount would push the text noticeably further from the bottom edge than in a step
+   * without that border style - verified via the exact centering formula
+   * gap = (height + bottomInset - textHeight) / 2: for gap to stay constant while height grows by
+   * N, bottomInset must shrink by N (not grow - growing it makes the gap worse, not better). Not
+   * zoom-scaled - see MetaStripPanel.BORDER_OVERDRAW_COMPENSATION for why. */
+  public void setHeightGrowthCompensation(int pixels) {
+    if (heightGrowthCompensation != pixels) {
+      heightGrowthCompensation = pixels;
+      setBorder(scaledBorder(borderColor));
+    }
   }
 
   public void setStepNumber(StepNumber stepNumber) {

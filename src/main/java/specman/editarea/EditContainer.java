@@ -169,16 +169,15 @@ public class EditContainer extends JPanel {
 				System.err.println("Can't set step number in " + schrittNummer);
 			}
 			else {
-				// metaPanel spans the header strip (row 2) and the first edit area's cell (row 3),
-				// deliberately NOT row 1 (the topInset row, non-zero for "abgesetzte" rounded-border
-				// steps): that row must stay free of any opaque content, or its flat edge collides
-				// with RoundedBorderDecorator's antialiased arc and the border looks "nibbled" -
-				// which is exactly the bug this topInset row exists to avoid for the text field in
-				// the first place (see the class comment above). Reaching metaPanel into row 1
-				// closes the white-gap-above-the-tab gap in that display style, but reproduces the
-				// same nibbling for schrittNummer/KlappButton instead - not an acceptable trade.
+				// metaPanel spans the topInset row (1, now purely cosmetic breathing room for
+				// "abgesetzte" rounded-border steps - see Indentions.TOPBOTTOM_INSET_FOR_DECORATION),
+				// the header strip (row 2), and the first edit area's cell (row 3). Previously this
+				// caused visible nibbling of RoundedBorderDecorator's antialiased border line on
+				// full repaints; that root cause (stale repaints after structural changes) is now
+				// fixed via Specman.diagrammAktualisieren()'s resize nudge, so schrittNummer can
+				// bridge the inset row again without the label's top edge colliding with the border.
 				metaPanel.add(schrittNummer);
-				add(metaPanel, CC.xywh(2, 2, 1, 2, CC.FILL, CC.FILL), 0);
+				add(metaPanel, CC.xywh(2, 1, 1, 3, CC.FILL, CC.FILL), 0);
 			}
 		}
 		skalieren(editor().getZoomFactor(), 0);
@@ -261,10 +260,18 @@ public class EditContainer extends JPanel {
 					Dimension schrittnummerGroesse = schrittNummer.getPreferredSize();
 					int rightMargin = (int) editor().scale(MetaStripPanel.RIGHT_MARGIN);
 					int heightTrim = (int) editor().scale(MetaStripPanel.HEIGHT_TRIM);
+					// metaPanel bridges the topInset row (see initLayoutAndEditAreasV2()) so the
+					// label reaches the very top in "abgesetzte" (rounded-border) steps - but
+					// RoundedBorderDecorator paints its antialiased border line on top of
+					// everything inside it, overdrawing a few pixels off the label's top edge.
+					// Making the label taller by that same (fixed, not zoom-scaled - see
+					// MetaStripPanel.BORDER_OVERDRAW_COMPENSATION) amount keeps its visible
+					// (non-overdrawn) height identical to a step without that border style.
+					int topInsetBridge = indentions != null && indentions.top ? MetaStripPanel.BORDER_OVERDRAW_COMPENSATION : 0;
 					schrittNummer.setBounds(maxEditWidth - schrittnummerGroesse.width - rightMargin,
 						0,
 						schrittnummerGroesse.width,
-						schrittnummerGroesse.height - heightTrim);
+						schrittnummerGroesse.height - heightTrim + topInsetBridge);
 				} else {
 					schrittNummer.setBounds(0, 0, 0, 0);
 				}
@@ -367,6 +374,12 @@ public class EditContainer extends JPanel {
 		layout.setRowSpec(editAreas.size()+3, indentions.bottomInset());
 		layout.setColumnSpec(1, indentions.leftInset());
 		layout.setColumnSpec(3, indentions.rightInset());
+
+		if (schrittNummer != null) {
+			// See updateBounds(): the label's height grows by BORDER_OVERDRAW_COMPENSATION in
+			// "abgesetzte" steps - compensate so the text-to-bottom-edge distance stays the same.
+			schrittNummer.setHeightGrowthCompensation(this.indentions.top ? MetaStripPanel.BORDER_OVERDRAW_COMPENSATION : 0);
+		}
 
 		// TODO JL: Das ist hier noch nicht sauber. Der oberste und unterste Editbereich haben
 		//  unterschiedliche Top- und Bottom-Insets
@@ -886,5 +899,12 @@ public class EditContainer extends JPanel {
 
   public void viewsNachinitialisieren() {
     editAreas.forEach(ea -> ea.viewsNachinitialisieren());
+    // Re-run after construction, not just during it: step numbers can still change later in
+    // the same load (e.g. renummerieren() runs after the views are built), and the label's
+    // bounds from the original construction-time call may be stale for the final text/width.
+    // A plain revalidate()/repaint() does NOT fix this, because nothing in the normal FormLayout
+    // cascade calls updateBounds() again - only a real resize event does, via TextEditArea's
+    // own componentResized() listener.
+    updateBounds();
   }
 }
