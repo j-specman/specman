@@ -169,10 +169,29 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
    * never-hovered buttons (the common case - most steps aren't being pointed at) cost nothing. */
   private void setHoverVisible(boolean hovering) {
     setVisible(hovering);
-    if (hovering) {
+    setHoverPollRunning(hovering);
+    repaintEnclosingBorderDecorator();
+  }
+
+  private void setHoverPollRunning(boolean running) {
+    if (running) {
       hoverPoll.start();
     } else {
       hoverPoll.stop();
+    }
+  }
+
+  /** Quick fix for a render glitch in "abgesetzte" (rounded-border) steps: becoming visible (or
+   * hidden) only repaints this button's own freshly (un)covered area - not the enclosing
+   * RoundedBorderDecorator's antialiased border line, which is supposed to overdraw a few pixels
+   * on top of it (see MetaStripPanel.BORDER_OVERDRAW_COMPENSATION), leaving a visible seam where
+   * the two didn't get redrawn in the right order. Repainting the whole decorator (if this
+   * button's step actually has one) redraws everything beneath it too, in the correct, on-top
+   * order. */
+  private void repaintEnclosingBorderDecorator() {
+    Container decorator = SwingUtilities.getAncestorOfClass(RoundedBorderDecorator.class, this);
+    if (decorator != null) {
+      decorator.repaint();
     }
   }
 
