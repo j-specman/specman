@@ -5,6 +5,7 @@ import specman.StepNumber;
 import specman.draganddrop.DragMouseAdapter;
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.HangingTab;
+import specman.pdf.HangingTabShape;
 import specman.pdf.LineShape;
 import specman.undo.props.UDBL;
 import specman.pdf.LabelShapeText;
@@ -13,6 +14,7 @@ import specman.pdf.Shape;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.font.LineMetrics;
 
 import static specman.StepNumber.asString;
 import specman.ChangeSet;
@@ -122,26 +124,40 @@ public class StepnumberLabel extends HangingTab implements InteractiveStepFragme
   }
 
   private void drawDeletionLine(Graphics g) {
-    LineShape dline = createDeletionLine();
+    LineShape dline = createDeletionLine(0);
     if (dline != null) {
       g.drawLine(dline.start().x, dline.start().y, dline.end().x, dline.end().y);
     }
   }
 
-  private LineShape createDeletionLine() {
-    // + 1 turned out to produce a better vertical line placement
-    int VERTICAL_LINE_PLACEMENT_OFFSET = 1;
+  private LineShape createDeletionLine(int horizontalLinePlacementOffset) {
+    // -1 turned out to produce a better horizontal line placement
+    int VERTICAL_LINE_PLACEMENT_OFFSET = -1;
     IntRange delSubStringRange = findDelSubStringRange();
 
     if (delSubStringRange != null) {
+      // Ask Swing itself where it actually paints the text, instead of re-deriving the position
+      // by hand from insets/alignment - manual attempts at this (insets.left for X, a height/2
+      // formula adjusted for the border's bottom inset for Y) each needed another correction
+      // once tried against the real rendering, so just defer to the same layout computation
+      // BasicLabelUI itself uses to place the text.
       FontMetrics metrics = getFontMetrics(getFont());
+      Rectangle viewRect = SwingUtilities.calculateInnerArea(this, null);
+      Rectangle textRect = new Rectangle();
+      SwingUtilities.layoutCompoundLabel(this, metrics, getText(), getIcon(),
+        getVerticalAlignment(), getHorizontalAlignment(),
+        getVerticalTextPosition(), getHorizontalTextPosition(),
+        viewRect, new Rectangle(), textRect, getIconTextGap());
+
       int undeletedWidth = metrics.stringWidth(getText().substring(0, delSubStringRange.getMinimumInteger()));
       int deletedWidth = metrics.stringWidth(getText().substring(delSubStringRange.getMinimumInteger(), delSubStringRange.getMaximumInteger()));
+      int lineY = textRect.y + textRect.height / 2 + horizontalLinePlacementOffset;
+      int lineX = textRect.x + VERTICAL_LINE_PLACEMENT_OFFSET;
       return new LineShape(
-        undeletedWidth + VERTICAL_LINE_PLACEMENT_OFFSET,
-        getHeight() / 2,
-        undeletedWidth + deletedWidth + VERTICAL_LINE_PLACEMENT_OFFSET,
-        getHeight() / 2)
+        lineX + undeletedWidth,
+        lineY,
+        lineX + undeletedWidth + deletedWidth,
+        lineY)
         .withColor(getForeground())
         .withWidth(0.5f);
     }
@@ -231,9 +247,10 @@ public class StepnumberLabel extends HangingTab implements InteractiveStepFragme
   }
 
   public Shape getShape() {
-    return new Shape(this)
+    int lineYOffset = (int)editor().scale(1.0);
+    return new HangingTabShape(this, arc())
       .withText(new LabelShapeText(getText(), getInsets(), getForeground(), getFont()))
-      .add(createDeletionLine());
+      .add(createDeletionLine(lineYOffset));
   }
 
   private void setStructureUDBL(LabelStructure structure) { UDBL.setStructureUDBL(this, structure); }

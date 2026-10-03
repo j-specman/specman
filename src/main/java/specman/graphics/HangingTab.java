@@ -14,7 +14,7 @@ import static specman.Specman.editor;
 /**
  * Common base for meta-strip widgets (step number label, fold/collapse button, future ones) that
  * render as if hanging from the top edge of their container: sharp top corners, antialiased
- * rounded bottom corners (see {@link HangingTabShape} for how). Subclasses supply the corner arc
+ * rounded bottom corners (see {@link HangingTabRenderer} for how). Subclasses supply the corner arc
  * via {@link #arc()} and can override {@link #paintUnmasked(Graphics)} for content that must not
  * be clipped by the rounded-bottom mask (e.g. StepnumberLabel's deletion strike-through line,
  * painted directly onto the final Graphics after HangingTabShape has already composited the
@@ -72,7 +72,7 @@ public abstract class HangingTab extends JLabel {
 
   @Override
   public void paint(Graphics g) {
-    HangingTabShape.paint(this, g, arc(), super::paint);
+    HangingTabRenderer.paint(this, g, arc(), super::paint);
     paintUnmasked(g);
     paintHangingTabBorder(g);
   }
@@ -89,7 +89,7 @@ public abstract class HangingTab extends JLabel {
     // Inset by half the stroke width so the (centered-on-path) stroke stays fully within the
     // widget's own bounds instead of half of it getting clipped off at the edges.
     g2.translate(strokeWidth / 2, strokeWidth / 2);
-    g2.draw(HangingTabShape.outline(getWidth() - strokeWidth, getHeight() - strokeWidth, arc()));
+    g2.draw(HangingTabRenderer.outline(getWidth() - strokeWidth, getHeight() - strokeWidth, arc()));
     g2.dispose();
   }
 
