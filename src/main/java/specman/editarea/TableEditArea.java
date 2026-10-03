@@ -11,7 +11,6 @@ import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.TextInit;
 import static specman.ChangeSet.changeset;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.TableEditAreaModel_V002;
 import specman.pdf.Shape;
@@ -84,7 +83,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     int rows = model.cells.size();
     int columns = model.cells.get(0).size();
     initPanels(columns, rows);
-    addCellsV2(model.cells);
+    addCells(model.cells);
   }
 
   private Stream<EditContainer> cellstream() { return cells.stream().flatMap(l -> l.stream()); }
@@ -151,7 +150,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     cellstream().forEach(cell -> cell.addEditComponentListener(l));
   }
 
-  private void addCellsV2(List<List<EditorContentModel_V002>> model) {
+  private void addCells(List<List<EditorContentModel_V002>> model) {
     for (int r = 0; r < model.size(); r++) {
       List<EditorContentModel_V002> rowModel = model.get(r);
       cells.add(new ArrayList<>());
@@ -630,7 +629,6 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   @Override public void setQuellStil(ChangeSet changeSet) { /* Not required for tables - source steps only contain an empty text area */ }
-  @Override public void addSchrittnummer(StepnumberLabel schrittNummer) { add(schrittNummer); }
   @Override public Component asComponent() { return this; }
   @Override public String getPlainText() { return ""; }
   @Override public TextEditArea asTextArea() { return null; }

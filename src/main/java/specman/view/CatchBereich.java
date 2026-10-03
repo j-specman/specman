@@ -73,6 +73,10 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
     topBar.setLayout(null);
 
     klappen = new KlappButton(this, topBar, bereichLayout, 4, null);
+    // Sits in the divider bar rather than hanging from a step number - the lighter gray border
+    // that KlappButton uses by default (matching StepnumberLabel's own gray) is too subtle against
+    // Hintergrundfarbe_Deviderbar, so use a darker one here instead.
+    klappen.setBorderColor(Color.GRAY);
 
     bereichPanel.addComponentListener(this);
 

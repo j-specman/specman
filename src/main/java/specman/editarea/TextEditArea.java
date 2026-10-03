@@ -16,7 +16,6 @@ import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedElement;
 import specman.editarea.document.WrappedPosition;
 import specman.editarea.stepnumberlabel.BreakCatchScrollMouseAdapter;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.Markup_V002;
 import specman.model.v002.TableEditAreaModel_V002;
 import specman.model.v002.TextEditAreaModel_V002;
@@ -170,11 +169,6 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
             return BreakCatchScrollMouseAdapter.SCROLL_TOOLTIP;
         }
         return super.getToolTipText();
-    }
-
-    @Override
-    public void addSchrittnummer(StepnumberLabel schrittNummer) {
-        add(schrittNummer);
     }
 
     private void setStyleUDBL(MutableAttributeSet attr, Color backgroundColor, boolean editable) {

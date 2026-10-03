@@ -12,7 +12,12 @@ import static specman.Specman.editor;
 public class Indentions {
     public static final int JEDITORPANE_DEFAULT_BORDER_THICKNESS = 3;
     private static final int LEFTRIGHT_INSET_FOR_DECORATION = 10;
-    private static final int TOPBOTTOM_INSET_FOR_DECORATION = 1;
+    // Originally sized to avoid colliding with RoundedBorderDecorator's antialiased border line
+    // during text-field focus repaints, for both top and bottom edges - confirmed no longer
+    // needed for the top edge now that EditContainer's meta-strip row always provides generous
+    // clearance there (see topInset()/topBorder()). Still used for the bottom edge, which has no
+    // such strip: a bit of breathing room below the content in "abgesetzte" (rounded-border) steps.
+    private static final int BOTTOM_INSET_FOR_DECORATION = 1;
 
     final boolean top, left, bottom, right;
     final int individualLeft;
@@ -41,8 +46,11 @@ public class Indentions {
     }
 
     private RowSpec toRowSpec(boolean indent) {
-        int px = indent ? (TOPBOTTOM_INSET_FOR_DECORATION * zoomPercent() / 100) : 0;
-        return RowSpec.decode(px + "px");
+        return RowSpec.decode(pxFor(indent) + "px");
+    }
+
+    private int pxFor(boolean indent) {
+        return indent ? (BOTTOM_INSET_FOR_DECORATION * zoomPercent() / 100) : 0;
     }
 
     private ColumnSpec toColumnSpec(boolean indent, int additional) {
@@ -50,19 +58,27 @@ public class Indentions {
         return ColumnSpec.decode(px + "px");
     }
 
-    public RowSpec topInset() { return toRowSpec(top); }
+    public RowSpec topInset() {
+        // Was toRowSpec(top) - reserved breathing room above the content in "abgesetzte"
+        // (rounded-border) steps. Always 0 now: that role moved entirely to EditContainer's
+        // meta-strip row, which exists precisely when a step number is present - and "abgesetzt"
+        // only ever applies to steps, which always have one. top is still used for other things
+        // (see withTop() call sites for branches/substeps not at the top of their compound step).
+        return toRowSpec(false);
+    }
     public RowSpec bottomInset() { return toRowSpec(bottom); }
     public ColumnSpec leftInset() { return toColumnSpec(left, individualLeft); }
     public ColumnSpec rightInset() { return toColumnSpec(right, 0); }
 
     public int leftBorder() { return left ? individualLeft : JEDITORPANE_DEFAULT_BORDER_THICKNESS + individualLeft; }
     public int rightBorder() { return right ? 0 : JEDITORPANE_DEFAULT_BORDER_THICKNESS; }
-    public int topBorder() {
-        return JEDITORPANE_DEFAULT_BORDER_THICKNESS - (top ? TOPBOTTOM_INSET_FOR_DECORATION : 0);
-    }
     public int bottomBorder() {
-        return JEDITORPANE_DEFAULT_BORDER_THICKNESS - (bottom ? TOPBOTTOM_INSET_FOR_DECORATION : 0);
+        return JEDITORPANE_DEFAULT_BORDER_THICKNESS - (bottom ? BOTTOM_INSET_FOR_DECORATION : 0);
     }
+
+    /** No compensation required at the top even for "abgesetzte" steps, because at the top of steps there is
+     * always the meta-strip row of the EditContainer, which provides the necessary breathing room. */
+    public int topBorder() { return JEDITORPANE_DEFAULT_BORDER_THICKNESS; }
 
     public Indentions withTop(boolean top) { return new Indentions(top, left, bottom, right); }
     public Indentions withLeft(boolean left) { return new Indentions(top, left, bottom, right); }

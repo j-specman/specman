@@ -1,7 +1,5 @@
 package specman.ops;
 
-import specman.view.KlappButton;
-
 public class NewDiagrammSpecmanOp extends AbstractInitSpecmanOp {
 
   public NewDiagrammSpecmanOp(SpecmanOpContext context) {
@@ -17,7 +15,6 @@ public class NewDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     setChangeModeEnabled(false);
     context().initEmptyDiagram();
     zoomFaktorAnzeigeAktualisieren(100);
-    KlappButton.scaleIcons(100, 0);
   }
 
 }

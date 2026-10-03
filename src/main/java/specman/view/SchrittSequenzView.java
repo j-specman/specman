@@ -95,7 +95,7 @@ public class SchrittSequenzView {
 		this.sequenceId = model.id;
 		if (model.steps != null) {
 			for (AbstractStepModel_V002 step : model.steps) {
-				AbstractSchrittView schrittView = AbstractSchrittView.baueSchrittViewFromV2(this, step);
+				AbstractSchrittView schrittView = AbstractSchrittView.baueSchrittViewFrom(this, step);
 				appendStep(schrittView);
 				if (step.decorationStyle != null && step.decorationStyle != None) {
 					toggleBorderType(schrittView);

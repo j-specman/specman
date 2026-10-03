@@ -9,7 +9,6 @@ import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.Specman;
 import specman.editarea.focusmover.CrossEditAreaFocusMoverFromImage;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.ImageEditAreaModel_V002;
 import specman.pdf.Shape;
 import specman.pdf.ShapeImage;
@@ -102,11 +101,6 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     image.setBorder(changetype2border());
     addComponentListener(this);
     updateListenersByChangeInfo();
-  }
-
-  @Override
-  public void addSchrittnummer(StepnumberLabel schrittNummer) {
-    add(schrittNummer);
   }
 
   private void updateListenersByChangeInfo() {

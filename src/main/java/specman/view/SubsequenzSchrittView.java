@@ -16,7 +16,6 @@ import specman.undo.props.UDBL;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import java.awt.Color;
-import java.awt.event.ComponentEvent;
 import java.util.List;
 
 import static specman.draganddrop.DragSource.Type.StepCreation;
@@ -178,13 +177,6 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 	public SchrittSequenzView getSubsequenz() {
 		return subsequenz;
 	}
-
-	@Override
-	public void componentResized(ComponentEvent e) {
-		super.componentResized(e);
-		klappen.updateLocation(editContainer.getStepNumberBounds());
-	}
-
 
 	@Override
 	public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) throws UnsupportedDragSourceException {

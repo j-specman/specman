@@ -315,7 +315,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		int bisherigerFaktor = zoomFaktor;
 		zoomFaktor = prozent;
 		zoomFaktorAnzeigeAktualisieren(prozent);
-    KlappButton.scaleIcons(prozent, bisherigerFaktor);
 		float diagrammbreite100Prozent = (float)diagrammbreite / bisherigerFaktor * 100;
 		int neueDiagrammbreite = (int)(diagrammbreite100Prozent * prozent / 100);
 		spaltenbreitenAnpassenNachMausDragging(neueDiagrammbreite - diagrammbreite, 0);
@@ -360,11 +359,21 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		if (hauptSequenzContainer != null) {
 			hauptSequenzContainer.setVisible(false);
 			// Folgende Zeile forciert ein Relayouting, falls z.B. nur eine manuelle Breitenänderung
-			// einer If-Else-Spaltenteilung stattgefunden hat.
-			diagrammbreiteSetzen(diagrammbreite-1);
+			// einer If-Else-Spaltenteilung stattgefunden hat - das wirkt sich ohne diesen Nudge
+			// (und ohne das setVisible(false/true) drumherum) sonst nicht sofort sichtbar aus.
+			diagrammbreiteSetzen(diagrammbreite - 1);
+			// Separately, adding/loading/changing steps can leave some newly constructed nested
+			// FormLayout containers painted with stale bounds (most visibly on step number
+			// labels) - the diagrammbreite nudge above does not fix this. Only an actual resize
+			// event does, because that's the only thing that reliably retriggers every affected
+			// component's own componentResized() handling. So we synthesize one here too: nudge
+			// the window size by 1px, restored together with the diagrammbreite nudge below.
+			Dimension size = getSize();
+			setSize(size.width + 1, size.height);
 			final Point viewPosition = scrollPane.getViewport().getViewPosition();
 			SwingUtilities.invokeLater(() -> {
 				diagrammbreiteSetzen(diagrammbreite);
+				setSize(size.width, size.height);
 				hauptSequenzContainer.setVisible(true);
 				if (editArea != null) {
 					editArea.requestFocus();

@@ -200,7 +200,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	abstract public AbstractStepModel_V002 generiereModel(boolean formatierterText);
 
-	public static AbstractSchrittView baueSchrittViewFromV2(SchrittSequenzView parent, AbstractStepModel_V002 model) {
+	public static AbstractSchrittView baueSchrittViewFrom(SchrittSequenzView parent, AbstractStepModel_V002 model) {
 		if (model instanceof DoWhileStepModel_V002) {
 			return new WhileWhileSchrittView(parent, (DoWhileStepModel_V002) model);
 		}

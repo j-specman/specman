@@ -3,7 +3,6 @@ package specman.editarea;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.pdf.Shape;
 
@@ -15,8 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public interface EditArea<MODEL extends AbstractEditAreaModel_V002> extends InteractiveStepFragment {
-  void addSchrittnummer(StepnumberLabel schrittNummer);
-
   int getWidth();
 
   /** The passed ChangeSet is the one which the deletion has been triggered with. The EditArea
