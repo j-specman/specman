@@ -232,11 +232,16 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
 
   /** For KlappButtons not paired with a step number (CatchBereich's "collapse catch sequences"
    * button) - there's no StepnumberLabel bounds to borrow a height from, so this falls back to
-   * the fixed MINIMUM_ICON_LENGTH as a plain square. */
+   * the fixed MINIMUM_ICON_LENGTH for height (matching the bar row CatchBereich reserves for it,
+   * see computeBarRowSpec()). Width still comes from getPreferredSize(), same as the Rectangle
+   * overload above - using MINIMUM_ICON_LENGTH for width too made this button visibly narrower
+   * than its meta-strip counterpart, since the icon+padding recipe (ICON_GLYPH_SIZE + 2 *
+   * ICON_SIDE_PADDING) adds up to a bit more than MINIMUM_ICON_LENGTH. */
   public void updateLocation(int remainingWidth) {
     if (remainingWidth > 0) {
-      int desiredSize = (int) editor().scale(MINIMUM_ICON_LENGTH);
-      setBounds(remainingWidth - desiredSize, 0, desiredSize, desiredSize);
+      int height = (int) editor().scale(MINIMUM_ICON_LENGTH);
+      int width = getPreferredSize().width;
+      setBounds(remainingWidth - width, 0, width, height);
     }
   }
 
