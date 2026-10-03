@@ -43,6 +43,9 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
   // plus/minus glyph is known never to reach wide enough to collide with the rounded bottom
   // corners, so it can sit closer to the button's own left/right edges.
   private static final int ICON_SIDE_PADDING = 2;
+  // Poll interval for the hover-exit safety net (see hoverPoll below) - short enough that a quick
+  // flick of the mouse off the button still hides it within a human-imperceptible delay.
+  private static final int HOVER_POLL_MILLIS = 60;
 
   private final FormLayout layout;
   private final int contentrow;
@@ -53,6 +56,16 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
   private final SvgIcon expandIcon = new SvgIcon("plus", ICON_GLYPH_SIZE);
   private Color currentColor;
   private boolean selected;
+  // Safety net for mouseMoved/mouseExited-based hover detection (see mouseMoved's comment for why
+  // those alone proved unreliable under fast mouse movement): while shown for hover (not because
+  // selected), periodically re-confirms via getMousePosition() - a fresh, authoritative query of
+  // the actual current pointer location, immune to any mouse-event queuing/coalescing quirks -
+  // that the pointer is still really over this button, and hides it the moment it isn't.
+  private final Timer hoverPoll = new Timer(HOVER_POLL_MILLIS, e -> {
+    if (!isSelected() && getMousePosition() == null) {
+      setHoverVisible(false);
+    }
+  });
 
   public KlappButton(KlappbarerBereichI klappbarerBereich, Container parent, FormLayout layout, int contentrow, Integer fillerrow) {
     this.parent = parent;
@@ -66,6 +79,7 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
     setBorderColor(SCHRITTNUMMER_FARBE.color);
     setVisible(false);
     addMouseListener(this);
+    addMouseMotionListener(this);
     parent.addMouseMotionListener(this);
     parent.add(this);
     scale(editor().getZoomFactor(), 100);
@@ -78,6 +92,11 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
   private void setSelected(boolean selected) {
     this.selected = selected;
     setIcon(selected ? expandIcon : collapseIcon);
+    if (selected) {
+      // Stays visible permanently while selected (see mouseMoved's comment) - no more need to
+      // watch for the mouse leaving.
+      hoverPoll.stop();
+    }
   }
 
   public void init(boolean zugeklappt) {
@@ -132,8 +151,28 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
     // wenn die Maus an der richtigen Stelle steht. Sonst stören im aufgeklappten Zustand
     // die vielen Button-Icons das Erscheinungsbild des Diagramms
     if (!isSelected()) {
-      boolean mausUeberKlappenButton = getBounds().contains(e.getPoint());
-      setVisible(mausUeberKlappenButton);
+      // Registered as a MouseMotionListener both on parent (receives events while this button is
+      // invisible, since an invisible component isn't a hit-test target) and on itself (receives
+      // events once visible, since it then becomes the hit-test target instead of parent) - relying
+      // on mouseExited alone to hide it again turned out unreliable with this overlapping-panel
+      // setup (Swing's enter/exit synthesis isn't built for deliberately overlapping lightweight
+      // components), so every move event - from either source - re-checks the position directly.
+      boolean mausUeberKlappenButton = e.getComponent() == this
+        ? contains(e.getPoint())
+        : getBounds().contains(e.getPoint());
+      setHoverVisible(mausUeberKlappenButton);
+    }
+  }
+
+  /** Shows/hides the button for hover purposes, starting/stopping the hoverPoll safety net (see
+   * its field comment) in lockstep - started only while actually shown for hovering, so idle,
+   * never-hovered buttons (the common case - most steps aren't being pointed at) cost nothing. */
+  private void setHoverVisible(boolean hovering) {
+    setVisible(hovering);
+    if (hovering) {
+      hoverPoll.start();
+    } else {
+      hoverPoll.stop();
     }
   }
 
@@ -144,7 +183,7 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
    */
   @Override public void mouseExited(MouseEvent e) {
     if (!isSelected()) {
-      setVisible(false);
+      setHoverVisible(false);
     }
   }
 
