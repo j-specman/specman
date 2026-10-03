@@ -25,9 +25,9 @@ import java.util.function.Consumer;
  * True antialiased edges require rendering the component into an offscreen buffer and
  * compositing it against a separately, antialiased-filled mask shape via AlphaComposite.DstIn.
  */
-public final class HangingTabShape {
+public final class HangingTabRenderer {
 
-  private HangingTabShape() {}
+  private HangingTabRenderer() {}
 
   /** Call from a component's own paint(Graphics) override, passing its own super::paint as
    * superPaint so this stays usable for any JComponent without a shared base class. */

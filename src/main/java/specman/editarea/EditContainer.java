@@ -591,7 +591,14 @@ public class EditContainer extends JPanel {
 			// (not nested inside the first one) - its shape must nest the same way, via a shape
 			// for metaPanel itself, or its position would be off by metaPanel's own
 			// offset within EditContainer (most visibly the header strip height from step 2).
-			shape.add(new Shape(metaPanel).add(schrittNummer.getShape()));
+			// Using new Shape(metaPanel) (the Component-based constructor) would also make this
+			// a hasForm()==true rectangle filled with metaPanel's own background - PDFRenderer
+			// draws subshapes of this very shape list in order, so that fill would be painted
+			// *after* (on top of) the first edit area's own shape above, since metaPanel visually
+			// overlaps down into that edit area's row. metaPanel is only ever meant to establish
+			// a coordinate offset here, not to paint anything itself (it's non-opaque on screen
+			// too) - a position-only Shape(int,int) has no form, so nothing gets filled/painted.
+			shape.add(new Shape(metaPanel.getX(), metaPanel.getY()).add(schrittNummer.getShape()));
 		}
 		return shape;
 	}
