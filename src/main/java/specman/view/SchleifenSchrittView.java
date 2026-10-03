@@ -24,7 +24,6 @@ import specman.undo.props.UDBL;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import java.awt.*;
-import java.awt.event.ComponentEvent;
 import java.util.List;
 
 import static specman.draganddrop.DragSource.Type.StepCreation;
@@ -237,12 +236,6 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 
 	public JPanel getPanel() {
 		return panel;
-	}
-
-	@Override
-	public void componentResized(ComponentEvent e) {
-		super.componentResized(e);
-		klappen.updateLocation(editContainer.getStepNumberBounds());
 	}
 
 	public List<BreakSchrittView> queryUnlinkedBreakSteps() {

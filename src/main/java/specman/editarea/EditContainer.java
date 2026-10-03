@@ -261,27 +261,7 @@ public class EditContainer extends JPanel {
 		// the containers and/or step number label to disappear. We rely on that there
 		// will follow additional calls with reasonable initialized components sizes.
 		if (maxEditWidth > 0) {
-			if (schrittNummer != null) {
-				if (schrittNummerSichtbar) {
-					Dimension schrittnummerGroesse = schrittNummer.getPreferredSize();
-					int rightMargin = (int) editor().scale(MetaStripPanel.RIGHT_MARGIN);
-					int heightTrim = (int) editor().scale(MetaStripPanel.HEIGHT_TRIM);
-					// schrittNummer already reaches the very top of the step via row 2 alone (see
-					// initLayoutAndEditAreas()) - but RoundedBorderDecorator paints its
-					// antialiased border line on top of everything inside it, overdrawing a few
-					// pixels off the label's top edge in "abgesetzte" (rounded-border) steps.
-					// Making the label taller by that same (fixed, not zoom-scaled - see
-					// MetaStripPanel.BORDER_OVERDRAW_COMPENSATION) amount keeps its visible
-					// (non-overdrawn) height identical to a step without that border style.
-					int topInsetBridge = indentions != null && indentions.top ? MetaStripPanel.BORDER_OVERDRAW_COMPENSATION : 0;
-					schrittNummer.setBounds(maxEditWidth - schrittnummerGroesse.width - rightMargin,
-						0,
-						schrittnummerGroesse.width,
-						schrittnummerGroesse.height - heightTrim + topInsetBridge);
-				} else {
-					schrittNummer.setBounds(0, 0, 0, 0);
-				}
-			}
+			metaPanel.updateBounds(maxEditWidth, indentions, schrittNummerSichtbar);
 		}
 	}
 

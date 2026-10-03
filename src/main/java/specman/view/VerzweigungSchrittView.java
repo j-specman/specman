@@ -108,12 +108,6 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 	}
 
 	@Override
-	public void componentResized(ComponentEvent e) {
-		super.componentResized(e);
-		klappen.updateLocation(editContainer.getStepNumberBounds());
-	}
-
-	@Override
 	public void focusLost(FocusEvent e) {
 		super.focusLost(e);
 		panel.repaint(); // Zeichnet Dreieck und Case-Trenner nach, wenn man mit Editieren der Texte fertig ist
