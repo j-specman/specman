@@ -169,15 +169,12 @@ public class EditContainer extends JPanel {
 				System.err.println("Can't set step number in " + schrittNummer);
 			}
 			else {
-				// metaPanel spans the topInset row (1, now purely cosmetic breathing room for
-				// "abgesetzte" rounded-border steps - see Indentions.TOPBOTTOM_INSET_FOR_DECORATION),
-				// the header strip (row 2), and the first edit area's cell (row 3). Previously this
-				// caused visible nibbling of RoundedBorderDecorator's antialiased border line on
-				// full repaints; that root cause (stale repaints after structural changes) is now
-				// fixed via Specman.diagrammAktualisieren()'s resize nudge, so schrittNummer can
-				// bridge the inset row again without the label's top edge colliding with the border.
+				// The metaPanel spans row 2 - the header strip - and row 3 - the first edit area's row.
+				// This causes the label to start in the header strip and overlap down into the first edit
+				// area, which is what we want to avoid too much height loss. Text edit areas have plenty of
+				// unused top margin, so the label doesn't overlap the text itself.
 				metaPanel.add(schrittNummer);
-				add(metaPanel, CC.xywh(2, 1, 1, 3, CC.FILL, CC.FILL), 0);
+				add(metaPanel, CC.xywh(2, 2, 1, 2, CC.FILL, CC.FILL), 0);
 			}
 		}
 		skalieren(editor().getZoomFactor(), 0);
@@ -260,10 +257,10 @@ public class EditContainer extends JPanel {
 					Dimension schrittnummerGroesse = schrittNummer.getPreferredSize();
 					int rightMargin = (int) editor().scale(MetaStripPanel.RIGHT_MARGIN);
 					int heightTrim = (int) editor().scale(MetaStripPanel.HEIGHT_TRIM);
-					// metaPanel bridges the topInset row (see initLayoutAndEditAreasV2()) so the
-					// label reaches the very top in "abgesetzte" (rounded-border) steps - but
-					// RoundedBorderDecorator paints its antialiased border line on top of
-					// everything inside it, overdrawing a few pixels off the label's top edge.
+					// schrittNummer already reaches the very top of the step via row 2 alone (see
+					// initLayoutAndEditAreasV2()) - but RoundedBorderDecorator paints its
+					// antialiased border line on top of everything inside it, overdrawing a few
+					// pixels off the label's top edge in "abgesetzte" (rounded-border) steps.
 					// Making the label taller by that same (fixed, not zoom-scaled - see
 					// MetaStripPanel.BORDER_OVERDRAW_COMPENSATION) amount keeps its visible
 					// (non-overdrawn) height identical to a step without that border style.
