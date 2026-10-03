@@ -4,6 +4,8 @@ import org.apache.commons.lang.math.IntRange;
 import specman.StepNumber;
 import specman.draganddrop.DragMouseAdapter;
 import specman.editarea.InteractiveStepFragment;
+import specman.editarea.MetaStripPanel;
+import specman.graphics.HangingTabShape;
 import specman.pdf.LineShape;
 import specman.undo.props.UDBL;
 import specman.pdf.LabelShapeText;
@@ -25,14 +27,14 @@ import static specman.graphics.Styles.labelFont;
 import static specman.Specman.editor;
 
 public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
-  private static final Border STANDARD_BORDER = new MatteBorder(0, 2, 0, 1, SCHRITTNUMMER_FARBE.color);
-  private static final Border CHANGED_BORDER = new MatteBorder(0, 2, 0, 1, ChangeSet.DEFAULT.colors.panelColor);
-  private static final Border DELETED_BORDER = new MatteBorder(0, 2, 0, 1, DELETED_BACKGROUND_COLOR.color);
   private static final String SPACER = " ";
   private static final String TO_TARGET_ARROW = SPACER + ">" + SPACER;
   private static final String FROM_SOURCE_ARROW = SPACER + "<" + SPACER;
 
   private LabelStructure structure;
+  // Tracks which color the current border was built from, so zoom changes can rebuild it at the
+  // new scale (see refreshMetaWidgetScale()) without needing to know which style is active.
+  private Color borderColor;
 
   public StepnumberLabel(StepNumber stepNumber) {
     super(String.valueOf(stepNumber));
@@ -40,7 +42,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
     structure = LabelStructure.Standard;
     setFont(labelFont);
     setBackground(SCHRITTNUMMER_FARBE.color);
-    setBorder(STANDARD_BORDER);
+    setBorderForColor(SCHRITTNUMMER_FARBE.color);
     setForeground(Color.WHITE);
     setOpaque(true);
 
@@ -49,6 +51,30 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
     addMouseMotionListener(ada);
     addMouseListener(BreakCatchScrollMouseAdapter.instance);
     addMouseListener(StepnumberContextMenu.instance);
+  }
+
+  /** Border insets scale with zoom just like the widget's font/size do - rebuilt here (rather
+   * than cached as a static constant) because MatteBorder insets are fixed at construction time. */
+  private Border scaledBorder(Color color) {
+    int padding = (int) editor().scale(MetaStripPanel.SIDE_PADDING);
+    int lift = (int) editor().scale(MetaStripPanel.CONTENT_LIFT);
+    return new MatteBorder(0, padding, lift, padding, color);
+  }
+
+  private void setBorderForColor(Color color) {
+    borderColor = color;
+    setBorder(scaledBorder(color));
+  }
+
+  private void setBorderForColorUDBL(Color color) {
+    borderColor = color;
+    setBorderUDBL(scaledBorder(color));
+  }
+
+  /** Called from EditContainer#skalieren() so the border rescales immediately on zoom change,
+   * not only the next time the label's style (standard/target/source/deleted) changes. */
+  public void refreshMetaWidgetScale() {
+    setBorder(scaledBorder(borderColor));
   }
 
   public void setStepNumber(StepNumber stepNumber) {
@@ -73,7 +99,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
 
   @Override
   public void paint(Graphics g) {
-    super.paint(g);
+    HangingTabShape.paint(this, g, (int) editor().scale(MetaStripPanel.CORNER_ARC), super::paint);
     drawDeletionLine(g);
   }
 
@@ -131,7 +157,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
   }
 
   public void setStandardStyle(StepNumber id) {
-    setBorder(STANDARD_BORDER);
+    setBorderForColor(SCHRITTNUMMER_FARBE.color);
     setBackground(SCHRITTNUMMER_FARBE.color);
     setForeground(SCHRITTNUMMER_VORDERGRUNDFARBE);
     this.structure = LabelStructure.Standard;
@@ -140,7 +166,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
 
   public void setTargetStyleUDBL(StepNumber quellschrittId, ChangeSet changeset) {
     setStructureUDBL(LabelStructure.Target);
-    setBorderUDBL(CHANGED_BORDER);
+    setBorderForColorUDBL(ChangeSet.DEFAULT.colors.panelColor);
     setBackgroundUDBL(changeset.panelColor());
     setForegroundUDBL(DELETED_BACKGROUND_COLOR.color);
     resyncSourceSuffixUDBL(quellschrittId);
@@ -148,7 +174,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
 
   public void setSourceStyle(StepNumber zielschrittID) {
     setStructure(LabelStructure.Source);
-    setBorder(DELETED_BORDER);
+    setBorderForColor(DELETED_BACKGROUND_COLOR.color);
     setBackground(DELETED_BACKGROUND_COLOR.color);
     setForeground(Schriftfarbe_Geloescht);
     NumberPair numbers = splitText();
@@ -180,7 +206,7 @@ public class StepnumberLabel extends JLabel implements InteractiveStepFragment {
 
   public void setDeletedStyleUDBL(StepNumber id) {
     setStructureUDBL(LabelStructure.Standard);
-    setBorderUDBL(DELETED_BORDER);
+    setBorderForColorUDBL(DELETED_BACKGROUND_COLOR.color);
     setBackgroundUDBL(DELETED_BACKGROUND_COLOR.color);
     setForegroundUDBL(Schriftfarbe_Geloescht);
     setTextUDBL(id.toString(), null);

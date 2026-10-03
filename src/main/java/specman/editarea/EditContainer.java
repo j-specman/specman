@@ -169,9 +169,14 @@ public class EditContainer extends JPanel {
 				System.err.println("Can't set step number in " + schrittNummer);
 			}
 			else {
-				// metaPanel spans the header strip (row 2) and the first edit area's cell
-				// (row 3), top-aligned by construction, so it stays identical to the first edit
-				// area's x/width (same column) while reaching from the strip down into the text.
+				// metaPanel spans the header strip (row 2) and the first edit area's cell (row 3),
+				// deliberately NOT row 1 (the topInset row, non-zero for "abgesetzte" rounded-border
+				// steps): that row must stay free of any opaque content, or its flat edge collides
+				// with RoundedBorderDecorator's antialiased arc and the border looks "nibbled" -
+				// which is exactly the bug this topInset row exists to avoid for the text field in
+				// the first place (see the class comment above). Reaching metaPanel into row 1
+				// closes the white-gap-above-the-tab gap in that display style, but reproduces the
+				// same nibbling for schrittNummer/KlappButton instead - not an acceptable trade.
 				metaPanel.add(schrittNummer);
 				add(metaPanel, CC.xywh(2, 2, 1, 2, CC.FILL, CC.FILL), 0);
 			}
@@ -254,10 +259,12 @@ public class EditContainer extends JPanel {
 			if (schrittNummer != null) {
 				if (schrittNummerSichtbar) {
 					Dimension schrittnummerGroesse = schrittNummer.getPreferredSize();
-					schrittNummer.setBounds(maxEditWidth - schrittnummerGroesse.width,
+					int rightMargin = (int) editor().scale(MetaStripPanel.RIGHT_MARGIN);
+					int heightTrim = (int) editor().scale(MetaStripPanel.HEIGHT_TRIM);
+					schrittNummer.setBounds(maxEditWidth - schrittnummerGroesse.width - rightMargin,
 						0,
 						schrittnummerGroesse.width,
-						schrittnummerGroesse.height - 2);
+						schrittnummerGroesse.height - heightTrim);
 				} else {
 					schrittNummer.setBounds(0, 0, 0, 0);
 				}
@@ -284,6 +291,7 @@ public class EditContainer extends JPanel {
 		editAreas.forEach(ea -> ea.skalieren(prozentNeu, prozentAktuell));
 		if (schrittNummer != null) {
 			schrittNummer.setFont(labelFont.deriveFont((float) SCHRITTNR_FONTSIZE * prozentNeu / 100));
+			schrittNummer.refreshMetaWidgetScale();
 		}
 		updateMetaStripHeight(prozentNeu);
 		if (indentions != null) {

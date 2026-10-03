@@ -2,6 +2,8 @@ package specman.view;
 
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import specman.editarea.MetaStripPanel;
+import specman.graphics.HangingTabShape;
 import specman.graphics.IconReader;
 import specman.Specman;
 
@@ -52,6 +54,7 @@ public class KlappButton extends JLabel implements MouseMotionListener, MouseLis
     this.fillerrow = fillerrow;
     this.klappbarerBereich = klappbarerBereich;
     setOpaque(true);
+    setHorizontalAlignment(SwingConstants.CENTER);
     hintergrundfarbeVonParentUebernehmen();
     setVisible(false);
     addMouseListener(this);
@@ -199,10 +202,18 @@ public class KlappButton extends JLabel implements MouseMotionListener, MouseLis
   public void updateLocation(int remainingWidth) {
     if (remainingWidth > 0) {
       int desiredSize = (int) editor().scale(MINIMUM_ICON_LENGTH);
-      setBounds(remainingWidth - desiredSize, 0, desiredSize, desiredSize);
+      int gap = (int) editor().scale(MetaStripPanel.WIDGET_GAP);
+      int sidePadding = (int) editor().scale(MetaStripPanel.SIDE_PADDING);
+      int width = desiredSize + 2 * sidePadding;
+      setBounds(remainingWidth - gap - width, 0, width, desiredSize);
       int borderSize = (int) Math.round(desiredSize * 0.1);
       setBorder(new MatteBorder(borderSize, borderSize, borderSize, borderSize, borderColor));
     }
+  }
+
+  @Override
+  public void paint(Graphics g) {
+    HangingTabShape.paint(this, g, (int) editor().scale(MetaStripPanel.CORNER_ARC), super::paint);
   }
 
 }
