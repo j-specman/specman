@@ -76,7 +76,7 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
     setHorizontalAlignment(SwingConstants.CENTER);
     setIcon(collapseIcon);
     resetToDefaultBackground();
-    setBorderColor(SCHRITTNUMMER_FARBE.color);
+    setBorderColor(Color.GRAY);
     setVisible(false);
     addMouseListener(this);
     addMouseMotionListener(this);
@@ -271,7 +271,7 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
 
   @Override
   protected float borderStrokeWidth() {
-    return (float) editor().scale(1.5);
+    return (float) editor().scale(1.0);
   }
 
 }

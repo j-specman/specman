@@ -2,6 +2,7 @@ package specman.editarea;
 
 import specman.editarea.stepnumberlabel.StepnumberLabel;
 import specman.view.KlappButton;
+import specman.view.UserMetaLabel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,10 +44,13 @@ public class MetaStripPanel extends JPanel {
   public static final int BORDER_OVERDRAW_COMPENSATION = 1;
 
   private StepnumberLabel stepNumber;
+  // Quick experiment, not a real feature yet - see UserMetaLabel's own class comment.
+  private final UserMetaLabel userBadge = new UserMetaLabel();
 
   public MetaStripPanel() {
     setLayout(null);
     setOpaque(false);
+    //add(userBadge);
   }
 
   public void add(StepnumberLabel stepNumber) {
@@ -114,6 +118,10 @@ public class MetaStripPanel extends JPanel {
       // (SchleifenSchrittView, SubsequenzSchrittView, VerzweigungSchrittView) don't each need to
       // separately call klappen.updateLocation(...) after every resize.
       repositionKlappButton(stepNumber.getBounds());
+      // Quick experiment, not a real feature yet - see UserMetaLabel's own class comment. Ignores
+      // KlappButton entirely for now (may overlap it on steps that have one).
+      userBadge.scale();
+      userBadge.updateLocation(stepNumber.getBounds(), (int) editor().scale(WIDGET_GAP));
     }
   }
 }

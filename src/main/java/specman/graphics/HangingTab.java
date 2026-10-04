@@ -65,9 +65,17 @@ public abstract class HangingTab extends JLabel {
    * collide with the rounded bottom corners even with much less padding than StepnumberLabel's
    * digits need, and so can sit closer to their own edges. */
   protected static Border scaledBorder(Color color, int heightGrowthCompensation, int sidePadding) {
+    return scaledBorder(color, heightGrowthCompensation, sidePadding, CONTENT_LIFT);
+  }
+
+  /** Same as {@link #scaledBorder(Color, int, int)}, but with an explicit lift instead of the
+   * default CONTENT_LIFT - for widgets (like UserMetaLabel's icon) that don't want their content
+   * nudged upward at all, e.g. because unlike StepnumberLabel/KlappButton's own text/glyph, theirs
+   * already sits too close to the top edge without any lift applied in the first place. */
+  protected static Border scaledBorder(Color color, int heightGrowthCompensation, int sidePadding, int lift) {
     int padding = (int) editor().scale(sidePadding);
-    int lift = (int) editor().scale(CONTENT_LIFT) - heightGrowthCompensation;
-    return new MatteBorder(0, padding, lift, padding, color);
+    int scaledLift = (int) editor().scale(lift) - heightGrowthCompensation;
+    return new MatteBorder(0, padding, scaledLift, padding, color);
   }
 
   @Override
