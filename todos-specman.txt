@@ -1,18 +1,38 @@
 Release notes Specman 1.3.2
 - Copy / Cut / Paste von Tabellen
 
+Meta Tags
+x Meta Tag Panel für Aufnahme von Schrittlabel, Klappbutton und Meta Tags
+x Überarbeitung der Darstellung / Platzierung von Schrittlabel, Klappbutton
+x Generische Basisklasse für Meta Tags
+  x Icon, Label, Hintergrundfarbe, Rahmenfarbe
+  x Editierbarer Freitext, also Tooltip angezeigt
+- Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
+  - Beim Editieren bestehender Konfigurationen müssen die Meta Tags, die aus dieser Konfiguration hervorgegangen sind, im UI aktualisiert werden
+- Vergeben eines Tags an einem Schritt über die GUI
+  - Jeder Typ von Tag nur einmal pro Schritt
+  - Denkbar über Auswahl aus Untermenü des Kontextmenüs an der Schrittnummer
+  - Alle bereits vergebenen Tags sind ausgegraut
+  - Menüpunkte zeigen Icon und Label der Konfiguration
+  - Undo / Redo
+  - Vergeben von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
+  - Meta Tags werden im Meta Tag Panel immer zwischen Schrittlabel und Klappbutton (sofern vorhanden) einsortiert
+  - Meta Tag Panel kann im Moment noch nicht mit variabler Anzahl der Tags umgehen
+  - Prototypisches UserMetaTag in dem Zuge entfernen
+- Entfernen eines Tags von einem Schritt über die GUI
+  - Denkbar über Kontextmenü des Tags mit den Punkten Edit und Delete
+  - Undo / Redo
+  - Entfernen von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
+- Aufnahme der Konfigurationen in die Modelldatei
+- Aufnahme der an den Schritten vergebenen Tags in die Modelldatei
+  - Es reicht eine Referenz auf die Bezeichner der Konfiguration + des ggf. zugehörigen Freitexts
+- Einlesen der Konfigs und der Tags an den Schritten aus der Modelldatei
+
 Aus aktueller Anwendung
 - beim Öffnen und einer vorhandenen .wrk, *drei* Optionen: 1) nicht laden, 2) laden, 3) ist in Arbeit - nicht laden aber auch nicht überschreiben und beim Schließen löschen
-x .wrk entsteht auch, wenn man weder Autosave noch Autoload eingeschaltet hat
-x Drücken von DELETE entfernt keine Zeilenumbruch hin zu einer leeren Folgezeile. Das gleiche Problem, wie ursprünglich auch bei BACKSPACE. Lösung vielleicht dort abkupfern
 - Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
 - PDF-Option "Export beim Speichern"
 - Hoch/Runter über Grenzen von Schritten wäre cool
-x PDF-Export: schlauere Ableitung von PDF-Exportdateinamen aus ggf. geänderten / umgezogenen Diagrammdateinamen
-x Page-up / Page-down geht nicht
-x Scrollen mit Mausrad ist zu langsam
-x Fokus ist nach dem Öffnen auf der Zoom-Kombobox. Wenn man also noch dem Öffnen einer Datei auf Page-down / Page-up drückt, ändert man den Zoomfaktor, statt dass man auf dem Wege Scrollen kann
-x Sortierung der Schritte im Auswahldialog für Schrittrerefenzen ist ungünstig. Vmtl. lexikografisch.
 
 Reste Multi-Catch
 - Obersten Co-Catch nach oben schieben macht diesen zum primären Catch
