@@ -37,10 +37,15 @@ class MetaTagConfigEditDialog extends JDialog {
   private MetaTagConfig result;
 
   /** @param existing the configuration to edit, null to create a new one
+   * @param nameEditable whether the name may be changed - not if tags at steps refer to it
    * @param isNameTaken tells whether a name is already used by another configuration */
-  MetaTagConfigEditDialog(Frame owner, MetaTagConfig existing, Predicate<String> isNameTaken) {
+  MetaTagConfigEditDialog(Frame owner, MetaTagConfig existing, boolean nameEditable, Predicate<String> isNameTaken) {
     super(owner, existing == null ? "New Meta Tag" : "Edit Meta Tag", true);
     this.isNameTaken = isNameTaken;
+    if (!nameEditable) {
+      nameField.setEnabled(false);
+      nameField.setToolTipText("Tags at steps refer to this meta tag, so it can't be renamed");
+    }
     iconChooser = new IconChooser(existing != null ? existing.getIconSvg() : null, this::refreshTagPreview);
     backgroundButton = new ColorChooseButton("Background color",
       existing != null ? existing.getBackgroundColor() : DEFAULT_BACKGROUND, this::refreshTagPreview);

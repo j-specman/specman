@@ -3,7 +3,6 @@ package specman.metatag.generic;
 import specman.metatag.AbstractMetaTag;
 import specman.metatag.MetaTagPanel;
 import specman.metatag.generic.config.MetaTagConfig;
-import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.undo.UndoableMetaTagFreetextChanged;
 
 import javax.swing.JToolTip;
@@ -35,11 +34,6 @@ public class GenericMetaTag extends AbstractMetaTag {
   private boolean freetextEditable = true;
   private Popup feedbackPopup;
   private Timer feedbackTimer;
-  private final MetaTagConfigListener configListener = (oldConfig, newConfig) -> {
-    if (oldConfig.getName().equals(config.getName())) {
-      applyConfig(newConfig);
-    }
-  };
 
   /** @param freetext optional freetext shown as tooltip while hovering the tag, may be null */
   public GenericMetaTag(MetaTagConfig config, String freetext) {
@@ -61,12 +55,6 @@ public class GenericMetaTag extends AbstractMetaTag {
   /** Turned off for pure previews of a configuration, e.g. in the configuration dialog. */
   public void setFreetextEditable(boolean freetextEditable) {
     this.freetextEditable = freetextEditable;
-  }
-
-  @Override
-  public void addNotify() {
-    super.addNotify();
-    editor().addMetaTagConfigListener(configListener);
   }
 
   public MetaTagConfig getConfig() {
@@ -149,7 +137,6 @@ public class GenericMetaTag extends AbstractMetaTag {
 
   @Override
   public void removeNotify() {
-    editor().removeMetaTagConfigListener(configListener);
     hideFreetextFeedback();
     super.removeNotify();
   }

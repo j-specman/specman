@@ -11,6 +11,7 @@ import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
 import specman.editarea.EditArea;
 import specman.ops.*;
+import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.metatag.generic.config.MetaTagConfigRegistry;
@@ -39,7 +40,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 
@@ -592,7 +595,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
   @Override
   public void openMetaTagConfigs() {
-    new MetaTagConfigsDialog(this, metaTagConfigs).setVisible(true);
+    new MetaTagConfigsDialog(this, metaTagConfigs, queryMetaTagConfigsInUse()).setVisible(true);
   }
 
   @Override
@@ -600,6 +603,17 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
   @Override
   public List<MetaTagConfig> metaTagConfigs() { return metaTagConfigs.all(); }
+
+  @Override
+  public Set<String> queryMetaTagConfigsInUse() {
+    Set<String> names = new HashSet<>();
+    for (AbstractSchrittView step : listAllSteps()) {
+      for (GenericMetaTag tag : step.getTags()) {
+        names.add(tag.getConfig().getName());
+      }
+    }
+    return names;
+  }
 
   @Override
   public void addMetaTagConfigListener(MetaTagConfigListener listener) { metaTagConfigs.addListener(listener); }

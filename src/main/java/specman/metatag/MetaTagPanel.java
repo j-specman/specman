@@ -4,11 +4,13 @@ import specman.StepNumber;
 import specman.editarea.Indentions;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
+import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static specman.Specman.editor;
@@ -50,6 +52,8 @@ public class MetaTagPanel extends JPanel {
   private StepnumberLabel stepNumber;
   // In the order they were assigned: the first one hangs directly left of the step number.
   private final List<GenericMetaTag> tags = new ArrayList<>();
+  // Registered at the editor as long as the panel holds at least one tag.
+  private final MetaTagConfigListener configListener = this::configReplaced;
 
   public MetaTagPanel() {
     setLayout(null);
@@ -59,18 +63,39 @@ public class MetaTagPanel extends JPanel {
   public void addTag(GenericMetaTag tag) {
     tags.add(tag);
     super.add(tag);
+    if (tags.size() == 1) {
+      editor().addMetaTagConfigListener(configListener);
+    }
     repaint();
   }
 
   public void removeTag(GenericMetaTag tag) {
     tags.remove(tag);
     remove(tag);
+    if (tags.isEmpty()) {
+      editor().removeMetaTagConfigListener(configListener);
+    }
     repaint();
+  }
+
+  /** Informs the tag of the edited configuration - the panel has a null layout, so afterwards the
+   * tags are repositioned, as their widths may have changed. */
+  private void configReplaced(MetaTagConfig oldConfig, MetaTagConfig newConfig) {
+    for (GenericMetaTag tag : tags) {
+      if (tag.getConfig().getName().equals(oldConfig.getName())) {
+        tag.applyConfig(newConfig);
+      }
+    }
+    updateTagLocations();
   }
 
   /** @return whether a tag of the given configuration (identified by its name) is already present */
   public boolean hasTag(MetaTagConfig config) {
     return tags.stream().anyMatch(tag -> tag.getConfig().getName().equals(config.getName()));
+  }
+
+  public List<GenericMetaTag> getTags() {
+    return Collections.unmodifiableList(tags);
   }
 
   /** The height of the step number label - and thereby of every meta tag, which borrows it - in a
@@ -138,18 +163,26 @@ public class MetaTagPanel extends JPanel {
         0,
         schrittnummerGroesse.width,
         schrittnummerGroesse.height - heightTrim + topInsetBridge);
-      // Hangs the tags and the KlappButton (if any - not every step has one) one after the other
-      // to the left of the step number's bounds just set above, so views owning a KlappButton
-      // (SchleifenSchrittView, SubsequenzSchrittView, VerzweigungSchrittView) don't each need to
-      // separately call klappen.updateLocation(...) after every resize.
-      int height = stepNumber.getHeight();
-      int leftEdge = stepNumber.getX();
-      for (GenericMetaTag tag : tags) {
-        tag.scale();
-        tag.updateLocation(leftEdge, height);
-        leftEdge = tag.getX();
-      }
-      repositionKlappButton(leftEdge, height);
+      updateTagLocations();
     }
+  }
+
+  /** Hangs the tags and the KlappButton (if any - not every step has one) one after the other
+   * to the left of the step number's current bounds, so views owning a KlappButton
+   * (SchleifenSchrittView, SubsequenzSchrittView, VerzweigungSchrittView) don't each need to
+   * separately call klappen.updateLocation(...) after every resize. Also to be called when a tag
+   * changed its width, e.g. because its configuration was edited. */
+  public void updateTagLocations() {
+    if (stepNumber == null) {
+      return;
+    }
+    int height = stepNumber.getHeight();
+    int leftEdge = stepNumber.getX();
+    for (GenericMetaTag tag : tags) {
+      tag.scale();
+      tag.updateLocation(leftEdge, height);
+      leftEdge = tag.getX();
+    }
+    repositionKlappButton(leftEdge, height);
   }
 }

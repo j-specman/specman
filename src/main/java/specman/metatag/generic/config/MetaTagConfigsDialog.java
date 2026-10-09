@@ -25,6 +25,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static specman.Specman.editor;
 
@@ -35,13 +36,16 @@ public class MetaTagConfigsDialog extends JDialog {
   private static final Dimension LIST_SIZE = new Dimension(280, 200);
 
   private final MetaTagConfigRegistry registry;
+  private final Set<String> namesInUse;
   private final DefaultListModel<MetaTagConfig> listModel = new DefaultListModel<>();
   private final JList<MetaTagConfig> list = new JList<>(listModel);
   private final JButton editButton = new JButton("Edit...");
 
-  public MetaTagConfigsDialog(Frame owner, MetaTagConfigRegistry registry) {
+  /** @param namesInUse names of the configurations which tags at steps refer to; these must not be renamed */
+  public MetaTagConfigsDialog(Frame owner, MetaTagConfigRegistry registry, Set<String> namesInUse) {
     super(owner, "Meta Tags", true);
     this.registry = registry;
+    this.namesInUse = namesInUse;
     initComponents();
     refreshList(null);
   }
@@ -90,7 +94,7 @@ public class MetaTagConfigsDialog extends JDialog {
   }
 
   private void createNew() {
-    MetaTagConfig created = new MetaTagConfigEditDialog((Frame) getOwner(), null, registry::contains).showAndGet();
+    MetaTagConfig created = new MetaTagConfigEditDialog((Frame) getOwner(), null, true, registry::contains).showAndGet();
     if (created != null) {
       registry.add(created);
       editor().addEdit(new UndoableMetaTagConfigAdded(registry, created));
@@ -100,7 +104,7 @@ public class MetaTagConfigsDialog extends JDialog {
 
   private void editSelected() {
     MetaTagConfig old = list.getSelectedValue();
-    MetaTagConfig edited = new MetaTagConfigEditDialog((Frame) getOwner(), old,
+    MetaTagConfig edited = new MetaTagConfigEditDialog((Frame) getOwner(), old, !namesInUse.contains(old.getName()),
       name -> !name.equals(old.getName()) && registry.contains(name)).showAndGet();
     if (edited != null && !edited.equals(old)) {
       registry.replace(old.getName(), edited);

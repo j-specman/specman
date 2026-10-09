@@ -11,12 +11,10 @@ x Generische Basisklasse für Meta Tags
   x Icon, Label, Hintergrundfarbe, Rahmenfarbe
   x Editierbarer Freitext, also Tooltip angezeigt
   x Undo / Redo der Freitext-Edits
-- Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
+x Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
   x Für das Icon: Auswahl einer SVG-Datei
-  - Beim Editieren bestehender Konfigurationen müssen die Meta Tags, die auf diese Konfiguration verweisen, im UI in der Darstellung aktualisiert werden
-    (Mechanismus über MetaTagConfigListener fertig, erst mit Tag-Vergabe an Schritten testbar)
-  - Umbenennen einer Konfiguration, für die bereits Tags vergeben sind, ist nicht erlaubt
-    (Umbenennen ist im Moment immer erlaubt, Prüfung kommt mit der Tag-Vergabe)
+  x Beim Editieren bestehender Konfigurationen müssen die Meta Tags, die auf diese Konfiguration verweisen, im UI in der Darstellung aktualisiert werden
+  x Umbenennen einer Konfiguration, für die bereits Tags vergeben sind, ist nicht erlaubt
   x Undo / Redo
 x Vergeben eines Tags an einem Schritt über die GUI
   x Jeder Typ von Tag nur einmal pro Schritt

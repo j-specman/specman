@@ -18,6 +18,7 @@ import java.awt.*;
 import java.awt.event.FocusListener;
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 /** This interface represents the current actogramm editor and is supposed to
  * substitute the older direct access of the {@link Specman} class. This may
@@ -70,6 +71,8 @@ public interface EditorI extends FocusListener {
   void removeMetaTagConfigListener(MetaTagConfigListener listener);
   /** @return a snapshot of the meta tag configurations of the diagram in creation order */
   List<MetaTagConfig> metaTagConfigs();
+  /** @return the names of the meta tag configurations which at least one tag at a step refers to */
+  Set<String> queryMetaTagConfigsInUse();
   void openMetaTagConfigs();
   void showToast(String message);
 }

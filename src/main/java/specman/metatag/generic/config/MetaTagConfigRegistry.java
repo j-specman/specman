@@ -61,8 +61,12 @@ public class MetaTagConfigRegistry {
     configsByName.remove(name);
   }
 
+  /** Forgets all configurations and listeners. Meant for replacing the whole diagram: with its
+   * steps, all panels registered as listeners are gone, too, and must not be kept alive by the
+   * registry. */
   public void clear() {
     configsByName.clear();
+    listeners.clear();
   }
 
   public void addListener(MetaTagConfigListener listener) {

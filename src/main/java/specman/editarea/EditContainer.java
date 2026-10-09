@@ -380,6 +380,8 @@ public class EditContainer extends JPanel {
 
 	public boolean hasTag(MetaTagConfig config) { return metaPanel.hasTag(config); }
 
+	public List<GenericMetaTag> getTags() { return metaPanel.getTags(); }
+
 	public void resyncStepnumberAsTargetUDBL(StepNumber quellschrittId) { schrittNummer.resyncSourceSuffixUDBL(quellschrittId); }
 	public void resyncStepnumberAsSourceUDBL(StepNumber zielschrittID) { schrittNummer.resyncTargetSuffixUDBL(zielschrittID); }
 
