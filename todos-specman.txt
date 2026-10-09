@@ -11,17 +11,13 @@ x Generische Basisklasse für Meta Tags
   x Icon, Label, Hintergrundfarbe, Rahmenfarbe
   x Editierbarer Freitext, also Tooltip angezeigt
   x Undo / Redo der Freitext-Edits
-- Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
+x Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
   x Für das Icon: Auswahl einer SVG-Datei
   - Beim Editieren bestehender Konfigurationen müssen die Meta Tags, die auf diese Konfiguration verweisen, im UI in der Darstellung aktualisiert werden
     (Mechanismus über MetaTagConfigListener fertig, erst mit Tag-Vergabe an Schritten testbar)
   - Umbenennen einer Konfiguration, für die bereits Tags vergeben sind, ist nicht erlaubt
     (Umbenennen ist im Moment immer erlaubt, Prüfung kommt mit der Tag-Vergabe)
   x Undo / Redo
-- Löschen einer Meta Tag Konfiguration über die GUI
-  - Sicherheitsabfrage, wenn es Tags gibt, die sich darauf beziehen
-  - Bei Bestätigung, die entsprechenden Tags entfernen
-  - Undo / Redo
 - Vergeben eines Tags an einem Schritt über die GUI
   - Jeder Typ von Tag nur einmal pro Schritt
   - Über Auswahl aus Untermenü des Kontextmenüs an der Schrittnummer
@@ -39,6 +35,11 @@ x Generische Basisklasse für Meta Tags
   - Denkbar über Kontextmenü des Tags mit den Punkten Edit (öffnet den Freitexteditor) und Delete
   - Undo / Redo
   - Entfernen von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
+- Löschen einer Meta Tag Konfiguration über die GUI
+  - Sicherheitsabfrage, wenn es Tags gibt, die sich darauf beziehen
+  - Bei Bestätigung, die entsprechenden Tags entfernen
+  - Undo / Redo (mit Toast-Feedback wie beim Anlegen / Editieren)
+  - MetaTagConfigRegistry#remove / clear müssen die Listener benachrichtigen
 - Aufnahme der Konfigurationen in die Modelldatei
   - Das SVG des Icons wird in die Modelldatei eingebettet
 - Aufnahme der an den Schritten vergebenen Tags in die Modelldatei
