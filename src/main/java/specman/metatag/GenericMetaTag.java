@@ -133,7 +133,7 @@ public class GenericMetaTag extends AbstractMetaTag {
     feedbackTimer.start();
   }
 
-  private void hideFreetextFeedback() {
+  public void hideFreetextFeedback() {
     if (feedbackTimer != null) {
       feedbackTimer.stop();
       feedbackTimer = null;

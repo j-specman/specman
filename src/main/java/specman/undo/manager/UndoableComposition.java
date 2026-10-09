@@ -9,11 +9,20 @@ import javax.swing.undo.UndoableEdit;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UndoableComposition extends AbstractUndoableInteraction {
+public class UndoableComposition extends AbstractUndoableInteraction implements UndoRedoFeedbackHider {
   private List<UndoableEdit> interactions = new ArrayList();
 
   public void add(UndoableEdit interaction) {
     interactions.add(interaction);
+  }
+
+  @Override
+  public void hideFeedback() {
+    for (UndoableEdit interaction : interactions) {
+      if (interaction instanceof UndoRedoFeedbackHider) {
+        ((UndoRedoFeedbackHider) interaction).hideFeedback();
+      }
+    }
   }
 
   @Override

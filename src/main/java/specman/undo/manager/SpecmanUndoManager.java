@@ -27,6 +27,7 @@ public class SpecmanUndoManager extends UndoManager {
 
     private final Specman specman;
     private final Stack<UndoRecordingMode> recordingMode = new Stack<>();
+    private UndoableEdit lastUndoneOrRedone;
     private UndoableComposition recordingComposition;
     /** Set when a model was restored from an auto-save working copy. In that case the file
      * on disk still holds the older pre-crash state, so the model must be treated as modified
@@ -46,7 +47,6 @@ public class SpecmanUndoManager extends UndoManager {
                 boolean success = super.addEdit(anEdit);
                 if (success) {
                     updateUnsavedChangesIndicatorInTitleBar();
-                    //System.out.println("Wert false");
                 }
                 return success;
             case Composing:
@@ -71,14 +71,27 @@ public class SpecmanUndoManager extends UndoManager {
 
     @Override
     public void undo() throws CannotUndoException {
+        UndoableEdit edit = editToBeUndone();
+        hideFeedbackOfPreviousUndoRedo();
         super.undo();
+        lastUndoneOrRedone = edit;
         updateUnsavedChangesIndicatorInTitleBar();
     }
 
     @Override
     public void redo() throws CannotRedoException {
+        UndoableEdit edit = editToBeRedone();
+        hideFeedbackOfPreviousUndoRedo();
         super.redo();
+        lastUndoneOrRedone = edit;
         updateUnsavedChangesIndicatorInTitleBar();
+    }
+
+    private void hideFeedbackOfPreviousUndoRedo() {
+        if (lastUndoneOrRedone instanceof UndoRedoFeedbackHider) {
+            ((UndoRedoFeedbackHider) lastUndoneOrRedone).hideFeedback();
+        }
+        lastUndoneOrRedone = null;
     }
 
     private void updateUnsavedChangesIndicatorInTitleBar() {
