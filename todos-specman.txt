@@ -10,7 +10,7 @@ x Überarbeitung der Darstellung / Platzierung von Schrittlabel, Klappbutton
 x Generische Basisklasse für Meta Tags
   x Icon, Label, Hintergrundfarbe, Rahmenfarbe
   x Editierbarer Freitext, also Tooltip angezeigt
-  - Undo / Redo der Freitext-Edits
+  x Undo / Redo der Freitext-Edits
 - Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
   - Für das Icon: Auswahl einer SVG-Datei
   - Beim Editieren bestehender Konfigurationen müssen die Meta Tags, die auf diese Konfiguration verweisen, im UI in der Darstellung aktualisiert werden

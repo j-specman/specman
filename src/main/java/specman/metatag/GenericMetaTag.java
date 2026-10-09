@@ -1,9 +1,7 @@
 package specman.metatag;
 
-import specman.graphics.SvgIcon;
 import specman.undo.UndoableMetaTagFreetextChanged;
 
-import javax.swing.Icon;
 import javax.swing.JToolTip;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
@@ -11,8 +9,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -26,42 +22,23 @@ import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
  * Configurable meta-tag displayed to the left of a step number.
  */
 public class GenericMetaTag extends AbstractMetaTag {
-  private static final int ICON_GLYPH_SIZE = 10;
-  // The bottom-only content lift moves the centered content area upward by half its inset.
-  private static final int ICON_LIFT = CONTENT_LIFT / 2;
   private static final int SIDE_PADDING = 2;
   private static final int TOOLTIP_WIDTH = 250;
   private static final int FEEDBACK_DURATION_MS = 3000;
 
-  private final SvgIcon icon;
-  private final Icon liftedIcon = new Icon() {
-    @Override
-    public void paintIcon(Component component, Graphics graphics, int x, int y) {
-      icon.paintIcon(component, graphics, x, y + (int) editor().scale(ICON_LIFT));
-    }
-
-    @Override
-    public int getIconWidth() {
-      return icon.getIconWidth();
-    }
-
-    @Override
-    public int getIconHeight() {
-      return icon.getIconHeight();
-    }
-  };
-
+  private final LiftedMetaTagIcon icon;
   private final Color backgroundColor;
   private String freetext;
   private Popup feedbackPopup;
   private Timer feedbackTimer;
+
   /** @param freetext optional freetext shown as tooltip while hovering the tag, may be null */
   public GenericMetaTag(String iconName, String labelText, String freetext, Color backgroundColor, Color borderColor) {
-    this.icon = new SvgIcon(iconName, ICON_GLYPH_SIZE);
+    this.icon = new LiftedMetaTagIcon(iconName);
     this.backgroundColor = backgroundColor;
 
     setHorizontalAlignment(SwingConstants.CENTER);
-    setIcon(liftedIcon);
+    setIcon(icon);
     setText(labelText);
     setFreetext(freetext);
     setOpaque(true);
@@ -96,10 +73,6 @@ public class GenericMetaTag extends AbstractMetaTag {
     }
     setFreetext(newFreetext);
     editor().addEdit(new UndoableMetaTagFreetextChanged(this, oldFreetext, newFreetext));
-  }
-
-  public String getFreetext() {
-    return freetext;
   }
 
   public void setFreetext(String freetext) {
@@ -161,7 +134,7 @@ public class GenericMetaTag extends AbstractMetaTag {
   }
 
   public void scale() {
-    icon.setSize((int) editor().scale(ICON_GLYPH_SIZE));
+    icon.scale();
     setFont(getFont().deriveFont((float) editor().scale(SCHRITTNR_FONTSIZE)));
     setBorder(scaledBorder(backgroundColor, 0, SIDE_PADDING));
   }
