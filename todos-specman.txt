@@ -36,7 +36,7 @@ x Entfernen eines Tags von einem Schritt über die GUI
 x Löschen einer Meta Tag Konfiguration über die GUI
   x Sicherheitsabfrage, wenn es Tags gibt, die sich darauf beziehen
   x Bei Bestätigung, die entsprechenden Tags entfernen
-  - Undo / Redo (mit Toast-Feedback wie beim Anlegen / Editieren)
+  x Undo / Redo (mit Toast-Feedback wie beim Anlegen / Editieren)
 - Aufnahme der Konfigurationen in die Modelldatei
   - Das SVG des Icons wird in die Modelldatei eingebettet
 - Aufnahme der an den Schritten vergebenen Tags in die Modelldatei

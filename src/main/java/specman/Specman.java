@@ -599,10 +599,18 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
   }
 
   @Override
-  public void clearMetaTagConfigs() { metaTagConfigs.clear(); }
+  public void setMetaTagConfigs(List<MetaTagConfig> configs) {
+    metaTagConfigs.clear();
+    for (MetaTagConfig config : configs) {
+      metaTagConfigs.add(config);
+    }
+  }
 
   @Override
   public List<MetaTagConfig> metaTagConfigs() { return metaTagConfigs.all(); }
+
+  @Override
+  public MetaTagConfig findMetaTagConfig(String name) { return metaTagConfigs.get(name); }
 
   @Override
   public Set<String> queryMetaTagConfigsInUse() {

@@ -17,8 +17,8 @@ public class SubsequenceStepModel_V002 extends StructuredStepModel_V002 {
         flatNumbering = false;
     }
 
-    public SubsequenceStepModel_V002(String id, String stepNumber, EditorContentModel_V002 content, Integer shade, ChangeInfo changeInfo, boolean collapsed, StepSequenceModel_V002 subsequence, String sourceStepId, RoundedBorderDecorationStyle decorationStyle, boolean flatNumbering) {
-        super(id, stepNumber, content, shade, changeInfo, collapsed, sourceStepId, decorationStyle);
+    public SubsequenceStepModel_V002(String id, String stepNumber, EditorContentModel_V002 content, Integer shade, ChangeInfo changeInfo, boolean collapsed, StepSequenceModel_V002 subsequence, String sourceStepId, RoundedBorderDecorationStyle decorationStyle, boolean flatNumbering, List<MetaTagModel_V002> tags) {
+        super(id, stepNumber, content, shade, changeInfo, collapsed, sourceStepId, decorationStyle, tags);
         this.subsequence = subsequence;
         this.flatNumbering = flatNumbering;
     }

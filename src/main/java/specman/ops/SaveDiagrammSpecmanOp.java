@@ -1,7 +1,9 @@
 package specman.ops;
 
 import specman.ScrollPause;
+import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.DiagramModel_V002;
+import specman.model.v002.MetaTagConfigModel_V002;
 import specman.model.v002.io.ModelSerializer_V002;
 import static specman.ChangeSet.changeset;
 
@@ -98,6 +100,9 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         getOutro().editorContent2Model(formatierterText),
         getPdfExportOptions(),
         changeset().name);
+    for (MetaTagConfig config : context().metaTagConfigs()) {
+      model.metaTagConfigs.add(MetaTagConfigModel_V002.from(config));
+    }
     return model;
   }
 

@@ -19,6 +19,7 @@ import specman.draganddrop.UnsupportedDragSourceException;
 import specman.editarea.EditArea;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
+import specman.model.v002.MetaTagModel_V002;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.BreakStepModel_V002;
@@ -199,7 +200,32 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	abstract public AbstractStepModel_V002 generiereModel(boolean formatierterText);
 
+	/** The models of this step's tags, to be handed to the constructor of the step's model. */
+	protected List<MetaTagModel_V002> tagModels() {
+		List<MetaTagModel_V002> tagModels = new ArrayList<>();
+		for (GenericMetaTag tag : getTags()) {
+			tagModels.add(new MetaTagModel_V002(tag.getConfig().getName(), tag.getFreetext()));
+		}
+		return tagModels;
+	}
+
+	/** Hangs the tags of a loaded model to this step. A tag whose configuration doesn't exist is skipped. */
+	private void applyTags(List<MetaTagModel_V002> tagModels) {
+		for (MetaTagModel_V002 tagModel : tagModels) {
+			MetaTagConfig config = editor().findMetaTagConfig(tagModel.configName);
+			if (config != null) {
+				addTag(new GenericMetaTag(config, tagModel.freetext));
+			}
+		}
+	}
+
 	public static AbstractSchrittView baueSchrittViewFrom(SchrittSequenzView parent, AbstractStepModel_V002 model) {
+		AbstractSchrittView view = baueSchrittViewWithoutTagsFrom(parent, model);
+		view.applyTags(model.tags);
+		return view;
+	}
+
+	private static AbstractSchrittView baueSchrittViewWithoutTagsFrom(SchrittSequenzView parent, AbstractStepModel_V002 model) {
 		if (model instanceof DoWhileStepModel_V002) {
 			return new WhileWhileSchrittView(parent, (DoWhileStepModel_V002) model);
 		}

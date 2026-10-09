@@ -44,7 +44,8 @@ public class WhileWhileSchrittView extends SchleifenSchrittView {
 			wiederholSequenz.generiereSchrittSequenzModel(formatierterText),
 			linkerBalken.getWidth(),
 			getSourceStepId(),
-			getDecorated());
+			getDecorated(),
+			tagModels());
 	}
 
 }

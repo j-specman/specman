@@ -152,7 +152,8 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 			subsequenz.generiereSchrittSequenzModel(formatierterText),
 			getSourceStepId(),
 			getDecorated(),
-			flatNumbering);
+			flatNumbering,
+			tagModels());
 	}
 
 	@Override public int aenderungenUebernehmen() throws EditException {

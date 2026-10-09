@@ -100,6 +100,11 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     updateTooltip();
   }
 
+  /** @return the freetext, null if the tag has none */
+  public String getFreetext() {
+    return freetext;
+  }
+
   private void updateTooltip() {
     setToolTipText(toTooltipHtml(freetext));
   }

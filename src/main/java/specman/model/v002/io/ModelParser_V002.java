@@ -26,6 +26,8 @@ import specman.model.v002.IfStepModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.model.v002.Markup_V002;
+import specman.model.v002.MetaTagConfigModel_V002;
+import specman.model.v002.MetaTagModel_V002;
 import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.model.v002.SimpleStepModel_V002;
 import specman.model.v002.SpecmanModel_V002Lexer;
@@ -40,6 +42,7 @@ import specman.view.RoundedBorderDecorationStyle;
 
 import static specman.model.v002.io.ModelKeyword_V002.*;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -148,7 +151,7 @@ public class ModelParser_V002 {
     // Diagram
     // -----------------------------------------------------------------------
 
-    private DiagramModel_V002 buildDiagram(SpecmanModel_V002Parser.DiagramContext ctx, String name) {
+    private DiagramModel_V002 buildDiagram(SpecmanModel_V002Parser.DiagramContext ctx, String name) throws ModelParseException {
         Settings s = buildSettings(ctx.settings());
         EditorContentModel_V002 intro = ctx.intro() != null
             ? buildEditContainer(ctx.intro().editContainerHead(), ctx.intro().editContainerTail())
@@ -157,7 +160,9 @@ public class ModelParser_V002 {
             ? buildEditContainer(ctx.outro().editContainerHead(), ctx.outro().editContainerTail())
             : null;
         StepSequenceModel_V002 mainSeq = buildMainSequence(ctx.mainSequence());
-        return new DiagramModel_V002(name, s.width, s.zoomFactor, s.changeModeEnabled, mainSeq, intro, outro, s.pdfOptions, s.changeSetName);
+        DiagramModel_V002 diagram = new DiagramModel_V002(name, s.width, s.zoomFactor, s.changeModeEnabled, mainSeq, intro, outro, s.pdfOptions, s.changeSetName);
+        diagram.metaTagConfigs.addAll(s.metaTagConfigs);
+        return diagram;
     }
 
     private static class Settings {
@@ -166,9 +171,10 @@ public class ModelParser_V002 {
         boolean changeModeEnabled = false;
         String changeSetName = "yellow";
         PdfExportOptionsModel_V002 pdfOptions = null;
+        final List<MetaTagConfigModel_V002> metaTagConfigs = new ArrayList<>();
     }
 
-    private Settings buildSettings(SpecmanModel_V002Parser.SettingsContext ctx) {
+    private Settings buildSettings(SpecmanModel_V002Parser.SettingsContext ctx) throws ModelParseException {
         Settings s = new Settings();
         if (ctx == null) {
             return s;
@@ -185,9 +191,37 @@ public class ModelParser_V002 {
                 s.changeSetName = entry.ID().getText();
             } else if (PDF_OPTIONS.toString().equals(keyword)) {
                 s.pdfOptions = buildPdfOptions(entry.pdfOptionEntry());
+            } else if (META_TAGS.toString().equals(keyword)) {
+                for (SpecmanModel_V002Parser.MetaTagConfigContext configCtx : entry.metaTagConfig()) {
+                    MetaTagConfigModel_V002 config = buildMetaTagConfig(configCtx);
+                    for (MetaTagConfigModel_V002 existing : s.metaTagConfigs) {
+                        if (existing.name.equals(config.name)) {
+                            throw new ModelParseException("The meta tag '" + config.name + "' is defined more than once");
+                        }
+                    }
+                    s.metaTagConfigs.add(config);
+                }
             }
         }
         return s;
+    }
+
+    private MetaTagConfigModel_V002 buildMetaTagConfig(SpecmanModel_V002Parser.MetaTagConfigContext ctx) {
+        // The first color is the background, the optional second one the border.
+        List<TerminalNode> colors = ctx.COLOR_HEX();
+        SpecmanModel_V002Parser.MetaTagContentContext content = ctx.metaTagContent();
+        String label = content.labelParam() != null
+            ? stripBackticks(content.labelParam().BACKTICK_STRING().getText())
+            : "";
+        String iconSvg = content.iconParam() != null
+            ? stripBackticks(content.iconParam().BACKTICK_STRING().getText())
+            : null;
+        return new MetaTagConfigModel_V002(
+            stripBackticks(ctx.tagId().getText()),
+            label,
+            iconSvg,
+            Color.decode(colors.get(0).getText()).getRGB(),
+            colors.size() > 1 ? Color.decode(colors.get(1).getText()).getRGB() : null);
     }
 
     private PdfExportOptionsModel_V002 buildPdfOptions(List<SpecmanModel_V002Parser.PdfOptionEntryContext> entries) {
@@ -414,12 +448,25 @@ public class ModelParser_V002 {
         throw new IllegalStateException("Unknown step type in context: " + ctx.getText());
     }
 
+    private List<MetaTagModel_V002> buildTags(SpecmanModel_V002Parser.TagsParamContext ctx) {
+        List<MetaTagModel_V002> tags = new ArrayList<>();
+        if (ctx != null) {
+            for (SpecmanModel_V002Parser.TagRefContext tagRef : ctx.tagRef()) {
+                String freetext = tagRef.BACKTICK_STRING() != null
+                    ? stripBackticks(tagRef.BACKTICK_STRING().getText())
+                    : null;
+                tags.add(new MetaTagModel_V002(stripBackticks(tagRef.tagId().getText()), freetext));
+            }
+        }
+        return tags;
+    }
+
     private AbstractStepModel_V002 buildSimpleStep(SpecmanModel_V002Parser.SimpleStepContext ctx) {
         // Backward compat: old files may encode a source step as simple(..., change=(source, cs))
         SpecmanModel_V002Parser.ChangeParamContext cp = ctx.changeParam();
         if (cp != null && "source".equals(cp.changeType().getText())) {
             return buildSourceStepFromLegacy(ctx.stepId().getText(), ctx.stepNum().getText(),
-                buildStepContent(ctx.editContainerHead(), ctx.editContainerTail()), cp);
+                buildStepContent(ctx.editContainerHead(), ctx.editContainerTail()), cp, buildTags(ctx.tagsParam()));
         }
         return new SimpleStepModel_V002(
             ctx.stepId().getText(),
@@ -428,19 +475,21 @@ public class ModelParser_V002 {
             buildShade(ctx.shadeParam()),
             buildChangeInfo(ctx.changeParam()),
             buildSourceStepId(ctx.changeParam()),
-            buildDecorationStyle(ctx.decoParam()));
+            buildDecorationStyle(ctx.decoParam()),
+            buildTags(ctx.tagsParam()));
     }
 
     private SourceStepModel_V002 buildSourceStepFromLegacy(String id, String stepNum,
                                                             EditorContentModel_V002 content,
-                                                            SpecmanModel_V002Parser.ChangeParamContext cp) {
+                                                            SpecmanModel_V002Parser.ChangeParamContext cp,
+                                                            List<MetaTagModel_V002> tags) {
         String changesetName = cp.ID().getText();
         ChangeSet cs = ChangeSet.fromName(changesetName);
         if (cs == null) {
             cs = ChangeSet.changeset();
         }
         return new SourceStepModel_V002(id, stepNum, content, null,
-            new ChangeInfo(Aenderungsart.Quellschritt, cs), null, RoundedBorderDecorationStyle.None);
+            new ChangeInfo(Aenderungsart.Quellschritt, cs), null, RoundedBorderDecorationStyle.None, tags);
     }
 
     private SourceStepModel_V002 buildSourceStep(SpecmanModel_V002Parser.SourceStepContext ctx) {
@@ -457,7 +506,8 @@ public class ModelParser_V002 {
             buildShade(ctx.shadeParam()),
             new ChangeInfo(Aenderungsart.Quellschritt, cs),
             targetStepId,
-            buildDecorationStyle(ctx.decoParam()));
+            buildDecorationStyle(ctx.decoParam()),
+            buildTags(ctx.tagsParam()));
     }
 
     private BreakStepModel_V002 buildBreakStep(SpecmanModel_V002Parser.BreakStepContext ctx,
@@ -472,7 +522,8 @@ public class ModelParser_V002 {
             buildShade(ctx.shadeParam()),
             buildChangeInfo(ctx.changeParam()),
             buildSourceStepId(ctx.changeParam()),
-            buildDecorationStyle(ctx.decoParam()));
+            buildDecorationStyle(ctx.decoParam()),
+            buildTags(ctx.tagsParam()));
     }
 
     private WhileStepModel_V002 buildWhileStep(SpecmanModel_V002Parser.WhileStepContext ctx) {
@@ -488,7 +539,8 @@ public class ModelParser_V002 {
             buildLoopSequenceFromContent(ctx.step(), ctx.catchArea()),
             barWidth,
             buildSourceStepId(ctx.changeParam()),
-            buildDecorationStyle(ctx.decoParam()));
+            buildDecorationStyle(ctx.decoParam()),
+            buildTags(ctx.tagsParam()));
     }
 
     private DoWhileStepModel_V002 buildDoWhileStep(SpecmanModel_V002Parser.DoWhileStepContext ctx) {
@@ -504,7 +556,8 @@ public class ModelParser_V002 {
             buildLoopSequence(ctx.step(), List.of()),
             barWidth,
             buildSourceStepId(ctx.changeParam()),
-            buildDecorationStyle(ctx.decoParam()));
+            buildDecorationStyle(ctx.decoParam()),
+            buildTags(ctx.tagsParam()));
     }
 
     private IfElseStepModel_V002 buildIfElseStep(SpecmanModel_V002Parser.IfElseStepContext ctx) {
@@ -528,7 +581,8 @@ public class ModelParser_V002 {
             ifSeq,
             elseSeq,
             ifWidthRatio,
-            buildSourceStepId(ctx.changeParam()));
+            buildSourceStepId(ctx.changeParam()),
+            buildTags(ctx.tagsParam()));
     }
 
     private IfStepModel_V002 buildIfStep(SpecmanModel_V002Parser.IfStepContext ctx) {
@@ -547,7 +601,8 @@ public class ModelParser_V002 {
             buildChangeInfo(ctx.changeParam()),
             ifSeq,
             emptyWidth,
-            buildSourceStepId(ctx.changeParam()));
+            buildSourceStepId(ctx.changeParam()),
+            buildTags(ctx.tagsParam()));
     }
 
     private CaseStepModel_V002 buildCaseStep(SpecmanModel_V002Parser.CaseStepContext ctx) {
@@ -580,7 +635,8 @@ public class ModelParser_V002 {
             defaultSeq,
             columnWidthRatios,
             buildSourceStepId(ctx.changeParam()),
-            buildDecorationStyle(ctx.decoParam()));
+            buildDecorationStyle(ctx.decoParam()),
+            buildTags(ctx.tagsParam()));
         for (SpecmanModel_V002Parser.CaseBranchContext cb : ctx.caseBranch()) {
             step.addCase(buildBranchNoCatch(cb.editContainerHead(), cb.editContainerTail(), cb.changeParam(), cb.step()));
         }
@@ -599,7 +655,8 @@ public class ModelParser_V002 {
             buildLoopSequenceFromContent(ctx.step(), ctx.catchArea()),
             buildSourceStepId(ctx.changeParam()),
             buildDecorationStyle(ctx.decoParam()),
-            flat);
+            flat,
+            buildTags(ctx.tagsParam()));
     }
 
     // -----------------------------------------------------------------------

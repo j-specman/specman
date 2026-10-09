@@ -275,7 +275,8 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 			sonstSequenz.generiereZweigSchrittSequenzModel(formatierterText),
 			new ArrayList<Float>(spaltenbreitenAnteileBerechnen(spaltenbreitenErmitteln())),
 			getSourceStepId(),
-			getDecorated());
+			getDecorated(),
+			tagModels());
 		caseSequenzen.forEach(sequenz -> model.addCase(sequenz.generiereZweigSchrittSequenzModel(formatierterText)));
 		return model;
 	}

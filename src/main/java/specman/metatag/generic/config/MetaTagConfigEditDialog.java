@@ -22,7 +22,6 @@ import java.util.function.Predicate;
  * the user confirms with OK; nothing is changed in the registry by this dialog itself. */
 class MetaTagConfigEditDialog extends JDialog {
   private static final Color DEFAULT_BACKGROUND = new Color(0xE0E0E0);
-  private static final Color DEFAULT_BORDER_COLOR = new Color(0x606060);
   private static final int TEXT_FIELD_COLUMNS = 20;
 
   private final Predicate<String> isNameTaken;
@@ -30,7 +29,7 @@ class MetaTagConfigEditDialog extends JDialog {
   private final JTextField labelField = new JTextField(TEXT_FIELD_COLUMNS);
   private final IconChooser iconChooser;
   private final ColorChooseButton backgroundButton;
-  private final ColorChooseButton borderButton;
+  private final OptionalColorChooser borderChooser;
   private final PreviewPanel preview = new PreviewPanel();
 
   private boolean labelFollowsName = true;
@@ -49,8 +48,8 @@ class MetaTagConfigEditDialog extends JDialog {
     iconChooser = new IconChooser(existing != null ? existing.getIconSvg() : null, this::refreshTagPreview);
     backgroundButton = new ColorChooseButton("Background color",
       existing != null ? existing.getBackgroundColor() : DEFAULT_BACKGROUND, this::refreshTagPreview);
-    borderButton = new ColorChooseButton("Border color",
-      existing != null ? existing.getBorderColor() : DEFAULT_BORDER_COLOR, this::refreshTagPreview);
+    borderChooser = new OptionalColorChooser("Border color",
+      existing != null ? existing.getBorderColor() : null, this::refreshTagPreview);
     if (existing != null) {
       nameField.setText(existing.getName());
       labelField.setText(existing.getLabel());
@@ -109,7 +108,7 @@ class MetaTagConfigEditDialog extends JDialog {
     panel.add(new JLabel("Background:"), CC.xy(2, 8));
     panel.add(backgroundButton, CC.xy(4, 8, "left, center"));
     panel.add(new JLabel("Border:"), CC.xy(2, 10));
-    panel.add(borderButton, CC.xy(4, 10, "left, center"));
+    panel.add(borderChooser, CC.xy(4, 10, "left, center"));
     panel.add(new JLabel("Preview:"), CC.xy(2, 12, "right, top"));
     panel.add(preview, CC.xy(4, 12));
     return panel;
@@ -134,7 +133,7 @@ class MetaTagConfigEditDialog extends JDialog {
 
   private MetaTagConfig currentConfig() {
     return new MetaTagConfig(nameField.getText(), labelField.getText(), iconChooser.getIconSvg(),
-      backgroundButton.getColor(), borderButton.getColor());
+      backgroundButton.getColor(), borderChooser.getColor());
   }
 
   private void confirm() {

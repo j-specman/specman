@@ -71,6 +71,8 @@ public interface EditorI extends FocusListener {
   void removeMetaTagConfigListener(MetaTagConfigListener listener);
   /** @return a snapshot of the meta tag configurations of the diagram in creation order */
   List<MetaTagConfig> metaTagConfigs();
+  /** @return the meta tag configuration of that name, null if there is none */
+  MetaTagConfig findMetaTagConfig(String name);
   /** @return the names of the meta tag configurations which at least one tag at a step refers to */
   Set<String> queryMetaTagConfigsInUse();
   void openMetaTagConfigs();

@@ -19,13 +19,14 @@ public class MetaTagConfig {
   private final Color borderColor;
 
   /** @param iconSvg SVG markup of the icon, null for a tag without icon. A tag needs a label or
-   * an icon, but that is a matter of the configuration dialog, not enforced here. */
+   * an icon, but that is a matter of the configuration dialog, not enforced here.
+   * @param borderColor null for a tag without border */
   public MetaTagConfig(String name, String label, String iconSvg, Color backgroundColor, Color borderColor) {
     this.name = Objects.requireNonNull(name);
     this.label = Objects.requireNonNull(label);
     this.iconSvg = iconSvg;
     this.backgroundColor = Objects.requireNonNull(backgroundColor);
-    this.borderColor = Objects.requireNonNull(borderColor);
+    this.borderColor = borderColor;
   }
 
   public String getName() {
@@ -48,6 +49,11 @@ public class MetaTagConfig {
     return backgroundColor;
   }
 
+  public boolean hasBorderColor() {
+    return borderColor != null;
+  }
+
+  /** @return the border color, null if the tag has no border */
   public Color getBorderColor() {
     return borderColor;
   }
@@ -62,7 +68,7 @@ public class MetaTagConfig {
     }
     MetaTagConfig that = (MetaTagConfig) other;
     return name.equals(that.name) && label.equals(that.label) && Objects.equals(iconSvg, that.iconSvg)
-      && backgroundColor.equals(that.backgroundColor) && borderColor.equals(that.borderColor);
+      && backgroundColor.equals(that.backgroundColor) && Objects.equals(borderColor, that.borderColor);
   }
 
   @Override

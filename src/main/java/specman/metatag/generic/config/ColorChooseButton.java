@@ -8,13 +8,15 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 
-/** A button showing a swatch of its current color, which opens a color chooser on click. */
+/** A button showing a swatch of its current color, which opens a color chooser on click. A button
+ * can also show "no color", as a crossed-out empty swatch. */
 class ColorChooseButton extends JButton {
   private final String chooserTitle;
   private final Runnable onColorChanged;
   private Color color;
 
-  /** @param onColorChanged called after the user picked a different color */
+  /** @param initialColor the color to start with, null for no color
+   * @param onColorChanged called after the user picked a different color */
   ColorChooseButton(String chooserTitle, Color initialColor, Runnable onColorChanged) {
     super("Choose...");
     this.chooserTitle = chooserTitle;
@@ -23,11 +25,12 @@ class ColorChooseButton extends JButton {
     addActionListener(e -> chooseColor());
   }
 
+  /** @return the chosen color, null for no color */
   Color getColor() {
     return color;
   }
 
-  private void setColor(Color color) {
+  void setColor(Color color) {
     this.color = color;
     setIcon(new ColorSwatchIcon(color));
   }
@@ -50,10 +53,15 @@ class ColorChooseButton extends JButton {
 
     @Override
     public void paintIcon(Component c, Graphics g, int x, int y) {
-      g.setColor(color);
-      g.fillRect(x, y, SIZE, SIZE);
+      if (color != null) {
+        g.setColor(color);
+        g.fillRect(x, y, SIZE, SIZE);
+      }
       g.setColor(Color.GRAY);
       g.drawRect(x, y, SIZE - 1, SIZE - 1);
+      if (color == null) {
+        g.drawLine(x, y + SIZE - 1, x + SIZE - 1, y);
+      }
     }
 
     @Override

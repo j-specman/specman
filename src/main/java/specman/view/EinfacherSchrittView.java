@@ -30,7 +30,8 @@ public class EinfacherSchrittView extends AbstractSchrittView {
 			shadeColorForModel(),
 			changeInfo,
 			getSourceStepId(),
-			getDecorated()
+			getDecorated(),
+			tagModels()
 		);
 	}
 

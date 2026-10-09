@@ -16,8 +16,8 @@ public class WhileStepModel_V002 extends StructuredStepModel_V002 {
         barWidth = 0;
     }
 
-    public WhileStepModel_V002(String id, String stepNumber, EditorContentModel_V002 content, Integer shade, ChangeInfo changeInfo, boolean collapsed, StepSequenceModel_V002 loopSequence, int barWidth, String sourceStepId, RoundedBorderDecorationStyle decorationStyle) {
-        super(id, stepNumber, content, shade, changeInfo, collapsed, sourceStepId, decorationStyle);
+    public WhileStepModel_V002(String id, String stepNumber, EditorContentModel_V002 content, Integer shade, ChangeInfo changeInfo, boolean collapsed, StepSequenceModel_V002 loopSequence, int barWidth, String sourceStepId, RoundedBorderDecorationStyle decorationStyle, List<MetaTagModel_V002> tags) {
+        super(id, stepNumber, content, shade, changeInfo, collapsed, sourceStepId, decorationStyle, tags);
         this.loopSequence = loopSequence;
         this.barWidth = barWidth;
     }

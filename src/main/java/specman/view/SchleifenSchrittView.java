@@ -202,7 +202,8 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 			wiederholSequenz.generiereSchrittSequenzModel(formatierterText),
 			0,
 			getSourceStepId(),
-			getDecorated());
+			getDecorated(),
+			tagModels());
 	}
 
 	@Override public int aenderungenUebernehmen() throws EditException {

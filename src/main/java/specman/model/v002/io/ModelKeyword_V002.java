@@ -60,7 +60,14 @@ public enum ModelKeyword_V002 {
     MODEL_FILENAME(KW_MODEL_FILENAME),
     PAGE_SIZE(KW_PAGE_SIZE),
     PORTRAIT(KW_PORTRAIT),
-    PAGING(KW_PAGING);
+    PAGING(KW_PAGING),
+    META_TAGS(KW_META_TAGS),
+    TAG(KW_TAG),
+    TAGS(KW_TAGS),
+    LABEL(KW_LABEL),
+    BACKGROUND(KW_BACKGROUND),
+    BORDER(KW_BORDER),
+    ICON(KW_ICON);
 
     private final String keyword;
 

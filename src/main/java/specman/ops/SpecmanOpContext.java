@@ -6,6 +6,7 @@ import specman.ScrollPause;
 import specman.SpaltenResizer;
 import specman.Specman;
 import specman.editarea.EditContainer;
+import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
@@ -13,6 +14,7 @@ import specman.view.SchrittSequenzView;
 import java.awt.Container;
 import java.awt.Image;
 import java.io.File;
+import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -32,13 +34,12 @@ public interface SpecmanOpContext extends EditorI {
   void exportAsGraphviz();
   void exit();
   void openSettings();
-  void clearMetaTagConfigs();
+  void setMetaTagConfigs(List<MetaTagConfig> configs);
   boolean hasUnsavedChanges();
   void markAsUnsavedWorkingCopy();
   void notifyWorkingCopyInitialized(long timestamp);
   void zusammenklappenFuerReview();
   void showMessage(String text);
-  /** Shows a brief non-modal toast notification; clicking "Details" opens the full modal dialog. */
   default void showToast(String briefMessage, String detailMessage) {
     showMessage(briefMessage + "\n\n" + detailMessage);
   }

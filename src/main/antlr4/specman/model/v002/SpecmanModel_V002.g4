@@ -67,6 +67,7 @@ settingEntry
     | 'changeModeEnabled' '=' boolVal
     | 'changeSetName'     '=' ID
     | 'pdfOptions'        '{' pdfOptionEntry* '}'
+    | 'metaTags'          '{' metaTagConfig+ '}'
     ;
 
 pdfOptionEntry
@@ -75,6 +76,33 @@ pdfOptionEntry
     | 'pageSize'      '=' ID
     | 'portrait'      '=' boolVal
     | 'paging'        '=' boolVal
+    ;
+
+// Meta tag configuration (MetaTagConfig): a kind of tag which can be assigned to steps.
+// The metaTags entry of the settings is omitted if there is no configuration - not even an empty
+// metaTags block is allowed - so that a model without meta tags can still be read by Specman 1.3.
+// The same goes for the tags parameter of a step. The first parameter is
+// the tagId, the name tags at steps refer to. A tag shows a label, an icon, or both, see
+// metaTagContent. The colors come first, because the background is mandatory in any case. The
+// border color is omitted for a tag without border.
+metaTagConfig
+    : 'tag' '(' tagId ',' 'background' '=' COLOR_HEX (',' 'border' '=' COLOR_HEX)? ',' metaTagContent ')'
+    ;
+
+// A label or an icon or both - but not neither of them. The label is omitted for a tag with just an
+// icon. icon is the SVG markup of the icon. A backtick inside of the SVG is written as the XML
+// character reference &#96;, which keeps the SVG valid.
+metaTagContent
+    : labelParam (',' iconParam)?
+    | iconParam
+    ;
+
+labelParam
+    : 'label' '=' BACKTICK_STRING
+    ;
+
+iconParam
+    : 'icon' '=' BACKTICK_STRING
     ;
 
 // Intro and outro are EditorContentModel_V002 — full EditContainer pattern.
@@ -109,50 +137,50 @@ step
 
 // change=(type, changeset) is an optional inline parameter for ChangeInfoModel_V002.
 simpleStep
-    : 'simple' '(' stepNum ',' stepId ',' editContainerHead (',' changeParam)? (',' decoParam)? (',' shadeParam)? ')' (';' | '{' editContainerTail '}')
+    : 'simple' '(' stepNum ',' stepId ',' editContainerHead (',' changeParam)? (',' decoParam)? (',' shadeParam)? (',' tagsParam)? ')' (';' | '{' editContainerTail '}')
     ;
 
 // UI convention: break text is single-line, but the model allows extra areas.
 breakStep
-    : 'break' '(' stepNum ',' stepId ',' editContainerHead (',' changeParam)? (',' decoParam)? (',' shadeParam)? ')' (';' | '{' editContainerTail '}')
+    : 'break' '(' stepNum ',' stepId ',' editContainerHead (',' changeParam)? (',' decoParam)? (',' shadeParam)? (',' tagsParam)? ')' (';' | '{' editContainerTail '}')
     ;
 
 // Source step (Quellschritt): the ghost left behind when a step is moved in change mode.
 // The changeset parameter (ID) is mandatory; sourceStep= links to the moved (target) step.
 sourceStep
-    : 'source' '(' stepNum ',' stepId ',' editContainerHead ',' ID (',' 'sourceStep' '=' STEP_ID)? (',' decoParam)? (',' shadeParam)? ')' (';' | '{' editContainerTail '}')
+    : 'source' '(' stepNum ',' stepId ',' editContainerHead ',' ID (',' 'sourceStep' '=' STEP_ID)? (',' decoParam)? (',' shadeParam)? (',' tagsParam)? ')' (';' | '{' editContainerTail '}')
     ;
 
 // barWidth preserves the user-set width of the loop bar in pixels.
 whileStep
-    : 'while' '(' stepNum ',' stepId ',' editContainerHead (',' 'barWidth' '=' INT)? (',' 'collapsed' '=' 'true')? (',' changeParam)? (',' decoParam)? (',' shadeParam)? ')' '{' editContainerTail step+ catchArea? '}'
+    : 'while' '(' stepNum ',' stepId ',' editContainerHead (',' 'barWidth' '=' INT)? (',' 'collapsed' '=' 'true')? (',' changeParam)? (',' decoParam)? (',' shadeParam)? (',' tagsParam)? ')' '{' editContainerTail step+ catchArea? '}'
     ;
 
 doWhileStep
-    : 'doWhile' '(' stepNum ',' stepId ',' editContainerHead (',' 'barWidth' '=' INT)? (',' 'collapsed' '=' 'true')? (',' changeParam)? (',' decoParam)? (',' shadeParam)? ')' '{' editContainerTail step+ '}'
+    : 'doWhile' '(' stepNum ',' stepId ',' editContainerHead (',' 'barWidth' '=' INT)? (',' 'collapsed' '=' 'true')? (',' changeParam)? (',' decoParam)? (',' shadeParam)? (',' tagsParam)? ')' '{' editContainerTail step+ '}'
     ;
 
 // ifRatio preserves the user-set width ratio of the if-branch vs. total (as percentage).
 ifElseStep
-    : 'ifElse' '(' stepNum ',' stepId ',' editContainerHead (',' 'ifRatio' '=' PERCENT)? (',' 'collapsed' '=' 'true')? (',' changeParam)? (',' decoParam)? (',' shadeParam)? ')' '{' editContainerTail ifBranch elseBranch '}'
+    : 'ifElse' '(' stepNum ',' stepId ',' editContainerHead (',' 'ifRatio' '=' PERCENT)? (',' 'collapsed' '=' 'true')? (',' changeParam)? (',' decoParam)? (',' shadeParam)? (',' tagsParam)? ')' '{' editContainerTail ifBranch elseBranch '}'
     ;
 
 // emptyWidth preserves the user-set width of the empty else area in pixels.
 ifStep
-    : 'if' '(' stepNum ',' stepId ',' editContainerHead (',' 'emptyWidth' '=' INT)? (',' 'collapsed' '=' 'true')? (',' changeParam)? (',' decoParam)? (',' shadeParam)? ')' '{' editContainerTail ifBranch '}'
+    : 'if' '(' stepNum ',' stepId ',' editContainerHead (',' 'emptyWidth' '=' INT)? (',' 'collapsed' '=' 'true')? (',' changeParam)? (',' decoParam)? (',' shadeParam)? (',' tagsParam)? ')' '{' editContainerTail ifBranch '}'
     ;
 
 // editContainerTail covers extra areas of the condition content (e.g. a condition list).
 // Requires exactly one defaultBranch and at least two caseBranches.
 // cols=[...] preserves the user-set column width ratios (one entry per branch incl. default).
 caseStep
-    : 'case' '(' stepNum ',' stepId ',' editContainerHead (',' 'cols' '=' '[' PERCENT (',' PERCENT)* ']')? (',' 'collapsed' '=' 'true')? (',' changeParam)? (',' decoParam)? (',' shadeParam)? ')'
+    : 'case' '(' stepNum ',' stepId ',' editContainerHead (',' 'cols' '=' '[' PERCENT (',' PERCENT)* ']')? (',' 'collapsed' '=' 'true')? (',' changeParam)? (',' decoParam)? (',' shadeParam)? (',' tagsParam)? ')'
       '{' editContainerTail defaultBranch caseBranch caseBranch+ '}'
     ;
 
 // flat=true preserves the flat-numbering flag as an inline parameter, consistent with other optionals.
 subsequenceStep
-    : 'subsequence' '(' stepNum ',' stepId ',' editContainerHead (',' 'flat' '=' 'true')? (',' 'collapsed' '=' 'true')? (',' changeParam)? (',' decoParam)? (',' shadeParam)? ')' '{' editContainerTail step+ catchArea? '}'
+    : 'subsequence' '(' stepNum ',' stepId ',' editContainerHead (',' 'flat' '=' 'true')? (',' 'collapsed' '=' 'true')? (',' changeParam)? (',' decoParam)? (',' shadeParam)? (',' tagsParam)? ')' '{' editContainerTail step+ catchArea? '}'
     ;
 
 // Branch headings are EditorContentModel_V002 — full EditContainer pattern.
@@ -303,6 +331,25 @@ shadeParam
     : 'shade' '=' COLOR_HEX
     ;
 
+// tags=[(`name`), (`name`, `freetext`)] — the meta tags assigned to the step, in the order they hang
+// at the step. Omitted when the step has no tags. A tag refers to its configuration by its tagId;
+// the freetext is optional. Backticks in the freetext are replaced by apostrophes when writing.
+tagsParam
+    : 'tags' '=' '[' tagRef (',' tagRef)* ']'
+    ;
+
+tagRef
+    : '(' tagId (',' BACKTICK_STRING)? ')'
+    ;
+
+// The name of a meta tag configuration, which tags at steps refer to. It is written as a backtick
+// string and not as an identifier, because identifiers would collide with keywords like 'source' or
+// 'text' and other tokens, e.g. 'deadbeef' is a STEP_ID. There is no lexer token of its own for it,
+// because it would be indistinguishable from BACKTICK_STRING.
+tagId
+    : BACKTICK_STRING
+    ;
+
 changeType
     : 'added'
     | 'removed'
@@ -398,6 +445,13 @@ KW_MODEL_FILENAME  : 'modelFilename' ;
 KW_PAGE_SIZE       : 'pageSize' ;
 KW_PORTRAIT        : 'portrait' ;
 KW_PAGING          : 'paging' ;
+KW_META_TAGS       : 'metaTags' ;
+KW_TAG             : 'tag' ;
+KW_TAGS            : 'tags' ;
+KW_LABEL           : 'label' ;
+KW_BACKGROUND      : 'background' ;
+KW_BORDER          : 'border' ;
+KW_ICON            : 'icon' ;
 
 // Identifiers: changeset names (yellow, blue), image types (png)
 ID          : [a-zA-Z][a-zA-Z0-9_-]* ;

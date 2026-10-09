@@ -22,6 +22,8 @@ import specman.model.v002.IfStepModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.model.v002.Markup_V002;
+import specman.model.v002.MetaTagConfigModel_V002;
+import specman.model.v002.MetaTagModel_V002;
 import specman.model.v002.SourceStepModel_V002;
 import specman.model.v002.StepSequenceModel_V002;
 import specman.model.v002.SubsequenceStepModel_V002;
@@ -30,6 +32,7 @@ import specman.model.v002.TextEditAreaModel_V002;
 import specman.model.v002.WhileStepModel_V002;
 import specman.view.RoundedBorderDecorationStyle;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -159,7 +162,38 @@ public class ModelSerializer_V002 {
             sb.append(indent()).append(PAGING).append("=").append(pdf.paging).append("\n");
             blockClose();
         }
+        appendMetaTagConfigs(model);
         blockClose();
+    }
+
+    private void appendMetaTagConfigs(DiagramModel_V002 model) {
+        if (model.metaTagConfigs.isEmpty()) {
+            return;
+        }
+        blockOpen(META_TAGS);
+        for (MetaTagConfigModel_V002 config : model.metaTagConfigs) {
+            appendMetaTagConfig(config);
+        }
+        blockClose();
+    }
+
+    private void appendMetaTagConfig(MetaTagConfigModel_V002 config) {
+        String border = config.borderColor != null
+            ? BORDER + "=" + ReadWriteColor.toHTMLColor(new Color(config.borderColor))
+            : null;
+        // The label may only be omitted if there is an icon instead, see the grammar.
+        String label = config.label.isEmpty() && config.iconSvg != null
+            ? null
+            : LABEL + "=`" + escapeBackticks(config.label) + "`";
+        // A backtick in the SVG is replaced by an XML character reference, which keeps the SVG valid.
+        String icon = config.iconSvg != null
+            ? ICON + "=`" + config.iconSvg.replace("`", "&#96;") + "`"
+            : null;
+        blockBegin(TAG,
+            "`" + escapeBackticks(config.name) + "`",
+            BACKGROUND + "=" + ReadWriteColor.toHTMLColor(new Color(config.backgroundColor)),
+            border, label, icon);
+        sb.append("\n");
     }
 
     // ---- id → stepNumber map ----
@@ -393,6 +427,20 @@ public class ModelSerializer_V002 {
         return SHADE + "=" + ReadWriteColor.toHTMLColor(new java.awt.Color(step.shade));
     }
 
+    private String tagsParam(AbstractStepModel_V002 step) {
+        if (step.tags.isEmpty()) {
+            return null;
+        }
+        List<String> tagRefs = new ArrayList<>();
+        for (MetaTagModel_V002 tag : step.tags) {
+            String freetext = tag.freetext != null && !tag.freetext.isEmpty()
+                ? ", `" + escapeBackticks(tag.freetext) + "`"
+                : "";
+            tagRefs.add("(`" + escapeBackticks(tag.configName) + "`" + freetext + ")");
+        }
+        return TAGS + "=[" + String.join(", ", tagRefs) + "]";
+    }
+
     private String collapsedParam(boolean collapsed) {
         return collapsed ? COLLAPSED + "=true" : null;
     }
@@ -451,22 +499,22 @@ public class ModelSerializer_V002 {
             : null;
         boolean hasExtraAreas = hasContent(step.content) && step.content.areas.size() > 1;
         if (hasExtraAreas) {
-            blockOpen(SOURCE, stepNum(step), stepId(step), editContainerHead(step.content), cs, targetParam, decoParam(step), shadeParam(step));
+            blockOpen(SOURCE, stepNum(step), stepId(step), editContainerHead(step.content), cs, targetParam, decoParam(step), shadeParam(step), tagsParam(step));
             appendEditContainerTail(step.content, 1);
             blockClose();
         } else {
-            block(SOURCE, stepNum(step), stepId(step), editContainerHead(step.content), cs, targetParam, decoParam(step), shadeParam(step));
+            block(SOURCE, stepNum(step), stepId(step), editContainerHead(step.content), cs, targetParam, decoParam(step), shadeParam(step), tagsParam(step));
         }
     }
 
     private void appendLeafStep(ModelKeyword_V002 keyword, AbstractStepModel_V002 step) {
         boolean hasExtraAreas = hasContent(step.content) && step.content.areas.size() > 1;
         if (hasExtraAreas) {
-            blockOpen(keyword, stepNum(step), stepId(step), editContainerHead(step.content), changeAnno(step.changeInfo, step.sourceStepId), decoParam(step), shadeParam(step));
+            blockOpen(keyword, stepNum(step), stepId(step), editContainerHead(step.content), changeAnno(step.changeInfo, step.sourceStepId), decoParam(step), shadeParam(step), tagsParam(step));
             appendEditContainerTail(step.content, 1);
             blockClose();
         } else {
-            block(keyword, stepNum(step), stepId(step), editContainerHead(step.content), changeAnno(step.changeInfo, step.sourceStepId), decoParam(step), shadeParam(step));
+            block(keyword, stepNum(step), stepId(step), editContainerHead(step.content), changeAnno(step.changeInfo, step.sourceStepId), decoParam(step), shadeParam(step), tagsParam(step));
         }
     }
 
@@ -474,7 +522,7 @@ public class ModelSerializer_V002 {
                                 AbstractStepModel_V002 step,
                                 Map<String, String> idToNum, boolean withCatch, String extraParam) {
         boolean collapsed = step instanceof StructuredStepModel_V002 s ? s.collapsed : false;
-        blockOpen(keyword, stepNum(step), stepId(step), editContainerHead(step.content), extraParam, collapsedParam(collapsed), changeAnno(step.changeInfo, step.sourceStepId), decoParam(step), shadeParam(step));
+        blockOpen(keyword, stepNum(step), stepId(step), editContainerHead(step.content), extraParam, collapsedParam(collapsed), changeAnno(step.changeInfo, step.sourceStepId), decoParam(step), shadeParam(step), tagsParam(step));
         appendEditContainerTail(step.content, 1);
         appendSteps(loopSeq, idToNum);
         if (withCatch && loopSeq != null) {
@@ -492,7 +540,7 @@ public class ModelSerializer_V002 {
           collapsedParam(step.collapsed),
           changeAnno(step.changeInfo, step.sourceStepId),
           decoParam(step),
-          shadeParam(step)
+          shadeParam(step), tagsParam(step)
         );
         appendEditContainerTail(step.content, 1);
         appendBranch(IF_BRANCH, step.ifSequence, idToNum, true);
@@ -537,7 +585,7 @@ public class ModelSerializer_V002 {
           collapsedParam(step.collapsed),
           changeAnno(step.changeInfo, step.sourceStepId),
           decoParam(step),
-          shadeParam(step)
+          shadeParam(step), tagsParam(step)
         );
 
         appendEditContainerTail(step.content, 1);
@@ -556,7 +604,7 @@ public class ModelSerializer_V002 {
             }
             cols = c.append("]").toString();
         }
-        blockOpen(CASE, stepNum(step), stepId(step), editContainerHead(step.content), cols, collapsedParam(step.collapsed), changeAnno(step.changeInfo, step.sourceStepId), decoParam(step), shadeParam(step));
+        blockOpen(CASE, stepNum(step), stepId(step), editContainerHead(step.content), cols, collapsedParam(step.collapsed), changeAnno(step.changeInfo, step.sourceStepId), decoParam(step), shadeParam(step), tagsParam(step));
         appendEditContainerTail(step.content, 1);
         appendBranch(DEFAULT_BRANCH, step.defaultSequence, idToNum, false);
         if (step.caseSequences != null) {
@@ -576,7 +624,7 @@ public class ModelSerializer_V002 {
           collapsedParam(step.collapsed),
           changeAnno(step.changeInfo, step.sourceStepId),
           decoParam(step),
-          shadeParam(step)
+          shadeParam(step), tagsParam(step)
         );
         appendEditContainerTail(step.content, 1);
         appendSteps(step.subsequence, idToNum);
