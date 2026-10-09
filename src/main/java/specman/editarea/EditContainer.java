@@ -278,13 +278,13 @@ public class EditContainer extends JPanel {
 		if (schrittNummer != null) {
 			schrittNummer.applyZoom(prozentNeu);
 		}
-		updateMetaStripHeight(prozentNeu);
+		updateMetaPanelHeight(prozentNeu);
 		if (indentions != null) {
 			updateDecorationIndentions(indentions);
 		}
 	}
 
-	private void updateMetaStripHeight(int zoomPercent) {
+	private void updateMetaPanelHeight(int zoomPercent) {
 		int height = schrittNummer != null ? (META_STRIP_PANEL_HEIGHT * zoomPercent) / 100 : 0;
 		layout.setRowSpec(2, RowSpec.decode(height + "px"));
 	}
@@ -368,14 +368,23 @@ public class EditContainer extends JPanel {
 
 	public boolean isStepNumber(StepnumberLabel label) { return schrittNummer != null && schrittNummer == label; }
 
-	public void addTag(GenericMetaTag tag) {
-		metaPanel.addTag(tag);
+	/** Appends the tag. @return the index it got */
+	public int addTag(GenericMetaTag tag) {
+		int index = metaPanel.addTag(tag);
+		updateBounds();
+		return index;
+	}
+
+	public void addTag(GenericMetaTag tag, int index) {
+		metaPanel.addTag(tag, index);
 		updateBounds();
 	}
 
-	public void removeTag(GenericMetaTag tag) {
-		metaPanel.removeTag(tag);
+	/** @return the index the tag had */
+	public int removeTag(GenericMetaTag tag) {
+		int index = metaPanel.removeTag(tag);
 		updateBounds();
+		return index;
 	}
 
 	public boolean hasTag(MetaTagConfig config) { return metaPanel.hasTag(config); }
@@ -409,7 +418,7 @@ public class EditContainer extends JPanel {
 
 	public boolean enthaelt(InteractiveStepFragment fragment) {
 		return editAreas.stream().anyMatch(ea -> ea.enthaelt(fragment))
-			|| schrittNummer == fragment;
+			|| metaPanel.contains(fragment);
 	}
 
 	public InteractiveStepFragment asInteractiveFragment() { return editAreas.get(0); }

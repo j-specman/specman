@@ -701,9 +701,13 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
     return !changeInfo.isDeleted() && editContainer.isStepNumber(initiatingLabel);
   }
 
-  public void addTag(GenericMetaTag tag) { editContainer.addTag(tag); }
+  /** Appends the tag. @return the index it got */
+  public int addTag(GenericMetaTag tag) { return editContainer.addTag(tag); }
 
-  public void removeTag(GenericMetaTag tag) { editContainer.removeTag(tag); }
+  public void addTag(GenericMetaTag tag, int index) { editContainer.addTag(tag, index); }
+
+  /** @return the index the tag had */
+  public int removeTag(GenericMetaTag tag) { return editContainer.removeTag(tag); }
 
   public boolean hasTag(MetaTagConfig config) { return editContainer.hasTag(config); }
 

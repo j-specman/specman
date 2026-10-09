@@ -182,8 +182,8 @@ public class StepnumberContextMenu implements MouseListener {
 
   private void assignTag(MetaTagConfig config) {
     GenericMetaTag tag = new GenericMetaTag(config, null);
-    currentStep.addTag(tag);
-    editor().addEdit(new UndoableMetaTagAssigned(currentStep, tag));
+    int index = currentStep.addTag(tag);
+    editor().addEdit(new UndoableMetaTagAssigned(currentStep, tag, index));
   }
 
   private void initLeftRightMenuItems() {

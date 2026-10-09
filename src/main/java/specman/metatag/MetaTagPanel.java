@@ -2,6 +2,7 @@ package specman.metatag;
 
 import specman.StepNumber;
 import specman.editarea.Indentions;
+import specman.editarea.InteractiveStepFragment;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigListener;
@@ -60,8 +61,15 @@ public class MetaTagPanel extends JPanel {
     setOpaque(false);
   }
 
-  public void addTag(GenericMetaTag tag) {
-    tags.add(tag);
+  /** Appends the tag. @return the index it got */
+  public int addTag(GenericMetaTag tag) {
+    int index = tags.size();
+    addTag(tag, index);
+    return index;
+  }
+
+  public void addTag(GenericMetaTag tag, int index) {
+    tags.add(index, tag);
     super.add(tag);
     if (tags.size() == 1) {
       editor().addMetaTagConfigListener(configListener);
@@ -69,13 +77,16 @@ public class MetaTagPanel extends JPanel {
     repaint();
   }
 
-  public void removeTag(GenericMetaTag tag) {
-    tags.remove(tag);
+  /** @return the index the tag had */
+  public int removeTag(GenericMetaTag tag) {
+    int index = tags.indexOf(tag);
+    tags.remove(index);
     remove(tag);
     if (tags.isEmpty()) {
       editor().removeMetaTagConfigListener(configListener);
     }
     repaint();
+    return index;
   }
 
   /** Informs the tag of the edited configuration - the panel has a null layout, so afterwards the
@@ -96,6 +107,11 @@ public class MetaTagPanel extends JPanel {
 
   public List<GenericMetaTag> getTags() {
     return Collections.unmodifiableList(tags);
+  }
+
+  /** @return whether the fragment is this panel's step number or one of its tags */
+  public boolean contains(InteractiveStepFragment fragment) {
+    return stepNumber == fragment || tags.contains(fragment);
   }
 
   /** The height of the step number label - and thereby of every meta tag, which borrows it - in a

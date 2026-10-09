@@ -1,5 +1,6 @@
 package specman.metatag.generic;
 
+import specman.editarea.InteractiveStepFragment;
 import specman.metatag.AbstractMetaTag;
 import specman.metatag.MetaTagPanel;
 import specman.metatag.generic.config.MetaTagConfig;
@@ -23,7 +24,7 @@ import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
 /**
  * Configurable meta-tag displayed to the left of a step number.
  */
-public class GenericMetaTag extends AbstractMetaTag {
+public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFragment {
   private static final int SIDE_PADDING = 2;
   private static final int TOOLTIP_WIDTH = 250;
   private static final int FEEDBACK_DURATION_MS = 3000;
@@ -42,6 +43,7 @@ public class GenericMetaTag extends AbstractMetaTag {
     setFreetext(freetext);
     applyConfig(config);
 
+    addMouseListener(MetaTagContextMenu.instance);
     addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
@@ -74,7 +76,7 @@ public class GenericMetaTag extends AbstractMetaTag {
     repaint();
   }
 
-  private void editFreetext() {
+  void editFreetext() {
     hideFreetextFeedback();
     // Without this, the tooltip would pop up on top of the editor as soon as the mouse (still
     // resting on the tag after the click) moves a little.
