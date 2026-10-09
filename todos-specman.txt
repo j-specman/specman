@@ -18,19 +18,19 @@ x Generische Basisklasse für Meta Tags
   - Umbenennen einer Konfiguration, für die bereits Tags vergeben sind, ist nicht erlaubt
     (Umbenennen ist im Moment immer erlaubt, Prüfung kommt mit der Tag-Vergabe)
   x Undo / Redo
-- Vergeben eines Tags an einem Schritt über die GUI
+x Vergeben eines Tags an einem Schritt über die GUI
   x Jeder Typ von Tag nur einmal pro Schritt
   x Über Auswahl aus Untermenü des Kontextmenüs an der Schrittnummer
   x Dadurch sichergestellt: Meta Tag Panels ohne Schrittnummer, erhalten nie konfigurierte Meta Tags, die ja die Schrittnummer bräuchten, um ihre Höhe und Position daraus abzuleiten
   x Alle bereits vergebenen Tags sind ausgegraut
   x Menüpunkte zeigen Icon und Label der Konfiguration
-  - Undo / Redo
+  x Undo / Redo
   x Vergeben von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
-  - Meta Tags werden im Meta Tag Panel immer links neben dem Schrittlabel bzw. dem letzten bereits vorliegenden Meta Tag eingehängt.
-  - Wenn ein Klappbutton vorliegt, verschiebt dieser sich dabei nach links, d.h. er steht immer ganz links
-    - Das ist so am besten, weil er nicht permanent sichtbar ist.
-  - Meta Tag Panel kann im Moment noch nicht mit variabler Anzahl der Tags umgehen
-  - Prototypisches UserMetaTag in dem Zuge entfernen
+  x Meta Tags werden im Meta Tag Panel immer links neben dem Schrittlabel bzw. dem letzten bereits vorliegenden Meta Tag eingehängt.
+  x Wenn ein Klappbutton vorliegt, verschiebt dieser sich dabei nach links, d.h. er steht immer ganz links
+    x Das ist so am besten, weil er nicht permanent sichtbar ist.
+  x Meta Tag Panel kann im Moment noch nicht mit variabler Anzahl der Tags umgehen
+  x Prototypisches UserMetaTag in dem Zuge entfernen
 - Entfernen eines Tags von einem Schritt über die GUI
   - Denkbar über Kontextmenü des Tags mit den Punkten Edit (öffnet den Freitexteditor) und Delete
   - Undo / Redo
