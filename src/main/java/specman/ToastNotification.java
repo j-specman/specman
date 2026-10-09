@@ -11,10 +11,21 @@ public class ToastNotification {
     private static final int DISPLAY_DURATION_MS = 5000;
     private static final int WIDTH = 400;
     private static final int HEIGHT = 72;
-    private static final Color BG = new Color(50, 50, 50);
+    private static final Color BG = new Color(100, 100, 100);
+    private static final float OPACITY = 0.7f;
 
+    /** Toast with just the message, for plain feedback that has nothing more to tell. */
+    public static void show(JFrame parent, String brief) {
+        show(parent, brief, null);
+    }
+
+    /** @param detail text of the modal dialog behind a "Details" button, null for a toast without such button */
     public static void show(JFrame parent, String brief, String detail) {
         JWindow toast = new JWindow(parent);
+        if (GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
+            .isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT)) {
+            toast.setOpacity(OPACITY);
+        }
         toast.setFocusableWindowState(false); // prevents focus steal → no title-bar flicker on parent
         toast.setLayout(new BorderLayout(0, 0));
         toast.getContentPane().setBackground(BG);
@@ -24,19 +35,9 @@ public class ToastNotification {
         label.setBorder(BorderFactory.createEmptyBorder(10, 14, 10, 8));
         toast.add(label, BorderLayout.CENTER);
 
-        JButton detailsBtn = new JButton("Details");
-        detailsBtn.setFocusPainted(false);
-        detailsBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        detailsBtn.addActionListener(e -> {
-            toast.dispose();
-            JOptionPane.showMessageDialog(parent, detail);
-        });
-        JPanel btnPanel = new JPanel(new GridBagLayout());
-        btnPanel.setBackground(BG);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(0, 8, 0, 10);
-        btnPanel.add(detailsBtn, gbc);
-        toast.add(btnPanel, BorderLayout.EAST);
+        if (detail != null) {
+            toast.add(createDetailsPanel(toast, parent, detail), BorderLayout.EAST);
+        }
 
         toast.addMouseListener(new MouseAdapter() {
             @Override
@@ -52,6 +53,22 @@ public class ToastNotification {
         Timer dismissTimer = new Timer(DISPLAY_DURATION_MS, e -> toast.dispose());
         dismissTimer.setRepeats(false);
         dismissTimer.start();
+    }
+
+    private static JPanel createDetailsPanel(JWindow toast, JFrame parent, String detail) {
+        JButton detailsBtn = new JButton("Details");
+        detailsBtn.setFocusPainted(false);
+        detailsBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        detailsBtn.addActionListener(e -> {
+            toast.dispose();
+            JOptionPane.showMessageDialog(parent, detail);
+        });
+        JPanel btnPanel = new JPanel(new GridBagLayout());
+        btnPanel.setBackground(BG);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(0, 8, 0, 10);
+        btnPanel.add(detailsBtn, gbc);
+        return btnPanel;
     }
 
     private static void positionToast(JWindow toast, JFrame parent) {

@@ -67,4 +67,5 @@ public interface EditorI extends FocusListener {
   ChangeSet changeset();
   void addMetaTagConfigListener(MetaTagConfigListener listener);
   void removeMetaTagConfigListener(MetaTagConfigListener listener);
+  void showToast(String message);
 }
