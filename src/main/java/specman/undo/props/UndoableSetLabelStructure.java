@@ -1,7 +1,7 @@
 package specman.undo.props;
 
-import specman.editarea.stepnumberlabel.StepnumberLabel;
-import specman.editarea.stepnumberlabel.StepnumberLabel.LabelStructure;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
+import specman.metatag.stepnumberlabel.StepnumberLabel.LabelStructure;
 
 public class UndoableSetLabelStructure extends UndoableSetProperty<LabelStructure> {
 

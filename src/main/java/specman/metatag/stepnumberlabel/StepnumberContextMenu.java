@@ -1,4 +1,4 @@
-package specman.editarea.stepnumberlabel;
+package specman.metatag.stepnumberlabel;
 
 import specman.graphics.IconReader;
 import specman.undo.UndoableFlatNumberingToggled;

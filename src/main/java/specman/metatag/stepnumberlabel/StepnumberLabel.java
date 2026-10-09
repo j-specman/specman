@@ -1,10 +1,10 @@
-package specman.editarea.stepnumberlabel;
+package specman.metatag.stepnumberlabel;
 
 import org.apache.commons.lang.math.IntRange;
 import specman.StepNumber;
 import specman.draganddrop.DragMouseAdapter;
 import specman.editarea.InteractiveStepFragment;
-import specman.graphics.HangingTab;
+import specman.metatag.AbstractMetaTag;
 import specman.pdf.HangingTabShape;
 import specman.pdf.LineShape;
 import specman.undo.props.UDBL;
@@ -14,7 +14,6 @@ import specman.pdf.Shape;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.font.LineMetrics;
 
 import static specman.StepNumber.asString;
 import specman.ChangeSet;
@@ -26,7 +25,7 @@ import static specman.graphics.Styles.Schriftfarbe_Geloescht;
 import static specman.graphics.Styles.labelFont;
 import static specman.Specman.editor;
 
-public class StepnumberLabel extends HangingTab implements InteractiveStepFragment {
+public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepFragment {
   private static final String SPACER = " ";
   private static final String TO_TARGET_ARROW = SPACER + ">" + SPACER;
   private static final String FROM_SOURCE_ARROW = SPACER + "<" + SPACER;

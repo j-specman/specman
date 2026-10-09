@@ -1,11 +1,9 @@
-package specman.view;
+package specman.metatag;
 
+import specman.view.RoundedBorderDecorator;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import specman.editarea.MetaStripPanel;
-import specman.graphics.HangingTab;
 import specman.graphics.SvgIcon;
-import specman.Specman;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +13,6 @@ import java.awt.event.MouseMotionListener;
 
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_SICHTBAR;
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_VERBORGEN;
-import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
 import static specman.Specman.editor;
 
 /**
@@ -29,7 +26,7 @@ import static specman.Specman.editor;
  *
  * @author less02
  */
-public class KlappButton extends HangingTab implements MouseMotionListener, MouseListener {
+public class KlappButton extends AbstractMetaTag implements MouseMotionListener, MouseListener {
   // Base (100% zoom) size of the square button - also used by CatchBereich to size an unrelated
   // row spec, independent of any button instance, hence public and static.
   public static final int MINIMUM_ICON_LENGTH = 12;
@@ -243,7 +240,7 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
    * instead of relying on two separate formulas staying in sync by hand. */
   public void updateLocation(Rectangle stepnumberBounds) {
     if (stepnumberBounds.height > 0) {
-      int gap = (int) editor().scale(MetaStripPanel.WIDGET_GAP);
+      int gap = (int) editor().scale(MetaTagPanel.WIDGET_GAP);
       int width = getPreferredSize().width;
       setBounds(stepnumberBounds.x - gap - width, 0, width, stepnumberBounds.height);
     }

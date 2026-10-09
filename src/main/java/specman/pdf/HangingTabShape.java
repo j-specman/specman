@@ -1,7 +1,7 @@
 package specman.pdf;
 
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
-import specman.graphics.HangingTabRenderer;
+import specman.metatag.HangingTabRenderer;
 
 import java.awt.Component;
 import java.awt.Point;

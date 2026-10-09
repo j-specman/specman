@@ -14,7 +14,8 @@ import specman.ChangeInfo;
 import static specman.ChangeSet.changeset;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
+import specman.metatag.MetaTagPanel;
 import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
@@ -105,7 +106,7 @@ public class EditContainer extends JPanel {
 	private final List<FocusListener> editAreasFocusListeners = new ArrayList<>();
 	private final List<ComponentListener> editAreasComponentListeners = new ArrayList<>();
 	private final StepnumberLabel schrittNummer;
-	private final MetaStripPanel metaPanel = new MetaStripPanel();
+	private final MetaTagPanel metaPanel = new MetaTagPanel();
 	private FormLayout layout;
 	private Indentions indentions;
 	private boolean schrittNummerSichtbar = true;
@@ -364,7 +365,7 @@ public class EditContainer extends JPanel {
 		if (schrittNummer != null) {
 			// See updateBounds(): the label's height grows by BORDER_OVERDRAW_COMPENSATION in
 			// "abgesetzte" steps - compensate so the text-to-bottom-edge distance stays the same.
-			schrittNummer.setHeightGrowthCompensation(this.indentions.top ? MetaStripPanel.BORDER_OVERDRAW_COMPENSATION : 0);
+			schrittNummer.setHeightGrowthCompensation(this.indentions.top ? MetaTagPanel.BORDER_OVERDRAW_COMPENSATION : 0);
 		}
 
 		// TODO JL: Das ist hier noch nicht sauber. Der oberste und unterste Editbereich haben

@@ -1,5 +1,6 @@
 package specman.view;
 
+import specman.metatag.KlappbarerBereichI;
 import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
@@ -16,7 +17,7 @@ import static specman.util.ObjectUtils.nvl;
 
 import specman.draganddrop.UnsupportedDragSourceException;
 import specman.editarea.EditArea;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.BreakStepModel_V002;
 import specman.model.v002.CaseStepModel_V002;

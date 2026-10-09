@@ -1,8 +1,7 @@
-package specman.editarea;
+package specman.metatag;
 
-import specman.editarea.stepnumberlabel.StepnumberLabel;
-import specman.view.KlappButton;
-import specman.view.UserMetaLabel;
+import specman.editarea.Indentions;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +11,7 @@ import static specman.Specman.editor;
 /**
  * Transparent overlay panel for the step number, the fold/collapse button, and future meta
  * widgets, placed on top of the first edit area via a FormLayout row span in
- * {@link EditContainer}. Positioning of its children is done externally
+ * {@link specman.editarea.EditContainer}. Positioning of its children is done externally
  * (EditContainer#updateBounds(), {@link #repositionKlappButton(Rectangle)}), not by a
  * LayoutManager - hence the null layout and the fixed (0,0) preferred/minimum size, which keeps
  * this panel from freezing the row height of the FormLayout row it spans.
@@ -25,15 +24,15 @@ import static specman.Specman.editor;
  * <p>
  * Only holds constants/logic about how widgets are arranged *within* the strip (gap between them,
  * margin to the strip's own right edge) - how an individual widget renders itself (corner arc,
- * border) is {@link specman.graphics.HangingTab}'s concern, not this panel's.
+ * border) is {@link AbstractMetaTag}'s concern, not this panel's.
  */
-public class MetaStripPanel extends JPanel {
+public class MetaTagPanel extends JPanel {
   // All still in flux for finetuning the "hanging tab" look - at 100% zoom, scaled from there
   // the same way the widgets' own sizes are (see StepnumberLabel/KlappButton paint()/updateLocation()).
   public static final int WIDGET_GAP = 4;
   public static final int RIGHT_MARGIN = 3;
   // Pixels trimmed off a widget's natural preferred height for the final "stingy" box height -
-  // larger than HangingTab.CONTENT_LIFT so the box actually gets shorter, not just internally
+  // larger than AbstractMetaTag.CONTENT_LIFT so the box actually gets shorter, not just internally
   // re-centered.
   public static final int HEIGHT_TRIM = 4;
   // Compensates for RoundedBorderDecorator painting its antialiased border line on top of the
@@ -44,13 +43,13 @@ public class MetaStripPanel extends JPanel {
   public static final int BORDER_OVERDRAW_COMPENSATION = 1;
 
   private StepnumberLabel stepNumber;
-  // Quick experiment, not a real feature yet - see UserMetaLabel's own class comment.
-  private final UserMetaLabel userBadge = new UserMetaLabel();
+  // Quick experiment, not a real feature yet - see UserMetaTag's own class comment.
+  private final UserMetaTag userBadge = new UserMetaTag();
 
-  public MetaStripPanel() {
+  public MetaTagPanel() {
     setLayout(null);
     setOpaque(false);
-    //add(userBadge);
+    add(userBadge);
   }
 
   public void add(StepnumberLabel stepNumber) {
@@ -96,16 +95,16 @@ public class MetaStripPanel extends JPanel {
     if (stepNumber != null) {
       if (schrittNummerSichtbar) {
         Dimension schrittnummerGroesse = stepNumber.getPreferredSize();
-        int rightMargin = (int) editor().scale(MetaStripPanel.RIGHT_MARGIN);
-        int heightTrim = (int) editor().scale(MetaStripPanel.HEIGHT_TRIM);
+        int rightMargin = (int) editor().scale(MetaTagPanel.RIGHT_MARGIN);
+        int heightTrim = (int) editor().scale(MetaTagPanel.HEIGHT_TRIM);
         // schrittNummer already reaches the very top of the step via row 2 alone (see
         // initLayoutAndEditAreas()) - but RoundedBorderDecorator paints its
         // antialiased border line on top of everything inside it, overdrawing a few
         // pixels off the label's top edge in "abgesetzte" (rounded-border) steps.
         // Making the label taller by that same (fixed, not zoom-scaled - see
-        // MetaStripPanel.BORDER_OVERDRAW_COMPENSATION) amount keeps its visible
+        // MetaTagPanel.BORDER_OVERDRAW_COMPENSATION) amount keeps its visible
         // (non-overdrawn) height identical to a step without that border style.
-        int topInsetBridge = indentions != null && indentions.top ? MetaStripPanel.BORDER_OVERDRAW_COMPENSATION : 0;
+        int topInsetBridge = indentions != null && indentions.hasTopIndention() ? MetaTagPanel.BORDER_OVERDRAW_COMPENSATION : 0;
         stepNumber.setBounds(maxEditWidth - schrittnummerGroesse.width - rightMargin,
           0,
           schrittnummerGroesse.width,
@@ -118,7 +117,7 @@ public class MetaStripPanel extends JPanel {
       // (SchleifenSchrittView, SubsequenzSchrittView, VerzweigungSchrittView) don't each need to
       // separately call klappen.updateLocation(...) after every resize.
       repositionKlappButton(stepNumber.getBounds());
-      // Quick experiment, not a real feature yet - see UserMetaLabel's own class comment. Ignores
+      // Quick experiment, not a real feature yet - see UserMetaTag's own class comment. Ignores
       // KlappButton entirely for now (may overlap it on steps that have one).
       userBadge.scale();
       userBadge.updateLocation(stepNumber.getBounds(), (int) editor().scale(WIDGET_GAP));

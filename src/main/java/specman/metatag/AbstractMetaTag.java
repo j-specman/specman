@@ -1,4 +1,4 @@
-package specman.graphics;
+package specman.metatag;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -12,7 +12,7 @@ import javax.swing.border.MatteBorder;
 import static specman.Specman.editor;
 
 /**
- * Common base for meta-strip widgets (step number label, fold/collapse button, future ones) that
+ * Common base for meta-tag widgets (step number label, fold/collapse button, future ones) that
  * render as if hanging from the top edge of their container: sharp top corners, antialiased
  * rounded bottom corners (see {@link HangingTabRenderer} for how). Subclasses supply the corner arc
  * via {@link #arc()} and can override {@link #paintUnmasked(Graphics)} for content that must not
@@ -26,7 +26,7 @@ import static specman.Specman.editor;
  * Border's insets would, and doesn't fight with HangingTabShape's own offscreen compositing the
  * way a MatteBorder painted as part of super.paint() used to (causing visible render glitches).
  */
-public abstract class HangingTab extends JLabel {
+public abstract class AbstractMetaTag extends JLabel {
   // Base (100% zoom) corner radius for the rounded bottom corners - shared default for arc(), at
   // 100% zoom, scaled the same way the rest of a widget's own size is.
   protected static final int CORNER_ARC = 8;
@@ -36,14 +36,14 @@ public abstract class HangingTab extends JLabel {
   private static final int SIDE_PADDING = 5;
   // Border bottom inset that nudges Swing's centered content upward within its natural preferred
   // height (a larger bottom inset than top shifts the centering point up).
-  private static final int CONTENT_LIFT = 2;
+  protected static final int CONTENT_LIFT = 2;
 
   private Color borderColor;
 
-  protected HangingTab() {
+  protected AbstractMetaTag() {
   }
 
-  protected HangingTab(String text) {
+  protected AbstractMetaTag(String text) {
     super(text);
   }
 
@@ -51,11 +51,11 @@ public abstract class HangingTab extends JLabel {
     this.borderColor = borderColor;
   }
 
-  /** Border recipe for a HangingTab's own content box: SIDE_PADDING left/right for the rounded
+  /** Border recipe for an AbstractMetaTag's own content box: SIDE_PADDING left/right for the rounded
    * corners to live in, CONTENT_LIFT bottom inset to nudge Swing's centered content upward,
    * reduced by heightGrowthCompensation to counteract a matching height growth in "abgesetzte"
    * (rounded-border) steps (see StepnumberLabel#setHeightGrowthCompensation and
-   * MetaStripPanel.BORDER_OVERDRAW_COMPENSATION for why that's needed there). */
+   * MetaTagPanel.BORDER_OVERDRAW_COMPENSATION for why that's needed there). */
   protected static Border scaledBorder(Color color, int heightGrowthCompensation) {
     return scaledBorder(color, heightGrowthCompensation, SIDE_PADDING);
   }
@@ -69,9 +69,7 @@ public abstract class HangingTab extends JLabel {
   }
 
   /** Same as {@link #scaledBorder(Color, int, int)}, but with an explicit lift instead of the
-   * default CONTENT_LIFT - for widgets (like UserMetaLabel's icon) that don't want their content
-   * nudged upward at all, e.g. because unlike StepnumberLabel/KlappButton's own text/glyph, theirs
-   * already sits too close to the top edge without any lift applied in the first place. */
+   * default CONTENT_LIFT. */
   protected static Border scaledBorder(Color color, int heightGrowthCompensation, int sidePadding, int lift) {
     int padding = (int) editor().scale(sidePadding);
     int scaledLift = (int) editor().scale(lift) - heightGrowthCompensation;

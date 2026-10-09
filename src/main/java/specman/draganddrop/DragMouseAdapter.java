@@ -4,8 +4,8 @@ import specman.EditException;
 import specman.Specman;
 import specman.StepButtonBar;
 import specman.editarea.InteractiveStepFragment;
-import specman.editarea.stepnumberlabel.BreakCatchScrollMouseAdapter;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
+import specman.metatag.stepnumberlabel.BreakCatchScrollMouseAdapter;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.view.AbstractSchrittView;
 
 import javax.swing.*;

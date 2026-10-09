@@ -15,7 +15,7 @@ import specman.editarea.markups.*;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedElement;
 import specman.editarea.document.WrappedPosition;
-import specman.editarea.stepnumberlabel.BreakCatchScrollMouseAdapter;
+import specman.metatag.stepnumberlabel.BreakCatchScrollMouseAdapter;
 import specman.model.v002.Markup_V002;
 import specman.model.v002.TableEditAreaModel_V002;
 import specman.model.v002.TextEditAreaModel_V002;

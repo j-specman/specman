@@ -1,5 +1,7 @@
 package specman.view;
 
+import specman.metatag.KlappbarerBereichI;
+import specman.metatag.KlappButton;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
@@ -17,7 +19,7 @@ import specman.draganddrop.DropTarget;
 import specman.draganddrop.LocalCursor;
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.Styles;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.CatchAreaModel_V002;

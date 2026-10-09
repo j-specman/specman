@@ -1,5 +1,6 @@
 package specman.view;
 
+import specman.metatag.KlappButton;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;

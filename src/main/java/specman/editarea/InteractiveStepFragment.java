@@ -1,6 +1,6 @@
 package specman.editarea;
 
-import specman.editarea.stepnumberlabel.StepnumberLabel;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
 
 /** Tag Interface für grafische Bestandteile eines Schritts, die Ziel einer
  * Interaktion sind, und über die man den betreffenden Schritt im Diagramm
