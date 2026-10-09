@@ -1,32 +1,66 @@
 Release notes Specman 1.3.2
 - Copy / Cut / Paste von Tabellen
 
-Meta Tags
+Release notes Specman 1.4.0
+- Meta Tags
+
+Meta Tags (Release 1.4.0)
 x Meta Tag Panel für Aufnahme von Schrittlabel, Klappbutton und Meta Tags
 x Überarbeitung der Darstellung / Platzierung von Schrittlabel, Klappbutton
 x Generische Basisklasse für Meta Tags
   x Icon, Label, Hintergrundfarbe, Rahmenfarbe
   x Editierbarer Freitext, also Tooltip angezeigt
+  - Undo / Redo der Freitext-Edits
 - Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
-  - Beim Editieren bestehender Konfigurationen müssen die Meta Tags, die aus dieser Konfiguration hervorgegangen sind, im UI aktualisiert werden
+  - Für das Icon: Auswahl einer SVG-Datei
+  - Beim Editieren bestehender Konfigurationen müssen die Meta Tags, die auf diese Konfiguration verweisen, im UI in der Darstellung aktualisiert werden
+  - Umbenennen einer Konfiguration, für die bereits Tags vergeben sind, ist nicht erlaubt
+  - Undo / Redo
+- Löschen einer Meta Tag Konfiguration über die GUI
+  - Sicherheitsabfrage, wenn es Tags gibt, die sich darauf beziehen
+  - Bei Bestätigung, die entsprechenden Tags entfernen
+  - Undo / Redo
 - Vergeben eines Tags an einem Schritt über die GUI
   - Jeder Typ von Tag nur einmal pro Schritt
-  - Denkbar über Auswahl aus Untermenü des Kontextmenüs an der Schrittnummer
+  - Über Auswahl aus Untermenü des Kontextmenüs an der Schrittnummer
+  - Dadurch sichergestellt: Meta Tag Panels ohne Schrittnummer, erhalten nie konfigurierte Meta Tags, die ja die Schrittnummer bräuchten, um ihre Höhe und Position daraus abzuleiten
   - Alle bereits vergebenen Tags sind ausgegraut
   - Menüpunkte zeigen Icon und Label der Konfiguration
   - Undo / Redo
   - Vergeben von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
-  - Meta Tags werden im Meta Tag Panel immer zwischen Schrittlabel und Klappbutton (sofern vorhanden) einsortiert
+  - Meta Tags werden im Meta Tag Panel immer links neben dem Schrittlabel bzw. dem letzten bereits vorliegenden Meta Tag eingehängt.
+  - Wenn ein Klappbutton vorliegt, verschiebt dieser sich dabei nach links, d.h. er steht immer ganz links
+    - Das ist so am besten, weil er nicht permanent sichtbar ist.
   - Meta Tag Panel kann im Moment noch nicht mit variabler Anzahl der Tags umgehen
   - Prototypisches UserMetaTag in dem Zuge entfernen
 - Entfernen eines Tags von einem Schritt über die GUI
-  - Denkbar über Kontextmenü des Tags mit den Punkten Edit und Delete
+  - Denkbar über Kontextmenü des Tags mit den Punkten Edit (öffnet den Freitexteditor) und Delete
   - Undo / Redo
   - Entfernen von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
 - Aufnahme der Konfigurationen in die Modelldatei
+  - Das SVG des Icons wird in die Modelldatei eingebettet
 - Aufnahme der an den Schritten vergebenen Tags in die Modelldatei
   - Es reicht eine Referenz auf die Bezeichner der Konfiguration + des ggf. zugehörigen Freitexts
-- Einlesen der Konfigs und der Tags an den Schritten aus der Modelldatei
+- Einlesen der Konfigs und der Tags an den Schritten aus der Modelldatei (Model Parser)
+- Wir erweitern die Grammatik, bleiben aber bei V002
+- Wichtig für Erweiterung: sie soll eine reiner Erweiterung gegenüber 1.3 sein, d.h. wenn man in 1.4 arbeiten aber keine Meta Tags konfiguriert (und nutzt) enthält die Modelldatei keine neuen (auch keine leeren!) Bestandteile, die ein Öffnen der Datei mit 1.3 verhindern würde.
+- Zielversion 1.4 mit Warnung bei Öffnen einer 1.3'er Datei, dass die Modelle kompatibel sind aber anschließend nicht mehr mit 1.3 bearbeitet werden sollten, um keine Meta-Informationen zu verlieren
+- Copy / Cut / Paste von Schritten mit Meta Tags
+  - Innerhalb derselben Instanz: Tags wandern mit
+  - Zwischen Instanzen: Tags wandern mit, wenn es eine passend bezeichnete Tag Konfiguration im Zielmodell gibt, sonst verschwinden sie still
+- Drag & Drop von Schritten: Meta Tags bleiben erhalten
+- Schritt als gelöscht markieren
+  - Tags bleiben, aber Darstellung schwarz mit grauem Rand
+  - Entfernen, Editieren, Hinzufügen nicht mehr möglich
+  - Undo / Redo
+  - Darstellung / Editierbarkeit beim Verwerfen der Löschung wiederherstellen
+- Ergänzung Sanitizer: Fehler bei der Vergabe eines Tags, dessen Konfiguration nicht existiert
+- PDF-Export von Meta Tags
+  - Nice to have: Freitext als Kommentar in der PDF-Ausgabe?
+- Verschieben der Tags eines Schritts untereinander mit rechts/links im Kontextmenü analog Catch-Bereiche
+- Noch zur späteren Überlegung offen:
+  - Umgang mit Überlauf
+  - Freitexte irgendwie durchsuchbar?
 
 Aus aktueller Anwendung
 - beim Öffnen und einer vorhandenen .wrk, *drei* Optionen: 1) nicht laden, 2) laden, 3) ist in Arbeit - nicht laden aber auch nicht überschreiben und beim Schließen löschen

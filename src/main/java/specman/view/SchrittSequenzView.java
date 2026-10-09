@@ -61,7 +61,6 @@ public class SchrittSequenzView {
 	//wird benötigt um mehre als gelöscht markierte Schritte auf einmal zu löschen
 	public final List<AbstractSchrittView> schritte = new CopyOnWriteArrayList<AbstractSchrittView>();
 	final FormLayout sequenzbereichLayout;
-	boolean schrittnummernSichtbar = true;
 	final FormLayout huellLayout;
 	final AbstractSchrittView parent;
 
@@ -162,13 +161,6 @@ public class SchrittSequenzView {
 		return sequenzBasisId.naechsteID();
 	}
 
-	void schrittnummerSichtbarkeitSetzen(boolean sichtbar) {
-		schrittnummernSichtbar = sichtbar;
-		for (AbstractSchrittView schritt: schritte) {
-			schritt.schrittnummerSichtbarkeitSetzen(sichtbar);
-		}
-	}
-
 	public AbstractSchrittView einfachenSchrittAnhaengen() {
 		EditorContentModel_V002 initialerText = initialtext("Neuer Schritt " + (schritte.size() + 1));
 		EinfacherSchrittView schritt = new EinfacherSchrittView(this, initialerText, naechsteSchrittID(), TextInit.initialChangeInfo());
@@ -244,7 +236,6 @@ public class SchrittSequenzView {
 	}
 
 	public AbstractSchrittView appendStep(final AbstractSchrittView schritt) {
-		schritt.schrittnummerSichtbarkeitSetzen(schrittnummernSichtbar);
 		if (schritte.size() != 0) {
 			sequenzbereichLayout.appendRow(RowSpec.decode(ZEILENLAYOUT_GAP));
 		}
@@ -327,8 +318,6 @@ public class SchrittSequenzView {
 	}
 
 	public AbstractSchrittView insertStep(AbstractSchrittView newStep, RelativeStepPosition insertionPosition, AbstractSchrittView referenceStep) {
-		newStep.schrittnummerSichtbarkeitSetzen(schrittnummernSichtbar);
-
 		int newStepOffset = (insertionPosition == After ? 1 : 0);
 		int newStepIndex = stepIndex(referenceStep) + newStepOffset;
 

@@ -181,13 +181,6 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 	}
 
 	@Override
-	void schrittnummerSichtbarkeitSetzen(boolean sichtbar) {
-		super.schrittnummerSichtbarkeitSetzen(sichtbar);
-		ifSequenz.schrittnummerSichtbarkeitSetzen(sichtbar);
-		elseSequenz.schrittnummerSichtbarkeitSetzen(sichtbar);
-	}
-
-	@Override
   public List<SchrittSequenzView> unterSequenzen() {
 		return sequenzenAuflisten(ifSequenz, elseSequenz);
 	}

@@ -91,27 +91,23 @@ public class MetaTagPanel extends JPanel {
     }
   }
 
-  public void updateBounds(int maxEditWidth, Indentions indentions, boolean schrittNummerSichtbar) {
+  public void updateBounds(int maxEditWidth, Indentions indentions) {
     if (stepNumber != null) {
-      if (schrittNummerSichtbar) {
-        Dimension schrittnummerGroesse = stepNumber.getPreferredSize();
-        int rightMargin = (int) editor().scale(MetaTagPanel.RIGHT_MARGIN);
-        int heightTrim = (int) editor().scale(MetaTagPanel.HEIGHT_TRIM);
-        // schrittNummer already reaches the very top of the step via row 2 alone (see
-        // initLayoutAndEditAreas()) - but RoundedBorderDecorator paints its
-        // antialiased border line on top of everything inside it, overdrawing a few
-        // pixels off the label's top edge in "abgesetzte" (rounded-border) steps.
-        // Making the label taller by that same (fixed, not zoom-scaled - see
-        // MetaTagPanel.BORDER_OVERDRAW_COMPENSATION) amount keeps its visible
-        // (non-overdrawn) height identical to a step without that border style.
-        int topInsetBridge = indentions != null && indentions.hasTopIndention() ? MetaTagPanel.BORDER_OVERDRAW_COMPENSATION : 0;
-        stepNumber.setBounds(maxEditWidth - schrittnummerGroesse.width - rightMargin,
-          0,
-          schrittnummerGroesse.width,
-          schrittnummerGroesse.height - heightTrim + topInsetBridge);
-      } else {
-        stepNumber.setBounds(0, 0, 0, 0);
-      }
+      Dimension schrittnummerGroesse = stepNumber.getPreferredSize();
+      int rightMargin = (int) editor().scale(MetaTagPanel.RIGHT_MARGIN);
+      int heightTrim = (int) editor().scale(MetaTagPanel.HEIGHT_TRIM);
+      // schrittNummer already reaches the very top of the step via row 2 alone (see
+      // initLayoutAndEditAreas()) - but RoundedBorderDecorator paints its
+      // antialiased border line on top of everything inside it, overdrawing a few
+      // pixels off the label's top edge in "abgesetzte" (rounded-border) steps.
+      // Making the label taller by that same (fixed, not zoom-scaled - see
+      // MetaTagPanel.BORDER_OVERDRAW_COMPENSATION) amount keeps its visible
+      // (non-overdrawn) height identical to a step without that border style.
+      int topInsetBridge = indentions != null && indentions.hasTopIndention() ? MetaTagPanel.BORDER_OVERDRAW_COMPENSATION : 0;
+      stepNumber.setBounds(maxEditWidth - schrittnummerGroesse.width - rightMargin,
+        0,
+        schrittnummerGroesse.width,
+        schrittnummerGroesse.height - heightTrim + topInsetBridge);
       // Keeps a KlappButton living in metaPanel (if any - not every step has one) positioned
       // relative to the step number's bounds just set above, so views owning a KlappButton
       // (SchleifenSchrittView, SubsequenzSchrittView, VerzweigungSchrittView) don't each need to

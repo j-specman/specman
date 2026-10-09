@@ -109,7 +109,6 @@ public class EditContainer extends JPanel {
 	private final MetaTagPanel metaPanel = new MetaTagPanel();
 	private FormLayout layout;
 	private Indentions indentions;
-	private boolean schrittNummerSichtbar = true;
 
 	public EditContainer(TextEditArea initialContent, StepNumber stepNumber) {
 		this(new EditorContentModel_V002(), stepNumber);
@@ -262,7 +261,7 @@ public class EditContainer extends JPanel {
 		// the containers and/or step number label to disappear. We rely on that there
 		// will follow additional calls with reasonable initialized components sizes.
 		if (maxEditWidth > 0) {
-			metaPanel.updateBounds(maxEditWidth, indentions, schrittNummerSichtbar);
+			metaPanel.updateBounds(maxEditWidth, indentions);
 		}
 	}
 
@@ -272,13 +271,6 @@ public class EditContainer extends JPanel {
 			maxWidth = Math.max(maxWidth, area.getWidth());
 		}
 		return maxWidth;
-	}
-
-	public void schrittnummerAnzeigen(boolean sichtbar) {
-		if (schrittNummer != null) {
-			schrittNummerSichtbar = sichtbar;
-			updateBounds(); // Sorgt dafür, dass der Label auch optisch sofort verschwindet
-		}
 	}
 
 	public void skalieren(int prozentNeu, int prozentAktuell) {
@@ -587,7 +579,7 @@ public class EditContainer extends JPanel {
 	public specman.pdf.Shape getShape() {
 		Shape shape = new Shape(this);
 		editAreas.forEach(ea -> shape.add(ea.getShape()));
-		if (schrittNummer != null && schrittNummerSichtbar) {
+		if (schrittNummer != null) {
 			// schrittNummer's real Swing parent is metaPanel, a sibling of the edit areas
 			// (not nested inside the first one) - its shape must nest the same way, via a shape
 			// for metaPanel itself, or its position would be off by metaPanel's own

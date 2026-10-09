@@ -195,10 +195,6 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	public boolean isStrukturiert() { return false; }
 
-	void schrittnummerSichtbarkeitSetzen(boolean sichtbar) {
-		editContainer.schrittnummerAnzeigen(sichtbar);
-	}
-
 	abstract public AbstractStepModel_V002 generiereModel(boolean formatierterText);
 
 	public static AbstractSchrittView baueSchrittViewFrom(SchrittSequenzView parent, AbstractStepModel_V002 model) {

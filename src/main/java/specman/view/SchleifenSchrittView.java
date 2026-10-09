@@ -151,12 +151,6 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 		return true;
 	}
 
-	@Override
-	void schrittnummerSichtbarkeitSetzen(boolean sichtbar) {
-		super.schrittnummerSichtbarkeitSetzen(sichtbar);
-		wiederholSequenz.schrittnummerSichtbarkeitSetzen(sichtbar);
-	}
-
 	public SchrittSequenzView getSequenz() {
 		return wiederholSequenz;
 	}
