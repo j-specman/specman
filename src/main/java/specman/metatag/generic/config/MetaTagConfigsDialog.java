@@ -151,11 +151,13 @@ public class MetaTagConfigsDialog extends JDialog {
   }
 
   private boolean confirmDeletionWithTags(MetaTagConfig config) {
-    int choice = JOptionPane.showConfirmDialog(this,
+    Object[] options = {"Delete", "Cancel"};
+    int choice = JOptionPane.showOptionDialog(this,
       "Tags at steps refer to the meta tag '" + config.getName() + "'.\n"
-        + "If you delete it, these tags are removed as well. Delete anyway?",
-      "Delete Meta Tag", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-    return choice == JOptionPane.YES_OPTION;
+        + "If you delete it, these tags are removed as well.",
+      "Delete Meta Tag", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+      null, options, options[1]);
+    return choice == 0;
   }
 
   private void removeTagsOf(MetaTagConfig config) {

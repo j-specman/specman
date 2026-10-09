@@ -33,11 +33,10 @@ x Entfernen eines Tags von einem Schritt über die GUI
   x Denkbar über Kontextmenü des Tags mit den Punkten Edit (öffnet den Freitexteditor) und Delete
   x Undo / Redo
   x Entfernen von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
-- Löschen einer Meta Tag Konfiguration über die GUI
-  - Sicherheitsabfrage, wenn es Tags gibt, die sich darauf beziehen
-  - Bei Bestätigung, die entsprechenden Tags entfernen
+x Löschen einer Meta Tag Konfiguration über die GUI
+  x Sicherheitsabfrage, wenn es Tags gibt, die sich darauf beziehen
+  x Bei Bestätigung, die entsprechenden Tags entfernen
   - Undo / Redo (mit Toast-Feedback wie beim Anlegen / Editieren)
-  - MetaTagConfigRegistry#remove / clear müssen die Listener benachrichtigen
 - Aufnahme der Konfigurationen in die Modelldatei
   - Das SVG des Icons wird in die Modelldatei eingebettet
 - Aufnahme der an den Schritten vergebenen Tags in die Modelldatei
