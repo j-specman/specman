@@ -11,7 +11,7 @@ x Generische Basisklasse für Meta Tags
   x Icon, Label, Hintergrundfarbe, Rahmenfarbe
   x Editierbarer Freitext, also Tooltip angezeigt
   x Undo / Redo der Freitext-Edits
-x Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
+- Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
   x Für das Icon: Auswahl einer SVG-Datei
   - Beim Editieren bestehender Konfigurationen müssen die Meta Tags, die auf diese Konfiguration verweisen, im UI in der Darstellung aktualisiert werden
     (Mechanismus über MetaTagConfigListener fertig, erst mit Tag-Vergabe an Schritten testbar)
@@ -19,13 +19,13 @@ x Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
     (Umbenennen ist im Moment immer erlaubt, Prüfung kommt mit der Tag-Vergabe)
   x Undo / Redo
 - Vergeben eines Tags an einem Schritt über die GUI
-  - Jeder Typ von Tag nur einmal pro Schritt
-  - Über Auswahl aus Untermenü des Kontextmenüs an der Schrittnummer
-  - Dadurch sichergestellt: Meta Tag Panels ohne Schrittnummer, erhalten nie konfigurierte Meta Tags, die ja die Schrittnummer bräuchten, um ihre Höhe und Position daraus abzuleiten
-  - Alle bereits vergebenen Tags sind ausgegraut
-  - Menüpunkte zeigen Icon und Label der Konfiguration
+  x Jeder Typ von Tag nur einmal pro Schritt
+  x Über Auswahl aus Untermenü des Kontextmenüs an der Schrittnummer
+  x Dadurch sichergestellt: Meta Tag Panels ohne Schrittnummer, erhalten nie konfigurierte Meta Tags, die ja die Schrittnummer bräuchten, um ihre Höhe und Position daraus abzuleiten
+  x Alle bereits vergebenen Tags sind ausgegraut
+  x Menüpunkte zeigen Icon und Label der Konfiguration
   - Undo / Redo
-  - Vergeben von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
+  x Vergeben von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
   - Meta Tags werden im Meta Tag Panel immer links neben dem Schrittlabel bzw. dem letzten bereits vorliegenden Meta Tag eingehängt.
   - Wenn ein Klappbutton vorliegt, verschiebt dieser sich dabei nach links, d.h. er steht immer ganz links
     - Das ist so am besten, weil er nicht permanent sichtbar ist.
