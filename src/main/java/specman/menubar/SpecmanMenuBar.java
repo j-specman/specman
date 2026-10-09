@@ -3,6 +3,7 @@ package specman.menubar;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeSet;
+import specman.graphics.IconReader;
 import specman.ops.SpecmanOpContext;
 
 import javax.swing.*;
@@ -57,7 +58,7 @@ public class SpecmanMenuBar extends JMenuBar {
     exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
     exit.addActionListener(e -> context.exit());
 
-    JMenuItem metaTags = new JMenuItem("Meta Tags...");
+    JMenuItem metaTags = new JMenuItem("Meta Tags...", IconReader.readImageIcon("tags"));
     metaTags.addActionListener(e -> context.openMetaTagConfigs());
 
     JMenuItem settings = new JMenuItem("Settings");

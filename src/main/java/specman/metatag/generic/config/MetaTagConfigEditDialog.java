@@ -123,7 +123,8 @@ class MetaTagConfigEditDialog extends JDialog {
   }
 
   private void refreshTagPreview() {
-    preview.showTag(iconChooser.getIconSvg() != null ? currentConfig() : null);
+    MetaTagConfig config = currentConfig();
+    preview.showTag(config.hasIcon() || !config.getLabel().isEmpty() ? config : null);
   }
 
   private MetaTagConfig currentConfig() {
@@ -139,8 +140,8 @@ class MetaTagConfigEditDialog extends JDialog {
     else if (isNameTaken.test(name)) {
       showProblem("There is already a meta tag named '" + name + "'.");
     }
-    else if (iconChooser.getIconSvg() == null) {
-      showProblem("Please choose an SVG file as icon.");
+    else if (iconChooser.getIconSvg() == null && labelField.getText().isEmpty()) {
+      showProblem("Please enter a label or choose an SVG file as icon.");
     }
     else {
       result = currentConfig();

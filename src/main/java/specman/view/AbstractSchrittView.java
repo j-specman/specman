@@ -17,6 +17,8 @@ import static specman.util.ObjectUtils.nvl;
 
 import specman.draganddrop.UnsupportedDragSourceException;
 import specman.editarea.EditArea;
+import specman.metatag.generic.GenericMetaTag;
+import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.BreakStepModel_V002;
@@ -692,4 +694,16 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
   }
 
   public boolean allowsClipboardOperations() { return !changeInfo.isDeleted(); }
+
+  /** Tags can only be assigned via the step's own step number, not e.g. via the one of a catch
+   * heading, and not to a step marked as deleted. */
+  public boolean allowsTags(StepnumberLabel initiatingLabel) {
+    return !changeInfo.isDeleted() && editContainer.isStepNumber(initiatingLabel);
+  }
+
+  public void addTag(GenericMetaTag tag) { editContainer.addTag(tag); }
+
+  public void removeTag(GenericMetaTag tag) { editContainer.removeTag(tag); }
+
+  public boolean hasTag(MetaTagConfig config) { return editContainer.hasTag(config); }
 }

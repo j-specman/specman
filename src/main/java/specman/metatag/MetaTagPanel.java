@@ -2,11 +2,14 @@ package specman.metatag;
 
 import specman.StepNumber;
 import specman.editarea.Indentions;
-import specman.metatag.generic.UserMetaTag;
+import specman.metatag.generic.GenericMetaTag;
+import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static specman.Specman.editor;
 
@@ -14,7 +17,7 @@ import static specman.Specman.editor;
  * Transparent overlay panel for the step number, the fold/collapse button, and future meta
  * widgets, placed on top of the first edit area via a FormLayout row span in
  * {@link specman.editarea.EditContainer}. Positioning of its children is done externally
- * (EditContainer#updateBounds(), {@link #repositionKlappButton(Rectangle)}), not by a
+ * (EditContainer#updateBounds(), {@link #repositionKlappButton(int, int)}), not by a
  * LayoutManager - hence the null layout and the fixed (0,0) preferred/minimum size, which keeps
  * this panel from freezing the row height of the FormLayout row it spans.
  * <p>
@@ -45,13 +48,29 @@ public class MetaTagPanel extends JPanel {
   public static final int BORDER_OVERDRAW_COMPENSATION = 1;
 
   private StepnumberLabel stepNumber;
-  // Quick experiment, not a real feature yet - see UserMetaTag's own class comment.
-  private final UserMetaTag userBadge = new UserMetaTag();
+  // In the order they were assigned: the first one hangs directly left of the step number.
+  private final List<GenericMetaTag> tags = new ArrayList<>();
 
   public MetaTagPanel() {
     setLayout(null);
     setOpaque(false);
-    add(userBadge);
+  }
+
+  public void addTag(GenericMetaTag tag) {
+    tags.add(tag);
+    super.add(tag);
+    repaint();
+  }
+
+  public void removeTag(GenericMetaTag tag) {
+    tags.remove(tag);
+    remove(tag);
+    repaint();
+  }
+
+  /** @return whether a tag of the given configuration (identified by its name) is already present */
+  public boolean hasTag(MetaTagConfig config) {
+    return tags.stream().anyMatch(tag -> tag.getConfig().getName().equals(config.getName()));
   }
 
   /** The height of the step number label - and thereby of every meta tag, which borrows it - in a
@@ -89,15 +108,15 @@ public class MetaTagPanel extends JPanel {
   }
 
   /** Repositions this strip's KlappButton (if it has one among its children - not every step has
-   * a fold/collapse button) relative to the step number's own just-updated bounds. Called from
-   * EditContainer#updateBounds() so every caller that resizes a step gets both meta-strip widgets
-   * kept in sync for free, instead of each KlappButton-owning view (SchleifenSchrittView,
-   * SubsequenzSchrittView, VerzweigungSchrittView) having to separately remember to call
-   * klappen.updateLocation(editContainer.getStepNumberBounds()) after every resize. */
-  private void repositionKlappButton(Rectangle stepnumberBounds) {
+   * a fold/collapse button) to the left of its right neighbour - the leftmost tag or, without
+   * tags, the step number. Called from EditContainer#updateBounds() so every caller that resizes
+   * a step gets all meta-strip widgets kept in sync for free, instead of each KlappButton-owning
+   * view (SchleifenSchrittView, SubsequenzSchrittView, VerzweigungSchrittView) having to
+   * separately remember to reposition its klappen after every resize. */
+  private void repositionKlappButton(int rightNeighborX, int height) {
     for (Component child : getComponents()) {
       if (child instanceof KlappButton) {
-        ((KlappButton) child).updateLocation(stepnumberBounds);
+        ((KlappButton) child).updateLocation(rightNeighborX, height);
       }
     }
   }
@@ -119,15 +138,18 @@ public class MetaTagPanel extends JPanel {
         0,
         schrittnummerGroesse.width,
         schrittnummerGroesse.height - heightTrim + topInsetBridge);
-      // Keeps a KlappButton living in metaPanel (if any - not every step has one) positioned
-      // relative to the step number's bounds just set above, so views owning a KlappButton
+      // Hangs the tags and the KlappButton (if any - not every step has one) one after the other
+      // to the left of the step number's bounds just set above, so views owning a KlappButton
       // (SchleifenSchrittView, SubsequenzSchrittView, VerzweigungSchrittView) don't each need to
       // separately call klappen.updateLocation(...) after every resize.
-      repositionKlappButton(stepNumber.getBounds());
-      // Quick experiment, not a real feature yet - see UserMetaTag's own class comment. Ignores
-      // KlappButton entirely for now (may overlap it on steps that have one).
-      userBadge.scale();
-      userBadge.updateLocation(stepNumber.getBounds(), (int) editor().scale(WIDGET_GAP));
+      int height = stepNumber.getHeight();
+      int leftEdge = stepNumber.getX();
+      for (GenericMetaTag tag : tags) {
+        tag.scale();
+        tag.updateLocation(leftEdge, height);
+        leftEdge = tag.getX();
+      }
+      repositionKlappButton(leftEdge, height);
     }
   }
 }

@@ -16,6 +16,8 @@ import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.metatag.MetaTagPanel;
+import specman.metatag.generic.GenericMetaTag;
+import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
@@ -363,6 +365,20 @@ public class EditContainer extends JPanel {
 	}
 
 	public Rectangle getStepNumberBounds() { return schrittNummer.getBounds(); }
+
+	public boolean isStepNumber(StepnumberLabel label) { return schrittNummer != null && schrittNummer == label; }
+
+	public void addTag(GenericMetaTag tag) {
+		metaPanel.addTag(tag);
+		updateBounds();
+	}
+
+	public void removeTag(GenericMetaTag tag) {
+		metaPanel.removeTag(tag);
+		updateBounds();
+	}
+
+	public boolean hasTag(MetaTagConfig config) { return metaPanel.hasTag(config); }
 
 	public void resyncStepnumberAsTargetUDBL(StepNumber quellschrittId) { schrittNummer.resyncSourceSuffixUDBL(quellschrittId); }
 	public void resyncStepnumberAsSourceUDBL(StepNumber zielschrittID) { schrittNummer.resyncTargetSuffixUDBL(zielschrittID); }

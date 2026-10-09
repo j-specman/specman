@@ -11,6 +11,7 @@ import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
 import specman.editarea.EditArea;
 import specman.ops.*;
+import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.metatag.generic.config.MetaTagConfigRegistry;
 import specman.metatag.generic.config.MetaTagConfigsDialog;
@@ -596,6 +597,9 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
   @Override
   public void clearMetaTagConfigs() { metaTagConfigs.clear(); }
+
+  @Override
+  public List<MetaTagConfig> metaTagConfigs() { return metaTagConfigs.all(); }
 
   @Override
   public void addMetaTagConfigListener(MetaTagConfigListener listener) { metaTagConfigs.addListener(listener); }

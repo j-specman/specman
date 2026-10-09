@@ -6,6 +6,7 @@ import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
+import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
@@ -67,5 +68,8 @@ public interface EditorI extends FocusListener {
   ChangeSet changeset();
   void addMetaTagConfigListener(MetaTagConfigListener listener);
   void removeMetaTagConfigListener(MetaTagConfigListener listener);
+  /** @return a snapshot of the meta tag configurations of the diagram in creation order */
+  List<MetaTagConfig> metaTagConfigs();
+  void openMetaTagConfigs();
   void showToast(String message);
 }

@@ -236,13 +236,14 @@ public class KlappButton extends AbstractMetaTag implements MouseMotionListener,
 
   /** Matches StepnumberLabel's own width/height recipe exactly - borrows the step number's
    * already-computed height (see EditContainer#updateBounds()) rather than independently
-   * recomputing it, so the two meta-strip widgets are guaranteed to end up the same height
-   * instead of relying on two separate formulas staying in sync by hand. */
-  public void updateLocation(Rectangle stepnumberBounds) {
-    if (stepnumberBounds.height > 0) {
+   * recomputing it, so the meta-strip widgets are guaranteed to end up the same height
+   * instead of relying on separate formulas staying in sync by hand. Hangs the button left of
+   * its right neighbour, which is the leftmost tag or the step number. */
+  public void updateLocation(int rightNeighborX, int height) {
+    if (height > 0) {
       int gap = (int) editor().scale(MetaTagPanel.WIDGET_GAP);
       int width = getPreferredSize().width;
-      setBounds(stepnumberBounds.x - gap - width, 0, width, stepnumberBounds.height);
+      setBounds(rightNeighborX - gap - width, 0, width, height);
     }
   }
 

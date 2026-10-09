@@ -1,6 +1,7 @@
 package specman.metatag.generic;
 
 import specman.metatag.AbstractMetaTag;
+import specman.metatag.MetaTagPanel;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.undo.UndoableMetaTagFreetextChanged;
@@ -75,7 +76,7 @@ public class GenericMetaTag extends AbstractMetaTag {
   /** Takes over icon, label and colors of the given configuration, e.g. after it was edited. */
   public void applyConfig(MetaTagConfig config) {
     this.config = config;
-    icon = new LiftedMetaTagIcon(config.getIconSvg());
+    icon = config.hasIcon() ? new LiftedMetaTagIcon(config.getIconSvg()) : null;
     setIcon(icon);
     setText(config.getLabel());
     setBackground(config.getBackgroundColor());
@@ -164,16 +165,20 @@ public class GenericMetaTag extends AbstractMetaTag {
   }
 
   public void scale() {
-    icon.scale();
+    if (icon != null) {
+      icon.scale();
+    }
     setFont(getFont().deriveFont((float) editor().scale(SCHRITTNR_FONTSIZE)));
     setBorder(scaledBorder(config.getBackgroundColor(), 0, SIDE_PADDING));
   }
 
-  /** Borrows the step number's height, same trick as KlappButton#updateLocation. */
-  public void updateLocation(Rectangle stepnumberBounds, int gap) {
-    if (stepnumberBounds.height > 0) {
+  /** Hangs the tag left of its right neighbour at the given height, which is the step number's,
+   * same trick as KlappButton#updateLocation. */
+  public void updateLocation(int rightNeighborX, int height) {
+    if (height > 0) {
+      int gap = (int) editor().scale(MetaTagPanel.WIDGET_GAP);
       int width = getPreferredSize().width;
-      setBounds(stepnumberBounds.x - gap - width, 0, width, stepnumberBounds.height);
+      setBounds(rightNeighborX - gap - width, 0, width, height);
     }
   }
 

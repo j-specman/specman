@@ -1,7 +1,11 @@
 package specman.metatag.stepnumberlabel;
 
 import specman.graphics.IconReader;
+import specman.graphics.SvgIcon;
+import specman.metatag.generic.GenericMetaTag;
+import specman.metatag.generic.config.MetaTagConfig;
 import specman.undo.UndoableFlatNumberingToggled;
+import specman.undo.UndoableMetaTagAssigned;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
 import static specman.Specman.editor;
@@ -11,8 +15,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.List;
 
 public class StepnumberContextMenu implements MouseListener {
+  private static final int META_TAG_ICON_SIZE = 16;
   private final JPopupMenu popup;
   private final JMenuItem delete;
   private final JMenuItem copy;
@@ -23,6 +29,8 @@ public class StepnumberContextMenu implements MouseListener {
   private final JMenuItem up;
   private final JMenuItem down;
   private final JCheckBoxMenuItem toggleFlatNumbering;
+  private final JPopupMenu.Separator metaTagSeparator = new JPopupMenu.Separator();
+  private final JMenu metaTagMenu = new JMenu("Tags");
   private AbstractSchrittView currentStep;
   private StepnumberLabel initiatingLabel;
 
@@ -39,6 +47,9 @@ public class StepnumberContextMenu implements MouseListener {
     up = createUpItem();
     down = createDownItem();
     toggleFlatNumbering = createSubnumberingItem();
+    popup.add(metaTagSeparator);
+    metaTagMenu.setIcon(IconReader.readImageIcon("tag"));
+    popup.add(metaTagMenu);
   }
 
   private JMenuItem createUpItem() {
@@ -141,6 +152,38 @@ public class StepnumberContextMenu implements MouseListener {
     }
     initLeftRightMenuItems();
     initUpDownMenuItems();
+    initMetaTagMenu();
+  }
+
+  private void initMetaTagMenu() {
+    boolean tagsAllowed = currentStep.allowsTags(initiatingLabel);
+    metaTagSeparator.setVisible(tagsAllowed);
+    metaTagMenu.setVisible(tagsAllowed);
+    if (!tagsAllowed) {
+      return;
+    }
+    metaTagMenu.removeAll();
+    List<MetaTagConfig> configs = editor().metaTagConfigs();
+    for (MetaTagConfig config : configs) {
+      Icon icon = config.hasIcon() ? new SvgIcon(META_TAG_ICON_SIZE, config.getIconSvg()) : null;
+      String text = config.getLabel().isEmpty() ? config.getName() : config.getLabel();
+      JMenuItem item = new JMenuItem(text, icon);
+      item.setEnabled(!currentStep.hasTag(config));
+      item.addActionListener(e -> assignTag(config));
+      metaTagMenu.add(item);
+    }
+    if (!configs.isEmpty()) {
+      metaTagMenu.addSeparator();
+    }
+    JMenuItem configure = new JMenuItem("Configure...", IconReader.readImageIcon("tags"));
+    configure.addActionListener(e -> editor().openMetaTagConfigs());
+    metaTagMenu.add(configure);
+  }
+
+  private void assignTag(MetaTagConfig config) {
+    GenericMetaTag tag = new GenericMetaTag(config, null);
+    currentStep.addTag(tag);
+    editor().addEdit(new UndoableMetaTagAssigned(currentStep, tag));
   }
 
   private void initLeftRightMenuItems() {

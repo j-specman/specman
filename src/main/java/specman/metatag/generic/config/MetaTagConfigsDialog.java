@@ -122,7 +122,7 @@ public class MetaTagConfigsDialog extends JDialog {
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
       MetaTagConfig config = (MetaTagConfig) value;
       super.getListCellRendererComponent(list, config.getName(), index, isSelected, cellHasFocus);
-      setIcon(icons.computeIfAbsent(config, c -> new SvgIcon(LIST_ICON_SIZE, c.getIconSvg())));
+      setIcon(config.hasIcon() ? icons.computeIfAbsent(config, c -> new SvgIcon(LIST_ICON_SIZE, c.getIconSvg())) : null);
       return this;
     }
   }

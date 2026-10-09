@@ -1,5 +1,6 @@
 package specman.graphics;
 
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import javax.swing.Icon;
@@ -20,7 +21,7 @@ import java.nio.charset.StandardCharsets;
  * the editor's zoom factor changes, the same way HangingTab widgets rescale their own font/border
  * rather than being rebuilt from scratch.
  */
-public class SvgIcon implements Icon {
+public class SvgIcon implements Icon, FlatLaf.DisabledIconProvider {
 
   private FlatSVGIcon icon;
   private int size;
@@ -63,6 +64,13 @@ public class SvgIcon implements Icon {
   public void setSize(int size) {
     this.size = size;
     icon = icon.derive(size, size);
+  }
+
+  /** Swing creates disabled icons on its own only for ImageIcons - FlatLaf asks this interface
+   * instead, so e.g. a disabled menu item gets a grayed-out icon rather than none at all. */
+  @Override
+  public Icon getDisabledIcon() {
+    return icon.getDisabledIcon();
   }
 
   @Override
