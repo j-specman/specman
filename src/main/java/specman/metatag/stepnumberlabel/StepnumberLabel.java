@@ -19,6 +19,7 @@ import static specman.StepNumber.asString;
 import specman.ChangeSet;
 
 import static specman.graphics.Styles.DELETED_BACKGROUND_COLOR;
+import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
 import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
 import static specman.graphics.Styles.SCHRITTNUMMER_VORDERGRUNDFARBE;
 import static specman.graphics.Styles.Schriftfarbe_Geloescht;
@@ -75,6 +76,12 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
    * not only the next time the label's style (standard/target/source/deleted) changes. */
   public void refreshMetaWidgetScale() {
     setBorder(scaledBorder(borderColor));
+  }
+
+  /** Scales font and border to the given zoom. */
+  public void applyZoom(int zoomPercent) {
+    setFont(labelFont.deriveFont((float) SCHRITTNR_FONTSIZE * zoomPercent / 100));
+    refreshMetaWidgetScale();
   }
 
   /** Called from EditContainer#updateDecorationIndentions() whenever this step's "abgesetzt"

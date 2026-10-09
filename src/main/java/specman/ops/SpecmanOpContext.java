@@ -32,6 +32,8 @@ public interface SpecmanOpContext extends EditorI {
   void exportAsGraphviz();
   void exit();
   void openSettings();
+  void openMetaTagConfigs();
+  void clearMetaTagConfigs();
   boolean hasUnsavedChanges();
   void markAsUnsavedWorkingCopy();
   void notifyWorkingCopyInitialized(long timestamp);

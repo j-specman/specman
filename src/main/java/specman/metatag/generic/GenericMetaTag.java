@@ -1,5 +1,8 @@
-package specman.metatag;
+package specman.metatag.generic;
 
+import specman.metatag.AbstractMetaTag;
+import specman.metatag.generic.config.MetaTagConfig;
+import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.undo.UndoableMetaTagFreetextChanged;
 
 import javax.swing.JToolTip;
@@ -8,7 +11,6 @@ import javax.swing.PopupFactory;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -26,34 +28,61 @@ public class GenericMetaTag extends AbstractMetaTag {
   private static final int TOOLTIP_WIDTH = 250;
   private static final int FEEDBACK_DURATION_MS = 3000;
 
-  private final LiftedMetaTagIcon icon;
-  private final Color backgroundColor;
+  private LiftedMetaTagIcon icon;
+  private MetaTagConfig config;
   private String freetext;
+  private boolean freetextEditable = true;
   private Popup feedbackPopup;
   private Timer feedbackTimer;
+  private final MetaTagConfigListener configListener = (oldConfig, newConfig) -> {
+    if (oldConfig.getName().equals(config.getName())) {
+      applyConfig(newConfig);
+    }
+  };
 
   /** @param freetext optional freetext shown as tooltip while hovering the tag, may be null */
-  public GenericMetaTag(String iconName, String labelText, String freetext, Color backgroundColor, Color borderColor) {
-    this.icon = new LiftedMetaTagIcon(iconName);
-    this.backgroundColor = backgroundColor;
-
+  public GenericMetaTag(MetaTagConfig config, String freetext) {
     setHorizontalAlignment(SwingConstants.CENTER);
-    setIcon(icon);
-    setText(labelText);
-    setFreetext(freetext);
     setOpaque(true);
-    setBackground(backgroundColor);
-    setBorderColor(borderColor);
-    scale();
+    setFreetext(freetext);
+    applyConfig(config);
 
     addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
-        if (SwingUtilities.isLeftMouseButton(e)) {
+        if (freetextEditable && SwingUtilities.isLeftMouseButton(e)) {
           editFreetext();
         }
       }
     });
+  }
+
+  /** Turned off for pure previews of a configuration, e.g. in the configuration dialog. */
+  public void setFreetextEditable(boolean freetextEditable) {
+    this.freetextEditable = freetextEditable;
+  }
+
+  @Override
+  public void addNotify() {
+    super.addNotify();
+    editor().addMetaTagConfigListener(configListener);
+  }
+
+  public MetaTagConfig getConfig() {
+    return config;
+  }
+
+  /** Takes over icon, label and colors of the given configuration, e.g. after it was edited. */
+  public void applyConfig(MetaTagConfig config) {
+    this.config = config;
+    icon = new LiftedMetaTagIcon(config.getIconSvg());
+    setIcon(icon);
+    setText(config.getLabel());
+    setBackground(config.getBackgroundColor());
+    setBorderColor(config.getBorderColor());
+    scale();
+    revalidate();
+    repaint();
   }
 
   private void editFreetext() {
@@ -119,6 +148,7 @@ public class GenericMetaTag extends AbstractMetaTag {
 
   @Override
   public void removeNotify() {
+    editor().removeMetaTagConfigListener(configListener);
     hideFreetextFeedback();
     super.removeNotify();
   }
@@ -136,7 +166,7 @@ public class GenericMetaTag extends AbstractMetaTag {
   public void scale() {
     icon.scale();
     setFont(getFont().deriveFont((float) editor().scale(SCHRITTNR_FONTSIZE)));
-    setBorder(scaledBorder(backgroundColor, 0, SIDE_PADDING));
+    setBorder(scaledBorder(config.getBackgroundColor(), 0, SIDE_PADDING));
   }
 
   /** Borrows the step number's height, same trick as KlappButton#updateLocation. */

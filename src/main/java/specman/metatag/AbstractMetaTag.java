@@ -36,7 +36,7 @@ public abstract class AbstractMetaTag extends JLabel {
   private static final int SIDE_PADDING = 5;
   // Border bottom inset that nudges Swing's centered content upward within its natural preferred
   // height (a larger bottom inset than top shifts the centering point up).
-  protected static final int CONTENT_LIFT = 2;
+  public static final int CONTENT_LIFT = 2;
 
   private Color borderColor;
 

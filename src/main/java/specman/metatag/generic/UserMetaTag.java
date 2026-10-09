@@ -1,6 +1,12 @@
-package specman.metatag;
+package specman.metatag.generic;
+
+import specman.metatag.generic.config.MetaTagConfig;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Quick experiment: a static per-step meta badge (e.g. "assigned user") shown to the left of the
@@ -17,6 +23,14 @@ public class UserMetaTag extends GenericMetaTag {
     + "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
 
   public UserMetaTag() {
-    super("user", "User ", LOREM_IPSUM, BACKGROUND, BORDER_COLOR);
+    super(new MetaTagConfig("user", "User ", readUserIcon(), BACKGROUND, BORDER_COLOR), LOREM_IPSUM);
+  }
+
+  private static String readUserIcon() {
+    try (InputStream in = UserMetaTag.class.getClassLoader().getResourceAsStream("images/user.svg")) {
+      return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 }

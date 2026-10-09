@@ -147,6 +147,7 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
   private void applyEnvelope(ModelEnvelope envelope) throws EditException {
     DiagramModel_V002 model = resolveModel(envelope);
 
+    context.clearMetaTagConfigs();
     ChangeSet changeSet = ChangeSet.fromName(model.changeSetName);
     if (changeSet != null) {
       context.updateChangeSet(changeSet);

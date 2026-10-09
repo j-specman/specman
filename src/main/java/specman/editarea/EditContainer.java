@@ -43,8 +43,6 @@ import java.util.stream.Collectors;
 
 import specman.graphics.Styles;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
-import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
-import static specman.graphics.Styles.labelFont;
 import static specman.Specman.editor;
 
 /** Zentrales grafisches Containerpanel für einen zusammenhängenden Text mit einem Nummernlabel
@@ -276,8 +274,7 @@ public class EditContainer extends JPanel {
 	public void skalieren(int prozentNeu, int prozentAktuell) {
 		editAreas.forEach(ea -> ea.skalieren(prozentNeu, prozentAktuell));
 		if (schrittNummer != null) {
-			schrittNummer.setFont(labelFont.deriveFont((float) SCHRITTNR_FONTSIZE * prozentNeu / 100));
-			schrittNummer.refreshMetaWidgetScale();
+			schrittNummer.applyZoom(prozentNeu);
 		}
 		updateMetaStripHeight(prozentNeu);
 		if (indentions != null) {

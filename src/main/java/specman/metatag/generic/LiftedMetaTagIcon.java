@@ -1,6 +1,7 @@
-package specman.metatag;
+package specman.metatag.generic;
 
 import specman.graphics.SvgIcon;
+import specman.metatag.AbstractMetaTag;
 
 import java.awt.Component;
 import java.awt.Graphics;
@@ -15,8 +16,8 @@ class LiftedMetaTagIcon extends SvgIcon {
   private static final int GLYPH_SIZE = 10;
   private static final int LIFT = AbstractMetaTag.CONTENT_LIFT / 2;
 
-  LiftedMetaTagIcon(String iconBasename) {
-    super(iconBasename, GLYPH_SIZE);
+  LiftedMetaTagIcon(String svgContent) {
+    super(GLYPH_SIZE, svgContent);
     scale();
   }
 

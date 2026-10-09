@@ -1,4 +1,4 @@
-package specman.metatag;
+package specman.metatag.generic;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;

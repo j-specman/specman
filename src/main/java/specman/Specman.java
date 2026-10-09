@@ -11,6 +11,9 @@ import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
 import specman.editarea.EditArea;
 import specman.ops.*;
+import specman.metatag.generic.config.MetaTagConfigListener;
+import specman.metatag.generic.config.MetaTagConfigRegistry;
+import specman.metatag.generic.config.MetaTagConfigsDialog;
 import specman.settings.SettingsDialog;
 
 import specman.editarea.InteractiveStepFragment;
@@ -58,6 +61,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	File diagrammDatei;
   FocusHistory focusHistory = new FocusHistory();
   private ChangeSet currentChangeSet = ChangeSet.DEFAULT;
+  private final MetaTagConfigRegistry metaTagConfigs = new MetaTagConfigRegistry();
 
 	private DiagramToolBar diagramToolBar;
 	private StepButtonBar stepButtonBar;
@@ -141,6 +145,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		diagrammbreite = WorkingAreaPanel.INITIAL_DIAGRAMM_WIDTH;
 		zoomFaktor = 100;
 		diagrammDatei = null;
+		metaTagConfigs.clear();
 		setTitle(SPECMAN_TITLE);
 		undoManager.discardAllEdits();
 	}
@@ -578,6 +583,20 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
   public void openSettings() {
     new SettingsDialog(this).setVisible(true);
   }
+
+  @Override
+  public void openMetaTagConfigs() {
+    new MetaTagConfigsDialog(this, metaTagConfigs).setVisible(true);
+  }
+
+  @Override
+  public void clearMetaTagConfigs() { metaTagConfigs.clear(); }
+
+  @Override
+  public void addMetaTagConfigListener(MetaTagConfigListener listener) { metaTagConfigs.addListener(listener); }
+
+  @Override
+  public void removeMetaTagConfigListener(MetaTagConfigListener listener) { metaTagConfigs.removeListener(listener); }
 
   @Override
   public boolean hasUnsavedChanges() {

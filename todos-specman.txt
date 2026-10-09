@@ -12,10 +12,12 @@ x Generische Basisklasse für Meta Tags
   x Editierbarer Freitext, also Tooltip angezeigt
   x Undo / Redo der Freitext-Edits
 - Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
-  - Für das Icon: Auswahl einer SVG-Datei
+  x Für das Icon: Auswahl einer SVG-Datei
   - Beim Editieren bestehender Konfigurationen müssen die Meta Tags, die auf diese Konfiguration verweisen, im UI in der Darstellung aktualisiert werden
+    (Mechanismus über MetaTagConfigListener fertig, erst mit Tag-Vergabe an Schritten testbar)
   - Umbenennen einer Konfiguration, für die bereits Tags vergeben sind, ist nicht erlaubt
-  - Undo / Redo
+    (Umbenennen ist im Moment immer erlaubt, Prüfung kommt mit der Tag-Vergabe)
+  x Undo / Redo
 - Löschen einer Meta Tag Konfiguration über die GUI
   - Sicherheitsabfrage, wenn es Tags gibt, die sich darauf beziehen
   - Bei Bestätigung, die entsprechenden Tags entfernen

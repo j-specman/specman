@@ -6,6 +6,7 @@ import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
+import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
 
@@ -64,4 +65,6 @@ public interface EditorI extends FocusListener {
   void moveBranchSequenceRightADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   DragMouseAdapter createDragMouseAdapter();
   ChangeSet changeset();
+  void addMetaTagConfigListener(MetaTagConfigListener listener);
+  void removeMetaTagConfigListener(MetaTagConfigListener listener);
 }

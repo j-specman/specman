@@ -1,6 +1,8 @@
 package specman.metatag;
 
+import specman.StepNumber;
 import specman.editarea.Indentions;
+import specman.metatag.generic.UserMetaTag;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 
 import javax.swing.*;
@@ -50,6 +52,15 @@ public class MetaTagPanel extends JPanel {
     setLayout(null);
     setOpaque(false);
     add(userBadge);
+  }
+
+  /** The height of the step number label - and thereby of every meta tag, which borrows it - in a
+   * step without rounded border at the current zoom. Mirrors {@link #updateBounds}, for places
+   * like the meta tag configuration dialog that show a tag outside of a step. */
+  public static int stepnumberHeight() {
+    StepnumberLabel probe = new StepnumberLabel(new StepNumber(1));
+    probe.applyZoom(editor().getZoomFactor());
+    return probe.getPreferredSize().height - (int) editor().scale(HEIGHT_TRIM);
   }
 
   public void add(StepnumberLabel stepNumber) {

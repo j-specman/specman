@@ -5,7 +5,11 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import javax.swing.Icon;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Square {@link Icon} rendering a vector graphic from {@code images/<name>.svg} via FlatLaf
@@ -22,13 +26,38 @@ public class SvgIcon implements Icon {
   private int size;
 
   public SvgIcon(String iconBasename, int size) {
+    this(loadResource(iconBasename), size);
+  }
+
+  /** Icon from SVG markup held in memory, e.g. read from a user-chosen file or a model file. */
+  public SvgIcon(int size, String svgContent) {
+    this(loadContent(svgContent), size);
+  }
+
+  private SvgIcon(FlatSVGIcon icon, int size) {
+    this.icon = icon.derive(size, size);
+    this.size = size;
+  }
+
+  private static FlatSVGIcon loadResource(String iconBasename) {
     String resource = "images/" + iconBasename + ".svg";
     URL url = SvgIcon.class.getClassLoader().getResource(resource);
     if (url == null) {
       throw new IllegalArgumentException("Can't load SVG icon " + resource);
     }
-    this.icon = new FlatSVGIcon(url).derive(size, size);
-    this.size = size;
+    return new FlatSVGIcon(url);
+  }
+
+  private static FlatSVGIcon loadContent(String svgContent) {
+    try {
+      FlatSVGIcon icon = new FlatSVGIcon(new ByteArrayInputStream(svgContent.getBytes(StandardCharsets.UTF_8)));
+      if (!icon.hasFound()) {
+        throw new IllegalArgumentException("Not a valid SVG graphic");
+      }
+      return icon;
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   public void setSize(int size) {

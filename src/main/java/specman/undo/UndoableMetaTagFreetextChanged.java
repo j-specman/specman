@@ -1,7 +1,7 @@
 package specman.undo;
 
 import specman.EditException;
-import specman.metatag.GenericMetaTag;
+import specman.metatag.generic.GenericMetaTag;
 import specman.undo.manager.UndoRedoFeedbackHider;
 
 public class UndoableMetaTagFreetextChanged extends AbstractUndoableInteraction implements UndoRedoFeedbackHider {
