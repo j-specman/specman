@@ -29,10 +29,10 @@ x Vergeben eines Tags an einem Schritt über die GUI
     x Das ist so am besten, weil er nicht permanent sichtbar ist.
   x Meta Tag Panel kann im Moment noch nicht mit variabler Anzahl der Tags umgehen
   x Prototypisches UserMetaTag in dem Zuge entfernen
-- Entfernen eines Tags von einem Schritt über die GUI
-  - Denkbar über Kontextmenü des Tags mit den Punkten Edit (öffnet den Freitexteditor) und Delete
-  - Undo / Redo
-  - Entfernen von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
+x Entfernen eines Tags von einem Schritt über die GUI
+  x Denkbar über Kontextmenü des Tags mit den Punkten Edit (öffnet den Freitexteditor) und Delete
+  x Undo / Redo
+  x Entfernen von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
 - Löschen einer Meta Tag Konfiguration über die GUI
   - Sicherheitsabfrage, wenn es Tags gibt, die sich darauf beziehen
   - Bei Bestätigung, die entsprechenden Tags entfernen
