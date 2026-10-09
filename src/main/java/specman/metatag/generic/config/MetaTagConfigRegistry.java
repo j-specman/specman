@@ -23,12 +23,24 @@ public class MetaTagConfigRegistry {
     return configsByName.containsKey(name);
   }
 
-  /** @throws IllegalArgumentException if a configuration of that name already exists */
+  /** Appends the configuration.
+   * @throws IllegalArgumentException if a configuration of that name already exists */
   public void add(MetaTagConfig config) {
+    add(configsByName.size(), config);
+  }
+
+  /** Inserts the configuration at the given position of the list.
+   * @throws IllegalArgumentException if a configuration of that name already exists */
+  public void add(int index, MetaTagConfig config) {
     if (contains(config.getName())) {
       throw new IllegalArgumentException("Meta tag configuration '" + config.getName() + "' already exists");
     }
-    configsByName.put(config.getName(), config);
+    List<MetaTagConfig> ordered = new ArrayList<>(configsByName.values());
+    ordered.add(index, config);
+    configsByName.clear();
+    for (MetaTagConfig orderedConfig : ordered) {
+      configsByName.put(orderedConfig.getName(), orderedConfig);
+    }
   }
 
   /** Replaces the configuration named oldName by the given one, which may carry a different
@@ -57,8 +69,13 @@ public class MetaTagConfigRegistry {
     new ArrayList<>(listeners).forEach(listener -> listener.configReplaced(oldConfig, newConfig));
   }
 
-  public void remove(String name) {
+  /** Removes the configuration without telling the listeners: the caller is in charge of removing
+   * the tags which refer to it first.
+   * @return the index the configuration had in the list */
+  public int remove(String name) {
+    int index = new ArrayList<>(configsByName.keySet()).indexOf(name);
     configsByName.remove(name);
+    return index;
   }
 
   /** Forgets all configurations and listeners. Meant for replacing the whole diagram: with its
