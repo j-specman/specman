@@ -33,6 +33,7 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
   private MetaTagConfig config;
   private String freetext;
   private boolean freetextEditable = true;
+  private boolean deleted = false;
   private Popup feedbackPopup;
   private Timer feedbackTimer;
 
@@ -64,6 +65,16 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     return config;
   }
 
+  /** Whether the step the tag belongs to is marked as deleted. Such a tag can't be changed, but its
+   * freetext can still be read. Set by the step, which is the one who knows. */
+  public void setDeleted(boolean deleted) {
+    this.deleted = deleted;
+  }
+
+  public boolean isDeleted() {
+    return deleted;
+  }
+
   /** Takes over icon, label and colors of the given configuration, e.g. after it was edited. */
   public void applyConfig(MetaTagConfig config) {
     this.config = config;
@@ -79,7 +90,7 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
   }
 
   void editFreetext() {
-    if (!config.allowsFreetext()) {
+    if (!config.allowsFreetext() || deleted) {
       return;
     }
     hideFreetextFeedback();

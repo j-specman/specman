@@ -41,6 +41,7 @@ import specman.editarea.EditContainer;
 import specman.editarea.Indentions;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TextEditArea;
+import specman.undo.UndoableMetaTagRemoved;
 import specman.undo.props.UDBL;
 
 import javax.swing.JComponent;
@@ -59,7 +60,6 @@ import java.util.stream.Collectors;
 
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Zielschritt;
-import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.view.RelativeStepPosition.After;
 import static specman.view.RoundedBorderDecorationStyle.Co;
 import static specman.view.RoundedBorderDecorationStyle.Full;
@@ -121,7 +121,14 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	public ChangeInfo getChangeInfo() { return changeInfo; }
 
-	public void setChangeInfo(ChangeInfo changeInfo) { this.changeInfo = changeInfo; }
+	/** Also passes the deleted state on to the step's tags. Every change of the step's change info
+	 * after construction has to go through here. */
+	public void setChangeInfo(ChangeInfo changeInfo) {
+		this.changeInfo = changeInfo;
+		for (GenericMetaTag tag : getTags()) {
+			tag.setDeleted(changeInfo.isDeleted());
+		}
+	}
 
 	public void setNumber(StepNumber number) {
 		StepNumber oldStepNumber = this.number;
@@ -541,7 +548,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 					break;
 			}
 			aenderungsmarkierungenEntfernen();
-			changeInfo = changeInfo.untrack(currentSet);
+			setChangeInfo(changeInfo.untrack(currentSet));
 		}
 		return changesMade;
 	}
@@ -570,7 +577,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 					break;
 			}
 			aenderungsmarkierungenEntfernen();
-			changeInfo = changeInfo.untrack(currentSet);
+			setChangeInfo(changeInfo.untrack(currentSet));
 		}
 		return changesRejected;
 	}
@@ -728,14 +735,37 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
   }
 
   /** Appends the tag. @return the index it got */
-  public int addTag(GenericMetaTag tag) { return editContainer.addTag(tag); }
+  public int addTag(GenericMetaTag tag) {
+    tag.setDeleted(changeInfo.isDeleted());
+    return editContainer.addTag(tag);
+  }
 
-  public void addTag(GenericMetaTag tag, int index) { editContainer.addTag(tag, index); }
+  public void addTag(GenericMetaTag tag, int index) {
+    tag.setDeleted(changeInfo.isDeleted());
+    editContainer.addTag(tag, index);
+  }
 
   /** @return the index the tag had */
   public int removeTag(GenericMetaTag tag) { return editContainer.removeTag(tag); }
 
+  /** Removes the step's tags which refer to the given configuration, each as an undoable edit. */
+  public void removeTagsOfUDBL(MetaTagConfig config) {
+    for (GenericMetaTag tag : new ArrayList<>(getTags())) {
+      if (tag.getConfig().getName().equals(config.getName())) {
+        int index = removeTag(tag);
+        editor().addEdit(new UndoableMetaTagRemoved(this, tag, index));
+      }
+    }
+  }
+
   public boolean hasTag(MetaTagConfig config) { return editContainer.hasTag(config); }
 
-  public List<GenericMetaTag> getTags() { return editContainer.getTags(); }
+  /** @return the names of the configurations which the step's tags refer to */
+  public Set<String> getTagConfigNames() {
+    return getTags().stream()
+      .map(tag -> tag.getConfig().getName())
+      .collect(Collectors.toSet());
+  }
+
+  private List<GenericMetaTag> getTags() { return editContainer.getTags(); }
 }

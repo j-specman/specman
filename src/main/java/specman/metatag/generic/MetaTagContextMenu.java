@@ -40,8 +40,9 @@ class MetaTagContextMenu implements MouseListener {
     if (SwingUtilities.isRightMouseButton(e)) {
       GenericMetaTag tag = (GenericMetaTag) e.getComponent();
       AbstractSchrittView step = editor().findStep(tag);
-      // A tag outside of a step, like the one in the preview of the configuration dialog, has no menu.
-      if (step != null) {
+      // A tag outside of a step, like the one in the preview of the configuration dialog, has no menu,
+      // and neither has a tag at a deleted step, which can't be changed.
+      if (step != null && !tag.isDeleted()) {
         currentTag = tag;
         currentStep = step;
         edit.setVisible(tag.getConfig().allowsFreetext());

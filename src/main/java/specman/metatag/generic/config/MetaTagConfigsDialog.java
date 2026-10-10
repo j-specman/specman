@@ -3,11 +3,9 @@ package specman.metatag.generic.config;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.graphics.SvgIcon;
-import specman.metatag.generic.GenericMetaTag;
 import specman.undo.UndoableMetaTagConfigAdded;
 import specman.undo.UndoableMetaTagConfigEdited;
 import specman.undo.UndoableMetaTagConfigRemoved;
-import specman.undo.UndoableMetaTagRemoved;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
 
@@ -29,7 +27,6 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -162,12 +159,7 @@ public class MetaTagConfigsDialog extends JDialog {
 
   private void removeTagsOf(MetaTagConfig config) {
     for (AbstractSchrittView step : editor().listAllSteps()) {
-      for (GenericMetaTag tag : new ArrayList<>(step.getTags())) {
-        if (tag.getConfig().getName().equals(config.getName())) {
-          int index = step.removeTag(tag);
-          editor().addEdit(new UndoableMetaTagRemoved(step, tag, index));
-        }
-      }
+      step.removeTagsOfUDBL(config);
     }
   }
 
