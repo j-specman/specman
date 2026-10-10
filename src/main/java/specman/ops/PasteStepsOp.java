@@ -7,6 +7,7 @@ import specman.clipboard.ExternalPasteChangemarksAdjuster;
 import specman.clipboard.InternalPasteChangemarksAdjuster;
 import specman.clipboard.PasteChangemarksAdjusterI;
 import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.MetaTagModel_V002;
 import specman.model.v002.io.ModelParser_V002;
 import specman.model.v002.io.ModelParseException;
 import specman.model.v002.io.StepIdRemapper_V002;
@@ -16,6 +17,8 @@ import specman.view.SchrittSequenzView;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,6 +48,7 @@ public class PasteStepsOp extends AbstractADBLSpecmanOp {
             : new ExternalPasteChangemarksAdjuster();
         stepModels = adjuster.adjust(stepModels, aenderungenVerfolgen());
         addSteps(stepModels);
+        toastSkippedMetaTags(stepModels);
       }
     }
     catch (ModelParseException ex) {
@@ -62,6 +66,28 @@ public class PasteStepsOp extends AbstractADBLSpecmanOp {
       newStep.viewsNachinitialisieren();
       newStepPostInit(newStep);
       reference = newStep;
+    }
+  }
+
+  /** Tags whose meta tag configuration doesn't exist in this diagram are not pasted. Tells the user
+   * which configurations were missing, nested steps included. */
+  private void toastSkippedMetaTags(List<AbstractStepModel_V002> stepModels) {
+    Set<String> unknownConfigNames = new LinkedHashSet<>();
+    List<AbstractStepModel_V002> allSteps = new ArrayList<>();
+    for (AbstractStepModel_V002 stepModel : stepModels) {
+      stepModel.addStepRecursively(allSteps);
+    }
+    for (AbstractStepModel_V002 step : allSteps) {
+      for (MetaTagModel_V002 tag : step.tags) {
+        if (editor().findMetaTagConfig(tag.configName) == null) {
+          unknownConfigNames.add(tag.configName);
+        }
+      }
+    }
+    if (!unknownConfigNames.isEmpty()) {
+      showToast("Meta tags skipped",
+        "The following meta tags have been skipped\nas they are not configured in this diagram:\n• "
+          + String.join("\n• ", unknownConfigNames));
     }
   }
 
