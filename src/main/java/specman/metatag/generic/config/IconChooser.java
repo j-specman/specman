@@ -3,28 +3,39 @@ package specman.metatag.generic.config;
 import specman.graphics.SvgIcon;
 
 import javax.swing.Box;
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.Color;
+import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 /** A button to choose an SVG file as icon, a button to remove the icon again, and a small preview
- * of the chosen icon. The icon is optional and held as SVG markup, not as file reference. */
+ * of the chosen icon. The icon is optional and held as SVG markup, not as file reference. An icon
+ * is displayed tiny, so there is a red warning about an unreasonably large SVG; it is only a
+ * warning, the SVG can still be used. The warning is a component of its own, see
+ * {@link #getSizeWarning()}, to be placed below the chooser. */
 class IconChooser extends JPanel {
   private static final int PREVIEW_SIZE = 16;
   private static final int BUTTON_GAP = 4;
   private static final int PREVIEW_GAP = 8;
+  private static final int WARNING_GAP = 4;
+  private static final int BYTES_PER_KB = 1024;
+  private static final int SIZE_WARNING_BYTES = 2 * BYTES_PER_KB;
   private static final String NO_ICON_TEXT = "no icon";
 
   private final JLabel preview = new JLabel(NO_ICON_TEXT);
   private final JButton remove = new JButton("Remove");
+  private final JLabel sizeWarning = new JLabel();
   private final Runnable onIconChanged;
   private String iconSvg;
 
@@ -41,7 +52,21 @@ class IconChooser extends JPanel {
     add(remove);
     add(Box.createHorizontalStrut(PREVIEW_GAP));
     add(preview);
+    sizeWarning.setForeground(Color.RED);
+    sizeWarning.setBorder(BorderFactory.createEmptyBorder(WARNING_GAP, 0, 0, 0));
+    sizeWarning.setVisible(false);
     setIconSvg(initialIconSvg);
+  }
+
+  /** @return the warning about an oversized SVG, invisible as long as there is none. The component
+   * takes no room while invisible if it is placed in a FormLayout, which honors the visibility. */
+  JLabel getSizeWarning() {
+    return sizeWarning;
+  }
+
+  private static String sizeWarningText(int sizeInBytes) {
+    return "Warning: the SVG is " + (sizeInBytes + BYTES_PER_KB - 1) / BYTES_PER_KB + " KB - icons should stay below "
+      + SIZE_WARNING_BYTES / BYTES_PER_KB + " KB.";
   }
 
   /** @return the SVG markup of the chosen icon, null if there is none */
@@ -59,6 +84,24 @@ class IconChooser extends JPanel {
     else {
       preview.setIcon(null);
       preview.setText(NO_ICON_TEXT);
+    }
+    updateSizeWarning();
+  }
+
+  /** The warning only takes room while it is shown, so a window containing the chooser is packed
+   * again to grow or shrink with it. Before the window exists, its first pack takes care. */
+  private void updateSizeWarning() {
+    int size = iconSvg != null ? iconSvg.getBytes(StandardCharsets.UTF_8).length : 0;
+    boolean tooLarge = size > SIZE_WARNING_BYTES;
+    if (tooLarge) {
+      sizeWarning.setText(sizeWarningText(size));
+    }
+    if (sizeWarning.isVisible() != tooLarge) {
+      sizeWarning.setVisible(tooLarge);
+      Window window = SwingUtilities.getWindowAncestor(this);
+      if (window != null) {
+        window.pack();
+      }
     }
   }
 

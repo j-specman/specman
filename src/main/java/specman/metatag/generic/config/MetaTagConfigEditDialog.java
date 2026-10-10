@@ -99,23 +99,26 @@ class MetaTagConfigEditDialog extends JDialog {
     refreshTagPreview();
   }
 
+  /** The warning about an oversized icon has a row of its own below the icon chooser, which has no
+   * height as long as the warning is invisible. */
   private JPanel buildFormPanel() {
     JPanel panel = new JPanel(new FormLayout("10px, right:default, 8px, fill:default:grow, 10px",
-      "10px, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 10px"));
+      "10px, pref, 4px, pref, 4px, pref, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 10px"));
     panel.add(new JLabel("Name:"), CC.xy(2, 2));
     panel.add(nameField, CC.xy(4, 2));
     panel.add(new JLabel("Label:"), CC.xy(2, 4));
     panel.add(labelField, CC.xy(4, 4));
     panel.add(new JLabel("Icon:"), CC.xy(2, 6));
     panel.add(iconChooser, CC.xy(4, 6));
-    panel.add(new JLabel("Background:"), CC.xy(2, 8));
-    panel.add(backgroundButton, CC.xy(4, 8, "left, center"));
-    panel.add(new JLabel("Border:"), CC.xy(2, 10));
-    panel.add(borderChooser, CC.xy(4, 10, "left, center"));
-    panel.add(new JLabel("Freetext:"), CC.xy(2, 12));
-    panel.add(freetextCheckBox, CC.xy(4, 12));
-    panel.add(new JLabel("Preview:"), CC.xy(2, 14, "right, top"));
-    panel.add(preview, CC.xy(4, 14));
+    panel.add(iconChooser.getSizeWarning(), CC.xy(4, 7));
+    panel.add(new JLabel("Background:"), CC.xy(2, 9));
+    panel.add(backgroundButton, CC.xy(4, 9, "left, center"));
+    panel.add(new JLabel("Border:"), CC.xy(2, 11));
+    panel.add(borderChooser, CC.xy(4, 11, "left, center"));
+    panel.add(new JLabel("Freetext:"), CC.xy(2, 13));
+    panel.add(freetextCheckBox, CC.xy(4, 13));
+    panel.add(new JLabel("Preview:"), CC.xy(2, 15, "right, top"));
+    panel.add(preview, CC.xy(4, 15));
     return panel;
   }
 
