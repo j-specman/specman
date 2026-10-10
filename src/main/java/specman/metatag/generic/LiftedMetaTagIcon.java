@@ -16,6 +16,8 @@ class LiftedMetaTagIcon extends SvgIcon {
   private static final int GLYPH_SIZE = 10;
   private static final int LIFT = AbstractMetaTag.CONTENT_LIFT / 2;
 
+  private boolean grayedOut = false;
+
   LiftedMetaTagIcon(String svgContent) {
     super(GLYPH_SIZE, svgContent);
     scale();
@@ -26,8 +28,19 @@ class LiftedMetaTagIcon extends SvgIcon {
     setSize((int) editor().scale(GLYPH_SIZE));
   }
 
+  /** Paints the icon in gray scale, e.g. for a tag at a deleted step. */
+  void setGrayedOut(boolean grayedOut) {
+    this.grayedOut = grayedOut;
+  }
+
   @Override
   public void paintIcon(Component component, Graphics graphics, int x, int y) {
-    super.paintIcon(component, graphics, x, y + (int) editor().scale(LIFT));
+    int liftedY = y + (int) editor().scale(LIFT);
+    if (grayedOut) {
+      getDisabledIcon().paintIcon(component, graphics, x, liftedY);
+    }
+    else {
+      super.paintIcon(component, graphics, x, liftedY);
+    }
   }
 }

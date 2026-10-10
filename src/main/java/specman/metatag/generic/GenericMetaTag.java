@@ -12,6 +12,8 @@ import javax.swing.PopupFactory;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -20,6 +22,7 @@ import java.util.Objects;
 
 import static specman.Specman.editor;
 import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
+import static specman.graphics.Styles.Schriftfarbe_Geloescht;
 
 /**
  * Configurable meta-tag displayed to the left of a step number.
@@ -28,7 +31,9 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
   private static final int SIDE_PADDING = 2;
   private static final int TOOLTIP_WIDTH = 250;
   private static final int FEEDBACK_DURATION_MS = 3000;
+  private static final Color DELETED_BACKGROUND = Color.BLACK;
 
+  private final Color defaultForeground = getForeground();
   private LiftedMetaTagIcon icon;
   private MetaTagConfig config;
   private String freetext;
@@ -41,7 +46,8 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
    * ignored as long as the configuration doesn't allow a freetext, see {@link #getFreetext()}. */
   public GenericMetaTag(MetaTagConfig config, String freetext) {
     setHorizontalAlignment(SwingConstants.CENTER);
-    setOpaque(true);
+    // Not opaque although the tag has a background of its own: see paintComponent().
+    setOpaque(false);
     this.freetext = freetext;
     applyConfig(config);
 
@@ -68,7 +74,10 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
   /** Whether the step the tag belongs to is marked as deleted. Such a tag can't be changed, but its
    * freetext can still be read. Set by the step, which is the one who knows. */
   public void setDeleted(boolean deleted) {
-    this.deleted = deleted;
+    if (this.deleted != deleted) {
+      this.deleted = deleted;
+      applyAppearance();
+    }
   }
 
   public boolean isDeleted() {
@@ -81,9 +90,19 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     icon = config.hasIcon() ? new LiftedMetaTagIcon(config.getIconSvg()) : null;
     setIcon(icon);
     setText(config.getLabel());
-    setBackground(config.getBackgroundColor());
-    setBorderColor(config.getBorderColor());
     updateTooltip();
+    applyAppearance();
+  }
+
+  /** The tag of a deleted step is shown as the step number is: gray on black, with a gray border if
+   * the configuration has one, and a gray scale icon. */
+  private void applyAppearance() {
+    setBackground(deleted ? DELETED_BACKGROUND : config.getBackgroundColor());
+    setForeground(deleted ? Schriftfarbe_Geloescht : defaultForeground);
+    setBorderColor(deleted ? (config.hasBorderColor() ? Schriftfarbe_Geloescht : null) : config.getBorderColor());
+    if (icon != null) {
+      icon.setGrayedOut(deleted);
+    }
     scale();
     revalidate();
     repaint();
@@ -181,7 +200,7 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
       icon.scale();
     }
     setFont(getFont().deriveFont((float) editor().scale(SCHRITTNR_FONTSIZE)));
-    setBorder(scaledBorder(config.getBackgroundColor(), 0, SIDE_PADDING));
+    setBorder(scaledBorder(getBackground(), 0, SIDE_PADDING));
   }
 
   /** Hangs the tag left of its right neighbour at the given height, which is the step number's,
@@ -192,6 +211,23 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
       int width = getPreferredSize().width;
       setBounds(rightNeighborX - gap - width, 0, width, height);
     }
+  }
+
+  /** Fills the background itself, because the tag is deliberately not opaque, see the constructor.
+   * <p>
+   * The rounded bottom corners of a tag are transparent: {@link specman.metatag.HangingTabRenderer}
+   * masks them out of what the tag paints. A component which reports itself as opaque promises to
+   * cover its whole bounds, though, and Swing relies on that: when only the tag is repainted, e.g.
+   * after the step was inserted or the zoom factor was changed, it doesn't paint what is behind the
+   * tag first. Whatever was painted behind the corners before then stays, which showed up as small
+   * glitches in the corners, particularly visible where the tag sits on a dark background. As the
+   * tag is not opaque, Swing paints its surroundings first, and the tag only paints its own,
+   * rounded shape on top of that. */
+  @Override
+  protected void paintComponent(Graphics g) {
+    g.setColor(getBackground());
+    g.fillRect(0, 0, getWidth(), getHeight());
+    super.paintComponent(g);
   }
 
   @Override
