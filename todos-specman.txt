@@ -45,9 +45,9 @@ x Einlesen der Konfigs und der Tags an den Schritten aus der Modelldatei (Model 
 x Wir erweitern die Grammatik, bleiben aber bei V002
 x Wichtig für Erweiterung: sie soll eine reiner Erweiterung gegenüber 1.3 sein, d.h. wenn man in 1.4 arbeiten aber keine Meta Tags konfiguriert (und nutzt) enthält die Modelldatei keine neuen (auch keine leeren!) Bestandteile, die ein Öffnen der Datei mit 1.3 verhindern würde.
 x Zielversion 1.4 mit Warnung bei Öffnen einer 1.3'er Datei, dass die Modelle kompatibel sind aber anschließend nicht mehr mit 1.3 bearbeitet werden sollten, um keine Meta-Informationen zu verlieren
-- Copy / Cut / Paste von Schritten mit Meta Tags
+x Copy / Cut / Paste von Schritten mit Meta Tags
   x Innerhalb derselben Instanz: Tags wandern mit
-  - Zwischen Instanzen: Tags wandern mit, wenn es eine passend bezeichnete Tag Konfiguration im Zielmodell gibt, sonst verschwinden sie still
+  x Zwischen Instanzen: Tags wandern mit, wenn es eine passend bezeichnete Tag Konfiguration im Zielmodell gibt, sonst verschwinden sie still
 x Drag & Drop von Schritten: Meta Tags bleiben erhalten
 - Schritt als gelöscht markieren
   - Tags bleiben, aber Darstellung mit schwarzem Hintergrund grauem Rand (wenn Rand definiet war) und grauem (disabled) Icon und grauem Label
