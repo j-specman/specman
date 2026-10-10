@@ -189,10 +189,11 @@ public class ModelSerializer_V002 {
         String icon = config.iconSvg != null
             ? ICON + "=`" + config.iconSvg.replace("`", "&#96;") + "`"
             : null;
+        String freetext = config.freetextAllowed ? null : FREETEXT + "=false";
         blockBegin(TAG,
             "`" + escapeBackticks(config.name) + "`",
             BACKGROUND + "=" + ReadWriteColor.toHTMLColor(new Color(config.backgroundColor)),
-            border, label, icon);
+            border, label, icon, freetext);
         sb.append("\n");
     }
 

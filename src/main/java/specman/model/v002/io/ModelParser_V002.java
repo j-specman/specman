@@ -221,7 +221,8 @@ public class ModelParser_V002 {
             label,
             iconSvg,
             Color.decode(colors.get(0).getText()).getRGB(),
-            colors.size() > 1 ? Color.decode(colors.get(1).getText()).getRGB() : null);
+            colors.size() > 1 ? Color.decode(colors.get(1).getText()).getRGB() : null,
+            ctx.freetextParam() == null);
     }
 
     private PdfExportOptionsModel_V002 buildPdfOptions(List<SpecmanModel_V002Parser.PdfOptionEntryContext> entries) {

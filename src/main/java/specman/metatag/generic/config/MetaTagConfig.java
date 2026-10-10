@@ -17,16 +17,20 @@ public class MetaTagConfig {
   private final String iconSvg;
   private final Color backgroundColor;
   private final Color borderColor;
+  private final boolean freetextAllowed;
 
   /** @param iconSvg SVG markup of the icon, null for a tag without icon. A tag needs a label or
    * an icon, but that is a matter of the configuration dialog, not enforced here.
-   * @param borderColor null for a tag without border */
-  public MetaTagConfig(String name, String label, String iconSvg, Color backgroundColor, Color borderColor) {
+   * @param borderColor null for a tag without border
+   * @param freetextAllowed whether the user can attach a freetext to tags of this configuration */
+  public MetaTagConfig(String name, String label, String iconSvg, Color backgroundColor, Color borderColor,
+                       boolean freetextAllowed) {
     this.name = Objects.requireNonNull(name);
     this.label = Objects.requireNonNull(label);
     this.iconSvg = iconSvg;
     this.backgroundColor = Objects.requireNonNull(backgroundColor);
     this.borderColor = borderColor;
+    this.freetextAllowed = freetextAllowed;
   }
 
   public String getName() {
@@ -58,6 +62,10 @@ public class MetaTagConfig {
     return borderColor;
   }
 
+  public boolean allowsFreetext() {
+    return freetextAllowed;
+  }
+
   @Override
   public boolean equals(Object other) {
     if (this == other) {
@@ -68,11 +76,12 @@ public class MetaTagConfig {
     }
     MetaTagConfig that = (MetaTagConfig) other;
     return name.equals(that.name) && label.equals(that.label) && Objects.equals(iconSvg, that.iconSvg)
-      && backgroundColor.equals(that.backgroundColor) && Objects.equals(borderColor, that.borderColor);
+      && backgroundColor.equals(that.backgroundColor) && Objects.equals(borderColor, that.borderColor)
+      && freetextAllowed == that.freetextAllowed;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, label, iconSvg, backgroundColor, borderColor);
+    return Objects.hash(name, label, iconSvg, backgroundColor, borderColor, freetextAllowed);
   }
 }

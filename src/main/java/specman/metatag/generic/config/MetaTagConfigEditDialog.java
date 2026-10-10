@@ -4,6 +4,7 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -30,6 +31,7 @@ class MetaTagConfigEditDialog extends JDialog {
   private final IconChooser iconChooser;
   private final ColorChooseButton backgroundButton;
   private final OptionalColorChooser borderChooser;
+  private final JCheckBox freetextCheckBox = new JCheckBox("Users can attach a freetext to the tag", true);
   private final PreviewPanel preview = new PreviewPanel();
 
   private boolean labelFollowsName = true;
@@ -53,6 +55,7 @@ class MetaTagConfigEditDialog extends JDialog {
     if (existing != null) {
       nameField.setText(existing.getName());
       labelField.setText(existing.getLabel());
+      freetextCheckBox.setSelected(existing.allowsFreetext());
     }
     labelFollowsName = labelMatchesName();
     refreshTagPreview();
@@ -98,7 +101,7 @@ class MetaTagConfigEditDialog extends JDialog {
 
   private JPanel buildFormPanel() {
     JPanel panel = new JPanel(new FormLayout("10px, right:default, 8px, fill:default:grow, 10px",
-      "10px, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 10px"));
+      "10px, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 10px"));
     panel.add(new JLabel("Name:"), CC.xy(2, 2));
     panel.add(nameField, CC.xy(4, 2));
     panel.add(new JLabel("Label:"), CC.xy(2, 4));
@@ -109,8 +112,10 @@ class MetaTagConfigEditDialog extends JDialog {
     panel.add(backgroundButton, CC.xy(4, 8, "left, center"));
     panel.add(new JLabel("Border:"), CC.xy(2, 10));
     panel.add(borderChooser, CC.xy(4, 10, "left, center"));
-    panel.add(new JLabel("Preview:"), CC.xy(2, 12, "right, top"));
-    panel.add(preview, CC.xy(4, 12));
+    panel.add(new JLabel("Freetext:"), CC.xy(2, 12));
+    panel.add(freetextCheckBox, CC.xy(4, 12));
+    panel.add(new JLabel("Preview:"), CC.xy(2, 14, "right, top"));
+    panel.add(preview, CC.xy(4, 14));
     return panel;
   }
 
@@ -133,7 +138,7 @@ class MetaTagConfigEditDialog extends JDialog {
 
   private MetaTagConfig currentConfig() {
     return new MetaTagConfig(nameField.getText(), labelField.getText(), iconChooser.getIconSvg(),
-      backgroundButton.getColor(), borderChooser.getColor());
+      backgroundButton.getColor(), borderChooser.getColor(), freetextCheckBox.isSelected());
   }
 
   private void confirm() {

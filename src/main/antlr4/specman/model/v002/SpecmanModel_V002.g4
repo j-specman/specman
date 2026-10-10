@@ -84,9 +84,14 @@ pdfOptionEntry
 // The same goes for the tags parameter of a step. The first parameter is
 // the tagId, the name tags at steps refer to. A tag shows a label, an icon, or both, see
 // metaTagContent. The colors come first, because the background is mandatory in any case. The
-// border color is omitted for a tag without border.
+// border color is omitted for a tag without border. Tags allow a freetext by default, so only
+// freetext=false is ever written, for a configuration which doesn't allow it.
 metaTagConfig
-    : 'tag' '(' tagId ',' 'background' '=' COLOR_HEX (',' 'border' '=' COLOR_HEX)? ',' metaTagContent ')'
+    : 'tag' '(' tagId ',' 'background' '=' COLOR_HEX (',' 'border' '=' COLOR_HEX)? ',' metaTagContent (',' freetextParam)? ')'
+    ;
+
+freetextParam
+    : 'freetext' '=' 'false'
     ;
 
 // A label or an icon or both - but not neither of them. The label is omitted for a tag with just an
@@ -452,6 +457,7 @@ KW_LABEL           : 'label' ;
 KW_BACKGROUND      : 'background' ;
 KW_BORDER          : 'border' ;
 KW_ICON            : 'icon' ;
+KW_FREETEXT        : 'freetext' ;
 
 // Identifiers: changeset names (yellow, blue), image types (png)
 ID          : [a-zA-Z][a-zA-Z0-9_-]* ;

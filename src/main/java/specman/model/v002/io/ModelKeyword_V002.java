@@ -67,7 +67,8 @@ public enum ModelKeyword_V002 {
     LABEL(KW_LABEL),
     BACKGROUND(KW_BACKGROUND),
     BORDER(KW_BORDER),
-    ICON(KW_ICON);
+    ICON(KW_ICON),
+    FREETEXT(KW_FREETEXT);
 
     private final String keyword;
 

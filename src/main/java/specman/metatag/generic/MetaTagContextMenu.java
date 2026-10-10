@@ -18,11 +18,11 @@ class MetaTagContextMenu implements MouseListener {
   static final MetaTagContextMenu instance = new MetaTagContextMenu();
 
   private final JPopupMenu popup = new JPopupMenu();
+  private final JMenuItem edit = new JMenuItem("Edit");
   private GenericMetaTag currentTag;
   private AbstractSchrittView currentStep;
 
   private MetaTagContextMenu() {
-    JMenuItem edit = new JMenuItem("Edit");
     edit.addActionListener(e -> currentTag.editFreetext());
     JMenuItem delete = new JMenuItem("Delete", IconReader.readImageIcon("loeschen"));
     delete.addActionListener(e -> deleteCurrentTag());
@@ -44,6 +44,7 @@ class MetaTagContextMenu implements MouseListener {
       if (step != null) {
         currentTag = tag;
         currentStep = step;
+        edit.setVisible(tag.getConfig().allowsFreetext());
         popup.show(e.getComponent(), e.getX(), e.getY());
       }
     }

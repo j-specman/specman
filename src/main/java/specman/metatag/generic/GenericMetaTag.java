@@ -36,11 +36,12 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
   private Popup feedbackPopup;
   private Timer feedbackTimer;
 
-  /** @param freetext optional freetext shown as tooltip while hovering the tag, may be null */
+  /** @param freetext optional freetext shown as tooltip while hovering the tag, may be null. It is
+   * ignored as long as the configuration doesn't allow a freetext, see {@link #getFreetext()}. */
   public GenericMetaTag(MetaTagConfig config, String freetext) {
     setHorizontalAlignment(SwingConstants.CENTER);
     setOpaque(true);
-    setFreetext(freetext);
+    this.freetext = freetext;
     applyConfig(config);
 
     addMouseListener(MetaTagContextMenu.instance);
@@ -71,12 +72,16 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     setText(config.getLabel());
     setBackground(config.getBackgroundColor());
     setBorderColor(config.getBorderColor());
+    updateTooltip();
     scale();
     revalidate();
     repaint();
   }
 
   void editFreetext() {
+    if (!config.allowsFreetext()) {
+      return;
+    }
     hideFreetextFeedback();
     // Without this, the tooltip would pop up on top of the editor as soon as the mouse (still
     // resting on the tag after the click) moves a little.
@@ -100,13 +105,15 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     updateTooltip();
   }
 
-  /** @return the freetext, null if the tag has none */
+  /** @return the freetext, null if the tag has none or its configuration doesn't allow one. In the
+   * latter case the text itself is kept, so that undoing the configuration change brings it back,
+   * but it is neither shown nor saved. */
   public String getFreetext() {
-    return freetext;
+    return config.allowsFreetext() ? freetext : null;
   }
 
   private void updateTooltip() {
-    setToolTipText(toTooltipHtml(freetext));
+    setToolTipText(toTooltipHtml(getFreetext()));
   }
 
   /** Shows the tooltip for a few seconds without the mouse hovering over the tag, e.g. as visual
@@ -115,7 +122,7 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
    * tag has no freetext or is currently not visible. */
   public void showFreetextFeedback() {
     hideFreetextFeedback();
-    String tipText = toTooltipHtml(freetext);
+    String tipText = toTooltipHtml(getFreetext());
     if (tipText == null || !isShowing()) {
       return;
     }
