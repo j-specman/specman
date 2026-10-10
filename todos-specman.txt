@@ -58,6 +58,10 @@ x Schritt als gelöscht markieren
 - PDF-Export von Meta Tags
   - Nice to have: Freitext als Kommentar in der PDF-Ausgabe?
 - Verschieben der Tags eines Schritts untereinander mit rechts/links im Kontextmenü analog Catch-Bereiche
+- Neues Refernmodell specman-reference-v1.4-model-v2.nsd mit Meta Tag Konfigurationen und Tags an Schritten
+  - Nur Icon / nur Label / beides
+  - Mit / ohne Randfarbe
+  - Mit / ohne Freitext
 - Noch zur späteren Überlegung offen:
   - Umgang mit Überlauf
   - Freitexte irgendwie durchsuchbar?
