@@ -129,6 +129,13 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
     drawDeletionLine(g);
   }
 
+  /** The label of a step marked as deleted gets a gray border line, like the tags at that step.
+   * Derived from the label's state, so undo and redo of the deletion need no extra handling. */
+  @Override
+  protected Color paintedBorderColor() {
+    return fullTextDeleted() ? DELETED_BORDER_COLOR : super.paintedBorderColor();
+  }
+
   private void drawDeletionLine(Graphics g) {
     LineShape dline = createDeletionLine(0);
     if (dline != null) {

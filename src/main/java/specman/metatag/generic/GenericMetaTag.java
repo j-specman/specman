@@ -94,12 +94,12 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     applyAppearance();
   }
 
-  /** The tag of a deleted step is shown as the step number is: gray on black, with a gray border if
-   * the configuration has one, and a gray scale icon. */
+  /** The tag of a deleted step is shown as the step number is: gray on black, with a gray border
+   * even if the configuration has none (black on black would be hard to see), and a gray scale icon. */
   private void applyAppearance() {
     setBackground(deleted ? DELETED_BACKGROUND : config.getBackgroundColor());
     setForeground(deleted ? Schriftfarbe_Geloescht : defaultForeground);
-    setBorderColor(deleted ? (config.hasBorderColor() ? Schriftfarbe_Geloescht : null) : config.getBorderColor());
+    setBorderColor(deleted ? DELETED_BORDER_COLOR : config.getBorderColor());
     if (icon != null) {
       icon.setGrayedOut(deleted);
     }

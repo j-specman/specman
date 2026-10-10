@@ -37,6 +37,10 @@ public abstract class AbstractMetaTag extends JLabel {
   // Border bottom inset that nudges Swing's centered content upward within its natural preferred
   // height (a larger bottom inset than top shifts the centering point up).
   public static final int CONTENT_LIFT = 2;
+  // Border of a meta widget which belongs to a step marked as deleted (black background) - the
+  // same gray as the border of the KlappButton, so it is visible against black background
+  // of the step's deleted-marked text which the tag may slightly overlap with.
+  protected static final Color DELETED_BORDER_COLOR = Color.GRAY;
 
   private Color borderColor;
 
@@ -84,13 +88,14 @@ public abstract class AbstractMetaTag extends JLabel {
   }
 
   private void paintHangingTabBorder(Graphics g) {
-    if (borderColor == null) {
+    Color color = paintedBorderColor();
+    if (color == null) {
       return;
     }
     float strokeWidth = borderStrokeWidth();
     Graphics2D g2 = (Graphics2D) g.create();
     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g2.setColor(borderColor);
+    g2.setColor(color);
     g2.setStroke(new BasicStroke(strokeWidth));
     // Inset by half the stroke width so the (centered-on-path) stroke stays fully within the
     // widget's own bounds instead of half of it getting clipped off at the edges.
@@ -100,6 +105,13 @@ public abstract class AbstractMetaTag extends JLabel {
   }
 
   protected abstract int arc();
+
+  /** @return the color of the border line which is painted, null for none. By default the one set
+   * by setBorderColor(); a widget whose border depends on its state (and not on a setter call,
+   * which can't be undone) overrides this to derive it from the state instead. */
+  protected Color paintedBorderColor() {
+    return borderColor;
+  }
 
   /** Width (in pixels, at the widget's current size) of the border line drawn by
    * setBorderColor() - 1px at 100% zoom by default; override to scale with zoom like arc()

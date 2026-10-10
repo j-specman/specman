@@ -49,11 +49,11 @@ x Copy / Cut / Paste von Schritten mit Meta Tags
   x Innerhalb derselben Instanz: Tags wandern mit
   x Zwischen Instanzen: Tags wandern mit, wenn es eine passend bezeichnete Tag Konfiguration im Zielmodell gibt, sonst verschwinden sie still
 x Drag & Drop von Schritten: Meta Tags bleiben erhalten
-- Schritt als gelöscht markieren
-  - Tags bleiben, aber Darstellung mit schwarzem Hintergrund grauem Rand (wenn Rand definiet war) und grauem (disabled) Icon und grauem Label
-  - Entfernen, Editieren, Hinzufügen nicht mehr möglich
-  - Undo / Redo
-  - Darstellung / Editierbarkeit beim Verwerfen der Löschung wiederherstellen
+x Schritt als gelöscht markieren
+  x Tags bleiben, aber Darstellung mit schwarzem Hintergrund grauem Rand (wenn Rand definiet war) und grauem (disabled) Icon und grauem Label
+  x Entfernen, Editieren, Hinzufügen nicht mehr möglich
+  x Undo / Redo
+  x Darstellung / Editierbarkeit beim Verwerfen der Löschung wiederherstellen
 - Ergänzung Sanitizer: Fehler bei der Vergabe eines Tags, dessen Konfiguration nicht existiert
 - PDF-Export von Meta Tags
   - Nice to have: Freitext als Kommentar in der PDF-Ausgabe?
