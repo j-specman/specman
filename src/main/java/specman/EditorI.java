@@ -25,7 +25,7 @@ import java.util.Set;
  * later e.g. allow to run multiple editors windows within a single editor
  * application. */
 public interface EditorI extends FocusListener {
-	void vertikalLinieSetzen(int x, SpaltenResizer spaltenResizer);
+	void vertikalLinieSetzen(int x, Component source);
 	void diagrammLaden(File diagramFile);
 	int getZoomFactor();
 	String instanceId();

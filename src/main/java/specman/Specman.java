@@ -205,11 +205,12 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		return delta;
 	}
 
+	/** Shows a vertical drag line at x, given in the coordinates of the source component; null as source hides the line. */
 	@Override
-	public void vertikalLinieSetzen(int x, SpaltenResizer spaltenResizer) {
+	public void vertikalLinieSetzen(int x, Component source) {
 		Integer dragX = null;
-		if (spaltenResizer != null) {
-			Point relativePosition = SwingUtilities.convertPoint(spaltenResizer, new Point(x, 0), arbeitsbereich);
+		if (source != null) {
+			Point relativePosition = SwingUtilities.convertPoint(source, new Point(x, 0), arbeitsbereich);
 			dragX = (int)relativePosition.getX();
 		}
 		arbeitsbereich.showDragLine(dragX);

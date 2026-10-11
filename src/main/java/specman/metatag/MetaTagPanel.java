@@ -94,6 +94,26 @@ public class MetaTagPanel extends JPanel {
     return newIndex >= 0 && newIndex < tags.size();
   }
 
+  /** For dragging a tag with the mouse: the tag takes the place of its neighbor as soon as the mouse
+   * passes the neighbor's center - not only at the gap behind it, which with tags of different widths
+   * would make the tag jump back and forth.
+   * @param mouseX in the coordinates of this panel
+   * @return the direction the tag has to move one step to follow the mouse, null if it stays */
+  public TagMoveDirection directionTowards(GenericMetaTag tag, int mouseX) {
+    int index = tags.indexOf(tag);
+    if (allowsTagMove(tag, TagMoveDirection.LEFT) && mouseX < centerX(tags.get(index + 1))) {
+      return TagMoveDirection.LEFT;
+    }
+    if (allowsTagMove(tag, TagMoveDirection.RIGHT) && mouseX > centerX(tags.get(index - 1))) {
+      return TagMoveDirection.RIGHT;
+    }
+    return null;
+  }
+
+  private static int centerX(GenericMetaTag tag) {
+    return tag.getX() + tag.getWidth() / 2;
+  }
+
   /** Moves the tag one position in the given direction and hangs all tags anew. */
   public void moveTag(GenericMetaTag tag, TagMoveDirection direction) {
     int newIndex = tags.indexOf(tag) + direction.indexOffset();

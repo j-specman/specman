@@ -66,10 +66,13 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     applyConfig(config);
 
     addMouseListener(MetaTagContextMenu.instance);
+    MetaTagDragReorder dragReorder = new MetaTagDragReorder(this);
+    addMouseListener(dragReorder);
+    addMouseMotionListener(dragReorder);
     addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
-        if (freetextEditable && SwingUtilities.isLeftMouseButton(e)) {
+        if (freetextEditable && !dragReorder.hasReordered() && SwingUtilities.isLeftMouseButton(e)) {
           editFreetext();
         }
       }
