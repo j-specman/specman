@@ -65,7 +65,7 @@ class IconChooser extends JPanel {
   }
 
   private static String sizeWarningText(int sizeInBytes) {
-    return "Warning: the SVG is " + (sizeInBytes + BYTES_PER_KB - 1) / BYTES_PER_KB + " KB - icons should stay below "
+    return "Warning: the SVG is " + (sizeInBytes + BYTES_PER_KB - 1) / BYTES_PER_KB + " KB - icons should not exceed "
       + SIZE_WARNING_BYTES / BYTES_PER_KB + " KB.";
   }
 
