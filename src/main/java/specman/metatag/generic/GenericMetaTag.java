@@ -9,6 +9,7 @@ import specman.pdf.HangingTabShape;
 import specman.pdf.IconShape;
 import specman.pdf.LabelShapeText;
 import specman.pdf.Shape;
+import specman.pdf.ShapeNote;
 import specman.undo.UndoableMetaTagFreetextChanged;
 
 import javax.swing.BorderFactory;
@@ -288,12 +289,22 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
 
     HangingTabShape shape = new HangingTabShape(this, arc())
       .withBorder(paintedBorderColor(), borderStrokeWidth());
+    Rectangle contentArea = null;
     if (!getText().isEmpty()) {
       shape.withText(LabelShapeText.at(this, textRect));
+      contentArea = new Rectangle(textRect);
     }
     if (icon != null) {
       Rectangle paintedArea = new Rectangle(iconRect.x, iconRect.y, iconRect.width, iconRect.height + icon.lift());
       shape.add(new IconShape(this, icon, paintedArea));
+      contentArea = contentArea == null ? paintedArea : contentArea.union(paintedArea);
+    }
+    String freetext = getFreetext();
+    if (freetext != null && !freetext.isBlank()) {
+      // The note is attached to what the tag shows: label, icon, or both
+      Rectangle tagArea = new Rectangle(0, 0, getWidth(), getHeight());
+      Rectangle noteArea = contentArea == null ? tagArea : contentArea.intersection(tagArea);
+      shape.withNote(new ShapeNote(config.getName(), freetext, noteArea));
     }
     return shape;
   }

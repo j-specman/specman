@@ -1,6 +1,7 @@
 package specman.pdf;
 
 import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfReader;
@@ -17,6 +18,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static specman.pdf.Shape.DEFAULT_LINE_COLOR;
 import static specman.pdf.Shape.toPDFColor;
@@ -42,6 +45,8 @@ public class PDFRenderer {
   boolean withPageTiling;
   int uizoomfactor;
   float swing2pdfScaleFactor;
+  // Collected while drawing, added to the pages afterwards, see addNotes()
+  private final List<PlacedNote> notes = new ArrayList<>();
 
   public PDFRenderer(String pdfFilename, PageSize pageSize, boolean portrait, boolean withPageTiling, int uizoomfactor) {
     try {
@@ -102,6 +107,9 @@ public class PDFRenderer {
 
   private void render(Shape rootShape, Point renderOffset, PageSize overlengthPagesize) throws IOException {
     drawShape(rootShape, renderOffset);
+    if (!isTiled(overlengthPagesize)) {
+      addNotes(pdfDoc.getFirstPage(), Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, 0);
+    }
     document.close();
     pdfOutputStream.close();
 
@@ -116,8 +124,26 @@ public class PDFRenderer {
     return overlengthPagesize.getHeight() > pageSize.getHeight();
   }
 
+  private boolean isTiled(PageSize overlengthPagesize) {
+    return hasOverlength(overlengthPagesize) && withPageTiling;
+  }
+
+  /** Adds the notes whose vertical center lies within the given range of the page they were drawn
+   * on, moved by the given distance. Tiling copies only the content of that page, no annotations,
+   * so the notes are added to the tiles on their own. */
+  private void addNotes(PdfPage page, float minY, float maxY, float shiftY) {
+    for (PlacedNote placed : notes) {
+      float centerY = placed.area.getY() + placed.area.getHeight() / 2;
+      if (centerY >= minY && centerY < maxY) {
+        Rectangle shifted = new Rectangle(placed.area.getX(), placed.area.getY() + shiftY,
+          placed.area.getWidth(), placed.area.getHeight());
+        page.addAnnotation(placed.note.toAnnotation(shifted));
+      }
+    }
+  }
+
   private void tileOverlengthPage(PageSize overlengthPagesize) throws IOException {
-    if (!hasOverlength(overlengthPagesize) || !withPageTiling) {
+    if (!isTiled(overlengthPagesize)) {
       return;
     }
     ByteArrayInputStream is = new ByteArrayInputStream(pdfOutputStream.toByteArray());
@@ -137,6 +163,10 @@ public class PDFRenderer {
       PdfPage tilePage = tilePdf.addNewPage(pageSize);
       PdfCanvas canvas = new PdfCanvas(tilePage);
       canvas.addXObjectAt(overlengthForm, 0, -overlengthRect.getHeight() + tileHeight * tileNo);
+      addNotes(tilePage,
+        overlengthRect.getHeight() - tileHeight * tileNo,
+        overlengthRect.getHeight() - tileHeight * (tileNo - 1),
+        -overlengthRect.getHeight() + tileHeight * tileNo);
 //      canvas
 //        .beginText()
 //        .setFontAndSize(pageNumberingFont, 10)
@@ -178,6 +208,10 @@ public class PDFRenderer {
         }
     }
     renderOffset = shape.translate(renderOffset);
+    ShapeNote note = shape.getNote();
+    if (note != null) {
+      notes.add(new PlacedNote(note, note.placeOnPage(renderOffset, swing2pdfScaleFactor)));
+    }
     writeShapeText(shape, renderOffset);
     drawShapeImage(shape, renderOffset);
     for (Shape subshape: shape.getSubshapes()) {
@@ -197,6 +231,16 @@ public class PDFRenderer {
     AbstractShapeText text = shape.getText();
     if (text != null) {
       text.writeToPDF(renderOffset, swing2pdfScaleFactor, pdfCanvas, document);
+    }
+  }
+
+  private static class PlacedNote {
+    final ShapeNote note;
+    final Rectangle area;
+
+    PlacedNote(ShapeNote note, Rectangle area) {
+      this.note = note;
+      this.area = area;
     }
   }
 

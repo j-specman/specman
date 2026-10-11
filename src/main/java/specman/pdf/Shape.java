@@ -22,6 +22,7 @@ public class Shape {
   private boolean withOutline;
   private AbstractShapeText text;
   private ShapeImage image;
+  private ShapeNote note;
   protected float lineWidth = (float)LINIENBREITE;
 
   public Shape() {}
@@ -164,6 +165,15 @@ public class Shape {
 
   public ShapeImage getImage() {
     return image;
+  }
+
+  public Shape withNote(ShapeNote note) {
+    this.note = note;
+    return this;
+  }
+
+  public ShapeNote getNote() {
+    return note;
   }
 
   public void runPath(Point renderOffset, float swing2pdfScaleFactor, PdfCanvas pdfCanvas) {
