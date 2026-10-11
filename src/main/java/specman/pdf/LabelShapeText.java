@@ -45,7 +45,10 @@ public class LabelShapeText extends AbstractShapeText {
     if (family.contains("Sans")) {
       family = "Helvetica";
     }
-    FontInfo info = fontProvider.getFontSelector(Arrays.asList(family), null).bestMatch();
+    FontCharacteristics characteristics = new FontCharacteristics();
+    characteristics.setBoldFlag(font.isBold());
+    characteristics.setItalicFlag(font.isItalic());
+    FontInfo info = fontProvider.getFontSelector(Arrays.asList(family), characteristics).bestMatch();
     return fontProvider.getPdfFont(info);
   }
 }

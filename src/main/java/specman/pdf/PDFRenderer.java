@@ -8,6 +8,7 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvasConstants.LineCapStyle;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvasConstants.LineJoinStyle;
+import com.itextpdf.kernel.pdf.extgstate.PdfExtGState;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.layout.Document;
 
@@ -151,6 +152,11 @@ public class PDFRenderer {
   private void drawShape(Shape shape, Point renderOffset) {
     if (shape.hasForm()) {
         if (!shape.isLine()) {
+          float fillOpacity = shape.getFillOpacity();
+          if (fillOpacity < 1f) {
+            pdfCanvas.saveState();
+            pdfCanvas.setExtGState(new PdfExtGState().setFillOpacity(fillOpacity));
+          }
           pdfCanvas.setFillColor(shape.getPDFBackgroundColor());
           shape.runPath(renderOffset, swing2pdfScaleFactor, pdfCanvas);
           // This looks wrong and is probably caused by a lack of knowledge of the iText API:
@@ -160,6 +166,9 @@ public class PDFRenderer {
           // solution with the double-run was an accidential finding.
           shape.runPath(renderOffset, swing2pdfScaleFactor, pdfCanvas);
           pdfCanvas.fill();
+          if (fillOpacity < 1f) {
+            pdfCanvas.restoreState();
+          }
         }
         if (shape.withOutline()) {
           pdfCanvas.setLineWidth(shape.lineWidth() * swing2pdfScaleFactor);

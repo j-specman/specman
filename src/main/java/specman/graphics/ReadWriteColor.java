@@ -46,4 +46,19 @@ public class ReadWriteColor {
     }
     return "#" + Integer.toHexString(color.getRGB()).substring(2).toLowerCase();
   }
+
+  /** @return the color as it is written to a model file: #rrggbb, and #rrggbbaa if the color is not opaque */
+  public static String toModelColor(Color color) {
+    String rgb = String.format("#%06x", color.getRGB() & 0xFFFFFF);
+    return color.getAlpha() == 255 ? rgb : rgb + String.format("%02x", color.getAlpha());
+  }
+
+  /** @param text a color of a model file, see {@link #toModelColor(Color)} */
+  public static Color fromModelColor(String text) {
+    if (text.length() == "#rrggbbaa".length()) {
+      Color rgb = Color.decode(text.substring(0, "#rrggbb".length()));
+      return new Color(rgb.getRed(), rgb.getGreen(), rgb.getBlue(), Integer.parseInt(text.substring("#rrggbb".length()), 16));
+    }
+    return Color.decode(text);
+  }
 }

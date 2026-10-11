@@ -10,6 +10,7 @@ import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.editarea.markups.MarkupType;
+import specman.graphics.ReadWriteColor;
 import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.BranchSequenceModel_V002;
@@ -42,7 +43,6 @@ import specman.view.RoundedBorderDecorationStyle;
 
 import static specman.model.v002.io.ModelKeyword_V002.*;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -220,8 +220,8 @@ public class ModelParser_V002 {
             stripBackticks(ctx.tagId().getText()),
             label,
             iconSvg,
-            Color.decode(colors.get(0).getText()).getRGB(),
-            colors.size() > 1 ? Color.decode(colors.get(1).getText()).getRGB() : null,
+            ReadWriteColor.fromModelColor(colors.get(0).getText()).getRGB(),
+            colors.size() > 1 ? ReadWriteColor.fromModelColor(colors.get(1).getText()).getRGB() : null,
             ctx.freetextParam() == null);
     }
 

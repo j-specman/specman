@@ -4,7 +4,7 @@ import specman.metatag.generic.config.MetaTagConfig;
 
 import java.awt.Color;
 
-/** Model of a {@link MetaTagConfig}. Colors are held as RGB values, like the shade of a step. */
+/** Model of a {@link MetaTagConfig}. Colors are held as ARGB values, so they can be transparent. */
 public class MetaTagConfigModel_V002 {
     public final String name;
     /** Empty for a tag without label. */
@@ -36,6 +36,6 @@ public class MetaTagConfigModel_V002 {
     }
 
     public MetaTagConfig toConfig() {
-        return new MetaTagConfig(name, label, iconSvg, new Color(backgroundColor), borderColor != null ? new Color(borderColor) : null, freetextAllowed);
+        return new MetaTagConfig(name, label, iconSvg, new Color(backgroundColor, true), borderColor != null ? new Color(borderColor, true) : null, freetextAllowed);
     }
 }

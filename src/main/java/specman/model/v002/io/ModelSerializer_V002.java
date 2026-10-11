@@ -179,7 +179,7 @@ public class ModelSerializer_V002 {
 
     private void appendMetaTagConfig(MetaTagConfigModel_V002 config) {
         String border = config.borderColor != null
-            ? BORDER + "=" + ReadWriteColor.toHTMLColor(new Color(config.borderColor))
+            ? BORDER + "=" + ReadWriteColor.toModelColor(new Color(config.borderColor, true))
             : null;
         // The label may only be omitted if there is an icon instead, see the grammar.
         String label = config.label.isEmpty() && config.iconSvg != null
@@ -192,7 +192,7 @@ public class ModelSerializer_V002 {
         String freetext = config.freetextAllowed ? null : FREETEXT + "=false";
         blockBegin(TAG,
             "`" + escapeBackticks(config.name) + "`",
-            BACKGROUND + "=" + ReadWriteColor.toHTMLColor(new Color(config.backgroundColor)),
+            BACKGROUND + "=" + ReadWriteColor.toModelColor(new Color(config.backgroundColor, true)),
             border, label, icon, freetext);
         sb.append("\n");
     }

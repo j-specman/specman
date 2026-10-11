@@ -615,7 +615,9 @@ public class EditContainer extends JPanel {
 			// overlaps down into that edit area's row. metaPanel is only ever meant to establish
 			// a coordinate offset here, not to paint anything itself (it's non-opaque on screen
 			// too) - a position-only Shape(int,int) has no form, so nothing gets filled/painted.
-			shape.add(new Shape(metaPanel.getX(), metaPanel.getY()).add(schrittNummer.getShape()));
+			Shape metaShape = new Shape(metaPanel.getX(), metaPanel.getY()).add(schrittNummer.getShape());
+			metaPanel.getTags().forEach(tag -> metaShape.add(tag.getShape()));
+			shape.add(metaShape);
 		}
 		return shape;
 	}

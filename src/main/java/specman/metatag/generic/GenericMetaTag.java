@@ -4,8 +4,13 @@ import specman.editarea.InteractiveStepFragment;
 import specman.metatag.AbstractMetaTag;
 import specman.metatag.MetaTagPanel;
 import specman.metatag.generic.config.MetaTagConfig;
+import specman.pdf.HangingTabShape;
+import specman.pdf.IconShape;
+import specman.pdf.LabelShapeText;
+import specman.pdf.Shape;
 import specman.undo.UndoableMetaTagFreetextChanged;
 
+import javax.swing.BorderFactory;
 import javax.swing.JToolTip;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
@@ -13,7 +18,9 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import java.awt.Color;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -23,12 +30,16 @@ import java.util.Objects;
 import static specman.Specman.editor;
 import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
 import static specman.graphics.Styles.Schriftfarbe_Geloescht;
+import static specman.graphics.Styles.metaTagFont;
 
 /**
  * Configurable meta-tag displayed to the left of a step number.
  */
 public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFragment {
   private static final int SIDE_PADDING = 2;
+  // The last letter of a label would otherwise come too close to the rounded bottom right corner.
+  // Added on the left as well if there is no icon, to keep a text-only label centered.
+  private static final int LABEL_EXTRA_PADDING = 2;
   private static final int TOOLTIP_WIDTH = 250;
   private static final int FEEDBACK_DURATION_MS = 3000;
   private static final Color DELETED_BACKGROUND = Color.BLACK;
@@ -39,6 +50,9 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
   private String freetext;
   private boolean freetextEditable = true;
   private boolean deleted = false;
+  // Lifts the text, see alignTextVertically(). Zero until the tag knows its height.
+  private int bottomInset = 0;
+  private final TagLabelLayout labelLayout = new TagLabelLayout(this);
   private Popup feedbackPopup;
   private Timer feedbackTimer;
 
@@ -92,6 +106,7 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     setText(config.getLabel());
     updateTooltip();
     applyAppearance();
+    alignTextVertically(getHeight());
   }
 
   /** The tag of a deleted step is shown as the step number is: gray on black, with a gray border
@@ -199,8 +214,41 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     if (icon != null) {
       icon.scale();
     }
-    setFont(getFont().deriveFont((float) editor().scale(SCHRITTNR_FONTSIZE)));
-    setBorder(scaledBorder(getBackground(), 0, SIDE_PADDING));
+    setFont(metaTagFont.deriveFont((float) editor().scale(SCHRITTNR_FONTSIZE)));
+    updateBorder();
+  }
+
+  private void updateBorder() {
+    boolean hasLabel = !config.getLabel().isEmpty();
+    int leftPadding = hasLabel && icon == null ? SIDE_PADDING + LABEL_EXTRA_PADDING : SIDE_PADDING;
+    int rightPadding = hasLabel ? SIDE_PADDING + LABEL_EXTRA_PADDING : SIDE_PADDING;
+    // An empty border: a colored one would be painted on top of the background, which is not
+    // opaque, and make the tag look different in the area of the insets.
+    setBorder(BorderFactory.createEmptyBorder(0, (int) editor().scale(leftPadding), bottomInset, (int) editor().scale(rightPadding)));
+  }
+
+  /** The height of the tag is only known when it is given its bounds, hence the text is aligned
+   * here, see {@link TagLabelLayout}. */
+  @Override
+  public void setBounds(int x, int y, int width, int height) {
+    super.setBounds(x, y, width, height);
+    alignTextVertically(height);
+  }
+
+  /** Lifts the text via the bottom inset. The icon is held where it would be without lifting, only
+   * the text moves. A tag without label has nothing to lift. */
+  private void alignTextVertically(int height) {
+    if (height <= 0) {
+      return;
+    }
+    int newInset = getText().isEmpty() ? 0 : labelLayout.bottomInset(height);
+    if (newInset != bottomInset) {
+      bottomInset = newInset;
+      updateBorder();
+    }
+    if (icon != null) {
+      icon.setLift(labelLayout.iconLift(height, bottomInset));
+    }
   }
 
   /** Hangs the tag left of its right neighbour at the given height, which is the step number's,
@@ -233,5 +281,28 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
   @Override
   protected int arc() {
     return (int) editor().scale(CORNER_ARC);
+  }
+
+  /** The PDF counterpart of the tag as it looks on screen, also at a deleted step. Where Swing
+   * puts icon and text is taken from the same layout computation the label itself uses. */
+  public Shape getShape() {
+    FontMetrics metrics = getFontMetrics(getFont());
+    Rectangle iconRect = new Rectangle();
+    Rectangle textRect = new Rectangle();
+    labelLayout.layout(SwingUtilities.calculateInnerArea(this, null), iconRect, textRect);
+
+    HangingTabShape shape = new HangingTabShape(this, arc())
+      .withBorder(paintedBorderColor(), borderStrokeWidth());
+    if (!getText().isEmpty()) {
+      // LabelShapeText takes the distance of the text's baseline from the top as its top inset
+      int baselineCorrection = metrics.getAscent() - getFont().getSize() + 1;
+      Insets textInsets = new Insets(textRect.y + baselineCorrection, textRect.x + 1, 0, 0);
+      shape.withText(new LabelShapeText(getText(), textInsets, getForeground(), getFont()));
+    }
+    if (icon != null) {
+      Rectangle paintedArea = new Rectangle(iconRect.x, iconRect.y, iconRect.width, iconRect.height + icon.lift());
+      shape.add(new IconShape(this, icon, paintedArea));
+    }
+    return shape;
   }
 }
