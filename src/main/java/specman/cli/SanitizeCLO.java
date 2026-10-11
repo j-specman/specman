@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import specman.model.ModelEnvelope;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.DiagramModel_V002;
+import specman.model.v002.MetaTagConfigModel_V002;
+import specman.model.v002.MetaTagModel_V002;
 import specman.model.v002.io.ModelParseException;
 import specman.model.v002.io.ModelParser_V002;
 import specman.model.v002.io.ModelRenumberer_V002;
@@ -20,9 +22,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static specman.ops.LoadDiagrammSpecmanOp.isTextFormat;
 
@@ -122,6 +126,11 @@ public class SanitizeCLO extends AbstractCLO {
       throw new RuntimeException("Duplicate step IDs:\n  " + String.join("\n  ", idErrors));
     }
 
+    List<String> tagErrors = checkMetaTags(model);
+    if (!tagErrors.isEmpty()) {
+      throw new RuntimeException("Invalid meta tags:\n  " + String.join("\n  ", tagErrors));
+    }
+
     Map<String, String> savedNumbers = ModelRenumberer_V002.collectNumbers(model.mainSequence);
     ModelRenumberer_V002.renumber(model.mainSequence);
     Map<String, String> computedNumbers = ModelRenumberer_V002.collectNumbers(model.mainSequence);
@@ -161,6 +170,38 @@ public class SanitizeCLO extends AbstractCLO {
     for (Map.Entry<String, List<String>> entry : idToStepNumbers.entrySet()) {
       if (entry.getValue().size() > 1) {
         errors.add("ID " + entry.getKey() + " used by steps: " + entry.getValue());
+      }
+    }
+    return errors;
+  }
+
+  private static List<String> checkMetaTags(DiagramModel_V002 model) {
+    Map<String, MetaTagConfigModel_V002> configs = new LinkedHashMap<>();
+    List<String> errors = new ArrayList<>();
+    for (MetaTagConfigModel_V002 config : model.metaTagConfigs) {
+      if (configs.put(config.name, config) != null) {
+        errors.add("Meta tag configuration '" + config.name + "' is defined more than once");
+      }
+      boolean hasLabel = config.label != null && !config.label.isEmpty();
+      boolean hasIcon = config.iconSvg != null && !config.iconSvg.isEmpty();
+      if (!hasLabel && !hasIcon) {
+        errors.add("Meta tag configuration '" + config.name + "' has neither label nor icon");
+      }
+    }
+    for (AbstractStepModel_V002 step : model.queryAllSteps()) {
+      String stepLabel = "Step " + (step.stepNumber != null ? step.stepNumber : "?") + " (" + step.id + ")";
+      Set<String> assignedConfigNames = new HashSet<>();
+      for (MetaTagModel_V002 tag : step.tags) {
+        if (!assignedConfigNames.add(tag.configName)) {
+          errors.add(stepLabel + ": tag '" + tag.configName + "' is assigned more than once");
+        }
+        MetaTagConfigModel_V002 config = configs.get(tag.configName);
+        if (config == null) {
+          errors.add(stepLabel + ": tag '" + tag.configName + "' has no configuration");
+        }
+        else if (!config.freetextAllowed && tag.freetext != null && !tag.freetext.isEmpty()) {
+          errors.add(stepLabel + ": tag '" + tag.configName + "' has freetext but its configuration does not allow freetext");
+        }
       }
     }
     return errors;

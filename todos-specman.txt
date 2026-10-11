@@ -54,7 +54,12 @@ x Schritt als gelöscht markieren
   x Entfernen, Editieren, Hinzufügen nicht mehr möglich
   x Undo / Redo
   x Darstellung / Editierbarkeit beim Verwerfen der Löschung wiederherstellen
-- Ergänzung Sanitizer: Fehler bei der Vergabe eines Tags, dessen Konfiguration nicht existiert
+x Zusätzliche Prüfungen im Sanitizer:
+  x Tag an einem Schritt, zu dem es keine Konfiguration gibt
+  x Freitext an einem Tag, das laut Konfiguration keinen Freitext zulässt
+  x Mehrdeutige Konfigurationsbezeichner
+  x Dasselbe Tag mehrfach an einem Schritt
+  x Konfiguration ohne Label und ohne Icon
 - PDF-Export von Meta Tags
   - Nice to have: Freitext als Kommentar in der PDF-Ausgabe?
 - Verschieben der Tags eines Schritts untereinander mit rechts/links im Kontextmenü analog Catch-Bereiche
