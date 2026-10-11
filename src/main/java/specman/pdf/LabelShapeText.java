@@ -23,9 +23,9 @@ public class LabelShapeText extends AbstractShapeText {
   /** The text of the label at the position where Swing paints it.
    * @param textRect the area the label's layout computation puts the text into */
   public static LabelShapeText at(JLabel label, Rectangle textRect) {
-    // writeToPDF() puts the baseline (top inset - 1 + font size) below the top
+    // writeToPDF() puts the baseline (top inset + font size) below the top
     int ascent = label.getFontMetrics(label.getFont()).getAscent();
-    Insets insets = new Insets(textRect.y + ascent - label.getFont().getSize() + 1, textRect.x + 1, 0, 0);
+    Insets insets = new Insets(textRect.y + ascent - label.getFont().getSize(), textRect.x + 1, 0, 0);
     return new LabelShapeText(label.getText(), insets, label.getForeground(), label.getFont());
   }
 
@@ -35,7 +35,7 @@ public class LabelShapeText extends AbstractShapeText {
     pdfCanvas.beginText().setFontAndSize(getPDFFont(), scaledFontSize)
       .moveText(
         (renderOffset.x + insets.left -1) * swing2pdfScaleFactor,
-        (renderOffset.y - insets.top +1) * swing2pdfScaleFactor - scaledFontSize)
+        (renderOffset.y - insets.top) * swing2pdfScaleFactor - scaledFontSize)
       .showText(getContent())
       .endText();
   }

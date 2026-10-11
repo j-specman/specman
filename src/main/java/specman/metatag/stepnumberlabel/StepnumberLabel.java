@@ -168,15 +168,15 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
   }
 
   private void drawDeletionLine(Graphics g) {
-    LineShape dline = createDeletionLine(0);
+    LineShape dline = createDeletionLine();
     if (dline != null) {
       g.drawLine(dline.start().x, dline.start().y, dline.end().x, dline.end().y);
     }
   }
 
-  private LineShape createDeletionLine(int horizontalLinePlacementOffset) {
+  private LineShape createDeletionLine() {
     // -1 turned out to produce a better horizontal line placement
-    int VERTICAL_LINE_PLACEMENT_OFFSET = -1;
+    int LINE_X_PLACEMENT_OFFSET = -1;
     IntRange delSubStringRange = findDelSubStringRange();
 
     if (delSubStringRange != null) {
@@ -185,8 +185,8 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
 
       int undeletedWidth = metrics.stringWidth(getText().substring(0, delSubStringRange.getMinimumInteger()));
       int deletedWidth = metrics.stringWidth(getText().substring(delSubStringRange.getMinimumInteger(), delSubStringRange.getMaximumInteger()));
-      int lineY = textRect.y + textRect.height / 2 + horizontalLinePlacementOffset;
-      int lineX = textRect.x + VERTICAL_LINE_PLACEMENT_OFFSET;
+      int lineY = textRect.y + textRect.height / 2;
+      int lineX = textRect.x + LINE_X_PLACEMENT_OFFSET;
       return new LineShape(
         lineX + undeletedWidth,
         lineY,
@@ -295,10 +295,9 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
   }
 
   public Shape getShape() {
-    int lineYOffset = (int)editor().scale(1.0);
     return new HangingTabShape(this, arc())
       .withText(LabelShapeText.at(this, textRect()))
-      .add(createDeletionLine(lineYOffset));
+      .add(createDeletionLine());
   }
 
   private void setStructureUDBL(LabelStructure structure) { UDBL.setStructureUDBL(this, structure); }
