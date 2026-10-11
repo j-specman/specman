@@ -1,6 +1,7 @@
 package specman.view;
 
 import specman.metatag.KlappbarerBereichI;
+import specman.metatag.TagMoveDirection;
 import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
@@ -41,6 +42,7 @@ import specman.editarea.EditContainer;
 import specman.editarea.Indentions;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TextEditArea;
+import specman.undo.UndoableMetaTagMoved;
 import specman.undo.UndoableMetaTagRemoved;
 import specman.undo.props.UDBL;
 
@@ -747,6 +749,17 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
   /** @return the index the tag had */
   public int removeTag(GenericMetaTag tag) { return editContainer.removeTag(tag); }
+
+  public boolean allowsTagMove(GenericMetaTag tag, TagMoveDirection direction) {
+    return editContainer.allowsTagMove(tag, direction);
+  }
+
+  public void moveTag(GenericMetaTag tag, TagMoveDirection direction) { editContainer.moveTag(tag, direction); }
+
+  public void moveTagUDBL(GenericMetaTag tag, TagMoveDirection direction) {
+    moveTag(tag, direction);
+    editor().addEdit(new UndoableMetaTagMoved(this, tag, direction));
+  }
 
   /** Removes the step's tags which refer to the given configuration, each as an undoable edit. */
   public void removeTagsOfUDBL(MetaTagConfig config) {

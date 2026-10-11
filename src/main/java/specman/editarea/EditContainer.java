@@ -16,6 +16,7 @@ import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.metatag.MetaTagPanel;
+import specman.metatag.TagMoveDirection;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.AbstractEditAreaModel_V002;
@@ -386,6 +387,10 @@ public class EditContainer extends JPanel {
 		updateBounds();
 		return index;
 	}
+
+	public boolean allowsTagMove(GenericMetaTag tag, TagMoveDirection direction) { return metaPanel.allowsTagMove(tag, direction); }
+
+	public void moveTag(GenericMetaTag tag, TagMoveDirection direction) { metaPanel.moveTag(tag, direction); }
 
 	public boolean hasTag(MetaTagConfig config) { return metaPanel.hasTag(config); }
 

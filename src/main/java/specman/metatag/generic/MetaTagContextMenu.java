@@ -1,6 +1,7 @@
 package specman.metatag.generic;
 
 import specman.graphics.IconReader;
+import specman.metatag.TagMoveDirection;
 import specman.undo.UndoableMetaTagRemoved;
 import specman.view.AbstractSchrittView;
 
@@ -19,15 +20,25 @@ class MetaTagContextMenu implements MouseListener {
 
   private final JPopupMenu popup = new JPopupMenu();
   private final JMenuItem edit = new JMenuItem("Edit");
+  private final JMenuItem left = new JMenuItem("Move left", IconReader.readImageIcon("arrow-left"));
+  private final JMenuItem right = new JMenuItem("Move right", IconReader.readImageIcon("arrow-right"));
   private GenericMetaTag currentTag;
   private AbstractSchrittView currentStep;
 
   private MetaTagContextMenu() {
     edit.addActionListener(e -> currentTag.editFreetext());
+    left.addActionListener(e -> moveCurrentTag(TagMoveDirection.LEFT));
+    right.addActionListener(e -> moveCurrentTag(TagMoveDirection.RIGHT));
     JMenuItem delete = new JMenuItem("Delete", IconReader.readImageIcon("loeschen"));
     delete.addActionListener(e -> deleteCurrentTag());
     popup.add(edit);
+    popup.add(left);
+    popup.add(right);
     popup.add(delete);
+  }
+
+  private void moveCurrentTag(TagMoveDirection direction) {
+    currentStep.moveTagUDBL(currentTag, direction);
   }
 
   private void deleteCurrentTag() {
@@ -46,6 +57,12 @@ class MetaTagContextMenu implements MouseListener {
         currentTag = tag;
         currentStep = step;
         edit.setVisible(tag.getConfig().allowsFreetext());
+        boolean leftAllowed = step.allowsTagMove(tag, TagMoveDirection.LEFT);
+        boolean rightAllowed = step.allowsTagMove(tag, TagMoveDirection.RIGHT);
+        left.setVisible(leftAllowed || rightAllowed);
+        right.setVisible(leftAllowed || rightAllowed);
+        left.setEnabled(leftAllowed);
+        right.setEnabled(rightAllowed);
         popup.show(e.getComponent(), e.getX(), e.getY());
       }
     }

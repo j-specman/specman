@@ -89,6 +89,20 @@ public class MetaTagPanel extends JPanel {
     return index;
   }
 
+  public boolean allowsTagMove(GenericMetaTag tag, TagMoveDirection direction) {
+    int newIndex = tags.indexOf(tag) + direction.indexOffset();
+    return newIndex >= 0 && newIndex < tags.size();
+  }
+
+  /** Moves the tag one position in the given direction and hangs all tags anew. */
+  public void moveTag(GenericMetaTag tag, TagMoveDirection direction) {
+    int newIndex = tags.indexOf(tag) + direction.indexOffset();
+    tags.remove(tag);
+    tags.add(newIndex, tag);
+    updateTagLocations();
+    repaint();
+  }
+
   /** Informs the tag of the edited configuration - the panel has a null layout, so afterwards the
    * tags are repositioned, as their widths may have changed. */
   private void configReplaced(MetaTagConfig oldConfig, MetaTagConfig newConfig) {
