@@ -197,7 +197,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
 
   @Override
   public void setGeloeschtMarkiertStilUDBL(ChangeSet triggerSet) {
-    setChangeInfo(changeInfo.deleted(triggerSet));
+    setChangeInfoUDBL(changeInfo.deleted(triggerSet));
     setBackgroundUDBL(triggerSet.panelColor());
     cellstream().forEach(cell -> cell.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet()));
   }
@@ -481,7 +481,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       }
     }
     else {
-      cells.get(rowIndex).forEach(cell -> cell.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet()));
+      cells.get(rowIndex).forEach(cell -> cell.setGeloeschtMarkiertStilUDBL(null, changeset()));
     }
   }
 
@@ -542,7 +542,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       }
     }
     else {
-      cells.forEach(row -> row.get(colIndex).setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet()));
+      cells.forEach(row -> row.get(colIndex).setGeloeschtMarkiertStilUDBL(null, changeset()));
     }
   }
 
