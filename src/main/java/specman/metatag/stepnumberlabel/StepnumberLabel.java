@@ -34,7 +34,7 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
   private LabelStructure structure;
   // Tracks which color the current border was built from, so zoom changes can rebuild it at the
   // new scale (see refreshMetaWidgetScale()) without needing to know which style is active.
-  private Color borderColor;
+  private Color borderSourceColor;
   // See setHeightGrowthCompensation() - subtracted from the bottom inset to counteract
   // EditContainer#updateBounds() growing this label's height in "abgesetzte" steps.
   private int heightGrowthCompensation;
@@ -62,20 +62,23 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
     return scaledBorder(color, heightGrowthCompensation);
   }
 
+  public void setBorderSourceColor(Color color) { borderSourceColor = color; }
+  public Color getBorderSourceColor() { return borderSourceColor; }
+
   private void setBorderForColor(Color color) {
-    borderColor = color;
+    setBorderSourceColor(color);
     setBorder(scaledBorder(color));
   }
 
   private void setBorderForColorUDBL(Color color) {
-    borderColor = color;
+    setBorderSourceColorUDBL(color);
     setBorderUDBL(scaledBorder(color));
   }
 
   /** Called from EditContainer#skalieren() so the border rescales immediately on zoom change,
    * not only the next time the label's style (standard/target/source/deleted) changes. */
   public void refreshMetaWidgetScale() {
-    setBorder(scaledBorder(borderColor));
+    setBorder(scaledBorder(borderSourceColor));
   }
 
   /** Scales font and border to the given zoom. */
@@ -95,7 +98,7 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
   public void setHeightGrowthCompensation(int pixels) {
     if (heightGrowthCompensation != pixels) {
       heightGrowthCompensation = pixels;
-      setBorder(scaledBorder(borderColor));
+      setBorder(scaledBorder(borderSourceColor));
     }
   }
 
@@ -271,6 +274,7 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
   private void setForegroundUDBL(Color fg) { UDBL.setForegroundUDBL(this, fg); }
   private void setBackgroundUDBL(Color fg) { UDBL.setBackgroundUDBL(this, fg); }
   private void setBorderUDBL(Border border) { UDBL.setBorderUDBL(this, border); }
+  private void setBorderSourceColorUDBL(Color color) { UDBL.setBorderSourceColorUDBL(this, color); }
 
   @Override
   public String toString() {

@@ -263,8 +263,8 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   protected void ueberschriftAlsGeloeschtMarkierenUDBL() {
     primaryCatchHeading.alsGeloeschtMarkierenUDBL();
     coCatchHeadings.forEach(cch -> cch.alsGeloeschtMarkierenUDBL());
-    headingHeightEaterPanel.setBackground(changeset().panelColor());
-    headingRightBarPanel.setBackground(changeset().panelColor());
+    UDBL.setBackgroundUDBL(headingHeightEaterPanel, changeset().panelColor());
+    UDBL.setBackgroundUDBL(headingRightBarPanel, changeset().panelColor());
   }
 
   @Override public void focusGained(FocusEvent e) {}

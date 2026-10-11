@@ -63,6 +63,14 @@ public class UDBL {
     }
   }
 
+  public static void setBorderSourceColorUDBL(StepnumberLabel label, Color color) {
+    Color undoColor = label.getBorderSourceColor();
+    if (!Objects.equals(undoColor, color)) {
+      label.setBorderSourceColor(color);
+      addEdit(new UndoableSetLabelBorderSourceColor(label, undoColor));
+    }
+  }
+
   public static void setTextUDBL(JLabel label, String text) {
     String undoText = label.getText();
     if (!Objects.equals(undoText, text)) {
