@@ -38,7 +38,7 @@ public class MetaTagPanel extends JPanel {
   // All still in flux for finetuning the "hanging tab" look - at 100% zoom, scaled from there
   // the same way the widgets' own sizes are (see StepnumberLabel/KlappButton paint()/updateLocation()).
   public static final int WIDGET_GAP = 4;
-  public static final int RIGHT_MARGIN = 3;
+  public static final int RIGHT_MARGIN = 0;
   // Pixels trimmed off a widget's natural preferred height for the final "stingy" box height -
   // larger than AbstractMetaTag.CONTENT_LIFT so the box actually gets shorter, not just internally
   // re-centered.
