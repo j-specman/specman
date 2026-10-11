@@ -165,7 +165,7 @@ public class FormattedShapeText extends AbstractShapeText {
     return null;
   }
 
-  private PdfFont resolvePdfFont(Font swingFont) {
+  static PdfFont resolvePdfFont(Font swingFont) {
     FontCharacteristics fc = new FontCharacteristics();
     fc.setBoldFlag(swingFont.isBold());
     fc.setItalicFlag(swingFont.isItalic());
@@ -176,7 +176,7 @@ public class FormattedShapeText extends AbstractShapeText {
     return fontProvider.getPdfFont(info);
   }
 
-  private String toITextFamilyName(Font swingFont) {
+  private static String toITextFamilyName(Font swingFont) {
     String family = swingFont.getFamily();
     // Map system monospace fonts to Specman's shipped CourierPrime
     if (family.equalsIgnoreCase("Monospaced") || family.equalsIgnoreCase("Courier New")
@@ -266,7 +266,6 @@ public class FormattedShapeText extends AbstractShapeText {
       for (String fontfile : Styles.FONTFILES) {
         fontProvider.addFont(FontProgramFactory.createFont(fontfile));
       }
-      fontProvider.addFont(FontProgramFactory.createFont()); // Helvetica for step labels
     }
     catch (IOException iox) {
       iox.printStackTrace();

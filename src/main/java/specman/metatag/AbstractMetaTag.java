@@ -55,19 +55,19 @@ public abstract class AbstractMetaTag extends JLabel {
     this.borderColor = borderColor;
   }
 
-  /** Border recipe for an AbstractMetaTag's own content box: SIDE_PADDING left/right for the rounded
-   * corners to live in, CONTENT_LIFT bottom inset to nudge Swing's centered content upward,
-   * reduced by heightGrowthCompensation to counteract a matching height growth in "abgesetzte"
-   * (rounded-border) steps (see StepnumberLabel#setHeightGrowthCompensation and
-   * MetaTagPanel.BORDER_OVERDRAW_COMPENSATION for why that's needed there). */
-  protected static Border scaledBorder(Color color, int heightGrowthCompensation) {
-    return scaledBorder(color, heightGrowthCompensation, SIDE_PADDING);
+  /** Border recipe for an AbstractMetaTag's own content box with the default side padding: SIDE_PADDING
+   * left/right for the rounded corners to live in, and exact insets in pixels at the top and bottom.
+   * These are what position the text vertically, see {@link MetaLabelLayout}. */
+  protected static Border insetBorder(Color color, int topInset, int bottomInset) {
+    int padding = (int) editor().scale(SIDE_PADDING);
+    return new MatteBorder(topInset, padding, bottomInset, padding, color);
   }
 
-  /** Same as {@link #scaledBorder(Color, int)}, but with an explicit side padding instead of the
-   * default SIDE_PADDING - for widgets (like KlappButton's plus/minus) that are known not to
-   * collide with the rounded bottom corners even with much less padding than StepnumberLabel's
-   * digits need, and so can sit closer to their own edges. */
+  /** Border recipe with an explicit side padding - for widgets (like KlappButton's plus/minus) that
+   * are known not to collide with the rounded bottom corners even with much less padding than
+   * StepnumberLabel's digits need, and so can sit closer to their own edges. The bottom inset is
+   * CONTENT_LIFT, which nudges Swing's centered content upward (a larger bottom inset than top
+   * shifts the centering point up), reduced by heightGrowthCompensation. */
   protected static Border scaledBorder(Color color, int heightGrowthCompensation, int sidePadding) {
     return scaledBorder(color, heightGrowthCompensation, sidePadding, CONTENT_LIFT);
   }

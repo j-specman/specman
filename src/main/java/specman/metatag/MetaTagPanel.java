@@ -42,7 +42,7 @@ public class MetaTagPanel extends JPanel {
   // Pixels trimmed off a widget's natural preferred height for the final "stingy" box height -
   // larger than AbstractMetaTag.CONTENT_LIFT so the box actually gets shorter, not just internally
   // re-centered.
-  public static final int HEIGHT_TRIM = 4;
+  public static final int HEIGHT_TRIM = 3;
   // Compensates for RoundedBorderDecorator painting its antialiased border line on top of the
   // step number label in "abgesetzte" (rounded-border) steps, once the label bridges the topInset
   // row to reach the very top (see EditContainer#initLayoutAndEditAreas()). Deliberately NOT
@@ -196,7 +196,7 @@ public class MetaTagPanel extends JPanel {
     int leftEdge = stepNumber.getX();
     for (GenericMetaTag tag : tags) {
       tag.scale();
-      tag.updateLocation(leftEdge, height);
+      tag.updateLocation(leftEdge, height, stepNumber.getOverdrawnTopRows());
       leftEdge = tag.getX();
     }
     repositionKlappButton(leftEdge, height);

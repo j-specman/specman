@@ -354,9 +354,9 @@ public class EditContainer extends JPanel {
 		layout.setColumnSpec(3, indentions.rightInset());
 
 		if (schrittNummer != null) {
-			// See updateBounds(): the label's height grows by BORDER_OVERDRAW_COMPENSATION in
-			// "abgesetzte" steps - compensate so the text-to-bottom-edge distance stays the same.
-			schrittNummer.setHeightGrowthCompensation(this.indentions.top ? MetaTagPanel.BORDER_OVERDRAW_COMPENSATION : 0);
+			// See updateBounds(): the border of an "abgesetzte" step paints over the topmost rows
+			// of the label, which the label has to know to keep its text out of them.
+			schrittNummer.setOverdrawnTopRows(this.indentions.top ? MetaTagPanel.BORDER_OVERDRAW_COMPENSATION : 0);
 		}
 
 		// TODO JL: Das ist hier noch nicht sauber. Der oberste und unterste Editbereich haben
