@@ -1,5 +1,6 @@
 package specman.undo.manager;
 
+import net.atlanticbb.tantlinger.ui.text.CompoundUndoManager;
 import org.apache.commons.lang.StringUtils;
 import specman.Specman;
 
@@ -46,7 +47,7 @@ public class SpecmanUndoManager extends UndoManager {
             case Normal:
                 boolean success = super.addEdit(anEdit);
                 if (success) {
-                    updateUnsavedChangesIndicatorInTitleBar();
+                    undoStackChanged();
                 }
                 return success;
             case Composing:
@@ -66,7 +67,7 @@ public class SpecmanUndoManager extends UndoManager {
     public synchronized void discardAllEdits() {
         super.discardAllEdits();
         unsavedWorkingCopy = false;
-        updateUnsavedChangesIndicatorInTitleBar();
+        undoStackChanged();
     }
 
     @Override
@@ -75,7 +76,7 @@ public class SpecmanUndoManager extends UndoManager {
         hideFeedbackOfPreviousUndoRedo();
         super.undo();
         lastUndoneOrRedone = edit;
-        updateUnsavedChangesIndicatorInTitleBar();
+        undoStackChanged();
     }
 
     @Override
@@ -84,7 +85,15 @@ public class SpecmanUndoManager extends UndoManager {
         hideFeedbackOfPreviousUndoRedo();
         super.redo();
         lastUndoneOrRedone = edit;
+        undoStackChanged();
+    }
+
+    /** The undo and redo actions of the text editors are shared by the whole diagram and only enabled
+     * while there is something to undo or redo. Their state is otherwise only updated when a text
+     * editor gains the focus or a text is edited, so edits of any other kind would leave them stale. */
+    private void undoStackChanged() {
         updateUnsavedChangesIndicatorInTitleBar();
+        CompoundUndoManager.updateCentralUndo();
     }
 
     private void hideFeedbackOfPreviousUndoRedo() {

@@ -83,6 +83,15 @@ public class CompoundUndoManager implements UndoableEditListener {
 
   }
 
+  /** Brings the enabled state of {@link #UNDO} and {@link #REDO} in line with the central undo
+   * manager, for changes of its stack which don't originate from a text document, e.g. tag moves. */
+  public static void updateCentralUndo() {
+    if (centralUndoer != null) {
+      UNDO.setEnabled(centralUndoer.canUndo());
+      REDO.setEnabled(centralUndoer.canRedo());
+    }
+  }
+
   public static void discardAllEdits(Document doc) {
     UndoManager um = getUndoManagerForDocument(doc);
     if (um != null) {
