@@ -63,12 +63,12 @@ x Zusätzliche Prüfungen im Sanitizer:
 x PDF-Export von Meta Tags
   x Nice to have: Freitext als Kommentar in der PDF-Ausgabe?
 x Verschieben der Tags eines Schritts untereinander mit rechts/links im Kontextmenü analog Catch-Bereiche
-- Neues Refernzmodell specman-reference-v1.4-model-v2.nsd mit Meta Tag Konfigurationen und Tags an Schritten
-  - Nur Icon / nur Label / beides
-  - Mit / ohne Randfarbe
-  - Mit / ohne Freitext
-  - Ein Tag mit transparentem Hintergrund (nur Icon, steht frei am Rand)
-  - Ein Icon mit scharfer Ecke unten: Im Freitext erklären, dass ein solches Icon im SVG etwas Randabstand braucht, weil das Tag unten abgerundet ist. Gleiches später im Manual (Kapitel zu Tags).
+x Neues Refernzmodell specman-reference-v1.4-model-v2.nsd mit Meta Tag Konfigurationen und Tags an Schritten
+  x Nur Icon / nur Label / beides
+  x Mit / ohne Randfarbe
+  x Mit / ohne Freitext
+  x Ein Tag mit transparentem Hintergrund (nur Icon, steht frei am Rand)
+  x Ein Icon mit scharfer Ecke unten: Im Freitext erklären, dass ein solches Icon im SVG etwas Randabstand braucht, weil das Tag unten abgerundet ist. Gleiches später im Manual (Kapitel zu Tags).
 - Noch zur späteren Überlegung offen:
   x Umgang mit Überlauf: Tags werden nach links hin abgeschnitten. Das ist OK.
   - Freitexte irgendwie durchsuchbar?
