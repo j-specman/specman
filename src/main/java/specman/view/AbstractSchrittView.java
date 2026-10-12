@@ -264,6 +264,27 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	public void geklappt(boolean auf) {}
 
+	/** @return whether the step was folded and is now unfolded. Steps without a fold button never are. */
+	public boolean unfold() {
+		return false;
+	}
+
+	/** Unfolds everything which hides the given fragment of this step: the step itself if the
+	 * fragment is not part of its always visible head (e.g. a branch or catch heading), and all
+	 * enclosing steps.
+	 * @return whether anything was unfolded */
+	public boolean unfoldToShow(InteractiveStepFragment fragment) {
+		boolean unfolded = !enthaelt(fragment) && unfold();
+		for (AbstractSchrittView ancestor = enclosingStep(); ancestor != null; ancestor = ancestor.enclosingStep()) {
+			unfolded |= ancestor.unfold();
+		}
+		return unfolded;
+	}
+
+	private AbstractSchrittView enclosingStep() {
+		return parent != null ? parent.getParent() : null;
+	}
+
 	public void zusammenklappenFuerReview() {
 		unterSequenzen().forEach(SchrittSequenzView::zusammenklappenFuerReview);
 	}

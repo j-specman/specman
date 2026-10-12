@@ -105,6 +105,11 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
   @Override public void componentHidden(ComponentEvent e) {}
 
   @Override
+  public boolean unfold() {
+    return klappen.unfold();
+  }
+
+  @Override
   public void geklappt(boolean auf) {
     sequencesPanel.setVisible(auf);
     String bottomBarLayout = auf ? barRowSpec : ZEILENLAYOUT_INHALT_VERBORGEN;

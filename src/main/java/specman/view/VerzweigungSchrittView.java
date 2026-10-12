@@ -79,6 +79,11 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
     UDBL.setBackgroundUDBL(filler, bg);
   }
 
+  @Override
+  public boolean unfold() {
+    return klappen.unfold();
+  }
+
   /** If the step is placed into a {@link RoundedBorderDecorator}, painting the step
 	 * sometimes causes a corruption of the rounded corners. So we repaint the decorator
 	 * afterwards. However: we can't just call its repaint method which causes a

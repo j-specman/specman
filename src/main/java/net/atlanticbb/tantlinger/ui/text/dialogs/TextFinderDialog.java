@@ -27,6 +27,7 @@ import javax.swing.text.JTextComponent;
 import net.atlanticbb.tantlinger.i18n.I18n;
 import net.atlanticbb.tantlinger.ui.text.TextEditPopupManager;
 import specman.Specman;
+import specman.editarea.InteractiveStepFragment;
 import specman.undo.manager.UndoRecording;
 import static specman.Specman.editor;
 
@@ -282,6 +283,7 @@ public class TextFinderDialog extends JDialog {
         return findResult;
       }
       if (findResult == 1 && !replaceAll) {
+        unfoldToShowHit();
         return findResult;
       }
       sumResult += findResult;
@@ -290,6 +292,19 @@ public class TextFinderDialog extends JDialog {
       this.warning(i18n.str("text_not_found"));
     }
     return sumResult;
+  }
+
+  /** The search also visits text areas inside folded steps. Only the one finally showing a hit
+   * unfolds what hides it, otherwise a search would unfold everything it passes. Layout and focus
+   * of the text area (which could not take the focus while it was hidden) must wait for the
+   * layout pass the unfolding has triggered. */
+  private void unfoldToShowHit() {
+    if (monitor instanceof InteractiveStepFragment fragment && editor().unfoldToShow(fragment)) {
+      SwingUtilities.invokeLater(() -> {
+        monitor.requestFocusInWindow();
+        monitor.scrollRectToVisible(monitor.getBounds());
+      });
+    }
   }
 
   private boolean moveToNextComponent(int startMonitorIndex, int startCaretPosition) {

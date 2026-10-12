@@ -18,6 +18,7 @@ import specman.model.v002.CaseStepModel_V002;
 import specman.pdf.Shape;
 import specman.editarea.Indentions;
 import specman.editarea.InteractiveStepFragment;
+import specman.editarea.TextEditArea;
 import specman.undo.UndoableZweigEntfernt;
 import specman.undo.props.UDBL;
 
@@ -284,6 +285,15 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	@Override
 	public List<SchrittSequenzView> unterSequenzen() {
 		return sequenzenAuflisten(caseSequenzen, sonstSequenz);
+	}
+
+	/** On screen the else branch is the leftmost column, which unterSequenzen() doesn't reflect. */
+	@Override
+	public List<TextEditArea> getTextAreas() {
+		List<TextEditArea> result = editContainer.getTextAreas();
+		result.addAll(sonstSequenz.getTextAreas());
+		caseSequenzen.forEach(sequenz -> result.addAll(sequenz.getTextAreas()));
+		return result;
 	}
 
 	@Override

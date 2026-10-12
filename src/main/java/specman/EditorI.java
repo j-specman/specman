@@ -50,6 +50,7 @@ public interface EditorI extends FocusListener {
   ScrollPause pauseScrolling();
   List<JTextComponent> queryAllTextComponents(JTextComponent tc);
   AbstractSchrittView findStep(InteractiveStepFragment fragment);
+  boolean unfoldToShow(InteractiveStepFragment fragment);
   void scrollBackwardInEditHistory();
   void scrollForwardInEditHistory();
   void appendToEditHistory(EditContainer editContainer);

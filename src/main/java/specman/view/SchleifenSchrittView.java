@@ -181,6 +181,11 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 	}
 
 	@Override
+	public boolean unfold() {
+		return klappen.unfold();
+	}
+
+	@Override
 	public void geklappt(boolean auf) {
 		wiederholSequenz.setVisible(auf);
 		if (untererBalken != null) {

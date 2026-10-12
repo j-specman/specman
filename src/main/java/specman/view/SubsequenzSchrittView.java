@@ -136,6 +136,11 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 	}
 
 	@Override
+	public boolean unfold() {
+		return klappen.unfold();
+	}
+
+	@Override
 	public void geklappt(boolean auf) {
 		subsequenz.setVisible(auf);
 	}

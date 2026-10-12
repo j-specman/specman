@@ -753,6 +753,12 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
   }
 
   @Override
+  public boolean unfoldToShow(InteractiveStepFragment fragment) {
+    AbstractSchrittView step = findStep(fragment);
+    return step != null && step.unfoldToShow(fragment);
+  }
+
+  @Override
   public void scrollBackwardInEditHistory() {
     scrollToHistoricContainer(focusHistory.navigateBack());
   }

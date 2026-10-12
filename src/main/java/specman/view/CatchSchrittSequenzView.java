@@ -334,6 +334,13 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   }
 
   @Override
+  protected List<TextEditArea> headingTextAreas() {
+    List<TextEditArea> result = super.headingTextAreas();
+    coCatchHeadings.forEach(coCatchHeading -> result.addAll(coCatchHeading.ueberschrift.getTextAreas()));
+    return result;
+  }
+
+  @Override
   public void aenderungsmarkierungenEntfernen() {
     primaryCatchHeading.aenderungsmarkierungenEntfernen();
     coCatchHeadings.forEach(cch -> cch.aenderungsmarkierungenEntfernen());

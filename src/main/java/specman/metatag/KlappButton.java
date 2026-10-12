@@ -103,6 +103,18 @@ public class KlappButton extends AbstractMetaTag implements MouseMotionListener,
     }
   }
 
+  /** Unfolds the area programmatically, e.g. to show a search hit. Unlike a click, there is no mouse
+   * over the button afterwards, so it must not stay visible for hovering.
+   * @return whether the area was folded before */
+  public boolean unfold() {
+    if (!isSelected()) {
+      return false;
+    }
+    mouseClicked(null);
+    setHoverVisible(false);
+    return true;
+  }
+
   /** Default look: takes on the step's actual background color (possibly changeset-tinted)
    * rather than being transparent - transparency let whatever happened to be painted underneath
    * (e.g. a text selection highlight in the first edit area, which the metaPanel overlaps) show
