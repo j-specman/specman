@@ -1,6 +1,6 @@
 :toc:
 
-# Specman 1.3 Manual
+# Specman 1.4 Manual
 
 ## Introduction
 // tag::readme[] - this region is copied into readme.adoc by the 'generate-readme' execution in pom.xml (mvn package, or standalone: mvn antrun:run@generate-readme)
@@ -98,3 +98,77 @@ Creates a catch step for a previously defined break step. This is the only kind 
 If a development project is working with a programming language that supports exceptions, it is strongly recommended to represent break and catch by throwing and catching exceptions in the code. In this case, it is a good idea to use relatively short expressions in the break step text, from which exception type names can be directly derived.
 
 Catch steps are displayed in optically separated sections with a gray bar above and below, making clear that this is not part of the normal control flow. Multiple catch steps for the same sequence are usually placed side by side which is
+
+## Meta tags
+Since version 1.4, the steps of a specification can be equipped with _meta tags_: small colored tabs which hang at the top edge of a step, to the left of its step number. They hold information about the step which is useful, but doesn't belong to its actual content, e.g.
+
+* who performs the step: the user, the system, an external system,
+* the implementation status of the step,
+* the requirement or ticket the step originates from,
+* an open question to be clarified in the next review.
+
+image::metatags.png[Meta Tags]
+
+Which kinds of tags exist is entirely up to you. There are basically two terms to understand for tagging:
+
+Meta tag configuration:: Describes a _kind_ of tag: its name, what it looks like (label, icon, colors) and whether its tags can carry a freetext. The configurations are created once per diagram and saved with it. In the following, they are just called _configurations_.
+
+Tag:: A single _occurrence_ of a configuration _at a step_. It looks the way its configuration says, and carries an individual freetext if the configuration allows. A step can have several tags, but only one per configuration.
+
+I.e. configurations are what you set up first, tags are what you then attach to the steps.
+
+### Configuring meta tags
+The configurations of a diagram are managed in the dialog which is opened by choosing _Meta Tags..._ from the _File_ menu. Alternatively, you can reach it from a step number's context menu, see below. The dialog lists all configurations of the diagram. Pressing _New..._ creates a configuration, _Edit..._ changes the selected one (a double click on a list entry does the same), and _Delete_ removes it.
+
+image::metatag-config.png[Meta Tag Configuration]
+
+Most of the dialog for creating or editing a configuration explains itself, and the preview shows what the tags will look like. The name is how the tags at steps refer to their configuration. It must be unique in the diagram, may only consist of letters, digits and underscores, and can no longer be changed once there are tags using the configuration. The label is the text displayed in the tags of this configuration, if any. Either a label or an icon must be provided. The icon comes from an SVG file and is embedded in the diagram file, so the original file isn't needed any more. A border is optional and off by default, and the freetext option is on by default.
+
+NOTE: The bottom corners of a tag are rounded. Parts of an icon which reach into these corners are cut off. If your icon has sharp corners at the bottom or fills its entire area, leave a little margin around the graphic in the SVG.
+
+Changes to a configuration take effect immediately in all tags which refer to it. Deleting a configuration also removes all tags which refer to it. If there are any, Specman asks for confirmation first. Creating, changing and deleting a configuration can be undone and redone like any other operation. The configurations are saved with the diagram, i.e. every diagram has its own set of configurations.
+
+### Attaching tags to steps
+To attach a tag to a step, click the step number with the right mouse button and choose the configuration of the tag from the _Tags_ submenu. The menu items show the icon and label of the configurations (or their name if they have no label). Configurations which the step already has a tag of are grayed out, as a step can only have one tag per configuration. The submenu's last entry _Configure..._ opens the dialog for managing the configurations, so a missing configuration can be created without going back to the _File_ menu.
+
+image::metatags-menu.png[Meta Tags Context Menu]
+
+The first tag attached to a step hangs directly to the left of the step number, the next one to the left of that, and so on. If the step has a fold button, it is always located to the left of the last tag. This is deliberate, because the fold button is only visible while the mouse is hovering over its location. If a step is too narrow to show all of its tags, the tags farthest to the left are cut off.
+
+Tags can be attached to every step which has a step number of its own, with these exceptions:
+
+* Steps marked as deleted do not accept new tags.
+* The headings of catch areas are no steps of their own and therefore don't have tags. The steps inside the handling sequence of a catch area do.
+
+Attaching and removing tags is not part of change tracking: it is not marked as a change, and works the same in change mode and in normal mode.
+
+### Working with tags
+Each tag has its own context menu, brought up by right-clicking the tag:
+
+* _Edit_ opens the freetext editor. The item is only available if the configuration of the tag allows freetexts.
+* _Move left_ and _Move right_ change the order of the tags at the step. The items are only shown if the step has more than one tag, and disabled at the end of the row.
+* _Delete_ removes the tag from the step.
+
+The order of tags can also be changed by dragging a tag with the mouse. A vertical line shows where the tag will end up when the mouse button is released.
+
+#### Freetext
+If the configuration of a tag allows freetexts, the tag can carry an individual text. When the mouse rests on the tag, the text is displayed as a tooltip. The freetext is plain text: Formatting is not supported, and HTML tags are shown literally.
+
+A single click on the tag, or _Edit_ from its context menu, opens the freetext editor. It looks like a note and appears below the tag, or above it if there is no room below on the screen.
+
+* Clicking anywhere outside of the editor closes it and takes over the text. _Ctrl+Enter_ does the same.
+* _Escape_ closes the editor and discards the changes.
+* The _Enter_ key inserts a line break.
+* The editor window is limited to 12 lines. A longer text is displayed with a scrollbar. The tooltip has no such limit.
+
+Each freetext change can be undone and redone. If a configuration is changed to not allow freetext any more, the texts of its existing tags are neither shown nor saved any longer. If this change is undone, the texts come back.
+
+On PDF export, the freetext of a tag is exported as a comment, which can be read in all common PDF viewers like Acrobat Reader, Chrome or Edge.
+
+Freetexts of tags can be searched and replaced with Specman's search dialog (_Ctrl+F_) after changing _Search in:_ from _Model_ to _Tags_.
+
+image::metatags-find-replace.png[Meta Tags Find & Replace]
+
+#### Copy & Paste
+Tags are kept when steps are moved or copied within a diagram. Copying steps to another diagram only takes their tags along if the target diagram has a configuration of the same name. Configurations are never taken over into the target diagram on pasting. Specman reports the names of the missing configurations in a short notification, so you can create them in the target diagram and paste again. If the target diagram has the configuration but it doesn't allow freetexts there, the tag is pasted without its freetext. The freetext is dropped silently, without a notification.
+
