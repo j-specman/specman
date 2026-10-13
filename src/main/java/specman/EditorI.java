@@ -6,6 +6,7 @@ import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
+import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.undo.manager.UndoRecording;
@@ -51,6 +52,9 @@ public interface EditorI extends FocusListener {
   List<JTextComponent> queryAllTextComponents(JTextComponent tc);
   AbstractSchrittView findStep(InteractiveStepFragment fragment);
   boolean unfoldToShow(InteractiveStepFragment fragment);
+  /** @return the tags with a freetext (which is not just blank) in document order, except those of
+   * deleted steps, as their freetext can't be edited */
+  List<GenericMetaTag> queryTagsWithFreetext();
   void scrollBackwardInEditHistory();
   void scrollForwardInEditHistory();
   void appendToEditHistory(EditContainer editContainer);

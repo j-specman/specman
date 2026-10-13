@@ -10,11 +10,15 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.text.BadLocationException;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.GraphicsConfiguration;
 import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -85,9 +89,56 @@ class FreetextEditorPopup extends JPopupMenu {
     });
   }
 
-  void showBelow(JComponent invoker) {
-    show(invoker, 0, invoker.getHeight());
-    SwingUtilities.invokeLater(textArea::requestFocusInWindow);
+  void select(int selectionStart, int selectionEnd) {
+    textArea.select(selectionStart, selectionEnd);
+  }
+
+  /** Shows the editor below the invoker, or above it if it doesn't fit below the invoker on the
+   * screen but above. Otherwise Swing would push it up as far as necessary, over the invoker. */
+  void showNear(JComponent invoker) {
+    show(invoker, 0, yRelativeToInvoker(invoker));
+    SwingUtilities.invokeLater(() -> {
+      textArea.requestFocusInWindow();
+      scrollSelectionToVisible();
+    });
+  }
+
+  /** A selected part of a long text, e.g. a search hit, may be outside of the visible part of the
+   * text. Only works once the popup has been laid out, as the position depends on the line wrapping. */
+  private void scrollSelectionToVisible() {
+    if (textArea.getSelectionStart() == textArea.getSelectionEnd()) {
+      return;
+    }
+    try {
+      Rectangle selectionStart = textArea.modelToView2D(textArea.getSelectionStart()).getBounds();
+      Rectangle selectionEnd = textArea.modelToView2D(textArea.getSelectionEnd()).getBounds();
+      textArea.scrollRectToVisible(selectionStart.union(selectionEnd));
+    } catch (BadLocationException e) {
+      // The selection was just set by select(), so its positions are valid
+      throw new IllegalStateException(e);
+    }
+  }
+
+  private int yRelativeToInvoker(JComponent invoker) {
+    int popupHeight = getPreferredSize().height;
+    Rectangle usableScreen = usableScreenArea(invoker);
+    int invokerTop = invoker.getLocationOnScreen().y;
+    int spaceBelow = usableScreen.y + usableScreen.height - (invokerTop + invoker.getHeight());
+    int spaceAbove = invokerTop - usableScreen.y;
+    boolean showAbove = popupHeight > spaceBelow && popupHeight <= spaceAbove;
+    return showAbove ? -popupHeight : invoker.getHeight();
+  }
+
+  /** The screen of the invoker without taskbars and the like. */
+  private static Rectangle usableScreenArea(JComponent invoker) {
+    GraphicsConfiguration screen = invoker.getGraphicsConfiguration();
+    Rectangle bounds = screen.getBounds();
+    Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(screen);
+    return new Rectangle(
+      bounds.x + insets.left,
+      bounds.y + insets.top,
+      bounds.width - insets.left - insets.right,
+      bounds.height - insets.top - insets.bottom);
   }
 
   /** Fixed width of COLUMNS characters; height is whatever the wrapped text needs, but never less

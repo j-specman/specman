@@ -127,14 +127,35 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
   }
 
   void editFreetext() {
-    if (!config.allowsFreetext() || deleted) {
-      return;
+    if (canEditFreetext()) {
+      createFreetextEditor().showNear(this);
     }
+  }
+
+  /** Opens the freetext editor with the given part of the text selected, e.g. a search hit. */
+  public void editFreetext(int selectionStart, int selectionEnd) {
+    if (canEditFreetext()) {
+      FreetextEditorPopup popup = createFreetextEditor();
+      popup.select(selectionStart, selectionEnd);
+      popup.showNear(this);
+    }
+  }
+
+  private boolean canEditFreetext() {
+    return config.allowsFreetext() && !deleted;
+  }
+
+  private FreetextEditorPopup createFreetextEditor() {
     hideFreetextFeedback();
     // Without this, the tooltip would pop up on top of the editor as soon as the mouse (still
     // resting on the tag after the click) moves a little.
     setToolTipText(null);
-    new FreetextEditorPopup(getFont(), freetext, this::commitFreetext, this::updateTooltip).showBelow(this);
+    return new FreetextEditorPopup(getFont(), freetext, this::commitFreetext, this::updateTooltip);
+  }
+
+  /** Changes the freetext like the editor does when it commits, i.e. as an undoable edit. */
+  public void replaceFreetext(String newFreetext) {
+    commitFreetext(newFreetext);
   }
 
   /** The editor delivers an empty string for a cleared text, while a never-edited tag has null -

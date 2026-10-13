@@ -69,9 +69,13 @@ x Neues Refernzmodell specman-reference-v1.4-model-v2.nsd mit Meta Tag Konfigura
   x Mit / ohne Freitext
   x Ein Tag mit transparentem Hintergrund (nur Icon, steht frei am Rand)
   x Ein Icon mit scharfer Ecke unten: Im Freitext erklären, dass ein solches Icon im SVG etwas Randabstand braucht, weil das Tag unten abgerundet ist. Gleiches später im Manual (Kapitel zu Tags).
-- Noch zur späteren Überlegung offen:
-  x Umgang mit Überlauf: Tags werden nach links hin abgeschnitten. Das ist OK.
-  - Freitexte irgendwie durchsuchbar?
+x Umgang mit Überlauf: Tags werden nach links hin abgeschnitten. Das ist OK.
+x Freitexte durchsuchen
+  x Auswahlbare Suchbereiche "Model" und "Tags" im Suchdialog
+  x Scrollen zum richtigen Schritt
+  x Freitext-Editor öffnen und Scrollen zum Suchtreffer im Text
+  x Compound Undo / Redo für Replace All ohne Tooltipanzeigen
+  x Tags gelöschter Schritte werden ignoriert -> kein Konflikt mit Editoranzeige und Replace
 
 Aus aktueller Anwendung
 - beim Öffnen und einer vorhandenen .wrk, *drei* Optionen: 1) nicht laden, 2) laden, 3) ist in Arbeit - nicht laden aber auch nicht überschreiben und beim Schließen löschen

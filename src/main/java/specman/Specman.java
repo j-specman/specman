@@ -11,6 +11,7 @@ import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
 import specman.editarea.EditArea;
 import specman.ops.*;
+import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.metatag.generic.config.MetaTagConfigRegistry;
@@ -619,6 +620,20 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
       names.addAll(step.getTagConfigNames());
     }
     return names;
+  }
+
+  @Override
+  public List<GenericMetaTag> queryTagsWithFreetext() {
+    List<GenericMetaTag> result = new ArrayList<>();
+    for (AbstractSchrittView step : listAllSteps()) {
+      for (GenericMetaTag tag : step.getTextShef().getTags()) {
+        String freetext = tag.getFreetext();
+        if (!tag.isDeleted() && freetext != null && !freetext.isBlank()) {
+          result.add(tag);
+        }
+      }
+    }
+    return result;
   }
 
   @Override
