@@ -601,8 +601,14 @@ public class EditContainer extends JPanel {
 		editAreas.forEach(ea -> addComponentListener(componentListener));
 	}
 
-	public boolean enthaeltAenderungsmarkierungen() {
-		return editAreas.stream().anyMatch(ea -> ea.enthaeltAenderungsmarkierungen());
+	public ChangeSet firstChangeSet() {
+		for (EditArea<?> editArea : editAreas) {
+			ChangeSet changeSet = editArea.firstChangeSet();
+			if (changeSet != null) {
+				return changeSet;
+			}
+		}
+		return null;
 	}
 
 	public specman.pdf.Shape getShape() {

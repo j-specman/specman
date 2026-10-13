@@ -452,12 +452,14 @@ public class SchrittSequenzView {
 		}
 	}
 
-	public boolean enthaeltAenderungsmarkierungen() {
-		for (AbstractSchrittView schritt: schritte) {
-			if (schritt.enthaeltAenderungsmarkierungen())
-				return true;
+	public ChangeSet firstChangeSet() {
+		for (AbstractSchrittView schritt : schritte) {
+			ChangeSet changeSet = schritt.firstChangeSet();
+			if (changeSet != null) {
+				return changeSet;
+			}
 		}
-		return false;
+		return null;
 	}
 
 	public void setVisible(boolean auf) {

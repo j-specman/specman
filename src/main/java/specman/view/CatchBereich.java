@@ -122,13 +122,14 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
   }
 
   @Override
-  public boolean enthaeltAenderungsmarkierungen() {
-    for (CatchSchrittSequenzView seq: catchSequences) {
-      if (seq.enthaeltAenderungsmarkierungen()) {
-        return true;
+  public ChangeSet firstChangeSet() {
+    for (CatchSchrittSequenzView seq : catchSequences) {
+      ChangeSet changeSet = seq.firstChangeSet();
+      if (changeSet != null) {
+        return changeSet;
       }
     }
-    return false;
+    return null;
   }
 
   public int catchEntfernen(CatchSchrittSequenzView catchSequence) {
@@ -161,9 +162,7 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
   }
 
   public void zusammenklappenFuerReview() {
-    boolean anyChanges = catchSequences
-      .stream()
-      .anyMatch(sequence -> sequence.enthaeltAenderungsmarkierungen());
+    boolean anyChanges = enthaeltAenderungsmarkierungen();
     if (!anyChanges) {
       klappen.init(true);
     }

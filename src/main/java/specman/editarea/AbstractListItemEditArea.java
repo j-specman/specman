@@ -225,7 +225,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   }
 
   //**************** canonical EditArea method implementations ************************
-  @Override public boolean enthaeltAenderungsmarkierungen() { return changeInfo.isChange() || content.enthaeltAenderungsmarkierungen(); }
+  @Override public ChangeSet firstChangeSet() { return changeInfo.isChange() ? changeInfo.changeSet() : content.firstChangeSet(); }
   @Override public void aenderungsmarkierungenEntfernen() { content.aenderungsmarkierungenEntfernen(null); }
   @Override public void findStepnumberLinkIDs(HashMap<TextEditArea, List<String>> stepnumberLinkMap) { content.findStepnumberLinkIDs(stepnumberLinkMap); }
   @Override public boolean enthaelt(InteractiveStepFragment fragment) { return content.enthaelt(fragment); }

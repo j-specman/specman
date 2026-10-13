@@ -1,6 +1,7 @@
 package specman.metatag;
 
 import specman.view.RoundedBorderDecorator;
+import specman.ChangeSet;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import specman.graphics.SvgIcon;
@@ -218,9 +219,9 @@ public class KlappButton extends AbstractMetaTag implements MouseMotionListener,
   @Override public void mouseClicked(MouseEvent e) {
     setSelected(!isSelected());
     if (isSelected()) {
-      boolean zuklappenVerbirgtAenderungen = klappbarerBereich.enthaeltAenderungsmarkierungen();
-      if (zuklappenVerbirgtAenderungen) {
-        setColor(Color.yellow);
+      ChangeSet hiddenChangeSet = klappbarerBereich.firstChangeSet();
+      if (hiddenChangeSet != null) {
+        setColor(hiddenChangeSet.textColor());
       }
     } else {
       resetToDefaultBackground();

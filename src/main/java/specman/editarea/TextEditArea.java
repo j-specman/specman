@@ -629,9 +629,15 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     @Override
-    public boolean enthaeltAenderungsmarkierungen() {
-        return changeInfo.isChange()
-          || !findMarkups(FirstChangeOnly).isEmpty();
+    public ChangeSet firstChangeSet() {
+        if (changeInfo.isChange()) {
+            return changeInfo.changeSet();
+        }
+        List<Markup_V002> changeMarkups = findMarkups(FirstChangeOnly);
+        if (changeMarkups.isEmpty()) {
+            return null;
+        }
+        return ChangeSet.fromName(changeMarkups.get(0).changeset);
     }
 
     private void scrollToStepnumber() {

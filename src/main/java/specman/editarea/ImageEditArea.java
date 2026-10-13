@@ -361,7 +361,9 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   @Override public boolean isImageEditArea() { return true; }
 
   @Override
-  public boolean enthaeltAenderungsmarkierungen() { return changeInfo != null; }
+  public ChangeSet firstChangeSet() {
+    return changeInfo.isChange() ? changeInfo.changeSet() : null;
+  }
 
   @Override
   public void findStepnumberLinkIDs(HashMap<TextEditArea, List<String>> stepnumberLinkMap) {

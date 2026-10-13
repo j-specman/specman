@@ -56,7 +56,8 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V002> extends Inte
 
   void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups);
 
-  boolean enthaeltAenderungsmarkierungen();
+  /** @return the changeset of the first change mark found in this area, or null if there is none */
+  ChangeSet firstChangeSet();
 
   void findStepnumberLinkIDs(HashMap<TextEditArea, List<String>> stepnumberLinkMap);
 

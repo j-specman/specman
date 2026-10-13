@@ -62,11 +62,12 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 	}
 
   @Override
-  public boolean enthaeltAenderungsmarkierungen() {
-    if (ueberschrift.enthaeltAenderungsmarkierungen()) {
-      return true;
+  public ChangeSet firstChangeSet() {
+    ChangeSet changeSet = ueberschrift.firstChangeSet();
+    if (changeSet != null) {
+      return changeSet;
     }
-    return super.enthaeltAenderungsmarkierungen();
+    return super.firstChangeSet();
   }
 
   public boolean hatUeberschrift(InteractiveStepFragment fragment) {

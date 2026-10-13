@@ -336,13 +336,19 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		}
 	}
 
-	public boolean enthaeltAenderungsmarkierungen() {
-		if (editContainer.enthaeltAenderungsmarkierungen()) {
-			return true;
+	@Override
+	public ChangeSet firstChangeSet() {
+		ChangeSet changeSet = editContainer.firstChangeSet();
+		if (changeSet != null) {
+			return changeSet;
 		}
-		return unterSequenzen()
-			.stream()
-			.anyMatch(untersequenz -> untersequenz.enthaeltAenderungsmarkierungen());
+		for (SchrittSequenzView untersequenz : unterSequenzen()) {
+			changeSet = untersequenz.firstChangeSet();
+			if (changeSet != null) {
+				return changeSet;
+			}
+		}
+		return null;
 	}
 
 	public AbstractSchrittView findeSchritt(InteractiveStepFragment fragment) {

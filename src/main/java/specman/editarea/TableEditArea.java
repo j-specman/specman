@@ -325,8 +325,16 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   @Override
-  public boolean enthaeltAenderungsmarkierungen() {
-    return cellstream().anyMatch(cell -> cell.enthaeltAenderungsmarkierungen());
+  public ChangeSet firstChangeSet() {
+    for (List<EditContainer> row : cells) {
+      for (EditContainer cell : row) {
+        ChangeSet changeSet = cell.firstChangeSet();
+        if (changeSet != null) {
+          return changeSet;
+        }
+      }
+    }
+    return null;
   }
 
   @Override
