@@ -1,4 +1,4 @@
-package specman.editarea.stepnumberlabel;
+package specman.metatag.stepnumberlabel;
 
 import specman.Specman;
 import specman.view.AbstractSchrittView;

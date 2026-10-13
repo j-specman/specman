@@ -1,5 +1,7 @@
 package specman.view;
 
+import specman.metatag.KlappbarerBereichI;
+import specman.metatag.KlappButton;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
@@ -17,7 +19,7 @@ import specman.draganddrop.DropTarget;
 import specman.draganddrop.LocalCursor;
 import specman.editarea.InteractiveStepFragment;
 import specman.graphics.Styles;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.CatchAreaModel_V002;
@@ -73,10 +75,6 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
     topBar.setLayout(null);
 
     klappen = new KlappButton(this, topBar, bereichLayout, 4, null);
-    // Sits in the divider bar rather than hanging from a step number - the lighter gray border
-    // that KlappButton uses by default (matching StepnumberLabel's own gray) is too subtle against
-    // Hintergrundfarbe_Deviderbar, so use a darker one here instead.
-    klappen.setBorderColor(Color.GRAY);
 
     bereichPanel.addComponentListener(this);
 
@@ -105,6 +103,11 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
   @Override public void componentMoved(ComponentEvent e) {}
   @Override public void componentShown(ComponentEvent e) {}
   @Override public void componentHidden(ComponentEvent e) {}
+
+  @Override
+  public boolean unfold() {
+    return klappen.unfold();
+  }
 
   @Override
   public void geklappt(boolean auf) {

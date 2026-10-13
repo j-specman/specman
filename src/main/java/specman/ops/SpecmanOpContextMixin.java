@@ -3,6 +3,7 @@ package specman.ops;
 import specman.ScrollPause;
 import specman.SpaltenResizer;
 import specman.editarea.EditArea;
+import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.undo.manager.UndoRecording;
 import specman.editarea.EditContainer;
@@ -10,6 +11,8 @@ import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
+
+import java.util.List;
 
 public interface SpecmanOpContextMixin {
   SpecmanOpContext context();
@@ -39,6 +42,7 @@ public interface SpecmanOpContextMixin {
   default void zoomFaktorAnzeigeAktualisieren(int prozent) { context().zoomFaktorAnzeigeAktualisieren(prozent); }
   default void setDiagrammbreite(int breite) { context().setDiagrammbreite(breite); }
   default void setPdfExportOptions(PdfExportOptionsModel_V002 options) { context().setPdfExportOptions(options); }
+  default void setMetaTagConfigs(List<MetaTagConfig> configs) { context().setMetaTagConfigs(configs); }
   default void setHauptSequenz(specman.view.SchrittSequenzView seq) { context().setHauptSequenz(seq); }
   default void hauptSequenzInitialisieren() { context().hauptSequenzInitialisieren(); }
   default void setDiagrammName(String name) { context().setDiagrammName(name); }

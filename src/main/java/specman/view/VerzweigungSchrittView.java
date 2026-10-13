@@ -1,5 +1,6 @@
 package specman.view;
 
+import specman.metatag.KlappButton;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.ChangeInfo;
 import specman.StepNumber;
@@ -76,6 +77,11 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
   public void setBackgroundUDBL(Color bg) {
     super.setBackgroundUDBL(bg);
     UDBL.setBackgroundUDBL(filler, bg);
+  }
+
+  @Override
+  public boolean unfold() {
+    return klappen.unfold();
   }
 
   /** If the step is placed into a {@link RoundedBorderDecorator}, painting the step

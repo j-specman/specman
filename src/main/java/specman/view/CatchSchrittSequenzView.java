@@ -263,8 +263,8 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   protected void ueberschriftAlsGeloeschtMarkierenUDBL() {
     primaryCatchHeading.alsGeloeschtMarkierenUDBL();
     coCatchHeadings.forEach(cch -> cch.alsGeloeschtMarkierenUDBL());
-    headingHeightEaterPanel.setBackground(changeset().panelColor());
-    headingRightBarPanel.setBackground(changeset().panelColor());
+    UDBL.setBackgroundUDBL(headingHeightEaterPanel, changeset().panelColor());
+    UDBL.setBackgroundUDBL(headingRightBarPanel, changeset().panelColor());
   }
 
   @Override public void focusGained(FocusEvent e) {}
@@ -331,6 +331,13 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   private void updateHeadings() {
     primaryCatchHeading.updateLinkedBreakStepContent();
     coCatchHeadings.stream().forEach(coCatchHeading -> coCatchHeading.updateLinkedBreakStepContent());
+  }
+
+  @Override
+  protected List<TextEditArea> headingTextAreas() {
+    List<TextEditArea> result = super.headingTextAreas();
+    coCatchHeadings.forEach(coCatchHeading -> result.addAll(coCatchHeading.ueberschrift.getTextAreas()));
+    return result;
   }
 
   @Override

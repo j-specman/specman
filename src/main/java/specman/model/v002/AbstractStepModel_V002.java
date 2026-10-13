@@ -11,6 +11,7 @@ import specman.StepNumber;
 import specman.model.v002.io.NumberedSubSequence_V002;
 import specman.view.RoundedBorderDecorationStyle;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,8 @@ public abstract class AbstractStepModel_V002 {
     public ChangeInfoModel_V002 changeInfo;
     public String sourceStepId;
     public final RoundedBorderDecorationStyle decorationStyle;
+    /** The meta tags assigned to the step, in the order they hang at the step. */
+    public final List<MetaTagModel_V002> tags;
     /** Computed by ModelRenumberer_V002; not part of step identity. */
     public String stepNumber;
 
@@ -47,6 +50,7 @@ public abstract class AbstractStepModel_V002 {
         changeInfo = null;
         sourceStepId = null;
         decorationStyle = null;
+        tags = new ArrayList<>();
         stepNumber = null;
     }
 
@@ -57,7 +61,8 @@ public abstract class AbstractStepModel_V002 {
             Integer shade,
             ChangeInfo changeInfo,
             String sourceStepId,
-            RoundedBorderDecorationStyle decorationStyle) {
+            RoundedBorderDecorationStyle decorationStyle,
+            List<MetaTagModel_V002> tags) {
         this.id = id;
         this.stepNumber = stepNumber;
         this.content = content;
@@ -65,6 +70,7 @@ public abstract class AbstractStepModel_V002 {
         this.changeInfo = ChangeInfoModel_V002.from(changeInfo);
         this.sourceStepId = sourceStepId;
         this.decorationStyle = decorationStyle;
+        this.tags = tags;
     }
 
     /** Returns a random 8-character hex ID derived from the first 32 bits of a random UUID.

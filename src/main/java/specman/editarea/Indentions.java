@@ -79,6 +79,7 @@ public class Indentions {
     /** No compensation required at the top even for "abgesetzte" steps, because at the top of steps there is
      * always the meta-strip row of the EditContainer, which provides the necessary breathing room. */
     public int topBorder() { return JEDITORPANE_DEFAULT_BORDER_THICKNESS; }
+    public boolean hasTopIndention() { return top; }
 
     public Indentions withTop(boolean top) { return new Indentions(top, left, bottom, right); }
     public Indentions withLeft(boolean left) { return new Indentions(top, left, bottom, right); }
@@ -91,5 +92,4 @@ public class Indentions {
     }
 
     private int zoomPercent() { return editor().getZoomFactor(); }
-
 }

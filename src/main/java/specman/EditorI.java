@@ -6,6 +6,9 @@ import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
+import specman.metatag.generic.GenericMetaTag;
+import specman.metatag.generic.config.MetaTagConfig;
+import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
 
@@ -16,13 +19,14 @@ import java.awt.*;
 import java.awt.event.FocusListener;
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 /** This interface represents the current actogramm editor and is supposed to
  * substitute the older direct access of the {@link Specman} class. This may
  * later e.g. allow to run multiple editors windows within a single editor
  * application. */
 public interface EditorI extends FocusListener {
-	void vertikalLinieSetzen(int x, SpaltenResizer spaltenResizer);
+	void vertikalLinieSetzen(int x, Component source);
 	void diagrammLaden(File diagramFile);
 	int getZoomFactor();
 	String instanceId();
@@ -47,6 +51,10 @@ public interface EditorI extends FocusListener {
   ScrollPause pauseScrolling();
   List<JTextComponent> queryAllTextComponents(JTextComponent tc);
   AbstractSchrittView findStep(InteractiveStepFragment fragment);
+  boolean unfoldToShow(InteractiveStepFragment fragment);
+  /** @return the tags with a freetext (which is not just blank) in document order, except those of
+   * deleted steps, as their freetext can't be edited */
+  List<GenericMetaTag> queryTagsWithFreetext();
   void scrollBackwardInEditHistory();
   void scrollForwardInEditHistory();
   void appendToEditHistory(EditContainer editContainer);
@@ -64,4 +72,14 @@ public interface EditorI extends FocusListener {
   void moveBranchSequenceRightADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   DragMouseAdapter createDragMouseAdapter();
   ChangeSet changeset();
+  void addMetaTagConfigListener(MetaTagConfigListener listener);
+  void removeMetaTagConfigListener(MetaTagConfigListener listener);
+  /** @return a snapshot of the meta tag configurations of the diagram in creation order */
+  List<MetaTagConfig> metaTagConfigs();
+  /** @return the meta tag configuration of that name, null if there is none */
+  MetaTagConfig findMetaTagConfig(String name);
+  /** @return the names of the meta tag configurations which at least one tag at a step refers to */
+  Set<String> queryMetaTagConfigsInUse();
+  void openMetaTagConfigs();
+  void showToast(String message);
 }

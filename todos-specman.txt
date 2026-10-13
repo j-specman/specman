@@ -2,18 +2,87 @@ Release notes Specman 1.3.2
 - Copy / Cut / Paste von Tabellen
 - Design for step number labels modified to avoid overlapping with step text
 
+Release notes Specman 1.4.0
+- Meta Tags
+
+Meta Tags (Release 1.4.0)
+x Meta Tag Panel für Aufnahme von Schrittlabel, Klappbutton und Meta Tags
+x Überarbeitung der Darstellung / Platzierung von Schrittlabel, Klappbutton
+x Generische Basisklasse für Meta Tags
+  x Icon, Label, Hintergrundfarbe, Rahmenfarbe
+  x Editierbarer Freitext, also Tooltip angezeigt
+  x Undo / Redo der Freitext-Edits
+x Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
+  x Für das Icon: Auswahl einer SVG-Datei
+  x Beim Editieren bestehender Konfigurationen müssen die Meta Tags, die auf diese Konfiguration verweisen, im UI in der Darstellung aktualisiert werden
+  x Umbenennen einer Konfiguration, für die bereits Tags vergeben sind, ist nicht erlaubt
+  x Undo / Redo
+x Vergeben eines Tags an einem Schritt über die GUI
+  x Jeder Typ von Tag nur einmal pro Schritt
+  x Über Auswahl aus Untermenü des Kontextmenüs an der Schrittnummer
+  x Dadurch sichergestellt: Meta Tag Panels ohne Schrittnummer, erhalten nie konfigurierte Meta Tags, die ja die Schrittnummer bräuchten, um ihre Höhe und Position daraus abzuleiten
+  x Alle bereits vergebenen Tags sind ausgegraut
+  x Menüpunkte zeigen Icon und Label der Konfiguration
+  x Undo / Redo
+  x Vergeben von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
+  x Meta Tags werden im Meta Tag Panel immer links neben dem Schrittlabel bzw. dem letzten bereits vorliegenden Meta Tag eingehängt.
+  x Wenn ein Klappbutton vorliegt, verschiebt dieser sich dabei nach links, d.h. er steht immer ganz links
+    x Das ist so am besten, weil er nicht permanent sichtbar ist.
+  x Meta Tag Panel kann im Moment noch nicht mit variabler Anzahl der Tags umgehen
+  x Prototypisches UserMetaTag in dem Zuge entfernen
+x Entfernen eines Tags von einem Schritt über die GUI
+  x Denkbar über Kontextmenü des Tags mit den Punkten Edit (öffnet den Freitexteditor) und Delete
+  x Undo / Redo
+  x Entfernen von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
+x Löschen einer Meta Tag Konfiguration über die GUI
+  x Sicherheitsabfrage, wenn es Tags gibt, die sich darauf beziehen
+  x Bei Bestätigung, die entsprechenden Tags entfernen
+  x Undo / Redo (mit Toast-Feedback wie beim Anlegen / Editieren)
+x Aufnahme der Konfigurationen in die Modelldatei
+  x Das SVG des Icons wird in die Modelldatei eingebettet
+x Aufnahme der an den Schritten vergebenen Tags in die Modelldatei
+  x Es reicht eine Referenz auf die Bezeichner der Konfiguration + des ggf. zugehörigen Freitexts
+x Einlesen der Konfigs und der Tags an den Schritten aus der Modelldatei (Model Parser)
+x Wir erweitern die Grammatik, bleiben aber bei V002
+x Wichtig für Erweiterung: sie soll eine reiner Erweiterung gegenüber 1.3 sein, d.h. wenn man in 1.4 arbeiten aber keine Meta Tags konfiguriert (und nutzt) enthält die Modelldatei keine neuen (auch keine leeren!) Bestandteile, die ein Öffnen der Datei mit 1.3 verhindern würde.
+x Zielversion 1.4 mit Warnung bei Öffnen einer 1.3'er Datei, dass die Modelle kompatibel sind aber anschließend nicht mehr mit 1.3 bearbeitet werden sollten, um keine Meta-Informationen zu verlieren
+x Copy / Cut / Paste von Schritten mit Meta Tags
+  x Innerhalb derselben Instanz: Tags wandern mit
+  x Zwischen Instanzen: Tags wandern mit, wenn es eine passend bezeichnete Tag Konfiguration im Zielmodell gibt, sonst verschwinden sie still
+x Drag & Drop von Schritten: Meta Tags bleiben erhalten
+x Schritt als gelöscht markieren
+  x Tags bleiben, aber Darstellung mit schwarzem Hintergrund grauem Rand (wenn Rand definiet war) und grauem (disabled) Icon und grauem Label
+  x Entfernen, Editieren, Hinzufügen nicht mehr möglich
+  x Undo / Redo
+  x Darstellung / Editierbarkeit beim Verwerfen der Löschung wiederherstellen
+x Zusätzliche Prüfungen im Sanitizer:
+  x Tag an einem Schritt, zu dem es keine Konfiguration gibt
+  x Freitext an einem Tag, das laut Konfiguration keinen Freitext zulässt
+  x Mehrdeutige Konfigurationsbezeichner
+  x Dasselbe Tag mehrfach an einem Schritt
+  x Konfiguration ohne Label und ohne Icon
+x PDF-Export von Meta Tags
+  x Nice to have: Freitext als Kommentar in der PDF-Ausgabe?
+x Verschieben der Tags eines Schritts untereinander mit rechts/links im Kontextmenü analog Catch-Bereiche
+x Neues Refernzmodell specman-reference-v1.4-model-v2.nsd mit Meta Tag Konfigurationen und Tags an Schritten
+  x Nur Icon / nur Label / beides
+  x Mit / ohne Randfarbe
+  x Mit / ohne Freitext
+  x Ein Tag mit transparentem Hintergrund (nur Icon, steht frei am Rand)
+  x Ein Icon mit scharfer Ecke unten: Im Freitext erklären, dass ein solches Icon im SVG etwas Randabstand braucht, weil das Tag unten abgerundet ist. Gleiches später im Manual (Kapitel zu Tags).
+x Umgang mit Überlauf: Tags werden nach links hin abgeschnitten. Das ist OK.
+x Freitexte durchsuchen
+  x Auswahlbare Suchbereiche "Model" und "Tags" im Suchdialog
+  x Scrollen zum richtigen Schritt
+  x Freitext-Editor öffnen und Scrollen zum Suchtreffer im Text
+  x Compound Undo / Redo für Replace All ohne Tooltipanzeigen
+  x Tags gelöschter Schritte werden ignoriert -> kein Konflikt mit Editoranzeige und Replace
+
 Aus aktueller Anwendung
 - beim Öffnen und einer vorhandenen .wrk, *drei* Optionen: 1) nicht laden, 2) laden, 3) ist in Arbeit - nicht laden aber auch nicht überschreiben und beim Schließen löschen
-x .wrk entsteht auch, wenn man weder Autosave noch Autoload eingeschaltet hat
-x Drücken von DELETE entfernt keine Zeilenumbruch hin zu einer leeren Folgezeile. Das gleiche Problem, wie ursprünglich auch bei BACKSPACE. Lösung vielleicht dort abkupfern
 - Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
 - PDF-Option "Export beim Speichern"
 - Hoch/Runter über Grenzen von Schritten wäre cool
-x PDF-Export: schlauere Ableitung von PDF-Exportdateinamen aus ggf. geänderten / umgezogenen Diagrammdateinamen
-x Page-up / Page-down geht nicht
-x Scrollen mit Mausrad ist zu langsam
-x Fokus ist nach dem Öffnen auf der Zoom-Kombobox. Wenn man also noch dem Öffnen einer Datei auf Page-down / Page-up drückt, ändert man den Zoomfaktor, statt dass man auf dem Wege Scrollen kann
-x Sortierung der Schritte im Auswahldialog für Schrittrerefenzen ist ungünstig. Vmtl. lexikografisch.
 
 Reste Multi-Catch
 - Obersten Co-Catch nach oben schieben macht diesen zum primären Catch

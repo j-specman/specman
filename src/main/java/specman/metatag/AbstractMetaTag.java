@@ -1,4 +1,4 @@
-package specman.graphics;
+package specman.metatag;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -12,7 +12,7 @@ import javax.swing.border.MatteBorder;
 import static specman.Specman.editor;
 
 /**
- * Common base for meta-strip widgets (step number label, fold/collapse button, future ones) that
+ * Common base for meta-tag widgets (step number label, fold/collapse button, future ones) that
  * render as if hanging from the top edge of their container: sharp top corners, antialiased
  * rounded bottom corners (see {@link HangingTabRenderer} for how). Subclasses supply the corner arc
  * via {@link #arc()} and can override {@link #paintUnmasked(Graphics)} for content that must not
@@ -26,7 +26,7 @@ import static specman.Specman.editor;
  * Border's insets would, and doesn't fight with HangingTabShape's own offscreen compositing the
  * way a MatteBorder painted as part of super.paint() used to (causing visible render glitches).
  */
-public abstract class HangingTab extends JLabel {
+public abstract class AbstractMetaTag extends JLabel {
   // Base (100% zoom) corner radius for the rounded bottom corners - shared default for arc(), at
   // 100% zoom, scaled the same way the rest of a widget's own size is.
   protected static final int CORNER_ARC = 8;
@@ -36,14 +36,18 @@ public abstract class HangingTab extends JLabel {
   private static final int SIDE_PADDING = 5;
   // Border bottom inset that nudges Swing's centered content upward within its natural preferred
   // height (a larger bottom inset than top shifts the centering point up).
-  private static final int CONTENT_LIFT = 2;
+  public static final int CONTENT_LIFT = 2;
+  // Border of a meta widget which belongs to a step marked as deleted (black background) - the
+  // same gray as the border of the KlappButton, so it is visible against black background
+  // of the step's deleted-marked text which the tag may slightly overlap with.
+  protected static final Color DELETED_BORDER_COLOR = Color.GRAY;
 
   private Color borderColor;
 
-  protected HangingTab() {
+  protected AbstractMetaTag() {
   }
 
-  protected HangingTab(String text) {
+  protected AbstractMetaTag(String text) {
     super(text);
   }
 
@@ -51,23 +55,29 @@ public abstract class HangingTab extends JLabel {
     this.borderColor = borderColor;
   }
 
-  /** Border recipe for a HangingTab's own content box: SIDE_PADDING left/right for the rounded
-   * corners to live in, CONTENT_LIFT bottom inset to nudge Swing's centered content upward,
-   * reduced by heightGrowthCompensation to counteract a matching height growth in "abgesetzte"
-   * (rounded-border) steps (see StepnumberLabel#setHeightGrowthCompensation and
-   * MetaStripPanel.BORDER_OVERDRAW_COMPENSATION for why that's needed there). */
-  protected static Border scaledBorder(Color color, int heightGrowthCompensation) {
-    return scaledBorder(color, heightGrowthCompensation, SIDE_PADDING);
+  /** Border recipe for an AbstractMetaTag's own content box with the default side padding: SIDE_PADDING
+   * left/right for the rounded corners to live in, and exact insets in pixels at the top and bottom.
+   * These are what position the text vertically, see {@link MetaLabelLayout}. */
+  protected static Border insetBorder(Color color, int topInset, int bottomInset) {
+    int padding = (int) editor().scale(SIDE_PADDING);
+    return new MatteBorder(topInset, padding, bottomInset, padding, color);
   }
 
-  /** Same as {@link #scaledBorder(Color, int)}, but with an explicit side padding instead of the
-   * default SIDE_PADDING - for widgets (like KlappButton's plus/minus) that are known not to
-   * collide with the rounded bottom corners even with much less padding than StepnumberLabel's
-   * digits need, and so can sit closer to their own edges. */
+  /** Border recipe with an explicit side padding - for widgets (like KlappButton's plus/minus) that
+   * are known not to collide with the rounded bottom corners even with much less padding than
+   * StepnumberLabel's digits need, and so can sit closer to their own edges. The bottom inset is
+   * CONTENT_LIFT, which nudges Swing's centered content upward (a larger bottom inset than top
+   * shifts the centering point up), reduced by heightGrowthCompensation. */
   protected static Border scaledBorder(Color color, int heightGrowthCompensation, int sidePadding) {
+    return scaledBorder(color, heightGrowthCompensation, sidePadding, CONTENT_LIFT);
+  }
+
+  /** Same as {@link #scaledBorder(Color, int, int)}, but with an explicit lift instead of the
+   * default CONTENT_LIFT. */
+  protected static Border scaledBorder(Color color, int heightGrowthCompensation, int sidePadding, int lift) {
     int padding = (int) editor().scale(sidePadding);
-    int lift = (int) editor().scale(CONTENT_LIFT) - heightGrowthCompensation;
-    return new MatteBorder(0, padding, lift, padding, color);
+    int scaledLift = (int) editor().scale(lift) - heightGrowthCompensation;
+    return new MatteBorder(0, padding, scaledLift, padding, color);
   }
 
   @Override
@@ -78,13 +88,14 @@ public abstract class HangingTab extends JLabel {
   }
 
   private void paintHangingTabBorder(Graphics g) {
-    if (borderColor == null) {
+    Color color = paintedBorderColor();
+    if (color == null) {
       return;
     }
     float strokeWidth = borderStrokeWidth();
     Graphics2D g2 = (Graphics2D) g.create();
     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g2.setColor(borderColor);
+    g2.setColor(color);
     g2.setStroke(new BasicStroke(strokeWidth));
     // Inset by half the stroke width so the (centered-on-path) stroke stays fully within the
     // widget's own bounds instead of half of it getting clipped off at the edges.
@@ -94,6 +105,13 @@ public abstract class HangingTab extends JLabel {
   }
 
   protected abstract int arc();
+
+  /** @return the color of the border line which is painted, null for none. By default the one set
+   * by setBorderColor(); a widget whose border depends on its state (and not on a setter call,
+   * which can't be undone) overrides this to derive it from the state instead. */
+  protected Color paintedBorderColor() {
+    return borderColor;
+  }
 
   /** Width (in pixels, at the widget's current size) of the border line drawn by
    * setBorderColor() - 1px at 100% zoom by default; override to scale with zoom like arc()

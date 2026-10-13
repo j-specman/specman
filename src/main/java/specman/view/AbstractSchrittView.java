@@ -1,5 +1,7 @@
 package specman.view;
 
+import specman.metatag.KlappbarerBereichI;
+import specman.metatag.TagMoveDirection;
 import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
@@ -16,7 +18,10 @@ import static specman.util.ObjectUtils.nvl;
 
 import specman.draganddrop.UnsupportedDragSourceException;
 import specman.editarea.EditArea;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
+import specman.metatag.generic.GenericMetaTag;
+import specman.metatag.generic.config.MetaTagConfig;
+import specman.model.v002.MetaTagModel_V002;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.BreakStepModel_V002;
 import specman.model.v002.CaseStepModel_V002;
@@ -37,6 +42,8 @@ import specman.editarea.EditContainer;
 import specman.editarea.Indentions;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TextEditArea;
+import specman.undo.UndoableMetaTagMoved;
+import specman.undo.UndoableMetaTagRemoved;
 import specman.undo.props.UDBL;
 
 import javax.swing.JComponent;
@@ -55,7 +62,6 @@ import java.util.stream.Collectors;
 
 import static specman.Aenderungsart.Geloescht;
 import static specman.Aenderungsart.Zielschritt;
-import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.view.RelativeStepPosition.After;
 import static specman.view.RoundedBorderDecorationStyle.Co;
 import static specman.view.RoundedBorderDecorationStyle.Full;
@@ -117,7 +123,14 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	public ChangeInfo getChangeInfo() { return changeInfo; }
 
-	public void setChangeInfo(ChangeInfo changeInfo) { this.changeInfo = changeInfo; }
+	/** Also passes the deleted state on to the step's tags. Every change of the step's change info
+	 * after construction has to go through here. */
+	public void setChangeInfo(ChangeInfo changeInfo) {
+		this.changeInfo = changeInfo;
+		for (GenericMetaTag tag : getTags()) {
+			tag.setDeleted(changeInfo.isDeleted());
+		}
+	}
 
 	public void setNumber(StepNumber number) {
 		StepNumber oldStepNumber = this.number;
@@ -194,13 +207,34 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	public boolean isStrukturiert() { return false; }
 
-	void schrittnummerSichtbarkeitSetzen(boolean sichtbar) {
-		editContainer.schrittnummerAnzeigen(sichtbar);
-	}
-
 	abstract public AbstractStepModel_V002 generiereModel(boolean formatierterText);
 
+	/** The models of this step's tags, to be handed to the constructor of the step's model. */
+	protected List<MetaTagModel_V002> tagModels() {
+		List<MetaTagModel_V002> tagModels = new ArrayList<>();
+		for (GenericMetaTag tag : getTags()) {
+			tagModels.add(new MetaTagModel_V002(tag.getConfig().getName(), tag.getFreetext()));
+		}
+		return tagModels;
+	}
+
+	/** Hangs the tags of a loaded model to this step. A tag whose configuration doesn't exist is skipped. */
+	private void applyTags(List<MetaTagModel_V002> tagModels) {
+		for (MetaTagModel_V002 tagModel : tagModels) {
+			MetaTagConfig config = editor().findMetaTagConfig(tagModel.configName);
+			if (config != null) {
+				addTag(new GenericMetaTag(config, tagModel.freetext));
+			}
+		}
+	}
+
 	public static AbstractSchrittView baueSchrittViewFrom(SchrittSequenzView parent, AbstractStepModel_V002 model) {
+		AbstractSchrittView view = baueSchrittViewWithoutTagsFrom(parent, model);
+		view.applyTags(model.tags);
+		return view;
+	}
+
+	private static AbstractSchrittView baueSchrittViewWithoutTagsFrom(SchrittSequenzView parent, AbstractStepModel_V002 model) {
 		if (model instanceof DoWhileStepModel_V002) {
 			return new WhileWhileSchrittView(parent, (DoWhileStepModel_V002) model);
 		}
@@ -229,6 +263,27 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	}
 
 	public void geklappt(boolean auf) {}
+
+	/** @return whether the step was folded and is now unfolded. Steps without a fold button never are. */
+	public boolean unfold() {
+		return false;
+	}
+
+	/** Unfolds everything which hides the given fragment of this step: the step itself if the
+	 * fragment is not part of its always visible head (e.g. a branch or catch heading), and all
+	 * enclosing steps.
+	 * @return whether anything was unfolded */
+	public boolean unfoldToShow(InteractiveStepFragment fragment) {
+		boolean unfolded = !enthaelt(fragment) && unfold();
+		for (AbstractSchrittView ancestor = enclosingStep(); ancestor != null; ancestor = ancestor.enclosingStep()) {
+			unfolded |= ancestor.unfold();
+		}
+		return unfolded;
+	}
+
+	private AbstractSchrittView enclosingStep() {
+		return parent != null ? parent.getParent() : null;
+	}
 
 	public void zusammenklappenFuerReview() {
 		unterSequenzen().forEach(SchrittSequenzView::zusammenklappenFuerReview);
@@ -516,7 +571,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 					break;
 			}
 			aenderungsmarkierungenEntfernen();
-			changeInfo = changeInfo.untrack(currentSet);
+			setChangeInfo(changeInfo.untrack(currentSet));
 		}
 		return changesMade;
 	}
@@ -545,7 +600,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 					break;
 			}
 			aenderungsmarkierungenEntfernen();
-			changeInfo = changeInfo.untrack(currentSet);
+			setChangeInfo(changeInfo.untrack(currentSet));
 		}
 		return changesRejected;
 	}
@@ -695,4 +750,56 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
   }
 
   public boolean allowsClipboardOperations() { return !changeInfo.isDeleted(); }
+
+  /** Tags can only be assigned via the step's own step number, not e.g. via the one of a catch
+   * heading, and not to a step marked as deleted. */
+  public boolean allowsTags(StepnumberLabel initiatingLabel) {
+    return !changeInfo.isDeleted() && editContainer.isStepNumber(initiatingLabel);
+  }
+
+  /** Appends the tag. @return the index it got */
+  public int addTag(GenericMetaTag tag) {
+    tag.setDeleted(changeInfo.isDeleted());
+    return editContainer.addTag(tag);
+  }
+
+  public void addTag(GenericMetaTag tag, int index) {
+    tag.setDeleted(changeInfo.isDeleted());
+    editContainer.addTag(tag, index);
+  }
+
+  /** @return the index the tag had */
+  public int removeTag(GenericMetaTag tag) { return editContainer.removeTag(tag); }
+
+  public boolean allowsTagMove(GenericMetaTag tag, TagMoveDirection direction) {
+    return editContainer.allowsTagMove(tag, direction);
+  }
+
+  public void moveTag(GenericMetaTag tag, TagMoveDirection direction) { editContainer.moveTag(tag, direction); }
+
+  public void moveTagUDBL(GenericMetaTag tag, TagMoveDirection direction) {
+    moveTag(tag, direction);
+    editor().addEdit(new UndoableMetaTagMoved(this, tag, direction));
+  }
+
+  /** Removes the step's tags which refer to the given configuration, each as an undoable edit. */
+  public void removeTagsOfUDBL(MetaTagConfig config) {
+    for (GenericMetaTag tag : new ArrayList<>(getTags())) {
+      if (tag.getConfig().getName().equals(config.getName())) {
+        int index = removeTag(tag);
+        editor().addEdit(new UndoableMetaTagRemoved(this, tag, index));
+      }
+    }
+  }
+
+  public boolean hasTag(MetaTagConfig config) { return editContainer.hasTag(config); }
+
+  /** @return the names of the configurations which the step's tags refer to */
+  public Set<String> getTagConfigNames() {
+    return getTags().stream()
+      .map(tag -> tag.getConfig().getName())
+      .collect(Collectors.toSet());
+  }
+
+  private List<GenericMetaTag> getTags() { return editContainer.getTags(); }
 }

@@ -11,6 +11,11 @@ import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
 import specman.editarea.EditArea;
 import specman.ops.*;
+import specman.metatag.generic.GenericMetaTag;
+import specman.metatag.generic.config.MetaTagConfig;
+import specman.metatag.generic.config.MetaTagConfigListener;
+import specman.metatag.generic.config.MetaTagConfigRegistry;
+import specman.metatag.generic.config.MetaTagConfigsDialog;
 import specman.settings.SettingsDialog;
 
 import specman.editarea.InteractiveStepFragment;
@@ -35,7 +40,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 
@@ -58,6 +65,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	File diagrammDatei;
   FocusHistory focusHistory = new FocusHistory();
   private ChangeSet currentChangeSet = ChangeSet.DEFAULT;
+  private final MetaTagConfigRegistry metaTagConfigs = new MetaTagConfigRegistry();
 
 	private DiagramToolBar diagramToolBar;
 	private StepButtonBar stepButtonBar;
@@ -141,6 +149,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		diagrammbreite = WorkingAreaPanel.INITIAL_DIAGRAMM_WIDTH;
 		zoomFaktor = 100;
 		diagrammDatei = null;
+		metaTagConfigs.clear();
 		setTitle(SPECMAN_TITLE);
 		undoManager.discardAllEdits();
 	}
@@ -197,11 +206,12 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		return delta;
 	}
 
+	/** Shows a vertical drag line at x, given in the coordinates of the source component; null as source hides the line. */
 	@Override
-	public void vertikalLinieSetzen(int x, SpaltenResizer spaltenResizer) {
+	public void vertikalLinieSetzen(int x, Component source) {
 		Integer dragX = null;
-		if (spaltenResizer != null) {
-			Point relativePosition = SwingUtilities.convertPoint(spaltenResizer, new Point(x, 0), arbeitsbereich);
+		if (source != null) {
+			Point relativePosition = SwingUtilities.convertPoint(source, new Point(x, 0), arbeitsbereich);
 			dragX = (int)relativePosition.getX();
 		}
 		arbeitsbereich.showDragLine(dragX);
@@ -280,6 +290,11 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	@Override
 	public void showMessage(String text) {
 		SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, text));
+	}
+
+	@Override
+	public void showToast(String message) {
+		SwingUtilities.invokeLater(() -> ToastNotification.show(this, message));
 	}
 
 	@Override
@@ -580,6 +595,54 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
   }
 
   @Override
+  public void openMetaTagConfigs() {
+    new MetaTagConfigsDialog(this, metaTagConfigs, queryMetaTagConfigsInUse()).setVisible(true);
+  }
+
+  @Override
+  public void setMetaTagConfigs(List<MetaTagConfig> configs) {
+    metaTagConfigs.clear();
+    for (MetaTagConfig config : configs) {
+      metaTagConfigs.add(config);
+    }
+  }
+
+  @Override
+  public List<MetaTagConfig> metaTagConfigs() { return metaTagConfigs.all(); }
+
+  @Override
+  public MetaTagConfig findMetaTagConfig(String name) { return metaTagConfigs.get(name); }
+
+  @Override
+  public Set<String> queryMetaTagConfigsInUse() {
+    Set<String> names = new HashSet<>();
+    for (AbstractSchrittView step : listAllSteps()) {
+      names.addAll(step.getTagConfigNames());
+    }
+    return names;
+  }
+
+  @Override
+  public List<GenericMetaTag> queryTagsWithFreetext() {
+    List<GenericMetaTag> result = new ArrayList<>();
+    for (AbstractSchrittView step : listAllSteps()) {
+      for (GenericMetaTag tag : step.getTextShef().getTags()) {
+        String freetext = tag.getFreetext();
+        if (!tag.isDeleted() && freetext != null && !freetext.isBlank()) {
+          result.add(tag);
+        }
+      }
+    }
+    return result;
+  }
+
+  @Override
+  public void addMetaTagConfigListener(MetaTagConfigListener listener) { metaTagConfigs.addListener(listener); }
+
+  @Override
+  public void removeMetaTagConfigListener(MetaTagConfigListener listener) { metaTagConfigs.removeListener(listener); }
+
+  @Override
   public boolean hasUnsavedChanges() {
     return undoManager.hasUnsavedChanges();
   }
@@ -702,6 +765,12 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
   @Override
   public AbstractSchrittView findStep(InteractiveStepFragment fragment) {
     return hauptSequenz.findeSchritt(fragment);
+  }
+
+  @Override
+  public boolean unfoldToShow(InteractiveStepFragment fragment) {
+    AbstractSchrittView step = findStep(fragment);
+    return step != null && step.unfoldToShow(fragment);
   }
 
   @Override

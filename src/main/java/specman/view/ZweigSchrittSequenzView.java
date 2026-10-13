@@ -147,9 +147,14 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 
 	@Override
 	public List<TextEditArea> getTextAreas() {
-		List<TextEditArea> result = ueberschrift.getTextAreas();
+		List<TextEditArea> result = headingTextAreas();
 		result.addAll(super.getTextAreas());
 		return result;
+	}
+
+	/** @return a modifiable list of the text areas of the heading(s) of the branch, in layout order */
+	protected List<TextEditArea> headingTextAreas() {
+		return ueberschrift.getTextAreas();
 	}
 
   @Override

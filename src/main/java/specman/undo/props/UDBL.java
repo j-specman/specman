@@ -6,8 +6,8 @@ import specman.Specman;
 import specman.editarea.EditArea;
 import specman.editarea.ImageEditArea;
 import specman.editarea.EditArea;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
-import specman.editarea.stepnumberlabel.StepnumberLabel.LabelStructure;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
+import specman.metatag.stepnumberlabel.StepnumberLabel.LabelStructure;
 import specman.undo.AbstractUndoableInteraction;
 import specman.view.AbstractSchrittView;
 import specman.view.CatchUeberschrift;
@@ -60,6 +60,14 @@ public class UDBL {
     if (!Objects.equals(undoBorder, border)) {
       component.setBorder(border);
       addEdit(new UndoableSetBorder(component, undoBorder));
+    }
+  }
+
+  public static void setBorderSourceColorUDBL(StepnumberLabel label, Color color) {
+    Color undoColor = label.getBorderSourceColor();
+    if (!Objects.equals(undoColor, color)) {
+      label.setBorderSourceColor(color);
+      addEdit(new UndoableSetLabelBorderSourceColor(label, undoColor));
     }
   }
 

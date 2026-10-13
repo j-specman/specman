@@ -1,11 +1,9 @@
-package specman.view;
+package specman.metatag;
 
+import specman.view.RoundedBorderDecorator;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import specman.editarea.MetaStripPanel;
-import specman.graphics.HangingTab;
 import specman.graphics.SvgIcon;
-import specman.Specman;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +13,6 @@ import java.awt.event.MouseMotionListener;
 
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_SICHTBAR;
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_VERBORGEN;
-import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
 import static specman.Specman.editor;
 
 /**
@@ -29,7 +26,7 @@ import static specman.Specman.editor;
  *
  * @author less02
  */
-public class KlappButton extends HangingTab implements MouseMotionListener, MouseListener {
+public class KlappButton extends AbstractMetaTag implements MouseMotionListener, MouseListener {
   // Base (100% zoom) size of the square button - also used by CatchBereich to size an unrelated
   // row spec, independent of any button instance, hence public and static.
   public static final int MINIMUM_ICON_LENGTH = 12;
@@ -76,7 +73,7 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
     setHorizontalAlignment(SwingConstants.CENTER);
     setIcon(collapseIcon);
     resetToDefaultBackground();
-    setBorderColor(SCHRITTNUMMER_FARBE.color);
+    setBorderColor(Color.GRAY);
     setVisible(false);
     addMouseListener(this);
     addMouseMotionListener(this);
@@ -104,6 +101,18 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
       mouseClicked(null);
       setVisible(isSelected());
     }
+  }
+
+  /** Unfolds the area programmatically, e.g. to show a search hit. Unlike a click, there is no mouse
+   * over the button afterwards, so it must not stay visible for hovering.
+   * @return whether the area was folded before */
+  public boolean unfold() {
+    if (!isSelected()) {
+      return false;
+    }
+    mouseClicked(null);
+    setHoverVisible(false);
+    return true;
   }
 
   /** Default look: takes on the step's actual background color (possibly changeset-tinted)
@@ -239,13 +248,14 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
 
   /** Matches StepnumberLabel's own width/height recipe exactly - borrows the step number's
    * already-computed height (see EditContainer#updateBounds()) rather than independently
-   * recomputing it, so the two meta-strip widgets are guaranteed to end up the same height
-   * instead of relying on two separate formulas staying in sync by hand. */
-  public void updateLocation(Rectangle stepnumberBounds) {
-    if (stepnumberBounds.height > 0) {
-      int gap = (int) editor().scale(MetaStripPanel.WIDGET_GAP);
+   * recomputing it, so the meta-strip widgets are guaranteed to end up the same height
+   * instead of relying on separate formulas staying in sync by hand. Hangs the button left of
+   * its right neighbour, which is the leftmost tag or the step number. */
+  public void updateLocation(int rightNeighborX, int height) {
+    if (height > 0) {
+      int gap = (int) editor().scale(MetaTagPanel.WIDGET_GAP);
       int width = getPreferredSize().width;
-      setBounds(stepnumberBounds.x - gap - width, 0, width, stepnumberBounds.height);
+      setBounds(rightNeighborX - gap - width, 0, width, height);
     }
   }
 
@@ -271,7 +281,7 @@ public class KlappButton extends HangingTab implements MouseMotionListener, Mous
 
   @Override
   protected float borderStrokeWidth() {
-    return (float) editor().scale(1.5);
+    return (float) editor().scale(1.0);
   }
 
 }

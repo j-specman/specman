@@ -80,8 +80,9 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
 
   @Override
   public void setGeloeschtMarkiertStilUDBL(ChangeSet triggerSet) {
-    setBackgroundUDBL(changeInfo.changeSet().panelColor());
-    content.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet());
+    UDBL.setChangeInfo(this, changeInfo.deleted(triggerSet));
+    setBackgroundUDBL(triggerSet.panelColor());
+    content.setGeloeschtMarkiertStilUDBL(null, triggerSet);
   }
 
   @Override

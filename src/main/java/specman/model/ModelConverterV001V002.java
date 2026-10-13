@@ -167,13 +167,13 @@ public class ModelConverterV001V002 {
             WhileWhileSchrittModel_V001 s = (WhileWhileSchrittModel_V001) v1;
             return new DoWhileStepModel_V002(id, null, convertContent(s.inhalt), s.farbe,
                 changeInfo(s), s.zugeklappt,
-                convertSequence(s.wiederholSequenz, map), s.balkenbreite, null, s.decorationStyle);
+                convertSequence(s.wiederholSequenz, map), s.balkenbreite, null, s.decorationStyle, noTags());
         }
         if (v1 instanceof WhileSchrittModel_V001) {
             WhileSchrittModel_V001 s = (WhileSchrittModel_V001) v1;
             return new WhileStepModel_V002(id, null, convertContent(s.inhalt), s.farbe,
                 changeInfo(s), s.zugeklappt,
-                convertSequence(s.wiederholSequenz, map), s.balkenbreite, null, s.decorationStyle);
+                convertSequence(s.wiederholSequenz, map), s.balkenbreite, null, s.decorationStyle, noTags());
         }
         if (v1 instanceof IfElseSchrittModel_V001) {
             IfElseSchrittModel_V001 s = (IfElseSchrittModel_V001) v1;
@@ -181,14 +181,14 @@ public class ModelConverterV001V002 {
                 s.zugeklappt, changeInfo(s),
                 convertBranchSequence(s.ifSequenz, map),
                 convertBranchSequence(s.elseSequenz, map),
-                s.ifBreitenanteil, null);
+                s.ifBreitenanteil, null, noTags());
         }
         if (v1 instanceof IfSchrittModel_V001) {
             IfSchrittModel_V001 s = (IfSchrittModel_V001) v1;
             return new IfStepModel_V002(id, null, convertContent(s.inhalt), s.farbe, s.decorationStyle,
                 s.zugeklappt, changeInfo(s),
                 convertBranchSequence(s.ifSequenz, map),
-                s.leerBreite, null);
+                s.leerBreite, null, noTags());
         }
         if (v1 instanceof CaseSchrittModel_V001) {
             CaseSchrittModel_V001 s = (CaseSchrittModel_V001) v1;
@@ -196,7 +196,7 @@ public class ModelConverterV001V002 {
                 changeInfo(s), s.zugeklappt,
                 convertBranchSequence(s.sonstSequenz, map),
                 s.spaltenbreitenAnteile != null ? new ArrayList<>(s.spaltenbreitenAnteile) : null,
-                null, s.decorationStyle);
+                null, s.decorationStyle, noTags());
             if (s.caseSequenzen != null) {
                 s.caseSequenzen.forEach(cs -> caseStep.addCase(convertBranchSequence(cs, map)));
             }
@@ -207,21 +207,26 @@ public class ModelConverterV001V002 {
             return new SubsequenceStepModel_V002(id, null, convertContent(s.inhalt), s.farbe,
                 changeInfo(s), s.zugeklappt,
                 convertSequence(s.subsequenz, map),
-                null, s.decorationStyle, s.flatNumbering);
+                null, s.decorationStyle, s.flatNumbering, noTags());
         }
         if (v1 instanceof QuellSchrittModel_V001) {
             String targetId = v1.quellschrittID != null ? map.get(v1.quellschrittID.toString()) : null;
             return new SourceStepModel_V002(id, null, convertContent(v1.inhalt), v1.farbe,
-                changeInfo(v1), targetId, v1.decorationStyle);
+                changeInfo(v1), targetId, v1.decorationStyle, noTags());
         }
         if (v1 instanceof BreakSchrittModel_V001) {
             return new BreakStepModel_V002(id, null, convertContent(v1.inhalt), v1.farbe,
-                changeInfo(v1), null, v1.decorationStyle);
+                changeInfo(v1), null, v1.decorationStyle, noTags());
         }
         // EinfacherSchrittModel_V001 and StrukturierterSchrittModel_V001 fallback
         String sourceId = v1.quellschrittID != null ? map.get(v1.quellschrittID.toString()) : null;
         return new SimpleStepModel_V002(id, null, convertContent(v1.inhalt), v1.farbe,
-            changeInfo(v1), sourceId, v1.decorationStyle);
+            changeInfo(v1), sourceId, v1.decorationStyle, noTags());
+    }
+
+    /** The V1 model has no meta tags. */
+    private static List<MetaTagModel_V002> noTags() {
+        return new ArrayList<>();
     }
 
     private static specman.ChangeInfo changeInfo(AbstractSchrittModel_V001 step) {

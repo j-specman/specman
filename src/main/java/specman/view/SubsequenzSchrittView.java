@@ -1,5 +1,6 @@
 package specman.view;
 
+import specman.metatag.KlappButton;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.*;
@@ -135,6 +136,11 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 	}
 
 	@Override
+	public boolean unfold() {
+		return klappen.unfold();
+	}
+
+	@Override
 	public void geklappt(boolean auf) {
 		subsequenz.setVisible(auf);
 	}
@@ -151,7 +157,8 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 			subsequenz.generiereSchrittSequenzModel(formatierterText),
 			getSourceStepId(),
 			getDecorated(),
-			flatNumbering);
+			flatNumbering,
+			tagModels());
 	}
 
 	@Override public int aenderungenUebernehmen() throws EditException {

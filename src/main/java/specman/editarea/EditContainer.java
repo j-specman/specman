@@ -14,7 +14,11 @@ import specman.ChangeInfo;
 import static specman.ChangeSet.changeset;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
+import specman.metatag.MetaTagPanel;
+import specman.metatag.TagMoveDirection;
+import specman.metatag.generic.GenericMetaTag;
+import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
@@ -42,8 +46,6 @@ import java.util.stream.Collectors;
 
 import specman.graphics.Styles;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
-import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
-import static specman.graphics.Styles.labelFont;
 import static specman.Specman.editor;
 
 /** Zentrales grafisches Containerpanel für einen zusammenhängenden Text mit einem Nummernlabel
@@ -105,10 +107,9 @@ public class EditContainer extends JPanel {
 	private final List<FocusListener> editAreasFocusListeners = new ArrayList<>();
 	private final List<ComponentListener> editAreasComponentListeners = new ArrayList<>();
 	private final StepnumberLabel schrittNummer;
-	private final MetaStripPanel metaPanel = new MetaStripPanel();
+	private final MetaTagPanel metaPanel = new MetaTagPanel();
 	private FormLayout layout;
 	private Indentions indentions;
-	private boolean schrittNummerSichtbar = true;
 
 	public EditContainer(TextEditArea initialContent, StepNumber stepNumber) {
 		this(new EditorContentModel_V002(), stepNumber);
@@ -261,7 +262,7 @@ public class EditContainer extends JPanel {
 		// the containers and/or step number label to disappear. We rely on that there
 		// will follow additional calls with reasonable initialized components sizes.
 		if (maxEditWidth > 0) {
-			metaPanel.updateBounds(maxEditWidth, indentions, schrittNummerSichtbar);
+			metaPanel.updateBounds(maxEditWidth, indentions);
 		}
 	}
 
@@ -273,26 +274,18 @@ public class EditContainer extends JPanel {
 		return maxWidth;
 	}
 
-	public void schrittnummerAnzeigen(boolean sichtbar) {
-		if (schrittNummer != null) {
-			schrittNummerSichtbar = sichtbar;
-			updateBounds(); // Sorgt dafür, dass der Label auch optisch sofort verschwindet
-		}
-	}
-
 	public void skalieren(int prozentNeu, int prozentAktuell) {
 		editAreas.forEach(ea -> ea.skalieren(prozentNeu, prozentAktuell));
 		if (schrittNummer != null) {
-			schrittNummer.setFont(labelFont.deriveFont((float) SCHRITTNR_FONTSIZE * prozentNeu / 100));
-			schrittNummer.refreshMetaWidgetScale();
+			schrittNummer.applyZoom(prozentNeu);
 		}
-		updateMetaStripHeight(prozentNeu);
+		updateMetaPanelHeight(prozentNeu);
 		if (indentions != null) {
 			updateDecorationIndentions(indentions);
 		}
 	}
 
-	private void updateMetaStripHeight(int zoomPercent) {
+	private void updateMetaPanelHeight(int zoomPercent) {
 		int height = schrittNummer != null ? (META_STRIP_PANEL_HEIGHT * zoomPercent) / 100 : 0;
 		layout.setRowSpec(2, RowSpec.decode(height + "px"));
 	}
@@ -362,9 +355,9 @@ public class EditContainer extends JPanel {
 		layout.setColumnSpec(3, indentions.rightInset());
 
 		if (schrittNummer != null) {
-			// See updateBounds(): the label's height grows by BORDER_OVERDRAW_COMPENSATION in
-			// "abgesetzte" steps - compensate so the text-to-bottom-edge distance stays the same.
-			schrittNummer.setHeightGrowthCompensation(this.indentions.top ? MetaStripPanel.BORDER_OVERDRAW_COMPENSATION : 0);
+			// See updateBounds(): the border of an "abgesetzte" step paints over the topmost rows
+			// of the label, which the label has to know to keep its text out of them.
+			schrittNummer.setOverdrawnTopRows(this.indentions.top ? MetaTagPanel.BORDER_OVERDRAW_COMPENSATION : 0);
 		}
 
 		// TODO JL: Das ist hier noch nicht sauber. Der oberste und unterste Editbereich haben
@@ -373,6 +366,35 @@ public class EditContainer extends JPanel {
 	}
 
 	public Rectangle getStepNumberBounds() { return schrittNummer.getBounds(); }
+
+	public boolean isStepNumber(StepnumberLabel label) { return schrittNummer != null && schrittNummer == label; }
+
+	/** Appends the tag. @return the index it got */
+	public int addTag(GenericMetaTag tag) {
+		int index = metaPanel.addTag(tag);
+		updateBounds();
+		return index;
+	}
+
+	public void addTag(GenericMetaTag tag, int index) {
+		metaPanel.addTag(tag, index);
+		updateBounds();
+	}
+
+	/** @return the index the tag had */
+	public int removeTag(GenericMetaTag tag) {
+		int index = metaPanel.removeTag(tag);
+		updateBounds();
+		return index;
+	}
+
+	public boolean allowsTagMove(GenericMetaTag tag, TagMoveDirection direction) { return metaPanel.allowsTagMove(tag, direction); }
+
+	public void moveTag(GenericMetaTag tag, TagMoveDirection direction) { metaPanel.moveTag(tag, direction); }
+
+	public boolean hasTag(MetaTagConfig config) { return metaPanel.hasTag(config); }
+
+	public List<GenericMetaTag> getTags() { return metaPanel.getTags(); }
 
 	public void resyncStepnumberAsTargetUDBL(StepNumber quellschrittId) { schrittNummer.resyncSourceSuffixUDBL(quellschrittId); }
 	public void resyncStepnumberAsSourceUDBL(StepNumber zielschrittID) { schrittNummer.resyncTargetSuffixUDBL(zielschrittID); }
@@ -401,7 +423,7 @@ public class EditContainer extends JPanel {
 
 	public boolean enthaelt(InteractiveStepFragment fragment) {
 		return editAreas.stream().anyMatch(ea -> ea.enthaelt(fragment))
-			|| schrittNummer == fragment;
+			|| metaPanel.contains(fragment);
 	}
 
 	public InteractiveStepFragment asInteractiveFragment() { return editAreas.get(0); }
@@ -586,7 +608,7 @@ public class EditContainer extends JPanel {
 	public specman.pdf.Shape getShape() {
 		Shape shape = new Shape(this);
 		editAreas.forEach(ea -> shape.add(ea.getShape()));
-		if (schrittNummer != null && schrittNummerSichtbar) {
+		if (schrittNummer != null) {
 			// schrittNummer's real Swing parent is metaPanel, a sibling of the edit areas
 			// (not nested inside the first one) - its shape must nest the same way, via a shape
 			// for metaPanel itself, or its position would be off by metaPanel's own
@@ -598,7 +620,9 @@ public class EditContainer extends JPanel {
 			// overlaps down into that edit area's row. metaPanel is only ever meant to establish
 			// a coordinate offset here, not to paint anything itself (it's non-opaque on screen
 			// too) - a position-only Shape(int,int) has no form, so nothing gets filled/painted.
-			shape.add(new Shape(metaPanel.getX(), metaPanel.getY()).add(schrittNummer.getShape()));
+			Shape metaShape = new Shape(metaPanel.getX(), metaPanel.getY()).add(schrittNummer.getShape());
+			metaPanel.getTags().forEach(tag -> metaShape.add(tag.getShape()));
+			shape.add(metaShape);
 		}
 		return shape;
 	}

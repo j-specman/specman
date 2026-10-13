@@ -1,22 +1,16 @@
 package net.atlanticbb.tantlinger.ui.text.dialogs;
 
+import com.jgoodies.forms.factories.CC;
+import com.jgoodies.forms.layout.FormLayout;
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.LayoutManager;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.List;
-import java.util.Vector;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -27,6 +21,10 @@ import javax.swing.text.JTextComponent;
 import net.atlanticbb.tantlinger.i18n.I18n;
 import net.atlanticbb.tantlinger.ui.text.TextEditPopupManager;
 import specman.Specman;
+import specman.editarea.InteractiveStepFragment;
+import specman.search.MetaTagFreetextSearch;
+import specman.search.SearchScope;
+import specman.search.TextMatcher;
 import specman.undo.manager.UndoRecording;
 import static specman.Specman.editor;
 
@@ -38,7 +36,15 @@ public class TextFinderDialog extends JDialog {
 
   private static final long serialVersionUID = 1L;
   private static final I18n i18n = I18n.getInstance("net.atlanticbb.tantlinger.ui.text.dialogs");
-  public static final char[] WORD_SEPARATORS = new char[]{' ', '\t', '\n', '\r', '\f', '.', ',', ':', '-', '(', ')', '[', ']', '{', '}', '<', '>', '/', '|', '\\', '\'', '"'};
+  // The labels of the "Search in" box are no i18n entries as these live in the SHEF library
+  private static final String SEARCH_IN_LABEL = "Search in:";
+  // Label, gap, field, gap, buttons. The buttons have the same width on both tabs.
+  private static final String FORM_COLUMN_SPECS = "left:pref, 4dlu, fill:120dlu:grow, 8dlu, fill:max(pref;60dlu)";
+  // Takes the extra height of the tab with less rows, so the options stick to the bottom on both tabs
+  private static final String FILLER_ROW = "fill:0px:grow";
+
+  private final MetaTagFreetextSearch tagSearch = new MetaTagFreetextSearch();
+  private final DefaultComboBoxModel<SearchScope> modelScope = new DefaultComboBoxModel<>(SearchScope.values());
   public static final int FIND = 0;
   public static final int REPLACE = 1;
   protected Frame owner;
@@ -82,134 +88,8 @@ public class TextFinderDialog extends JDialog {
 
   private void init(int index) {
     this.tb = new JTabbedPane();
-    JPanel p1 = new JPanel(new BorderLayout());
-    JPanel pc1 = new JPanel(new BorderLayout());
-    JPanel pf = new JPanel();
-    pf.setLayout(new DialogLayout(20, 5));
-    pf.setBorder(new EmptyBorder(8, 5, 8, 0));
-    pf.add(new JLabel(i18n.str("find_what")));
-    this.txtFind1 = new JTextField();
-    this.docFind = this.txtFind1.getDocument();
-    pf.add(this.txtFind1);
-    pc1.add(pf, "Center");
-    this.popupManager.registerJTextComponent(this.txtFind1);
-    JPanel po = new JPanel(new GridLayout(2, 2, 8, 2));
-    po.setBorder(new TitledBorder(new EtchedBorder(), i18n.str("options")));
-    JCheckBox chkWord = new JCheckBox(i18n.str("whole_words_only"));
-    chkWord.setMnemonic('w');
-    this.modelWord = chkWord.getModel();
-    po.add(chkWord);
-    ButtonGroup bg = new ButtonGroup();
-    JRadioButton rdUp = new JRadioButton(i18n.str("search_up"));
-    rdUp.setMnemonic('u');
-    this.modelUp = rdUp.getModel();
-    bg.add(rdUp);
-    po.add(rdUp);
-    JCheckBox chkCase = new JCheckBox(i18n.str("match_case"));
-    chkCase.setMnemonic('c');
-    this.modelCase = chkCase.getModel();
-    po.add(chkCase);
-    JRadioButton rdDown = new JRadioButton(i18n.str("search_down"), true);
-    rdDown.setMnemonic('d');
-    this.modelDown = rdDown.getModel();
-    bg.add(rdDown);
-    po.add(rdDown);
-    pc1.add(po, "South");
-    p1.add(pc1, "Center");
-    JPanel p01 = new JPanel(new FlowLayout());
-    JPanel p = new JPanel(new GridLayout(2, 1, 2, 8));
-    ActionListener findAction = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        TextFinderDialog.this.findNext(false, false);
-      }
-    };
-    JButton btFind = new JButton(i18n.str("find_next"));
-    btFind.addActionListener(findAction);
-    btFind.setMnemonic('f');
-    p.add(btFind);
-    ActionListener closeAction = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        TextFinderDialog.this.setVisible(false);
-      }
-    };
-    JButton btClose = new JButton(i18n.str("close"));
-    btClose.addActionListener(closeAction);
-    btClose.setDefaultCapable(true);
-    p.add(btClose);
-    p01.add(p);
-    p1.add(p01, "East");
-    this.tb.addTab(i18n.str("find"), p1);
-    JPanel p2 = new JPanel(new BorderLayout());
-    JPanel pc2 = new JPanel(new BorderLayout());
-    JPanel pc = new JPanel();
-    pc.setLayout(new DialogLayout(20, 5));
-    pc.setBorder(new EmptyBorder(8, 5, 8, 0));
-    pc.add(new JLabel(i18n.str("find_what")));
-    this.txtFind2 = new JTextField();
-    this.txtFind2.setDocument(this.docFind);
-    pc.add(this.txtFind2);
-    this.popupManager.registerJTextComponent(this.txtFind2);
-    pc.add(new JLabel(i18n.str("replace")));
-    JTextField txtReplace = new JTextField();
-    this.docReplace = txtReplace.getDocument();
-    pc.add(txtReplace);
-    pc2.add(pc, "Center");
-    this.popupManager.registerJTextComponent(txtReplace);
-    po = new JPanel(new GridLayout(2, 2, 8, 2));
-    po.setBorder(new TitledBorder(new EtchedBorder(), i18n.str("options")));
-    chkWord = new JCheckBox(i18n.str("whole_words_only"));
-    chkWord.setMnemonic('w');
-    chkWord.setModel(this.modelWord);
-    po.add(chkWord);
-    bg = new ButtonGroup();
-    rdUp = new JRadioButton(i18n.str("search_up"));
-    rdUp.setMnemonic('u');
-    rdUp.setModel(this.modelUp);
-    bg.add(rdUp);
-    po.add(rdUp);
-    chkCase = new JCheckBox(i18n.str("match_case"));
-    chkCase.setMnemonic('c');
-    chkCase.setModel(this.modelCase);
-    po.add(chkCase);
-    rdDown = new JRadioButton(i18n.str("search_down"), true);
-    rdDown.setMnemonic('d');
-    rdDown.setModel(this.modelDown);
-    bg.add(rdDown);
-    po.add(rdDown);
-    pc2.add(po, "South");
-    p2.add(pc2, "Center");
-    JPanel p02 = new JPanel(new FlowLayout());
-    p = new JPanel(new GridLayout(3, 1, 2, 8));
-    ActionListener replaceAction = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        TextFinderDialog.this.findNext(true, false);
-      }
-    };
-    JButton btReplace = new JButton(i18n.str("replace"));
-    btReplace.addActionListener(replaceAction);
-    btReplace.setMnemonic('r');
-    p.add(btReplace);
-    ActionListener replaceAllAction = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        int result = TextFinderDialog.this.findNext(true, true);
-        if (result < 0) {
-          return;
-        }
-        JOptionPane.showMessageDialog(TextFinderDialog.this.owner, result + " " + TextFinderDialog.i18n.str("replacements_prompt"), "Info", 1);
-      }
-    };
-    JButton btReplaceAll = new JButton(i18n.str("replace_all"));
-    btReplaceAll.addActionListener(replaceAllAction);
-    btReplaceAll.setMnemonic('a');
-    p.add(btReplaceAll);
-    btClose = new JButton(i18n.str("close"));
-    btClose.addActionListener(closeAction);
-    btClose.setDefaultCapable(true);
-    p.add(btClose);
-    p02.add(p);
-    p2.add(p02, "East");
-    p01.setPreferredSize(p02.getPreferredSize());
-    this.tb.addTab(i18n.str("replace"), p2);
+    this.tb.addTab(i18n.str("find"), createFindPanel());
+    this.tb.addTab(i18n.str("replace"), createReplacePanel());
     this.tb.setSelectedIndex(index);
     this.getContentPane().add(this.tb, "Center");
     WindowListener flst = new WindowAdapter() {
@@ -231,6 +111,110 @@ public class TextFinderDialog extends JDialog {
     this.addWindowListener(flst);
     this.pack();
     this.setResizable(false);
+  }
+
+  private JPanel createFindPanel() {
+    this.txtFind1 = new JTextField();
+    this.docFind = this.txtFind1.getDocument();
+    this.popupManager.registerJTextComponent(this.txtFind1);
+
+    JPanel panel = createFormPanel("fill:pref, 4dlu, fill:pref, " + FILLER_ROW + ", 8dlu, pref");
+    panel.add(new JLabel(i18n.str("find_what")), CC.xy(1, 1));
+    panel.add(this.txtFind1, CC.xy(3, 1));
+    panel.add(createButton("find_next", 'f', e -> findNext(false, false)), CC.xy(5, 1));
+    panel.add(createCloseButton(), CC.xy(5, 3));
+    panel.add(createOptionsPanel(), CC.xyw(1, 6, 5));
+    return panel;
+  }
+
+  private JPanel createReplacePanel() {
+    this.txtFind2 = new JTextField();
+    this.txtFind2.setDocument(this.docFind);
+    this.popupManager.registerJTextComponent(this.txtFind2);
+    JTextField txtReplace = new JTextField();
+    this.docReplace = txtReplace.getDocument();
+    this.popupManager.registerJTextComponent(txtReplace);
+
+    JPanel panel = createFormPanel("fill:pref, 4dlu, fill:pref, 4dlu, fill:pref, " + FILLER_ROW + ", 8dlu, pref");
+    panel.add(new JLabel(i18n.str("find_what")), CC.xy(1, 1));
+    panel.add(this.txtFind2, CC.xy(3, 1));
+    panel.add(createButton("replace", 'r', e -> findNext(true, false)), CC.xy(5, 1));
+    panel.add(new JLabel(i18n.str("replace")), CC.xy(1, 3));
+    panel.add(txtReplace, CC.xy(3, 3));
+    panel.add(createButton("replace_all", 'a', e -> replaceAll()), CC.xy(5, 3));
+    panel.add(createCloseButton(), CC.xy(5, 5));
+    panel.add(createOptionsPanel(), CC.xyw(1, 8, 5));
+    return panel;
+  }
+
+  private void replaceAll() {
+    int result = findNext(true, true);
+    if (result >= 0) {
+      JOptionPane.showMessageDialog(owner, result + " " + i18n.str("replacements_prompt"), "Info", 1);
+    }
+  }
+
+  private static JPanel createFormPanel(String rowSpecs) {
+    JPanel panel = new JPanel(new FormLayout(FORM_COLUMN_SPECS, rowSpecs));
+    panel.setBorder(new EmptyBorder(8, 5, 8, 5));
+    return panel;
+  }
+
+  private JButton createButton(String i18nKey, char mnemonic, ActionListener action) {
+    JButton button = new JButton(i18n.str(i18nKey));
+    button.addActionListener(action);
+    button.setMnemonic(mnemonic);
+    return button;
+  }
+
+  private JButton createCloseButton() {
+    JButton button = new JButton(i18n.str("close"));
+    button.addActionListener(e -> setVisible(false));
+    button.setDefaultCapable(true);
+    return button;
+  }
+
+  /** Below the buttons, so it spans the whole width of the dialog. The options are the same on
+   * both tabs, the first panel created creates their models. */
+  private JPanel createOptionsPanel() {
+    JCheckBox chkWord = new JCheckBox(i18n.str("whole_words_only"));
+    chkWord.setMnemonic('w');
+    JRadioButton rdUp = new JRadioButton(i18n.str("search_up"));
+    rdUp.setMnemonic('u');
+    JCheckBox chkCase = new JCheckBox(i18n.str("match_case"));
+    chkCase.setMnemonic('c');
+    JRadioButton rdDown = new JRadioButton(i18n.str("search_down"), true);
+    rdDown.setMnemonic('d');
+    if (this.modelWord == null) {
+      this.modelWord = chkWord.getModel();
+      this.modelUp = rdUp.getModel();
+      this.modelCase = chkCase.getModel();
+      this.modelDown = rdDown.getModel();
+    } else {
+      chkWord.setModel(this.modelWord);
+      rdUp.setModel(this.modelUp);
+      chkCase.setModel(this.modelCase);
+      rdDown.setModel(this.modelDown);
+    }
+    ButtonGroup bg = new ButtonGroup();
+    bg.add(rdUp);
+    bg.add(rdDown);
+
+    JPanel optionsGrid = new JPanel(new GridLayout(2, 2, 8, 2));
+    optionsGrid.add(chkWord);
+    optionsGrid.add(rdUp);
+    optionsGrid.add(chkCase);
+    optionsGrid.add(rdDown);
+
+    JPanel searchIn = new JPanel(new BorderLayout(8, 0));
+    searchIn.add(new JLabel(SEARCH_IN_LABEL), BorderLayout.WEST);
+    searchIn.add(new JComboBox<>(modelScope), BorderLayout.CENTER);
+
+    JPanel panel = new JPanel(new BorderLayout(0, 4));
+    panel.setBorder(new TitledBorder(new EtchedBorder(), i18n.str("options")));
+    panel.add(searchIn, BorderLayout.NORTH);
+    panel.add(optionsGrid, BorderLayout.CENTER);
+    return panel;
   }
 
   public void setJTextComponent(int monitorIndex) {
@@ -273,6 +257,9 @@ public class TextFinderDialog extends JDialog {
   }
 
   public int findNext(boolean doReplace, boolean replaceAll) {
+    if (modelScope.getSelectedItem() == SearchScope.TAGS) {
+      return findNextInTags(doReplace, replaceAll);
+    }
     int startMonitorIndex = this.monitorIndex;
     int startCaretPosition = this.monitor.getCaretPosition();
     int sumResult = 0;
@@ -282,6 +269,7 @@ public class TextFinderDialog extends JDialog {
         return findResult;
       }
       if (findResult == 1 && !replaceAll) {
+        unfoldToShowHit();
         return findResult;
       }
       sumResult += findResult;
@@ -290,6 +278,52 @@ public class TextFinderDialog extends JDialog {
       this.warning(i18n.str("text_not_found"));
     }
     return sumResult;
+  }
+
+  /** The search also visits text areas inside folded steps. Only the one finally showing a hit
+   * unfolds what hides it, otherwise a search would unfold everything it passes. Layout and focus
+   * of the text area (which could not take the focus while it was hidden) must wait for the
+   * layout pass the unfolding has triggered. */
+  private void unfoldToShowHit() {
+    if (monitor instanceof InteractiveStepFragment fragment && editor().unfoldToShow(fragment)) {
+      SwingUtilities.invokeLater(() -> {
+        monitor.requestFocusInWindow();
+        monitor.scrollRectToVisible(monitor.getBounds());
+      });
+    }
+  }
+
+  /** @return the number of replacements for "replace all", otherwise 1 if there was a hit, 0 if not,
+   * -1 if the search can't be run */
+  private int findNextInTags(boolean doReplace, boolean replaceAll) {
+    String key = searchKey();
+    if (key == null) {
+      return -1;
+    }
+    TextMatcher matcher = createMatcher();
+    String replacement = replacementText();
+    if (replaceAll) {
+      return tagSearch.replaceAll(key, replacement, matcher);
+    }
+    boolean hit = doReplace
+      ? tagSearch.replace(key, replacement, matcher)
+      : tagSearch.findNext(key, matcher);
+    if (!hit) {
+      warning(i18n.str("text_not_found"));
+    }
+    return hit ? 1 : 0;
+  }
+
+  private TextMatcher createMatcher() {
+    return new TextMatcher(modelCase.isSelected(), modelWord.isSelected(), modelUp.isSelected());
+  }
+
+  private String replacementText() {
+    try {
+      return this.docReplace.getText(0, this.docReplace.getLength());
+    } catch (BadLocationException e) {
+      return "";
+    }
   }
 
   private boolean moveToNextComponent(int startMonitorIndex, int startCaretPosition) {
@@ -309,6 +343,50 @@ public class TextFinderDialog extends JDialog {
 
   public int findNextInCurrentTextComponent(boolean doReplace) {
     int pos = this.monitor.getCaretPosition();
+    String key = searchKey();
+    if (key == null) {
+      return -1;
+    }
+
+    String replacement = doReplace ? replacementText() : "";
+
+    if (this.modelUp.isSelected() != this.searchUp) {
+      this.searchUp = this.modelUp.isSelected();
+    }
+
+    String searchData = "";
+
+    try {
+      searchData = this.monitor.getDocument().getText(0, this.monitor.getDocument().getLength());
+    } catch (Exception var12) {
+      var12.printStackTrace();
+      return -1;
+    }
+
+    int index = createMatcher().indexOfHit(searchData, key, pos);
+    if (index < 0) {
+      return 0;
+    }
+
+    if (doReplace) {
+      this.setSelection(index, index + key.length(), this.searchUp);
+      // Without undo composition, the following replacement is undone in two
+      // steps: removing the selected text and adding the replacement text.
+      try (UndoRecording ur = editor().composeUndo()) {
+        this.monitor.replaceSelection(replacement);
+      }
+      this.setSelection(index, index + replacement.length(), this.searchUp);
+    } else {
+      this.setSelection(index, index + key.length(), this.searchUp);
+    }
+
+    monitor.scrollRectToVisible(monitor.getBounds());
+    return 1;
+  }
+
+  /** @return the text to search for, null if there is none or it doesn't fit the options. The
+   * user has been told in these cases. */
+  private String searchKey() {
     String key = "";
 
     try {
@@ -318,91 +396,14 @@ public class TextFinderDialog extends JDialog {
 
     if (key.length() == 0) {
       this.warning(i18n.str("no_target_prompt"));
-      return -1;
-    } else {
-      if (this.modelWord.isSelected()) {
-        for(int k = 0; k < WORD_SEPARATORS.length; ++k) {
-          if (key.indexOf(WORD_SEPARATORS[k]) >= 0) {
-            this.warning(i18n.str("illegal_character_prompt") + " '" + WORD_SEPARATORS[k] + "'");
-            return -1;
-          }
-        }
-      }
-
-      String replacement = "";
-      if (doReplace) {
-        try {
-          replacement = this.docReplace.getText(0, this.docReplace.getLength());
-        } catch (BadLocationException var13) {
-        }
-      }
-
-      if (this.modelUp.isSelected() != this.searchUp) {
-        this.searchUp = this.modelUp.isSelected();
-      }
-
-      String searchData = "";
-
-      try {
-        searchData = this.monitor.getDocument().getText(0, this.monitor.getDocument().getLength());
-      } catch (Exception var12) {
-        var12.printStackTrace();
-        return -1;
-      }
-
-      if (!this.modelCase.isSelected()) {
-        searchData = searchData.toLowerCase();
-        key = key.toLowerCase();
-      }
-
-      while(true) {
-        int index;
-        if (!this.searchUp) {
-          index = searchData.indexOf(key, pos);
-        } else {
-          index = searchData.lastIndexOf(key, pos - 1);
-        }
-
-        if (index >= 0 && index < searchData.length()) {
-          if (this.modelWord.isSelected()) {
-            boolean s1 = index > 0;
-            boolean b1 = s1 && !this.isSeparator(searchData.charAt(index - 1));
-            boolean s2 = index + key.length() < searchData.length();
-            boolean b2 = s2 && !this.isSeparator(searchData.charAt(index + key.length()));
-            if (b1 || b2) {
-              if (!this.searchUp && s2) {
-                pos = index + key.length();
-                continue;
-              }
-
-              if (this.searchUp && s1) {
-                pos = index;
-                continue;
-              }
-
-              return 0;
-            }
-          }
-
-          if (doReplace) {
-            this.setSelection(index, index + key.length(), this.searchUp);
-            // Without undo composition, the following replacement is undone in two
-            // steps: removing the selected text and adding the replacement text.
-            try (UndoRecording ur = editor().composeUndo()) {
-              this.monitor.replaceSelection(replacement);
-            }
-            this.setSelection(index, index + replacement.length(), this.searchUp);
-          } else {
-            this.setSelection(index, index + key.length(), this.searchUp);
-          }
-
-          monitor.scrollRectToVisible(monitor.getBounds());
-          return 1;
-        }
-
-        return 0;
-      }
+      return null;
     }
+    Character illegalCharacter = createMatcher().illegalCharacterIn(key);
+    if (illegalCharacter != null) {
+      this.warning(i18n.str("illegal_character_prompt") + " '" + illegalCharacter + "'");
+      return null;
+    }
+    return key;
   }
 
   public void setSelection(int xStart, int xFinish, boolean moveUp) {
@@ -416,250 +417,12 @@ public class TextFinderDialog extends JDialog {
 
   }
 
-  protected boolean isSeparator(char ch) {
-    for(int k = 0; k < WORD_SEPARATORS.length; ++k) {
-      if (ch == WORD_SEPARATORS[k]) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   protected void warning(String message) {
     JOptionPane.showMessageDialog(this.owner, message, TITLE, 1);
   }
 
   static {
     TITLE = i18n.str("find_and_replace");
-  }
-
-  private class DialogLayout implements LayoutManager {
-    protected static final int COMP_TWO_COL = 0;
-    protected static final int COMP_BIG = 1;
-    protected static final int COMP_BUTTON = 2;
-    protected int m_divider = -1;
-    protected int m_hGap = 10;
-    protected int m_vGap = 5;
-    protected Vector m_v = new Vector();
-
-    public DialogLayout() {
-    }
-
-    public DialogLayout(int hGap, int vGap) {
-      this.m_hGap = hGap;
-      this.m_vGap = vGap;
-    }
-
-    public void addLayoutComponent(String name, Component comp) {
-    }
-
-    public void removeLayoutComponent(Component comp) {
-    }
-
-    public Dimension preferredLayoutSize(Container parent) {
-      this.m_v.removeAllElements();
-      int w = 0;
-      int h = 0;
-      int type = -1;
-
-      for(int k = 0; k < parent.getComponentCount(); ++k) {
-        Component comp = parent.getComponent(k);
-        int newType = this.getLayoutType(comp);
-        if (k == 0) {
-          type = newType;
-        }
-
-        if (type != newType) {
-          Dimension d = this.preferredLayoutSize(this.m_v, type);
-          w = Math.max(w, d.width);
-          h += d.height + this.m_vGap;
-          this.m_v.removeAllElements();
-          type = newType;
-        }
-
-        this.m_v.addElement(comp);
-      }
-
-      Dimension dx = this.preferredLayoutSize(this.m_v, type);
-      w = Math.max(w, dx.width);
-      h += dx.height + this.m_vGap;
-      h -= this.m_vGap;
-      Insets insets = parent.getInsets();
-      return new Dimension(w + insets.left + insets.right, h + insets.top + insets.bottom);
-    }
-
-    protected Dimension preferredLayoutSize(Vector v, int type) {
-      int w = 0;
-      int h = 0;
-      Component comp;
-      Dimension dx;
-      int k;
-      switch (type) {
-        case 0:
-          int divider = this.getDivider(v);
-
-          for(k = 1; k < v.size(); k += 2) {
-            comp = (Component)v.elementAt(k);
-            dx = comp.getPreferredSize();
-            w = Math.max(w, dx.width);
-            h += dx.height + this.m_vGap;
-          }
-
-          h -= this.m_vGap;
-          return new Dimension(divider + w, h);
-        case 1:
-          for(k = 0; k < v.size(); ++k) {
-            comp = (Component)v.elementAt(k);
-            dx = comp.getPreferredSize();
-            w = Math.max(w, dx.width);
-            h += dx.height + this.m_vGap;
-          }
-
-          h -= this.m_vGap;
-          return new Dimension(w, h);
-        case 2:
-          Dimension d = this.getMaxDimension(v);
-          w = d.width + this.m_hGap;
-          h = d.height;
-          return new Dimension(w * v.size() - this.m_hGap, h);
-        default:
-          throw new IllegalArgumentException("Illegal type " + type);
-      }
-    }
-
-    public Dimension minimumLayoutSize(Container parent) {
-      return this.preferredLayoutSize(parent);
-    }
-
-    public void layoutContainer(Container parent) {
-      this.m_v.removeAllElements();
-      int type = -1;
-      Insets insets = parent.getInsets();
-      int w = parent.getWidth() - insets.left - insets.right;
-      int x = insets.left;
-      int y = insets.top;
-
-      for(int k = 0; k < parent.getComponentCount(); ++k) {
-        Component comp = parent.getComponent(k);
-        int newType = this.getLayoutType(comp);
-        if (k == 0) {
-          type = newType;
-        }
-
-        if (type != newType) {
-          y = this.layoutComponents(this.m_v, type, x, y, w);
-          this.m_v.removeAllElements();
-          type = newType;
-        }
-
-        this.m_v.addElement(comp);
-      }
-
-      this.layoutComponents(this.m_v, type, x, y, w);
-      this.m_v.removeAllElements();
-    }
-
-    protected int layoutComponents(Vector v, int type, int x, int y, int w) {
-      int k;
-      Component comp1;
-      switch (type) {
-        case 0:
-          int divider = this.getDivider(v);
-
-          for(k = 1; k < v.size(); k += 2) {
-            comp1 = (Component)v.elementAt(k - 1);
-            Component comp2 = (Component)v.elementAt(k);
-            Dimension dx = comp2.getPreferredSize();
-            comp1.setBounds(x, y, divider, dx.height);
-            comp2.setBounds(x + divider, y, w - divider, dx.height);
-            y += dx.height + this.m_vGap;
-          }
-
-          return y;
-        case 1:
-          for(k = 0; k < v.size(); ++k) {
-            comp1 = (Component)v.elementAt(k);
-            Dimension d = comp1.getPreferredSize();
-            comp1.setBounds(x, y, w, d.height);
-            y += d.height + this.m_vGap;
-          }
-
-          return y;
-        case 2:
-          Dimension dxx = this.getMaxDimension(v);
-          int ww = dxx.width * v.size() + this.m_hGap * (v.size() - 1);
-          int xx = x + Math.max(0, (w - ww) / 2);
-
-          for(int kx = 0; kx < v.size(); ++kx) {
-            Component comp = (Component)v.elementAt(kx);
-            comp.setBounds(xx, y, dxx.width, dxx.height);
-            xx += dxx.width + this.m_hGap;
-          }
-
-          return y + dxx.height;
-        default:
-          throw new IllegalArgumentException("Illegal type " + type);
-      }
-    }
-
-    public int getHGap() {
-      return this.m_hGap;
-    }
-
-    public int getVGap() {
-      return this.m_vGap;
-    }
-
-    public void setDivider(int divider) {
-      if (divider > 0) {
-        this.m_divider = divider;
-      }
-
-    }
-
-    public int getDivider() {
-      return this.m_divider;
-    }
-
-    protected int getDivider(Vector v) {
-      if (this.m_divider > 0) {
-        return this.m_divider;
-      } else {
-        int divider = 0;
-
-        for(int k = 0; k < v.size(); k += 2) {
-          Component comp = (Component)v.elementAt(k);
-          Dimension d = comp.getPreferredSize();
-          divider = Math.max(divider, d.width);
-        }
-
-        divider += this.m_hGap;
-        return divider;
-      }
-    }
-
-    protected Dimension getMaxDimension(Vector v) {
-      int w = 0;
-      int h = 0;
-
-      for(int k = 0; k < v.size(); ++k) {
-        Component comp = (Component)v.elementAt(k);
-        Dimension d = comp.getPreferredSize();
-        w = Math.max(w, d.width);
-        h = Math.max(h, d.height);
-      }
-
-      return new Dimension(w, h);
-    }
-
-    protected int getLayoutType(Component comp) {
-      if (comp instanceof AbstractButton) {
-        return 2;
-      } else {
-        return !(comp instanceof JPanel) && !(comp instanceof JScrollPane) && !(comp instanceof JTabbedPane) ? 0 : 1;
-      }
-    }
   }
 
   /** This method is called if the user changes the caret position or the focused edit field while

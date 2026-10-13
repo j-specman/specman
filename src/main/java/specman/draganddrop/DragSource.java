@@ -1,6 +1,6 @@
 package specman.draganddrop;
 
-import specman.editarea.stepnumberlabel.StepnumberLabel;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.view.AbstractSchrittView;
 
 public sealed interface DragSource {

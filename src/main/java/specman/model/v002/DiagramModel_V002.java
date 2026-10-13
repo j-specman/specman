@@ -13,6 +13,7 @@ public class DiagramModel_V002 {
     public final EditorContentModel_V002 intro;
     public final EditorContentModel_V002 outro;
     public final PdfExportOptionsModel_V002 pdfExportOptions;
+    public final List<MetaTagConfigModel_V002> metaTagConfigs = new ArrayList<>();
 
     @Deprecated public DiagramModel_V002() { // For Jackson only
         name = null;

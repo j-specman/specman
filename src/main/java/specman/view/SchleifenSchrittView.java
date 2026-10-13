@@ -1,5 +1,6 @@
 package specman.view;
 
+import specman.metatag.KlappButton;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -150,12 +151,6 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 		return true;
 	}
 
-	@Override
-	void schrittnummerSichtbarkeitSetzen(boolean sichtbar) {
-		super.schrittnummerSichtbarkeitSetzen(sichtbar);
-		wiederholSequenz.schrittnummerSichtbarkeitSetzen(sichtbar);
-	}
-
 	public SchrittSequenzView getSequenz() {
 		return wiederholSequenz;
 	}
@@ -186,6 +181,11 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 	}
 
 	@Override
+	public boolean unfold() {
+		return klappen.unfold();
+	}
+
+	@Override
 	public void geklappt(boolean auf) {
 		wiederholSequenz.setVisible(auf);
 		if (untererBalken != null) {
@@ -207,7 +207,8 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 			wiederholSequenz.generiereSchrittSequenzModel(formatierterText),
 			0,
 			getSourceStepId(),
-			getDecorated());
+			getDecorated(),
+			tagModels());
 	}
 
 	@Override public int aenderungenUebernehmen() throws EditException {

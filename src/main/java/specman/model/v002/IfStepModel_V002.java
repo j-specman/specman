@@ -16,8 +16,8 @@ public class IfStepModel_V002 extends StructuredStepModel_V002 {
         emptyWidth = 0;
     }
 
-    public IfStepModel_V002(String id, String stepNumber, EditorContentModel_V002 content, Integer shade, RoundedBorderDecorationStyle decorationStyle, boolean collapsed, ChangeInfo changeInfo, BranchSequenceModel_V002 ifSequence, int emptyWidth, String sourceStepId) {
-        super(id, stepNumber, content, shade, changeInfo, collapsed, sourceStepId, decorationStyle);
+    public IfStepModel_V002(String id, String stepNumber, EditorContentModel_V002 content, Integer shade, RoundedBorderDecorationStyle decorationStyle, boolean collapsed, ChangeInfo changeInfo, BranchSequenceModel_V002 ifSequence, int emptyWidth, String sourceStepId, List<MetaTagModel_V002> tags) {
+        super(id, stepNumber, content, shade, changeInfo, collapsed, sourceStepId, decorationStyle, tags);
         this.ifSequence = ifSequence;
         this.emptyWidth = emptyWidth;
     }

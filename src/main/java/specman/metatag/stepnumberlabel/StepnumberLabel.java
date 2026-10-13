@@ -1,10 +1,11 @@
-package specman.editarea.stepnumberlabel;
+package specman.metatag.stepnumberlabel;
 
 import org.apache.commons.lang.math.IntRange;
 import specman.StepNumber;
 import specman.draganddrop.DragMouseAdapter;
 import specman.editarea.InteractiveStepFragment;
-import specman.graphics.HangingTab;
+import specman.metatag.AbstractMetaTag;
+import specman.metatag.MetaLabelLayout;
 import specman.pdf.HangingTabShape;
 import specman.pdf.LineShape;
 import specman.undo.props.UDBL;
@@ -14,19 +15,19 @@ import specman.pdf.Shape;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.font.LineMetrics;
 
 import static specman.StepNumber.asString;
 import specman.ChangeSet;
 
 import static specman.graphics.Styles.DELETED_BACKGROUND_COLOR;
+import static specman.graphics.Styles.SCHRITTNR_FONTSIZE;
 import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
 import static specman.graphics.Styles.SCHRITTNUMMER_VORDERGRUNDFARBE;
 import static specman.graphics.Styles.Schriftfarbe_Geloescht;
 import static specman.graphics.Styles.labelFont;
 import static specman.Specman.editor;
 
-public class StepnumberLabel extends HangingTab implements InteractiveStepFragment {
+public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepFragment {
   private static final String SPACER = " ";
   private static final String TO_TARGET_ARROW = SPACER + ">" + SPACER;
   private static final String FROM_SOURCE_ARROW = SPACER + "<" + SPACER;
@@ -34,10 +35,11 @@ public class StepnumberLabel extends HangingTab implements InteractiveStepFragme
   private LabelStructure structure;
   // Tracks which color the current border was built from, so zoom changes can rebuild it at the
   // new scale (see refreshMetaWidgetScale()) without needing to know which style is active.
-  private Color borderColor;
-  // See setHeightGrowthCompensation() - subtracted from the bottom inset to counteract
-  // EditContainer#updateBounds() growing this label's height in "abgesetzte" steps.
-  private int heightGrowthCompensation;
+  private Color borderSourceColor;
+  // The number of rows at the top of the label which the border of the step paints over, see
+  // setOverdrawnTopRows().
+  private int overdrawnTopRows;
+  private final MetaLabelLayout labelLayout = new MetaLabelLayout(this);
 
   public StepnumberLabel(StepNumber stepNumber) {
     super(String.valueOf(stepNumber));
@@ -57,40 +59,75 @@ public class StepnumberLabel extends HangingTab implements InteractiveStepFragme
   }
 
   /** Border insets scale with zoom just like the widget's font/size do - rebuilt here (rather
-   * than cached as a static constant) because MatteBorder insets are fixed at construction time. */
+   * than cached as a static constant) because MatteBorder insets are fixed at construction time.
+   * The top and bottom inset position the text, see {@link MetaLabelLayout}. */
   private Border scaledBorder(Color color) {
-    return scaledBorder(color, heightGrowthCompensation);
+    return insetBorder(color, labelLayout.topInset(), labelLayout.bottomInset());
   }
 
+  public void setBorderSourceColor(Color color) { borderSourceColor = color; }
+  public Color getBorderSourceColor() { return borderSourceColor; }
+
   private void setBorderForColor(Color color) {
-    borderColor = color;
+    setBorderSourceColor(color);
     setBorder(scaledBorder(color));
   }
 
   private void setBorderForColorUDBL(Color color) {
-    borderColor = color;
+    setBorderSourceColorUDBL(color);
     setBorderUDBL(scaledBorder(color));
   }
 
   /** Called from EditContainer#skalieren() so the border rescales immediately on zoom change,
    * not only the next time the label's style (standard/target/source/deleted) changes. */
   public void refreshMetaWidgetScale() {
-    setBorder(scaledBorder(borderColor));
+    setBorder(scaledBorder(borderSourceColor));
+  }
+
+  /** Scales font and border to the given zoom. */
+  public void applyZoom(int zoomPercent) {
+    setFont(labelFont.deriveFont((float) SCHRITTNR_FONTSIZE * zoomPercent / 100));
+    refreshMetaWidgetScale();
   }
 
   /** Called from EditContainer#updateDecorationIndentions() whenever this step's "abgesetzt"
-   * (rounded-border) state changes. Swing centers this label's text within (height - insets), so
-   * growing the label's total height in updateBounds() without also shrinking the bottom inset by
-   * the same amount would push the text noticeably further from the bottom edge than in a step
-   * without that border style - verified via the exact centering formula
-   * gap = (height + bottomInset - textHeight) / 2: for gap to stay constant while height grows by
-   * N, bottomInset must shrink by N (not grow - growing it makes the gap worse, not better). Not
-   * zoom-scaled - see MetaStripPanel.BORDER_OVERDRAW_COMPENSATION for why. */
-  public void setHeightGrowthCompensation(int pixels) {
-    if (heightGrowthCompensation != pixels) {
-      heightGrowthCompensation = pixels;
-      setBorder(scaledBorder(borderColor));
+   * (rounded-border) state changes: the border of such a step paints over the topmost rows of this
+   * label. The label is made taller by that amount in MetaTagPanel#updateBounds(), so what remains
+   * visible is as high as in a step without that border, and the text is centered in that part. Not
+   * zoom-scaled, see MetaTagPanel.BORDER_OVERDRAW_COMPENSATION for why. */
+  public void setOverdrawnTopRows(int rows) {
+    if (overdrawnTopRows != rows) {
+      overdrawnTopRows = rows;
+      alignTextVertically(getHeight());
     }
+  }
+
+  public int getOverdrawnTopRows() {
+    return overdrawnTopRows;
+  }
+
+  /** The height of the label is only known when it is given its bounds, hence the text is aligned
+   * here, see {@link MetaLabelLayout}. */
+  @Override
+  public void setBounds(int x, int y, int width, int height) {
+    super.setBounds(x, y, width, height);
+    alignTextVertically(height);
+  }
+
+  private void alignTextVertically(int height) {
+    if (labelLayout.align(height, overdrawnTopRows) && borderSourceColor != null) {
+      setBorder(scaledBorder(borderSourceColor));
+    }
+  }
+
+  /** The height must not depend on the insets which lift the text, as the label is given its
+   * height from this size: the natural height of the text plus the fixed lift. */
+  @Override
+  public Dimension getPreferredSize() {
+    Dimension size = super.getPreferredSize();
+    Insets insets = getInsets();
+    size.height += (int) editor().scale(CONTENT_LIFT) - insets.top - insets.bottom;
+    return size;
   }
 
   public void setStepNumber(StepNumber stepNumber) {
@@ -123,36 +160,33 @@ public class StepnumberLabel extends HangingTab implements InteractiveStepFragme
     drawDeletionLine(g);
   }
 
+  /** The label of a step marked as deleted gets a gray border line, like the tags at that step.
+   * Derived from the label's state, so undo and redo of the deletion need no extra handling. */
+  @Override
+  protected Color paintedBorderColor() {
+    return fullTextDeleted() ? DELETED_BORDER_COLOR : super.paintedBorderColor();
+  }
+
   private void drawDeletionLine(Graphics g) {
-    LineShape dline = createDeletionLine(0);
+    LineShape dline = createDeletionLine();
     if (dline != null) {
       g.drawLine(dline.start().x, dline.start().y, dline.end().x, dline.end().y);
     }
   }
 
-  private LineShape createDeletionLine(int horizontalLinePlacementOffset) {
+  private LineShape createDeletionLine() {
     // -1 turned out to produce a better horizontal line placement
-    int VERTICAL_LINE_PLACEMENT_OFFSET = -1;
+    int LINE_X_PLACEMENT_OFFSET = -1;
     IntRange delSubStringRange = findDelSubStringRange();
 
     if (delSubStringRange != null) {
-      // Ask Swing itself where it actually paints the text, instead of re-deriving the position
-      // by hand from insets/alignment - manual attempts at this (insets.left for X, a height/2
-      // formula adjusted for the border's bottom inset for Y) each needed another correction
-      // once tried against the real rendering, so just defer to the same layout computation
-      // BasicLabelUI itself uses to place the text.
       FontMetrics metrics = getFontMetrics(getFont());
-      Rectangle viewRect = SwingUtilities.calculateInnerArea(this, null);
-      Rectangle textRect = new Rectangle();
-      SwingUtilities.layoutCompoundLabel(this, metrics, getText(), getIcon(),
-        getVerticalAlignment(), getHorizontalAlignment(),
-        getVerticalTextPosition(), getHorizontalTextPosition(),
-        viewRect, new Rectangle(), textRect, getIconTextGap());
+      Rectangle textRect = textRect();
 
       int undeletedWidth = metrics.stringWidth(getText().substring(0, delSubStringRange.getMinimumInteger()));
       int deletedWidth = metrics.stringWidth(getText().substring(delSubStringRange.getMinimumInteger(), delSubStringRange.getMaximumInteger()));
-      int lineY = textRect.y + textRect.height / 2 + horizontalLinePlacementOffset;
-      int lineX = textRect.x + VERTICAL_LINE_PLACEMENT_OFFSET;
+      int lineY = textRect.y + textRect.height / 2;
+      int lineX = textRect.x + LINE_X_PLACEMENT_OFFSET;
       return new LineShape(
         lineX + undeletedWidth,
         lineY,
@@ -162,6 +196,20 @@ public class StepnumberLabel extends HangingTab implements InteractiveStepFragme
         .withWidth(0.5f);
     }
     return null;
+  }
+
+  /** Asks Swing itself where it actually paints the text, instead of re-deriving the position
+   * by hand from insets/alignment - manual attempts at this (insets.left for X, a height/2
+   * formula adjusted for the border's bottom inset for Y) each needed another correction
+   * once tried against the real rendering, so just defer to the same layout computation
+   * BasicLabelUI itself uses to place the text. */
+  private Rectangle textRect() {
+    Rectangle textRect = new Rectangle();
+    SwingUtilities.layoutCompoundLabel(this, getFontMetrics(getFont()), getText(), getIcon(),
+      getVerticalAlignment(), getHorizontalAlignment(),
+      getVerticalTextPosition(), getHorizontalTextPosition(),
+      SwingUtilities.calculateInnerArea(this, null), new Rectangle(), textRect, getIconTextGap());
+    return textRect;
   }
 
   /** Important to remember: The end index of Java's String#substring method
@@ -247,10 +295,9 @@ public class StepnumberLabel extends HangingTab implements InteractiveStepFragme
   }
 
   public Shape getShape() {
-    int lineYOffset = (int)editor().scale(1.0);
     return new HangingTabShape(this, arc())
-      .withText(new LabelShapeText(getText(), getInsets(), getForeground(), getFont()))
-      .add(createDeletionLine(lineYOffset));
+      .withText(LabelShapeText.at(this, textRect()))
+      .add(createDeletionLine());
   }
 
   private void setStructureUDBL(LabelStructure structure) { UDBL.setStructureUDBL(this, structure); }
@@ -258,6 +305,7 @@ public class StepnumberLabel extends HangingTab implements InteractiveStepFragme
   private void setForegroundUDBL(Color fg) { UDBL.setForegroundUDBL(this, fg); }
   private void setBackgroundUDBL(Color fg) { UDBL.setBackgroundUDBL(this, fg); }
   private void setBorderUDBL(Border border) { UDBL.setBorderUDBL(this, border); }
+  private void setBorderSourceColorUDBL(Color color) { UDBL.setBorderSourceColorUDBL(this, color); }
 
   @Override
   public String toString() {

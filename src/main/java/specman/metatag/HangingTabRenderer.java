@@ -1,4 +1,4 @@
-package specman.graphics;
+package specman.metatag;
 
 import javax.swing.JComponent;
 import java.awt.AlphaComposite;

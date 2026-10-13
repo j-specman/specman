@@ -22,6 +22,7 @@ public class Shape {
   private boolean withOutline;
   private AbstractShapeText text;
   private ShapeImage image;
+  private ShapeNote note;
   protected float lineWidth = (float)LINIENBREITE;
 
   public Shape() {}
@@ -108,6 +109,13 @@ public class Shape {
     return toPDFColor(backgroundColor, DEFAULT_FILL_COLOR);
   }
 
+  /** @return how opaque the shape is filled, 1 for fully opaque. Only shapes which explicitly care
+   * override this: components may have a background with an alpha value which was never meant to
+   * show up in the PDF, as the PDF always painted them opaque. */
+  public float getFillOpacity() {
+    return 1f;
+  }
+
   static com.itextpdf.kernel.colors.Color toPDFColor(Color awtColor, com.itextpdf.kernel.colors.Color fallback) {
     if (awtColor == null) {
       return fallback;
@@ -157,6 +165,15 @@ public class Shape {
 
   public ShapeImage getImage() {
     return image;
+  }
+
+  public Shape withNote(ShapeNote note) {
+    this.note = note;
+    return this;
+  }
+
+  public ShapeNote getNote() {
+    return note;
   }
 
   public void runPath(Point renderOffset, float swing2pdfScaleFactor, PdfCanvas pdfCanvas) {

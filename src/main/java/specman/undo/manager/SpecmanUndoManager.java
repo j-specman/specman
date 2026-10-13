@@ -1,5 +1,6 @@
 package specman.undo.manager;
 
+import net.atlanticbb.tantlinger.ui.text.CompoundUndoManager;
 import org.apache.commons.lang.StringUtils;
 import specman.Specman;
 
@@ -27,6 +28,7 @@ public class SpecmanUndoManager extends UndoManager {
 
     private final Specman specman;
     private final Stack<UndoRecordingMode> recordingMode = new Stack<>();
+    private UndoableEdit lastUndoneOrRedone;
     private UndoableComposition recordingComposition;
     /** Set when a model was restored from an auto-save working copy. In that case the file
      * on disk still holds the older pre-crash state, so the model must be treated as modified
@@ -45,8 +47,7 @@ public class SpecmanUndoManager extends UndoManager {
             case Normal:
                 boolean success = super.addEdit(anEdit);
                 if (success) {
-                    updateUnsavedChangesIndicatorInTitleBar();
-                    //System.out.println("Wert false");
+                    undoStackChanged();
                 }
                 return success;
             case Composing:
@@ -66,19 +67,40 @@ public class SpecmanUndoManager extends UndoManager {
     public synchronized void discardAllEdits() {
         super.discardAllEdits();
         unsavedWorkingCopy = false;
-        updateUnsavedChangesIndicatorInTitleBar();
+        undoStackChanged();
     }
 
     @Override
     public void undo() throws CannotUndoException {
+        UndoableEdit edit = editToBeUndone();
+        hideFeedbackOfPreviousUndoRedo();
         super.undo();
-        updateUnsavedChangesIndicatorInTitleBar();
+        lastUndoneOrRedone = edit;
+        undoStackChanged();
     }
 
     @Override
     public void redo() throws CannotRedoException {
+        UndoableEdit edit = editToBeRedone();
+        hideFeedbackOfPreviousUndoRedo();
         super.redo();
+        lastUndoneOrRedone = edit;
+        undoStackChanged();
+    }
+
+    /** The undo and redo actions of the text editors are shared by the whole diagram and only enabled
+     * while there is something to undo or redo. Their state is otherwise only updated when a text
+     * editor gains the focus or a text is edited, so edits of any other kind would leave them stale. */
+    private void undoStackChanged() {
         updateUnsavedChangesIndicatorInTitleBar();
+        CompoundUndoManager.updateCentralUndo();
+    }
+
+    private void hideFeedbackOfPreviousUndoRedo() {
+        if (lastUndoneOrRedone instanceof UndoRedoFeedbackHider) {
+            ((UndoRedoFeedbackHider) lastUndoneOrRedone).hideFeedback();
+        }
+        lastUndoneOrRedone = null;
     }
 
     private void updateUnsavedChangesIndicatorInTitleBar() {

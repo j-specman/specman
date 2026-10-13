@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import specman.ChangeSet;
 import specman.EditException;
 import specman.SpecmanVersion;
+import specman.metatag.generic.config.MetaTagConfig;
+import specman.model.v002.MetaTagConfigModel_V002;
 import specman.model.ModelEnvelope;
 import specman.model.ModelConverterV001V002;
 import specman.model.v001.AbstractSchrittModel_V001;
@@ -147,6 +149,7 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
   private void applyEnvelope(ModelEnvelope envelope) throws EditException {
     DiagramModel_V002 model = resolveModel(envelope);
 
+    setMetaTagConfigs(toConfigs(model.metaTagConfigs));
     ChangeSet changeSet = ChangeSet.fromName(model.changeSetName);
     if (changeSet != null) {
       context.updateChangeSet(changeSet);
@@ -172,6 +175,14 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     setChangeModeEnabled(model.changeModeEnabled);
     discardAllUndoEdits();
     diagrammAktualisieren(null);
+  }
+
+  private List<MetaTagConfig> toConfigs(List<MetaTagConfigModel_V002> configModels) {
+    List<MetaTagConfig> configs = new ArrayList<>();
+    for (MetaTagConfigModel_V002 configModel : configModels) {
+      configs.add(configModel.toConfig());
+    }
+    return configs;
   }
 
   private DiagramModel_V002 resolveModel(ModelEnvelope envelope) {

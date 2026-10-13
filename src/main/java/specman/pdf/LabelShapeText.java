@@ -1,21 +1,15 @@
 package specman.pdf;
 
 import com.itextpdf.kernel.font.PdfFont;
-import com.itextpdf.kernel.font.PdfFontFactory;
-import com.itextpdf.kernel.font.PdfSimpleFont;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.IBlockElement;
-import com.itextpdf.layout.element.IElement;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.font.FontCharacteristics;
-import com.itextpdf.layout.font.FontInfo;
 
-import java.awt.*;
-import java.io.IOException;
-import java.util.Arrays;
-
-import static specman.pdf.FormattedShapeText.fontProvider;
+import javax.swing.JLabel;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
 
 public class LabelShapeText extends AbstractShapeText {
 
@@ -26,13 +20,22 @@ public class LabelShapeText extends AbstractShapeText {
     this.content = content;
   }
 
+  /** The text of the label at the position where Swing paints it.
+   * @param textRect the area the label's layout computation puts the text into */
+  public static LabelShapeText at(JLabel label, Rectangle textRect) {
+    // writeToPDF() puts the baseline (top inset + font size) below the top
+    int ascent = label.getFontMetrics(label.getFont()).getAscent();
+    Insets insets = new Insets(textRect.y + ascent - label.getFont().getSize(), textRect.x + 1, 0, 0);
+    return new LabelShapeText(label.getText(), insets, label.getForeground(), label.getFont());
+  }
+
   public void writeToPDF(Point renderOffset, float swing2pdfScaleFactor, PdfCanvas pdfCanvas, Document document) {
     float scaledFontSize = getFontsize() * swing2pdfScaleFactor;
     pdfCanvas.setFillColor(getPDFColor());
     pdfCanvas.beginText().setFontAndSize(getPDFFont(), scaledFontSize)
       .moveText(
         (renderOffset.x + insets.left -1) * swing2pdfScaleFactor,
-        (renderOffset.y - insets.top +1) * swing2pdfScaleFactor - scaledFontSize)
+        (renderOffset.y - insets.top) * swing2pdfScaleFactor - scaledFontSize)
       .showText(getContent())
       .endText();
   }
@@ -41,11 +44,6 @@ public class LabelShapeText extends AbstractShapeText {
 
   @Override
   protected PdfFont getPDFFont() {
-    String family = font.getFamily().replace(" ", "");
-    if (family.contains("Sans")) {
-      family = "Helvetica";
-    }
-    FontInfo info = fontProvider.getFontSelector(Arrays.asList(family), null).bestMatch();
-    return fontProvider.getPdfFont(info);
+    return FormattedShapeText.resolvePdfFont(font);
   }
 }

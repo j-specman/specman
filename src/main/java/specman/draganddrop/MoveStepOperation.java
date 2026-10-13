@@ -4,7 +4,7 @@ import specman.EditException;
 import specman.EditorI;
 import specman.ScrollPause;
 import specman.Specman;
-import specman.editarea.stepnumberlabel.StepnumberLabel;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.undo.UndoableSchrittVerschoben;
 import specman.undo.UndoableSchrittVerschobenMarkiert;
 import specman.undo.manager.UndoRecording;

@@ -59,7 +59,10 @@ public class Styles {
       }
     }
 
-    public static Font labelFont = new Font(Font.SANS_SERIF, Font.BOLD, SCHRITTNR_FONTSIZE);
+    // Shipped with Specman and embedded into the PDF, so the labels look the same there.
+    public static Font labelFont = new Font("Roboto", Font.BOLD, SCHRITTNR_FONTSIZE);
+
+    public static Font metaTagFont = new Font("Roboto", Font.PLAIN, SCHRITTNR_FONTSIZE);
 
     public static final Color Schriftfarbe_Geloescht = Color.LIGHT_GRAY;
     public static final Color Hintergrundfarbe_Deviderbar = Color.LIGHT_GRAY;
