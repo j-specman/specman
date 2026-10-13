@@ -30,7 +30,7 @@ Specman provides a high-quality PDF export, so that the diagrams can be shared e
 ### Change tracking
 The yellow highlighting in the screenshot above indicates changes which were made in change mode. Similar to Microsoft Word, e.g. deleting text in change mode does not actually cause the text to disappear but displayed as crossed out with a yellow background as if someone had marked the section with a text marker. Changes in a model are therefore immediately recognizable by everybody. This is a crucial aspect in iterative development where specifications evolve over time.
 
-Folding up a structured step which includes any change marks will cause the unfold-button beside the step number to be displayed with a colored background. I.e. even if details are hidden, it is still visible that there are changes in the folded up section.
+Folding up a structured step which includes any change marks will cause the unfold-button beside the step number to be displayed in the highlight color of the hidden changes. I.e. even if details are hidden, it is still visible that there are changes in the folded up section.
 
 Since version 1.2.1, Specman supports multiple change sets, which is of interest e.g. if there are multiple change requests to be considered in parallel within a single development iteration.
 
@@ -101,14 +101,14 @@ Catch steps are displayed in optically separated sections with a gray bar above 
 
 ## Change Tracking
 
-A specification is not a one-shot design. Like the code, it is developed iteratively, and during an iteration everybody involved must be able to see what has changed compared to the status quo. That's what change tracking is for. It is similar to change tracking in Microsoft Word, but tailored to specifications. It covers both the text content and the structure of the diagramm, and it works with strong colors just as if the author had marked the changes with a text marker.
+A specification is not a one-shot design. Like the code, it is developed iteratively, and during an iteration everybody involved must be able to see what has changed compared to the status quo. That's what change tracking is for. It is similar to change tracking in Microsoft Word, but tailored to specifications. It covers both the text content and the structure of the diagram, and it works with strong colors just as if the author had marked the changes with a text marker.
 
 ### Change mode
 Change tracking is switched on and off with the toggle button _Änderungen verfolgen_ in the diagram toolbar:
 
 image::../src/main/resources/images/aenderungen.png[Change Mode Button]
 
-While the button is pressed, Specman is in _change mode_: every edit is tracked and highlighted in the color of the current changeset (see below). Otherwise Specman is in _normal mode_ and edits are applied without any tracking. If change mode is on or off and which change set is selected is saved with the diagram, so it is restored when you open the file again. A new diagram starts in normal mode.
+While the button is pressed, Specman is in _change mode_: every edit is tracked and highlighted in the color of the current changeset (see below). Otherwise Specman is in _normal mode_ and edits are applied without any tracking. Whether change mode is on and which changeset is selected is saved with the diagram, so it is restored when you open the file again. A new diagram starts in normal mode.
 
 Deleting something in change mode doesn't remove it, but marks it as deleted, so that the reader can see what is going to disappear. The exception is content which was itself added in change mode: it carries no history worth keeping, so deleting it simply removes it.
 
@@ -124,26 +124,30 @@ In change mode, the following modifications are tracked:
 Not tracked are meta tags (see below), shading, the fold state of steps and the order of case branches and catch areas.
 
 ### What changes look like
+image::changetracking-marks.png[Change Marks]
+
 Added text has a background in the changeset color, added steps a pale panel in that color. Deleted text is struck through on a background in the changeset color. A deleted step gets a panel in the changeset color, a black step number tab and light-gray, struck-through text on black.
 
 Moving a step leaves a placeholder behind at its old position: a black-tabbed step with empty content, and a step number label like [line-through]#2# > 5 ("moved from 2 to 5"). At the new position, the step carries the changeset color and the label 5 < [line-through]#2# ("came from 2"). It's all one move, so accepting or rejecting it always takes care of both places.
 
-If a folded step contains changes, its unfold button takes on the color of one of the changesets involved, so even a folded step shows that there is something to look at.
+If a folded step contains changes, its unfold button is displayed in the color of the changeset which the first hidden change belongs to. So even a folded step shows that there is something to look at, and by which changeset.
 
 ### Changesets
-Sometimes more than one set of changes is in the air: several change requests being considered in parallel within one iteration, or changes of changes in a multi-stage coordination, where each round of feedback should be recognizable on its own. For this, Specman provides _changesets_. Each changeset has its own color, and all of them are displayed at the same time.
+Sometimes more than one set of changes is in the air: several change requests being considered in parallel within one iteration, or changes of changes in a multi-loop coordination, where each round of feedback should be recognizable on its own. For this, Specman provides _changesets_. Each changeset has its own color, and all of them are displayed at the same time.
 
-There are five changesets, which are predefined and cannot be changed or extended: yellow, lilac, blue, orange and pink. The colors were chosen to remain distinguishable for people with most kinds of color vision deficiency.
+There are five changesets, which are predefined and cannot be changed or extended yet: yellow, lilac, blue, orange and pink. The colors were chosen to remain distinguishable for people with most kinds of color vision deficiency.
 
 The current changeset is the one which new changes are assigned to. It is chosen in the _Change Set_ menu of the menu bar, and it is recognizable at any time by the colored dot in the menu title and by the color of the toolbar buttons for change tracking. Accepting, rejecting and merging, as described below, always refer to the current changeset only.
 
+image::changetracking-menu-toolbar.png[Changeset Menu and Toolbar Buttons]
+
 ### Accepting and rejecting changes
-The toolbar buttons _Änderungen übernehmen_ and _Änderungen verwerfen_ accept or reject all changes of the current changeset in the entire diagram, including intro and outro. Changes of other changesets are not touched. There is no way of accepting or rejecting changes selectively, e.g. for a single step.
+The toolbar buttons _Änderungen übernehmen_ and _Änderungen verwerfen_ accept or reject all changes of the current changeset in the entire diagram, including intro and outro. Changes of other changesets are not touched. There is no way of accepting or rejecting changes selectively yet, e.g. for a single step.
 
 image::../src/main/resources/images/uebernehmen.png[Accept Changes Button]
 image::../src/main/resources/images/verwerfen.png[Reject Changes Button]
 
-Accepting makes the changes part of the specification: added content loses its marking and deleted content is actually removed. A moved step stays at its new position and the placeholder disappears.
+Accepting makes the changes part of the specification: added content loses its marking and deleted content is actually removed. A moved step stays at its new position and the placeholder at the step's original position disappears.
 
 Rejecting does the opposite: added content is removed, deleted content is restored, and moved steps return to their old position.
 
@@ -154,10 +158,10 @@ The toolbar button _Change Sets zusammenführen_ pulls the changes of another ch
 
 image::../src/main/resources/images/merge.png[Merge Changesets Button]
 
-Pressing it opens a list of the other changesets. The changes of the one you choose are recolored into the current changeset, which makes it the target of the merge. This is typically the consolidation step at the end of a multi-stage coordination: the outcome gets merged into a single changeset, which is then accepted all at once before the development starts. Merging can be undone.
+Pressing the button opens a list of all changesets except the current one. The changes of the one you choose are recolored into the current changeset, which makes it the target of the merge. This is typically the consolidation step at the end of a multi-loop coordination: the outcome gets merged into a single changeset, which is the basis for development and testing. Merging can be undone.
 
 ### Review
-Even with a few changes only, they can be hard to find in a large diagram. The toolbar button _Für Review zusammenklappen_ folds up all structured steps which contain no changes, so that only the parts of the diagram which are worth a reviewer's attention remain open.
+Even with a few changes only, they can be hard to find in a large diagram. The toolbar button _Für Review zusammenklappen_ folds up all structured steps which contain no changes, so that only the parts of the diagram remain open which are worth a reviewer's attention.
 
 image::../src/main/resources/images/review.png[Review Button]
 
