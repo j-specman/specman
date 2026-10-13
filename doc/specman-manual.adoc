@@ -52,43 +52,55 @@ As an alternative, most steps can be created by drag & drop by pressing the corr
 
 The steps creation bar provides the following buttons:
 
-image::../src/main/resources/images/einfacher-schritt.png[Simple Step]
+### image:../src/main/resources/images/einfacher-schritt.png[Simple Step] Simple step
+
 Creates a simple step in the diagram. The new step is immediately focused, i.e. pressing the button multiple times creates multiple steps one after the other.
 
-image::../src/main/resources/images/subsequenz-schritt.png[Sub Sequence Step]
+### image:../src/main/resources/images/subsequenz-schritt.png[Sub Sequence Step] Subsequence step
+
 Creates a subsequence of steps with an initial simple step immediately added within. Subsequences are not part of original Nassi-Shneiderman diagrams. They bring structure into larger sequences like chapters in a book. These substructures may be directly used as a reasonable indicator for how to structure the code when implementing the specification.
 
 The steps within the subsequence are numbered on a lower level, e.g. step 2.1, 2.2, 2.3 within subsequence step 2.
 
 Subsequences can be folded up to hide their content when the details are currently not of interest. Placing the mouse directly right of the subsequence's step number brings up a small button with a minus sign. Pressing this button folds up the subsequence. The button then shows a plus sign for unfolding the subsequence again.
 
-image::../src/main/resources/images/while-schritt.png[While Step]
+### image:../src/main/resources/images/while-schritt.png[While Step] While step
+
 Creates a loop step with an initial simple step in its repetition sequence immediately added. The repetition sequence must not be empty. So if the first step must be a different one than a simple step, add a step of the required type and remove the initial first step afterward.
 
-image::../src/main/resources/images/whilewhile-schritt.png[While While Step]
+### image:../src/main/resources/images/whilewhile-schritt.png[While While Step] While-while step
+
 Creates a loop step with an additional horizontal empty bar at the bottom. This is functionally identical with the loop step, but sometimes it is optically clearer to understand of a loop as an easily recognizable graphical boundary at the bottom. E.g. if there are catch steps at the end of the loop's repetition sequence.
 
-image::../src/main/resources/images/ifelse-schritt.png[If Else Step]
+### image:../src/main/resources/images/ifelse-schritt.png[If Else Step] If-else step
+
 Creates an if-else step with an initial simple step in its if and else branches. The division ratio of the branches may be changed by clicking on the separating line between the branches and moving it right or left.
 
-image::../src/main/resources/images/if-schritt.png[If Step]
+### image:../src/main/resources/images/if-schritt.png[If Step] If step
+
 Creates an if step. Unlike the if-else step, the left branch is empty and its width cannot be modified.
 
-image::../src/main/resources/images/case-schritt.png[Case Step]
+### image:../src/main/resources/images/case-schritt.png[Case Step] Case step
+
 Creates a case step which has the default branch on the left and two initial other case branches on the right. Additional branches can be added by pressing the corresponding button from the steps creation toolbar (see below). Branch removal is achieved by placing the cursor in the branch's heading or condition edit area and pressing the delete button from the step & document properties toolbar. However, two case branches and the default branch are the minimum which a case step has to provide. Otherwise it's an if or if-else step.
 
-image::../src/main/resources/images/zweig.png[New Branch]
+### image:../src/main/resources/images/zweig.png[New Branch] New branch
+
 Creates a new branch in a previously created case step. The creation by button click requires placing the cursor into an existing branch's heading edit area first. The new branch is then added _left_ from the cursor-selected branch. Alternatively the new branch can be created by drag & drop which requires dragging into an existing branch's heading. A vertical insertion bar indicates where the new branch will be created when releasing the mouse button.
 
-image::../src/main/resources/images/break-schritt.png[Break Step]
+### image:../src/main/resources/images/break-schritt.png[Break Step] Break step
+
 Creates a break step which can be understood as the occurrence of a business exception. It causes the following steps to be skipped down to the place where the exception gets caught. If it is not caught anywhere the exception causes the complete usecase to be aborted which is described in the diagram. However, this is usually not a good idea as it makes the reader wonder if this was designed by intention or if the design is not yet complete.
 
 There are two flavours for using break steps: The compact form is the one being used in the anagram example: The preceding step describes some system functionality and the break step simply mentions an exceptional situation which may occur in the step before. An appropriate check for the situation is implicitly assumed to be included in the described functionality. The more comprehensive form includes a preceding step which _explicitly_ consists of nothing else but the check for a particular exceptional situation where the break step(s) then expresses the abortion of the step sequence in case the situation is present. This form is recommended, if the situation takes some more text to be described or if it is of particular importance in the overall context. The actual system functionality is then described in a step following the break step(s).
 
-image::../src/main/resources/images/catch-schritt.png[Catch Step]
-Creates a catch step for a previously defined break step. This is the only kind of step which unfortunately cannot be created by drag & drop yet and the creation takes the following steps.
+image::breakcatch-break-flavours.png[Compact and Comprehensive Form of Break Steps]
 
-* Place the cursor into any step of the sequence to which the catch step is to be added at the very end.
+### image:../src/main/resources/images/catch-schritt.png[Catch Step] Catch step
+
+Creates a catch step for a previously defined break step. Unlike all other steps, it is not just inserted at the drop position: the creation takes the following steps, no matter whether the button is pressed or dragged into the diagram.
+
+* Place the cursor into any step of the sequence to which the catch step is to be added at the very end. When working with drag & drop, drop the button anywhere in this sequence instead.
 * Press the catch step button from the steps creation toolbar. This brings up a dialog for break step selection. The dialog allows you to choose from all break steps
 ** which are not already coupled with a catch step yet and
 ** which are present in the step sequence to which the catch step is about to be attached, or in any of its nested sequences
@@ -97,7 +109,22 @@ Creates a catch step for a previously defined break step. This is the only kind 
 
 If a development project is working with a programming language that supports exceptions, it is strongly recommended to represent break and catch by throwing and catching exceptions in the code. In this case, it is a good idea to use relatively short expressions in the break step text, from which exception type names can be directly derived.
 
-Catch steps are displayed in optically separated sections with a gray bar above and below, making clear that this is not part of the normal control flow. Multiple catch steps for the same sequence are usually placed side by side which is
+Catch steps are displayed in optically separated sections with a gray bar above and below, making clear that this is not part of the normal control flow. Multiple catch steps for the same sequence are placed side by side, each with its own handling sequence below its heading. New catch steps are appended on the right. Right-clicking the step number of a catch heading brings up a context menu with _Move left_ and _Move right_ to change the order, and the widths of the catch steps can be changed by dragging the dividers between them. As in loops, the handling sequence must not be empty, i.e. its last step cannot be deleted.
+
+A single catch step can also handle several break steps, just like `catch (A | B e)` in Java. The additional break steps are called _co-catches_. To add one, place the cursor in the heading of the catch step and press the catch step button, or drop the button onto the heading. The dialog then adds the chosen break step as a co-catch of this catch step instead of creating a new one. The headings of co-catches are stacked below the main heading, and each heading is coupled with its own break step, whose text it shows. A co-catch can be moved up and down among the other co-catches by the context menu of its step number.
+
+image::breakcatch-catch-variations.png[Catch Steps with and without Co-Catch]
+
+Pressing the Ctrl key while clicking the step number of a break step jumps to the heading of its catch step. The same works the other way round, from the catch heading to the break step.
+
+Deleting works as follows, using _Löschen_ from the step number's context menu:
+
+* On the main heading of a catch step, it removes the entire catch step including its co-catches.
+* On the heading of a co-catch, it removes just this co-catch.
+* The break steps stay in both cases. They are no longer coupled with a catch step, so they show up again in the break step selection dialog.
+* The other way round, deleting a break step removes its catch heading. If this was the main heading, the entire catch step is removed.
+
+The catch area can be folded up like any other structured step. The button for this is on the right of the gray bar above the catch area. It shows up when you move the mouse there, and stays visible as long as the area is folded.
 
 ## Change Tracking
 
