@@ -130,7 +130,9 @@ The catch area can be folded up like any other structured step. The button for t
 The content of a step is not just a single text. It is a vertical sequence of _edit areas_, which can be text, list items, tables and images, in any order, with a text area always coming first. Everything is edited in place, like in a word processor.
 
 ### Text and formatting
-Text formatting is based on an HTML subset. However, Specman is a WYSIWYG editor, so you never have to deal with HTML source code. The toolbar and the menus work like in a word processor, and what they offer is what HTML offers: paragraphs with a paragraph style (body text, headings, block quotes, preformatted text), character styles, font, size, color and alignment. The text is saved as HTML in the diagram file, together with a plain text rendition for tools which don't want to deal with HTML like full text search in IDEs.
+Text formatting is based on an HTML subset. However, Specman is a WYSIWYG editor, so you never have to deal with HTML source code when using the UI. The toolbar and the menus work like in a word processor, and what they offer is what HTML offers: paragraphs with a paragraph style (body text, headings, block quotes, preformatted text), character styles, font, size, color and alignment. The text is saved as HTML in the diagram file, together with a plain text rendition for tools which don't want to deal with HTML like full text search in IDEs.
+
+HTML is used for text formatting only. Lists, images and tables are not part of the text content, even though HTML could express them. In Specman they are independent building blocks of the step content, each being an edit area of its own, see <<_lists,Lists>>, <<_tables,Tables>> and <<_images,Images>>. This allows Specman to render them better than a plain HTML component could, and, above all, to track changes at a much finer granularity (see chapter see <<changetracking,Change Tracking>>). An added list item, a removed table row or a deleted image is marked individually instead of marking a whole text as changed.
 
 Formatting is done with the formatting toolbar above the diagram and the menus _Bearbeiten_, _Format_ and _Einfügen_. The toolbar covers the usual suspects like bold, italic, underline, font, size, color and alignment, plus the paragraph style box. The _Format_ menu has even more character styles, e.g. subscript and superscript. Strikethrough and text background colors are missing on purpose: they are reserved for the markings of change mode, see <<changetracking,Change Tracking>>.
 
@@ -140,7 +142,7 @@ Pasting with Ctrl+V depends on where the content comes from:
 * Text from other applications, like Word or a browser, is reduced to plain text. Formatting is dropped.
 * A pure image in the clipboard, e.g. a screenshot, becomes an image at the caret. If the clipboard contains text as well, the text wins.
 
-Complete steps can be copied and pasted using the step context menu rather than operating on text content.
+Complete steps are copied, cut and pasted using the step context menu rather than operating on text content, see <<steprearranging,Moving, copying and deleting steps>>.
 
 ### Lists
 The toolbar buttons for unordered and ordered lists turn the paragraph at the caret into a list item. Text before and after it stays what it was. Pressing Enter splits the item at the caret. Pressing Backspace at the start of an item dissolves it back into plain text, which is also the way out of a list: Enter in an empty item just creates the next empty item. Pressing one of the list buttons within an item dissolves it as well.
@@ -172,6 +174,35 @@ A step reference is displayed as the step number on a light gray background. It 
 The reference number follows its step automatically when the numbering changes. If the step is deleted, the reference remains with a question mark behind the number, e.g. _2.3?_. Deleting a referenced step causes a confirmation message to appear.
 
 Ctrl+click on a reference scrolls to the step it points to. Ctrl+Alt+Left goes back to where you came from, and Ctrl+Alt+Right forward again.
+
+[#steprearranging]
+## Moving, copying and deleting steps
+
+Once a diagram is populated with steps, they can be rearranged, copied and deleted. All these operations are available through a step's number label at its upper left corner. Right-clicking the step number brings up a context menu with a number of typical edit operations like Cut / Copy / Paste. Depending on the type of step, there may be more operations available, including tagging operations as described in chapter <<_meta_tags,Meta tags>>.
+
+### Moving steps
+To move a step, press the mouse button on its step number, keep it pressed, move the mouse to the new place and release it. As when creating steps by drag & drop, a half-transparent gray insertion bar shows where the step will be placed. The step takes its entire content with it, nested steps included, and gets a new step number. It stays the same step, so references to it stay valid and the displayed step number is automatically updated.
+
+Some steps cannot be dragged: the only step of a sequence (because a sequence must not be empty), steps marked as deleted, and the placeholders which change mode leaves behind at the old position of a moved step. A step cannot be dropped into itself either.
+
+In change mode a move is tracked as a move, see <<changetracking,Change Tracking>>.
+
+### Deleting steps
+_Löschen_ from the step number's context menu removes the step including everything inside. The last step of a sequence cannot be deleted. If the step is referenced from somewhere else, Specman asks for confirmation, and the references are marked as defective once the step is actually removed, see <<_step_references,Step references>>. In change mode, the step is marked as deleted instead of removed, see <<changetracking,Change Tracking>>. For catch steps, see above.
+
+### Copy, cut and paste
+_Copy_ puts the step including everything inside onto the clipboard. _Cut_ does the same and deletes the step afterwards, with the rules of _Löschen_ above. _Paste_ inserts the clipboard content as a new step directly below the step whose menu was used, in the same sequence. For a structured step this means below the entire step, not inside it. The items are disabled for steps marked as deleted and for catch steps.
+
+Cutting is not the same as moving: the references to the cut step become defective, and in change mode it shows up as a deletion at the old and an addition at the new position, instead of one move. If the only reason for cutting is a different place within the same diagram, drag & drop is the better choice. It is also the safer one for steps containing break steps. If the catch sequence of such a break step is not part of the cut step itself, cutting removes the catch sequence with all its handling steps. Specman warns before doing so.
+
+Pasting works across diagrams, and also between two Specman windows. What happens to the change marks of the pasted step depends on where it comes from:
+
+* From the same Specman window, the marks are kept as they are. In change mode, only the pasted step itself and its own content are marked as added, while steps nested in it keep the marks they have.
+* From another Specman window, or from plain text, the marks are replaced: in change mode everything pasted is marked as added in the current changeset, otherwise all marks are dropped. Deleted content inside the pasted step is left out. If the pasted step itself is marked as deleted, nothing is pasted and an error message appears.
+
+For the handling of meta tags in pasted steps, see the section _Copy & Paste_ in the chapter <<_meta_tags,Meta tags>>.
+
+The clipboard content of copied steps is also available as plain text in the file format of the diagram, so steps can be pasted into any text editor, mail or AI chat. The other way round, steps written in this format can be pasted into a diagram. If the clipboard content doesn't parse, Specman reports that it cannot be pasted as a step.
 
 [#changetracking]
 ## Change Tracking
