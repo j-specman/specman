@@ -5,6 +5,14 @@ Release notes Specman 1.3.2
 Release notes Specman 1.4.0
 - Meta Tags
 
+Aus aktueller Anwendung
+- Durchgestrichen kann der User als Schriftformatierung auswählen. Da beißt sich aber mit Durchstreichungen durch den Änderungmodus
+  - Führt z.B. zu Fehlern, wenn man Text durchstreicht, den entsprechenden Schritt dann löscht und dann die Änderungen zurücknimmt
+- beim Öffnen und einer vorhandenen .wrk, *drei* Optionen: 1) nicht laden, 2) laden, 3) ist in Arbeit - nicht laden aber auch nicht überschreiben und beim Schließen löschen
+- Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
+- PDF-Option "Export beim Speichern"
+- Hoch/Runter über Grenzen von Schritten wäre cool
+
 Meta Tags (Release 1.4.0)
 x Meta Tag Panel für Aufnahme von Schrittlabel, Klappbutton und Meta Tags
 x Überarbeitung der Darstellung / Platzierung von Schrittlabel, Klappbutton
@@ -77,12 +85,6 @@ x Freitexte durchsuchen
   x Freitext-Editor öffnen und Scrollen zum Suchtreffer im Text
   x Compound Undo / Redo für Replace All ohne Tooltipanzeigen
   x Tags gelöschter Schritte werden ignoriert -> kein Konflikt mit Editoranzeige und Replace
-
-Aus aktueller Anwendung
-- beim Öffnen und einer vorhandenen .wrk, *drei* Optionen: 1) nicht laden, 2) laden, 3) ist in Arbeit - nicht laden aber auch nicht überschreiben und beim Schließen löschen
-- Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
-- PDF-Option "Export beim Speichern"
-- Hoch/Runter über Grenzen von Schritten wäre cool
 
 Reste Multi-Catch
 - Obersten Co-Catch nach oben schieben macht diesen zum primären Catch
