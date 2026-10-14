@@ -19,7 +19,7 @@ public class AutoSaveOp extends AbstractSpecmanOp {
 
   private final SaveDiagrammSpecmanOp saveOp;
   private final Timer timer;
-  private long lastSaveTime = 0;
+  private long lastSeenWorkingCopyTimestamp = 0;
   private int lastSavedContentHash = 0;
 
   public AutoSaveOp(SpecmanOpContext context) {
@@ -36,6 +36,9 @@ public class AutoSaveOp extends AbstractSpecmanOp {
       return;
     }
     File wc = workingCopyFor(getDiagrammDatei());
+    if (isNewerThanLastSeen(wc)) {
+      return;
+    }
     try (UndoRecording ur = pauseUndo(); ScrollPause sp = pauseScrolling()) {
       byte[] content = saveOp.generateBytes();
       int contentHash = Arrays.hashCode(content);
@@ -44,14 +47,33 @@ public class AutoSaveOp extends AbstractSpecmanOp {
       }
       saveOp.writeToFile(wc, content);
       lastSavedContentHash = contentHash;
-      lastSaveTime = wc.lastModified();
+      lastSeenWorkingCopyTimestamp = wc.lastModified();
     }
     catch (IOException e) {
       displayException(e);
     }
   }
 
-  public long getLastSaveTime() { return lastSaveTime; }
+  /** With auto-load on, a working copy which changed since Specman last saw it (e.g. written by an
+   * AI agent) is still waiting to be loaded. Writing the UI state now would overwrite it. */
+  private boolean isNewerThanLastSeen(File wc) {
+    return SettingAutoLoad.isEnabled() && wc.lastModified() > lastSeenWorkingCopyTimestamp;
+  }
+
+  public long getLastSeenWorkingCopyTimestamp() { return lastSeenWorkingCopyTimestamp; }
+
+  public void setLastSeenWorkingCopyTimestamp(long timestamp) { lastSeenWorkingCopyTimestamp = timestamp; }
+
+  /** Called after the UI state was replaced by the working copy's content, so that the next
+   * auto-save doesn't write the same content back and thereby touch the file again. */
+  public void markCurrentContentAsSaved() {
+    try {
+      lastSavedContentHash = Arrays.hashCode(saveOp.generateBytes());
+    }
+    catch (IOException e) {
+      lastSavedContentHash = 0; // harmless: the next auto-save writes and reports the problem itself
+    }
+  }
 
   public byte[] generateSnapshot() throws IOException {
     return saveOp.generateBytes();

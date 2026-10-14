@@ -15,7 +15,6 @@ public class AutoLoadOp extends AbstractSpecmanOp {
   private final AutoSaveOp autoSave;
   private final LoadDiagrammSpecmanOp loadOp;
   private final WorkingCopyWatcher watcher;
-  private long lastLoadedFileTimestamp = 0;
 
   /** One-shot timer to debounce the change events, e.g. truncate + write of a working copy file before actually loading it */
   private final Timer loadWorkingCopy_Debounced;
@@ -31,7 +30,7 @@ public class AutoLoadOp extends AbstractSpecmanOp {
   }
 
   public void workingCopyInitialized(long timestamp) {
-    lastLoadedFileTimestamp = timestamp;
+    autoSave.setLastSeenWorkingCopyTimestamp(timestamp);
     watchWorkingCopy();
     // Catches changes which happened before the watcher was (re)targeted
     loadWorkingCopy_Debounced.restart();
@@ -66,10 +65,10 @@ public class AutoLoadOp extends AbstractSpecmanOp {
     }
     File workingCopy = AutoSaveOp.workingCopyFor(diagramFile);
     long wcTimestamp = workingCopy.lastModified();
-    if (wcTimestamp <= Math.max(lastLoadedFileTimestamp, autoSave.getLastSaveTime())) {
+    if (wcTimestamp <= autoSave.getLastSeenWorkingCopyTimestamp()) {
       return;
     }
-    lastLoadedFileTimestamp = wcTimestamp;
+    autoSave.setLastSeenWorkingCopyTimestamp(wcTimestamp);
     loadWorkingCopy(workingCopy, diagramFile);
   }
 
@@ -85,6 +84,7 @@ public class AutoLoadOp extends AbstractSpecmanOp {
         loadOp.loadOrThrow(workingCopy);
         setDiagrammDatei(diagramFile);
         markAsUnsavedWorkingCopy();
+        autoSave.markCurrentContentAsSaved();
       }
       catch (Exception x) {
         showToast(
