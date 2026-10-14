@@ -46,7 +46,7 @@ image::specman-window.png[Specman Toolbars]
 The diagram area is initially empty as well as the intro and outro sections above and below. These sections are important in real-world applications where they contain additional context information like preconditions, postconditions, actors, references to related documents etc. To get an idea of how this may look, see the link:usecase-birdsview.png[bird's view] on a mid-size system usecase specification from ongoing project development.
 
 ## Populating the diagram
-The diagram gets populated by using the steps creation toolbar at the left of the window. Pressing a button in the toolbar creates a new step of the corresponding type in the diagram area. The new step is always created below the step which the currently focused edit area is in. If the current focus is not within a step's edit area, the new step is created at the end of the diagram.
+You populate the diagram using the step creation toolbar at the left of the window. Pressing a button in the toolbar creates a new step of the corresponding type in the diagram area. The new step is created directly below the step containing the currently focused edit area. If the current focus is not within a step's edit area, the new step is created at the end of the diagram.
 
 As an alternative, most steps can be created by drag and drop: press the corresponding button from the toolbar, hold the mouse button down, move the mouse to the desired position in the diagram, and release the button. A semi-transparent gray insertion bar indicates where the new step will be created when the mouse button is released.
 
@@ -382,7 +382,7 @@ Loading replaces the entire diagram, including the undo history. Undo does not r
 ### The sanitizer
 The sanitizer checks a file and repairs what can be repaired automatically. It is a command-line operation of Specman: it runs without a window and without a running Specman, and usually only takes a second to check and repair a file. There are two reasons for the sanitizer to exist:
 
-* An AI agent is not a deterministic generator, so it may produce a file which is not consistent with the grammar. The sanitizer checks the file syntax and important consistency rules, and gives the agent instant feedback for a repair.
+* An AI agent is not a deterministic generator, so it may produce a file that does not conform to the grammar. The sanitizer checks the file syntax and important consistency rules, and gives the agent instant feedback to help it make corrections.
 * Some jobs in maintaining a specification file are complicated and error-prone for an AI agent, but trivial for Specman CLI. The most important one is the consistent renumbering of steps, together with the step references in the texts, whenever the structure of the diagram has changed. The sanitizer takes care of that, so the agent doesn't have to. Its output tells the agent which steps got which new numbers. So the agent can update its context for the next prompt without reading the entire specification again.
 
 Specman comes with a console launcher for such operations, called _Specman CLI_ here. The launcher depends on how Specman was installed:
