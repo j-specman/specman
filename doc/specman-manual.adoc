@@ -126,6 +126,54 @@ Deleting works as follows, using _Löschen_ from the step number's context menu:
 
 The catch area can be folded up like any other structured step. The button for this is on the right of the gray bar above the catch area. It shows up when you move the mouse there, and stays visible as long as the area is folded.
 
+## Editing step content
+The content of a step is not just a single text. It is a vertical sequence of _edit areas_, which can be text, list items, tables and images, in any order, with a text area always coming first. Everything is edited in place, like in a word processor.
+
+### Text and formatting
+Text formatting is based on an HTML subset. However, Specman is a WYSIWYG editor, so you never have to deal with HTML source code. The toolbar and the menus work like in a word processor, and what they offer is what HTML offers: paragraphs with a paragraph style (body text, headings, block quotes, preformatted text), character styles, font, size, color and alignment. The text is saved as HTML in the diagram file, together with a plain text rendition for tools which don't want to deal with HTML like full text search in IDEs.
+
+Formatting is done with the formatting toolbar above the diagram and the menus _Bearbeiten_, _Format_ and _Einfügen_. The toolbar covers the usual suspects like bold, italic, underline, font, size, color and alignment, plus the paragraph style box. The _Format_ menu has even more character styles, e.g. subscript and superscript. Strikethrough and text background colors are missing on purpose: they are reserved for the markings of change mode, see <<changetracking,Change Tracking>>.
+
+Pasting with Ctrl+V depends on where the content comes from:
+
+* Text copied within Specman keeps its formatting, including step references and tables.
+* Text from other applications, like Word or a browser, is reduced to plain text. Formatting is dropped.
+* A pure image in the clipboard, e.g. a screenshot, becomes an image at the caret. If the clipboard contains text as well, the text wins.
+
+Complete steps can be copied and pasted using the step context menu rather than operating on text content.
+
+### Lists
+The toolbar buttons for unordered and ordered lists turn the paragraph at the caret into a list item. Text before and after it stays what it was. Pressing Enter splits the item at the caret. Pressing Backspace at the start of an item dissolves it back into plain text, which is also the way out of a list: Enter in an empty item just creates the next empty item. Pressing one of the list buttons within an item dissolves it as well.
+
+A list item can contain more than text, e.g. images and tables. Lists cannot be nested yet.
+
+### Tables
+The table button of the formatting toolbar allows to add a table at the caret position of a text. Cells can contain the same things as a step, i.e. texts, lists, images, and tables. There is no header row and no formatting of the table itself.
+
+The structure of a table is edited with the mouse in the thin margin around it:
+
+* Above the table, the gap between two columns adds a column, and a column itself is removed. Left of the table, the same applies to rows.
+* The top left corner allows to remove, copy or cut the entire table.
+
+Hovering over such a spot highlights it and changes the mouse cursor, and a click executes the action. While the mouse is over the top left corner, Ctrl+C, Ctrl+X and Delete copy, cut and delete the table.
+
+In a cell, Tab moves to the next cell, and Tab in the very last cell appends a row. Column widths are changed by dragging the dividers between the columns. The divider at the right edge of the table changes the width of the entire table. Pressing Esc while dragging cancels the change.
+
+### Images
+The image button of the formatting toolbar opens a file chooser for jpg, png, gif and bmp files. Alternatively, an image can be pasted from the clipboard (see above). The image is embedded in the diagram file as a PNG, so the original file is no longer needed.
+
+Clicking an image selects it. Delete or Backspace removes it, and Ctrl+C or Ctrl+X copies or cuts it. To continue typing below the image, press Enter. Dragging the narrow bar at the right edge of the image changes its size. An image is never wider than the diagram, and its size follows the zoom factor.
+
+### Step references
+Step references are links to other steps within the text, like "see step 2.3". They are inserted with the step reference button of the formatting toolbar, or by _Einfügen_ > _Link to Stepnumber..._. The dialog lists all steps by number and the beginning of their text. A filter field narrows the list, and a click on an entry inserts the reference at the caret.
+
+A step reference is displayed as the step number on a light gray background. It behaves like a single character: you cannot type into it, the cursor jumps over it, and Backspace removes it entirely. If it needs to point somewhere else, remove it and insert a new one.
+
+The reference number follows its step automatically when the numbering changes. If the step is deleted, the reference remains with a question mark behind the number, e.g. _2.3?_. Deleting a referenced step causes a confirmation message to appear.
+
+Ctrl+click on a reference scrolls to the step it points to. Ctrl+Alt+Left goes back to where you came from, and Ctrl+Alt+Right forward again.
+
+[#changetracking]
 ## Change Tracking
 
 A specification is not a one-shot design. Like the code, it is developed iteratively, and during an iteration everybody involved must be able to see what has changed compared to the status quo. That's what change tracking is for. It is similar to change tracking in Microsoft Word, but tailored to specifications. It covers both the text content and the structure of the diagram, and it works with strong colors just as if the author had marked the changes with a text marker.

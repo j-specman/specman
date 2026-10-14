@@ -70,12 +70,16 @@ public class PDFExportChooser extends JFileChooser {
   }
 
   public void initFromModel(PdfExportOptionsModel_V002 pdfExportOptions, File currentModelFile) {
+    this.currentModelFile = currentModelFile;
     if (pdfExportOptions != null) {
       setOrientation(pdfExportOptions.portrait);
       this.paging.setSelected(pdfExportOptions.paging);
       this.pageSize.setSelectedItem(pdfExportOptions.pageSize);
-      this.currentModelFile = currentModelFile;
       File exportFile = guessBestFilenameAndDirectory(pdfExportOptions, currentModelFile);
+      setSelectedFile(exportFile);
+    }
+    else if (currentModelFile != null) {
+      File exportFile = new File(currentModelFile.getParent(), getBaseName(currentModelFile.getName()) + PDF_EXTENSION);
       setSelectedFile(exportFile);
     }
   }
