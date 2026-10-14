@@ -27,7 +27,7 @@ Specman provides a high-quality PDF export, so that the diagrams can be shared e
 ### Change tracking
 The yellow highlighting in the screenshot above indicates changes which were made in change mode. Similar to Microsoft Word, e.g. deleting text in change mode does not actually cause the text to disappear but displayed as crossed out with a yellow background as if someone had marked the section with a text marker. Changes in a model are therefore immediately recognizable by everybody. This is a crucial aspect in iterative development where specifications evolve over time.
 
-Folding up a structured step which includes any change marks will cause the unfold-button beside the step number to be displayed with a yellow background. I.e. even if details are hidden, it is still visible that there are changes in the folded up section.
+Folding up a structured step which includes any change marks will cause the unfold-button beside the step number to be displayed in the highlight color of the hidden changes. I.e. even if details are hidden, it is still visible that there are changes in the folded up section.
 
 Since version 1.2.1, Specman supports multiple change sets, which is of interest e.g. if there are multiple change requests to be considered in parallel within a single development iteration.
 
