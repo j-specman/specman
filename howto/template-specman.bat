@@ -1,5 +1,5 @@
 @echo off
-REM Generated from howto/template-specman.bat by 'mvn package' - do not edit target/specman.bat directly
+REM Generated from howto/template-specman.bat by 'mvn package' - do not edit the generated file directly
 
 REM Check strategy before starting Specman:
 REM   1. Is 'java' on the PATH at all? If not, abort with a download hint.
@@ -8,6 +8,8 @@ REM   3. Locate the Specman jar: prefer one next to this script (portable/zip la
 REM      otherwise fall back to SPECMAN_HOME\<jar> (fileserver install layout).
 REM      If neither exists, abort and tell the user both locations that were checked.
 REM   4. All checks passed: start Specman.
+REM This template is used for specman.bat (GUI: javaw, waits for a key after an error) and for
+REM specman-cli.bat (console: java, never waits, hands the exit code back), see pom.xml.
 
 set "JAR_NAME=specman-@VERSION@-jar-with-dependencies.jar"
 set "MIN_JAVA_VERSION=@MIN_JAVA_VERSION@"
@@ -29,19 +31,19 @@ if exist "%SCRIPT_DIR%%JAR_NAME%" set "JAR_PATH=%SCRIPT_DIR%%JAR_NAME%"
 if not defined JAR_PATH if defined SPECMAN_HOME if exist "%SPECMAN_HOME%\%JAR_NAME%" set "JAR_PATH=%SPECMAN_HOME%\%JAR_NAME%"
 if not defined JAR_PATH goto :jar_not_found
 
-javaw -jar "%JAR_PATH%" %*
-goto :eof
+@JAVA_EXE@ -jar "%JAR_PATH%" %*
+exit /b %errorlevel%
 
 :no_java
 echo Java not found on PATH.
 echo Specman requires Java %MIN_JAVA_VERSION% or higher. Download: https://adoptium.net
-pause
+@PAUSE@
 exit /b 1
 
 :java_too_old
 echo Found Java %JAVA_VERSION_FULL%, but Specman requires Java %MIN_JAVA_VERSION% or higher.
 echo Download: https://adoptium.net
-pause
+@PAUSE@
 exit /b 1
 
 :jar_not_found
@@ -50,5 +52,5 @@ echo Looked in:
 echo   %SCRIPT_DIR%
 if defined SPECMAN_HOME (echo   %SPECMAN_HOME%) else (echo   ^(SPECMAN_HOME is not set^))
 echo Either place the jar next to this script, or set SPECMAN_HOME to the directory containing it.
-pause
+@PAUSE@
 exit /b 1

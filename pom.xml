@@ -272,18 +272,24 @@
                                         </tokenfilter>
                                     </filterchain>
                                 </loadresource>
+                                <!-- GUI launcher: javaw (no console), waits for a key press after an error so that a double click shows the message -->
                                 <copy file="${project.basedir}/howto/template-specman.bat" tofile="${project.build.directory}/specman.bat"
                                       overwrite="true" encoding="UTF-8">
                                     <filterset>
                                         <filter token="VERSION" value="${project.version}"/>
                                         <filter token="MIN_JAVA_VERSION" value="${maven.compiler.target}"/>
+                                        <filter token="JAVA_EXE" value="javaw"/>
+                                        <filter token="PAUSE" value="pause"/>
                                     </filterset>
                                 </copy>
-                                <copy file="${project.basedir}/howto/template-specman-cli.bat" tofile="${project.build.directory}/specman-cli.bat"
+                                <!-- Console launcher for command-line operations like sanitizing (e.g. for AI agents): java, never waits, returns the exit code -->
+                                <copy file="${project.basedir}/howto/template-specman.bat" tofile="${project.build.directory}/specman-cli.bat"
                                       overwrite="true" encoding="UTF-8">
                                     <filterset>
                                         <filter token="VERSION" value="${project.version}"/>
                                         <filter token="MIN_JAVA_VERSION" value="${maven.compiler.target}"/>
+                                        <filter token="JAVA_EXE" value="java"/>
+                                        <filter token="PAUSE" value="rem"/>
                                     </filterset>
                                 </copy>
                                 <copy file="${project.basedir}/howto/template-specman.sh" tofile="${project.build.directory}/specman.sh"
