@@ -22,6 +22,8 @@
         <maven.compiler.target>21</maven.compiler.target>
         <flatlaf.version>3.5</flatlaf.version>
         <itext.version>9.4.0</itext.version>
+        <!-- Output of jpackage in the windows-installer profile; global because the pre-clean unlock below needs it without the profile -->
+        <specman.inno.appImageDir>${project.build.directory}/jpackage-app-image</specman.inno.appImageDir>
     </properties>
 
     <dependencies>
@@ -300,6 +302,29 @@
                     </execution>
 
                     <!--
+                        jpackage creates the launchers in the app image read-only, which maven-clean-plugin
+                        can't delete on Windows ("Failed to delete ...Specman.exe"). Clearing the flag in
+                        pre-clean lets "mvn clean" work on a previously built app image. Deliberately part of
+                        the main build, not of the windows-installer profile: it must also run for a plain
+                        "mvn clean" or "mvn -P release-bundle clean package" after an installer build.
+                        Does nothing if there is no app image.
+                    -->
+                    <execution>
+                        <id>unlock-inno-app-image</id>
+                        <phase>pre-clean</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <attrib readonly="false">
+                                    <fileset dir="${specman.inno.appImageDir}" erroronmissingdir="false"/>
+                                </attrib>
+                            </target>
+                        </configuration>
+                    </execution>
+
+                    <!--
                         Generates readme.adoc from howto/template-readme.adoc and the region between
                         '// tag::readme[]' and '// end::readme[]' in doc/specman-manual.adoc.
                         GitHub doesn't resolve AsciiDoc includes, so the readme must be a real copy.
@@ -363,20 +388,21 @@
 
     <profiles>
         <!--
-            Builds a Windows MSI installer with a bundled Java runtime via jpackage.
-            Requires JDK 17+ (jpackage) and the WiX Toolset (v3.14) on the PATH.
-            Usage: mvn -P windows-installer clean verify
+            Builds the Windows installer: jpackage creates the app image (launchers + bundled Java
+            runtime), Inno Setup 6 turns it into a Setup EXE (see src/main/inno/specman.iss).
+            Requires JDK 17+ (jpackage) and Inno Setup 6 (ISCC.exe on the PATH, or set -Dspecman.inno.iscc=<full path>).
+            Usage: mvn -P windows-installer clean package
         -->
         <profile>
             <id>windows-installer</id>
             <properties>
                 <specman.installer.vendor>Specman</specman.installer.vendor>
-                <!-- Fixed on purpose: jpackage needs a stable upgrade code so that installing
-                     a newer version replaces the older one instead of installing side by side. -->
-                <specman.installer.upgradeUuid>866b19a6-d061-4d12-bb20-89c895cc9f48</specman.installer.upgradeUuid>
+                <!-- Fixed on purpose: Inno's AppId must stay stable so that installing a newer version
+                     upgrades the older one in place. It is the upgrade code of the former MSI installer. -->
+                <specman.installer.appId>866b19a6-d061-4d12-bb20-89c895cc9f48</specman.installer.appId>
                 <specman.installer.input>${project.build.directory}/jpackage-input</specman.installer.input>
-                <specman.installer.dest>${project.build.directory}</specman.installer.dest>
-                <specman.installer.wixResourceDir>${project.build.directory}/jpackage-wix</specman.installer.wixResourceDir>
+                <specman.inno.extraDir>${project.build.directory}/inno-extra</specman.inno.extraDir>
+                <specman.inno.iscc>ISCC.exe</specman.inno.iscc>
             </properties>
             <build>
                 <plugins>
@@ -386,7 +412,7 @@
                         <version>3.1.0</version>
                         <executions>
                             <execution>
-                                <id>stage-jpackage-input</id>
+                                <id>stage-inno-input</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -399,13 +425,9 @@
                                             todir="${specman.installer.input}"/>
 
                                         <!--
-                                            Also install the grammar and a matching reference model, so users can
-                                            open both without cloning the repo. The reference model to ship is
-                                            picked by the project's own major.minor version (e.g. 1.3.1 -> 1.3,
-                                            computed once as specman.release.version in the validate-phase execution),
-                                            so a version bump without a matching specman-reference-vX.Y-*.nsd file
-                                            in the repo root fails the build instead of shipping a stale/missing
-                                            reference silently.
+                                            Grammar and matching reference model, same files as in the release-bundle profile.
+                                            Staged outside the jpackage input (which ends up in app\) so that the installer
+                                            puts them directly into the installation directory, like the release bundle.
                                         -->
                                         <fail message="No specman-reference-v${specman.release.version}-*.nsd found in ${project.basedir} for version ${project.version}">
                                             <condition>
@@ -414,71 +436,11 @@
                                                 </resourcecount>
                                             </condition>
                                         </fail>
-                                        <mkdir dir="${specman.installer.input}/docs"/>
-                                        <copy todir="${specman.installer.input}/docs" flatten="true">
+                                        <mkdir dir="${specman.inno.extraDir}"/>
+                                        <copy todir="${specman.inno.extraDir}" flatten="true">
                                             <fileset file="${project.basedir}/src/main/antlr4/specman/model/v002/SpecmanModel_V002.g4"/>
                                             <fileset dir="${project.basedir}" includes="specman-reference-v${specman.release.version}-*.nsd"/>
                                         </copy>
-
-                                        <!--
-                                            Stage the WiX resource-dir override: main.wxs adds a File element
-                                            for specman.cmd and WixVariables pointing at the branding bitmaps,
-                                            but jpackage copies main.wxs into its own temp directory before
-                                            compiling it, so WiX's sys.SOURCEFILEDIR can't be used to locate
-                                            these files relative to it. Instead, copy them all into a
-                                            build-local directory and bake their absolute paths into main.wxs
-                                            here, before jpackage/candle ever run.
-                                        -->
-                                        <mkdir dir="${specman.installer.wixResourceDir}"/>
-                                        <copy
-                                            file="${project.basedir}/src/main/jpackage/wix/specman.cmd"
-                                            todir="${specman.installer.wixResourceDir}"/>
-                                        <copy
-                                            file="${project.basedir}/src/main/jpackage/wix/banner.bmp"
-                                            todir="${specman.installer.wixResourceDir}"/>
-                                        <copy
-                                            file="${project.basedir}/src/main/jpackage/wix/dialog.bmp"
-                                            todir="${specman.installer.wixResourceDir}"/>
-                                        <copy
-                                            file="${project.basedir}/src/main/jpackage/wix/main.wxs"
-                                            todir="${specman.installer.wixResourceDir}"
-                                            overwrite="true">
-                                            <filterset>
-                                                <filter
-                                                    token="specman.cmd.absolute.path"
-                                                    value="${specman.installer.wixResourceDir}/specman.cmd"/>
-                                                <filter
-                                                    token="wix.banner.bmp.absolute.path"
-                                                    value="${specman.installer.wixResourceDir}/banner.bmp"/>
-                                                <filter
-                                                    token="wix.dialog.bmp.absolute.path"
-                                                    value="${specman.installer.wixResourceDir}/dialog.bmp"/>
-                                            </filterset>
-                                        </copy>
-                                    </target>
-                                </configuration>
-                            </execution>
-
-                            <!--
-                                jpackage derives the output filename from the "name" argument (Specman), which
-                                must stay capitalized because it also becomes the Start Menu entry, the
-                                "Apps & Features" display name and the window title - jpackage has no separate
-                                switch for just the filename. Renaming after the fact keeps the lowercase
-                                "specman-<version>.msi" convention matching specman-<version>-portable.zip from
-                                the release-bundle profile, without touching anything user-visible inside the
-                                installed app. Bound to verify (runs after package, where jpackage produces the
-                                file) so it doesn't depend on plugin declaration order within the package phase.
-                            -->
-                            <execution>
-                                <id>lowercase-msi-filename</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <move file="${project.build.directory}/Specman-${project.version}.msi"
-                                              tofile="${project.build.directory}/specman-${project.version}-windows.msi"/>
                                     </target>
                                 </configuration>
                             </execution>
@@ -490,8 +452,9 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>3.6.4</version>
                         <executions>
+                            <!-- Declared first so it runs before inno-compile within the package phase. -->
                             <execution>
-                                <id>jpackage-windows-msi</id>
+                                <id>jpackage-app-image</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>exec</goal>
@@ -501,7 +464,7 @@
                                     <workingDirectory>${project.basedir}</workingDirectory>
                                     <arguments>
                                         <argument>--type</argument>
-                                        <argument>msi</argument>
+                                        <argument>app-image</argument>
                                         <argument>--name</argument>
                                         <argument>Specman</argument>
                                         <argument>--app-version</argument>
@@ -509,7 +472,7 @@
                                         <argument>--vendor</argument>
                                         <argument>${specman.installer.vendor}</argument>
                                         <argument>--dest</argument>
-                                        <argument>${specman.installer.dest}</argument>
+                                        <argument>${specman.inno.appImageDir}</argument>
                                         <argument>--input</argument>
                                         <argument>${specman.installer.input}</argument>
                                         <argument>--main-jar</argument>
@@ -518,24 +481,33 @@
                                         <argument>specman.Specman</argument>
                                         <argument>--icon</argument>
                                         <argument>${project.basedir}/src/main/resources/images/specman.ico</argument>
-                                        <argument>--win-menu</argument>
-                                        <argument>--win-menu-group</argument>
-                                        <argument>Specman</argument>
-                                        <argument>--win-shortcut</argument>
-                                        <argument>--win-dir-chooser</argument>
-                                        <argument>--win-per-user-install</argument>
-                                        <argument>--win-upgrade-uuid</argument>
-                                        <argument>${specman.installer.upgradeUuid}</argument>
-                                        <argument>--file-associations</argument>
-                                        <argument>${project.basedir}/src/main/jpackage/nsd.properties</argument>
                                         <argument>--add-launcher</argument>
                                         <argument>specman-cli=${project.basedir}/src/main/jpackage/cli.properties</argument>
-                                        <argument>--resource-dir</argument>
-                                        <argument>${specman.installer.wixResourceDir}</argument>
                                         <argument>--java-options</argument>
                                         <argument>-Dfile.encoding=UTF-8</argument>
                                         <argument>--jlink-options</argument>
                                         <argument>--strip-debug --no-header-files --no-man-pages</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>inno-compile</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${specman.inno.iscc}</executable>
+                                    <workingDirectory>${project.basedir}</workingDirectory>
+                                    <arguments>
+                                        <argument>/DAppVersion=${project.version}</argument>
+                                        <argument>/DAppId=${specman.installer.appId}</argument>
+                                        <argument>/DAppPublisher=${specman.installer.vendor}</argument>
+                                        <argument>/DSourceDir=${specman.inno.appImageDir}/Specman</argument>
+                                        <argument>/DExtraDir=${specman.inno.extraDir}</argument>
+                                        <argument>/DOutDir=${project.build.directory}</argument>
+                                        <argument>/DProjectDir=${project.basedir}</argument>
+                                        <argument>${project.basedir}/src/main/inno/specman.iss</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
