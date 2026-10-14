@@ -277,6 +277,13 @@
                                         <filter token="MIN_JAVA_VERSION" value="${maven.compiler.target}"/>
                                     </filterset>
                                 </copy>
+                                <copy file="${project.basedir}/howto/template-specman-cli.bat" tofile="${project.build.directory}/specman-cli.bat"
+                                      overwrite="true" encoding="UTF-8">
+                                    <filterset>
+                                        <filter token="VERSION" value="${project.version}"/>
+                                        <filter token="MIN_JAVA_VERSION" value="${maven.compiler.target}"/>
+                                    </filterset>
+                                </copy>
                                 <copy file="${project.basedir}/howto/template-specman.sh" tofile="${project.build.directory}/specman.sh"
                                       overwrite="true" encoding="UTF-8">
                                     <filterset>
@@ -541,7 +548,8 @@
         <!--
             Assembles a portable release bundle: target/specman-installation/<major.minor>/ (the same
             layout that gets copied onto the fileserver by hand today) plus a matching zip for e.g. a
-            GitHub release. Contains specman.bat/.sh, the jar *with* dependencies (the plain jar is
+            GitHub release. Contains specman.bat/.sh, specman-cli.bat (console variant for command-line
+            operations like sanitizing), the jar *with* dependencies (the plain jar is
             useless without them on the classpath), the grammar and the matching reference model - the
             latter two are first-class artifacts for AI-agent-assisted spec authoring, not just dev extras.
             Usage: mvn -P release-bundle package
@@ -574,6 +582,7 @@
                                         <mkdir dir="${specman.releaseBundle.dir}"/>
                                         <copy todir="${specman.releaseBundle.dir}" flatten="true">
                                             <fileset file="${project.build.directory}/specman.bat"/>
+                                            <fileset file="${project.build.directory}/specman-cli.bat"/>
                                             <fileset file="${project.build.directory}/specman.sh"/>
                                             <fileset file="${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar"/>
                                             <fileset file="${project.basedir}/src/main/antlr4/specman/model/v002/SpecmanModel_V002.g4"/>

@@ -345,3 +345,82 @@ image::metatags-find-replace.png[Meta Tags Find & Replace]
 #### Copy & Paste
 Tags are kept when steps are moved or copied within a diagram. Copying steps to another diagram only takes their tags along if the target diagram has a configuration of the same name. Configurations are never taken over into the target diagram on pasting. Specman reports the names of the missing configurations in a short notification, so you can create them in the target diagram and paste again. If the target diagram has the configuration but it doesn't allow freetexts there, the tag is pasted without its freetext. The freetext is dropped silently, without a notification.
 
+[#aiassisted]
+## AI-assisted specification
+Specman and its file format were designed to involve AI agents in the work on specifications. A specification is not only read by people. It is the starting point of everything that follows, and agents can take part at every stage:
+
+* *After the specification:* the text format of a diagram can be read directly by agents, which makes it possible to carry a specification on into the following steps of the work.
+* *During the specification:* agents can collaborate while the specification is still being written, e.g. by checking it for completeness, consistency and coverage of requirements.
+* *Writing the specification:* agents can also help with creating it, in particular if existing specifications are available as templates. At least one such template is part of every delivery of Specman: a reference model which applies every modeling aspect of the Specman file grammar.
+
+This chapter is about the collaboration during the specification. A Specman diagram is a text file with a pseudocode-like syntax, so an agent can work on a specification while you keep the diagram open in Specman: the agent changes the file, and the changes show up in the window within seconds. You can edit in parallel, and the agent sees what you did. The chapter explains how the pieces fit together.
+
+Two terms are used strictly in this chapter. The _model file_ is the `.nsd` file you open and save. The _working copy_ is the file `.nsd.wrk` next to it. The working copy is the channel between Specman and the agent. The agent edits it, never the model file.
+
+image::ai-collaboration.png[Collaboration of User, Specman, AI Agent and Files]
+
+### Setting up
+Choose _File_ > _Settings_ and switch on _Automatisches Laden_ (auto-load). Specman then watches the working copy and loads it whenever it changes. Additionally switching on _Automatisches Speichern_ (auto-save, 5 seconds is a good choice) makes Specman write your own edits to the working copy, so the agent always works on your latest state.
+
+Specman creates the working copy next to the model file when loading or saving a diagram, as long as auto-load or auto-save is on. A new diagram therefore needs to be saved once before an agent can work on it.
+
+The agent needs to know the file format. The grammar `SpecmanModel_V002.g4` and the reference model `specman-reference-v1.4-model-v2.nsd` are located in the root directory of the installation, next to the launcher. Point your agent to them, or better, install the skill which is delivered there as well, see <<_teaching_the_agent_the_file_format,Teaching the agent the file format>>.
+
+### A round trip
+The numbers refer to the picture above.
+
+* *(1)* You tell the agent what to do with the specification (the prompt). In many cases the prompts refer to step numbers you see on the screen in your running Specman UI, e.g. _"Please suggest checks for weak search criteria after step 3.4."_
+* *(2)* The agent writes the changes into the working copy. All changes belong in a single write operation, because Specman may load the file in between two writes.
+* *(3)* The agent runs the sanitizer on the working copy, see below. The picture calls it _Specman CLI_, because the sanitizer is one of the command-line operations of Specman.
+* *(4), (5)* The sanitizer loads the working copy, repairs what can be repaired and reports what it did. Above all, it reports which steps have been renumbered. The agent needs this to understand your next prompt, because you refer to the numbers you see in the window. If the sanitizer reports an error instead, the agent fixes the file in another edit and runs the sanitizer again.
+* *(6)* Specman notices the changed working copy and loads it automatically. The diagram is rebuilt, and Specman now treats it as unsaved.
+
+Your own edits in the window take the opposite way: auto-save writes them into the working copy, so the agent always works on your latest state. Once you are happy with the result, save the diagram (_save_ in the picture). This is the only thing which writes the model file. Loading a diagram (_load_) is the moment where Specman creates the working copy.
+
+Loading replaces the entire diagram, including the undo history. Undo does not reach back behind the agent's changes. Edits of yours which were not written to the working copy yet are replaced without asking, which is why auto-save is recommended.
+
+### The sanitizer
+The sanitizer checks a file and repairs what can be repaired automatically. It is a command-line operation of Specman: it runs without a window and without a running Specman, and usually only takes a second to check and repair a file. There are two reasons for the sanitizer to exist:
+
+* An AI agent is not a deterministic generator, so it may produce a file which is not consistent with the grammar. The sanitizer checks the file syntax and important consistency rules, and gives the agent instant feedback for a repair.
+* Some jobs in maintaining a specification file are complicated and error-prone for an AI agent, but trivial for Specman CLI. The most important one is the consistent renumbering of steps, together with the step references in the texts, whenever the structure of the diagram has changed. The sanitizer takes care of that, so the agent doesn't have to. Its output tells the agent which steps got which new numbers. So the agent can update its context for the next prompt without reading the entire specification again.
+
+Specman comes with a console launcher for such operations, called _Specman CLI_ here. Which one it is depends on how Specman was installed:
+
+* With the Windows installer, it is `specman-cli.exe` in the installation directory. Additionally, the installer puts the command `specman` on the PATH, which forwards to it. So `specman --sanitize <file>` works in every newly opened terminal.
+* With the portable bundle on Windows, it is `specman-cli.bat`: `specman-cli.bat --sanitize <file>`. `specman.bat` is not suitable, because it starts Specman without a console and passes no exit code back.
+* With the portable bundle on Linux, `specman.sh --sanitize <file>` does it.
+
+The result is one of three:
+
+* `OK`: the file is fine and untouched.
+* `SANITIZED` and a list of what has been done: the sanitizer changed the file in place. It renumbers the steps, adjusts step references in the texts accordingly, and regenerates the plain text renditions. The list names the old and the new number of every renumbered step, with its type and the beginning of its text, e.g. `1.2 -> 1.3 (simple) "The system checks whether ..."`. An agent may therefore insert a step with any made-up number like 3.2.4.2b, and does not have to renumber anything. The list tells the agent which number the new step got.
+* `ERROR`, the line and column of the problem, and exit code 1: the file cannot be read or is inconsistent, e.g. because of a syntax error, duplicate step IDs, an invalid meta tag or a step reference to a step which doesn't exist. Specman prints this to the error stream, so an agent must read stderr as well.
+
+If the sanitizer changed the file, Specman loads it a second time, and the diagram may update twice.
+
+### Rules of the game
+* The last writer wins. There is no merging. While the agent is working, it is better not to type in the diagram, otherwise your text is replaced when the agent's changes arrive.
+* Auto-save does not overwrite a working copy which was changed from outside and has not been loaded yet. That's what makes it safe if the agent writes at the very moment auto-save is due.
+* If the agent leaves a file which cannot be loaded, Specman shows a notification and keeps the diagram as it is. The agent should fix the file right away. If you change something in the diagram in the meantime, the next auto-save replaces the agent's file with the diagram's state.
+* Closing Specman asks whether to save, because the loaded working copy counts as unsaved changes. After closing normally, the working copy is deleted. After a crash it stays, and Specman offers to restore from it the next time the diagram is opened.
+* The model file is not watched. If an agent edits it directly, Specman doesn't notice, and the next save overwrites it.
+
+### Teaching the agent the file format
+The header of the grammar already lists the conventions which matter for an agent. The most important ones:
+
+* The first line, an envelope in JSON, must stay intact.
+* Every step has a unique ID of 8 lower-case hexadecimal characters.
+* Step numbers may be made up, the sanitizer fixes them. Existing numbers should not be "corrected" by the agent.
+* Step IDs are stable, step numbers are not: they change whenever steps are inserted or moved. An agent should therefore identify a step by its ID when editing the file.
+* The text of a step is HTML in backticks and must not contain backticks itself.
+* Plain text renditions (`plain=`) are generated and not written by the agent.
+* Image blocks consist of Base64 data. They are left alone.
+
+The reference model contains an example of everything the format can express and is the best source for the agent to copy patterns from. The skill delivered with Specman puts these rules and the working procedure of this chapter into a form which an agent loads on its own whenever it is asked to work on a Specman diagram.
+
+### Change mode and agents
+The format can express change marks, so an agent can record its edits as changes, just like you would in change mode, see <<changetracking,Change Tracking>>. It often works, but it's a bit fiddly: the agent has to write the marks itself, and the sanitizer doesn't check them. If the result looks odd, have a look at the marks in the diagram and ask the agent to correct them, before accepting or rejecting anything.
+
+TIP: For small edits like rewording a step, switch off the extended thinking mode of the agent if it has one. The answer comes much faster, and so do the changes in your window.
+
