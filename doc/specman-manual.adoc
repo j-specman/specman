@@ -355,7 +355,7 @@ Specman and its file format were designed to involve AI agents in the work on sp
 
 This chapter is about the collaboration during the specification. A Specman diagram is a text file with a pseudocode-like syntax, so an agent can work on a specification while you keep the diagram open in Specman: the agent changes the file, and the changes show up in the window within seconds. You can edit in parallel, and the agent sees what you did. The chapter explains how the pieces fit together.
 
-Two terms are used strictly in this chapter. The _model file_ is the `.nsd` file you open and save. The _working copy_ is the file `.nsd.wrk` next to it. The working copy is the channel between Specman and the agent. The agent edits it, never the model file.
+Two terms are used strictly in this chapter. The _model file_ is the `.nsd` file you open and save. The _working copy_ is the file `.nsd.wrk` next to it. The working copy is the channel between Specman and the agent in an interactive collaborative scenario. The agent edits the working copy, rather than the model file.
 
 image::ai-collaboration.png[Collaboration of User, Specman, AI Agent and Files]
 
