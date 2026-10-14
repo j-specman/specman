@@ -41,6 +41,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
+import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.undo.UndoManager;
@@ -189,6 +190,8 @@ public class HTMLEditorPane extends JPanel
     fontSizeActions.addAll(lst);
 
     lst = HTMLEditorActionFactory.createInlineActionList();
+    // Strikethrough conflicts with the deletion markup in change mode, so it is not offered as a user style
+    lst.removeIf(a -> a instanceof HTMLInlineAction && ((HTMLInlineAction) a).getTag() == HTML.Tag.STRIKE);
     actionList.addAll(lst);
     formatMenu.add(createMenu(lst, i18n.str("style")));
 

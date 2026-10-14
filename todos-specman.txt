@@ -8,6 +8,7 @@ Release notes Specman 1.4.0
 Aus aktueller Anwendung
 - Durchgestrichen kann der User als Schriftformatierung auswählen. Da beißt sich aber mit Durchstreichungen durch den Änderungmodus
   - Führt z.B. zu Fehlern, wenn man Text durchstreicht, den entsprechenden Schritt dann löscht und dann die Änderungen zurücknimmt
+  x Durchgestrichen ist als Workaround als Schriftformatierung nicht mehr auswählbar (siehe HTMLEditorPane, HTML.Tag.STRIKE)
 - beim Öffnen und einer vorhandenen .wrk, *drei* Optionen: 1) nicht laden, 2) laden, 3) ist in Arbeit - nicht laden aber auch nicht überschreiben und beim Schließen löschen
 - Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
 - PDF-Option "Export beim Speichern"
