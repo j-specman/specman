@@ -4,18 +4,18 @@
 
 ## Introduction
 // tag::readme[] - this region is copied into readme.adoc by the 'generate-readme' execution in pom.xml (mvn package, or standalone: mvn antrun:run@generate-readme)
-Specman is a WYSIWYG editor for actogramms, which are basically Nassi-Shneiderman-like diagrams with some graphical aspects taken over from UML activity diagrams. Specman is designed for the specification of procedural workflows in software systems, and came out of more than 15 years of experience in software engineering based on standard tools like Microsoft Word, Confluence and UML.
+Specman is a WYSIWYG editor for actogramms, which are similar to Nassi-Shneiderman diagrams but incorporate some graphical elements from UML activity diagrams. Specman is designed for the specification of procedural workflows in software systems, and grew out of more than 15 years of experience in software engineering based on standard tools like Microsoft Word, Confluence and UML.
 
-Microsoft Word is a perfect word processor with change tracking (a crucial aspect for iterative / agile development), but control structures like loops and branches are difficult to visualize. UML activity diagrams on the other hand are very good at visualizing control structures, but change tracking and diagram layout stability in iterative development are poor. Specman makes a difference by combining various tooling aspects in a unique way which turned out to be crucial for highly efficient, iterative software development.
+Microsoft Word is an excellent word processor with change tracking (a crucial aspect for iterative / agile development), but control structures like loops and branches are difficult to visualize. UML activity diagrams, on the other hand, are very good at visualizing control structures, but change tracking and diagram layout stability in iterative development are poor. Specman combines features of these tools in a way that has proven particularly useful for efficient, iterative software development.
 
 ## Hello Specman
-Specman is a small Java 2D / Swing application, which is built into an executable JAR file using Maven. To run Specman, you need a Java Runtime Environment (JRE) version 21 or higher installed. The main class is specman.Specman, and the delivery package includes launcher scripts for Windows (`specman.bat`) and Linux (`specman.sh`) that check the Java installation and locate the jar before starting the application. Opening the file link:anagramms.nsd[anagramms.nsd] in Specman brings up the following diagram on the screen:
+Specman is a small Java 2D / Swing application packaged as an executable JAR file using Maven. To run Specman, you need a Java Runtime Environment (JRE) version 21 or higher installed. The main class is specman.Specman, and the delivery package includes launcher scripts for Windows (`specman.bat`) and Linux (`specman.sh`) that check the Java installation and locate the jar before starting the application. Opening the file link:anagramms.nsd[anagramms.nsd] in Specman displays the following diagram:
 
 image::anagramms-screenshot.png[Two Word Anagrams Specman Diagram]
 
-A significant graphical difference to Nassi-Shneiderman diagrams is the representation of decision nodes by diamonds as they are known from UML activity diagrams. The original Nassi-Shneiderman notation uses triangles which causes a little messy impression when they occur repeatedly in a diagram.
+A significant graphical difference to Nassi-Shneiderman diagrams is the representation of decision nodes by diamonds as they are known from UML activity diagrams. The original Nassi-Shneiderman notation uses triangles which can make a diagram look cluttered when used repeatedly.
 
-Every structured step within a diagram may be folded up, to hide the details of its inner structure. The following screenshot shows what the "Two Word Anagrams" diagram looks like when all steps are folded up:
+Every structured step in a diagram can be collapsed, to hide the details of its inner structure. The following screenshot shows what the "Two Word Anagrams" diagram looks like when all steps are collapsed:
 
 image::anagramms-folded-screenshot.png[Two Word Anagrams Folded]
 
@@ -25,32 +25,32 @@ The requirement in the description of the example is taken from a link:https://c
 Since version 1.3, the diagram files have a pseudocode-like format which makes them machine-readable e.g. to feed code generators or AI agent based programming pipelines. The file structure follows an EBNF grammar defined in SpecmanModel_V002.g4, which is part of the delivery. It is explicitly designed to also integrate AI support in the process of creating specifications. Using Specman's autoload mode and its headless sanitizer makes it possible to set up a collaborative environment where the user is working with the WYSIWYG UI while an AI agent is supporting in the background. Specifications are supposed to be designed as both human-readable and technically exact, using a natural but precise language according to basic clean code development principles and the central ideas of Domain-Driven Design. The result is a document with structure and textual content which is perfectly understandable for AI agents.
 
 ### PDF export
-Specman provides a high-quality PDF export, so that the diagrams can be shared easily with everybody involved in the software engineering process. Reviewers only need a standard tool like Adobe's Acrobat Reader to open and comment on the exported diagrams. See link:anagramms-export.pdf[anagramms-export.pdf] for an example of a PDF export of the "Anagrams" diagram.
+Specman provides a high-quality PDF export, so that the diagrams can be shared easily with everyone involved in the software engineering process. Reviewers only need a standard tool like Adobe's Acrobat Reader to open and comment on the exported diagrams. See link:anagramms-export.pdf[anagramms-export.pdf] for an example of a PDF export of the "Anagrams" diagram.
 
 ### Change tracking
-The yellow highlighting in the screenshot above indicates changes which were made in change mode. Similar to Microsoft Word, e.g. deleting text in change mode does not actually cause the text to disappear but displayed as crossed out with a yellow background as if someone had marked the section with a text marker. Changes in a model are therefore immediately recognizable by everybody. This is a crucial aspect in iterative development where specifications evolve over time.
+The yellow highlighting in the screenshot above indicates changes which were made in change mode. Similar to Microsoft Word, e.g. deleting text in change mode does not actually remove the text; instead, it is displayed as struck through with a yellow background as if someone had marked the section with a text marker. Changes in a model are therefore immediately recognizable by everyone. This is a crucial aspect in iterative development where specifications evolve over time.
 
 Folding up a structured step which includes any change marks will cause the unfold-button beside the step number to be displayed in the highlight color of the hidden changes. I.e. even if details are hidden, it is still visible that there are changes in the folded up section.
 
 Since version 1.2.1, Specman supports multiple change sets, which is of interest e.g. if there are multiple change requests to be considered in parallel within a single development iteration.
 
 ### Real world use case specifications
-For an impression how real-world specifications look like in Specman, see the link:usecase-birdsview.png[bird's view] on a mid-size system usecase specification from ongoing project development.
+To get an idea of what real-world specifications look like in Specman, see the link:usecase-birdsview.png[bird's view] on a mid-size system usecase specification from ongoing project development.
 // end::readme[] - see tag::readme[] above
 
-## Specman Main Window structure
+## Specman main window
 Starting Specman brings up an empty window with the following areas.
 
 image::specman-window.png[Specman Toolbars]
 
-The diagram area is initially empty as well as the intro and outro sections above and below. These sections are important in real-world applications where they contain additional context information like preconditions, postconditions, actors, references to related documents etc. For an impression of how this may look, see the link:usecase-birdsview.png[bird's view] on a mid-size system usecase specification from ongoing project development.
+The diagram area is initially empty as well as the intro and outro sections above and below. These sections are important in real-world applications where they contain additional context information like preconditions, postconditions, actors, references to related documents etc. To get an idea of how this may look, see the link:usecase-birdsview.png[bird's view] on a mid-size system usecase specification from ongoing project development.
 
 ## Populating the diagram
 The diagram gets populated by using the steps creation toolbar at the left of the window. Pressing a button in the toolbar creates a new step of the corresponding type in the diagram area. The new step is always created below the step which the currently focused edit area is in. If the current focus is not within a step's edit area, the new step is created at the end of the diagram.
 
-As an alternative, most steps can be created by drag & drop by pressing the corresponding button from the toolbar, keeping the mouse pressed, moving it to the right place in the diagram and releasing the mouse button there. A half-transparent gray insertion bar indicates where the new step will be created when the mouse button is released.
+As an alternative, most steps can be created by drag and drop: press the corresponding button from the toolbar, hold the mouse button down, move the mouse to the desired position in the diagram, and release the button. A semi-transparent gray insertion bar indicates where the new step will be created when the mouse button is released.
 
-The steps creation bar provides the following buttons:
+The step creation toolbar provides the following buttons:
 
 ### image:../src/main/resources/images/einfacher-schritt.png[Simple Step] Simple step
 
@@ -62,15 +62,15 @@ Creates a subsequence of steps with an initial simple step immediately added wit
 
 The steps within the subsequence are numbered on a lower level, e.g. step 2.1, 2.2, 2.3 within subsequence step 2.
 
-Subsequences can be folded up to hide their content when the details are currently not of interest. Placing the mouse directly right of the subsequence's step number brings up a small button with a minus sign. Pressing this button folds up the subsequence. The button then shows a plus sign for unfolding the subsequence again.
+Subsequences can be folded up to hide their content when the details are currently not of interest. Moving the mouse just to the right of the subsequence's step number brings up a small button with a minus sign. Pressing this button folds up the subsequence. The button then shows a plus sign for unfolding the subsequence again.
 
 ### image:../src/main/resources/images/while-schritt.png[While Step] While step
 
-Creates a loop step with an initial simple step in its repetition sequence immediately added. The repetition sequence must not be empty. So if the first step must be a different one than a simple step, add a step of the required type and remove the initial first step afterward.
+Creates a loop step with an initial simple step in its repetition sequence immediately added. The repetition sequence must not be empty. So if the first step needs to be something other than a simple step, add a step of the required type and remove the initial first step afterward.
 
 ### image:../src/main/resources/images/whilewhile-schritt.png[While While Step] While-while step
 
-Creates a loop step with an additional horizontal empty bar at the bottom. This is functionally identical with the loop step, but sometimes it is optically clearer to understand of a loop as an easily recognizable graphical boundary at the bottom. E.g. if there are catch steps at the end of the loop's repetition sequence.
+Creates a loop step with an additional horizontal empty bar at the bottom. This is functionally identical with the loop step, but sometimes the extra bar makes the lower boundary of the loop easier to recognize. E.g. if there are catch steps at the end of the loop's repetition sequence.
 
 ### image:../src/main/resources/images/ifelse-schritt.png[If Else Step] If-else step
 
@@ -82,7 +82,7 @@ Creates an if step. Unlike the if-else step, the left branch is empty and its wi
 
 ### image:../src/main/resources/images/case-schritt.png[Case Step] Case step
 
-Creates a case step which has the default branch on the left and two initial other case branches on the right. Additional branches can be added by pressing the corresponding button from the steps creation toolbar (see below). Branch removal is achieved by placing the cursor in the branch's heading or condition edit area and pressing the delete button from the step & document properties toolbar. However, two case branches and the default branch are the minimum which a case step has to provide. Otherwise it's an if or if-else step.
+Creates a case step with the default branch on the left and two other initial case branches on the right. Additional branches can be added by pressing the corresponding button from the steps creation toolbar (see below). Branch removal is achieved by placing the cursor in the branch's heading or condition edit area and pressing the delete button from the step & document properties toolbar. However, two case branches and the default branch are the minimum which a case step has to provide. Otherwise it's an if or if-else step.
 
 ### image:../src/main/resources/images/zweig.png[New Branch] New branch
 
@@ -109,7 +109,7 @@ Creates a catch step for a previously defined break step. Unlike all other steps
 
 If a development project is working with a programming language that supports exceptions, it is strongly recommended to represent break and catch by throwing and catching exceptions in the code. In this case, it is a good idea to use relatively short expressions in the break step text, from which exception type names can be directly derived.
 
-Catch steps are displayed in optically separated sections with a gray bar above and below, making clear that this is not part of the normal control flow. Multiple catch steps for the same sequence are placed side by side, each with its own handling sequence below its heading. New catch steps are appended on the right. Right-clicking the step number of a catch heading brings up a context menu with _Move left_ and _Move right_ to change the order, and the widths of the catch steps can be changed by dragging the dividers between them. As in loops, the handling sequence must not be empty, i.e. its last step cannot be deleted.
+Catch steps are displayed in visually separated sections with a gray bar above and below, making it clear that they are not part of the normal control flow. Multiple catch steps for the same sequence are placed side by side, each with its own handling sequence below its heading. New catch steps are appended on the right. Right-clicking the step number of a catch heading brings up a context menu with _Move left_ and _Move right_ to change the order, and the widths of the catch steps can be changed by dragging the dividers between them. As in loops, the handling sequence must not be empty, i.e. its last step cannot be deleted.
 
 A single catch step can also handle several break steps, just like `catch (A | B e)` in Java. The additional break steps are called _co-catches_. To add one, place the cursor in the heading of the catch step and press the catch step button, or drop the button onto the heading. The dialog then adds the chosen break step as a co-catch of this catch step instead of creating a new one. The headings of co-catches are stacked below the main heading, and each heading is coupled with its own break step, whose text it shows. A co-catch can be moved up and down among the other co-catches by the context menu of its step number.
 
@@ -132,9 +132,9 @@ The content of a step is not just a single text. It is a vertical sequence of _e
 ### Text and formatting
 Text formatting is based on an HTML subset. However, Specman is a WYSIWYG editor, so you never have to deal with HTML source code when using the UI. The toolbar and the menus work like in a word processor, and what they offer is what HTML offers: paragraphs with a paragraph style (body text, headings, block quotes, preformatted text), character styles, font, size, color and alignment. The text is saved as HTML in the diagram file, together with a plain text rendition for tools which don't want to deal with HTML like full text search in IDEs.
 
-HTML is used for text formatting only. Lists, images and tables are not part of the text content, even though HTML could express them. In Specman they are independent building blocks of the step content, each being an edit area of its own, see <<_lists,Lists>>, <<_tables,Tables>> and <<_images,Images>>. This allows Specman to render them better than a plain HTML component could, and, above all, to track changes at a much finer granularity (see chapter see <<changetracking,Change Tracking>>). An added list item, a removed table row or a deleted image is marked individually instead of marking a whole text as changed.
+HTML is used for text formatting only. Lists, images and tables are not part of the text content, even though HTML could express them. In Specman they are independent building blocks of the step content, each being an edit area of its own, see <<_lists,Lists>>, <<_tables,Tables>> and <<_images,Images>>. This allows Specman to render them better than a plain HTML component could, and, above all, to track changes at a much finer granularity (see <<changetracking,Change Tracking>>). An added list item, a removed table row or a deleted image is marked individually instead of marking a whole text as changed.
 
-Formatting is done with the formatting toolbar above the diagram and the menus _Bearbeiten_, _Format_ and _Einfügen_. The toolbar covers the usual suspects like bold, italic, underline, font, size, color and alignment, plus the paragraph style box. The _Format_ menu has even more character styles, e.g. subscript and superscript. Strikethrough and text background colors are missing on purpose: they are reserved for the markings of change mode, see <<changetracking,Change Tracking>>.
+Formatting is done with the formatting toolbar above the diagram and the menus _Bearbeiten_, _Format_ and _Einfügen_. The toolbar provides familiar options such as bold, italic, underline, font, size, color and alignment, plus the paragraph style box. The _Format_ menu has even more character styles, e.g. subscript and superscript. Strikethrough and text background colors are missing on purpose: they are reserved for the markings of change mode, see <<changetracking,Change Tracking>>.
 
 Pasting with Ctrl+V depends on where the content comes from:
 
@@ -162,7 +162,7 @@ Hovering over such a spot highlights it and changes the mouse cursor, and a clic
 In a cell, Tab moves to the next cell, and Tab in the very last cell appends a row. Column widths are changed by dragging the dividers between the columns. The divider at the right edge of the table changes the width of the entire table. Pressing Esc while dragging cancels the change.
 
 ### Images
-The image button of the formatting toolbar opens a file chooser for jpg, png, gif and bmp files. Alternatively, an image can be pasted from the clipboard (see above). The image is embedded in the diagram file as a PNG, so the original file is no longer needed.
+The image button of the formatting toolbar opens a file chooser for JPG, PNG, GIF and BMP files. Alternatively, an image can be pasted from the clipboard (see above). The image is embedded in the diagram file as a PNG, so the original file is no longer needed.
 
 Clicking an image selects it. Delete or Backspace removes it, and Ctrl+C or Ctrl+X copies or cuts it. To continue typing below the image, press Enter. Dragging the narrow bar at the right edge of the image changes its size. An image is never wider than the diagram, and its size follows the zoom factor.
 
@@ -185,7 +185,7 @@ To move a step, press the mouse button on its step number, keep it pressed, move
 
 Some steps cannot be dragged: the only step of a sequence (because a sequence must not be empty), steps marked as deleted, and the placeholders which change mode leaves behind at the old position of a moved step. A step cannot be dropped into itself either.
 
-In change mode a move is tracked as a move, see <<changetracking,Change Tracking>>.
+In change mode, a move is tracked as a move, see <<changetracking,Change Tracking>>.
 
 ### Deleting steps
 _Löschen_ from the step number's context menu removes the step including everything inside. The last step of a sequence cannot be deleted. If the step is referenced from somewhere else, Specman asks for confirmation, and the references are marked as defective once the step is actually removed, see <<_step_references,Step references>>. In change mode, the step is marked as deleted instead of removed, see <<changetracking,Change Tracking>>. For catch steps, see above.
@@ -236,7 +236,7 @@ Added text has a background in the changeset color, added steps a pale panel in 
 
 Moving a step leaves a placeholder behind at its old position: a black-tabbed step with empty content, and a step number label like [line-through]#2# > 5 ("moved from 2 to 5"). At the new position, the step carries the changeset color and the label 5 < [line-through]#2# ("came from 2"). It's all one move, so accepting or rejecting it always takes care of both places.
 
-If a folded step contains changes, its unfold button is displayed in the color of the changeset which the first hidden change belongs to. So even a folded step shows that there is something to look at, and by which changeset.
+If a folded step contains changes, its unfold button is displayed in the color of the changeset to which the first hidden change belongs. So even a folded step shows that there is something to look at, and by which changeset.
 
 ### Changesets
 Sometimes more than one set of changes is in the air: several change requests being considered in parallel within one iteration, or changes of changes in a multi-loop coordination, where each round of feedback should be recognizable on its own. For this, Specman provides _changesets_. Each changeset has its own color, and all of them are displayed at the same time.
@@ -267,7 +267,7 @@ image::../src/main/resources/images/merge.png[Merge Changesets Button]
 Pressing the button opens a list of all changesets except the current one. The changes of the one you choose are recolored into the current changeset, which makes it the target of the merge. This is typically the consolidation step at the end of a multi-loop coordination: the outcome gets merged into a single changeset, which is the basis for development and testing. Merging can be undone.
 
 ### Review
-Even with a few changes only, they can be hard to find in a large diagram. The toolbar button _Für Review zusammenklappen_ folds up all structured steps which contain no changes, so that only the parts of the diagram remain open which are worth a reviewer's attention.
+Even with only a few changes, they can be hard to find in a large diagram. The toolbar button _Für Review zusammenklappen_ folds up all structured steps which contain no changes, so that only the parts of the diagram remain open which are worth a reviewer's attention.
 
 image::../src/main/resources/images/review.png[Review Button]
 
@@ -295,25 +295,25 @@ The configurations of a diagram are managed in the dialog which is opened by cho
 
 image::metatag-config.png[Meta Tag Configuration]
 
-Most of the dialog for creating or editing a configuration explains itself, and the preview shows what the tags will look like. The name is how the tags at steps refer to their configuration. It must be unique in the diagram, may only consist of letters, digits and underscores, and can no longer be changed once there are tags using the configuration. The label is the text displayed in the tags of this configuration, if any. Either a label or an icon must be provided. The icon comes from an SVG file and is embedded in the diagram file, so the original file isn't needed any more. A border is optional and off by default, and the freetext option is on by default.
+Most of the dialog for creating or editing a configuration is self-explanatory, and the preview shows what the tags will look like. The name is how the tags at steps refer to their configuration. It must be unique in the diagram, may only consist of letters, digits and underscores, and cannot be changed once tags use the configuration. The label is the text displayed in the tags of this configuration, if any. Either a label or an icon must be provided. The icon comes from an SVG file and is embedded in the diagram file, so the original file isn't needed any more. A border is optional and off by default, and the freetext option is on by default.
 
 NOTE: The bottom corners of a tag are rounded. Parts of an icon which reach into these corners are cut off. If your icon has sharp corners at the bottom or fills its entire area, leave a little margin around the graphic in the SVG.
 
 Changes to a configuration take effect immediately in all tags which refer to it. Deleting a configuration also removes all tags which refer to it. If there are any, Specman asks for confirmation first. Creating, changing and deleting a configuration can be undone and redone like any other operation. The configurations are saved with the diagram, i.e. every diagram has its own set of configurations.
 
 ### Attaching tags to steps
-To attach a tag to a step, click the step number with the right mouse button and choose the configuration of the tag from the _Tags_ submenu. The menu items show the icon and label of the configurations (or their name if they have no label). Configurations which the step already has a tag of are grayed out, as a step can only have one tag per configuration. The submenu's last entry _Configure..._ opens the dialog for managing the configurations, so a missing configuration can be created without going back to the _File_ menu.
+To attach a tag to a step, right-click the step number and choose the configuration of the tag from the _Tags_ submenu. The menu items show the icon and label of the configurations (or their name if they have no label). Configurations for which the step already has a tag are grayed out, as a step can only have one tag per configuration. The submenu's last entry _Configure..._ opens the dialog for managing the configurations, so a missing configuration can be created without going back to the _File_ menu.
 
 image::metatags-menu.png[Meta Tags Context Menu]
 
 The first tag attached to a step hangs directly to the left of the step number, the next one to the left of that, and so on. If the step has a fold button, it is always located to the left of the last tag. This is deliberate, because the fold button is only visible while the mouse is hovering over its location. If a step is too narrow to show all of its tags, the tags farthest to the left are cut off.
 
-Tags can be attached to every step which has a step number of its own, with these exceptions:
+Tags can be attached to every step that has its own step number, with these exceptions:
 
 * Steps marked as deleted do not accept new tags.
 * The headings of catch areas are no steps of their own and therefore don't have tags. The steps inside the handling sequence of a catch area do.
 
-Attaching and removing tags is not part of change tracking: it is not marked as a change, and works the same in change mode and in normal mode.
+Attaching and removing tags is not part of change tracking: it is not marked as a change, and works the same way in change mode and normal mode.
 
 ### Working with tags
 Each tag has its own context menu, brought up by right-clicking the tag:
@@ -370,14 +370,14 @@ The agent needs to know the file format. The grammar `SpecmanModel_V002.g4` and 
 The numbers refer to the picture above.
 
 * *(1)* You tell the agent what to do with the specification (the prompt). In many cases the prompts refer to step numbers you see on the screen in your running Specman UI, e.g. _"Please suggest checks for weak search criteria after step 3.4."_
-* *(2)* The agent writes the changes into the working copy. All changes belong in a single write operation, because Specman may load the file in between two writes.
+* *(2)* The agent writes the changes into the working copy. All changes should be written in a single operation, because Specman may load the file in between two writes.
 * *(3)* The agent runs the sanitizer on the working copy, see below. The picture calls it _Specman CLI_, because the sanitizer is one of the command-line operations of Specman.
 * *(4), (5)* The sanitizer loads the working copy, repairs what can be repaired and reports what it did. Above all, it reports which steps have been renumbered. The agent needs this to understand your next prompt, because you refer to the numbers you see in the window. If the sanitizer reports an error instead, the agent fixes the file in another edit and runs the sanitizer again.
 * *(6)* Specman notices the changed working copy and loads it automatically. The diagram is rebuilt, and Specman now treats it as unsaved.
 
 Your own edits in the window take the opposite way: auto-save writes them into the working copy, so the agent always works on your latest state. Once you are happy with the result, save the diagram (_save_ in the picture). This is the only thing which writes the model file. Loading a diagram (_load_) is the moment where Specman creates the working copy.
 
-Loading replaces the entire diagram, including the undo history. Undo does not reach back behind the agent's changes. Edits of yours which were not written to the working copy yet are replaced without asking, which is why auto-save is recommended.
+Loading replaces the entire diagram, including the undo history. Undo does not reach back behind the agent's changes. Your edits that have not yet been written to the working copy yet are replaced without asking, which is why auto-save is recommended.
 
 ### The sanitizer
 The sanitizer checks a file and repairs what can be repaired automatically. It is a command-line operation of Specman: it runs without a window and without a running Specman, and usually only takes a second to check and repair a file. There are two reasons for the sanitizer to exist:
@@ -385,16 +385,16 @@ The sanitizer checks a file and repairs what can be repaired automatically. It i
 * An AI agent is not a deterministic generator, so it may produce a file which is not consistent with the grammar. The sanitizer checks the file syntax and important consistency rules, and gives the agent instant feedback for a repair.
 * Some jobs in maintaining a specification file are complicated and error-prone for an AI agent, but trivial for Specman CLI. The most important one is the consistent renumbering of steps, together with the step references in the texts, whenever the structure of the diagram has changed. The sanitizer takes care of that, so the agent doesn't have to. Its output tells the agent which steps got which new numbers. So the agent can update its context for the next prompt without reading the entire specification again.
 
-Specman comes with a console launcher for such operations, called _Specman CLI_ here. Which one it is depends on how Specman was installed:
+Specman comes with a console launcher for such operations, called _Specman CLI_ here. The launcher depends on how Specman was installed:
 
 * With the Windows installer, it is `specman-cli.exe` in the installation directory. Additionally, the installer puts the command `specman` on the PATH, which forwards to it. So `specman --sanitize <file>` works in every newly opened terminal.
 * With the portable bundle on Windows, it is `specman-cli.bat`: `specman-cli.bat --sanitize <file>`. `specman.bat` is not suitable, because it starts Specman without a console and passes no exit code back.
 * With the portable bundle on Linux, `specman.sh --sanitize <file>` does it.
 
-The result is one of three:
+There are three possible results:
 
 * `OK`: the file is fine and untouched.
-* `SANITIZED` and a list of what has been done: the sanitizer changed the file in place. It renumbers the steps, adjusts step references in the texts accordingly, and regenerates the plain text renditions. The list names the old and the new number of every renumbered step, with its type and the beginning of its text, e.g. `1.2 -> 1.3 (simple) "The system checks whether ..."`. An agent may therefore insert a step with any made-up number like 3.2.4.2b, and does not have to renumber anything. The list tells the agent which number the new step got.
+* `SANITIZED` and a list of what has been done: the sanitizer changed the file in place. It renumbers the steps, adjusts step references in the texts accordingly, and regenerates the plain text renditions. The list names the old and the new number of every renumbered step, with its type and the beginning of its text, e.g. `1.2 -> 1.3 (simple) "The system checks whether ..."`. An agent may therefore insert a step with any temporary number such as 3.2.4.2b, and does not have to renumber anything. The list tells the agent which number the new step got.
 * `ERROR`, the line and column of the problem, and exit code 1: the file cannot be read or is inconsistent, e.g. because of a syntax error, duplicate step IDs, an invalid meta tag or a step reference to a step which doesn't exist. Specman prints this to the error stream, so an agent must read stderr as well.
 
 If the sanitizer changed the file, Specman loads it a second time, and the diagram may update twice.
@@ -402,7 +402,7 @@ If the sanitizer changed the file, Specman loads it a second time, and the diagr
 ### Rules of the game
 * The last writer wins. There is no merging. While the agent is working, it is better not to type in the diagram, otherwise your text is replaced when the agent's changes arrive.
 * Auto-save does not overwrite a working copy which was changed from outside and has not been loaded yet. That's what makes it safe if the agent writes at the very moment auto-save is due.
-* If the agent leaves a file which cannot be loaded, Specman shows a notification and keeps the diagram as it is. The agent should fix the file right away. If you change something in the diagram in the meantime, the next auto-save replaces the agent's file with the diagram's state.
+* If the agent leaves a file that cannot be loaded, Specman shows a notification and keeps the diagram as it is. The agent should fix the file right away. If you change something in the diagram in the meantime, the next auto-save replaces the agent's file with the diagram's state.
 * Closing Specman asks whether to save, because the loaded working copy counts as unsaved changes. After closing normally, the working copy is deleted. After a crash it stays, and Specman offers to restore from it the next time the diagram is opened.
 * The model file is not watched. If an agent edits it directly, Specman doesn't notice, and the next save overwrites it.
 
@@ -420,7 +420,7 @@ The header of the grammar already lists the conventions which matter for an agen
 The reference model contains an example of everything the format can express and is the best source for the agent to copy patterns from. The skill delivered with Specman puts these rules and the working procedure of this chapter into a form which an agent loads on its own whenever it is asked to work on a Specman diagram.
 
 ### Change mode and agents
-The format can express change marks, so an agent can record its edits as changes, just like you would in change mode, see <<changetracking,Change Tracking>>. It often works, but it's a bit fiddly: the agent has to write the marks itself, and the sanitizer doesn't check them. If the result looks odd, have a look at the marks in the diagram and ask the agent to correct them, before accepting or rejecting anything.
+The format can express change marks, so an agent can record its edits as changes, just like you would in change mode, see <<changetracking,Change Tracking>>. It often works, but it requires some care: the agent has to write the marks itself, and the sanitizer doesn't check them. If the result looks odd, have a look at the marks in the diagram and ask the agent to correct them, before accepting or rejecting anything.
 
 TIP: For small edits like rewording a step, switch off the extended thinking mode of the agent if it has one. The answer comes much faster, and so do the changes in your window.
 
