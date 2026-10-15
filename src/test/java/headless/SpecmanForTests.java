@@ -74,6 +74,12 @@ public class SpecmanForTests extends Specman {
     return null;
   }
 
+  @Override
+  public int showConfirmDialog(String message, String title, int optionType) {
+    shownMessages.add(message);
+    return JOptionPane.YES_OPTION;
+  }
+
   @Override public void openSettings() {}
   @Override public void openMetaTagConfigs() {}
   @Override public void copyStepToClipboard(AbstractSchrittView step) {}
@@ -90,11 +96,5 @@ public class SpecmanForTests extends Specman {
   @Override public void showToast(String briefMessage, String detailMessage) { shownMessages.add(briefMessage); }
   @Override public void showError(EditException ex) { shownMessages.add(ex.getMessage()); }
   @Override public void displayException(Exception x) { shownMessages.add(x.getMessage()); }
-
-  @Override
-  public int showConfirmDialog(String message, String title, int optionType) {
-    shownMessages.add(message);
-    return JOptionPane.YES_OPTION;
-  }
 
 }
