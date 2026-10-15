@@ -20,7 +20,6 @@ import specman.view.QuellSchrittView;
 import specman.view.SchrittSequenzView;
 import specman.view.AbstractSchrittView;
 
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +37,7 @@ import specman.editarea.StepnumberLink;
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedElement;
 import specman.model.v002.AbstractStepModel_V002;
+import specman.i18n.IFileNameExtensionFilter;
 
 import static specman.i18n.Messages.i18n;
 
@@ -50,7 +50,7 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
   public void load() {
     File verzeichnis = (getDiagrammDatei() != null) ? getDiagrammDatei().getParentFile() : null;
     JFileChooser fileChooser = new JFileChooser(verzeichnis);
-    fileChooser.setFileFilter(new FileNameExtensionFilter(i18n("msg.filter.diagrams"), "nsd"));
+    fileChooser.setFileFilter(new IFileNameExtensionFilter("msg.filter.diagrams", "nsd"));
     if (fileChooser.showOpenDialog(getScrollPane()) == JFileChooser.APPROVE_OPTION) {
       loadFromDiagrammOrWorkingCopy(fileChooser.getSelectedFile());
       resetPdfExportChooser();

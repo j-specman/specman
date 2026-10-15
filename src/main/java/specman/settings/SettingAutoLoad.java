@@ -4,7 +4,6 @@ import specman.Specman;
 
 import java.util.prefs.Preferences;
 
-import static specman.i18n.Messages.i18n;
 
 public class SettingAutoLoad extends AbstractBooleanSetting {
 
@@ -15,7 +14,7 @@ public class SettingAutoLoad extends AbstractBooleanSetting {
   }
 
   public SettingAutoLoad() {
-    super(i18n("settings.autoload"), AUTOLOAD_PREF, false);
+    super("settings.autoload", AUTOLOAD_PREF, false);
   }
 
   public static boolean isEnabled() {

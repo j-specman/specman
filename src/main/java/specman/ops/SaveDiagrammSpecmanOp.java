@@ -5,11 +5,11 @@ import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.MetaTagConfigModel_V002;
 import specman.model.v002.io.ModelSerializer_V002;
+import specman.i18n.IFileNameExtensionFilter;
 import static specman.ChangeSet.changeset;
 import static specman.i18n.Messages.i18n;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
       if (getDiagrammDatei() == null || dateiauswahlErzwingen) {
         File verzeichnis = (getDiagrammDatei() != null) ? getDiagrammDatei().getParentFile() : null;
         JFileChooser fileChooser = new JFileChooser(verzeichnis);
-        fileChooser.setFileFilter(new FileNameExtensionFilter(i18n("msg.filter.diagrams"), "nsd"));
+        fileChooser.setFileFilter(new IFileNameExtensionFilter("msg.filter.diagrams", "nsd"));
         if (fileChooser.showSaveDialog(getScrollPane()) != JFileChooser.APPROVE_OPTION) {
           return;
         }

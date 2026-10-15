@@ -2,6 +2,7 @@ package specman.metatag.generic.config;
 
 import specman.graphics.SvgIcon;
 import specman.i18n.IButton;
+import specman.i18n.IFileNameExtensionFilter;
 
 import javax.swing.Box;
 import javax.swing.BorderFactory;
@@ -12,7 +13,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Color;
 import java.awt.Window;
 import java.io.File;
@@ -115,7 +115,7 @@ class IconChooser extends JPanel {
 
   private void chooseIcon() {
     JFileChooser chooser = new JFileChooser();
-    chooser.setFileFilter(new FileNameExtensionFilter(i18n("dialog.metatag.icon.filter.svg"), "svg"));
+    chooser.setFileFilter(new IFileNameExtensionFilter("dialog.metatag.icon.filter.svg", "svg"));
     if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
       return;
     }

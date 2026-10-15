@@ -12,14 +12,14 @@ abstract class AbstractSelectSetting<T> extends AbstractSetting {
   private final JComboBox<SettingOption<T>> comboBox;
   private final String prefKey;
 
-  public AbstractSelectSetting(String label, String prefKey, List<SettingOption<T>> options) {
-    this(label, prefKey, options, new JComboBox<>());
+  public AbstractSelectSetting(String labelKey, String prefKey, List<SettingOption<T>> options) {
+    this(labelKey, prefKey, options, new JComboBox<>());
   }
 
   // Two-step constructor: comboBox is created before super() runs so the field
   // assignment and preference loading below can safely reference it.
-  private AbstractSelectSetting(String label, String prefKey, List<SettingOption<T>> options, JComboBox<SettingOption<T>> comboBox) {
-    super(label, comboBox);
+  private AbstractSelectSetting(String labelKey, String prefKey, List<SettingOption<T>> options, JComboBox<SettingOption<T>> comboBox) {
+    super(labelKey, comboBox);
     this.comboBox = comboBox;
     this.prefKey = prefKey;
     options.forEach(comboBox::addItem);

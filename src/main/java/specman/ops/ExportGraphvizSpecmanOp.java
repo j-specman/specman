@@ -1,13 +1,12 @@
 package specman.ops;
 
 import specman.GraphvizExporter;
+import specman.i18n.IFileNameExtensionFilter;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.IOException;
 
-import static specman.i18n.Messages.i18n;
 
 public class ExportGraphvizSpecmanOp extends AbstractSpecmanOp {
 
@@ -18,7 +17,7 @@ public class ExportGraphvizSpecmanOp extends AbstractSpecmanOp {
   public void export() {
     File verzeichnis = getDiagrammDatei() != null ? getDiagrammDatei().getParentFile() : null;
     JFileChooser fileChooser = new JFileChooser(verzeichnis);
-    fileChooser.setFileFilter(new FileNameExtensionFilter(i18n("msg.filter.graphviz"), "gv"));
+    fileChooser.setFileFilter(new IFileNameExtensionFilter("msg.filter.graphviz", "gv"));
     if (fileChooser.showSaveDialog(getScrollPane()) != JFileChooser.APPROVE_OPTION) {
       return;
     }

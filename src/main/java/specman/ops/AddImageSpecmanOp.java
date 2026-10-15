@@ -1,15 +1,14 @@
 package specman.ops;
 
 import specman.editarea.TextEditArea;
+import specman.i18n.IFileNameExtensionFilter;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import static specman.i18n.Messages.i18n;
 
 public class AddImageSpecmanOp extends AbstractSpecmanOp {
 
@@ -26,7 +25,7 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
       JFileChooser fileChooser = new JFileChooser();
       fileChooser.setCurrentDirectory(new File("."));
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-      fileChooser.addChoosableFileFilter(new FileNameExtensionFilter(i18n("msg.filter.images"), "jpg", "png", "gif", "bmp"));
+      fileChooser.addChoosableFileFilter(new IFileNameExtensionFilter("msg.filter.images", "jpg", "png", "gif", "bmp"));
       fileChooser.setAcceptAllFileFilterUsed(true);
       if (fileChooser.showOpenDialog(getArbeitsbereich()) == JFileChooser.APPROVE_OPTION) {
         File selectedFile = fileChooser.getSelectedFile();

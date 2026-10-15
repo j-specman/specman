@@ -5,10 +5,10 @@ import com.jgoodies.forms.layout.FormLayout;
 import specman.i18n.IButton;
 import specman.i18n.ICheckBox;
 import specman.i18n.ILabel;
+import specman.i18n.IDialog;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
@@ -25,7 +25,7 @@ import static specman.i18n.Messages.i18n;
 
 /** Modal form for creating or editing one {@link MetaTagConfig}. The result is only delivered if
  * the user confirms with OK; nothing is changed in the registry by this dialog itself. */
-class MetaTagConfigEditDialog extends JDialog {
+class MetaTagConfigEditDialog extends IDialog {
   private static final Color DEFAULT_BACKGROUND = new Color(0xE0E0E0);
   private static final int TEXT_FIELD_COLUMNS = 20;
 
@@ -45,7 +45,7 @@ class MetaTagConfigEditDialog extends JDialog {
    * @param nameEditable whether the name may be changed - not if tags at steps refer to it
    * @param isNameTaken tells whether a name is already used by another configuration */
   MetaTagConfigEditDialog(Frame owner, MetaTagConfig existing, boolean nameEditable, Predicate<String> isNameTaken) {
-    super(owner, i18n(existing == null ? "dialog.metatag.edit.title.new" : "dialog.metatag.edit.title.edit"), true);
+    super(owner, existing == null ? "dialog.metatag.edit.title.new" : "dialog.metatag.edit.title.edit");
     this.isNameTaken = isNameTaken;
     if (!nameEditable) {
       nameField.setEnabled(false);

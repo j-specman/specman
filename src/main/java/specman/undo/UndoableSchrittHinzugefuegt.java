@@ -40,9 +40,7 @@ public class UndoableSchrittHinzugefuegt extends AbstractUndoableInteraction {
 	}
 
 	@Override
-	public String getPresentationName() {
-		return i18n("undo.step.added");
-	}
+	public String getPresentationName() { return i18n("undo.step.added"); }
 
 	@Override
 	public String getUndoPresentationName() {

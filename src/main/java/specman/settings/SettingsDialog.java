@@ -3,6 +3,7 @@ package specman.settings;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.i18n.IButton;
+import specman.i18n.IDialog;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,13 +12,13 @@ import java.util.stream.Collectors;
 
 import static specman.i18n.Messages.i18n;
 
-public class SettingsDialog extends JDialog {
+public class SettingsDialog extends IDialog {
 
   private final List<AbstractSetting> settings;
   private final SettingLanguage languageSetting = new SettingLanguage();
 
   public SettingsDialog(Frame owner) {
-    super(owner, i18n("dialog.settings.title"), true);
+    super(owner, "dialog.settings.title");
     settings = List.of(
         languageSetting,
         new SettingAutoSave(),

@@ -10,14 +10,14 @@ abstract class AbstractBooleanSetting extends AbstractSetting {
   private final JCheckBox checkBox;
   private final String prefKey;
 
-  public AbstractBooleanSetting(String label, String prefKey, boolean defaultValue) {
-    this(label, prefKey, defaultValue, new JCheckBox());
+  public AbstractBooleanSetting(String labelKey, String prefKey, boolean defaultValue) {
+    this(labelKey, prefKey, defaultValue, new JCheckBox());
   }
 
   // Two-step constructor: checkBox is created before super() runs, so the field
   // assignment and loadPreference() below can safely reference it.
-  private AbstractBooleanSetting(String label, String prefKey, boolean defaultValue, JCheckBox checkBox) {
-    super(label, checkBox);
+  private AbstractBooleanSetting(String labelKey, String prefKey, boolean defaultValue, JCheckBox checkBox) {
+    super(labelKey, checkBox);
     this.checkBox = checkBox;
     this.prefKey = prefKey;
     checkBox.setSelected(Preferences.userNodeForPackage(Specman.class).getBoolean(prefKey, defaultValue));

@@ -9,12 +9,12 @@ import specman.undo.UndoableMetaTagConfigRemoved;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
 import specman.i18n.IButton;
+import specman.i18n.IDialog;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -38,7 +38,7 @@ import static specman.i18n.Messages.i18n;
 
 /** Lists the meta tag configurations of the diagram and lets the user create and edit them.
  * Every confirmed creation or edit is one undoable step. */
-public class MetaTagConfigsDialog extends JDialog {
+public class MetaTagConfigsDialog extends IDialog {
   private static final int LIST_ICON_SIZE = 16;
   private static final Dimension LIST_SIZE = new Dimension(280, 200);
 
@@ -51,7 +51,7 @@ public class MetaTagConfigsDialog extends JDialog {
 
   /** @param namesInUse names of the configurations which tags at steps refer to; these must not be renamed */
   public MetaTagConfigsDialog(Frame owner, MetaTagConfigRegistry registry, Set<String> namesInUse) {
-    super(owner, i18n("dialog.metatag.configs.title"), true);
+    super(owner, "dialog.metatag.configs.title");
     this.registry = registry;
     this.namesInUse = new HashSet<>(namesInUse);
     initComponents();
