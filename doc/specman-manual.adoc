@@ -364,7 +364,7 @@ Choose _File_ > _Settings_ and switch on _Automatisches Laden_ (auto-load). Spec
 
 Specman creates the working copy next to the model file when loading or saving a diagram, as long as auto-load or auto-save is on. A new diagram therefore needs to be saved once before an agent can work on it.
 
-The agent needs to know the file format. The grammar `SpecmanModel_V002.g4` and the reference model `specman-reference-v1.4-model-v2.nsd` are located in the root directory of the installation, next to the launcher. Point your agent to them, or better, install the skill which is delivered there as well, see <<_teaching_the_agent_the_file_format,Teaching the agent the file format>>.
+The agent needs to know the file format. The grammar `SpecmanModel_V002.g4` and the reference model `specman-reference-v1.4-model-v2.nsd` are located in the root directory of the installation, next to the launcher. Point your agent to them, and tell it how to work with them, see <<teachingtheagent,Teaching the agent>>.
 
 ### A round trip
 The numbers refer to the picture above.
@@ -400,27 +400,47 @@ There are three possible results:
 If the sanitizer changed the file, Specman loads it a second time, and the diagram may update twice.
 
 ### Rules of the game
-* The last writer wins. There is no merging. While the agent is working, it is better not to type in the diagram, otherwise your text is replaced when the agent's changes arrive.
+* The last writer wins. There is no merging. While the agent is working, you had better not type in the diagram, otherwise your text is replaced when the agent's changes arrive.
 * Auto-save does not overwrite a working copy which was changed from outside and has not been loaded yet. That's what makes it safe if the agent writes at the very moment auto-save is due.
-* If the agent leaves a file that cannot be loaded, Specman shows a notification and keeps the diagram as it is. The agent should fix the file right away. If you change something in the diagram in the meantime, the next auto-save replaces the agent's file with the diagram's state.
+* If the agent leaves a file that cannot be loaded, Specman shows a notification and keeps the diagram as it is. The agent has to fix the file right away. If you change something in the diagram in the meantime, the next auto-save replaces the agent's file with the diagram's state.
 * Closing Specman asks whether to save, because the loaded working copy counts as unsaved changes. After closing normally, the working copy is deleted. After a crash it stays, and Specman offers to restore from it the next time the diagram is opened.
 * The model file is not watched. If an agent edits it directly, Specman doesn't notice, and the next save overwrites it.
 
-### Teaching the agent the file format
-The header of the grammar already lists the conventions which matter for an agent. The most important ones:
+[#teachingtheagent]
+### Teaching the agent: what belongs in a skill
+An agent does not know Specman, so it has to be told what this chapter told you. Specman deliberately doesn't deliver a ready-made instruction file such as a skill: these age quickly with every new agent generation, and they need to be tailored to your project anyway. Therefore, this section only lists what belongs in a skill. Put it into whatever your agent loads on its own, e.g. a separate skill file, a `CLAUDE.md` or an `AGENTS.md`, so that it applies whenever the agent is asked to work on a Specman diagram.
+
+Some things only you know and are part of the instructions as well: the exact command to start Specman CLI on your machine (see above), the language of your specifications, and the terminology and the level of detail your specifications follow. It is usually reasonable to provide a class model along with the Specman modells which provides the vocabulary.
+
+#### The file format
+Tell the agent where the grammar and the reference model are, and that it has to read the header of the grammar first. The header lists the conventions which matter for an agent. The most important ones:
 
 * The first line, an envelope in JSON, must stay intact.
-* Every step has a unique ID of 8 lower-case hexadecimal characters.
+* Every step has a unique ID of 8 lower-case hexadecimal characters. New steps get a new one.
 * Step numbers may be made up, the sanitizer fixes them. Existing numbers should not be "corrected" by the agent.
-* Step IDs are stable, step numbers are not: they change whenever steps are inserted or moved. An agent should therefore identify a step by its ID when editing the file.
+* Step IDs are stable, step numbers are not: they change whenever steps are inserted or moved. An agent should therefore identify a step by its ID when editing the file, even though your prompts refer to step _numbers_.
 * The text of a step is HTML in backticks and must not contain backticks itself.
-* Plain text renditions (`plain=`) are generated and not written by the agent.
-* Image blocks consist of Base64 data. They are left alone.
+* Plain text renditions (`plain=`) are generated and the agent doesn't have to spent time with deriving them from the HTML content.
+* Image blocks consist of Base64 data. The agent leaves them alone and skips them when reading the file, because they are large and of no use to it.
 
-The reference model contains an example of everything the format can express and is the best source for the agent to copy patterns from. The skill delivered with Specman puts these rules and the working procedure of this chapter into a form which an agent loads on its own whenever it is asked to work on a Specman diagram.
+The reference model contains an example of everything the format can express and is the best source for the agent to copy patterns from.
+
+#### The workflow
+Spell out the procedure of the round trip as well, because an agent doesn't find it out by itself. The instructions should make sure that the agent:
+
+* edits the working copy, not the model file, and never deletes the working copy.
+* reads the working copy once at the beginning of a session. Your prompts refer to the step numbers shown in the window, and the agent finds the steps in the file by those numbers.
+* does nothing without a request, because you may be typing in the diagram at the same moment.
+* writes all changes of a prompt in a single edit operation.
+* runs the sanitizer on the working copy right after each edit, and reads both its output and the error stream.
+* fixes the file right away in one edit and runs the sanitizer again, if the sanitizer reports `ERROR`.
+* takes the list of renumbered steps as its new picture of the diagram after `SANITIZED`, instead of reading the whole file again. Your next prompt refers to these numbers.
+* inserts new steps with a made-up number like `3.2.4.2b`, and never renumbers existing steps.
+* leaves the file alone after the sanitizer is through, until your next prompt.
+* records edits as change marks only when you ask for it, and checks them against the rules in the grammar, see <<_change_mode_and_agents,Change mode and agents>>.
+
+TIP: For small edits like rewording a step, switch off the extended thinking mode of the agent if it has one. The answer comes much faster, and so do the changes in your window.
 
 ### Change mode and agents
 The format can express change marks, so an agent can record its edits as changes, just like you would in change mode, see <<changetracking,Change Tracking>>. It often works, but it requires some care: the agent has to write the marks itself, and the sanitizer doesn't check them. If the result looks odd, have a look at the marks in the diagram and ask the agent to correct them, before accepting or rejecting anything.
-
-TIP: For small edits like rewording a step, switch off the extended thinking mode of the agent if it has one. The answer comes much faster, and so do the changes in your window.
 
