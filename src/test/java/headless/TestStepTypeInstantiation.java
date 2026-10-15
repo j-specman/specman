@@ -35,18 +35,21 @@ class TestStepTypeInstantiation {
   @Test
   void testSimpleStep() throws Exception {
     assertButtonCreatesStep(CreateSimpleStepOpButton.class, EinfacherSchrittView.class);
+    assertFollowerStepNumber("2");
   }
 
   @Test
   void testWhileStep() throws Exception {
     WhileSchrittView step = assertButtonCreatesStep(CreateWhileStepOpButton.class, WhileSchrittView.class);
     assertSubstepExists(step, "1.1", EinfacherSchrittView.class);
+    assertFollowerStepNumber("2");
   }
 
   @Test
   void testWhileWhileStep() throws Exception {
     WhileWhileSchrittView step = assertButtonCreatesStep(CreateWhileWhileStepOpButton.class, WhileWhileSchrittView.class);
     assertSubstepExists(step, "1.1", EinfacherSchrittView.class);
+    assertFollowerStepNumber("2");
   }
 
   @Test
@@ -54,6 +57,7 @@ class TestStepTypeInstantiation {
     IfElseSchrittView step = assertButtonCreatesStep(CreateIfElseStepOpButton.class, IfElseSchrittView.class);
     assertSubstepExists(step, "1.1", EinfacherSchrittView.class);
     assertSubstepExists(step, "2.1", EinfacherSchrittView.class);
+    assertFollowerStepNumber("3");
   }
 
   @Test
@@ -68,17 +72,20 @@ class TestStepTypeInstantiation {
     assertSubstepExists(step, "1.1", EinfacherSchrittView.class);
     assertSubstepExists(step, "2.1", EinfacherSchrittView.class);
     assertSubstepExists(step, "3.1", EinfacherSchrittView.class);
+    assertFollowerStepNumber("4");
   }
 
   @Test
   void testSubsequenceStep() throws Exception {
     SubsequenzSchrittView step = assertButtonCreatesStep(CreateSubsequenceStepOpButton.class, SubsequenzSchrittView.class);
     assertSubstepExists(step, "1.1", EinfacherSchrittView.class);
+    assertFollowerStepNumber("2");
   }
 
   @Test
   void testBreakStep() throws Exception {
     assertButtonCreatesStep(CreateBreakStepOpButton.class, BreakSchrittView.class);
+    assertFollowerStepNumber("2");
   }
 
   private <T extends AbstractSchrittView> T assertButtonCreatesStep(
@@ -94,4 +101,14 @@ class TestStepTypeInstantiation {
       "step " + stepID + " must be a substep of step " + step.getNumber());
     return substep;
   }
+
+  /** After having created a step, the focus is placed in a way that another click on a
+   * step creation button causes the next step to immediately follow the previous one.
+   * @param stepNumber the follower step's expected number
+   */
+  private void assertFollowerStepNumber(String stepNumber) {
+    specman.click(CreateSimpleStepOpButton.class);
+    specman.findStepByStepID(stepNumber, EinfacherSchrittView.class);
+  }
+
 }
