@@ -2,6 +2,7 @@ package specman.ops.buttons;
 
 import specman.*;
 
+
 public class AcceptChangesADBLOpButton extends AbstractADBLSpecmanOpButton {
 
   public AcceptChangesADBLOpButton(Specman specman) {
@@ -19,7 +20,7 @@ public class AcceptChangesADBLOpButton extends AbstractADBLSpecmanOpButton {
     if (changesMade > 0) {
       diagrammAktualisieren(null);
     } else {
-      showMessage("Das Diagramm enthält keine Änderungen für das aktuelle ChangeSet.");
+      showMessage("msg.changes.none");
     }
   }
 

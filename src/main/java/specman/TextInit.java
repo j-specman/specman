@@ -16,14 +16,19 @@ import static specman.Aenderungsart.Untracked;
 import static specman.ChangeSet.changeset;
 import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.Specman.editor;
+import static specman.i18n.Messages.i18n;
 
 public class TextInit {
 
-  public static EditorContentModel_V002 initialtext(String text) {
-    return initialtext(text, null);
+  public static EditorContentModel_V002 initialtext(String messageKey, Object... args) {
+    return initialModel(i18n(messageKey, args), null);
   }
 
-  public static EditorContentModel_V002 initialtext(String text, @Nullable String align) {
+  public static EditorContentModel_V002 initialtextAligned(String align, String messageKey, Object... args) {
+    return initialModel(i18n(messageKey, args), align);
+  }
+
+  private static EditorContentModel_V002 initialModel(String text, @Nullable String align) {
     List<Markup_V002> markups = new ArrayList<>();
     if (editor().aenderungenVerfolgen()) {
       TextMarkup markup = new TextMarkup(MarkupType.Changed, changeset());

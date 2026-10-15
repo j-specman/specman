@@ -1,25 +1,28 @@
 package specman.metatag.generic.config;
 
+import specman.i18n.IButton;
+
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 
+import static specman.i18n.Messages.i18n;
+
 /** A button showing a swatch of its current color, which opens a color chooser on click. A button
  * can also show "no color", as a crossed-out empty swatch. */
-class ColorChooseButton extends JButton {
+class ColorChooseButton extends IButton {
   private final String chooserTitle;
   private final Runnable onColorChanged;
   private Color color;
 
   /** @param initialColor the color to start with, null for no color
    * @param onColorChanged called after the user picked a different color */
-  ColorChooseButton(String chooserTitle, Color initialColor, Runnable onColorChanged) {
-    super("Choose...");
-    this.chooserTitle = chooserTitle;
+  ColorChooseButton(String chooserTitleKey, Color initialColor, Runnable onColorChanged) {
+    super("button.choose");
+    this.chooserTitle = i18n(chooserTitleKey);
     this.onColorChanged = onColorChanged;
     setColor(initialColor);
     addActionListener(e -> chooseColor());

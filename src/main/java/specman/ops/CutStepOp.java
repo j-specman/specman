@@ -8,6 +8,8 @@ import specman.view.BreakSchrittView;
 import javax.swing.JOptionPane;
 import java.util.List;
 
+import static specman.i18n.Messages.i18n;
+
 public class CutStepOp extends AbstractADBLSpecmanOp {
 
   private final AbstractSchrittView step;
@@ -34,10 +36,8 @@ public class CutStepOp extends AbstractADBLSpecmanOp {
     }
     int count = externalBreaks.size();
     int result = showConfirmDialog(
-        "The step contains " + count + " break step(s) whose catch sequence(s) are located outside the step itself. " +
-        "Cutting will permanently remove those catch sequence(s).\n" +
-        "Consider moving the step via drag & drop instead.\n\nCut anyway?",
-        "Linked catch sequences will be lost",
+        i18n("msg.cut.external.catches.message", count),
+        i18n("msg.cut.external.catches.title"),
         JOptionPane.OK_CANCEL_OPTION);
     return result == JOptionPane.OK_OPTION;
   }

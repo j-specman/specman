@@ -5,6 +5,7 @@ import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigRegistry;
 
 import static specman.Specman.editor;
+import static specman.i18n.Messages.i18n;
 
 public class UndoableMetaTagConfigEdited extends AbstractUndoableInteraction {
   private final MetaTagConfigRegistry registry;
@@ -20,12 +21,12 @@ public class UndoableMetaTagConfigEdited extends AbstractUndoableInteraction {
   @Override
   protected void undoEdit() throws EditException {
     registry.replace(newConfig.getName(), oldConfig);
-    editor().showToast("Undo: changes to meta tag '" + oldConfig.getName() + "' reverted");
+    editor().showToast(i18n("undo.metatag.config.edited.undo", oldConfig.getName()));
   }
 
   @Override
   protected void redoEdit() throws EditException {
     registry.replace(oldConfig.getName(), newConfig);
-    editor().showToast("Redo: meta tag '" + newConfig.getName() + "' changed");
+    editor().showToast(i18n("undo.metatag.config.edited.redo", newConfig.getName()));
   }
 }

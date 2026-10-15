@@ -1,5 +1,7 @@
 package specman.metatag.generic.config;
 
+import specman.i18n.IButton;
+
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -12,14 +14,14 @@ class OptionalColorChooser extends JPanel {
   private static final int BUTTON_GAP = 4;
 
   private final ColorChooseButton chooseButton;
-  private final JButton removeButton = new JButton("Remove");
+  private final JButton removeButton = new IButton("button.remove");
   private final Runnable onColorChanged;
 
   /** @param initialColor the color to start with, null for none
    * @param onColorChanged called after the user chose or removed a color */
-  OptionalColorChooser(String chooserTitle, Color initialColor, Runnable onColorChanged) {
+  OptionalColorChooser(String chooserTitleKey, Color initialColor, Runnable onColorChanged) {
     this.onColorChanged = onColorChanged;
-    chooseButton = new ColorChooseButton(chooserTitle, initialColor, this::colorChanged);
+    chooseButton = new ColorChooseButton(chooserTitleKey, initialColor, this::colorChanged);
     removeButton.addActionListener(e -> removeColor());
     removeButton.setEnabled(initialColor != null);
     setLayout(new BoxLayout(this, BoxLayout.X_AXIS));

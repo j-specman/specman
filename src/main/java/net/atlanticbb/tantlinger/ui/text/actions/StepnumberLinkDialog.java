@@ -8,6 +8,7 @@ import net.atlanticbb.tantlinger.ui.UIUtils;
 import org.apache.commons.lang.StringUtils;
 
 import static specman.Specman.editor;
+import static specman.i18n.Messages.i18n;
 import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;
 
@@ -31,8 +32,8 @@ public class StepnumberLinkDialog extends JDialog {
     private static final long serialVersionUID = 1L;
     private static final I18n i18n = I18n.getInstance("net.atlanticbb.tantlinger.ui.text.dialogs");
     private static final Icon icon = UIUtils.getIcon("resources/images/x32/", "link3.png");
-    private static final String title = "Link to Stepnumber...";
-    private static final String desc = "Insert a link to a Stepnumber";
+    private static final String title = i18n("action.stepnumberlink");
+    private static final String desc = i18n("dialog.stepnumberlink.description");
     private static final Color DEFAULT_BACKGROUND = Color.white;
     private static final Color HOVERED_BACKGROUND = Color.lightGray;
     private static final int MAXIMAL_REFERENCE_TEXTLENGTH = 60;

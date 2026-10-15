@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static specman.Specman.editor;
 import static specman.view.RelativeStepPosition.After;
+import static specman.i18n.Messages.i18n;
 
 public class PasteStepsOp extends AbstractADBLSpecmanOp {
 
@@ -52,7 +53,7 @@ public class PasteStepsOp extends AbstractADBLSpecmanOp {
       }
     }
     catch (ModelParseException ex) {
-      throw new EditException("Clipboard content cannot be pasted as a Specman step:\n" + ex.getMessage());
+      throw new EditException("msg.paste.step.failed", ex.getMessage());
     }
   }
 
@@ -85,9 +86,9 @@ public class PasteStepsOp extends AbstractADBLSpecmanOp {
       }
     }
     if (!unknownConfigNames.isEmpty()) {
-      showToast("Meta tags skipped",
-        "The following meta tags have been skipped\nas they are not configured in this diagram:\n• "
-          + String.join("\n• ", unknownConfigNames));
+      showToast(
+        i18n("msg.paste.tags.skipped.brief"),
+        i18n("msg.paste.tags.skipped.detail", String.join("\n• ", unknownConfigNames)));
     }
   }
 

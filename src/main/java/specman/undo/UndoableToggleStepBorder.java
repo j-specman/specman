@@ -7,6 +7,8 @@ import specman.view.SchrittSequenzView;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
+import static specman.i18n.Messages.i18n;
+
 public class UndoableToggleStepBorder extends AbstractUndoableInteraction {
   private final EditorI editor;
   private final AbstractSchrittView schritt;
@@ -32,16 +34,16 @@ public class UndoableToggleStepBorder extends AbstractUndoableInteraction {
 
   @Override
   public String getPresentationName() {
-    return "Schrittrahmen umgestellt...";
+    return i18n("undo.step.border.toggled");
   }
 
   @Override
   public String getUndoPresentationName() {
-    return "Schrittrahmen zurückstellen";
+    return i18n("undo.step.border.toggled.undo");
   }
 
   @Override
   public String getRedoPresentationName() {
-    return "Schrittrahmen wieder herstellen";
+    return i18n("undo.step.border.toggled.redo");
   }
 }

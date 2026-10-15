@@ -52,8 +52,6 @@ public interface EditorI extends FocusListener {
   List<JTextComponent> queryAllTextComponents(JTextComponent tc);
   AbstractSchrittView findStep(InteractiveStepFragment fragment);
   boolean unfoldToShow(InteractiveStepFragment fragment);
-  /** @return the tags with a freetext (which is not just blank) in document order, except those of
-   * deleted steps, as their freetext can't be edited */
   List<GenericMetaTag> queryTagsWithFreetext();
   void scrollBackwardInEditHistory();
   void scrollForwardInEditHistory();
@@ -74,11 +72,8 @@ public interface EditorI extends FocusListener {
   ChangeSet changeset();
   void addMetaTagConfigListener(MetaTagConfigListener listener);
   void removeMetaTagConfigListener(MetaTagConfigListener listener);
-  /** @return a snapshot of the meta tag configurations of the diagram in creation order */
   List<MetaTagConfig> metaTagConfigs();
-  /** @return the meta tag configuration of that name, null if there is none */
   MetaTagConfig findMetaTagConfig(String name);
-  /** @return the names of the meta tag configurations which at least one tag at a step refers to */
   Set<String> queryMetaTagConfigsInUse();
   void openMetaTagConfigs();
   void showToast(String message);

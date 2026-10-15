@@ -1,6 +1,7 @@
 package specman.metatag.generic.config;
 
 import specman.graphics.SvgIcon;
+import specman.i18n.IButton;
 
 import javax.swing.Box;
 import javax.swing.BorderFactory;
@@ -19,6 +20,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
+import static specman.i18n.Messages.i18n;
+
 /** A button to choose an SVG file as icon, a button to remove the icon again, and a small preview
  * of the chosen icon. The icon is optional and held as SVG markup, not as file reference. An icon
  * is displayed tiny, so there is a red warning about an unreasonably large SVG; it is only a
@@ -31,10 +34,10 @@ class IconChooser extends JPanel {
   private static final int WARNING_GAP = 4;
   private static final int BYTES_PER_KB = 1024;
   private static final int SIZE_WARNING_BYTES = 2 * BYTES_PER_KB;
-  private static final String NO_ICON_TEXT = "no icon";
 
-  private final JLabel preview = new JLabel(NO_ICON_TEXT);
-  private final JButton remove = new JButton("Remove");
+  private final String noIconText = i18n("dialog.metatag.icon.none");
+  private final JLabel preview = new JLabel(noIconText);
+  private final JButton remove = new IButton("button.remove");
   private final JLabel sizeWarning = new JLabel();
   private final Runnable onIconChanged;
   private String iconSvg;
@@ -44,7 +47,7 @@ class IconChooser extends JPanel {
   IconChooser(String initialIconSvg, Runnable onIconChanged) {
     this.onIconChanged = onIconChanged;
     setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-    JButton choose = new JButton("Choose SVG...");
+    JButton choose = new IButton("button.choose.svg");
     choose.addActionListener(e -> chooseIcon());
     remove.addActionListener(e -> removeIcon());
     add(choose);
@@ -65,8 +68,8 @@ class IconChooser extends JPanel {
   }
 
   private static String sizeWarningText(int sizeInBytes) {
-    return "Warning: the SVG is " + (sizeInBytes + BYTES_PER_KB - 1) / BYTES_PER_KB + " KB - icons should not exceed "
-      + SIZE_WARNING_BYTES / BYTES_PER_KB + " KB.";
+    return i18n("dialog.metatag.icon.size.warning",
+      (sizeInBytes + BYTES_PER_KB - 1) / BYTES_PER_KB, SIZE_WARNING_BYTES / BYTES_PER_KB);
   }
 
   /** @return the SVG markup of the chosen icon, null if there is none */
@@ -83,7 +86,7 @@ class IconChooser extends JPanel {
     }
     else {
       preview.setIcon(null);
-      preview.setText(NO_ICON_TEXT);
+      preview.setText(noIconText);
     }
     updateSizeWarning();
   }
@@ -112,7 +115,7 @@ class IconChooser extends JPanel {
 
   private void chooseIcon() {
     JFileChooser chooser = new JFileChooser();
-    chooser.setFileFilter(new FileNameExtensionFilter("SVG files", "svg"));
+    chooser.setFileFilter(new FileNameExtensionFilter(i18n("dialog.metatag.icon.filter.svg"), "svg"));
     if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
       return;
     }
@@ -124,8 +127,8 @@ class IconChooser extends JPanel {
       onIconChanged.run();
     }
     catch (IOException | RuntimeException ex) {
-      JOptionPane.showMessageDialog(this, "The file '" + file.getName() + "' can't be used as icon: " + ex.getMessage(),
-        "Choose SVG icon", JOptionPane.WARNING_MESSAGE);
+      JOptionPane.showMessageDialog(this, i18n("dialog.metatag.icon.unusable", file.getName(), ex.getMessage()),
+        i18n("dialog.metatag.icon.choose.title"), JOptionPane.WARNING_MESSAGE);
     }
   }
 }

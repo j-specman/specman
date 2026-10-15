@@ -10,6 +10,8 @@ import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 
+import static specman.i18n.Messages.i18n;
+
 public class AutoLoadOp extends AbstractSpecmanOp {
 
   private final AutoSaveOp autoSave;
@@ -46,8 +48,8 @@ public class AutoLoadOp extends AbstractSpecmanOp {
     }
     catch (IOException e) {
       if (SettingAutoLoad.isEnabled()) {
-        showToast("Auto-load is not possible.",
-          "The working copy cannot be watched:\n\n" + e.getMessage());
+        showToast(i18n("msg.autoload.unavailable.brief"),
+          i18n("msg.autoload.unavailable.detail", e.getMessage()));
       }
     }
   }
@@ -88,9 +90,8 @@ public class AutoLoadOp extends AbstractSpecmanOp {
       }
       catch (Exception x) {
         showToast(
-          workingCopy.getName() + " could not be loaded.",
-          "The working copy appears to be corrupt:\n\n" + x.getMessage() +
-          "\n\nThe last loaded state is kept.");
+          i18n("msg.autoload.corrupt.brief", workingCopy.getName()),
+          i18n("msg.autoload.corrupt.detail", x.getMessage()));
         recoverFromFailedLoad(snapshot, diagramFile, x);
         setDiagrammDatei(diagramFile);
         markAsUnsavedWorkingCopy();

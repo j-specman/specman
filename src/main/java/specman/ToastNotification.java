@@ -1,5 +1,7 @@
 package specman;
 
+import specman.i18n.IButton;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -56,7 +58,7 @@ public class ToastNotification {
     }
 
     private static JPanel createDetailsPanel(JWindow toast, JFrame parent, String detail) {
-        JButton detailsBtn = new JButton("Details");
+        JButton detailsBtn = new IButton("button.details");
         detailsBtn.setFocusPainted(false);
         detailsBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         detailsBtn.addActionListener(e -> {

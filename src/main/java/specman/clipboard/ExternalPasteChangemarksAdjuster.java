@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+
 /**
  * Adjusts the change-tracking markings of step models pasted from an external Specman
  * instance (or plain text) to match the current application changemark setting.
@@ -52,9 +53,7 @@ public class ExternalPasteChangemarksAdjuster implements PasteChangemarksAdjuste
       boolean trackingOn) throws EditException {
     for (AbstractStepModel_V002 step : steps) {
       if (isDeleted(step.changeInfo)) {
-        throw new EditException(
-            "One or more steps in the clipboard are marked as deleted and cannot be pasted. " +
-            "Remove deleted steps in a text editor before pasting.");
+        throw new EditException("msg.paste.deleted.steps");
       }
     }
     target = ChangeInfoModel_V002.from(trackingOn ? ChangeInfo.added() : ChangeInfo.UNTRACKED);
@@ -69,9 +68,7 @@ public class ExternalPasteChangemarksAdjuster implements PasteChangemarksAdjuste
   @Override
   public TableEditAreaModel_V002 adjustTable(TableEditAreaModel_V002 table, boolean trackingOn) throws EditException {
     if (isDeleted(table.changeInfo)) {
-      throw new EditException(
-          "The table in the clipboard is marked as deleted and cannot be pasted. " +
-          "Remove deleted content in a text editor before pasting.");
+      throw new EditException("msg.paste.deleted.table");
     }
     target = ChangeInfoModel_V002.from(trackingOn ? ChangeInfo.added() : ChangeInfo.UNTRACKED);
     table.changeInfo = target;

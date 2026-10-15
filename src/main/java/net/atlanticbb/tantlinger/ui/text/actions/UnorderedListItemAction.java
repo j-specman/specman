@@ -1,8 +1,8 @@
 package net.atlanticbb.tantlinger.ui.text.actions;
 
 import net.atlanticbb.tantlinger.ui.UIUtils;
-import specman.Specman;
 import static specman.Specman.editor;
+import static specman.i18n.Messages.i18n;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -13,7 +13,7 @@ public class UnorderedListItemAction extends BasicEditAction {
   private static final long serialVersionUID = 1L;
 
   public UnorderedListItemAction() {
-    super("List item");
+    super(i18n("action.list.item"));
     this.putValue("SmallIcon", UIUtils.getIcon("resources/images/x16/", "listunordered.png"));
     this.putValue("ShortDescription", this.getValue("Name"));
   }

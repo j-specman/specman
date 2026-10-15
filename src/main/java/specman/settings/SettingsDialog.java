@@ -2,20 +2,24 @@ package specman.settings;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
-import specman.Specman;
+import specman.i18n.IButton;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static specman.i18n.Messages.i18n;
+
 public class SettingsDialog extends JDialog {
 
   private final List<AbstractSetting> settings;
+  private final SettingLanguage languageSetting = new SettingLanguage();
 
   public SettingsDialog(Frame owner) {
-    super(owner, "Settings", true);
+    super(owner, i18n("dialog.settings.title"), true);
     settings = List.of(
+        languageSetting,
         new SettingAutoSave(),
         new SettingAutoLoad()
     );
@@ -48,9 +52,9 @@ public class SettingsDialog extends JDialog {
   }
 
   private JPanel buildButtonPanel() {
-    JButton ok = new JButton("OK");
+    JButton ok = new IButton("button.ok");
     ok.addActionListener(e -> { saveAllPreferences(); dispose(); });
-    JButton cancel = new JButton("Abbrechen");
+    JButton cancel = new IButton("button.cancel");
     cancel.addActionListener(e -> dispose());
     JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     panel.add(ok);
@@ -59,7 +63,11 @@ public class SettingsDialog extends JDialog {
   }
 
   private void saveAllPreferences() {
+    boolean languageChanged = languageSetting.isChanged();
     settings.forEach(AbstractSetting::savePreference);
+    if (languageChanged) {
+      JOptionPane.showMessageDialog(this, i18n("settings.language.restart"));
+    }
   }
 
 }

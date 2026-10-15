@@ -9,20 +9,12 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
+import static specman.i18n.Messages.i18n;
 
 public class WelcomeMessagePanel extends JLabel {
 
   public WelcomeMessagePanel() {
-    setText("<html>"
-        + "<h2><i>Welcome to Specman " + SpecmanVersion.getVersion() + "</i></h2><i>"
-        + "This is the modelling area. Click a button from the steps palette and "
-        + "drag the mouse to the position where you want to place the step. Alternatively "
-        + "just click the button from the steps palette to add a step below the one "
-        + "focused by the text cursor."
-        + "<p>"
-        + "As soon as you have started your work you can change the diagramm width by "
-        + "clicking on its right border and dragging it left or right."
-        + "</i></html>");
+    setText(i18n("welcome.message", SpecmanVersion.getVersion()));
     setOpaque(true);
     setForeground(Color.gray);
     setBackground(new Color(230, 230, 240));

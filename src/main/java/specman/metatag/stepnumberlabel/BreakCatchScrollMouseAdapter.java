@@ -1,10 +1,10 @@
 package specman.metatag.stepnumberlabel;
 
-import specman.Specman;
 import specman.view.AbstractSchrittView;
 import specman.view.BreakSchrittView;
 import specman.view.CatchBereich;
 import static specman.Specman.editor;
+import static specman.i18n.Messages.i18n;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -12,7 +12,7 @@ import java.awt.event.MouseEvent;
 import java.util.Objects;
 
 public class BreakCatchScrollMouseAdapter extends MouseAdapter {
-  public static final String SCROLL_TOOLTIP = "STRG+Klicken um Link zu folgen";
+  public static final String SCROLL_TOOLTIP = i18n("tooltip.stepnumber.scroll");
   public static final Cursor SCROLL_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 
   static BreakCatchScrollMouseAdapter instance = new BreakCatchScrollMouseAdapter();

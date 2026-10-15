@@ -290,12 +290,12 @@ public class EditContainer extends JPanel {
 		layout.setRowSpec(2, RowSpec.decode(height + "px"));
 	}
 
-	public static EditorContentModel_V002 right(String text) {
-		return TextInit.initialtext(text, "right");
+	public static EditorContentModel_V002 right(String messageKey, Object... args) {
+		return TextInit.initialtextAligned("right", messageKey, args);
 	}
 
-	public static EditorContentModel_V002 center(String text) {
-		return TextInit.initialtext(text, "center");
+	public static EditorContentModel_V002 center(String messageKey, Object... args) {
+		return TextInit.initialtextAligned("center", messageKey, args);
 	}
 
 	// KlappButton lives in metaPanel too, to the left of the step number - metaPanel's

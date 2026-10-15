@@ -1,6 +1,7 @@
 package specman.metatag.generic;
 
 import specman.graphics.IconReader;
+import specman.i18n.IMenuItem;
 import specman.metatag.TagMoveDirection;
 import specman.undo.UndoableMetaTagRemoved;
 import specman.view.AbstractSchrittView;
@@ -19,9 +20,9 @@ class MetaTagContextMenu implements MouseListener {
   static final MetaTagContextMenu instance = new MetaTagContextMenu();
 
   private final JPopupMenu popup = new JPopupMenu();
-  private final JMenuItem edit = new JMenuItem("Edit");
-  private final JMenuItem left = new JMenuItem("Move left", IconReader.readImageIcon("arrow-left"));
-  private final JMenuItem right = new JMenuItem("Move right", IconReader.readImageIcon("arrow-right"));
+  private final JMenuItem edit = new IMenuItem("menu.context.edit");
+  private final JMenuItem left = new IMenuItem("menu.context.move.left", IconReader.readImageIcon("arrow-left"));
+  private final JMenuItem right = new IMenuItem("menu.context.move.right", IconReader.readImageIcon("arrow-right"));
   private GenericMetaTag currentTag;
   private AbstractSchrittView currentStep;
 
@@ -29,7 +30,7 @@ class MetaTagContextMenu implements MouseListener {
     edit.addActionListener(e -> currentTag.editFreetext());
     left.addActionListener(e -> moveCurrentTag(TagMoveDirection.LEFT));
     right.addActionListener(e -> moveCurrentTag(TagMoveDirection.RIGHT));
-    JMenuItem delete = new JMenuItem("Delete", IconReader.readImageIcon("loeschen"));
+    JMenuItem delete = new IMenuItem("menu.context.delete", IconReader.readImageIcon("loeschen"));
     delete.addActionListener(e -> deleteCurrentTag());
     popup.add(edit);
     popup.add(left);

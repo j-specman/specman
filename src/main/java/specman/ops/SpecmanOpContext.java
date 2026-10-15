@@ -39,12 +39,10 @@ public interface SpecmanOpContext extends EditorI {
   void markAsUnsavedWorkingCopy();
   void notifyWorkingCopyInitialized(long timestamp);
   void zusammenklappenFuerReview();
-  void showMessage(String text);
-  default void showToast(String briefMessage, String detailMessage) {
-    showMessage(briefMessage + "\n\n" + detailMessage);
-  }
+  void showMessage(String messageKey, Object... args);
+  void showToast(String briefMessage, String detailMessage);
   void dropWelcomeMessage();
-  void fehler(String text);
+  void fehler(String messageKey, Object... args);
   void displayException(Exception e);
   Container getArbeitsbereich();
   void scrollBy(int delta);

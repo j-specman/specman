@@ -14,6 +14,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
+import static specman.i18n.Messages.i18n;
+
 public class DragMouseAdapter extends MouseAdapter {
 
     private final Specman specman;
@@ -133,9 +135,9 @@ public class DragMouseAdapter extends MouseAdapter {
         if (e.getSource() instanceof InteractiveStepFragment) {
             AbstractSchrittView step = specman.findStep((InteractiveStepFragment) e.getSource());
             var id = step.getNumber();
-            return id != null ? "Schritt " + id : " ";
+            return id != null ? i18n("drag.label.step", id) : " ";
         }
-        return "Neuer Schritt";
+        return i18n("drag.label.new.step");
     }
 
     private Point toCursorInSpecman(MouseEvent e) {

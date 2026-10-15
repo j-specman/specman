@@ -2,11 +2,13 @@ package specman.metatag.generic.config;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
+import specman.i18n.IButton;
+import specman.i18n.ICheckBox;
+import specman.i18n.ILabel;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
@@ -18,6 +20,8 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.util.function.Predicate;
+
+import static specman.i18n.Messages.i18n;
 
 /** Modal form for creating or editing one {@link MetaTagConfig}. The result is only delivered if
  * the user confirms with OK; nothing is changed in the registry by this dialog itself. */
@@ -31,7 +35,7 @@ class MetaTagConfigEditDialog extends JDialog {
   private final IconChooser iconChooser;
   private final ColorChooseButton backgroundButton;
   private final OptionalColorChooser borderChooser;
-  private final JCheckBox freetextCheckBox = new JCheckBox("Users can attach a freetext to the tag", true);
+  private final JCheckBox freetextCheckBox = new ICheckBox("dialog.metatag.edit.freetext.allowed", true);
   private final PreviewPanel preview = new PreviewPanel();
 
   private boolean labelFollowsName = true;
@@ -41,16 +45,16 @@ class MetaTagConfigEditDialog extends JDialog {
    * @param nameEditable whether the name may be changed - not if tags at steps refer to it
    * @param isNameTaken tells whether a name is already used by another configuration */
   MetaTagConfigEditDialog(Frame owner, MetaTagConfig existing, boolean nameEditable, Predicate<String> isNameTaken) {
-    super(owner, existing == null ? "New Meta Tag" : "Edit Meta Tag", true);
+    super(owner, i18n(existing == null ? "dialog.metatag.edit.title.new" : "dialog.metatag.edit.title.edit"), true);
     this.isNameTaken = isNameTaken;
     if (!nameEditable) {
       nameField.setEnabled(false);
-      nameField.setToolTipText("Tags at steps refer to this meta tag, so it can't be renamed");
+      nameField.setToolTipText(i18n("dialog.metatag.edit.name.locked.tooltip"));
     }
     iconChooser = new IconChooser(existing != null ? existing.getIconSvg() : null, this::refreshTagPreview);
-    backgroundButton = new ColorChooseButton("Background color",
+    backgroundButton = new ColorChooseButton("dialog.metatag.edit.background.chooser",
       existing != null ? existing.getBackgroundColor() : DEFAULT_BACKGROUND, this::refreshTagPreview);
-    borderChooser = new OptionalColorChooser("Border color",
+    borderChooser = new OptionalColorChooser("dialog.metatag.edit.border.chooser",
       existing != null ? existing.getBorderColor() : null, this::refreshTagPreview);
     if (existing != null) {
       nameField.setText(existing.getName());
@@ -104,28 +108,28 @@ class MetaTagConfigEditDialog extends JDialog {
   private JPanel buildFormPanel() {
     JPanel panel = new JPanel(new FormLayout("10px, right:default, 8px, fill:default:grow, 10px",
       "10px, pref, 4px, pref, 4px, pref, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 10px"));
-    panel.add(new JLabel("Name:"), CC.xy(2, 2));
+    panel.add(new ILabel("dialog.metatag.edit.name"), CC.xy(2, 2));
     panel.add(nameField, CC.xy(4, 2));
-    panel.add(new JLabel("Label:"), CC.xy(2, 4));
+    panel.add(new ILabel("dialog.metatag.edit.label"), CC.xy(2, 4));
     panel.add(labelField, CC.xy(4, 4));
-    panel.add(new JLabel("Icon:"), CC.xy(2, 6));
+    panel.add(new ILabel("dialog.metatag.edit.icon"), CC.xy(2, 6));
     panel.add(iconChooser, CC.xy(4, 6));
     panel.add(iconChooser.getSizeWarning(), CC.xy(4, 7));
-    panel.add(new JLabel("Background:"), CC.xy(2, 9));
+    panel.add(new ILabel("dialog.metatag.edit.background"), CC.xy(2, 9));
     panel.add(backgroundButton, CC.xy(4, 9, "left, center"));
-    panel.add(new JLabel("Border:"), CC.xy(2, 11));
+    panel.add(new ILabel("dialog.metatag.edit.border"), CC.xy(2, 11));
     panel.add(borderChooser, CC.xy(4, 11, "left, center"));
-    panel.add(new JLabel("Freetext:"), CC.xy(2, 13));
+    panel.add(new ILabel("dialog.metatag.edit.freetext"), CC.xy(2, 13));
     panel.add(freetextCheckBox, CC.xy(4, 13));
-    panel.add(new JLabel("Preview:"), CC.xy(2, 15, "right, top"));
+    panel.add(new ILabel("dialog.metatag.edit.preview"), CC.xy(2, 15, "right, top"));
     panel.add(preview, CC.xy(4, 15));
     return panel;
   }
 
   private JPanel buildButtonPanel() {
-    JButton ok = new JButton("OK");
+    JButton ok = new IButton("button.ok");
     ok.addActionListener(e -> confirm());
-    JButton cancel = new JButton("Cancel");
+    JButton cancel = new IButton("button.cancel");
     cancel.addActionListener(e -> dispose());
     getRootPane().setDefaultButton(ok);
     JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -147,13 +151,13 @@ class MetaTagConfigEditDialog extends JDialog {
   private void confirm() {
     String name = nameField.getText();
     if (name.isEmpty()) {
-      showProblem("Please enter a name.");
+      showProblem("dialog.metatag.edit.problem.name.missing");
     }
     else if (isNameTaken.test(name)) {
-      showProblem("There is already a meta tag named '" + name + "'.");
+      showProblem("dialog.metatag.edit.problem.name.taken", name);
     }
     else if (iconChooser.getIconSvg() == null && labelField.getText().isEmpty()) {
-      showProblem("Please enter a label or choose an SVG file as icon.");
+      showProblem("dialog.metatag.edit.problem.label.missing");
     }
     else {
       result = currentConfig();
@@ -161,8 +165,8 @@ class MetaTagConfigEditDialog extends JDialog {
     }
   }
 
-  private void showProblem(String message) {
-    JOptionPane.showMessageDialog(this, message, getTitle(), JOptionPane.WARNING_MESSAGE);
+  private void showProblem(String messageKey, Object... args) {
+    JOptionPane.showMessageDialog(this, i18n(messageKey, args), getTitle(), JOptionPane.WARNING_MESSAGE);
   }
 
   private static class SimpleDocumentListener implements DocumentListener {

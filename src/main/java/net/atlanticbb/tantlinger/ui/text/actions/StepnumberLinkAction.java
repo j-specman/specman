@@ -10,13 +10,15 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.io.Serial;
 
+import static specman.i18n.Messages.i18n;
+
 public class StepnumberLinkAction extends BasicEditAction {
     @Serial
     private static final long serialVersionUID = 1L;
     StepnumberLinkDialog dialog;
 
     public StepnumberLinkAction() {
-        super("Link to Stepnumber...");
+        super(i18n("action.stepnumberlink"));
         this.putValue("SmallIcon", UIUtils.getIcon("resources/images/x16/", "link3.png"));
         this.putValue("ShortDescription", this.getValue("Name"));
     }

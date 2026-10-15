@@ -10,7 +10,6 @@ import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.MetaTagConfigModel_V002;
 import specman.model.ModelEnvelope;
 import specman.model.ModelConverterV001V002;
-import specman.model.v001.AbstractSchrittModel_V001;
 import specman.model.v001.StruktogrammModel_V001;
 import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.io.ModelParser_V002;
@@ -38,8 +37,9 @@ import java.util.Map;
 import specman.editarea.StepnumberLink;
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedElement;
-import specman.Aenderungsart;
 import specman.model.v002.AbstractStepModel_V002;
+
+import static specman.i18n.Messages.i18n;
 
 public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
 
@@ -50,7 +50,7 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
   public void load() {
     File verzeichnis = (getDiagrammDatei() != null) ? getDiagrammDatei().getParentFile() : null;
     JFileChooser fileChooser = new JFileChooser(verzeichnis);
-    fileChooser.setFileFilter(new FileNameExtensionFilter("Nassi Diagramme", "nsd"));
+    fileChooser.setFileFilter(new FileNameExtensionFilter(i18n("msg.filter.diagrams"), "nsd"));
     if (fileChooser.showOpenDialog(getScrollPane()) == JFileChooser.APPROVE_OPTION) {
       loadFromDiagrammOrWorkingCopy(fileChooser.getSelectedFile());
       resetPdfExportChooser();
@@ -65,12 +65,9 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     if (AutoSaveOp.workingCopyExistsFor(diagramFile)) {
       File workingCopy = AutoSaveOp.workingCopyFor(diagramFile);
       int choice = showConfirmDialog(
-          "A working copy for '" + diagramFile.getName() + "' is present.\n" +
-          "Specman may not have been closed properly in the last session.\n\n" +
-          "Model file: " + formatTimestamp(diagramFile) + "\n" +
-          "Working copy: " + formatTimestamp(workingCopy) + "\n\n" +
-          "Restore from working copy?",
-          "Working copy found", JOptionPane.YES_NO_OPTION);
+          i18n("msg.workingcopy.found.message", diagramFile.getName(),
+            formatTimestamp(diagramFile), formatTimestamp(workingCopy)),
+          i18n("msg.workingcopy.found.title"), JOptionPane.YES_NO_OPTION);
       if (choice == JOptionPane.YES_OPTION) {
         load(workingCopy);
         setDiagrammDatei(diagramFile);
@@ -95,9 +92,8 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
           wcTimestamp = AutoSaveOp.createWorkingCopyFor(diagramFile);
         }
         catch (IOException e) {
-          showToast("Working copy could not be created.",
-            "Auto-load/auto-save are unavailable for this file until it is loaded or saved " +
-            "again:\n\n" + e.getMessage());
+          showToast(i18n("msg.workingcopy.create.failed.brief"),
+            i18n("msg.workingcopy.create.failed.detail", e.getMessage()));
         }
       }
       context().notifyWorkingCopyInitialized(wcTimestamp);
@@ -196,21 +192,12 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     boolean isV1 = StruktogrammModel_V001.class.getName().equals(envelope.modelType);
     boolean isV2 = DiagramModel_V002.class.getName().equals(envelope.modelType);
     if (!isV1 && !isV2) {
-      throw new EditException("The selected file does not contain an actogramm model or a model of an unsupported Specman version " + envelope.specmanVersion);
+      throw new EditException("msg.load.invalid.model", envelope.specmanVersion);
     }
     String compatibilityVersionPrefix = SpecmanVersion.getCompatibilityVersionPrefix();
     if (!envelope.specmanVersion.startsWith(compatibilityVersionPrefix)) {
-      String message = "The selected file was created from Specman version " + envelope.specmanVersion + ".\n" +
-          "The current version is " + SpecmanVersion.getVersion() + ".\n";
-      if (isV1) {
-        message += "The file format is incompatible but will be ported to the current format. It will " +
-          "no longer be accessible from the Specman version it was created with.";
-      }
-      else {
-        message += "The file format is compatible. However, files being edited with a newer version " +
-          "should not be edited with older versions afterwards. This may cause the loss of meta information";
-      }
-      showMessage(message);
+      showMessage(isV1 ? "msg.load.version.incompatible" : "msg.load.version.compatible",
+        envelope.specmanVersion, SpecmanVersion.getVersion());
     }
   }
 

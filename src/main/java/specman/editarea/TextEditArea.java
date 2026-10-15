@@ -9,7 +9,6 @@ import specman.EditorI;
 import specman.Specman;
 import static specman.ChangeSet.changeset;
 
-import specman.editarea.document.WrappedDocumentUtil;
 import specman.editarea.keylistener.TextEditAreaKeyListener;
 import specman.editarea.markups.*;
 import specman.editarea.document.WrappedDocument;
@@ -61,6 +60,7 @@ import static specman.ChangeSet.STEPNUMBER_LINK_COLOR;
 import static specman.editarea.markups.MarkupSearchPurpose.All;
 import static specman.editarea.markups.MarkupSearchPurpose.FirstChangeOnly;
 import static specman.Specman.editor;
+import static specman.i18n.Messages.i18n;
 
 public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaModel_V002> {
     private static final String INITIAL_EMPTY_CONTENT_INDICATOR = "x";
@@ -650,8 +650,8 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
         if (StepnumberLink.isStepnumberLinkDefect(stepnumberLinkID)) {
             JOptionPane.showMessageDialog(this,
-                    "Der Schritt, auf den der SchrittnummerLink verwiesen hat, existiert nicht mehr.",
-                    "Springen nicht möglich", JOptionPane.ERROR_MESSAGE);
+                    i18n("msg.stepnumberlink.defect.message"),
+                    i18n("msg.stepnumberlink.defect.title"), JOptionPane.ERROR_MESSAGE);
             return;
         }
         // The user might not have focussed anything in the current edit container before

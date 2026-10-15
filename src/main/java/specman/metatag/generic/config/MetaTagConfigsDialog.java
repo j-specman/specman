@@ -8,6 +8,7 @@ import specman.undo.UndoableMetaTagConfigEdited;
 import specman.undo.UndoableMetaTagConfigRemoved;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
+import specman.i18n.IButton;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
@@ -33,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static specman.Specman.editor;
+import static specman.i18n.Messages.i18n;
 
 /** Lists the meta tag configurations of the diagram and lets the user create and edit them.
  * Every confirmed creation or edit is one undoable step. */
@@ -44,12 +46,12 @@ public class MetaTagConfigsDialog extends JDialog {
   private final Set<String> namesInUse;
   private final DefaultListModel<MetaTagConfig> listModel = new DefaultListModel<>();
   private final JList<MetaTagConfig> list = new JList<>(listModel);
-  private final JButton editButton = new JButton("Edit...");
-  private final JButton deleteButton = new JButton("Delete");
+  private final JButton editButton = new IButton("button.edit");
+  private final JButton deleteButton = new IButton("button.delete");
 
   /** @param namesInUse names of the configurations which tags at steps refer to; these must not be renamed */
   public MetaTagConfigsDialog(Frame owner, MetaTagConfigRegistry registry, Set<String> namesInUse) {
-    super(owner, "Meta Tags", true);
+    super(owner, i18n("dialog.metatag.configs.title"), true);
     this.registry = registry;
     this.namesInUse = new HashSet<>(namesInUse);
     initComponents();
@@ -90,13 +92,13 @@ public class MetaTagConfigsDialog extends JDialog {
   }
 
   private JPanel buildButtonPanel() {
-    JButton newButton = new JButton("New...");
+    JButton newButton = new IButton("button.new");
     newButton.addActionListener(e -> createNew());
     editButton.addActionListener(e -> editSelected());
     editButton.setEnabled(false);
     deleteButton.addActionListener(e -> deleteSelected());
     deleteButton.setEnabled(false);
-    JButton close = new JButton("Close");
+    JButton close = new IButton("button.close");
     close.addActionListener(e -> dispose());
     JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     panel.add(newButton);
@@ -148,11 +150,10 @@ public class MetaTagConfigsDialog extends JDialog {
   }
 
   private boolean confirmDeletionWithTags(MetaTagConfig config) {
-    Object[] options = {"Delete", "Cancel"};
+    Object[] options = {i18n("button.delete"), i18n("button.cancel")};
     int choice = JOptionPane.showOptionDialog(this,
-      "Tags at steps refer to the meta tag '" + config.getName() + "'.\n"
-        + "If you delete it, these tags are removed as well.",
-      "Delete Meta Tag", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+      i18n("dialog.metatag.configs.delete.confirm", config.getName()),
+      i18n("dialog.metatag.configs.delete.title"), JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
       null, options, options[1]);
     return choice == 0;
   }

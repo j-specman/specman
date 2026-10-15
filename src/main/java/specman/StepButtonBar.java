@@ -18,27 +18,29 @@ import specman.ops.buttons.DragSourceProvider;
 import javax.swing.*;
 import java.awt.*;
 
+import static specman.i18n.Messages.i18n;
+
 public class StepButtonBar extends JToolBar {
 
   StepButtonBar(Specman specman) {
     super(JToolBar.VERTICAL);
 
-    addDragButton(new CreateSimpleStepOpButton(specman), "einfacher-schritt", "Create simple step", specman);
-    addDragButton(new CreateWhileStepOpButton(specman), "while-schritt", "Create while step", specman);
-    addDragButton(new CreateWhileWhileStepOpButton(specman), "whilewhile-schritt", "Create while-while step", specman);
-    addDragButton(new CreateIfElseStepOpButton(specman), "ifelse-schritt", "Create if-else step", specman);
-    addDragButton(new CreateIfStepOpButton(specman), "if-schritt", "Create if step", specman);
-    addDragButton(new CreateCaseStepOpButton(specman), "case-schritt", "Create case step", specman);
-    addDragButton(new CreateSubsequenceStepOpButton(specman), "subsequenz-schritt", "Create subsequence step", specman);
-    addDragButton(new CreateBreakStepOpButton(specman), "break-schritt", "Create break step", specman);
-    addDragButton(new CreateCatchSequenceADBLOpButton(specman), "catch-schritt", "Create catch block", specman);
-    addDragButton(new CreateCaseBranchADBLOpButton(specman), "zweig", "Create case branch", specman);
+    addDragButton(new CreateSimpleStepOpButton(specman), "einfacher-schritt", "palette.create.simple", specman);
+    addDragButton(new CreateWhileStepOpButton(specman), "while-schritt", "palette.create.while", specman);
+    addDragButton(new CreateWhileWhileStepOpButton(specman), "whilewhile-schritt", "palette.create.while.while", specman);
+    addDragButton(new CreateIfElseStepOpButton(specman), "ifelse-schritt", "palette.create.if.else", specman);
+    addDragButton(new CreateIfStepOpButton(specman), "if-schritt", "palette.create.if", specman);
+    addDragButton(new CreateCaseStepOpButton(specman), "case-schritt", "palette.create.case", specman);
+    addDragButton(new CreateSubsequenceStepOpButton(specman), "subsequenz-schritt", "palette.create.subsequence", specman);
+    addDragButton(new CreateBreakStepOpButton(specman), "break-schritt", "palette.create.break", specman);
+    addDragButton(new CreateCatchSequenceADBLOpButton(specman), "catch-schritt", "palette.create.catch", specman);
+    addDragButton(new CreateCaseBranchADBLOpButton(specman), "zweig", "palette.create.case.branch", specman);
   }
 
-  private void addDragButton(JButton button, String iconBasename, String tooltip, Specman specman) {
+  private void addDragButton(JButton button, String iconBasename, String tooltipKey, Specman specman) {
     button.setIcon(IconReader.readImageIcon(iconBasename));
     button.setMargin(new Insets(0, 0, 0, 0));
-    button.setToolTipText(tooltip);
+    button.setToolTipText(i18n(tooltipKey));
     add(button);
     DragMouseAdapter dragAdapter = new DragMouseAdapter(specman, this);
     button.addMouseListener(dragAdapter);

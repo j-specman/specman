@@ -6,6 +6,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import specman.cli.CLIOperation;
 import specman.cli.SpecmanCLI;
+import specman.i18n.Messages;
 import specman.menubar.SpecmanMenuBar;
 import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
@@ -45,6 +46,7 @@ import java.util.List;
 import java.util.Set;
 
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
+import static specman.i18n.Messages.i18n;
 
 public class Specman extends JFrame implements EditorI, SpaltenContainerI, SpecmanOpContext {
 	private static final BasicStroke GESTRICHELTE_LINIE =
@@ -194,7 +196,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		if (diagrammDatei != null) {
 			return diagrammDatei.getName();
 		}
-		return "Unbekannt";
+		return i18n("msg.filename.unknown");
 	}
 
 	@Override
@@ -283,13 +285,13 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		return diagrammbreite;
 	}
 
-	public void fehler(String text) {
-		JOptionPane.showMessageDialog(this, text);
+	public void fehler(String messageKey, Object... args) {
+		JOptionPane.showMessageDialog(this, i18n(messageKey, args));
 	}
 
 	@Override
-	public void showMessage(String text) {
-		SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, text));
+	public void showMessage(String messageKey, Object... args) {
+		SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, i18n(messageKey, args)));
 	}
 
 	@Override
@@ -546,6 +548,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 			SpecmanCLI.run(args);
 			return;
 		}
+    Messages.applyLanguagePreference();
     setLookAndFeel();
 		File initialFileToOpen = readFileFromArgs(args);
 		SwingUtilities.invokeAndWait(() -> {
@@ -701,7 +704,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	}
 
 	public void showError(EditException ex) {
-		fehler(ex.getMessage());
+		JOptionPane.showMessageDialog(this, ex.getMessage());
 	}
 
 	public double scale(double length) {
@@ -759,7 +762,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
   }
 
   private void displayErrorMessage(String message) {
-    JOptionPane.showMessageDialog(this, message, "Fehler", JOptionPane.ERROR_MESSAGE);
+    JOptionPane.showMessageDialog(this, message, i18n("msg.error.title"), JOptionPane.ERROR_MESSAGE);
   }
 
   @Override

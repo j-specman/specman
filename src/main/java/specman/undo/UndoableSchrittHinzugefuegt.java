@@ -3,11 +3,11 @@ package specman.undo;
 import specman.EditException;
 import specman.view.SchrittSequenzView;
 import specman.view.AbstractSchrittView;
-import specman.view.StepRemovalPurpose;
 
 import javax.swing.undo.CannotRedoException;
 
 import static specman.view.StepRemovalPurpose.Discard;
+import static specman.i18n.Messages.i18n;
 
 public class UndoableSchrittHinzugefuegt extends AbstractUndoableInteraction {
 
@@ -41,17 +41,17 @@ public class UndoableSchrittHinzugefuegt extends AbstractUndoableInteraction {
 
 	@Override
 	public String getPresentationName() {
-		return "Neuer Schritt...";
+		return i18n("undo.step.added");
 	}
 
 	@Override
 	public String getUndoPresentationName() {
-		return "Neuen Schritt entfernen";
+		return i18n("undo.step.added.undo");
 	}
 
 	@Override
 	public String getRedoPresentationName() {
-		return "Neuen Schritt wieder hinzuf�gen";
+		return i18n("undo.step.added.redo");
 	}
 
 }

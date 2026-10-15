@@ -1,6 +1,7 @@
 package specman.menubar;
 
 import specman.Specman;
+import specman.i18n.IMenu;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -25,7 +26,7 @@ public class RecentFiles {
     List<File> recentFiles;
 
     RecentFiles() {
-        this.menu = new JMenu("Zuletzt geladen");
+        this.menu = new IMenu("menu.file.recent");
         this.recentFiles = readLastFilesFromPreferences();
         populateMenuFromRecentFileList();
     }

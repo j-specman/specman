@@ -8,6 +8,7 @@ import specman.view.AbstractSchrittView;
 import specman.view.CaseSchrittView;
 import specman.view.ZweigSchrittSequenzView;
 
+
 public class CreateCaseBranchADBLOpButton extends AbstractADBLSpecmanOpButton implements DragSourceProvider {
 
   public CreateCaseBranchADBLOpButton(Specman specman) { super(specman); }
@@ -19,13 +20,13 @@ public class CreateCaseBranchADBLOpButton extends AbstractADBLSpecmanOpButton im
     dropWelcomeMessage();
     AbstractSchrittView schritt = getHauptSequenz().findeSchritt(getLastFocusedTextArea());
     if (!(schritt instanceof CaseSchrittView)) {
-      fehler("Kein Case-Schritt ausgewählt");
+      fehler("msg.case.branch.no.case.step");
       return;
     }
     CaseSchrittView caseSchritt = (CaseSchrittView) schritt;
     ZweigSchrittSequenzView ausgewaehlterZweig = caseSchritt.headingToBranch(getLastFocusedTextArea());
     if (ausgewaehlterZweig == null) {
-      fehler("Kein Zweig ausgewählt");
+      fehler("msg.case.branch.no.branch");
       return;
     }
     ZweigSchrittSequenzView neuerZweig = caseSchritt.neuenZweigHinzufuegen(ausgewaehlterZweig);

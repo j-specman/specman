@@ -1,14 +1,13 @@
 package specman.undo;
 
 import specman.EditException;
-import specman.EditorI;
-import specman.Specman;
 import specman.view.SchrittSequenzView;
 import specman.view.AbstractSchrittView;
 
 import javax.swing.undo.CannotUndoException;
 
 import static specman.view.StepRemovalPurpose.Discard;
+import static specman.i18n.Messages.i18n;
 
 public class UndoableSchrittEntfernt extends AbstractUndoableInteraction {
 
@@ -34,17 +33,17 @@ public class UndoableSchrittEntfernt extends AbstractUndoableInteraction {
 
 	@Override
 	public String getPresentationName() {
-		return "Schritt entfernt...";
+		return i18n("undo.step.removed");
 	}
 
 	@Override
 	public String getUndoPresentationName() {
-		return "Enfernten Schritt wieder hinzuf�gen";
+		return i18n("undo.step.removed.undo");
 	}
 
 	@Override
 	public String getRedoPresentationName() {
-		return "Schritt erneut entfernen";
+		return i18n("undo.step.removed.redo");
 	}
 
 }

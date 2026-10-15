@@ -108,10 +108,10 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	public CaseSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialerText, StepNumber id, ChangeInfo changeInfo) {
 		this(parent, initialerText, id, changeInfo, 2);
 		initCases(
-				new ZweigSchrittSequenzView(this, id.naechsteEbene(), initialtext("Sonst"), changeInfo),
+				new ZweigSchrittSequenzView(this, id.naechsteEbene(), initialtext("step.branch.else"), changeInfo),
 				new ArrayList<ZweigSchrittSequenzView>(Arrays.asList(
-						new ZweigSchrittSequenzView(this, id.naechsteID().naechsteEbene(), initialtext("Fall 1"), changeInfo),
-						new ZweigSchrittSequenzView(this, id.naechsteID().naechsteID().naechsteEbene(), initialtext("Fall 2"), changeInfo))));
+						new ZweigSchrittSequenzView(this, id.naechsteID().naechsteEbene(), initialtext("step.branch.case", 1), changeInfo),
+						new ZweigSchrittSequenzView(this, id.naechsteID().naechsteID().naechsteEbene(), initialtext("step.branch.case", 2), changeInfo))));
 	}
 
 	@Override
@@ -373,7 +373,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 	public ZweigSchrittSequenzView neuenZweigHinzufuegen(ZweigSchrittSequenzView linkerNachbar) {
 		int linkerNachbarIndex = caseSequenzen.indexOf(linkerNachbar);
 		ZweigSchrittSequenzView neuerZweig = new ZweigSchrittSequenzView
-			(this, linkerNachbar.naechsteNachbarSequenzID(), initialtext("Fall " + (linkerNachbarIndex+2)), TextInit.initialChangeInfo());
+			(this, linkerNachbar.naechsteNachbarSequenzID(), initialtext("step.branch.case", linkerNachbarIndex + 2), TextInit.initialChangeInfo());
 		neuerZweig.einfachenSchrittAnhaengen();
 		zweigHinzufuegen(neuerZweig, linkerNachbarIndex+2);
 		applyEffectiveBackgroundUDBL();

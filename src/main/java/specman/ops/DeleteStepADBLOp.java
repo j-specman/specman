@@ -1,6 +1,5 @@
 package specman.ops;
 
-import specman.Aenderungsart;
 import specman.EditException;
 import specman.editarea.InteractiveStepFragment;
 import specman.undo.UndoableSchrittEntfernt;
@@ -9,8 +8,8 @@ import specman.view.*;
 
 import javax.swing.*;
 
-import static specman.Aenderungsart.Hinzugefuegt;
 import static specman.view.StepRemovalPurpose.Discard;
+import static specman.i18n.Messages.i18n;
 
 public class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
 
@@ -70,13 +69,12 @@ public class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
 
   private boolean isDeletionAllowed(AbstractSchrittView step) throws EditException {
     if (!step.getParent().allowsStepDeletion()) {
-      throw new EditException("Der letzte Schritt kann nicht entfernt werden.");
+      throw new EditException("msg.delete.last.step");
     }
     if (step.hasStepnumberLinks()) {
       int dialogResult = showConfirmDialog(
-          "Der zu löschende Schritt wird referenziert. Möchten Sie den Schritt " +
-              "wirklich löschen? Die Referenzen werden dann als 'Defekt' markiert.",
-          "Verknüpfte Schrittreferenzen", JOptionPane.OK_CANCEL_OPTION);
+          i18n("msg.delete.referenced.message"),
+          i18n("msg.delete.referenced.title"), JOptionPane.OK_CANCEL_OPTION);
       return dialogResult == JOptionPane.OK_OPTION;
     }
     return true;

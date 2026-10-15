@@ -1,11 +1,15 @@
 package specman.ops;
 
+
 import javax.swing.*;
 import java.io.File;
 
+import static specman.i18n.Messages.i18n;
+
 public abstract class AbstractInitSpecmanOp extends AbstractSpecmanOp {
 
-  static final Object[] UNSAVED_CHANGES_OPTIONS = {"Save", "Discard", "Cancel"};
+  static final Object[] UNSAVED_CHANGES_OPTIONS = {
+      i18n("button.save"), i18n("button.discard"), i18n("button.cancel")};
 
   protected AbstractInitSpecmanOp(SpecmanOpContext context) {
     super(context);
@@ -14,8 +18,8 @@ public abstract class AbstractInitSpecmanOp extends AbstractSpecmanOp {
   public static boolean confirmDiscardUnsavedChanges(String filename, Runnable saveAction) {
     int result = JOptionPane.showOptionDialog(
         null,
-        "The document '" + filename + "' has unsaved changes.\nYour changes will be lost if you don't save them.",
-        "Unsaved Changes",
+        i18n("msg.unsaved.message", filename),
+        i18n("msg.unsaved.title"),
         JOptionPane.YES_NO_CANCEL_OPTION,
         JOptionPane.QUESTION_MESSAGE,
         null,
@@ -35,7 +39,7 @@ public abstract class AbstractInitSpecmanOp extends AbstractSpecmanOp {
       return true;
     }
     File current = getDiagrammDatei();
-    String filename = current != null ? current.getName() : "Unknown";
+    String filename = current != null ? current.getName() : i18n("msg.unsaved.filename.unknown");
     return confirmDiscardUnsavedChanges(filename, () -> context.diagrammSpeichern(false));
   }
 

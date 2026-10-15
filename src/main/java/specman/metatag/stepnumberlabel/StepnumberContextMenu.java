@@ -2,6 +2,9 @@ package specman.metatag.stepnumberlabel;
 
 import specman.graphics.IconReader;
 import specman.graphics.SvgIcon;
+import specman.i18n.ICheckBoxMenuItem;
+import specman.i18n.IMenu;
+import specman.i18n.IMenuItem;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.undo.UndoableFlatNumberingToggled;
@@ -30,7 +33,7 @@ public class StepnumberContextMenu implements MouseListener {
   private final JMenuItem down;
   private final JCheckBoxMenuItem toggleFlatNumbering;
   private final JPopupMenu.Separator metaTagSeparator = new JPopupMenu.Separator();
-  private final JMenu metaTagMenu = new JMenu("Tags");
+  private final JMenu metaTagMenu = new IMenu("menu.context.tags");
   private AbstractSchrittView currentStep;
   private StepnumberLabel initiatingLabel;
 
@@ -53,7 +56,7 @@ public class StepnumberContextMenu implements MouseListener {
   }
 
   private JMenuItem createUpItem() {
-    return createItem("Move up", "arrow-up", e -> {
+    return createItem("menu.context.move.up", "arrow-up", e -> {
       try(UndoRecording ur = editor().composeUndo()) {
         currentStep.moveCoCatchUpUDBL(initiatingLabel);
       }
@@ -61,7 +64,7 @@ public class StepnumberContextMenu implements MouseListener {
   }
 
   private JMenuItem createDownItem() {
-    return createItem("Move down", "arrow-down", e -> {
+    return createItem("menu.context.move.down", "arrow-down", e -> {
       try(UndoRecording ur = editor().composeUndo()) {
         currentStep.moveCoCatchDownUDBL(initiatingLabel);
       }
@@ -69,7 +72,7 @@ public class StepnumberContextMenu implements MouseListener {
   }
 
   private JCheckBoxMenuItem createSubnumberingItem() {
-    JCheckBoxMenuItem item = new JCheckBoxMenuItem("Flache Nummerierung");
+    JCheckBoxMenuItem item = new ICheckBoxMenuItem("menu.context.flat.numbering");
     item.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -83,45 +86,38 @@ public class StepnumberContextMenu implements MouseListener {
     return item;
   }
 
-  private JMenuItem createItem(String label, String iconBasename, ActionListener actionListener) {
+  private JMenuItem createItem(String messageKey, String iconBasename, ActionListener actionListener) {
     ImageIcon icon = IconReader.readImageIcon(iconBasename);
-    JMenuItem item = new JMenuItem(label, icon);
+    JMenuItem item = new IMenuItem(messageKey, icon);
     item.addActionListener(actionListener);
     popup.add(item);
     return item;
   }
 
   private JMenuItem createDeleteItem() {
-    return createItem("Löschen", "loeschen",
+    return createItem("menu.context.delete", "loeschen",
       e -> editor().deleteStepADBL(currentStep, initiatingLabel));
   }
 
   private JMenuItem createCopyItem() {
-    return createItem("Copy", "copy", e -> editor().copyStepToClipboard(currentStep));
+    return createItem("menu.context.copy", "copy", e -> editor().copyStepToClipboard(currentStep));
   }
 
   private JMenuItem createCutItem() {
-    return createItem("Cut", "cut", e -> editor().cutStepToClipboard(currentStep, initiatingLabel));
+    return createItem("menu.context.cut", "cut", e -> editor().cutStepToClipboard(currentStep, initiatingLabel));
   }
 
   private JMenuItem createPasteItem() {
-    return createItem("Paste", "paste", e -> editor().pasteStepsAfter(currentStep));
-  }
-
-  private JMenuItem createItem(String label, ActionListener actionListener) {
-    JMenuItem item = new JMenuItem(label);
-    item.addActionListener(actionListener);
-    popup.add(item);
-    return item;
+    return createItem("menu.context.paste", "paste", e -> editor().pasteStepsAfter(currentStep));
   }
 
   private JMenuItem createLeftItem() {
-    return createItem("Move left", "arrow-left",
+    return createItem("menu.context.move.left", "arrow-left",
       e -> editor().moveBranchSequenceLeftADBL(currentStep, initiatingLabel));
   }
 
   private JMenuItem createRightItem() {
-    return createItem("Move right", "arrow-right",
+    return createItem("menu.context.move.right", "arrow-right",
       e -> editor().moveBranchSequenceRightADBL(currentStep, initiatingLabel));
   }
 
@@ -175,7 +171,7 @@ public class StepnumberContextMenu implements MouseListener {
     if (!configs.isEmpty()) {
       metaTagMenu.addSeparator();
     }
-    JMenuItem configure = new JMenuItem("Configure...", IconReader.readImageIcon("tags"));
+    JMenuItem configure = new IMenuItem("menu.context.configure", IconReader.readImageIcon("tags"));
     configure.addActionListener(e -> editor().openMetaTagConfigs());
     metaTagMenu.add(configure);
   }

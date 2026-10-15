@@ -23,7 +23,7 @@ public interface SpecmanOpContextMixin {
   default void markAsUnsavedWorkingCopy() { context().markAsUnsavedWorkingCopy(); }
   default void notifyWorkingCopyInitialized(long timestamp) { context().notifyWorkingCopyInitialized(timestamp); }
   default void zusammenklappenFuerReview() { context().zusammenklappenFuerReview(); }
-  default void showMessage(String text) { context().showMessage(text); }
+  default void showMessage(String messageKey, Object... args) { context().showMessage(messageKey, args); }
   default void showToast(String briefMessage, String detailMessage) { context().showToast(briefMessage, detailMessage); }
   default EditContainer getIntro() { return context().getIntro(); }
   default EditContainer getOutro() { return context().getOutro(); }
@@ -60,7 +60,7 @@ public interface SpecmanOpContextMixin {
   default void addEdit(javax.swing.undo.UndoableEdit edit) { context().addEdit(edit); }
   default void deleteStepADBL(AbstractSchrittView step, InteractiveStepFragment fragment) { context().deleteStepADBL(step, fragment); }
   default void dropWelcomeMessage() { context().dropWelcomeMessage(); }
-  default void fehler(String text) { context().fehler(text); }
+  default void fehler(String messageKey, Object... args) { context().fehler(messageKey, args); }
   default void displayException(Exception e) { context().displayException(e); }
   default java.awt.Container getArbeitsbereich() { return context().getArbeitsbereich(); }
   default void newStepPostInit(AbstractSchrittView newStep) { context().newStepPostInit(newStep); }

@@ -37,6 +37,12 @@ abstract class AbstractSelectSetting<T> extends AbstractSetting {
     Preferences.userNodeForPackage(Specman.class).put(prefKey, selected != null ? serialise(selected.value) : "");
   }
 
+  @SuppressWarnings("unchecked")
+  protected T selectedValue() {
+    SettingOption<T> selected = (SettingOption<T>) comboBox.getSelectedItem();
+    return selected != null ? selected.value : null;
+  }
+
   protected static <T> T loadValue(String prefKey, List<SettingOption<T>> options, T defaultValue) {
     String saved = Preferences.userNodeForPackage(Specman.class).get(prefKey, serialise(defaultValue));
     Optional<SettingOption<T>> found = options.stream()

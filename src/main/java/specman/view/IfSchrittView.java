@@ -34,7 +34,7 @@ public class IfSchrittView extends IfElseSchrittView {
 	public IfSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialerString, StepNumber id, ChangeInfo changeInfo) {
 		super(parent, initialerString, id, changeInfo, false);
 		initIfSequenz(new ZweigSchrittSequenzView(this, id.naechsteID().naechsteEbene(), EditorContentModel_V002.empty(), changeInfo));
-		initElseSequenz(new ZweigSchrittSequenzView(this, id.naechsteEbene(), EditContainer.right("Ja"), changeInfo));
+		initElseSequenz(new ZweigSchrittSequenzView(this, id.naechsteEbene(), EditContainer.right("step.branch.yes"), changeInfo));
 		ifBreite = SPALTENLAYOUT_UMGEHUNG_GROESSE + 2; /**@author PVN, Dueck */ 
 	}
 

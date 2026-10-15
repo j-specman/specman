@@ -15,6 +15,8 @@ import specman.ops.buttons.ToneOpButton;
 import javax.swing.*;
 import java.awt.*;
 
+import static specman.i18n.Messages.i18n;
+
 public class DiagramToolBar extends JToolBar {
 
   private final JToggleButton aenderungenVerfolgen;
@@ -45,25 +47,25 @@ public class DiagramToolBar extends JToolBar {
     BirdsViewSpecmanOpButton birdsview = new BirdsViewSpecmanOpButton(specman);
     ExportPDFOpButton exportPDF = new ExportPDFOpButton(specman);
 
-    addButton(einfaerben, "helligkeit", "Hintergrund schattieren");
-    addButton(loeschen, "loeschen", "Schritt löschen");
-    addButton(toggleBorderType, "switch-border", "Rahmen umschalten");
+    addButton(einfaerben, "helligkeit", "toolbar.shade");
+    addButton(loeschen, "loeschen", "toolbar.delete.step");
+    addButton(toggleBorderType, "switch-border", "toolbar.toggle.border");
     addSeparator();
-    addButton(aenderungenVerfolgen, "aenderungen", "Änderungen verfolgen");
-    addButton(aenderungenUebernehmen, "uebernehmen", "Änderungen übernehmen");
-    addButton(aenderungenVerwerfen, "verwerfen", "Änderungen verwerfen");
-    addButton(mergeChangeSets, "merge", "Change Sets zusammenführen");
-    addButton(review, "review", "Für Review zusammenklappen");
+    addButton(aenderungenVerfolgen, "aenderungen", "toolbar.track.changes");
+    addButton(aenderungenUebernehmen, "uebernehmen", "toolbar.accept.changes");
+    addButton(aenderungenVerwerfen, "verwerfen", "toolbar.reject.changes");
+    addButton(mergeChangeSets, "merge", "toolbar.merge.changesets");
+    addButton(review, "review", "toolbar.review");
     addSeparator();
     add(zoom);
-    addButton(birdsview, "birdsview", "Bird's View");
-    addButton(exportPDF, "pdf", "PDF exportieren");
+    addButton(birdsview, "birdsview", "toolbar.birdsview");
+    addButton(exportPDF, "pdf", "toolbar.export.pdf");
   }
 
-  private void addButton(AbstractButton button, String iconBasename, String tooltip) {
+  private void addButton(AbstractButton button, String iconBasename, String tooltipKey) {
     button.setIcon(IconReader.readImageIcon(iconBasename));
     button.setMargin(new Insets(0, 0, 0, 0));
-    button.setToolTipText(tooltip);
+    button.setToolTipText(i18n(tooltipKey));
     add(button);
   }
 

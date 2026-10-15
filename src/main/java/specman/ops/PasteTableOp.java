@@ -41,7 +41,7 @@ public class PasteTableOp extends AbstractADBLSpecmanOp {
       }
     }
     catch (ModelParseException ex) {
-      throw new EditException("Clipboard content cannot be pasted as a Specman table:\n" + ex.getMessage());
+      throw new EditException("msg.paste.table.failed", ex.getMessage());
     }
   }
 

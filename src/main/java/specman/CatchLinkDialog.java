@@ -1,12 +1,13 @@
 package specman;
 
-import net.atlanticbb.tantlinger.i18n.I18n;
 import net.atlanticbb.tantlinger.ui.HeaderPanel;
 import net.atlanticbb.tantlinger.ui.UIUtils;
 import org.apache.commons.lang.StringUtils;
 import specman.undo.manager.UndoRecording;
 import specman.view.*;
+import specman.i18n.IButton;
 import static specman.Specman.editor;
+import static specman.i18n.Messages.i18n;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -25,10 +26,9 @@ import java.util.List;
 public class CatchLinkDialog extends JDialog {
     @Serial
     private static final long serialVersionUID = 1L;
-    private static final I18n i18n = I18n.getInstance("net.atlanticbb.tantlinger.ui.text.dialogs");
     private static final Icon icon = UIUtils.getIcon("resources/images/x32/", "link3.png");
-    private static final String title = "Link to break step...";
-    private static final String desc = "Create a catch sequence linked to a break step";
+    private static final String title = i18n("dialog.catch.link.title");
+    private static final String desc = i18n("dialog.catch.link.description");
     private static final Color DEFAULT_BACKGROUND = Color.white;
     private static final Color HOVERED_BACKGROUND = Color.lightGray;
     private static final int MAXIMAL_REFERENCE_TEXTLENGTH = 60;
@@ -77,7 +77,7 @@ public class CatchLinkDialog extends JDialog {
 
         jlist.setBorder(BorderFactory.createCompoundBorder(new EmptyBorder(10, 10, 10, 10), new MatteBorder(1, 1, 1, 1, Color.black)));
 
-        JButton close = new JButton(i18n.str("close"));
+        JButton close = new IButton("button.close");
         close.addActionListener(e -> CatchLinkDialog.this.setVisible(false));
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.add(close);

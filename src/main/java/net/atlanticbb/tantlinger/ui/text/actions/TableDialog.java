@@ -5,29 +5,18 @@ import com.jgoodies.forms.layout.FormLayout;
 import net.atlanticbb.tantlinger.i18n.I18n;
 import net.atlanticbb.tantlinger.ui.HeaderPanel;
 import net.atlanticbb.tantlinger.ui.UIUtils;
-import org.apache.commons.lang.StringUtils;
-import specman.Specman;
-import specman.editarea.TextEditArea;
-import specman.view.AbstractSchrittView;
+import specman.i18n.ILabel;
 import static specman.Specman.editor;
+import static specman.i18n.Messages.i18n;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.MatteBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
-import java.io.Serial;
-import java.util.List;
 
 public class TableDialog extends JDialog {
     private static final I18n i18n = I18n.getInstance("net.atlanticbb.tantlinger.ui");
     private static final Icon icon = UIUtils.getIcon("resources/images/x32/", "table.png");
-    private static final String title = "Insert table...";
-    private static final String desc = "Insert a table";
+    private static final String title = i18n("dialog.table.title");
+    private static final String desc = i18n("dialog.table.description");
     private JTextField columns = new JTextField("3");
     private JTextField rows = new JTextField("2");
     private JButton ok = new JButton(i18n.str("ok"));
@@ -51,10 +40,10 @@ public class TableDialog extends JDialog {
         contentPane.setLayout(layout);
         JPanel headerPanel = new HeaderPanel(title, desc, icon);
         contentPane.add(headerPanel, CC.xywh(1, 1, 5, 1));
-        contentPane.add(new JLabel("Tabellengröße"), CC.xywh(1, 2, 3, 1));
-        contentPane.add(new JLabel("Spaltenanzahl"), CC.xywh(2, 3, 1, 1));
+        contentPane.add(new ILabel("dialog.table.size"), CC.xywh(1, 2, 3, 1));
+        contentPane.add(new ILabel("dialog.table.columns"), CC.xywh(2, 3, 1, 1));
         contentPane.add(columns, CC.xywh(4, 3, 1, 1));
-        contentPane.add(new JLabel("Zeilenanzahl"), CC.xywh(2, 4, 1, 1));
+        contentPane.add(new ILabel("dialog.table.rows"), CC.xywh(2, 4, 1, 1));
         contentPane.add(rows, CC.xywh(4, 4, 1, 1));
         contentPane.add(ok, CC.xywh(2, 6, 1, 1));
         contentPane.add(cancel, CC.xywh(4, 6, 1, 1));

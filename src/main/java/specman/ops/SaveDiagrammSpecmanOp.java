@@ -6,6 +6,7 @@ import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.MetaTagConfigModel_V002;
 import specman.model.v002.io.ModelSerializer_V002;
 import static specman.ChangeSet.changeset;
+import static specman.i18n.Messages.i18n;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -28,7 +29,7 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
       if (getDiagrammDatei() == null || dateiauswahlErzwingen) {
         File verzeichnis = (getDiagrammDatei() != null) ? getDiagrammDatei().getParentFile() : null;
         JFileChooser fileChooser = new JFileChooser(verzeichnis);
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Nassi Diagramme", "nsd"));
+        fileChooser.setFileFilter(new FileNameExtensionFilter(i18n("msg.filter.diagrams"), "nsd"));
         if (fileChooser.showSaveDialog(getScrollPane()) != JFileChooser.APPROVE_OPTION) {
           return;
         }
@@ -39,8 +40,8 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         File ausgewaehlteDatei = new File(ausgewaehlterDateiname);
         if (!ausgewaehlteDatei.equals(getDiagrammDatei()) && ausgewaehlteDatei.exists()) {
           int confirmErgebnis = showConfirmDialog(
-              "The selected file already exists.\nShould the file be overwritten?",
-              "Overwrite file?", JOptionPane.OK_CANCEL_OPTION);
+              i18n("msg.save.overwrite.message"),
+              i18n("msg.save.overwrite.title"), JOptionPane.OK_CANCEL_OPTION);
           if (confirmErgebnis == JOptionPane.CANCEL_OPTION) {
             return;
           }
@@ -54,9 +55,8 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
           wcTimestamp = AutoSaveOp.createWorkingCopyFor(getDiagrammDatei());
         }
         catch (IOException e) {
-          showToast("Working copy could not be created.",
-            "Auto-load/auto-save are unavailable for this file until it is loaded or saved " +
-            "again:\n\n" + e.getMessage());
+          showToast(i18n("msg.workingcopy.create.failed.brief"),
+            i18n("msg.workingcopy.create.failed.detail", e.getMessage()));
         }
       }
       if (!getDiagrammDatei().equals(previousFile)) {

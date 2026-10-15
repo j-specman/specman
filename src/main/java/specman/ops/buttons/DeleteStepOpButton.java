@@ -5,6 +5,7 @@ import specman.*;
 import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;
 
+
 public class DeleteStepOpButton extends AbstractSpecmanOpButton {
 
   public DeleteStepOpButton(Specman specman) {
@@ -23,7 +24,7 @@ public class DeleteStepOpButton extends AbstractSpecmanOpButton {
   private AbstractSchrittView findStep(TextEditArea initiatingTextArea) throws EditException {
     AbstractSchrittView schritt = findeSchritt(initiatingTextArea);
     if (schritt == null) {
-      throw new EditException("Ups - niemandem scheint das Feld zu gehören, in dem steht: " + initiatingTextArea.getText());
+      throw new EditException("msg.delete.step.orphan.field", initiatingTextArea.getText());
     }
     return schritt;
   }
