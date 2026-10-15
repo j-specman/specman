@@ -29,6 +29,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * </ul>
  * Code which opens a dialog or accesses the system clipboard directly is not covered. It fails with
  * a {@link java.awt.HeadlessException}, which is the right outcome for an unexpected dialog.
+ * <p>
+ * On top of that, it offers convenience methods to express user behavior compactly in tests:
+ * {@link #focus(AbstractSchrittView)} and {@link #click(Class)} simulate the cursor placement and a
+ * toolbar button click, {@link #findStepByStepID(String, Class)} and {@link #findComponent(Class)}
+ * look up what the user would see.
  */
 public class SpecmanForTests extends Specman {
 
@@ -49,6 +54,11 @@ public class SpecmanForTests extends Specman {
     assertTrue(expectedType.isInstance(step),
       "step " + stepID + " must be a " + expectedType.getSimpleName() + " but is a " + step.getClass().getSimpleName());
     return expectedType.cast(step);
+  }
+
+  /** Simulates the user placing the cursor into the first text of the given step. */
+  public void focus(AbstractSchrittView step) {
+    setLastFocusedTextArea(step.getFirstEditArea().asTextArea());
   }
 
   /** Clicks the first button of the given type, without the default press delay of {@link AbstractButton#doClick()}. */
