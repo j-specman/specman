@@ -111,10 +111,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
     else {
       changesMade += content.aenderungenUebernehmen();
     }
-    if (changeInfo.changedBy(currentSet)) {
-      aenderungsmarkierungenEntfernen();
-    }
-    changeInfo = changeInfo.untrack(currentSet);
+    resolveChangeInfo(currentSet);
     return changesMade;
   }
 
@@ -129,11 +126,16 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
     else {
       changesMade += content.aenderungenVerwerfen();
     }
+    resolveChangeInfo(currentSet);
+    return changesMade;
+  }
+
+  private void resolveChangeInfo(ChangeSet currentSet) {
     if (changeInfo.changedBy(currentSet)) {
       aenderungsmarkierungenEntfernen();
     }
     changeInfo = changeInfo.untrack(currentSet);
-    return changesMade;
+    setBackground(changeInfo.panelColor());
   }
 
   @Override
@@ -144,8 +146,11 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
 
   @Override
   public void setEditBackgroundUDBL(Color bg) {
+    // The step's background is applied to its edit areas after loading. A list item which is
+    // a change itself must keep its own change color, like ImageEditArea does.
+    Color itemBackground = changeInfo.isChange() ? changeInfo.panelColor() : bg;
     content.setBackgroundUDBL(changeInfo.panelColor());
-    setBackgroundUDBL(bg);
+    setBackgroundUDBL(itemBackground);
   }
 
   private void setBackgroundUDBL(Color bg) {
