@@ -117,7 +117,7 @@ image::breakcatch-catch-variations.png[Catch Steps with and without Co-Catch]
 
 Pressing the Ctrl key while clicking the step number of a break step jumps to the heading of its catch step. The same works the other way round, from the catch heading to the break step.
 
-Deleting works as follows, using _Löschen_ from the step number's context menu:
+Deleting works as follows, using _Delete_ from the step number's context menu:
 
 * On the main heading of a catch step, it removes the entire catch step including its co-catches.
 * On the heading of a co-catch, it removes just this co-catch.
@@ -134,7 +134,7 @@ Text formatting is based on an HTML subset. However, Specman is a WYSIWYG editor
 
 HTML is used for text formatting only. Lists, images and tables are not part of the text content, even though HTML could express them. In Specman they are independent building blocks of the step content, each being an edit area of its own, see <<_lists,Lists>>, <<_tables,Tables>> and <<_images,Images>>. This allows Specman to render them better than a plain HTML component could, and, above all, to track changes at a much finer granularity (see <<changetracking,Change Tracking>>). An added list item, a removed table row or a deleted image is marked individually instead of marking a whole text as changed.
 
-Formatting is done with the formatting toolbar above the diagram and the menus _Bearbeiten_, _Format_ and _Einfügen_. The toolbar provides familiar options such as bold, italic, underline, font, size, color and alignment, plus the paragraph style box. The _Format_ menu has even more character styles, e.g. subscript and superscript. Strikethrough and text background colors are missing on purpose: they are reserved for the markings of change mode, see <<changetracking,Change Tracking>>.
+Formatting is done with the formatting toolbar above the diagram and the menus _Edit_, _Format_ and _Insert_. The toolbar provides familiar options such as bold, italic, underline, font, size, color and alignment, plus the paragraph style box. The _Format_ menu has even more character styles, e.g. subscript and superscript. Strikethrough and text background colors are missing on purpose: they are reserved for the markings of change mode, see <<changetracking,Change Tracking>>.
 
 Pasting with Ctrl+V depends on where the content comes from:
 
@@ -167,7 +167,7 @@ The image button of the formatting toolbar opens a file chooser for JPG, PNG, GI
 Clicking an image selects it. Delete or Backspace removes it, and Ctrl+C or Ctrl+X copies or cuts it. To continue typing below the image, press Enter. Dragging the narrow bar at the right edge of the image changes its size. An image is never wider than the diagram, and its size follows the zoom factor.
 
 ### Step references
-Step references are links to other steps within the text, like "see step 2.3". They are inserted with the step reference button of the formatting toolbar, or by _Einfügen_ > _Link to Stepnumber..._. The dialog lists all steps by number and the beginning of their text. A filter field narrows the list, and a click on an entry inserts the reference at the caret.
+Step references are links to other steps within the text, like "see step 2.3". They are inserted with the step reference button of the formatting toolbar, or by _Insert_ > _Link to Stepnumber..._. The dialog lists all steps by number and the beginning of their text. A filter field narrows the list, and a click on an entry inserts the reference at the caret.
 
 A step reference is displayed as the step number on a light gray background. It behaves like a single character: you cannot type into it, the cursor jumps over it, and Backspace removes it entirely. If it needs to point somewhere else, remove it and insert a new one.
 
@@ -188,10 +188,10 @@ Some steps cannot be dragged: the only step of a sequence (because a sequence mu
 In change mode, a move is tracked as a move, see <<changetracking,Change Tracking>>.
 
 ### Deleting steps
-_Löschen_ from the step number's context menu removes the step including everything inside. The last step of a sequence cannot be deleted. If the step is referenced from somewhere else, Specman asks for confirmation, and the references are marked as defective once the step is actually removed, see <<_step_references,Step references>>. In change mode, the step is marked as deleted instead of removed, see <<changetracking,Change Tracking>>. For catch steps, see above.
+_Delete_ from the step number's context menu removes the step including everything inside. The last step of a sequence cannot be deleted. If the step is referenced from somewhere else, Specman asks for confirmation, and the references are marked as defective once the step is actually removed, see <<_step_references,Step references>>. In change mode, the step is marked as deleted instead of removed, see <<changetracking,Change Tracking>>. For catch steps, see above.
 
 ### Copy, cut and paste
-_Copy_ puts the step including everything inside onto the clipboard. _Cut_ does the same and deletes the step afterwards, with the rules of _Löschen_ above. _Paste_ inserts the clipboard content as a new step directly below the step whose menu was used, in the same sequence. For a structured step this means below the entire step, not inside it. The items are disabled for steps marked as deleted and for catch steps.
+_Copy_ puts the step including everything inside onto the clipboard. _Cut_ does the same and deletes the step afterwards, with the rules of _Delete_ above. _Paste_ inserts the clipboard content as a new step directly below the step whose menu was used, in the same sequence. For a structured step this means below the entire step, not inside it. The items are disabled for steps marked as deleted and for catch steps.
 
 Cutting is not the same as moving: the references to the cut step become defective, and in change mode it shows up as a deletion at the old and an addition at the new position, instead of one move. If the only reason for cutting is a different place within the same diagram, drag & drop is the better choice. It is also the safer one for steps containing break steps. If the catch sequence of such a break step is not part of the cut step itself, cutting removes the catch sequence with all its handling steps. Specman warns before doing so.
 
@@ -210,7 +210,7 @@ The clipboard content of copied steps is also available as plain text in the fil
 A specification is not a one-shot design. Like the code, it is developed iteratively, and during an iteration everybody involved must be able to see what has changed compared to the status quo. That's what change tracking is for. It is similar to change tracking in Microsoft Word, but tailored to specifications. It covers both the text content and the structure of the diagram, and it works with strong colors just as if the author had marked the changes with a text marker.
 
 ### Change mode
-Change tracking is switched on and off with the toggle button _Änderungen verfolgen_ in the diagram toolbar:
+Change tracking is switched on and off with the toggle button _Track changes_ in the diagram toolbar:
 
 image::../src/main/resources/images/aenderungen.png[Change Mode Button]
 
@@ -248,7 +248,7 @@ The current changeset is the one which new changes are assigned to. It is chosen
 image::changetracking-menu-toolbar.png[Changeset Menu and Toolbar Buttons]
 
 ### Accepting and rejecting changes
-The toolbar buttons _Änderungen übernehmen_ and _Änderungen verwerfen_ accept or reject all changes of the current changeset in the entire diagram, including intro and outro. Changes of other changesets are not touched. There is no way of accepting or rejecting changes selectively yet, e.g. for a single step.
+The toolbar buttons _Accept changes_ and _Reject changes_ accept or reject all changes of the current changeset in the entire diagram, including intro and outro. Changes of other changesets are not touched. There is no way of accepting or rejecting changes selectively yet, e.g. for a single step.
 
 image::../src/main/resources/images/uebernehmen.png[Accept Changes Button]
 image::../src/main/resources/images/verwerfen.png[Reject Changes Button]
@@ -260,14 +260,14 @@ Rejecting does the opposite: added content is removed, deleted content is restor
 Both operations are a single undo step.
 
 ### Merging changesets
-The toolbar button _Change Sets zusammenführen_ pulls the changes of another changeset into the current one:
+The toolbar button _Merge change sets_ pulls the changes of another changeset into the current one:
 
 image::../src/main/resources/images/merge.png[Merge Changesets Button]
 
 Pressing the button opens a list of all changesets except the current one. The changes of the one you choose are recolored into the current changeset, which makes it the target of the merge. This is typically the consolidation step at the end of a multi-loop coordination: the outcome gets merged into a single changeset, which is the basis for development and testing. Merging can be undone.
 
 ### Review
-Even with only a few changes, they can be hard to find in a large diagram. The toolbar button _Für Review zusammenklappen_ folds up all structured steps which contain no changes, so that only the parts of the diagram remain open which are worth a reviewer's attention.
+Even with only a few changes, they can be hard to find in a large diagram. The toolbar button _Collapse for review_ folds up all structured steps which contain no changes, so that only the parts of the diagram remain open which are worth a reviewer's attention.
 
 image::../src/main/resources/images/review.png[Review Button]
 
@@ -360,7 +360,7 @@ Two terms are used strictly in this chapter. The _model file_ is the `.nsd` file
 image::ai-collaboration.png[Collaboration of User, Specman, AI Agent and Files]
 
 ### Setting up
-Choose _File_ > _Settings_ and switch on _Automatisches Laden_ (auto-load). Specman then watches the working copy and loads it whenever it changes. Additionally switching on _Automatisches Speichern_ (auto-save, 5 seconds is a good choice) makes Specman write your own edits to the working copy, so the agent always works on your latest state.
+Choose _File_ > _Settings_ and switch on _Auto-load_. Specman then watches the working copy and loads it whenever it changes. Additionally switching on _Auto-save_ (5 seconds is a good choice) makes Specman write your own edits to the working copy, so the agent always works on your latest state.
 
 Specman creates the working copy next to the model file when loading or saving a diagram, as long as auto-load or auto-save is on. A new diagram therefore needs to be saved once before an agent can work on it.
 
