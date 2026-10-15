@@ -7,6 +7,7 @@ import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;
 import specman.editarea.InteractiveStepFragment;
 
+import javax.swing.AbstractButton;
 import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.awt.Container;
@@ -48,6 +49,11 @@ public class SpecmanForTests extends Specman {
     assertTrue(expectedType.isInstance(step),
       "step " + stepID + " must be a " + expectedType.getSimpleName() + " but is a " + step.getClass().getSimpleName());
     return expectedType.cast(step);
+  }
+
+  /** Clicks the first button of the given type, without the default press delay of {@link AbstractButton#doClick()}. */
+  public void click(Class<? extends AbstractButton> buttonType) {
+    findComponent(buttonType).doClick(0);
   }
 
   /** Finds the first component of the given type in Specman's component tree, e.g. a toolbar button. */
