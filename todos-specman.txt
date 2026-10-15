@@ -14,6 +14,9 @@ Aus aktueller Anwendung
 - PDF-Option "Export beim Speichern"
 - Hoch/Runter über Grenzen von Schritten wäre cool
 
+Rechtschreibprüfung
+- Ist einer der Punkte, die wirklich als Verlust gegenüber Word als Spezifikationstool auffallen
+
 Meta Tags (Release 1.4.0)
 x Meta Tag Panel für Aufnahme von Schrittlabel, Klappbutton und Meta Tags
 x Überarbeitung der Darstellung / Platzierung von Schrittlabel, Klappbutton
