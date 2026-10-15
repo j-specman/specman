@@ -111,6 +111,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 		configureKeyboardManager();
 
 		openInitialFile(fileToOpen);
+    initAutoSaveAndLoad();
+	}
+
+	/** Overridable, so that tests can do without the auto-save timer and the working copy watcher. */
+	protected void initAutoSaveAndLoad() {
     autoSave = new AutoSaveOp(this);
     autoLoad = new AutoLoadOp(this, autoSave);
 	}
