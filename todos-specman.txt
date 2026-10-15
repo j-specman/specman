@@ -4,6 +4,7 @@ Release notes Specman 1.3.2
 
 Release notes Specman 1.4.0
 - Meta Tags
+- Beschriftungen internationalisieren
 
 Aus aktueller Anwendung
 - Durchgestrichen kann der User als Schriftformatierung auswählen. Da beißt sich aber mit Durchstreichungen durch den Änderungmodus
@@ -168,7 +169,6 @@ x PDF-Export
 - Permanente Aktualisierung der Birdsview oder vielleicht erst mal Birdsview rausnehmen
 - Vielleicht eine kleiner Top-Inset für Schritt-Texte, um die Überschneidung mit den Labels zu verringern?
 - Doku aktualisieren
-- Beschriftungen internationalisieren
 
 Bugs fixen
 - Ändern des Paragraphtypen lässt sich nicht zurücknehmen

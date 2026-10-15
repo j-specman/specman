@@ -27,6 +27,7 @@ import specman.model.v002.BreakStepModel_V002;
 import specman.model.v002.CaseStepModel_V002;
 import specman.model.v002.DoWhileStepModel_V002;
 import specman.model.v002.EditorContentModel_V002;
+import specman.undo.manager.UndoRecording;
 import specman.model.v002.IfElseStepModel_V002;
 import specman.model.v002.IfStepModel_V002;
 import specman.model.v002.SimpleStepModel_V002;
@@ -139,8 +140,12 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		editContainer.setId(number);
 
 		if (!oldStepNumber.equals(number)) {
-			for (TextEditArea textEditArea : referencedByTextEditAreas) {
-				textEditArea.updateStepnumberLink(oldStepNumber.toString(), number.toString());
+			// Link texts follow the step number by renumbering, which the structural undoables repeat on undo
+			// and redo. Recording the text edits as well would replay them before the renumbering.
+			try (UndoRecording ur = editor().pauseUndo()) {
+				for (TextEditArea textEditArea : referencedByTextEditAreas) {
+					textEditArea.updateStepnumberLink(oldStepNumber.toString(), number.toString());
+				}
 			}
       if (quellschritt != null) {
         quellschritt.resyncStepnumberStyleUDBL();
