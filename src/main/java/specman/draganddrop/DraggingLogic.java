@@ -71,7 +71,7 @@ public class DraggingLogic {
             return;
         }
         Component dropZone = target.dropZoneComponent();
-        Point origin = javax.swing.SwingUtilities.convertPoint(dropZone, new Point(0, 0), specman);
+        Point origin = javax.swing.SwingUtilities.convertPoint(dropZone, new Point(0, 0), specman.getWindowOrRootPane());
         Rectangle bounds = dropZone.getBounds();
         bounds.setLocation(origin);
 
@@ -86,8 +86,8 @@ public class DraggingLogic {
     private void showCaseBranchIndicator(GlassPane glassPane, ZweigSchrittSequenzView branch) {
         Component heading = branch.getUeberschrift();
         Component container = branch.getContainer();
-        Point headingOrigin = javax.swing.SwingUtilities.convertPoint(heading, new Point(0, 0), specman);
-        Point containerOrigin = javax.swing.SwingUtilities.convertPoint(container, new Point(0, 0), specman);
+        Point headingOrigin = javax.swing.SwingUtilities.convertPoint(heading, new Point(0, 0), specman.getWindowOrRootPane());
+        Point containerOrigin = javax.swing.SwingUtilities.convertPoint(container, new Point(0, 0), specman.getWindowOrRootPane());
         int x = containerOrigin.x + container.getWidth() - DropTargetFinder.DROP_ZONE_HEIGHT;
         int topY = headingOrigin.y + branch.dragIndicatorTopOffset();
         int bottomY = containerOrigin.y + container.getHeight();

@@ -149,7 +149,7 @@ public class DragMouseAdapter extends MouseAdapter {
             (Component) e.getSource(),
             (int) e.getPoint().getX(),
             (int) e.getPoint().getY() + yOffset,
-            specman
+            specman.getWindowOrRootPane()
         );
     }
 

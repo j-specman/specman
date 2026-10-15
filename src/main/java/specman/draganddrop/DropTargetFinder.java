@@ -80,7 +80,7 @@ public class DropTargetFinder {
         }
 
         LocalCursor localCursor = new LocalCursor(
-            SwingUtilities.convertPoint(specman, cursor, step.getPanel()), step.getPanel());
+            SwingUtilities.convertPoint(specman.getWindowOrRootPane(), cursor, step.getPanel()), step.getPanel());
         try {
             t = step.findDropTarget(localCursor, dragSource);
             if (t != null) {
@@ -149,7 +149,7 @@ public class DropTargetFinder {
     }
 
     private Rectangle boundsInSpecman(JComponent comp) {
-        Point origin = SwingUtilities.convertPoint(comp, 0, 0, specman);
+        Point origin = SwingUtilities.convertPoint(comp, 0, 0, specman.getWindowOrRootPane());
         Rectangle bounds = comp.getVisibleRect();
         bounds.setLocation(origin);
         return bounds;

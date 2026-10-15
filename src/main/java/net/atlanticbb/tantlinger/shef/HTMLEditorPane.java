@@ -4,17 +4,10 @@ import net.atlanticbb.tantlinger.i18n.I18n;
 import net.atlanticbb.tantlinger.ui.DefaultAction;
 import net.atlanticbb.tantlinger.ui.UIUtils;
 import net.atlanticbb.tantlinger.ui.text.CompoundUndoManager;
-import net.atlanticbb.tantlinger.ui.text.Entities;
 import net.atlanticbb.tantlinger.ui.text.HTMLUtils;
-import net.atlanticbb.tantlinger.ui.text.IndentationFilter;
-import net.atlanticbb.tantlinger.ui.text.SourceCodeEditor;
 import net.atlanticbb.tantlinger.ui.text.WysiwygHTMLEditorKit;
 import net.atlanticbb.tantlinger.ui.text.actions.*;
 import net.atlanticbb.tantlinger.ui.text.dialogs.SpecmanHTMLFontDialog.FontFamily;
-import novaworx.syntax.SyntaxFactory;
-import novaworx.textpane.SyntaxDocument;
-import novaworx.textpane.SyntaxGutter;
-import novaworx.textpane.SyntaxGutterBase;
 import org.bushe.swing.action.ActionList;
 import org.bushe.swing.action.ActionManager;
 import org.bushe.swing.action.ActionUIFactory;
@@ -29,17 +22,9 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingConstants;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
@@ -56,9 +41,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.Serial;
@@ -78,6 +60,17 @@ import java.util.Vector;
  *   <li>Differing functionality for the creation of tables, list items and images</li>
  *   <li>Recovery of markups on change of paragraph type</li>
  * </ul>
+ * The following parts of the original SHEF class have been removed on purpose:
+ * <ul>
+ *   <li>The HTML source editor tab (including syntax gutter, source popup menu and the
+ *   wysiwyg/source synchronization with its getText/setText), and the pane's own embedded
+ *   wysiwyg editor and popup menu. Specman never offers editing the HTML source, and the embedded
+ *   editors were never displayed, because Specman only uses this class for its menus, its format
+ *   toolbar and for {@link #instrumentWysEditor(JEditorPane, String, Integer)}.</li>
+ * </ul>
+ * The removal is important for headless testing: The source editor's {@code SyntaxTextPane} creates
+ * a custom cursor in its constructor, which throws a {@code HeadlessException}. With the source
+ * editor gone, this class can be constructed without a display.
  * The SHEF library in the project's local repository does not contain the class any more
  * to avoid selection of the wrong implementation in a Specman distribution jar.
  */
@@ -87,33 +80,21 @@ public class HTMLEditorPane extends JPanel
 
   private static final I18n i18n = I18n.getInstance("net.atlanticbb.tantlinger.shef");
 
-  private static final String INVALID_TAGS[] = {"html", "head", "body", "title"};
-
-  private JEditorPane wysEditor;
-  private SourceCodeEditor srcEditor;
   private JEditorPane focusedEditor;
   private JComboBox fontFamilyCombo;
   private JComboBox paragraphCombo;
-  private JTabbedPane tabs;
-  //private JMenuBar menuBar;
   private JToolBar formatToolBar;
 
   private JMenu editMenu;
   private JMenu formatMenu;
   private JMenu insertMenu;
 
-  private JPopupMenu wysPopupMenu, srcPopupMenu;
-
   private ActionList actionList;
 
   private FocusListener focusHandler = new FocusHandler();
-  private DocumentListener textChangedHandler = new TextChangedHandler();
   private ActionListener fontChangeHandler = new FontChangeHandler();
   private ActionListener paragraphComboHandler = new ParagraphComboHandler();
   private CaretListener caretHandler = new CaretHandler();
-  private MouseListener popupHandler = new PopupHandler();
-
-  private boolean isWysTextChanged;
 
   private UndoManager centralUndoManager;
 
@@ -126,12 +107,9 @@ public class HTMLEditorPane extends JPanel
 
   private void initUI()
   {
-    createEditorTabs();
     createEditorActions();
     setLayout(new BorderLayout());
     add(formatToolBar, BorderLayout.NORTH);
-    add(tabs, BorderLayout.CENTER);
-
   }
 
   public JToolBar getFormatToolBar() {
@@ -162,12 +140,6 @@ public class HTMLEditorPane extends JPanel
     ActionList fontSizeActions = new ActionList("fontSizeActions");
     ActionList editActions = HTMLEditorActionFactory.createEditActionList();
     Action objectPropertiesAction = new HTMLElementPropertiesAction();
-
-    //create editor popupmenus
-    wysPopupMenu = ActionUIFactory.getInstance().createPopupMenu(editActions);
-    wysPopupMenu.addSeparator();
-    wysPopupMenu.add(objectPropertiesAction);
-    srcPopupMenu = ActionUIFactory.getInstance().createPopupMenu(editActions);
 
     // create file menu
     JMenu fileMenu = new JMenu(i18n.str("file"));
@@ -435,59 +407,6 @@ public class HTMLEditorPane extends JPanel
     return m;
   }
 
-  private void createEditorTabs()
-  {
-    tabs = new JTabbedPane(SwingConstants.BOTTOM);
-    wysEditor = createWysiwygEditor();
-    srcEditor = createSourceEditor();
-
-    tabs.addTab("Edit", new JScrollPane(wysEditor));
-
-    JScrollPane scrollPane = new JScrollPane(srcEditor);
-    SyntaxGutter gutter = new SyntaxGutter(srcEditor);
-    SyntaxGutterBase gutterBase = new SyntaxGutterBase(gutter);
-    scrollPane.setRowHeaderView(gutter);
-    scrollPane.setCorner(ScrollPaneConstants.LOWER_LEFT_CORNER, gutterBase);
-
-    tabs.addTab("HTML", scrollPane);
-    tabs.addChangeListener(new ChangeListener()
-    {
-      public void stateChanged(ChangeEvent e)
-      {
-        updateEditView();
-      }
-    });
-  }
-
-  private SourceCodeEditor createSourceEditor()
-  {
-    SourceCodeEditor ed = new SourceCodeEditor();
-    SyntaxDocument doc = new SyntaxDocument();
-    doc.setSyntax(SyntaxFactory.getSyntax("html"));
-    CompoundUndoManager cuh = new CompoundUndoManager(doc, new UndoManager());
-
-    doc.addUndoableEditListener(cuh);
-    doc.setDocumentFilter(new IndentationFilter());
-    doc.addDocumentListener(textChangedHandler);
-    ed.setDocument(doc);
-    ed.addFocusListener(focusHandler);
-    ed.addCaretListener(caretHandler);
-    ed.addMouseListener(popupHandler);
-
-    return ed;
-  }
-
-  private JEditorPane createWysiwygEditor()
-  {
-    JEditorPane ed = new JEditorPane();
-    instrumentWysEditor(ed);
-    return ed;
-  }
-
-  public void instrumentWysEditor(JEditorPane ed) {
-    this.instrumentWysEditor(ed, (String)null, 0);
-  }
-
   public void instrumentWysEditor(JEditorPane ed, String initialText, Integer orientation) {
     ed.setEditorKit(new WysiwygHTMLEditorKit());
     //styleSheet.addRule("body { background-color: #ccc; font-family: Times, serif; }");
@@ -501,11 +420,9 @@ public class HTMLEditorPane extends JPanel
     this.insertHTML(ed, initialText, 0);
     ed.addCaretListener(this.caretHandler);
     ed.addFocusListener(this.focusHandler);
-    ed.addMouseListener(this.popupHandler);
     HTMLDocument document = (HTMLDocument)ed.getDocument();
     CompoundUndoManager cuh = new CompoundUndoManager(document, this.centralUndoManager != null ? this.centralUndoManager : new UndoManager());
     document.addUndoableEditListener(cuh);
-    document.addDocumentListener(this.textChangedHandler);
   }
 
   private String formatInitialText(String initialText, int orientation) {
@@ -539,133 +456,8 @@ public class HTMLEditorPane extends JPanel
     }
   }
 
-  // called when changing tabs
-  private void updateEditView()
-  {
-    if(tabs.getSelectedIndex() == 0)
-    {
-      String topText = removeInvalidTags(srcEditor.getText());
-      wysEditor.setText("");
-      insertHTML(wysEditor, topText, 0);
-      CompoundUndoManager.discardAllEdits(wysEditor.getDocument());
-
-    }
-    else
-    {
-      String topText = removeInvalidTags(wysEditor.getText());
-      if(isWysTextChanged || srcEditor.getText().equals(""))
-      {
-        String t = deIndent(removeInvalidTags(topText));
-        t = Entities.HTML40.unescapeUnknownEntities(t);
-        srcEditor.setText(t);
-      }
-      CompoundUndoManager.discardAllEdits(srcEditor.getDocument());
-    }
-
-    isWysTextChanged = false;
-    paragraphCombo.setEnabled(tabs.getSelectedIndex() == 0);
-    fontFamilyCombo.setEnabled(tabs.getSelectedIndex() == 0);
-    updateState();
-  }
-
-  public void setText(String text)
-  {
-    String topText = removeInvalidTags(text);
-
-    if(tabs.getSelectedIndex() == 0)
-    {
-
-      wysEditor.setText("");
-      insertHTML(wysEditor, topText, 0);
-      CompoundUndoManager.discardAllEdits(wysEditor.getDocument());
-
-    }
-    else
-    {
-      {
-        String t = deIndent(removeInvalidTags(topText));
-        t = Entities.HTML40.unescapeUnknownEntities(t);
-        srcEditor.setText(t);
-      }
-      CompoundUndoManager.discardAllEdits(srcEditor.getDocument());
-    }
-  }
-
-  public String getText()
-  {
-    String topText;
-    if(tabs.getSelectedIndex() == 0)
-    {
-      topText = removeInvalidTags(wysEditor.getText());
-
-    }
-    else
-    {
-      topText = removeInvalidTags(srcEditor.getText());
-      topText = deIndent(removeInvalidTags(topText));
-      topText = Entities.HTML40.unescapeUnknownEntities(topText);
-    }
-
-    return topText;
-  }
-
-
-  /* *******************************************************************
-   *  Methods for dealing with HTML between wysiwyg and source editors
-   * ******************************************************************/
-  private String deIndent(String html)
-  {
-    String ws = "\n    ";
-    StringBuffer sb = new StringBuffer(html);
-
-    while(sb.indexOf(ws) != -1)
-    {
-      int s = sb.indexOf(ws);
-      int e = s + ws.length();
-      sb.delete(s, e);
-      sb.insert(s, "\n");
-    }
-
-    return sb.toString();
-  }
-
-  private String removeInvalidTags(String html)
-  {
-    for(int i = 0; i < INVALID_TAGS.length; i++)
-    {
-      html = deleteOccurance(html, '<' + INVALID_TAGS[i] + '>');
-      html = deleteOccurance(html, "</" + INVALID_TAGS[i] + '>');
-    }
-
-    return html.trim();
-  }
-
-  private String deleteOccurance(String text, String word)
-  {
-    //if(text == null)return "";
-    StringBuffer sb = new StringBuffer(text);
-    int p;
-    while((p = sb.toString().toLowerCase().indexOf(word.toLowerCase())) != -1)
-    {
-      sb.delete(p, p + word.length());
-    }
-    return sb.toString();
-  }
-  /* ************************************* */
-
   private void updateState()
   {
-    if(focusedEditor == wysEditor)
-    {
-      fontFamilyCombo.removeActionListener(fontChangeHandler);
-      String fontName = HTMLUtils.getFontFamily(wysEditor);
-      if(fontName == null)
-        fontFamilyCombo.setSelectedIndex(0);
-      else
-        fontFamilyCombo.setSelectedItem(fontName);
-      fontFamilyCombo.addActionListener(fontChangeHandler);
-    }
-
     actionList.putContextValueForAll(HTMLTextEditAction.EDITOR, focusedEditor);
     actionList.updateEnabledForAll();
   }
@@ -679,30 +471,6 @@ public class HTMLEditorPane extends JPanel
     public void caretUpdate(CaretEvent e)
     {
       updateState();
-    }
-  }
-
-  private class PopupHandler extends MouseAdapter
-  {
-    public void mousePressed(MouseEvent e)
-    { checkForPopupTrigger(e); }
-
-    public void mouseReleased(MouseEvent e)
-    { checkForPopupTrigger(e); }
-
-    private void checkForPopupTrigger(MouseEvent e)
-    {
-      if(e.isPopupTrigger())
-      {
-        JPopupMenu p = null;
-        if(e.getSource() == wysEditor)
-          p =  wysPopupMenu;
-        else if(e.getSource() == srcEditor)
-          p = srcPopupMenu;
-        else
-          return;
-        p.show(e.getComponent(), e.getX(), e.getY());
-      }
     }
   }
 
@@ -729,30 +497,6 @@ public class HTMLEditorPane extends JPanel
         //focusedEditor = null;
         //wysiwygUpdated();
       }
-    }
-  }
-
-  private class TextChangedHandler implements DocumentListener
-  {
-    public void insertUpdate(DocumentEvent e)
-    {
-      textChanged();
-    }
-
-    public void removeUpdate(DocumentEvent e)
-    {
-      textChanged();
-    }
-
-    public void changedUpdate(DocumentEvent e)
-    {
-      textChanged();
-    }
-
-    private void textChanged()
-    {
-      if(tabs.getSelectedIndex() == 0)
-        isWysTextChanged = true;
     }
   }
 

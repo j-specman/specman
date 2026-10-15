@@ -17,12 +17,12 @@ public class ToastNotification {
     private static final float OPACITY = 0.7f;
 
     /** Toast with just the message, for plain feedback that has nothing more to tell. */
-    public static void show(JFrame parent, String brief) {
+    public static void show(Frame parent, String brief) {
         show(parent, brief, null);
     }
 
     /** @param detail text of the modal dialog behind a "Details" button, null for a toast without such button */
-    public static void show(JFrame parent, String brief, String detail) {
+    public static void show(Frame parent, String brief, String detail) {
         JWindow toast = new JWindow(parent);
         if (GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
             .isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT)) {
@@ -57,7 +57,7 @@ public class ToastNotification {
         dismissTimer.start();
     }
 
-    private static JPanel createDetailsPanel(JWindow toast, JFrame parent, String detail) {
+    private static JPanel createDetailsPanel(JWindow toast, Frame parent, String detail) {
         JButton detailsBtn = new IButton("button.details");
         detailsBtn.setFocusPainted(false);
         detailsBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -73,7 +73,7 @@ public class ToastNotification {
         return btnPanel;
     }
 
-    private static void positionToast(JWindow toast, JFrame parent) {
+    private static void positionToast(JWindow toast, Frame parent) {
         Rectangle bounds = parent.getBounds();
         int x = bounds.x + bounds.width - toast.getWidth() - 16;
         int y = bounds.y + bounds.height - toast.getHeight() - 48;

@@ -37,8 +37,7 @@ import javax.swing.text.JTextComponent;
 import javax.swing.undo.UndoableEdit;
 import java.awt.*;
 import java.awt.event.FocusEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -48,14 +47,13 @@ import java.util.Set;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.i18n.Messages.i18n;
 
-public class Specman extends JFrame implements EditorI, SpaltenContainerI, SpecmanOpContext {
+public class Specman extends JRootPane implements EditorI, SpaltenContainerI, SpecmanOpContext {
 	private static final BasicStroke GESTRICHELTE_LINIE =
 			new BasicStroke(1.0f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND, 1.0f, new float[] {10.0f, 10.0f }, 0f);
 	public static String SPECMAN_TITLE = "Specman " + SpecmanVersion.getVersion();
 
 	TextEditArea lastFocusedTextArea;
 	private SchrittSequenzView hauptSequenz;
-	JPanel contentPane;
 	WorkingAreaPanel arbeitsbereich;
 	JPanel hauptSequenzContainer;
 	SpaltenResizer breitenAnpasser;
@@ -71,7 +69,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	private DiagramToolBar diagramToolBar;
 	private StepButtonBar stepButtonBar;
-	private SpecmanMenuBar menuBar;
+	private SpecmanMenuBar specmanMenuBar;
 
 	private KeyboardSpecmanOp keyboardOp;
 	private final ExportPDFSpecmanOp exportPDFOp = new ExportPDFSpecmanOp(this);
@@ -81,11 +79,19 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	private static Specman instance;
 	public final String instanceId = java.util.UUID.randomUUID().toString();
 
+	/** The window hosting Specman as its root pane. Null as long as Specman is not shown in a window, e.g. headless. */
+	private SpecmanFrame frame;
+	private String title = SPECMAN_TITLE;
+	/** The former JFrame's default component name. It is persisted in existing diagram files. */
+	private String diagrammName = "frame0";
+
+	/**
+	 * Specman is the root pane of the application window. It can be handed over to a {@link SpecmanFrame},
+	 * but it can also live without one (headless tests). Everything related to the window itself is done
+	 * by the {@link SpecmanFrame}.
+	 */
 	public Specman(File fileToOpen) throws Exception {
 		instance = this;
-		setApplicationIcon();
-		setTitle(SPECMAN_TITLE);
-
 		undoManager = new SpecmanUndoManager(this);
 
 		initComponents();
@@ -102,18 +108,63 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 		initEmptyDiagram();
 
-		setInitialWindowSizeAndScreenCenteredLocation();
-		setVisible(true);
-		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-		this.setGlassPane(new GlassPane(SwingUtilities.convertPoint(contentPane, 0, 0,this).y, getJMenuBar().getHeight()));
-
 		configureKeyboardManager();
-		setupQuestionDialogWhenClosingWithoutSaving();
 
 		openInitialFile(fileToOpen);
     autoSave = new AutoSaveOp(this);
     autoLoad = new AutoLoadOp(this, autoSave);
+	}
+
+	/** Called by the {@link SpecmanFrame} when Specman is shown in it. */
+	void attachFrame(SpecmanFrame frame) {
+		this.frame = frame;
+		frame.setTitle(title);
+	}
+
+	/**
+	 * The GlassPane's offset calibration refers to the window's coordinate space, so it can only be
+	 * installed once the window is visible. It is needed for dragging only.
+	 */
+	void installGlassPane() {
+		setGlassPane(new GlassPane(
+			SwingUtilities.convertPoint(contentPane, 0, 0, getWindowOrRootPane()).y,
+			getJMenuBar().getHeight()));
+	}
+
+	/** The reference component for coordinates used by the drag and drop logic: the window if there is any. */
+	public Container getWindowOrRootPane() {
+		Window window = SwingUtilities.getWindowAncestor(this);
+		return window != null ? window : this;
+	}
+
+	public Frame getFrame() {
+		return frame;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+		if (frame != null) {
+			frame.setTitle(title);
+		}
+	}
+
+	/**
+	 * Called when the user wants to close the window.
+	 * @return true if the application may be terminated, false if the user cancelled because of unsaved changes
+	 */
+	boolean confirmClose() {
+		if (undoManager.hasUnsavedChanges()) {
+			if (!AbstractInitSpecmanOp.confirmDiscardUnsavedChanges(
+					getDiagramFilename(), () -> diagrammSpeichern(false))) {
+				return false;
+			}
+		}
+		AutoSaveOp.deleteWorkingCopyFor(diagrammDatei);
+		return true;
 	}
 
   private void openInitialFile(File fileToOpen) {
@@ -124,16 +175,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 			// vollständig aufgebaut ist, wird der Export Murks (abgeschnittene Texte, zu kleine Boxen...)
 			SwingUtilities.invokeLater(() -> diagrammLaden(fileToOpen));
 		}
-	}
-
-	private void setInitialWindowSizeAndScreenCenteredLocation() {
-		setSize(1100, 700);
-		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		int w = this.getSize().width;
-		int h = this.getSize().height;
-		int x = (dim.width-w)/2;
-		int y = (dim.height-h)/2;
-		this.setLocation(x, y);
 	}
 
 	@Override
@@ -168,28 +209,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		if (arbeitsbereich.dropWelcomeMessage()) {
 			hauptSequenzInitialisieren();
 		}
-	}
-
-	private void setApplicationIcon() {
-		setIconImage(IconReader.readImageIcon("specman").getImage());
-	}
-
-	private void setupQuestionDialogWhenClosingWithoutSaving() {
-		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				if (undoManager.hasUnsavedChanges()) {
-					if (!AbstractInitSpecmanOp.confirmDiscardUnsavedChanges(
-							getDiagramFilename(), () -> diagrammSpeichern(false))) {
-						return;
-					}
-				}
-				AutoSaveOp.deleteWorkingCopyFor(diagrammDatei);
-				dispose();
-				System.exit(0);
-			}
-		});
 	}
 
 	private String getDiagramFilename() {
@@ -277,7 +296,7 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	@Override
 	public String getDiagrammName() {
-		return getName();
+		return diagrammName;
 	}
 
 	@Override
@@ -296,12 +315,16 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	@Override
 	public void showToast(String message) {
-		SwingUtilities.invokeLater(() -> ToastNotification.show(this, message));
+		if (frame != null) {
+			SwingUtilities.invokeLater(() -> ToastNotification.show(frame, message));
+		}
 	}
 
 	@Override
 	public void showToast(String briefMessage, String detailMessage) {
-		SwingUtilities.invokeLater(() -> ToastNotification.show(this, briefMessage, detailMessage));
+		if (frame != null) {
+			SwingUtilities.invokeLater(() -> ToastNotification.show(frame, briefMessage, detailMessage));
+		}
 	}
 
   @Override
@@ -385,12 +408,13 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 			// event does, because that's the only thing that reliably retriggers every affected
 			// component's own componentResized() handling. So we synthesize one here too: nudge
 			// the window size by 1px, restored together with the diagrammbreite nudge below.
-			Dimension size = getSize();
-			setSize(size.width + 1, size.height);
+			Container window = getWindowOrRootPane();
+			Dimension size = window.getSize();
+			window.setSize(size.width + 1, size.height);
 			final Point viewPosition = scrollPane.getViewport().getViewPosition();
 			SwingUtilities.invokeLater(() -> {
 				diagrammbreiteSetzen(diagrammbreite);
-				setSize(size.width, size.height);
+				window.setSize(size.width, size.height);
 				hauptSequenzContainer.setVisible(true);
 				if (editArea != null) {
 					editArea.requestFocus();
@@ -434,7 +458,9 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	@Override
 	public Image createDiagramImage(int width, int height) {
-		return createImage(width, height);
+		// A lightweight root pane delegates to its window, without a window the result is null
+		Image image = createImage(width, height);
+		return image != null ? image : new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 	}
 
 	public void newStepPostInit(AbstractSchrittView newStep) {
@@ -455,8 +481,6 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 		contentPane.add(diagramToolBar, CC.xywh(1, 1, 2, 1));
 		contentPane.add(stepButtonBar, CC.xy(1, 3));
-		pack();
-		setLocationRelativeTo(getOwner());
 	}
 
 	HTMLEditorPane shefEditorPane;
@@ -469,8 +493,8 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
   private void initShefController() throws Exception {
 		shefEditorPane = new HTMLEditorPane(undoManager);
-		menuBar = new SpecmanMenuBar(this, shefEditorPane);
-		setJMenuBar(menuBar);
+		specmanMenuBar = new SpecmanMenuBar(this, shefEditorPane);
+		setJMenuBar(specmanMenuBar);
 		contentPane.add(shefEditorPane.getFormatToolBar(), CC.xywh(1, 2, 2, 1));
 	}
 
@@ -493,17 +517,17 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 	public void updateChangeSet(ChangeSet changeSet) {
 		currentChangeSet = changeSet;
 		diagramToolBar.updateChangeSet(changeSet);
-		menuBar.updateChangeSet(changeSet);
+		specmanMenuBar.updateChangeSet(changeSet);
 	}
 
 	@Override
 	public void addRecentFile(File file) {
-		menuBar.addRecentFile(file);
+		specmanMenuBar.addRecentFile(file);
 	}
 
 	@Override
 	public void setDiagrammName(String name) {
-		setName(name);
+		this.diagrammName = name;
 	}
 
 	@Override
@@ -553,7 +577,9 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 		File initialFileToOpen = readFileFromArgs(args);
 		SwingUtilities.invokeAndWait(() -> {
 			try {
-				new Specman(initialFileToOpen);
+				SpecmanFrame frame = new SpecmanFrame();
+				Specman specman = new Specman(initialFileToOpen);
+				frame.open(specman);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -580,7 +606,10 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
 	@Override
 	public void exit() {
-		dispatchEvent(new java.awt.event.WindowEvent(this, java.awt.event.WindowEvent.WINDOW_CLOSING));
+		Window window = SwingUtilities.getWindowAncestor(this);
+		if (window != null) {
+			window.dispatchEvent(new java.awt.event.WindowEvent(window, java.awt.event.WindowEvent.WINDOW_CLOSING));
+		}
 	}
 
 	@Override
@@ -594,12 +623,12 @@ public class Specman extends JFrame implements EditorI, SpaltenContainerI, Specm
 
   @Override
   public void openSettings() {
-    new SettingsDialog(this).setVisible(true);
+    new SettingsDialog(frame).setVisible(true);
   }
 
   @Override
   public void openMetaTagConfigs() {
-    new MetaTagConfigsDialog(this, metaTagConfigs, queryMetaTagConfigsInUse()).setVisible(true);
+    new MetaTagConfigsDialog(frame, metaTagConfigs, queryMetaTagConfigsInUse()).setVisible(true);
   }
 
   @Override
