@@ -10,12 +10,14 @@ import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
+import experiments.NoSuiteTest;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+@NoSuiteTest
 public class ITextPageTest {
   @Test
   void testCustomSizePages() throws Exception {

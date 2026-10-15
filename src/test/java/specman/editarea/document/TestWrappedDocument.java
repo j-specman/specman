@@ -1,5 +1,9 @@
 package specman.editarea.document;
 
+import specman.editarea.document.WrappedBadLocationException;
+import specman.editarea.document.WrappedDocumentI;
+import specman.editarea.document.WrappedPosition;
+
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 

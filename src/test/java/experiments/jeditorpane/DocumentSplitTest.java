@@ -1,11 +1,13 @@
 package experiments.jeditorpane;
 
 import com.jgoodies.forms.factories.CC;
+import experiments.NoSuiteTest;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.*;
 import javax.swing.text.Document;
 
+@NoSuiteTest
 public class DocumentSplitTest {
 
   @Test

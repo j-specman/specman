@@ -1,10 +1,12 @@
 package experiments.asciidoc;
 
 import org.asciidoctor.Asciidoctor;
+import experiments.NoSuiteTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
+@NoSuiteTest
 public class AsciidocTest {
 
   @Test

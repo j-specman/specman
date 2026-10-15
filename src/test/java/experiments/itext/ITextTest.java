@@ -12,6 +12,7 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
+import experiments.NoSuiteTest;
 import org.junit.jupiter.api.Test;
 
 import javax.imageio.ImageIO;
@@ -23,6 +24,7 @@ import java.io.File;
 /**
  *  Simple examples taken from https://www.tutorialspoint.com/itext/itext_drawing_line.htm
  */
+@NoSuiteTest
 public class ITextTest {
 
   @Test

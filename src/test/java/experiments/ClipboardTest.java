@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
+@NoSuiteTest
 public class ClipboardTest {
 
   @Test

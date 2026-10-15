@@ -1,7 +1,8 @@
-package jackson;
+package experiments.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
+import experiments.NoSuiteTest;
 import org.junit.jupiter.api.Test;
 import specman.StepNumber;
 import specman.model.ModelEnvelope;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static specman.view.RoundedBorderDecorationStyle.None;
 
+@NoSuiteTest
 public class JacksonTest {
 
 	@Test

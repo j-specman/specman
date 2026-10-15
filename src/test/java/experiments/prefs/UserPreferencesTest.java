@@ -1,5 +1,6 @@
-package prefs;
+package experiments.prefs;
 
+import experiments.NoSuiteTest;
 import org.junit.jupiter.api.Test;
 import specman.Specman;
 
@@ -7,6 +8,7 @@ import java.util.prefs.Preferences;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@NoSuiteTest
 public class UserPreferencesTest {
 
     @Test
