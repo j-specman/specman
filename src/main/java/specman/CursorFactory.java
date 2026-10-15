@@ -19,8 +19,8 @@ public class CursorFactory {
   }
 
   public static Cursor createCursor(String baseImageName, HotspotPlacement hotspotPlacement) {
-    Dimension bestCursorSize = Toolkit.getDefaultToolkit().getBestCursorSize(0, 0);
     try {
+      Dimension bestCursorSize = Toolkit.getDefaultToolkit().getBestCursorSize(0, 0);
       ImageIcon icon = IconReader.readImageIcon(baseImageName);
       if (icon.getIconWidth() > bestCursorSize.width || icon.getIconHeight() > bestCursorSize.height) {
         icon = IconReader.readImageIcon(baseImageName + "-32");

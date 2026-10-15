@@ -21,7 +21,7 @@ public class DragMouseAdapter extends MouseAdapter {
     private final Specman specman;
     private final StepButtonBar stepButtonBar;
     private final DraggingLogic draggingLogic;
-    private final JWindow floatingStepWindow = new JWindow();
+    private JWindow floatingStepWindow;
     private JTextField floatingLabel;
 
     public DragMouseAdapter(Specman specman, StepButtonBar stepButtonBar) {
@@ -50,10 +50,11 @@ public class DragMouseAdapter extends MouseAdapter {
         }
         try {
             Point cursor = toCursorInSpecman(e);
-            floatingStepWindow.add(floatingLabel);
-            floatingStepWindow.pack();
-            floatingStepWindow.setLocation(toScreenPoint(e));
-            floatingStepWindow.setVisible(true);
+            JWindow window = lazyInitFloatingStepWindow();
+            window.add(floatingLabel);
+            window.pack();
+            window.setLocation(toScreenPoint(e));
+            window.setVisible(true);
             draggingLogic.onDrag(cursor, toDragSource(e));
         }
         catch (EditException ex) {
@@ -71,8 +72,9 @@ public class DragMouseAdapter extends MouseAdapter {
             return;
         }
         try {
-            floatingStepWindow.setVisible(false);
-            floatingStepWindow.remove(floatingLabel);
+            JWindow window = lazyInitFloatingStepWindow();
+            window.setVisible(false);
+            window.remove(floatingLabel);
             Point cursor = toCursorInSpecman(e, -2);
             draggingLogic.onDrop(cursor, toDragSource(e));
         }
@@ -106,6 +108,14 @@ public class DragMouseAdapter extends MouseAdapter {
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         specman.getGlassPane().setVisible(false);
+    }
+
+    /** The window is created on first use, because a JWindow cannot be created headless. */
+    private JWindow lazyInitFloatingStepWindow() {
+        if (floatingStepWindow == null) {
+            floatingStepWindow = new JWindow();
+        }
+        return floatingStepWindow;
     }
 
     private DragSource toDragSource(MouseEvent e) {

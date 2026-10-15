@@ -1,10 +1,7 @@
 package experiments.headless;
 
-import specman.ChangeInfo;
-import specman.ChangeSet;
 import specman.EditorI;
 import specman.Specman;
-import specman.draganddrop.DragMouseAdapter;
 import specman.editarea.EditArea;
 import specman.editarea.TextEditArea;
 import specman.model.v002.DiagramModel_V002;
@@ -14,14 +11,12 @@ import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
 
-import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.border.Border;
 import javax.swing.border.MatteBorder;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,64 +26,19 @@ import java.util.Map;
  * Throwaway spike: can Specman's real view layer be built and operated headless?
  * Run with -Djava.awt.headless=true. NOT a test, NOT part of the suite (has a main only).
  *
- * Seam used instead of main-code changes: sun.misc.Unsafe.allocateInstance() creates a
- * Specman subclass instance WITHOUT running the JFrame constructor chain (which would throw
- * HeadlessException), then the static Specman.instance is set reflectively.
+ * The result is: yes, with the real, unmodified Specman. Specman is a JRootPane, so it can be
+ * instantiated without its SpecmanFrame. No stub subclass, no Unsafe, no reflection: the real
+ * toolbars, menus, HTMLEditorPane with all its listeners, drag adapters and the real undo manager
+ * are in place. Only the Specman constructor is called.
  */
 public class HeadlessViewSpike {
 
-  /** Never constructed normally - only via Unsafe.allocateInstance. Field initializers of
-   * Specman/JFrame do not run, so everything the views touch must be overridden here. */
-  public static class StubSpecman extends Specman {
-    String title = "stub";
-    boolean changeTracking = true;
-
-    StubSpecman() throws Exception { super(null); }
-
-    @Override public String getTitle() { return title; }
-    @Override public void setTitle(String t) { title = t; }
-    @Override public int getZoomFactor() { return 100; }
-    @Override public double scale(double length) { return length; }
-    @Override public boolean aenderungenVerfolgen() { return changeTracking; }
-    @Override public ChangeSet changeset() { return ChangeSet.DEFAULT; }
-    @Override public void diagrammAktualisieren(EditArea editArea) { }
-    @Override public void appendToEditHistory(specman.editarea.EditContainer c) { }
-    @Override public void setLastFocusedTextArea(TextEditArea area) { }
-    @Override public DragMouseAdapter createDragMouseAdapter() { return null; /* real adapter creates a JWindow -> HeadlessException; addMouseListener(null) is a no-op */ }
-    @Override public List<specman.metatag.generic.config.MetaTagConfig> metaTagConfigs() { return List.of(); }
-    @Override public specman.metatag.generic.config.MetaTagConfig findMetaTagConfig(String n) { return null; }
-    @Override public void addMetaTagConfigListener(specman.metatag.generic.config.MetaTagConfigListener l) { }
-    @Override public void removeMetaTagConfigListener(specman.metatag.generic.config.MetaTagConfigListener l) { }
-    @Override public void instrumentWysEditor(JEditorPane ed, String initialText, Integer orientation) {
-      // Core of HTMLEditorPane.instrumentWysEditor without its listeners/undo wiring.
-      // The real HTMLEditorPane can't be constructed headless (SyntaxTextPane.createCustomCursor).
-      ed.setEditorKit(new net.atlanticbb.tantlinger.ui.text.WysiwygHTMLEditorKit());
-      ed.setContentType("text/html");
-      ed.setText(initialText == null ? "<p></p>" : initialText);
-      javax.swing.text.html.HTMLDocument document = (javax.swing.text.html.HTMLDocument) ed.getDocument();
-      document.addUndoableEditListener(
-        new net.atlanticbb.tantlinger.ui.text.CompoundUndoManager(document, getUndoManager()));
-    }
+  static Specman installSpecman() throws Exception {
+    Specman specman = new Specman(null);
+    specman.setChangeModeEnabled(true);
+    return specman;
   }
 
-  static StubSpecman installStubEditor() throws Exception {
-    Field unsafeField = Class.forName("sun.misc.Unsafe").getDeclaredField("theUnsafe");
-    unsafeField.setAccessible(true);
-    sun.misc.Unsafe unsafe = (sun.misc.Unsafe) unsafeField.get(null);
-    StubSpecman stub = (StubSpecman) unsafe.allocateInstance(StubSpecman.class);
-    // allocateInstance skips field initializers, too
-    stub.title = "stub";
-    stub.changeTracking = true;
-
-    Field undoField = Specman.class.getDeclaredField("undoManager");
-    undoField.setAccessible(true);
-    undoField.set(stub, new SpecmanUndoManager(stub));
-
-    Field instanceField = Specman.class.getDeclaredField("instance");
-    instanceField.setAccessible(true);
-    instanceField.set(null, stub);
-    return stub;
-  }
 
   // ---- structural snapshot (properties only, no geometry) ----
 
@@ -194,8 +144,8 @@ public class HeadlessViewSpike {
     // java.awt.headless is controlled from the command line (-Djava.awt.headless=true|false)
     System.out.println("headless=" + java.awt.GraphicsEnvironment.isHeadless());
 
-    StubSpecman stub = installStubEditor();
-    System.out.println("[1] stub editor installed: " + (Specman.editor() == stub));
+    Specman specman = installSpecman();
+    System.out.println("[1] real Specman instantiated headless, no stub: " + (Specman.editor() == specman));
 
     boolean plain = args.length > 0 && args[0].equals("plain");
     DiagramModel_V002 model = new ModelParser_V002().parse(plain ? FIXTURE_PLAIN : FIXTURE);
@@ -204,7 +154,7 @@ public class HeadlessViewSpike {
     SchrittSequenzView main = new SchrittSequenzView(null, model.mainSequence);
     main.renummerieren();
     main.viewsNachinitialisieren();
-    stub.getUndoManager().discardAllEdits(); // like LoadDiagrammSpecmanOp.applyEnvelope
+    specman.getUndoManager().discardAllEdits(); // like LoadDiagrammSpecmanOp.applyEnvelope
     System.out.println("[3] views built, steps=" + main.listSteps().size());
 
     AbstractSchrittView step1 = main.listSteps().get(0);
@@ -219,7 +169,7 @@ public class HeadlessViewSpike {
     System.out.println("[5] step marked deleted, snapshot differs from before: " + !diff(before, marked).isEmpty()
       + " (" + diff(before, marked).size() + " diffs)");
 
-    SpecmanUndoManager undo = stub.getUndoManager();
+    SpecmanUndoManager undo = specman.getUndoManager();
     System.out.println("    canUndo=" + undo.canUndo());
     undo.undo();
     Map<String, String> afterUndo = snapshot(main);

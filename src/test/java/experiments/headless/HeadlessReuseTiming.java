@@ -36,7 +36,7 @@ public class HeadlessReuseTiming {
   }
 
   /** One complete small test: load, mark first step deleted, undo, redo. Returns diff count of the marking. */
-  static int oneTest(HeadlessViewSpike.StubSpecman stub, String fixture) throws Exception {
+  static int oneTest(Specman stub, String fixture) throws Exception {
     DiagramModel_V002 model = new ModelParser_V002().parse(fixture);
     SchrittSequenzView main = new SchrittSequenzView(null, model.mainSequence);
     main.renummerieren();
@@ -61,10 +61,10 @@ public class HeadlessReuseTiming {
   }
 
   static void measure(String label, boolean reuse, String fixture) throws Exception {
-    HeadlessViewSpike.StubSpecman shared = HeadlessViewSpike.installStubEditor();
+    Specman shared = HeadlessViewSpike.installSpecman();
     // warm-up
     for (int i = 0; i < 100; i++) {
-      oneTest(reuse ? shared : HeadlessViewSpike.installStubEditor(), fixture);
+      oneTest(reuse ? shared : HeadlessViewSpike.installSpecman(), fixture);
     }
     double[] ms = new double[RUNS];
     int markedDiffs = -1;
@@ -72,7 +72,7 @@ public class HeadlessReuseTiming {
     long totalStart = System.nanoTime();
     for (int i = 0; i < RUNS; i++) {
       long t0 = System.nanoTime();
-      int diffs = oneTest(reuse ? shared : HeadlessViewSpike.installStubEditor(), fixture);
+      int diffs = oneTest(reuse ? shared : HeadlessViewSpike.installSpecman(), fixture);
       ms[i] = (System.nanoTime() - t0) / 1e6;
       if (markedDiffs < 0) {
         markedDiffs = diffs;

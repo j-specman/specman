@@ -12,7 +12,7 @@ public class HeadlessStartupTiming {
     System.out.println("headless=" + java.awt.GraphicsEnvironment.isHeadless() + ", fixture=" + (plain ? "plain" : "with table"));
     for (int i = 0; i < runs; i++) {
       long t0 = System.nanoTime();
-      HeadlessViewSpike.StubSpecman stub = HeadlessViewSpike.installStubEditor();
+      Specman stub = HeadlessViewSpike.installSpecman();
       long t1 = System.nanoTime();
       DiagramModel_V002 model = new ModelParser_V002().parse(plain ? HeadlessViewSpike.FIXTURE_PLAIN : HeadlessViewSpike.FIXTURE);
       long t2 = System.nanoTime();
