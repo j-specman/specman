@@ -17,6 +17,9 @@ Aus aktueller Anwendung
 
 Rechtschreibprüfung
 - Ist einer der Punkte, die wirklich als Verlust gegenüber Word als Spezifikationstool auffallen
+- Erster Spike auf Basis LanguageTool (LGPL-Lizenz) sieht vielversprechend aus. Siehe SpellcheckExperiment
+- Man kann unterschiedliche Kategorien von Fehlern (Grammatik, Rechtschreibung, Stil) ein- und ausschalten.
+   Das ist interessant für Spezifikationen mit unterschiedlichen Stilen: Ganze Sätze vs. Kurzform
 
 Meta Tags (Release 1.4.0)
 x Meta Tag Panel für Aufnahme von Schrittlabel, Klappbutton und Meta Tags
