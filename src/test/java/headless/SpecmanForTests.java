@@ -74,44 +74,22 @@ public class SpecmanForTests extends Specman {
     return null;
   }
 
-  @Override
-  protected void initAutoSaveAndLoad() {
-  }
-
-  @Override
-  public void notifyWorkingCopyInitialized(long timestamp) {
-  }
-
-  @Override
-  public void fehler(String messageKey, Object... args) {
-    shownMessages.add(messageKey);
-  }
-
-  @Override
-  public void showMessage(String messageKey, Object... args) {
-    shownMessages.add(messageKey);
-  }
-
-  @Override
-  public void showToast(String message) {
-    shownMessages.add(message);
-  }
-
-  @Override
-  public void showToast(String briefMessage, String detailMessage) {
-    shownMessages.add(briefMessage);
-  }
-
-  @Override
-  public void showError(EditException ex) {
-    shownMessages.add(ex.getMessage());
-  }
-
-  @Override
-  public void displayException(Exception x) {
-    x.printStackTrace();
-    shownMessages.add(x.getMessage());
-  }
+  @Override public void openSettings() {}
+  @Override public void openMetaTagConfigs() {}
+  @Override public void copyStepToClipboard(AbstractSchrittView step) {}
+  @Override public void cutStepToClipboard(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {}
+  @Override public void pasteStepsAfter(AbstractSchrittView referenceStep) {}
+  @Override public void copyTableToClipboard(TableEditArea table) {}
+  @Override public void cutTableToClipboard(TableEditArea table) {}
+  @Override public void pasteTableInto(TextEditArea initiatingTextArea) {}
+  @Override protected void initAutoSaveAndLoad() {}
+  @Override public void notifyWorkingCopyInitialized(long timestamp) {}
+  @Override public void fehler(String messageKey, Object... args) { shownMessages.add(messageKey); }
+  @Override public void showMessage(String messageKey, Object... args) { shownMessages.add(messageKey); }
+  @Override public void showToast(String message) { shownMessages.add(message); }
+  @Override public void showToast(String briefMessage, String detailMessage) { shownMessages.add(briefMessage); }
+  @Override public void showError(EditException ex) { shownMessages.add(ex.getMessage()); }
+  @Override public void displayException(Exception x) { shownMessages.add(x.getMessage()); }
 
   @Override
   public int showConfirmDialog(String message, String title, int optionType) {
@@ -119,35 +97,4 @@ public class SpecmanForTests extends Specman {
     return JOptionPane.YES_OPTION;
   }
 
-  @Override
-  public void openSettings() {
-  }
-
-  @Override
-  public void openMetaTagConfigs() {
-  }
-
-  @Override
-  public void copyStepToClipboard(AbstractSchrittView step) {
-  }
-
-  @Override
-  public void cutStepToClipboard(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
-  }
-
-  @Override
-  public void pasteStepsAfter(AbstractSchrittView referenceStep) {
-  }
-
-  @Override
-  public void copyTableToClipboard(TableEditArea table) {
-  }
-
-  @Override
-  public void cutTableToClipboard(TableEditArea table) {
-  }
-
-  @Override
-  public void pasteTableInto(TextEditArea initiatingTextArea) {
-  }
 }
