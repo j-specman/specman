@@ -105,7 +105,15 @@ public class PDFExportChooser extends JFileChooser {
    * </ol>
    */
   private File guessBestFilenameAndDirectory(PdfExportOptionsModel_V002 pdfExportOptions, File currentModelFile) {
-    File pdfFile = new File(pdfExportOptions.filename);
+    File pdfFile;
+    if (pdfExportOptions.filename == null) {
+      pdfFile = currentModelFile != null
+        ? new File(currentModelFile.getParent(), getBaseName(currentModelFile.getName()) + PDF_EXTENSION)
+        : new File("export.pdf");
+    }
+    else {
+      pdfFile = new File(pdfExportOptions.filename);
+    }
     if (pdfExportOptions.modelFilename != null && currentModelFile != null) {
       File formerModelFile = new File(pdfExportOptions.modelFilename);
       String pdfExtension = FilenameUtils.getExtension(pdfFile.getName());

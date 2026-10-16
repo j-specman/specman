@@ -1,12 +1,15 @@
 package headless;
 
+import specman.CatchLinkPanel;
 import specman.EditException;
 import specman.Specman;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.metatag.stepnumberlabel.StepnumberContextMenu;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
+import specman.ops.buttons.CreateCatchSequenceADBLOpButton;
 import specman.view.AbstractSchrittView;
+import specman.view.BreakSchrittView;
 import specman.editarea.InteractiveStepFragment;
 
 import javax.swing.AbstractButton;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -131,6 +135,24 @@ public class SpecmanForTests extends Specman {
     }
   }
 
+  /**
+   * Clicks the button for creating a catch sequence like the user would. The dialog for choosing the
+   * break step is not displayed, but the panel it would show is returned for checking the offered
+   * break steps and choosing one via {@link #choose(CatchLinkPanel, BreakSchrittView)}.
+   */
+  public CatchLinkPanel clickCreateCatchButton() {
+    CreateCatchSequenceADBLOpButton button = findComponent(CreateCatchSequenceADBLOpButton.class);
+    button.setDialogDisplayed(false);
+    click(CreateCatchSequenceADBLOpButton.class);
+    return button.catchLinkPanel();
+  }
+
+  /** Simulates the user clicking the given break step in the catch link dialog's list. */
+  public void choose(CatchLinkPanel catchLinkPanel, BreakSchrittView breakStep) {
+    catchLinkPanel.choose(breakStep);
+    waitForEventsProcessed();
+  }
+
   /** The numbers of all steps in diagram order, substeps directly following their parent step. */
   public List<String> allStepNumbers() {
     List<String> numbers = new ArrayList<>();
@@ -138,6 +160,10 @@ public class SpecmanForTests extends Specman {
       numbers.add(step.getNumber().toString());
     }
     return numbers;
+  }
+
+  public void assertStepNumbers(String... expectedNumbers) {
+    assertEquals(List.of(expectedNumbers), allStepNumbers());
   }
 
   public void undo() {

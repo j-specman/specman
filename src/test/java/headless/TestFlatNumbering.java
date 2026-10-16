@@ -9,10 +9,7 @@ import specman.view.EinfacherSchrittView;
 import specman.view.SubsequenzSchrittView;
 import specman.view.WhileSchrittView;
 
-import java.util.List;
-
 import static headless.HeadlessExtension.specman;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static specman.metatag.stepnumberlabel.StepnumberContextMenu.FLAT_NUMBERING_ITEM;
 
 /**
@@ -26,19 +23,19 @@ class TestFlatNumbering {
   @Test
   void testFlatNumberingToggleAndInsertion() {
     SubsequenzSchrittView subsequence = createInitialDiagram();
-    assertStepNumbers("1", "2", "2.1", "2.2", "2.2.1", "3");
+    specman.assertStepNumbers("1", "2", "2.1", "2.2", "2.2.1", "3");
 
     insertSimpleStepAfterFirstStep();
-    assertStepNumbers("1", "2", "3", "3.1", "3.2", "3.2.1", "4");
+    specman.assertStepNumbers("1", "2", "3", "3.1", "3.2", "3.2.1", "4");
 
     specman.clickContextMenuItem(subsequence, FLAT_NUMBERING_ITEM);
-    assertStepNumbers("1", "2", "3", "4", "5", "5.1", "6");
+    specman.assertStepNumbers("1", "2", "3", "4", "5", "5.1", "6");
 
     insertSimpleStepAfterFirstStep();
-    assertStepNumbers("1", "2", "3", "4", "5", "6", "6.1", "7");
+    specman.assertStepNumbers("1", "2", "3", "4", "5", "6", "6.1", "7");
 
     specman.clickContextMenuItem(subsequence, FLAT_NUMBERING_ITEM);
-    assertStepNumbers("1", "2", "3", "4", "4.1", "4.2", "4.2.1", "5");
+    specman.assertStepNumbers("1", "2", "3", "4", "4.1", "4.2", "4.2.1", "5");
   }
 
   @Test
@@ -46,13 +43,13 @@ class TestFlatNumbering {
     SubsequenzSchrittView subsequence = createInitialDiagram();
 
     specman.clickContextMenuItem(subsequence, FLAT_NUMBERING_ITEM);
-    assertStepNumbers("1", "2", "3", "4", "4.1", "5");
+    specman.assertStepNumbers("1", "2", "3", "4", "4.1", "5");
 
     specman.undo();
-    assertStepNumbers("1", "2", "2.1", "2.2", "2.2.1", "3");
+    specman.assertStepNumbers("1", "2", "2.1", "2.2", "2.2.1", "3");
 
     specman.redo();
-    assertStepNumbers("1", "2", "3", "4", "4.1", "5");
+    specman.assertStepNumbers("1", "2", "3", "4", "4.1", "5");
   }
 
   /**
@@ -77,10 +74,6 @@ class TestFlatNumbering {
   private void insertSimpleStepAfterFirstStep() {
     specman.focus(specman.findStepByStepID("1", EinfacherSchrittView.class));
     specman.click(CreateSimpleStepOpButton.class);
-  }
-
-  private void assertStepNumbers(String... expectedNumbers) {
-    assertEquals(List.of(expectedNumbers), specman.allStepNumbers());
   }
 
 }
