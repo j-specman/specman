@@ -21,7 +21,20 @@ import java.awt.event.MouseListener;
 import java.util.List;
 
 public class StepnumberContextMenu implements MouseListener {
+  public static final String DELETE_ITEM = "menu.context.delete";
+  public static final String COPY_ITEM = "menu.context.copy";
+  public static final String CUT_ITEM = "menu.context.cut";
+  public static final String PASTE_ITEM = "menu.context.paste";
+  public static final String MOVE_LEFT_ITEM = "menu.context.move.left";
+  public static final String MOVE_RIGHT_ITEM = "menu.context.move.right";
+  public static final String MOVE_UP_ITEM = "menu.context.move.up";
+  public static final String MOVE_DOWN_ITEM = "menu.context.move.down";
+  public static final String FLAT_NUMBERING_ITEM = "menu.context.flat.numbering";
+  public static final String TAGS_MENU = "menu.context.tags";
+  public static final String CONFIGURE_TAGS_ITEM = "menu.context.configure";
+
   private static final int META_TAG_ICON_SIZE = 16;
+
   private final JPopupMenu popup;
   private final JMenuItem delete;
   private final JMenuItem copy;
@@ -33,7 +46,7 @@ public class StepnumberContextMenu implements MouseListener {
   private final JMenuItem down;
   private final JCheckBoxMenuItem toggleFlatNumbering;
   private final JPopupMenu.Separator metaTagSeparator = new JPopupMenu.Separator();
-  private final JMenu metaTagMenu = new IMenu("menu.context.tags");
+  private final JMenu metaTagMenu = new IMenu(TAGS_MENU);
   private AbstractSchrittView currentStep;
   private StepnumberLabel initiatingLabel;
 
@@ -56,7 +69,7 @@ public class StepnumberContextMenu implements MouseListener {
   }
 
   private JMenuItem createUpItem() {
-    return createItem("menu.context.move.up", "arrow-up", e -> {
+    return createItem(MOVE_UP_ITEM,"arrow-up", e -> {
       try(UndoRecording ur = editor().composeUndo()) {
         currentStep.moveCoCatchUpUDBL(initiatingLabel);
       }
@@ -64,7 +77,7 @@ public class StepnumberContextMenu implements MouseListener {
   }
 
   private JMenuItem createDownItem() {
-    return createItem("menu.context.move.down", "arrow-down", e -> {
+    return createItem(MOVE_DOWN_ITEM,"arrow-down", e -> {
       try(UndoRecording ur = editor().composeUndo()) {
         currentStep.moveCoCatchDownUDBL(initiatingLabel);
       }
@@ -72,7 +85,7 @@ public class StepnumberContextMenu implements MouseListener {
   }
 
   private JCheckBoxMenuItem createSubnumberingItem() {
-    JCheckBoxMenuItem item = new ICheckBoxMenuItem("menu.context.flat.numbering");
+    JCheckBoxMenuItem item = new ICheckBoxMenuItem(FLAT_NUMBERING_ITEM);
     item.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -95,29 +108,29 @@ public class StepnumberContextMenu implements MouseListener {
   }
 
   private JMenuItem createDeleteItem() {
-    return createItem("menu.context.delete", "loeschen",
+    return createItem(DELETE_ITEM,"loeschen",
       e -> editor().deleteStepADBL(currentStep, initiatingLabel));
   }
 
   private JMenuItem createCopyItem() {
-    return createItem("menu.context.copy", "copy", e -> editor().copyStepToClipboard(currentStep));
+    return createItem(COPY_ITEM,"copy", e -> editor().copyStepToClipboard(currentStep));
   }
 
   private JMenuItem createCutItem() {
-    return createItem("menu.context.cut", "cut", e -> editor().cutStepToClipboard(currentStep, initiatingLabel));
+    return createItem(CUT_ITEM,"cut", e -> editor().cutStepToClipboard(currentStep, initiatingLabel));
   }
 
   private JMenuItem createPasteItem() {
-    return createItem("menu.context.paste", "paste", e -> editor().pasteStepsAfter(currentStep));
+    return createItem(PASTE_ITEM,"paste", e -> editor().pasteStepsAfter(currentStep));
   }
 
   private JMenuItem createLeftItem() {
-    return createItem("menu.context.move.left", "arrow-left",
+    return createItem(MOVE_LEFT_ITEM,"arrow-left",
       e -> editor().moveBranchSequenceLeftADBL(currentStep, initiatingLabel));
   }
 
   private JMenuItem createRightItem() {
-    return createItem("menu.context.move.right", "arrow-right",
+    return createItem(MOVE_RIGHT_ITEM,"arrow-right",
       e -> editor().moveBranchSequenceRightADBL(currentStep, initiatingLabel));
   }
 
@@ -130,8 +143,16 @@ public class StepnumberContextMenu implements MouseListener {
     if (SwingUtilities.isRightMouseButton(e)) {
       AbstractSchrittView step = editor().findStep(label(e));
       initMenuForStep(step, label(e));
-      popup.show(e.getComponent(), e.getX(), e.getY());
+      // Not showing means headless in unit tests: The initialized menu stays operable via popupMenu()
+      if (e.getComponent().isShowing()) {
+        popup.show(e.getComponent(), e.getX(), e.getY());
+      }
     }
+  }
+
+  /** The menu as initialized for the step last right-clicked. Allows tests to operate the menu without showing it. */
+  public static JPopupMenu popupMenu() {
+    return instance.popup;
   }
 
   private void initMenuForStep(AbstractSchrittView currentStep, StepnumberLabel initiatingLabel) {
@@ -171,7 +192,7 @@ public class StepnumberContextMenu implements MouseListener {
     if (!configs.isEmpty()) {
       metaTagMenu.addSeparator();
     }
-    JMenuItem configure = new IMenuItem("menu.context.configure", IconReader.readImageIcon("tags"));
+    JMenuItem configure = new IMenuItem(CONFIGURE_TAGS_ITEM,IconReader.readImageIcon("tags"));
     configure.addActionListener(e -> editor().openMetaTagConfigs());
     metaTagMenu.add(configure);
   }

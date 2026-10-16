@@ -23,8 +23,6 @@ import specman.view.WhileSchrittView;
 import specman.view.WhileWhileSchrittView;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * For each step type: Click the creation button in an empty diagram and check that the matching step
@@ -32,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
  * follower step, delete the first step again and check that the follower moves up to step number 1.
  */
 @ExtendWith(HeadlessExtension.class)
-class TestStepTypeCreationAndDeletion {
+class TestStepCreationDeletion {
 
   private SpecmanForTests specman;
 
@@ -46,7 +44,7 @@ class TestStepTypeCreationAndDeletion {
   @Test
   void testWhileStep() throws Exception {
     WhileSchrittView step = assertButtonCreatesStep(CreateWhileStepOpButton.class, WhileSchrittView.class);
-    assertSubstepExists(step, "1.1", EinfacherSchrittView.class);
+    specman.findSubstep(step, "1.1", EinfacherSchrittView.class);
     EinfacherSchrittView follower = assertFollowerStepNumber("2");
     assertStepDeletion(step, follower);
   }
@@ -54,7 +52,7 @@ class TestStepTypeCreationAndDeletion {
   @Test
   void testWhileWhileStep() throws Exception {
     WhileWhileSchrittView step = assertButtonCreatesStep(CreateWhileWhileStepOpButton.class, WhileWhileSchrittView.class);
-    assertSubstepExists(step, "1.1", EinfacherSchrittView.class);
+    specman.findSubstep(step, "1.1", EinfacherSchrittView.class);
     EinfacherSchrittView follower = assertFollowerStepNumber("2");
     assertStepDeletion(step, follower);
   }
@@ -62,8 +60,8 @@ class TestStepTypeCreationAndDeletion {
   @Test
   void testIfElseStep() throws Exception {
     IfElseSchrittView step = assertButtonCreatesStep(CreateIfElseStepOpButton.class, IfElseSchrittView.class);
-    assertSubstepExists(step, "1.1", EinfacherSchrittView.class);
-    assertSubstepExists(step, "2.1", EinfacherSchrittView.class);
+    specman.findSubstep(step, "1.1", EinfacherSchrittView.class);
+    specman.findSubstep(step, "2.1", EinfacherSchrittView.class);
     EinfacherSchrittView follower = assertFollowerStepNumber("3");
     assertStepDeletion(step, follower);
   }
@@ -71,7 +69,7 @@ class TestStepTypeCreationAndDeletion {
   @Test
   void testIfStep() throws Exception {
     IfSchrittView step = assertButtonCreatesStep(CreateIfStepOpButton.class, IfSchrittView.class);
-    assertSubstepExists(step, "1.1", EinfacherSchrittView.class);
+    specman.findSubstep(step, "1.1", EinfacherSchrittView.class);
     EinfacherSchrittView follower = assertFollowerStepNumber("2");
     assertStepDeletion(step, follower);
   }
@@ -79,9 +77,9 @@ class TestStepTypeCreationAndDeletion {
   @Test
   void testCaseStep() throws Exception {
     CaseSchrittView step = assertButtonCreatesStep(CreateCaseStepOpButton.class, CaseSchrittView.class);
-    assertSubstepExists(step, "1.1", EinfacherSchrittView.class);
-    assertSubstepExists(step, "2.1", EinfacherSchrittView.class);
-    assertSubstepExists(step, "3.1", EinfacherSchrittView.class);
+    specman.findSubstep(step, "1.1", EinfacherSchrittView.class);
+    specman.findSubstep(step, "2.1", EinfacherSchrittView.class);
+    specman.findSubstep(step, "3.1", EinfacherSchrittView.class);
     EinfacherSchrittView follower = assertFollowerStepNumber("4");
     assertStepDeletion(step, follower);
   }
@@ -89,7 +87,7 @@ class TestStepTypeCreationAndDeletion {
   @Test
   void testSubsequenceStep() throws Exception {
     SubsequenzSchrittView step = assertButtonCreatesStep(CreateSubsequenceStepOpButton.class, SubsequenzSchrittView.class);
-    assertSubstepExists(step, "1.1", EinfacherSchrittView.class);
+    specman.findSubstep(step, "1.1", EinfacherSchrittView.class);
     EinfacherSchrittView follower = assertFollowerStepNumber("2");
     assertStepDeletion(step, follower);
   }
@@ -107,14 +105,6 @@ class TestStepTypeCreationAndDeletion {
     specman = new SpecmanForTests();
     specman.click(buttonType);
     return specman.findStepByStepID("1", stepType);
-  }
-
-  /** Checks that the step with the given number exists and is a direct substep of the given step's sequences. */
-  private <T extends AbstractSchrittView> T assertSubstepExists(AbstractSchrittView step, String stepID, Class<T> substepType) {
-    T substep = specman.findStepByStepID(stepID, substepType);
-    assertSame(step, substep.getParent().getParent(),
-      "step " + stepID + " must be a substep of step " + step.getNumber());
-    return substep;
   }
 
   /** After having created a step, the focus is placed in a way that another click on a

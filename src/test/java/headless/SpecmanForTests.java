@@ -4,19 +4,27 @@ import specman.EditException;
 import specman.Specman;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
+import specman.metatag.stepnumberlabel.StepnumberContextMenu;
+import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.view.AbstractSchrittView;
 import specman.editarea.InteractiveStepFragment;
 
 import javax.swing.AbstractButton;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.event.MouseEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static specman.i18n.Messages.i18n;
 
 /**
  * Specman for tests: the real Specman, instantiated without its {@link specman.SpecmanFrame}.
@@ -56,6 +64,14 @@ public class SpecmanForTests extends Specman {
     return expectedType.cast(step);
   }
 
+  /** Checks that the step with the given number exists, has the expected view class and lives in one of the given step's sequences. */
+  public <T extends AbstractSchrittView> T findSubstep(AbstractSchrittView step, String stepID, Class<T> expectedType) {
+    T substep = findStepByStepID(stepID, expectedType);
+    assertSame(step, substep.getParent().getParent(),
+      "step " + stepID + " must be a substep of step " + step.getNumber());
+    return substep;
+  }
+
   /** Simulates the user placing the cursor into the first text of the given step. */
   public void focus(AbstractSchrittView step) {
     setLastFocusedTextArea(step.getFirstEditArea().asTextArea());
@@ -64,30 +80,98 @@ public class SpecmanForTests extends Specman {
   /** Clicks the first button of the given type, without the default press delay of {@link AbstractButton#doClick()}. */
   public void click(Class<? extends AbstractButton> buttonType) {
     findComponent(buttonType).doClick(0);
+    waitForEventQueue();
+  }
+
+  /**
+   * Operates the step number's context menu like the user: Right-clicks the given step's number and
+   * clicks the menu item with the given message key. The menu is not shown, but the item is only
+   * clicked if the user could do so, i.e. if it is visible and enabled for that step.
+   * Check box items toggle their state when clicked.
+   */
+  public void clickContextMenuItem(AbstractSchrittView step, String itemMessageKey) {
+    rightClick(findStepnumberLabel(step));
+    String itemText = i18n(itemMessageKey);
+    for (Component component : StepnumberContextMenu.popupMenu().getComponents()) {
+      if (component instanceof JMenuItem item && itemText.equals(item.getText())) {
+        assertTrue(item.isVisible() && item.isEnabled(),
+          "context menu item '" + itemText + "' must be available for step " + step.getNumber());
+        item.doClick(0);
+        waitForEventQueue();
+        return;
+      }
+    }
+    throw new IllegalStateException("No context menu item '" + itemText + "'");
+  }
+
+  private StepnumberLabel findStepnumberLabel(AbstractSchrittView step) {
+    List<StepnumberLabel> labels = new ArrayList<>();
+    collectComponents(this, StepnumberLabel.class, labels);
+    for (StepnumberLabel label : labels) {
+      if (findStep(label) == step) {
+        return label;
+      }
+    }
+    throw new IllegalStateException("No step number label found for step " + step.getNumber());
+  }
+
+  private static void rightClick(Component component) {
+    component.dispatchEvent(new MouseEvent(component, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(),
+      MouseEvent.BUTTON3_DOWN_MASK, 1, 1, 1, false, MouseEvent.BUTTON3));
+  }
+
+  private static <T extends Component> void collectComponents(Container container, Class<T> type, List<T> result) {
+    for (Component child : container.getComponents()) {
+      if (type.isInstance(child)) {
+        result.add(type.cast(child));
+      }
+      if (child instanceof Container childContainer) {
+        collectComponents(childContainer, type, result);
+      }
+    }
+  }
+
+  /** The numbers of all steps in diagram order, substeps directly following their parent step. */
+  public List<String> allStepNumbers() {
+    List<String> numbers = new ArrayList<>();
+    for (AbstractSchrittView step : listAllSteps()) {
+      numbers.add(step.getNumber().toString());
+    }
+    return numbers;
+  }
+
+  public void undo() {
+    getUndoManager().undo();
+    waitForEventQueue();
+  }
+
+  public void redo() {
+    getUndoManager().redo();
+    waitForEventQueue();
+  }
+
+  /** Specman defers parts of the relayout to the event queue. Waiting for it keeps the tests deterministic. */
+  private static void waitForEventQueue() {
+    try {
+      SwingUtilities.invokeAndWait(() -> { });
+    }
+    catch (InterruptedException x) {
+      Thread.currentThread().interrupt();
+      throw new IllegalStateException(x);
+    }
+    catch (InvocationTargetException x) {
+      throw new IllegalStateException(x.getCause());
+    }
   }
 
   /** Finds the first component of the given type in Specman's component tree, e.g. a toolbar button. */
   public <T extends Component> T findComponent(Class<T> type) {
-    T result = findComponent(this, type);
-    if (result == null) {
+    List<T> components = new ArrayList<>();
+    collectComponents(this, type, components);
+    if (components.isEmpty()) {
       throw new IllegalStateException("No component of type " + type.getSimpleName() + " found");
     }
-    return result;
-  }
-
-  private static <T extends Component> T findComponent(Container container, Class<T> type) {
-    for (Component child : container.getComponents()) {
-      if (type.isInstance(child)) {
-        return type.cast(child);
-      }
-      if (child instanceof Container childContainer) {
-        T result = findComponent(childContainer, type);
-        if (result != null) {
-          return result;
-        }
-      }
-    }
-    return null;
+    return components.get(0);
   }
 
   @Override
