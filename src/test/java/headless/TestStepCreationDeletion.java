@@ -22,6 +22,7 @@ import specman.view.SubsequenzSchrittView;
 import specman.view.WhileSchrittView;
 import specman.view.WhileWhileSchrittView;
 
+import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -31,8 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @ExtendWith(HeadlessExtension.class)
 class TestStepCreationDeletion {
-
-  private SpecmanForTests specman;
 
   @Test
   void testSimpleStep() throws Exception {
@@ -99,10 +98,9 @@ class TestStepCreationDeletion {
     assertStepDeletion(step, follower);
   }
 
-  /** Starts with a fresh Specman, clicks the given creation button and returns the new step, which must be step 1. */
+  /** Clicks the given creation button in the empty diagram and returns the new step, which must be step 1. */
   private <T extends AbstractSchrittView> T assertButtonCreatesStep(
-      Class<? extends AbstractCreateStepOpButton> buttonType, Class<T> stepType) throws Exception {
-    specman = new SpecmanForTests();
+      Class<? extends AbstractCreateStepOpButton> buttonType, Class<T> stepType) {
     specman.click(buttonType);
     return specman.findStepByStepID("1", stepType);
   }

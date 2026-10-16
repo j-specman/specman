@@ -80,7 +80,7 @@ public class SpecmanForTests extends Specman {
   /** Clicks the first button of the given type, without the default press delay of {@link AbstractButton#doClick()}. */
   public void click(Class<? extends AbstractButton> buttonType) {
     findComponent(buttonType).doClick(0);
-    waitForEventQueue();
+    waitForEventsProcessed();
   }
 
   /**
@@ -97,7 +97,7 @@ public class SpecmanForTests extends Specman {
         assertTrue(item.isVisible() && item.isEnabled(),
           "context menu item '" + itemText + "' must be available for step " + step.getNumber());
         item.doClick(0);
-        waitForEventQueue();
+        waitForEventsProcessed();
         return;
       }
     }
@@ -142,16 +142,19 @@ public class SpecmanForTests extends Specman {
 
   public void undo() {
     getUndoManager().undo();
-    waitForEventQueue();
+    waitForEventsProcessed();
   }
 
   public void redo() {
     getUndoManager().redo();
-    waitForEventQueue();
+    waitForEventsProcessed();
   }
 
-  /** Specman defers parts of the relayout to the event queue. Waiting for it keeps the tests deterministic. */
-  private static void waitForEventQueue() {
+  /** Specman defers parts of the relayout to the event queue. This method ensures not to carry
+   * on with the test before all events pending at the time of the call are processed. Events
+   * scheduled by those events themselves are not awaited. Sometimes this is required for
+   * a deterministic application state before checking it. Must not be called on the EDT. */
+  private static void waitForEventsProcessed() {
     try {
       SwingUtilities.invokeAndWait(() -> { });
     }

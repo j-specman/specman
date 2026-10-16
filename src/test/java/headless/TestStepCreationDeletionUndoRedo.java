@@ -22,6 +22,7 @@ import specman.view.SubsequenzSchrittView;
 import specman.view.WhileSchrittView;
 import specman.view.WhileWhileSchrittView;
 
+import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -32,8 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  */
 @ExtendWith(HeadlessExtension.class)
 class TestStepCreationDeletionUndoRedo {
-
-  private SpecmanForTests specman;
 
   @Test
   void testSimpleStep() throws Exception {
@@ -79,8 +78,7 @@ class TestStepCreationDeletionUndoRedo {
    * @param substepIds the numbers of the simple substeps the step under test is expected to have
    */
   private <T extends AbstractSchrittView> void assertUndoRedo(
-      Class<? extends AbstractCreateStepOpButton> buttonType, Class<T> stepType, String... substepIds) throws Exception {
-    specman = new SpecmanForTests();
+      Class<? extends AbstractCreateStepOpButton> buttonType, Class<T> stepType, String... substepIds) {
     specman.click(CreateSimpleStepOpButton.class);
     specman.click(buttonType);
     T step = assertStepWithSubsteps(stepType, substepIds);

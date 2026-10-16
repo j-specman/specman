@@ -11,6 +11,7 @@ import specman.view.WhileSchrittView;
 
 import java.util.List;
 
+import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static specman.metatag.stepnumberlabel.StepnumberContextMenu.FLAT_NUMBERING_ITEM;
 
@@ -22,10 +23,8 @@ import static specman.metatag.stepnumberlabel.StepnumberContextMenu.FLAT_NUMBERI
 @ExtendWith(HeadlessExtension.class)
 class TestFlatNumbering {
 
-  private SpecmanForTests specman;
-
   @Test
-  void testFlatNumberingToggleAndInsertion() throws Exception {
+  void testFlatNumberingToggleAndInsertion() {
     SubsequenzSchrittView subsequence = createInitialDiagram();
     assertStepNumbers("1", "2", "2.1", "2.2", "2.2.1", "3");
 
@@ -43,7 +42,7 @@ class TestFlatNumbering {
   }
 
   @Test
-  void testFlatNumberingUndoRedo() throws Exception {
+  void testFlatNumberingUndoRedo() {
     SubsequenzSchrittView subsequence = createInitialDiagram();
 
     specman.clickContextMenuItem(subsequence, FLAT_NUMBERING_ITEM);
@@ -60,8 +59,7 @@ class TestFlatNumbering {
    * Creates the diagram 1 (simple), 2 (subsequence) containing 2.1 (simple) and 2.2 (while)
    * containing 2.2.1 (simple), 3 (simple). A new step is always inserted behind the step in focus.
    */
-  private SubsequenzSchrittView createInitialDiagram() throws Exception {
-    specman = new SpecmanForTests();
+  private SubsequenzSchrittView createInitialDiagram() {
     specman.click(CreateSimpleStepOpButton.class);
     specman.click(CreateSubsequenceStepOpButton.class);
     SubsequenzSchrittView subsequence = specman.findStepByStepID("2", SubsequenzSchrittView.class);
