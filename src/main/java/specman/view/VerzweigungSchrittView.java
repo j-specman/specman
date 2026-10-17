@@ -154,6 +154,9 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 		g.drawPolygon(polygonX, polygonY, polygonX.length);
 	}
 
+	/** This method uses the {@link Shape} class from the PDF package to create the
+	 * diamond shape for both PDF and UI rendering. This is a bit unclean, but there
+	 * are only very rare cases for such a mix-up. Not enough reasons to clean it up. */
 	protected Shape createDiamond() {
 		Point mittelpunktRaute = berechneRautenmittelpunkt(); //umbenannt
 		int layoutSpaltenbreite = (int)breiteLayoutspalteBerechnen();
