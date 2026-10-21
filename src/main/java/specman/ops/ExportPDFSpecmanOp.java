@@ -15,9 +15,17 @@ public class ExportPDFSpecmanOp extends AbstractSpecmanOp {
   private PDFExportChooser pdfExportChooser;
   private PdfExportOptionsModel_V002 pdfExportOptions;
 
-  public void resetChooser() { pdfExportChooser = null; }
-  public void setPdfExportOptions(PdfExportOptionsModel_V002 options) { pdfExportOptions = options; }
-  public PdfExportOptionsModel_V002 getPdfExportOptions() { return pdfExportOptions; }
+  public void resetChooser() {
+    pdfExportChooser = null;
+  }
+
+  public void setPdfExportOptions(PdfExportOptionsModel_V002 options) {
+    pdfExportOptions = options;
+  }
+
+  public PdfExportOptionsModel_V002 getPdfExportOptions() {
+    return pdfExportOptions;
+  }
 
   public ExportPDFSpecmanOp(SpecmanOpContext context) {
     super(context);
@@ -28,46 +36,55 @@ public class ExportPDFSpecmanOp extends AbstractSpecmanOp {
     java.awt.Point workingAreaLocation = getArbeitsbereich().getLocation();
     workingAreaLocation.translate(scrollPosition.x, scrollPosition.y);
     return new Shape(workingAreaLocation)
-        .add(getIntro().getShape())
-        .add(getHauptSequenz().getShapeSequence())
-        .add(getBreitenAnpasser().getShape())
-        .add(getOutro().getShape());
+      .add(getIntro().getShape())
+      .add(getHauptSequenz().getShapeSequence())
+      .add(getBreitenAnpasser().getShape())
+      .add(getOutro().getShape());
   }
 
   public void export() {
+    File selectedFile = chooseFileAndOptions();
+    if (selectedFile != null) {
+      renderPDF(selectedFile);
+      displayResult(selectedFile);
+    }
+  }
+
+  protected void renderPDF(File selectedFile) {
+    Shape all = getDiagramShape();
+    try {
+      new PDFRenderer(selectedFile.getAbsolutePath(),
+        PDFExportChooser.pageSizeByName(pdfExportOptions.pageSize),
+        pdfExportOptions.portrait,
+        pdfExportOptions.paging,
+        getZoomFactor()).render(all);
+    } catch (IOException iox) {
+      displayException(iox);
+    }
+  }
+
+  protected void displayResult(File selectedFile) {
+    if (pdfExportChooser.displayResult()) {
+      try {
+        Desktop.getDesktop().open(selectedFile);
+      } catch (IOException iox) {
+        displayException(iox);
+      }
+    }
+  }
+
+  protected File chooseFileAndOptions() {
     if (pdfExportChooser == null) {
       pdfExportChooser = new PDFExportChooser();
     }
     pdfExportChooser.initFromModel(pdfExportOptions, getDiagrammDatei());
     int result = pdfExportChooser.showSaveDialog(getScrollPane());
     if (result != JFileChooser.APPROVE_OPTION) {
-      return;
+      return null;
     }
     pdfExportChooser.safeUserPreferences();
     pdfExportOptions = pdfExportChooser.getExportOptions();
-    java.io.File selectedFile = pdfExportChooser.getSelectedFile();
-    if (selectedFile == null) {
-      return;
-    }
-    Shape all = getDiagramShape();
-    try {
-      new PDFRenderer(selectedFile.getAbsolutePath(),
-          pdfExportChooser.getSelectedPageSize(),
-          pdfExportChooser.isPortrait(),
-          pdfExportChooser.getPaging(),
-          getZoomFactor()).render(all);
-    }
-    catch (IOException iox) {
-      displayException(iox);
-    }
-    if (pdfExportChooser.displayResult()) {
-      try {
-        Desktop.getDesktop().open(selectedFile);
-      }
-      catch (IOException iox) {
-        displayException(iox);
-      }
-    }
+    File selectedFile = pdfExportChooser.getSelectedFile();
+    return selectedFile;
   }
-
 }

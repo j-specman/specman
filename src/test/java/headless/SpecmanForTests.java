@@ -7,6 +7,8 @@ import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.metatag.stepnumberlabel.StepnumberContextMenu;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
+import specman.model.v002.PdfExportOptionsModel_V002;
+import specman.ops.ExportPDFSpecmanOp;
 import specman.ops.buttons.CreateCatchSequenceADBLOpButton;
 import specman.view.AbstractSchrittView;
 import specman.view.BreakSchrittView;
@@ -18,7 +20,9 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,6 +54,7 @@ import static specman.i18n.Messages.i18n;
 public class SpecmanForTests extends Specman {
 
   private final List<String> shownMessages = new ArrayList<>();
+  private static final Dimension LAYOUT_SIZE = new Dimension(800, 600);
 
   public SpecmanForTests() throws Exception {
     super(null);
@@ -166,6 +171,27 @@ public class SpecmanForTests extends Specman {
     assertEquals(List.of(expectedNumbers), allStepNumbers());
   }
 
+  /** Exports the diagram to the given PDF file like the user would, but without file chooser dialog. */
+  public void exportPdf(File pdfFile, String pageSize, boolean portrait, boolean paging) {
+    setPdfExportOptions(new PdfExportOptionsModel_V002(pdfFile.getAbsolutePath(), null, pageSize, portrait, paging));
+    exportAsPDF();
+  }
+
+  /** Without a displayed frame nobody lays out the components, so their bounds stay empty. */
+  void layoutComponents() {
+    setSize(LAYOUT_SIZE);
+    layoutTree(this);
+  }
+
+  private static void layoutTree(Component component) {
+    if (component instanceof Container container) {
+      container.doLayout();
+      for (Component child : container.getComponents()) {
+        layoutTree(child);
+      }
+    }
+  }
+
   public void undo() {
     getUndoManager().undo();
     waitForEventsProcessed();
@@ -201,6 +227,11 @@ public class SpecmanForTests extends Specman {
       throw new IllegalStateException("No component of type " + type.getSimpleName() + " found");
     }
     return components.get(0);
+  }
+
+  @Override
+  protected ExportPDFSpecmanOp createExportPDFOp() {
+    return new ExportPDFSpecmanOpForTest(this);
   }
 
   @Override

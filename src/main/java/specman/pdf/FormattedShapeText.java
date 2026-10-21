@@ -14,8 +14,10 @@ import static specman.util.ObjectUtils.nvl;
 
 import javax.swing.text.*;
 import java.awt.*;
+import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +43,7 @@ public class FormattedShapeText extends AbstractShapeText {
 
     List<DecorationSpan> underlines = new ArrayList<>();
     List<DecorationSpan> strikethroughs = new ArrayList<>();
-    Graphics2D g2 = (Graphics2D) content.getGraphics();
+    FontRenderContext fontRenderContext = fontRenderContext();
 
     pdfCanvas.beginText();
 
@@ -80,7 +82,7 @@ public class FormattedShapeText extends AbstractShapeText {
 
       PdfFont pdfFont = resolvePdfFont(resolvedFont);
 
-      LineMetrics lm = resolvedFont.getLineMetrics("X", g2.getFontRenderContext());
+      LineMetrics lm = resolvedFont.getLineMetrics("X", fontRenderContext);
       float scaledFontSize = fontSize * swing2pdfScaleFactor;
       float pdfX = (renderOffset.x + (float) bounds.getX()) * swing2pdfScaleFactor;
       float baselineOffset = (float) bounds.getHeight() - lm.getDescent();
@@ -115,7 +117,7 @@ public class FormattedShapeText extends AbstractShapeText {
   private List<BackgroundSpan> collectBackgroundSpans(StyledDocument swingDoc, int length,
       Point renderOffset, float scale) {
     List<BackgroundSpan> spans = new ArrayList<>();
-    Graphics2D g2 = (Graphics2D) content.getGraphics();
+    FontRenderContext fontRenderContext = fontRenderContext();
     for (int offset = 0; offset < length; offset++) {
       String ch;
       try { ch = swingDoc.getText(offset, 1); } catch (BadLocationException e) { continue; }
@@ -133,7 +135,7 @@ public class FormattedShapeText extends AbstractShapeText {
       PdfFont pdfFont = resolvePdfFont(resolvedFont);
       float scaledFontSize = resolvedFont.getSize2D() * scale;
       float charWidth = pdfFont.getWidth(ch, scaledFontSize);
-      LineMetrics lm = resolvedFont.getLineMetrics("X", g2.getFontRenderContext());
+      LineMetrics lm = resolvedFont.getLineMetrics("X", fontRenderContext);
       float pdfX = (renderOffset.x + (float) bounds.getX()) * scale;
       float textHeight = (lm.getAscent() + lm.getDescent()) * scale;
       // rectY: bottom edge of the text box in PDF coordinates
@@ -141,6 +143,15 @@ public class FormattedShapeText extends AbstractShapeText {
       collectBackground(spans, pdfX, charWidth, rectY, textHeight, bg);
     }
     return spans;
+  }
+
+  /** A component which is not displayed (e.g. in headless tests) has no graphics, so we fall back to an image's. */
+  private FontRenderContext fontRenderContext() {
+    Graphics2D g2 = (Graphics2D) content.getGraphics();
+    if (g2 == null) {
+      g2 = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics();
+    }
+    return g2.getFontRenderContext();
   }
 
   private Font getResolvedFont(int offset) {

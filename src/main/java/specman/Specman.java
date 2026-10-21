@@ -72,7 +72,7 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	private SpecmanMenuBar specmanMenuBar;
 
 	private KeyboardSpecmanOp keyboardOp;
-	private final ExportPDFSpecmanOp exportPDFOp = new ExportPDFSpecmanOp(this);
+	private final ExportPDFSpecmanOp exportPDFOp = createExportPDFOp();
   private AutoSaveOp autoSave;
   private AutoLoadOp autoLoad;
 
@@ -620,6 +620,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	@Override
 	public void exportAsGraphviz() {
 		new ExportGraphvizSpecmanOp(this).export();
+	}
+
+	/** Called while Specman is being constructed. Overrides must not depend on their own fields. */
+	protected ExportPDFSpecmanOp createExportPDFOp() {
+		return new ExportPDFSpecmanOp(this);
 	}
 
 	public void exportAsPDF() {

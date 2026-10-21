@@ -169,8 +169,12 @@ public class PDFExportChooser extends JFileChooser {
   }
 
   public PageSize getSelectedPageSize() {
+    return pageSizeByName(pageSize.getSelectedItem().toString());
+  }
+
+  public static PageSize pageSizeByName(String pageSizeName) {
     try {
-      Field sizeField = PageSize.class.getField(pageSize.getSelectedItem().toString());
+      Field sizeField = PageSize.class.getField(pageSizeName);
       return (PageSize)sizeField.get(null);
     }
     catch(Exception x) {
