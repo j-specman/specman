@@ -14,6 +14,7 @@ import java.nio.file.Path;
 
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -47,7 +48,7 @@ class PdfExportSmokeTest {
   }
 
   @Test
-  void referenceModelExport(@TempDir Path modelCopyDirectory) throws IOException {
+  void testReferenceModelExport(@TempDir Path modelCopyDirectory) throws IOException {
     File pdf = nextPdfFile();
     specman.loadDiagramCopy(REFERENCE_MODEL, modelCopyDirectory);
 
@@ -56,6 +57,7 @@ class PdfExportSmokeTest {
     assertEquals(0, specman.shownMessages().size(), "unexpected messages: " + specman.shownMessages());
     assertTrue(pdf.length() >= MIN_REFERENCE_PDF_BYTES,
       pdf.getName() + " has only " + pdf.length() + " bytes");
+    String pdfContent = PdfReader.text(pdf);
+    assertTrue(pdfContent.contains("Specman Reference"), "intro text missing in " + pdf.getName());
   }
-
 }
