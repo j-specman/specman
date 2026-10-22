@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static specman.i18n.Messages.i18n;
 
 /**
- * Specman for tests: the real Specman, instantiated without its {@link specman.SpecmanFrame}.
+ * Specman <b>F</b>or <b>T</b>ests: the real Specman, instantiated without its {@link specman.SpecmanFrame}.
  * Everything which cannot work headless or must not touch the user's environment is disabled here:
  * <ul>
  *   <li>Dialogs and toasts are not shown. Their messages are collected in {@link #shownMessages()},
