@@ -1,16 +1,14 @@
-package headless;
+package headless.steps;
 
+import headless.HeadlessExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import specman.CatchLinkPanel;
-import specman.editarea.EditContainer;
 import specman.ops.buttons.CreateBreakStepOpButton;
 import specman.ops.buttons.CreateWhileStepOpButton;
 import specman.view.BreakSchrittView;
 import specman.view.CatchSchrittSequenzView;
-import specman.view.CatchUeberschrift;
 import specman.view.EinfacherSchrittView;
-import specman.view.SchrittSequenzView;
 import specman.view.WhileSchrittView;
 
 import java.util.List;
@@ -25,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Break steps which already have a catch sequence are not offered anymore.
  */
 @ExtendWith(HeadlessExtension.class)
-class TestCatchCreation {
+class CatchCreationTest {
 
   @Test
   void testCatchSequenceCreation() {

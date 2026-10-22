@@ -1,5 +1,6 @@
-package headless;
+package headless.steps;
 
+import headless.HeadlessExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import specman.ops.buttons.AbstractCreateStepOpButton;
@@ -31,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * follower step, delete the first step again and check that the follower moves up to step number 1.
  */
 @ExtendWith(HeadlessExtension.class)
-class TestStepCreationDeletion {
+class StepCreationDeletionTest {
 
   @Test
   void testSimpleStep() throws Exception {

@@ -18,7 +18,7 @@ import static specman.metatag.stepnumberlabel.StepnumberContextMenu.FLAT_NUMBERI
  * subsequence step must keep that numbering consistent in both modes.
  */
 @ExtendWith(HeadlessExtension.class)
-class TestFlatNumbering {
+class FlatNumberingTest {
 
   @Test
   void testFlatNumberingToggleAndInsertion() {

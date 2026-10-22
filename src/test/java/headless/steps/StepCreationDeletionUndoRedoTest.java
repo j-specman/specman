@@ -1,5 +1,6 @@
-package headless;
+package headless.steps;
 
+import headless.HeadlessExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import specman.ops.buttons.AbstractCreateStepOpButton;
@@ -32,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * under test is created as step 2, so the numbers of its substeps are shifted accordingly.
  */
 @ExtendWith(HeadlessExtension.class)
-class TestStepCreationDeletionUndoRedo {
+class StepCreationDeletionUndoRedoTest {
 
   @Test
   void testSimpleStep() throws Exception {

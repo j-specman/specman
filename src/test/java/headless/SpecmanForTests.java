@@ -23,6 +23,9 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -171,6 +174,16 @@ public class SpecmanForTests extends Specman {
     assertEquals(List.of(expectedNumbers), allStepNumbers());
   }
 
+  /**
+   * Loads a copy of the given diagram file located in the given directory. Loading may create or delete a
+   * working copy beside the loaded file, which must not happen to the original.
+   */
+  public void loadDiagramCopy(File diagramFile, Path copyDirectory) throws IOException {
+    File copy = copyDirectory.resolve(diagramFile.getName()).toFile();
+    Files.copy(diagramFile.toPath(), copy.toPath());
+    diagrammLaden(copy);
+  }
+
   /** Exports the diagram to the given PDF file like the user would, but without file chooser dialog. */
   public void exportPdf(File pdfFile, String pageSize, boolean portrait, boolean paging) {
     setPdfExportOptions(new PdfExportOptionsModel_V002(pdfFile.getAbsolutePath(), null, pageSize, portrait, paging));
@@ -241,6 +254,7 @@ public class SpecmanForTests extends Specman {
   }
 
   @Override public void openSettings() {}
+  @Override public void addRecentFile(File file) {}
   @Override public void openMetaTagConfigs() {}
   @Override public void copyStepToClipboard(AbstractSchrittView step) {}
   @Override public void cutStepToClipboard(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {}
