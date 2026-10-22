@@ -58,6 +58,7 @@ public class SpecmanFT extends Specman {
 
   private final List<String> shownMessages = new ArrayList<>();
   private static final Dimension LAYOUT_SIZE = new Dimension(800, 600);
+  private static final int MAX_LAYOUT_PASSES = 50;
 
   public SpecmanFT() throws Exception {
     super(null);
@@ -190,14 +191,43 @@ public class SpecmanFT extends Specman {
     exportAsPDF();
   }
 
-  /** Without a displayed frame nobody lays out the components, so their bounds stay empty. */
+  /**
+   * Without a displayed frame nobody lays out the components, so their bounds stay empty. A single
+   * pass is not enough: The height of a text depends on the width it has been given, which in turn
+   * changes the height of its parents. Each pass settles roughly one nesting level, so we lay out
+   * until no bounds change anymore. The layout managers must be invalidated for every pass, otherwise
+   * they keep working with their cached preferred sizes.
+   */
   void layoutComponents() {
     setSize(LAYOUT_SIZE);
-    layoutTree(this);
+    int previousBoundsHash;
+    int boundsHash = 0;
+    int passes = 0;
+    do {
+      if (++passes > MAX_LAYOUT_PASSES) {
+        throw new IllegalStateException("Layout did not settle within " + MAX_LAYOUT_PASSES + " passes");
+      }
+      previousBoundsHash = boundsHash;
+      layoutTree(this);
+      waitForEventsProcessed();
+      boundsHash = boundsHash(this);
+    }
+    while (boundsHash != previousBoundsHash);
+  }
+
+  private static int boundsHash(Component component) {
+    int hash = component.getBounds().hashCode();
+    if (component instanceof Container container) {
+      for (Component child : container.getComponents()) {
+        hash = 31 * hash + boundsHash(child);
+      }
+    }
+    return hash;
   }
 
   private static void layoutTree(Component component) {
     if (component instanceof Container container) {
+      container.invalidate();
       container.doLayout();
       for (Component child : container.getComponents()) {
         layoutTree(child);

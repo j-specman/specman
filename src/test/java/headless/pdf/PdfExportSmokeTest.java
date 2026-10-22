@@ -51,7 +51,7 @@ class PdfExportSmokeTest {
     File pdf = nextPdfFile();
     specman.loadDiagramCopy(REFERENCE_MODEL, modelCopyDirectory);
 
-    specman.exportPdf(pdf, "A4", true, false);
+    specman.exportPdf(pdf, "A3", false, false);
 
     assertEquals(0, specman.shownMessages().size(), "unexpected messages: " + specman.shownMessages());
     assertTrue(pdf.length() >= MIN_REFERENCE_PDF_BYTES,

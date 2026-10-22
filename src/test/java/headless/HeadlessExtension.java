@@ -1,9 +1,12 @@
 package headless;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import java.awt.GraphicsEnvironment;
 
 /**
@@ -19,6 +22,12 @@ public class HeadlessExtension implements BeforeAllCallback, BeforeEachCallback 
 
   static {
     System.setProperty("java.awt.headless", "true");
+    try {
+      UIManager.setLookAndFeel(new FlatLightLaf());
+    }
+    catch (UnsupportedLookAndFeelException x) {
+      throw new IllegalStateException(x);
+    }
   }
 
   public static SpecmanFT specman;
