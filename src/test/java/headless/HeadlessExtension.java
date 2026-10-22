@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import java.awt.GraphicsEnvironment;
 
 /**
- * Switches AWT to headless mode for tests and provides each test with a fresh {@link SpecmanForTests}.
+ * Switches AWT to headless mode for tests and provides each test with a fresh {@link SpecmanFT}.
  * The headless property is read once and cached when the first AWT class is initialized, so it must
  * be set before that. The static block runs when JUnit registers the extension, which happens before
  * the test class is instantiated.
@@ -21,7 +21,7 @@ public class HeadlessExtension implements BeforeAllCallback, BeforeEachCallback 
     System.setProperty("java.awt.headless", "true");
   }
 
-  public static SpecmanForTests specman;
+  public static SpecmanFT specman;
 
   @Override
   public void beforeAll(ExtensionContext context) {
@@ -34,6 +34,6 @@ public class HeadlessExtension implements BeforeAllCallback, BeforeEachCallback 
 
   @Override
   public void beforeEach(ExtensionContext context) throws Exception {
-    specman = new SpecmanForTests();
+    specman = new SpecmanFT();
   }
 }

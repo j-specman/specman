@@ -7,12 +7,12 @@ import java.io.File;
 
 /**
  * The PDF export without dialog: The export options which tests prepare via
- * {@link SpecmanForTests#exportPdf} play the role of the user's choices in the file chooser.
+ * {@link SpecmanFT#exportPdf} play the role of the user's choices in the file chooser.
  * The diagram is laid out before rendering, because without a frame nothing else does it.
  */
-public class ExportPDFSpecmanOpForTest extends ExportPDFSpecmanOp {
+public class ExportPDFSpecmanOpFT extends ExportPDFSpecmanOp {
 
-  public ExportPDFSpecmanOpForTest(SpecmanOpContext context) {
+  public ExportPDFSpecmanOpFT(SpecmanOpContext context) {
     super(context);
   }
 
@@ -23,7 +23,7 @@ public class ExportPDFSpecmanOpForTest extends ExportPDFSpecmanOp {
 
   @Override
   protected void renderPDF(File selectedFile) {
-    ((SpecmanForTests) context).layoutComponents();
+    ((SpecmanFT) context).layoutComponents();
     super.renderPDF(selectedFile);
   }
 

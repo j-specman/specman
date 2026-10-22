@@ -1,6 +1,5 @@
-package headless.steps;
+package headless;
 
-import headless.HeadlessExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import specman.Specman;
@@ -10,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 @ExtendWith(HeadlessExtension.class)
-class SpecmanForTestsTest {
+class SpecmanFTTest {
 
   @Test
   void testSpecmanCanBeInstantiated() {

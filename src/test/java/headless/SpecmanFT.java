@@ -54,12 +54,12 @@ import static specman.i18n.Messages.i18n;
  * toolbar button click, {@link #findStepByStepID(String, Class)} and {@link #findComponent(Class)}
  * look up what the user would see.
  */
-public class SpecmanForTests extends Specman {
+public class SpecmanFT extends Specman {
 
   private final List<String> shownMessages = new ArrayList<>();
   private static final Dimension LAYOUT_SIZE = new Dimension(800, 600);
 
-  public SpecmanForTests() throws Exception {
+  public SpecmanFT() throws Exception {
     super(null);
   }
 
@@ -244,7 +244,7 @@ public class SpecmanForTests extends Specman {
 
   @Override
   protected ExportPDFSpecmanOp createExportPDFOp() {
-    return new ExportPDFSpecmanOpForTest(this);
+    return new ExportPDFSpecmanOpFT(this);
   }
 
   @Override
