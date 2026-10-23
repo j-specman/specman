@@ -633,6 +633,16 @@ public class EditContainer extends JPanel {
 		return shape;
 	}
 
+  /** Matches the label inclusion rule in getShape(), without building or painting a shape. */
+  public boolean hasExportedStepNumber() {
+    return schrittNummer != null;
+  }
+
+  /** Identity binding for the label actually included in the export shape tree. */
+  public StepnumberLabel getExportedStepNumber() {
+    return hasExportedStepNumber() ? schrittNummer : null;
+  }
+
 	public void findStepnumberLinkIDs(HashMap<TextEditArea, List<String>> stepnumberLinkMap) {
 		for (EditArea editArea : editAreas) {
 			editArea.findStepnumberLinkIDs(stepnumberLinkMap);

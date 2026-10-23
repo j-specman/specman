@@ -321,6 +321,8 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
       if (bottomBar.isVisible()) {
         shape.add(new Shape(bottomBar).withBackgroundColor(bottomBar.getBackground()));
       }
+      // Folding the catch area hides this parent, not the individual sequences.
+      // Do not export their stale layout bounds or hidden reference sources.
       if (sequencesPanel.isVisible()) {
         Shape sequencesShape = new Shape(sequencesPanel);
         for (CatchSchrittSequenzView seq: catchSequences) {

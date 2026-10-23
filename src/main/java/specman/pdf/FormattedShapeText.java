@@ -8,11 +8,14 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.font.FontCharacteristics;
 import com.itextpdf.layout.font.FontInfo;
 import specman.editarea.TextEditArea;
+import specman.editarea.document.WrappedDocument;
+import specman.pdf.navigation.PdfNavigationRenderContext;
 import specman.graphics.Styles;
 
 import static specman.util.ObjectUtils.nvl;
 
 import javax.swing.text.*;
+import javax.swing.JEditorPane;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
@@ -27,16 +30,28 @@ public class FormattedShapeText extends AbstractShapeText {
 
   public static FontProvider fontProvider;
 
-  private final TextEditArea content;
+  private final JEditorPane content;
 
   public FormattedShapeText(TextEditArea content) {
+    this((JEditorPane) content);
+  }
+
+  public FormattedShapeText(JEditorPane content) {
     super(content.getInsets(), content.getForeground(), content.getFont());
     this.content = content;
   }
 
   public void writeToPDF(Point renderOffset, float swing2pdfScaleFactor, PdfCanvas pdfCanvas, Document document) {
+    writeToPDF(renderOffset, swing2pdfScaleFactor, pdfCanvas, document, null, null);
+  }
+
+  @Override
+  public void writeToPDF(Point renderOffset, float swing2pdfScaleFactor, PdfCanvas pdfCanvas, Document document,
+                         PdfNavigationRenderContext navigation, String textKey) {
     StyledDocument swingDoc = (StyledDocument) content.getDocument();
     int length = swingDoc.getLength();
+    int visibleTextStart = navigation == null || textKey == null ? 0
+      : new WrappedDocument(swingDoc).getVisibleTextStart();
 
     List<BackgroundSpan> backgrounds = collectBackgroundSpans(swingDoc, length, renderOffset, swing2pdfScaleFactor);
     drawBackgrounds(pdfCanvas, backgrounds);
@@ -94,6 +109,15 @@ public class FormattedShapeText extends AbstractShapeText {
       pdfCanvas.setFontAndSize(pdfFont, scaledFontSize);
       pdfCanvas.setTextMatrix(pdfX, pdfY);
       pdfCanvas.showText(ch);
+
+      if (navigation != null && textKey != null) {
+        Color bg = (Color) attrs.getAttribute(StyleConstants.Background);
+        var style = new PdfNavigationRenderContext.GlyphStyle(resolvedFont.getFontName(),
+          resolvedFont.getStyle(), fontSize, fg.getRGB(), bg == null ? null : bg.getRGB(),
+          StyleConstants.isUnderline(attrs), StyleConstants.isStrikeThrough(attrs));
+        navigation.glyph(textKey, offset - visibleTextStart, ch, pdfX, pdfY, charWidth,
+          lm.getAscent() * swing2pdfScaleFactor, lm.getDescent() * swing2pdfScaleFactor, style);
+      }
 
       if (StyleConstants.isUnderline(attrs)) {
         float decorY = pdfY - (lm.getUnderlineOffset() + lm.getDescent() * 0.5f) * swing2pdfScaleFactor;

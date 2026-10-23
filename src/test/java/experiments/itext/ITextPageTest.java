@@ -21,7 +21,7 @@ import java.io.ByteArrayOutputStream;
 public class ITextPageTest {
   @Test
   void testCustomSizePages() throws Exception {
-    String dest = "sample.pdf";
+    String dest = "sample-testCustomSizePages.pdf";
     PdfWriter writer = new PdfWriter(dest);
 
     PdfDocument pdf = new PdfDocument(writer);
@@ -37,12 +37,12 @@ public class ITextPageTest {
 
     document.close();
     Desktop desktop = Desktop.getDesktop();
-    desktop.open(new java.io.File("sample.pdf"));
+    desktop.open(new java.io.File(dest));
   }
 
   @Test
   void testTileOversizedPage() throws Exception {
-    String oversized = "sample.pdf";
+    String oversized = "sample-testTileOversizedPage.pdf";
     PdfWriter writer = new PdfWriter(oversized);
     PdfDocument pdf = new PdfDocument(writer);
     Document document = new Document(pdf);
@@ -56,7 +56,7 @@ public class ITextPageTest {
     pdf = new PdfDocument(reader);
     PdfPage page = pdf.getPage(1);
 
-    String a4sized = "sample-a4.pdf";
+    String a4sized = "sample-a4-testTileOversizedPage.pdf";
     PdfWriter a4writer = new PdfWriter(a4sized);
     PdfDocument a4pdf = new PdfDocument(a4writer);
 
@@ -104,7 +104,7 @@ public class ITextPageTest {
     PdfPage page = pdf.getPage(1);
     com.itextpdf.kernel.geom.Rectangle oversizedRect = page.getPageSizeWithRotation();
 
-    String a4sized = "sample-a4.pdf";
+    String a4sized = "sample-a4-testTileOversizedUnfiledPage.pdf";
     PdfWriter a4writer = new PdfWriter(a4sized);
     PdfDocument a4pdf = new PdfDocument(a4writer);
 
@@ -128,7 +128,7 @@ public class ITextPageTest {
 
   @Test
   void testMultiplePages() throws Exception {
-    String dest = "sample.pdf";
+    String dest = "sample-testMultiplePages.pdf";
     PdfWriter writer = new PdfWriter(dest);
 
     PdfDocument pdf = new PdfDocument(writer);
@@ -143,6 +143,6 @@ public class ITextPageTest {
 
     document.close();
     Desktop desktop = Desktop.getDesktop();
-    desktop.open(new java.io.File("sample.pdf"));
+    desktop.open(new java.io.File(dest));
   }
 }
