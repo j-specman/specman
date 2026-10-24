@@ -108,6 +108,33 @@ class StepnumberLinkTest {
     assertFalse(substep.hasStepnumberLinks()); // No longer referenced
   }
 
+  /** Scenario: Step 2 gets a link to step 1. Undo removes the link from the text and unregisters it at step 1,
+   * redo brings back both. The steps themselves stay untouched. */
+  @Test
+  void testUndoRedoOfInsertingLink() {
+    EinfacherSchrittView step1 = specman.createSimpleStep();
+    EinfacherSchrittView step2 = specman.createSimpleStep();
+    TextEditArea step2Text = step2.getFirstEditArea().asTextArea();
+    String textWithoutLink = step2Text.getPlainText();
+    specman.focus(step2);
+    specman.choose(specman.doEditStepnumberLink(), step1);
+    assertEquals(List.of("1"), stepnumberLinks(step2Text));
+    assertTrue(step1.hasStepnumberLinks());
+
+    specman.undo();
+
+    assertEquals(List.of(), stepnumberLinks(step2Text));
+    assertEquals(textWithoutLink, step2Text.getPlainText());
+    assertFalse(step1.hasStepnumberLinks());
+    specman.assertStepNumbers("1", "2");
+
+    specman.redo();
+
+    assertEquals(List.of("1"), stepnumberLinks(step2Text));
+    assertTrue(step1.hasStepnumberLinks());
+    specman.assertStepNumbers("1", "2");
+  }
+
   /** Creates three simple steps with a link in step 3 to step 2 and returns step 2. */
   private EinfacherSchrittView createStepsWithLinkFromStep3ToStep2() {
     specman.createSimpleStep();
