@@ -21,6 +21,7 @@ All Specman code lives in `specman`. Notable sub-packages:
 |`specman` |Application entry point (`Specman`, `SpecmanFrame`), shared types like `EditorI`, `ChangeSet`, `StepNumber`
 |`specman.view` |Views of the diagram steps and step sequences (`AbstractSchrittView` and subclasses)
 |`specman.editarea` |Editable content within steps: text, images, tables, list items
+|`specman.editarea.document` |Wrapping of Swing text documents, see <<Text Documents and Wrapped Positions>>
 |`specman.model` |Persistent model, versioned by package (`v001`, `v002`), converter and parsers
 |`specman.ops` |Operations and toolbar buttons extracted from the `Specman` class
 |`specman.undo` |Undo infrastructure and the concrete undoable edits
@@ -78,6 +79,44 @@ Swing does not reliably render everything correctly after the diagram's structur
 * a one-pixel nudge of the window size synthesizes the resize event, which is the only thing that makes every affected text area re-run its `componentResized()` handling and thus recompute the bounds of the step number label.
 
 The "stress" part of both nudges runs synchronously, the restoring part runs together in exactly **one** `SwingUtilities.invokeLater()`. Doing both directions of one property in the same `invokeLater` does not work reliably because Swing coalesces them into a single layout pass.
+
+## Text Documents and Wrapped Positions
+A central component of the UI is the `TextEditArea` for WYSIWYG text editing. It is a `JEditorPane` with an `HTMLDocument`. Positions in the persistent model (e.g. the start and end of the markups in `Markup_V002`) refer to the _visible text_. Offsets in the Swing document differ from that, because of two peculiarities of Swing's HTML documents:
+
+* **Leading newline:** Every document built by `HTMLEditorKit` starts with an invisible newline, the empty first paragraph of a fresh `HTMLDocument`. The text `abc` has the document content `\nabc`, so the model offset 0 is the document offset 1. This holds for any HTML, even for an empty text, which has a length of 1.
+
+* **Implied newline at the end:** Swing documents have an implied newline at their end. It is not counted by `getLength()`, but is covered by `Element#getEndOffset()`.
+
+`WrappedDocument`, `WrappedPosition` and `WrappedElement` (package `specman.editarea.document`) are the only place where these two worlds are converted into each other. The model must not depend on quirks of Swing, so the quirks stay in here:
+
+* A `WrappedPosition` is always created by its `WrappedDocument`, either from a Swing offset (`fromUI`) or from a model offset (`fromModel`). Its constructor is package-visible by intention. `unwrap()` returns the Swing offset, `toModel()` the model offset.
+
+* `WrappedElement` returns `WrappedPosition`s and corrects the end offset of elements which reach into the implied newline at the end of the document.
+
+* Code outside this package should not add or subtract the offset of the leading newline. If you find yourself doing that, a method is missing in `WrappedDocument`.
+
+### The leading newline is an invariant
+JEditorPane's default behavior has a few ways how the leading newline gets lost:
+
+* Calling `JEditorPane#setText("")` which leads to a completely empty document.
+
+* Placing the caret to the start of the visible text, and pressing backspace.
+
+To keep from complicating the various text operations, the leading newline is protected from vanishing by the `LeadingNewlineProtection` class. `TextEditArea` installs it right after the document has been created:
+
+* A `DocumentFilter` avoids removing or replaces anything at offset 0 and moves insertions at offset 0 behind the newline. So backspace, delete, cut, typing over a selection etc. can't remove it, no matter how.
+
+* A `NavigationFilter` keeps the caret behind the newline. Even `selectAll()` doesn't select it.
+
+* `TextEditArea#setText` suspends the filter while `JEditorPane#setText` does its job (it removes everything and reads at offset 0, which HTMLDocument can't do on a document that still has content). An empty text is read as `LeadingNewlineProtection.EMPTY_HTML`, which gives exactly the document containing nothing but the newline.
+
+Things to keep in mind:
+
+* Don't exchange the document or the editor kit of a `TextEditArea` after its construction, this drops the protection.
+
+* Temporary editors for processing model texts without UI (`HtmlToPlainText`) are not protected. They don't need to be, as they never remove the first character.
+
+* `LeadingNewlineTest` pins the assumption that Swing really starts every HTML document with that newline. If a JDK update changes this, the test fails first.
 
 ## Model and Persistence
 * The model is an in-memory tree of plain model classes, versioned by package: `specman.model.v001` (legacy) and `specman.model.v002` (current). The model classes are independent of Swing.

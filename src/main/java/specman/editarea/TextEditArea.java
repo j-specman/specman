@@ -11,6 +11,7 @@ import static specman.ChangeSet.changeset;
 
 import specman.editarea.keylistener.TextEditAreaKeyListener;
 import specman.editarea.markups.*;
+import specman.editarea.document.LeadingNewlineProtection;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedElement;
 import specman.editarea.document.WrappedPosition;
@@ -63,17 +64,17 @@ import static specman.Specman.editor;
 import static specman.i18n.Messages.i18n;
 
 public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaModel_V002> {
-    private static final String INITIAL_EMPTY_CONTENT_INDICATOR = "x";
-
     private WrappedElement hoveredElement;
     private ChangeInfo changeInfo;
     private TextEditAreaModel_V002 deletionBackup;
+    private LeadingNewlineProtection leadingNewlineProtection;
 
     public TextEditArea(TextEditAreaModel_V002 model, Font font) {
         this.changeInfo = model.changeInfo != null ? model.changeInfo.toChangeInfo() : specman.ChangeInfo.UNTRACKED;
         boolean isEmpty = model.text == null || model.text.isEmpty();
-        String initialText = isEmpty ? INITIAL_EMPTY_CONTENT_INDICATOR : model.text;
+        String initialText = isEmpty ? LeadingNewlineProtection.EMPTY_HTML : model.text;
         editor().instrumentWysEditor(this, initialText, 0);
+        leadingNewlineProtection = LeadingNewlineProtection.installOn(this);
         putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
         setFont(font);
         addKeyListener(new TextEditAreaKeyListener(this));
@@ -84,27 +85,18 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         if (model.markups != null && !model.markups.isEmpty()) {
             new MarkupBackgroundStyleInitializer(this, model.markups).styleChangedTextSections();
         }
-        if (isEmpty) {
-            clear();
-        }
     }
 
-    private void clear() {
-      WrappedDocument wd = getWrappedDocument();
-      wd.removeFrom(wd.start());
+    @Override
+    public void setText(String text) {
+      if (leadingNewlineProtection == null) {
+        super.setText(text);
+      }
+      else {
+        leadingNewlineProtection.setText(text, super::setText);
+      }
     }
 
-    /** Produces an empty TextEditArea which by first creating it from a single letter model
-     * object and removing that letter immediately afterwards. This crazy-looking procedure
-     * compensates a strange default behaviour of JEditorPane: when creating it immediately
-     * with empty content, the content, being interactively added later on, sometimes gets
-     * wrapped into <p style=\"margin-top: 0\">...</p>. The reason is unclear and it usually
-     * doesn't matter. However, it causes unintuitive behaviour when merging two text areas,
-     * e.g. when dissolving an area by pressing BACKSPACE at the very beginning of a text.
-     * Instead of a single flowtext, the paragraph boundary is still around as is represented
-     * as a line break in the merged text. That's different from the user's expectation.
-     * <p>
-     * the problem can still arise by <div>s, but the compensation here, already helps a lot. */
     public TextEditArea(Font font) {
       this(new TextEditAreaModel_V002(""), font);
     }
@@ -356,15 +348,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     public WrappedPosition getWrappedCaretPosition() {
-      int caretPosition = getCaretPosition();
-      // Not so nice, but hopefully OK: There might occur the situation that a document starts with an
-      // unvisible newline but the caret position is 0, so that it points to that invisible character.
-      // In that case we keep this 0 rather than compensating anything. There should only bew rare cases
-      // where this comes into play. The one we know of is when the user keeps pressing Backspace in a
-      // text area whichj is already empty.
-      return (caretPosition > 0)
-        ? getWrappedDocument().fromUI(getCaretPosition())
-        : getWrappedDocument().fromModel(0);
+      return getWrappedDocument().fromUI(getCaretPosition());
     }
 
     public MarkedCharSequence findMarkups() {

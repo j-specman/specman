@@ -11,21 +11,16 @@ import java.util.List;
 import static specman.editarea.markups.CharType.ParagraphBoundary;
 
 public class WrappedDocument implements WrappedDocumentI {
+  /** Every text document starts with an invisible newline, see {@link LeadingNewlineProtection}. */
+  public static final int VISIBLE_TEXT_START = 1;
+
   private final StyledDocument document;
-  private final int visibleTextStart;
 
   public WrappedDocument(StyledDocument document) {
-    try {
-      this.document = document;
-      String firstChar = document.getText(0, 1);
-      visibleTextStart = firstChar.equals("\n") ? 1 : 0;
-    }
-    catch(BadLocationException blx) {
-      throw new WrappedBadLocationException(blx);
-    }
+    this.document = document;
   }
 
-  public int getVisibleTextStart() { return visibleTextStart; }
+  public int getVisibleTextStart() { return VISIBLE_TEXT_START; }
 
   public int getLength() {
     return document.getLength();
@@ -98,12 +93,12 @@ public class WrappedDocument implements WrappedDocumentI {
   }
 
   public WrappedElement getParagraphElement(int pos) {
-    Element element = document.getParagraphElement(pos + visibleTextStart);
+    Element element = document.getParagraphElement(pos + VISIBLE_TEXT_START);
     return new WrappedElement(element, this);
   }
 
   public WrappedPosition fromUI(int position) {
-    return new WrappedPosition(position - getVisibleTextStart(), this);
+    return new WrappedPosition(position - VISIBLE_TEXT_START, this);
   }
 
   public WrappedPosition fromModel(int position) {

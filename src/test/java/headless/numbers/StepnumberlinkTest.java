@@ -32,7 +32,7 @@ class StepnumberLinkTest {
     specman.click(CreateSimpleStepOpButton.class);
     EinfacherSchrittView step3 = specman.findStepByStepID("3", EinfacherSchrittView.class);
     TextEditArea step3Text = step3.getFirstEditArea().asTextArea();
-    step3Text.setText("#");
+    step3Text.setText("");
 
     specman.focus(step3);
     StepnumberLinkPanel panel = specman.doEditStepnumberLink();
