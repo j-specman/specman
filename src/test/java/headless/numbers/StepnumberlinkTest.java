@@ -91,22 +91,21 @@ class StepnumberLinkTest {
   @Test
   void testSingleBackspaceRemovesWholeLink() {
     EinfacherSchrittView step1 = specman.createSimpleStep();
+    TextEditArea step1Text = step1.getFirstEditArea().asTextArea();
+    step1Text.setText("");
+
     SubsequenzSchrittView subsequence = specman.createSubsequenceStep();
     EinfacherSchrittView substep = specman.findSubstep(subsequence, "2.1", EinfacherSchrittView.class);
 
-    TextEditArea step1Text = step1.getFirstEditArea().asTextArea();
-    step1Text.setText("");
     specman.focus(step1);
     specman.choose(specman.doEditStepnumberLink(), substep);
-    assertTrue(step1Text.getPlainText().contains("2.1"));
+    assertEquals("2.1", step1Text.getPlainText());
     assertTrue(substep.hasStepnumberLinks());
-    step1Text.setCaretPosition(step1Text.findStepnumberLinks().get(0).getEndOffset().unwrap());
 
+    step1Text.setCaretPosition(step1Text.getLength());
     specman.press(step1, KeyEvent.VK_BACK_SPACE);
-
-    assertEquals(List.of(), stepnumberLinks(step1Text));
-    assertFalse(step1Text.getPlainText().contains("2.1"));
-    assertFalse(substep.hasStepnumberLinks());
+    assertEquals("", step1Text.getPlainText()); // The whole "2.1" is gone
+    assertFalse(substep.hasStepnumberLinks()); // No longer referenced
   }
 
   /** Creates three simple steps with a link in step 3 to step 2 and returns step 2. */
