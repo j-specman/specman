@@ -87,7 +87,7 @@ A central component of the UI is the `TextEditArea` for WYSIWYG text editing. It
 
 * **Implied newline at the end:** Swing documents have an implied newline at their end. It is not counted by `getLength()`, but is covered by `Element#getEndOffset()`.
 
-`WrappedDocument`, `WrappedPosition` and `WrappedElement` (package `specman.editarea.document`) are the only place where these two worlds are converted into each other. The model must not depend on quirks of Swing, so the quirks stay in here:
+`WrappedDocument`, `WrappedPosition` and `WrappedElement` (package `specman.editarea.document`) are the only place where these two worlds are converted into each other. The model must not depend on quirks of Swing, so the quirks stay inside these classes:
 
 * A `WrappedPosition` is always created by its `WrappedDocument`, either from a Swing offset (`fromUI`) or from a model offset (`fromModel`). Its constructor is package-visible by intention. `unwrap()` returns the Swing offset, `toModel()` the model offset.
 
@@ -95,24 +95,24 @@ A central component of the UI is the `TextEditArea` for WYSIWYG text editing. It
 
 * Code outside this package should not add or subtract the offset of the leading newline. If you find yourself doing that, a method is missing in `WrappedDocument`.
 
-### The leading newline is an invariant
-JEditorPane's default behavior has a few ways how the leading newline gets lost:
+### Leading newline protection
+The default behavior of `JEditorPane` offers several ways to lose the invisible leading newline:
 
-* Calling `JEditorPane#setText("")` which leads to a completely empty document.
+* Calling `JEditorPane#setText("")`, which leads to a completely empty document.
 
-* Placing the caret to the start of the visible text, and pressing backspace.
+* Placing the caret at the start of the visible text and pressing Backspace.
 
-To keep from complicating the various text operations, the leading newline is protected from vanishing by the `LeadingNewlineProtection` class. `TextEditArea` installs it right after the document has been created:
+To keep the various text operations from becoming complicated, the `LeadingNewlineProtection` class protects the leading newline from vanishing. `TextEditArea` installs it right after the document has been created:
 
-* A `DocumentFilter` avoids removing or replaces anything at offset 0 and moves insertions at offset 0 behind the newline. So backspace, delete, cut, typing over a selection etc. can't remove it, no matter how.
+* A `DocumentFilter` prevents anything at offset 0 from being removed or replaced, and moves insertions at offset 0 behind the newline. So Backspace, Delete, cut, typing over a selection etc. can't remove it, no matter how the removal is triggered.
 
 * A `NavigationFilter` keeps the caret behind the newline. Even `selectAll()` doesn't select it.
 
-* `TextEditArea#setText` suspends the filter while `JEditorPane#setText` does its job (it removes everything and reads at offset 0, which HTMLDocument can't do on a document that still has content). An empty text is read as `LeadingNewlineProtection.EMPTY_HTML`, which gives exactly the document containing nothing but the newline.
+* `TextEditArea#setText` suspends the filter while `JEditorPane#setText` does its job (it removes everything and reads at offset 0, which `HTMLDocument` can't do on a document that still has content). An empty text is read as `LeadingNewlineProtection.EMPTY_HTML`, which results in a document containing nothing but the newline.
 
 Things to keep in mind:
 
-* Don't exchange the document or the editor kit of a `TextEditArea` after its construction, this drops the protection.
+* Don't exchange the document or the editor kit of a `TextEditArea` after its construction, as this drops the protection.
 
 * Temporary editors for processing model texts without UI (`HtmlToPlainText`) are not protected. They don't need to be, as they never remove the first character.
 
