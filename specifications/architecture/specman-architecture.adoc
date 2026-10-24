@@ -5,3 +5,168 @@
 ## Introduction
 This document is a loose collection of information about the architecture of Specman. It is not intended as a complete specification. Instead, it grows incrementally from experience and observation, wherever further development has repeatedly raised a need for explanation or decisions.
 
+## Technology
+* Java 21, built with Maven.
+* Swing UI with FlatLaf look and feel and JGoodies FormLayout for the diagram layout.
+* The rich text editing is based on a modified copy of the SHEF HTML editor (package `net.atlanticbb.tantlinger`). Specman-specific additions in there are kept to a minimum.
+* Jackson reads the legacy V1 model format. The model classes carry Jackson annotations for their polymorphic step types.
+
+## Package Overview
+All Specman code lives in `specman`. Notable sub-packages:
+
+[cols="1,3"]
+|===
+|Package |Responsibility
+
+|`specman` |Application entry point (`Specman`, `SpecmanFrame`), shared types like `EditorI`, `ChangeSet`, `StepNumber`
+|`specman.view` |Views of the diagram steps and step sequences (`AbstractSchrittView` and subclasses)
+|`specman.editarea` |Editable content within steps: text, images, tables, list items
+|`specman.model` |Persistent model, versioned by package (`v001`, `v002`), converter and parsers
+|`specman.ops` |Operations and toolbar buttons extracted from the `Specman` class
+|`specman.undo` |Undo infrastructure and the concrete undoable edits
+|`specman.draganddrop` |Dragging of steps and tags
+|`specman.metatag` |Meta tags and the step number label
+|`specman.pdf` |PDF export
+|`specman.cli` |Command line operations (headless, e.g. `--sanitize`)
+|`specman.i18n` |Localization
+|===
+
+## Specman Class and Operations
+The application's main class is `Specman`. Due to its central role, it tends to grow continuously. Its size is contained by moving operations, buttons and menu listeners into classes of their own. `Specman` implements two very broad interfaces, `EditorI` and `SpecmanOpContext`, which give these classes access to the functionality they need for orchestration. The following conventions apply:
+
+* `Specman` extends `JRootPane`, not `JFrame`. Everything concerning the window itself lives in `SpecmanFrame`, which takes the `Specman` instance as its root pane. This is a precondition for running `Specman` headless in tests.
+
+* View components talk to `Specman` via the `EditorI` interface. Operations talk to it via `SpecmanOpContext` (which extends `EditorI` and adds the internals only needed by operations).
+
+* `AbstractSpecmanOp` is the base class of all operations. `SpecmanOpContextMixin` provides default methods delegating to the context, so operations and toolbar buttons can call `getHauptSequenz()`, `composeUndo()` etc. directly.
+
+* Operations which must be undoable as one single step extend `AbstractADBLSpecmanOp` (_ADBL_ = **A**tomic un**D**oa**BL**e). The same exists for toolbar buttons (`AbstractADBLSpecmanOpButton`). They wrap `execute()` in `composeUndo()` and report an `EditException` to the user.
+
+* `AbstractInitSpecmanOp` is the base class for operations which (re-)initialize a diagram, e.g. loading or creating a new one.
+
+* Orchestration logic belongs in operations, buttons and menu listeners, not into `Specman`. Tests trigger these classes the same way the user does, see <<Headless Tests>>.
+
+* Repeated structure among operation classes is captured by abstract base classes. An example is `AbstractCreateStepOpButton`, which implements the common "insert after the focused step or append to the main sequence" pattern for all step creation buttons.
+
+## Undo
+All user-visible changes of the diagram must be undoable. The central `SpecmanUndoManager` extends the Swing `UndoManager` and adds:
+
+* a stack of recording modes, behaving like a simple transaction manager. During undo and redo, recording is paused.
+* composite edits: `composeUndo()` returns an `UndoRecording` (use it in a try-with-resources block) which summarizes all edits made within it into one undo step.
+* the unsaved-changes indicator in the title bar.
+
+The text editors have their own undo handling (`CompoundUndoManager`). Their STRG+Z/STRG+Y actions are shared by the whole diagram and are enabled only if the central manager has something to undo or redo. `SpecmanUndoManager#undoStackChanged()` keeps their enabled state up to date. As long as a new edit goes through `SpecmanUndoManager`, nothing special is needed.
+
+### Undoable Property Changes (UDBL)
+Typical property changes are made undoable by one-liners in the helper class `UDBL` (_UnDoaBLe_), e.g. `UDBL.setBackgroundUDBL(component, color)`. Conventions:
+
+* A `UDBL.setXxxUDBL(target, value)` helper encapsulates exactly **one** property. It records an undo edit (an `UndoableSetXxx` derived from `UndoableSetProperty`, using `target::setXxx` and `target::getXxx`) and in its core calls the plain `setXxx(value)` of the target.
+
+* It does nothing if the value does not change. This keeps the undo history clean, e.g. when adding a step triggers a resync of all step number labels, most of which don't change at all.
+
+* The suffix `UDBL` on a method in a view or edit area class indicates that the modifications performed by this method are recorded in the undo manager and can therefore be undone. Such methods never just assign fields or call plain setters. They use the `UDBL` helper or call other methods with the `UDBL` suffix. If properties with a plain setter need to support undo, add an appropriate helper method to `UDBL`.
+
+* Methods of views and edit areas are usually called from operations, which already start undo composition where required. So there is normally no need to care for this within the view or edit area classes themselves. Existing `composeUndo()` calls in these classes are mostly relics.
+
+## Repainting after Structural Changes
+Swing does not reliably render everything correctly after the diagram's structure has changed, e.g. after loading a diagram or inserting a step. Symptoms are step number labels with missing pixel lines and If-Else column widths not taking effect immediately.
+
+`Specman.diagrammAktualisieren(EditArea)` is the single place which handles this. Every code path which changes the structure of the diagram must call it. `revalidate()` and `repaint()` are **not** a substitute. The method combines two independent workarounds, neither of which replaces the other:
+
+* a one-pixel nudge of the diagram width within a `setVisible(false)`/`setVisible(true)` pair forces FormLayout to apply changed column specs.
+
+* a one-pixel nudge of the window size synthesizes the resize event, which is the only thing that makes every affected text area re-run its `componentResized()` handling and thus recompute the bounds of the step number label.
+
+The "stress" part of both nudges runs synchronously, the restoring part runs together in exactly **one** `SwingUtilities.invokeLater()`. Doing both directions of one property in the same `invokeLater` does not work reliably because Swing coalesces them into a single layout pass.
+
+## Model and Persistence
+* The model is an in-memory tree of plain model classes, versioned by package: `specman.model.v001` (legacy) and `specman.model.v002` (current). The model classes are independent of Swing.
+
+* *V001* is a Jackson-serialized JSON format. It is only read, never written. `LoadDiagrammSpecmanOp` recognizes it by the `ModelEnvelope`, and `ModelConverterV001V002` converts it into the V002 model. The conversion is one-way, because the current Specman version supports _reading_ old model versions but _writes_ only the current one.
+
+* *V002* is a pseudocode-like text format introduced especially for AI collaboration. Various experiments showed that AI agents can read and produce this format much better than JSON. It is read by `ModelParser_V002` and written by `ModelSerializer_V002` (both in `specman.model.v002.io`, with the grammar keywords in `ModelKeyword_V002`).
+
+* Every step has a short random hex `id` (8 characters) which is stable for the lifetime of the step, and a `stepNumber` which is derived from the step's position. Step numbers change when steps are inserted or moved. References between steps (e.g. the source step of a step move) use ids, references in the text (_steplinks_) use the displayed step numbers.
+
+* `ModelRenumberer_V002` and the other classes in `specman.model.v002.io` work on the model without any Swing component. They are used by the headless `--sanitize` command line operation (`specman.cli`), which repairs step numbers and step number references in the text after a file has been edited outside of Specman. This matters for AI collaboration: it relieves AI agents of the renumbering, which turned out to be time-consuming and error-prone.
+
+* Old model versions must stay loadable. The version is checked first when loading (`specmanVersion`).
+
+## Localization
+* All user texts are in one resource bundle for the whole application: `src/main/resources/i18n/messages.properties` (English, default and fallback) and `messages_de.properties`. Both bundles must contain the same keys.
+
+* Texts are accessed via `Messages.i18n(key, args...)`. Placeholders are written as `{0}`, `{1}`, ... and are replaced literally (no `MessageFormat`, apostrophes are plain characters). A missing key shows as `?key`.
+
+* Keys are written lowercase, separated by dots, no camelCase, with an area prefix: `menu.`, `dialog.`, `settings.`, `msg.`, `undo.`, `button.` (e.g. `menu.file.save.as`, `button.ok`).
+
+* Swing components with fixed texts are wrapped by classes in `specman.i18n` (`IMenu`, `IMenuItem`, `IButton`, `ILabel`, ...). They only take the property key. Further wrappers are added when needed, with the goal to hide `Messages.i18n` where possible.
+
+* Dynamic texts (file names, tag labels, change set names) are not localized and use the plain Swing classes. The same goes for developer exceptions, `System.err` output, and the command line interface, which is English only.
+
+* The language is selected by the `language` preference (`system`, `de`, `en`) and applies after a restart. `Messages.applyLanguagePreference()` must run before the first UI component is created.
+
+* Default texts of new steps ("New step", "Yes"/"No", "Case 1", ...) are created in the UI language. After creation, they are regular document content and don't change with the language.
+
+* During development, plain literals may be written in the code. The externalization into the bundles is done in a dedicated step and can usually be delegated to an AI assistant.
+
+## Headless Tests
+The regression test suite runs without a display. The prerequisite is that `Specman` can be instantiated headless with the real component tree, without fakes. This is achieved by the following design:
+
+* `SpecmanFT` (`src/test/java/headless`) extends `Specman` and disables what can't work headless or must not touch the user's environment: dialogs and toasts (their messages are collected so errors don't vanish unnoticed), the auto-save timer and working copy watcher, and the Specman-level clipboard operations. Everything else is the real thing. It also offers convenience methods like `focus(step)` and `click(buttonType)` to express user behavior compactly.
+
+* `HeadlessExtension` switches AWT into headless mode (the property is read only once, so this must happen before the first AWT class is initialized) and provides each test with a fresh `SpecmanFT`. Tests import `HeadlessExtension.specman` statically. Each Swing-related test class carries `@ExtendWith(HeadlessExtension.class)`.
+
+* Tests which can't run headless, e.g. interactive experiments, live in the package `experiments` and are marked with `@NoSuiteTest`.
+
+* Naming: test classes end with `Test`. Classes which only provide infrastructure for headless operation and contain no tests end with `FT` (_For Tests_), e.g. `SpecmanFT`. This way, the Surefire pattern doesn't pick them up by accident.
+
+* Style: tests read like a description of user behavior. They use the real buttons and menu items (e.g. `clickContextMenuItem` with the message key constants of the menu), a setup consisting only of steps which belong to the scenario, and compact assertions like `assertStepNumbers("1", "2", "2.1")`.
+
+* If something isn't reachable for a test, a small headless seam is added to the production class (e.g. `StepnumberContextMenu.popupMenu()`). Test-specific orchestration methods in `Specman` are not acceptable.
+
+`SpecmanFT` is still new and evolves over time. Quite a few aspects still need to be made testable, e.g. by separating headless-suitable panels from heavyweight container components like `JDialog` (see `CatchLinkPanel` and `CatchLinkDialog` for an example). This is ongoing work.
+
+## Versioning
+Specman has two versioning systems: the application version and the model (file format) version.
+
+### Application Version
+The application version consists of three numbers separated by dots, e.g. 1.4.2. It is maintained in the file `pom.xml`, written to the manifest file with each release, and displayed in the window title bar.
+
+Changes without any impact on the file format usually only increment the last number of the application version.
+
+If the file format changes, at least the middle number must be incremented. When a file is opened, Specman compares the leading two numbers of the file's version with those of the running application. If they differ, in either direction, a warning is shown. For V1 files, the warning states that the file will be converted and will no longer be readable by the version it was created with. For V2 files, it advises not to edit files with older versions after they were edited with a newer one, because meta information may get lost.
+
+### Model / File Format Version
+The model version is a single number, e.g. 1 or 2. The current version is 2, represented by the classes with the suffix `V002` in the package `specman.model.v002`. A new model version is necessary when incompatible changes or extensions are introduced. In that case, at least the middle number of the application version must be incremented as well.
+
+The model version number does not need to be incremented with every extension of the model features. It may stay the same if the extension is _backward compatible_, so that files created with an older application version can still be read.
+
+An example is the introduction of meta tags, which were added to model 2 in Specman version 1.4, although model 2 had already been used in Specman 1.3. Files created with Specman 1.3 can still be read by Specman 1.4, because meta tags are optional in model 2. If the user works with Specman 1.4 without using meta tags, a file saved with 1.4 can still be read by 1.3. Opening it only causes a warning.
+
+When a new model version is introduced, a converter from the previous version to the current one must be provided. See e.g. `ModelConverterV001V002` in the package `specman.model`. The converter's functionality and completeness should be tested with the reference model of the previous version, because it uses all available modeling features.
+
+With every extension of the modeling features, and thereby of the file format, the reference model and the documentation must be extended as well.
+
+
+## Coding Conventions
+* New code, comments and Javadoc are written in English. The project is migrating away from German incrementally. When renaming classes, methods or members in passing, make sure this has no effect on the persistent model representation in files.
+
+* Local variables always have an explicit type, never `var`.
+
+* `if`, `else if` and `else` always use curly braces and line breaks. No single-line forms. Early return guards are unusual.
+
+* No duplication of non-trivial logic, not even "just for now". If the same logic is needed a second time, it is moved to a common parent class or utility first, even if that is a detour in the middle of other work. If multiple classes share the same structure, an abstract base class is introduced proactively.
+
+* Operations and menu listeners orchestrate, views and edit areas encapsulate their own state. Don't add functionality to `Specman` if it can live elsewhere.
+
+* Records are not used in the Specman project. Use classes instead.
+
+* Don't use inner classes that contain a noticeable amount of logic. It makes it difficult for the reader to find the class and to understand it in isolation. Use a separate file instead.
+
+* Apply the Boy Scout Rule (German: _Pfadfinderregel_): don't make bad code worse by adding more bad code. If a method is already too long or difficult to understand, don't add more lines to it. Refactor it first.
+
+* Keep clean code design principles in mind, especially the Single Level of Abstraction principle and the Integration Operation Segregation Principle (IOSP). Make sure that the reader of a class can understand its top-level methods by reading them in isolation, without having to understand the details of the lower-level methods.
+
+* Keep classes short. Even though there are no strict limits, a class should be understandable at a glance. Try to stay below 100 lines of pure code.
+
+* Keep lines short and try to apply the five-token rule: if a line consists of no more than five tokens, an average reader can take in the complete line at a single glance. Otherwise they must "parse" it mentally. Consider using static imports to keep the origin of a token out of the code line, since it is usually not of primary interest.

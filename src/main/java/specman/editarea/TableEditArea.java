@@ -455,10 +455,8 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
 
   public List<EditContainer> addRowUDBL(int rowIndex) {
     EditorI editor = editor();
-    try (UndoRecording ur = editor.composeUndo()) {
-      addEmptyRow(rowIndex);
-      editor.addEdit(new UndoableTableRowAdded(this, rowIndex, cells.get(rowIndex)));
-    }
+    addEmptyRow(rowIndex);
+    editor.addEdit(new UndoableTableRowAdded(this, rowIndex, cells.get(rowIndex)));
     return cells.get(rowIndex);
   }
 
