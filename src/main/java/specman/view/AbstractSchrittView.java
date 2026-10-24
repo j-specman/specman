@@ -294,16 +294,6 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		unterSequenzen().forEach(SchrittSequenzView::zusammenklappenFuerReview);
 	}
 
-	public String ersteZeileExtraieren() {
-		String[] zeilen = editContainer.getPlainText().split("\n");
-		for (String zeile: zeilen) {
-			String getrimmteZeile = zeile.trim();
-			if (getrimmteZeile.length() > 0)
-				return getrimmteZeile;
-		}
-		return null;
-	}
-
 	public void setGeloeschtMarkiertStilUDBL() {
 		setAenderungsartUDBL(Geloescht);
 		editContainer.setGeloeschtMarkiertStilUDBL(number, changeInfo.changeSet());

@@ -164,7 +164,8 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
     private void setStyleUDBL(MutableAttributeSet attr, Color backgroundColor, boolean editable) {
-        getWrappedDocument().setCharacterAttributes(0, getPlainText().length(), attr, false);
+        WrappedDocument wd = getWrappedDocument();
+        wd.setCharacterAttributes(wd.start(), getPlainText().length(), attr, false);
         setEditableUDBL(editable);
         setBackgroundUDBL(backgroundColor);
     }
@@ -224,12 +225,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     public Component asComponent() { return this; }
 
     public String getPlainText() {
-        try {
-            return getText(0, getDocument().getLength());
-        } catch (BadLocationException blx) {
-            blx.printStackTrace();
-            return null;
-        }
+        return getWrappedDocument().getVisibleText();
     }
 
     public TextEditAreaModel_V002 getTextWithMarkups(boolean formatierterText) {

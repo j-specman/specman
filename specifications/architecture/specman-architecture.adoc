@@ -95,6 +95,8 @@ A central component of the UI is the `TextEditArea` for WYSIWYG text editing. It
 
 * Code outside this package should not add or subtract the offset of the leading newline. If you find yourself doing that, a method is missing in `WrappedDocument`.
 
+* The plain text of a text contains only what the user can see, i.e. not the leading newline. `WrappedDocument#getVisibleText()` is the single definition. `TextEditArea#getPlainText()`, the `plainText` of the model and `HtmlToPlainText` are derived from it, so the markup offsets of a text match its plain text. `ModelSerializer_V002` still strips a leading newline, because models converted from V1 may carry one.
+
 ### Leading newline protection
 The default behavior of `JEditorPane` offers several ways to lose the invisible leading newline:
 

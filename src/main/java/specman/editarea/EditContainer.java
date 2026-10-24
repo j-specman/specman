@@ -248,10 +248,12 @@ public class EditContainer extends JPanel {
 		return new EditorContentModel_V002(areaModels);
 	}
 
+	/** The visible text of all edit areas, each of them starting in a line of its own. */
 	public String getPlainText() {
-		StringBuilder sb = new StringBuilder();
-		editAreas.forEach(ea -> sb.append(ea.getPlainText()));
-		return sb.toString();
+		return editAreas.stream()
+			.map(EditArea::getPlainText)
+			.filter(plainText -> !plainText.isEmpty())
+			.collect(Collectors.joining("\n"));
 	}
 
 	public void updateBounds() {

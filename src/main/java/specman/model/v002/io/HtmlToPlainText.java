@@ -1,10 +1,10 @@
 package specman.model.v002.io;
 
-import specman.editarea.document.WrappedBadLocationException;
+import specman.editarea.document.WrappedDocument;
 
 import javax.swing.JEditorPane;
 import javax.swing.SwingUtilities;
-import javax.swing.text.BadLocationException;
+import javax.swing.text.StyledDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
 /** Converting HTML to plain text is based on headless JEditorPanes to ensure that it works exactly
@@ -14,12 +14,7 @@ public class HtmlToPlainText {
 
     static String convert(String html) {
         JEditorPane ed = fromHtml(html);
-        try {
-            return ed.getDocument().getText(0, ed.getDocument().getLength()).replaceAll("^\\n", "");
-        }
-        catch (BadLocationException ex) {
-            throw new WrappedBadLocationException(ex);
-        }
+        return new WrappedDocument((StyledDocument) ed.getDocument()).getVisibleText();
     }
 
     public static JEditorPane fromHtml(String html) {

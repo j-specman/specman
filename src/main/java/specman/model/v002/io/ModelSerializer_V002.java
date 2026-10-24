@@ -236,6 +236,7 @@ public class ModelSerializer_V002 {
         hb.append("`").append(escapeBackticks(extractBodyHtml(area.text))).append("`");
 
         if (area.plainText != null && !area.plainText.isEmpty()) {
+            // Models converted from V1 may still carry the invisible leading newline in their plain text
             String plain = escapeBackticks(area.plainText.replaceAll("^\\n", ""));
             hb.append(", ").append(PLAIN).append("=`").append(plain).append("`");
         }

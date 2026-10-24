@@ -108,6 +108,11 @@ public class WrappedDocument implements WrappedDocumentI {
   public WrappedPosition start() { return fromModel(0); }
   public WrappedPosition end() { return fromModel(getLength()-1); }
 
+  /** The text a user can see: the content without the invisible leading newline. */
+  public String getVisibleText() {
+    return getLength() <= VISIBLE_TEXT_START ? "" : getText(start(), getLength() - VISIBLE_TEXT_START);
+  }
+
   public boolean hasContent() {
     switch(getLength()) {
       case 0: return false;

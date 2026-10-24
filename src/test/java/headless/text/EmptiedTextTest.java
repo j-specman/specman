@@ -1,11 +1,8 @@
 package headless.text;
 
-import headless.HeadlessExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import specman.editarea.TextEditArea;
-import specman.ops.buttons.CreateSimpleStepOpButton;
 import specman.view.EinfacherSchrittView;
 
 import java.awt.event.KeyEvent;
@@ -18,8 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * An empty text consists of an invisible newline. A text document of length 0 breaks the wrapped
  * positions, so whatever the user does to remove text must never produce one.
  */
-@ExtendWith(HeadlessExtension.class)
-class EmptiedTextTest {
+class EmptiedTextTest extends AbstractTextTest {
 
   private static final int EMPTY_TEXT_LENGTH = 1;
 
@@ -28,9 +24,8 @@ class EmptiedTextTest {
 
   @BeforeEach
   void createStepWithText() {
-    specman.click(CreateSimpleStepOpButton.class);
-    step = specman.findStepByStepID("1", EinfacherSchrittView.class);
-    text = step.getFirstEditArea().asTextArea();
+    step = specman.createSimpleStep();
+    text = textAreaOf(step);
     specman.focus(step);
   }
 
@@ -52,13 +47,12 @@ class EmptiedTextTest {
 
   @Test
   void testDeleteAtTextStartRemovesFirstVisibleCharacter() {
-    int initialLength = length();
+    String initialText = text.getPlainText();
     text.setCaretPosition(0);
 
     specman.press(step, KeyEvent.VK_DELETE);
 
-    assertEquals(initialLength - 1, length());
-    assertTrue(text.getPlainText().startsWith("\n"));
+    assertEquals(initialText.substring(1), text.getPlainText());
   }
 
   @Test
