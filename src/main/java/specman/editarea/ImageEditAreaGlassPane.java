@@ -3,6 +3,7 @@ package specman.editarea;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import specman.ChangeInfo;
+import specman.pdf.Shape;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,6 +32,15 @@ public class ImageEditAreaGlassPane extends JPanel {
     removeAll();
     new ImageDeletedMarker();
     revalidate();
+  }
+
+  /** The translucent glass with its markers, positioned relative to the glass pane's parent. */
+  public Shape getShape() {
+    Shape shape = new Shape(this).withBackgroundAlpha();
+    for (Component marker : getComponents()) {
+      shape.add(marker);
+    }
+    return shape;
   }
 
   /** The Markers are shown as small gray rectangles in each corner of a focussed {@link ImageEditArea},

@@ -7,7 +7,6 @@ import specman.ChangeInfo;
 import specman.EditorI;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
-import specman.Specman;
 import specman.editarea.focusmover.CrossEditAreaFocusMoverFromImage;
 import specman.model.v002.ImageEditAreaModel_V002;
 import specman.pdf.Shape;
@@ -393,9 +392,26 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   public boolean enthaelt(InteractiveStepFragment fragment) { return false; }
 
   public Shape getShape() {
-    return new Shape(this)
-      .add(new Shape(BORDER_THICKNESS, 0)
+    Shape shape = new Shape(this)
+      .add(new Shape(imageX(), imageY())
         .withImage(new ShapeImage(this)));
+    if (changeInfo.isDeleted() && focusGlass != null) {
+      shape.add(focusGlass.getShape());
+    }
+    return shape;
+  }
+
+  /** The image sits inside the image label's border, left-aligned and vertically centered.
+   * We need to take these details into account for precise image placement in PDF rendering. */
+  private int imageX() {
+    return image.getX() + image.getInsets().left;
+  }
+
+  /** Precise calculation of the image's Y position, required for exact placement in PDF rendering. */
+  private int imageY() {
+    Insets insets = image.getInsets();
+    int innerHeight = image.getHeight() - insets.top - insets.bottom;
+    return image.getY() + insets.top + (innerHeight - scaledIcon.getIconHeight()) / 2;
   }
 
   public BufferedImage getFullSizeImage() { return fullSizeImage; }

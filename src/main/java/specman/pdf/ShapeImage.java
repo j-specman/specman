@@ -34,7 +34,7 @@ public class ShapeImage {
       Paragraph p = new Paragraph()
         .setFixedPosition(
           renderOffset.x * swing2pdfScaleFactor,
-          (renderOffset.y - content.getHeight()) * swing2pdfScaleFactor,
+          (renderOffset.y - fullSizeImage.getHeight() * content.getTotalScalePercent()) * swing2pdfScaleFactor,
           fullSizeImage.getWidth() * scaleFactor)
         .setMargin(0);
 

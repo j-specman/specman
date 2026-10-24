@@ -20,6 +20,7 @@ public class Shape {
   private List<Shape> subshapes = new ArrayList<>();
   private Object source;
   private boolean withOutline;
+  private boolean withBackgroundAlpha;
   private AbstractShapeText text;
   private ShapeImage image;
   private ShapeNote note;
@@ -113,7 +114,13 @@ public class Shape {
    * override this: components may have a background with an alpha value which was never meant to
    * show up in the PDF, as the PDF always painted them opaque. */
   public float getFillOpacity() {
-    return 1f;
+    return withBackgroundAlpha && backgroundColor != null ? backgroundColor.getAlpha() / 255f : 1f;
+  }
+
+  /** Lets the shape be filled as translucent as its background color says, e.g. for glass panes. */
+  public Shape withBackgroundAlpha() {
+    this.withBackgroundAlpha = true;
+    return this;
   }
 
   static com.itextpdf.kernel.colors.Color toPDFColor(Color awtColor, com.itextpdf.kernel.colors.Color fallback) {
