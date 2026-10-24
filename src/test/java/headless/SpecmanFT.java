@@ -13,8 +13,12 @@ import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.ops.ExportPDFSpecmanOp;
 import specman.ops.buttons.CreateCatchSequenceADBLOpButton;
+import specman.ops.buttons.CreateSimpleStepOpButton;
+import specman.ops.buttons.CreateSubsequenceStepOpButton;
 import specman.view.AbstractSchrittView;
 import specman.view.BreakSchrittView;
+import specman.view.EinfacherSchrittView;
+import specman.view.SubsequenzSchrittView;
 import specman.editarea.InteractiveStepFragment;
 
 import javax.swing.AbstractButton;
@@ -52,7 +56,8 @@ import static specman.i18n.Messages.i18n;
  * Everything which cannot work headless or must not touch the user's environment is disabled here:
  * <ul>
  *   <li>Dialogs and toasts are not shown. Their messages are collected in {@link #shownMessages()},
- *   so that errors do not vanish unnoticed. Confirmation dialogs are answered with YES/OK.</li>
+ *   so that errors do not vanish unnoticed. Confirmation dialogs are answered with YES/OK, unless
+ *   {@link #answerConfirmDialogsWith(int)} says otherwise.</li>
  *   <li>Auto-save timer and working copy watcher are not started.</li>
  *   <li>The Specman-level clipboard operations do nothing.</li>
  * </ul>
@@ -67,6 +72,7 @@ import static specman.i18n.Messages.i18n;
 public class SpecmanFT extends Specman {
 
   private final List<String> shownMessages = new ArrayList<>();
+  private int confirmDialogAnswer = JOptionPane.YES_OPTION;
   private static final Dimension LAYOUT_SIZE = new Dimension(800, 600);
   private static final int MAX_LAYOUT_PASSES = 50;
 
@@ -76,6 +82,11 @@ public class SpecmanFT extends Specman {
 
   public List<String> shownMessages() {
     return Collections.unmodifiableList(shownMessages);
+  }
+
+  /** Defines how the user answers the following confirmation dialogs, e.g. {@link JOptionPane#CANCEL_OPTION}. */
+  public void answerConfirmDialogsWith(int option) {
+    confirmDialogAnswer = option;
   }
 
   /** Finds a step by its number and asserts that it exists and is of the expected view class. */
@@ -136,6 +147,28 @@ public class SpecmanFT extends Specman {
   public void click(Class<? extends AbstractButton> buttonType) {
     findComponent(buttonType).doClick(0);
     waitForEventsProcessed();
+  }
+
+  /** Creates a simple step like the user would by clicking the toolbar button, i.e. behind the focused step. Returns the new step. */
+  public EinfacherSchrittView createSimpleStep() {
+    return createStep(CreateSimpleStepOpButton.class, EinfacherSchrittView.class);
+  }
+
+  /** Creates a subsequence step behind the focused step. Returns it, not its first substep, which comes along. */
+  public SubsequenzSchrittView createSubsequenceStep() {
+    return createStep(CreateSubsequenceStepOpButton.class, SubsequenzSchrittView.class);
+  }
+
+  /** Clicks the button and returns the one new step of the given type. Further new steps of other types, e.g. substeps, are fine. */
+  private <T extends AbstractSchrittView> T createStep(Class<? extends AbstractButton> buttonType, Class<T> stepType) {
+    List<AbstractSchrittView> stepsBefore = new ArrayList<>(listAllSteps());
+    click(buttonType);
+    List<AbstractSchrittView> newSteps = new ArrayList<>(listAllSteps());
+    newSteps.removeAll(stepsBefore);
+    List<T> newStepsOfType = newSteps.stream().filter(stepType::isInstance).map(stepType::cast).toList();
+    assertEquals(1, newStepsOfType.size(),
+      "Clicking " + buttonType.getSimpleName() + " must create exactly one " + stepType.getSimpleName());
+    return newStepsOfType.get(0);
   }
 
   /**
@@ -364,7 +397,7 @@ public class SpecmanFT extends Specman {
   @Override
   public int showConfirmDialog(String message, String title, int optionType) {
     shownMessages.add(message);
-    return JOptionPane.YES_OPTION;
+    return confirmDialogAnswer;
   }
 
   @Override public void openSettings() {}
