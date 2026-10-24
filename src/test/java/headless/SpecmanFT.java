@@ -1,5 +1,8 @@
 package headless;
 
+import net.atlanticbb.tantlinger.ui.text.actions.BasicEditAction;
+import net.atlanticbb.tantlinger.ui.text.actions.StepnumberLinkAction;
+import net.atlanticbb.tantlinger.ui.text.actions.StepnumberLinkPanel;
 import specman.CatchLinkPanel;
 import specman.EditException;
 import specman.Specman;
@@ -15,12 +18,19 @@ import specman.view.BreakSchrittView;
 import specman.editarea.InteractiveStepFragment;
 
 import javax.swing.AbstractButton;
+import javax.swing.Action;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
@@ -50,9 +60,9 @@ import static specman.i18n.Messages.i18n;
  * a {@link java.awt.HeadlessException}, which is the right outcome for an unexpected dialog.
  * <p>
  * On top of that, it offers convenience methods to express user behavior compactly in tests:
- * {@link #focus(AbstractSchrittView)} and {@link #click(Class)} simulate the cursor placement and a
- * toolbar button click, {@link #findStepByStepID(String, Class)} and {@link #findComponent(Class)}
- * look up what the user would see.
+ * {@link #focus(AbstractSchrittView)}, {@link #click(Class)} and {@link #doEdit(Class)} simulate the cursor
+ * placement, a toolbar button click and a Shef edit action, {@link #findStepByStepID(String, Class)} and
+ * {@link #findComponent(Class)} look up what the user would see.
  */
 public class SpecmanFT extends Specman {
 
@@ -85,15 +95,71 @@ public class SpecmanFT extends Specman {
     return substep;
   }
 
-  /** Simulates the user placing the cursor into the first text of the given step. */
+  /**
+   * Simulates the user placing the cursor into the first text of the given step. The text area's focus
+   * listeners are notified like on a real focus change. This is what makes Shef's edit actions work
+   * on that text, see {@link #doEdit(Class)}.
+   */
   public void focus(AbstractSchrittView step) {
-    setLastFocusedTextArea(step.getFirstEditArea().asTextArea());
+    TextEditArea textArea = step.getFirstEditArea().asTextArea();
+    FocusEvent focusGained = new FocusEvent(textArea, FocusEvent.FOCUS_GAINED);
+    for (FocusListener listener : textArea.getFocusListeners()) {
+      listener.focusGained(focusGained);
+    }
+  }
+
+  /**
+   * Simulates the user pressing a key (e.g. {@link KeyEvent#VK_BACK_SPACE}) in the given step's first text. The text
+   * area processes the key like Swing does: First its key listeners get the chance to handle and consume the
+   * event, otherwise the editor kit's action bound to the key is performed. Without a focus owner, Swing would
+   * not deliver key events to a text area at all, so {@code dispatchEvent} does not work here. The key handlers
+   * ask the text area for its rows, which requires the layout to be up to date.
+   */
+  public void press(AbstractSchrittView step, int keyCode) {
+    layoutComponents();
+    TextEditArea textArea = step.getFirstEditArea().asTextArea();
+    KeyEvent keyEvent = new KeyEvent(textArea, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0, keyCode, KeyEvent.CHAR_UNDEFINED);
+    for (KeyListener listener : textArea.getKeyListeners()) {
+      listener.keyPressed(keyEvent);
+    }
+    if (!keyEvent.isConsumed()) {
+      Object actionKey = textArea.getInputMap().get(KeyStroke.getKeyStrokeForEvent(keyEvent));
+      Action action = actionKey == null ? null : textArea.getActionMap().get(actionKey);
+      if (action != null) {
+        action.actionPerformed(new ActionEvent(textArea, ActionEvent.ACTION_PERFORMED, null));
+      }
+    }
+    waitForEventsProcessed();
   }
 
   /** Clicks the first button of the given type, without the default press delay of {@link AbstractButton#doClick()}. */
   public void click(Class<? extends AbstractButton> buttonType) {
     findComponent(buttonType).doClick(0);
     waitForEventsProcessed();
+  }
+
+  /**
+   * Triggers the given Shef edit action on the text which got the cursor via {@link #focus(AbstractSchrittView)},
+   * like the user clicking the action's format toolbar button. Fails if the user couldn't do so, i.e. if the
+   * action is disabled because there is no focused text.
+   */
+  public void doEdit(Class<? extends BasicEditAction> actionType) {
+    BasicEditAction action = findEditAction(actionType);
+    assertTrue(action.isEnabled(), actionType.getSimpleName() + " must be enabled, focus a step first");
+    action.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+    waitForEventsProcessed();
+  }
+
+  /** Finds the Shef edit action of the given type behind a button of the format toolbar. */
+  public <T extends BasicEditAction> T findEditAction(Class<T> actionType) {
+    List<AbstractButton> buttons = new ArrayList<>();
+    collectComponents(this, AbstractButton.class, buttons);
+    for (AbstractButton button : buttons) {
+      if (actionType.isInstance(button.getAction())) {
+        return actionType.cast(button.getAction());
+      }
+    }
+    throw new IllegalStateException("No toolbar button for action " + actionType.getSimpleName());
   }
 
   /**
@@ -159,6 +225,24 @@ public class SpecmanFT extends Specman {
   /** Simulates the user clicking the given break step in the catch link dialog's list. */
   public void choose(CatchLinkPanel catchLinkPanel, BreakSchrittView breakStep) {
     catchLinkPanel.choose(breakStep);
+    waitForEventsProcessed();
+  }
+
+  /**
+   * Triggers the step number link action on the focused text like the user would. The dialog for choosing
+   * the step to link to is not displayed, but the panel it would show is returned for checking the offered
+   * steps and choosing one via {@link #choose(StepnumberLinkPanel, AbstractSchrittView)}.
+   */
+  public StepnumberLinkPanel doEditStepnumberLink() {
+    StepnumberLinkAction action = findEditAction(StepnumberLinkAction.class);
+    action.setDialogDisplayed(false);
+    doEdit(StepnumberLinkAction.class);
+    return action.stepnumberLinkPanel();
+  }
+
+  /** Simulates the user clicking the given step in the step number link dialog's list. */
+  public void choose(StepnumberLinkPanel stepnumberLinkPanel, AbstractSchrittView step) {
+    stepnumberLinkPanel.choose(step);
     waitForEventsProcessed();
   }
 

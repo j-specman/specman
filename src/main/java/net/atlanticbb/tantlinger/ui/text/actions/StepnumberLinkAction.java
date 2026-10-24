@@ -4,9 +4,7 @@ import net.atlanticbb.tantlinger.ui.UIUtils;
 
 import javax.swing.JEditorPane;
 import javax.swing.SwingUtilities;
-import java.awt.Component;
-import java.awt.Dialog;
-import java.awt.Frame;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.Serial;
 
@@ -15,7 +13,8 @@ import static specman.i18n.Messages.i18n;
 public class StepnumberLinkAction extends BasicEditAction {
     @Serial
     private static final long serialVersionUID = 1L;
-    StepnumberLinkDialog dialog;
+    private StepnumberLinkPanel panel;
+    private boolean dialogDisplayed = true;
 
     public StepnumberLinkAction() {
         super(i18n("action.stepnumberlink"));
@@ -23,33 +22,31 @@ public class StepnumberLinkAction extends BasicEditAction {
         this.putValue("ShortDescription", this.getValue("Name"));
     }
 
+    /** Allows tests to operate the {@link StepnumberLinkPanel} without displaying
+     * the dialog around it */
+    public void setDialogDisplayed(boolean dialogDisplayed) {
+        this.dialogDisplayed = dialogDisplayed;
+    }
+
+    /** The panel of the dialog opened by the last execution of the action. */
+    public StepnumberLinkPanel stepnumberLinkPanel() {
+        return panel;
+    }
+
     /**
-     * Always recreate the dialog since the stepnumberlinks are only fetched on creation
+     * Always recreate the panel since the stepnumberlinks are only fetched on creation
      */
     protected void doEdit(ActionEvent e, JEditorPane ed) {
-        Component c = SwingUtilities.getWindowAncestor(ed);
-
-        if (c instanceof Frame) {
-            this.dialog = new StepnumberLinkDialog((Frame) c, ed);
-        } else {
-            if (!(c instanceof Dialog)) {
-                return;
-            }
-
-            this.dialog = new StepnumberLinkDialog((Dialog) c, ed);
+        panel = new StepnumberLinkPanel(ed);
+        Window window = SwingUtilities.getWindowAncestor(ed);
+        if (dialogDisplayed && window != null) {
+            new StepnumberLinkDialog(window, panel);
         }
-
-        if (!this.dialog.isVisible()) {
-            this.dialog.setLocationRelativeTo(c);
-            this.dialog.setVisible(true);
-        }
-
     }
 
     protected void updateContextState(JEditorPane editor) {
-        if (this.dialog != null) {
-            this.dialog.setJTextComponent(editor);
+        if (this.panel != null) {
+            this.panel.setJTextComponent(editor);
         }
-
     }
 }
