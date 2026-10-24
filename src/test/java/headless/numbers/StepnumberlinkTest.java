@@ -21,6 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(HeadlessExtension.class)
 class StepnumberLinkTest {
 
+  /** Scenario: Three simple steps, step 3 with an emptied text. In step 3, the user inserts a link to step 2 via
+   * the step number link dialog, which must offer all three steps. Then a new step is inserted behind step 1.
+   * The linked step becomes step 3, so the link text in the old step 3, now step 4, changes from "2" to "3". */
   @Test
   void testLinkToStepIsInsertedIntoFocusedText() {
     specman.click(CreateSimpleStepOpButton.class);
@@ -37,8 +40,8 @@ class StepnumberLinkTest {
     specman.focus(step3);
     StepnumberLinkPanel panel = specman.doEditStepnumberLink();
     assertEquals(List.of(step1, step2, step3), panel.offeredSteps());
-    assertFalse(step3Text.getPlainText().contains("2"));
 
+    assertFalse(step3Text.getPlainText().contains("2"));
     specman.choose(panel, step2);
     assertTrue(step3Text.getPlainText().contains("2"));
 
