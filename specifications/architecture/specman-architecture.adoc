@@ -114,15 +114,17 @@ The regression test suite runs without a display. The prerequisite is that `Spec
 
 * `SpecmanFT` (`src/test/java/headless`) extends `Specman` and disables what can't work headless or must not touch the user's environment: dialogs and toasts (their messages are collected so errors don't vanish unnoticed), the auto-save timer and working copy watcher, and the Specman-level clipboard operations. Everything else is the real thing. It also offers convenience methods like `focus(step)` and `click(buttonType)` to express user behavior compactly.
 
-* `HeadlessExtension` switches AWT into headless mode (the property is read only once, so this must happen before the first AWT class is initialized) and provides each test with a fresh `SpecmanFT`. Tests import `HeadlessExtension.specman` statically. Each Swing-related test class carries `@ExtendWith(HeadlessExtension.class)`.
+* The suffix `FT` stands for _For Tests_ and is the convention for all classes which extend production classes for test purposes, e.g. `ExportPDFSpecmanOpFT`.
+
+* The JUnit extension `HeadlessExtension` switches AWT into headless mode (the property is read only once, so this must happen before the first AWT class is initialized) and provides each test with a fresh `SpecmanFT`. Tests import `HeadlessExtension.specman` statically. Each Swing-related test class carries `@ExtendWith(HeadlessExtension.class)`.
 
 * Tests which can't run headless, e.g. interactive experiments, live in the package `experiments` and are marked with `@NoSuiteTest`.
 
-* Naming: test classes end with `Test`. Classes which only provide infrastructure for headless operation and contain no tests end with `FT` (_For Tests_), e.g. `SpecmanFT`. This way, the Surefire pattern doesn't pick them up by accident.
-
-* Style: tests read like a description of user behavior. They use the real buttons and menu items (e.g. `clickContextMenuItem` with the message key constants of the menu), a setup consisting only of steps which belong to the scenario, and compact assertions like `assertStepNumbers("1", "2", "2.1")`.
+* Headless tests read like a description of user behavior. They use the real buttons and menu items (e.g. `clickContextMenuItem` with the message key constants of the menu), and compact assertions like `assertStepNumbers("1", "2", "2.1")`.
 
 * If something isn't reachable for a test, a small headless seam is added to the production class (e.g. `StepnumberContextMenu.popupMenu()`). Test-specific orchestration methods in `Specman` are not acceptable.
+
+* Naming and style conventions for tests are described in <<Coding Conventions for Tests>>.
 
 `SpecmanFT` is still new and evolves over time. Quite a few aspects still need to be made testable, e.g. by separating headless-suitable panels from heavyweight container components like `JDialog` (see `CatchLinkPanel` and `CatchLinkDialog` for an example). This is ongoing work.
 
@@ -170,3 +172,14 @@ With every extension of the modeling features, and thereby of the file format, t
 * Keep classes short. Even though there are no strict limits, a class should be understandable at a glance. Try to stay below 100 lines of pure code.
 
 * Keep lines short and try to apply the five-token rule: if a line consists of no more than five tokens, an average reader can take in the complete line at a single glance. Otherwise they must "parse" it mentally. Consider using static imports to keep the origin of a token out of the code line, since it is usually not of primary interest.
+
+### Coding Conventions for Tests
+* Test classes end with `Test` and test methods start with `test`.
+
+* Each test method should have a short Javadoc comment describing the aspect it tests. Don't rely on the method name alone to make the intent clear.
+
+* If the aspect can't be tested with a trivial scenario, add a brief description of the scenario and the strategy as well.
+
+* If all test methods of a class share the same aspect or scenario, it is enough to explain it once in the class-level Javadoc.
+
+* Tests should create a setup consisting only of the minimum required for the scenario. Avoid centralized setups shared by multiple tests that address different aspects. They are difficult to read and tend to become fragile over time.
