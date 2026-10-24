@@ -1,0 +1,7 @@
+:toc:
+
+# Specman Architecture
+
+## Introduction
+This document is a loose collection of information about the architecture of Specman. It is not intended as a complete specification. Instead, it grows incrementally from experience and observation, wherever further development has repeatedly raised a need for explanation or decisions.
+
