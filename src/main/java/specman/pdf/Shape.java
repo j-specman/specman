@@ -2,6 +2,7 @@ package specman.pdf;
 
 import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import specman.pdf.navigation.PdfNavigationPlan.TargetId;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ public class Shape {
   protected Color backgroundColor;
   private List<Shape> subshapes = new ArrayList<>();
   private Object source;
+  private TargetId navigationTarget;
+  private String navigationTextKey;
   private boolean withOutline;
   private AbstractShapeText text;
   private ShapeImage image;
@@ -28,8 +31,25 @@ public class Shape {
   public Shape() {}
 
   public Shape(Component component) {
-    this(component, null);
+    this(component, component);
   }
+
+  /** Export adapter binding only; the renderer uses the typed navigation metadata below. */
+  public Object getSource() { return source; }
+
+  public Shape withNavigationTarget(TargetId target) {
+    navigationTarget = target;
+    return this;
+  }
+
+  public TargetId getNavigationTarget() { return navigationTarget; }
+
+  public Shape withNavigationTextKey(String key) {
+    navigationTextKey = key;
+    return this;
+  }
+
+  public String getNavigationTextKey() { return navigationTextKey; }
 
   public Shape(Component component, Object source) {
     this.source = source;

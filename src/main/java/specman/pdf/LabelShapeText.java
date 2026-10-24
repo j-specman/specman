@@ -3,6 +3,7 @@ package specman.pdf;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
+import specman.pdf.navigation.PdfNavigationRenderContext;
 
 import javax.swing.JLabel;
 import java.awt.Color;
@@ -30,14 +31,27 @@ public class LabelShapeText extends AbstractShapeText {
   }
 
   public void writeToPDF(Point renderOffset, float swing2pdfScaleFactor, PdfCanvas pdfCanvas, Document document) {
+    writeToPDF(renderOffset, swing2pdfScaleFactor, pdfCanvas, document, null, null);
+  }
+
+  @Override
+  public void writeToPDF(Point renderOffset, float swing2pdfScaleFactor, PdfCanvas pdfCanvas, Document document,
+                         PdfNavigationRenderContext navigation, String textKey) {
     float scaledFontSize = getFontsize() * swing2pdfScaleFactor;
+    PdfFont pdfFont = getPDFFont();
+    float x = (renderOffset.x + insets.left -1) * swing2pdfScaleFactor;
+    float baseline = (renderOffset.y - insets.top) * swing2pdfScaleFactor - scaledFontSize;
     pdfCanvas.setFillColor(getPDFColor());
-    pdfCanvas.beginText().setFontAndSize(getPDFFont(), scaledFontSize)
-      .moveText(
-        (renderOffset.x + insets.left -1) * swing2pdfScaleFactor,
-        (renderOffset.y - insets.top) * swing2pdfScaleFactor - scaledFontSize)
+    pdfCanvas.beginText().setFontAndSize(pdfFont, scaledFontSize)
+      .moveText(x, baseline)
       .showText(getContent())
       .endText();
+    if (navigation != null && textKey != null) {
+      float descent = pdfFont.getDescent(getContent(), scaledFontSize);
+      float ascent = pdfFont.getAscent(getContent(), scaledFontSize);
+      navigation.label(textKey, x, baseline + descent,
+        pdfFont.getWidth(getContent(), scaledFontSize), ascent - descent);
+    }
   }
 
   public String getContent() { return content; }

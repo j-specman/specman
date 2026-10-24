@@ -4,11 +4,15 @@ import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.pdf.PDFExportChooser;
 import specman.pdf.PDFRenderer;
 import specman.pdf.Shape;
+import specman.pdf.PreparedPdfExport;
+import specman.view.PdfNavigationCollector;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ExportPDFSpecmanOp extends AbstractSpecmanOp {
 
@@ -42,6 +46,26 @@ public class ExportPDFSpecmanOp extends AbstractSpecmanOp {
       .add(getOutro().getShape());
   }
 
+  private PreparedPdfExport prepareExport() {
+    if (!SwingUtilities.isEventDispatchThread()) {
+      AtomicReference<PreparedPdfExport> result = new AtomicReference<>();
+      try {
+        SwingUtilities.invokeAndWait(() -> result.set(prepareExport()));
+      } catch (InterruptedException exception) {
+        Thread.currentThread().interrupt();
+        throw new IllegalStateException("PDF export preparation interrupted", exception);
+      } catch (InvocationTargetException exception) {
+        throw new IllegalStateException("Could not prepare PDF export", exception.getCause());
+      }
+      return result.get();
+    }
+    PdfNavigationCollector.Capture navigation = PdfNavigationCollector.collect(
+      getHauptSequenz(), getIntro(), getOutro());
+    Shape diagram = getDiagramShape();
+    navigation.bindNavigation(diagram);
+    return new PreparedPdfExport(diagram, navigation.plan());
+  }
+
   public void export() {
     File selectedFile = chooseFileAndOptions();
     if (selectedFile != null) {
@@ -51,15 +75,15 @@ public class ExportPDFSpecmanOp extends AbstractSpecmanOp {
   }
 
   protected void renderPDF(File selectedFile) {
-    Shape all = getDiagramShape();
     try {
+      PreparedPdfExport preparedExport = prepareExport();
       new PDFRenderer(selectedFile.getAbsolutePath(),
         PDFExportChooser.pageSizeByName(pdfExportOptions.pageSize),
         pdfExportOptions.portrait,
         pdfExportOptions.paging,
-        getZoomFactor()).render(all);
-    } catch (IOException iox) {
-      displayException(iox);
+        getZoomFactor()).render(preparedExport);
+    } catch (IOException | RuntimeException exception) {
+      displayException(exception);
     }
   }
 
