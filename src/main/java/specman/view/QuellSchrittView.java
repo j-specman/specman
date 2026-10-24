@@ -50,6 +50,11 @@ public class QuellSchrittView extends AbstractSchrittView {
     @Override
     public JComponent getPanel() { return editContainer; }
 
+    @Override
+    public specman.pdf.Shape getShape() {
+      return decoratedShape(editContainer.getShape());
+    }
+
     public StepNumber getZielschrittID() {
       return zielschritt != null ? zielschritt.getNumber() : null;
     }
