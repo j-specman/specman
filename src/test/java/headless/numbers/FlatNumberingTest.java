@@ -1,5 +1,6 @@
-package headless;
+package headless.numbers;
 
+import headless.HeadlessExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import specman.ops.buttons.CreateSimpleStepOpButton;
