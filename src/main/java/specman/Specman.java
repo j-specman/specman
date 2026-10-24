@@ -105,7 +105,7 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
 		scrollPane.getHorizontalScrollBar().setUnitIncrement(20);
 		scrollPane.addMouseWheelListener(createDragMouseAdapter());
-		contentPane.add(scrollPane, CC.xy(2, 3));
+		contentPane.add(scrollPane, CC.xy(2, 2));
 
 		initEmptyDiagram();
 
@@ -287,7 +287,21 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	@Override
 	public void setLastFocusedTextArea(TextEditArea area) {
 		lastFocusedTextArea = area;
+		updateFocusDependentActions();
   }
+
+	/**
+	 * Enables the toolbar's step buttons only if the last focused text area belongs to a step, and the insert
+	 * buttons only if a text area has been focused at all.
+	 */
+	public void updateFocusDependentActions() {
+		if (diagramToolBar == null) {
+			return;
+		}
+		AbstractSchrittView step = lastFocusedTextArea != null && hauptSequenz != null
+			? hauptSequenz.findeSchritt(lastFocusedTextArea) : null;
+		diagramToolBar.updateFocusDependentButtons(step != null, lastFocusedTextArea != null);
+	}
 
 	@Override
 	public void setDiagrammDatei(File diagrammDatei) {
@@ -399,6 +413,8 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	public void diagrammAktualisieren(EditArea editArea) {
+		// Steps may have been deleted or restored, so the focused text area may no longer belong to a step.
+		updateFocusDependentActions();
 		// Null-Abfrage ist für den Fall, dass der User etwas im Intro oder Outro macht,
 		// bevor er überhaupt das Diagramm angefangen hat. Sollte man später noch mal
 		// bereinigen, dass das gar nicht geht, solange die Welcome Message noch angezeigt wird.
@@ -414,13 +430,19 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 			// event does, because that's the only thing that reliably retriggers every affected
 			// component's own componentResized() handling. So we synthesize one here too: nudge
 			// the window size by 1px, restored together with the diagrammbreite nudge below.
+			// A maximized window must not be resized: that would restore it to its normal size.
 			Container window = getWindowOrRootPane();
 			Dimension size = window.getSize();
-			window.setSize(size.width + 1, size.height);
+			boolean nudgeWindow = !isWindowMaximized();
+			if (nudgeWindow) {
+				window.setSize(size.width + 1, size.height);
+			}
 			final Point viewPosition = scrollPane.getViewport().getViewPosition();
 			SwingUtilities.invokeLater(() -> {
 				diagrammbreiteSetzen(diagrammbreite);
-				window.setSize(size.width, size.height);
+				if (nudgeWindow) {
+					window.setSize(size.width, size.height);
+				}
 				hauptSequenzContainer.setVisible(true);
 				if (editArea != null) {
 					editArea.requestFocus();
@@ -428,6 +450,10 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 				scrollPane.getViewport().setViewPosition(viewPosition);
 			});
 		}
+	}
+
+	private boolean isWindowMaximized() {
+		return frame != null && (frame.getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;
 	}
 
 	@Override
@@ -478,15 +504,13 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	private void initComponents() {
-		diagramToolBar = new DiagramToolBar(this);
 		stepButtonBar = new StepButtonBar(this);
 
 		contentPane = new JPanel();
 		setContentPane(contentPane);
-		contentPane.setLayout(new FormLayout("pref, default:grow", "default, default, fill:10px:grow")); //ToDo Sidebar added "pref"
+		contentPane.setLayout(new FormLayout("pref, default:grow", "default, fill:10px:grow")); //ToDo Sidebar added "pref"
 
-		contentPane.add(diagramToolBar, CC.xywh(1, 1, 2, 1));
-		contentPane.add(stepButtonBar, CC.xy(1, 3));
+		contentPane.add(stepButtonBar, CC.xy(1, 2));
 	}
 
 	HTMLEditorPane shefEditorPane;
@@ -501,7 +525,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 		shefEditorPane = new HTMLEditorPane(undoManager);
 		specmanMenuBar = new SpecmanMenuBar(this, shefEditorPane);
 		setJMenuBar(specmanMenuBar);
-		contentPane.add(shefEditorPane.getFormatToolBar(), CC.xywh(1, 2, 2, 1));
+		diagramToolBar = new DiagramToolBar(this, shefEditorPane);
+		// the line spans both columns, so it also runs over the step button bar
+		contentPane.add(diagramToolBar.inScrollPane(
+			BorderFactory.createMatteBorder(0, 0, 1, 0, UIManager.getColor("Component.borderColor"))), CC.xywh(1, 1, 2, 1));
+		updateFocusDependentActions();
 	}
 
 	@Override
@@ -522,7 +550,6 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 
 	public void updateChangeSet(ChangeSet changeSet) {
 		currentChangeSet = changeSet;
-		diagramToolBar.updateChangeSet(changeSet);
 		specmanMenuBar.updateChangeSet(changeSet);
 	}
 
@@ -635,6 +662,15 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
   @Override
   public void openSettings() {
     new SettingsDialog(frame).setVisible(true);
+    diagramToolBar.reloadFileSettings();
+    checkWorkingCopyNow();
+  }
+
+  /** Checks for a newer working copy, if auto load is enabled. The load starts after the debounce delay of the auto load. */
+  public void checkWorkingCopyNow() {
+    if (autoLoad != null) {
+      autoLoad.checkNow();
+    }
   }
 
   @Override
@@ -703,6 +739,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	@Override
 	public void zusammenklappenFuerReview() {
 		getHauptSequenz().zusammenklappenFuerReview();
+	}
+
+	@Override
+	public void alleSchritteKlappen(boolean zuklappen) {
+		getHauptSequenz().alleKlappen(zuklappen);
 	}
 
 	@Override public int getZoomFactor() {

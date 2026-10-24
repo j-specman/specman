@@ -1,6 +1,8 @@
 package net.atlanticbb.tantlinger.ui.text.actions;
 
-import net.atlanticbb.tantlinger.ui.UIUtils;
+import specman.graphics.IconReader;
+import specman.graphics.SpecmanIcons;
+
 import net.atlanticbb.tantlinger.ui.text.actions.BasicEditAction;
 import specman.Specman;
 import static specman.Specman.editor;
@@ -15,7 +17,7 @@ public class TableAction extends BasicEditAction {
 
     public TableAction() {
         super(i18n.str("table_"));
-        this.putValue("SmallIcon", UIUtils.getIcon("resources/images/x16/", "table.png"));
+        this.putValue("SmallIcon", IconReader.readSvgIcon(SpecmanIcons.TABLE, SpecmanIcons.SIZE_SMALL));
         this.putValue("ShortDescription", this.getValue("Name"));
     }
 

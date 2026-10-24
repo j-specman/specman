@@ -11,8 +11,9 @@ abstract class AbstractSelectSetting<T> extends AbstractSetting {
 
   private final JComboBox<SettingOption<T>> comboBox;
   private final String prefKey;
+  private final List<SettingOption<T>> options;
 
-  public AbstractSelectSetting(String labelKey, String prefKey, List<SettingOption<T>> options) {
+  protected AbstractSelectSetting(String labelKey, String prefKey, List<SettingOption<T>> options) {
     this(labelKey, prefKey, options, new JComboBox<>());
   }
 
@@ -23,11 +24,20 @@ abstract class AbstractSelectSetting<T> extends AbstractSetting {
     this.comboBox = comboBox;
     this.prefKey = prefKey;
     options.forEach(comboBox::addItem);
+    this.options = options;
+    reloadFromPreferences();
+  }
+
+  public void reloadFromPreferences() {
     String saved = Preferences.userNodeForPackage(Specman.class).get(prefKey, "");
     options.stream()
         .filter(o -> serialise(o.value).equals(saved))
         .findFirst()
         .ifPresent(comboBox::setSelectedItem);
+  }
+
+  protected JComboBox<SettingOption<T>> comboBox() {
+    return comboBox;
   }
 
   @Override

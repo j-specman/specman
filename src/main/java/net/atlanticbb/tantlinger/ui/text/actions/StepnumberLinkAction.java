@@ -1,6 +1,8 @@
 package net.atlanticbb.tantlinger.ui.text.actions;
 
-import net.atlanticbb.tantlinger.ui.UIUtils;
+import specman.graphics.IconReader;
+import specman.graphics.SpecmanIcons;
+
 
 import javax.swing.JEditorPane;
 import javax.swing.SwingUtilities;
@@ -18,7 +20,7 @@ public class StepnumberLinkAction extends BasicEditAction {
 
     public StepnumberLinkAction() {
         super(i18n("action.stepnumberlink"));
-        this.putValue("SmallIcon", UIUtils.getIcon("resources/images/x16/", "link3.png"));
+        this.putValue("SmallIcon", IconReader.readSvgIcon(SpecmanIcons.STEPNUMBER_LINK, SpecmanIcons.SIZE_SMALL));
         this.putValue("ShortDescription", this.getValue("Name"));
     }
 

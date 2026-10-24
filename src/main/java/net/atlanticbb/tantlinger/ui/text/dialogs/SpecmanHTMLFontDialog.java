@@ -1,7 +1,9 @@
 package net.atlanticbb.tantlinger.ui.text.dialogs;
 
+import specman.graphics.IconReader;
+import specman.graphics.SpecmanIcons;
+
 import net.atlanticbb.tantlinger.i18n.I18n;
-import net.atlanticbb.tantlinger.ui.UIUtils;
 import net.atlanticbb.tantlinger.ui.text.actions.HTMLFontSizeAction;
 import net.atlanticbb.tantlinger.ui.text.actions.SpecmanFontSizeAction;
 import specman.Specman;
@@ -19,7 +21,7 @@ public class SpecmanHTMLFontDialog extends HTMLOptionDialog {
 
   private static final long serialVersionUID = 1L;
   private static final I18n i18n = I18n.getInstance("net.atlanticbb.tantlinger.ui.text.dialogs");
-  private static Icon icon = UIUtils.getIcon("resources/images/x32/", "fontsize.png");
+  private static Icon icon = IconReader.readSvgIcon(SpecmanIcons.FONT_SIZE, SpecmanIcons.SIZE_DIALOG);
   private static String title;
   private static String desc;
   private JPanel jContentPane = null;

@@ -1,8 +1,9 @@
 package specman;
 
 import net.atlanticbb.tantlinger.ui.HeaderPanel;
-import net.atlanticbb.tantlinger.ui.UIUtils;
 import org.apache.commons.lang.StringUtils;
+import specman.graphics.IconReader;
+import specman.graphics.SpecmanIcons;
 import specman.i18n.IButton;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
@@ -44,7 +45,7 @@ import static specman.i18n.Messages.i18n;
 public class CatchLinkPanel extends JPanel {
   @Serial
   private static final long serialVersionUID = 1L;
-  private static final Icon icon = UIUtils.getIcon("resources/images/x32/", "link3.png");
+  private static final Icon icon = IconReader.readSvgIcon(SpecmanIcons.STEPNUMBER_LINK, SpecmanIcons.SIZE_DIALOG);
   private static final Color DEFAULT_BACKGROUND = Color.white;
   private static final Color HOVERED_BACKGROUND = Color.lightGray;
   private static final int MAXIMAL_REFERENCE_TEXTLENGTH = 60;

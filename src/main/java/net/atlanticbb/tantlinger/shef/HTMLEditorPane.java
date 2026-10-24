@@ -1,8 +1,11 @@
 package net.atlanticbb.tantlinger.shef;
 
+import specman.graphics.IconReader;
+import specman.graphics.SpecmanIcons;
+
 import net.atlanticbb.tantlinger.i18n.I18n;
 import net.atlanticbb.tantlinger.ui.DefaultAction;
-import net.atlanticbb.tantlinger.ui.UIUtils;
+import net.atlanticbb.tantlinger.ui.ShefIconInstaller;
 import net.atlanticbb.tantlinger.ui.text.CompoundUndoManager;
 import net.atlanticbb.tantlinger.ui.text.HTMLUtils;
 import net.atlanticbb.tantlinger.ui.text.WysiwygHTMLEditorKit;
@@ -22,7 +25,6 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JToolBar;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.Document;
@@ -30,7 +32,6 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.undo.UndoManager;
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -50,6 +51,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 /**
  * This class was extracted from the SHEF library and modified / extended for Specman.
@@ -83,13 +85,19 @@ public class HTMLEditorPane extends JPanel
   private JEditorPane focusedEditor;
   private JComboBox fontFamilyCombo;
   private JComboBox paragraphCombo;
-  private JToolBar formatToolBar;
+  private final List<Component> textGroupComponents = new ArrayList<>();
+  private final List<Component> insertGroupComponents = new ArrayList<>();
 
   private JMenu editMenu;
   private JMenu formatMenu;
   private JMenu insertMenu;
 
   private ActionList actionList;
+  /** Insert buttons that need a focused text area. The state lives on the buttons, because the SHEF actions
+   * reset their own enabled state on every caret or focus event.
+   */
+  private final List<AbstractButton> textAreaButtons = new ArrayList<>();
+  private boolean textAreaActionsEnabled = true;
 
   private FocusListener focusHandler = new FocusHandler();
   private ActionListener fontChangeHandler = new FontChangeHandler();
@@ -108,12 +116,20 @@ public class HTMLEditorPane extends JPanel
   private void initUI()
   {
     createEditorActions();
-    setLayout(new BorderLayout());
-    add(formatToolBar, BorderLayout.NORTH);
   }
 
-  public JToolBar getFormatToolBar() {
-    return formatToolBar;
+  /** Controls of the toolbar group "Text": paragraph, font, size, color, inline styles, alignment.
+   * These components are part of the SHEF-Editor.
+   */
+  public List<Component> getTextGroupComponents() {
+    return List.copyOf(textGroupComponents);
+  }
+
+  /** Controls of the toolbar group "Insert": lists, link, image, table, step number link.
+   * These components are part of the SHEF-Editor.
+   */
+  public List<Component> getInsertGroupComponents() {
+    return List.copyOf(insertGroupComponents);
   }
 
   public JMenu getEditMenu()
@@ -245,15 +261,20 @@ public class HTMLEditorPane extends JPanel
     actionList.add(act);
     insertMenu.add(act);
 
-    createFormatToolBar(paraActions, fontSizeActions);
+    createToolbarComponents(paraActions, fontSizeActions);
+    List<AbstractButton> toolbarButtons = textGroupComponents.stream()
+            .filter(AbstractButton.class::isInstance)
+            .map(AbstractButton.class::cast)
+            .collect(Collectors.toCollection(java.util.ArrayList::new));
+    insertGroupComponents.stream()
+            .filter(AbstractButton.class::isInstance)
+            .map(AbstractButton.class::cast)
+            .forEach(toolbarButtons::add);
+    ShefIconInstaller.install(actionList, toolbarButtons);
   }
 
-  private void createFormatToolBar(ActionList blockActs, ActionList fontSizeActs)
+  private void createToolbarComponents(ActionList blockActs, ActionList fontSizeActs)
   {
-    formatToolBar = new JToolBar();
-    formatToolBar.setFloatable(false);
-    formatToolBar.setFocusable(false);
-
     Font comboFont = new Font("Dialog", Font.PLAIN, 12);
     PropertyChangeListener propLst = new PropertyChangeListener()
     {
@@ -270,11 +291,9 @@ public class HTMLEditorPane extends JPanel
         }
       }
     };
-    for(Iterator it = blockActs.iterator(); it.hasNext();)
-    {
-      Object o = it.next();
-      if(o instanceof DefaultAction)
-        ((DefaultAction)o).addPropertyChangeListener(propLst);
+    for (Object o : blockActs) {
+      if (o instanceof DefaultAction)
+        ((DefaultAction) o).addPropertyChangeListener(propLst);
     }
     paragraphCombo = new JComboBox(toArray(blockActs));
     paragraphCombo.setPreferredSize(new Dimension(120, 22));
@@ -283,8 +302,7 @@ public class HTMLEditorPane extends JPanel
     paragraphCombo.setFont(comboFont);
     paragraphCombo.addActionListener(paragraphComboHandler);
     paragraphCombo.setRenderer(new ParagraphComboRenderer());
-    formatToolBar.add(paragraphCombo);
-    formatToolBar.addSeparator();
+    textGroupComponents.add(paragraphCombo);
 
     fontFamilyCombo = new JComboBox(FontFamily.ALL_FONTS);
     fontFamilyCombo.setPreferredSize(new Dimension(150, 22));
@@ -292,43 +310,33 @@ public class HTMLEditorPane extends JPanel
     fontFamilyCombo.setMaximumSize(new Dimension(150, 22));
     fontFamilyCombo.setFont(comboFont);
     fontFamilyCombo.addActionListener(fontChangeHandler);
-    formatToolBar.add(fontFamilyCombo);
+    textGroupComponents.add(fontFamilyCombo);
 
-    final JButton fontSizeButton = new JButton(UIUtils.getIcon(UIUtils.X16, "fontsize.png"));
+    final JButton fontSizeButton = new JButton(IconReader.readSvgIcon(SpecmanIcons.FONT_SIZE, SpecmanIcons.SIZE_TOOLBAR));
     final JPopupMenu sizePopup = ActionUIFactory.getInstance().createPopupMenu(fontSizeActs);
     ActionListener al = e -> sizePopup.show(fontSizeButton, 0, fontSizeButton.getHeight());
     fontSizeButton.addActionListener(al);
     configToolbarButton(fontSizeButton);
-    formatToolBar.add(fontSizeButton);
+    textGroupComponents.add(fontSizeButton);
 
     Action act = new HTMLFontColorAction();
     actionList.add(act);
-    addToToolBar(formatToolBar, act);
-    formatToolBar.addSeparator();
+    addToToolBar(textGroupComponents, act);
 
     act = new HTMLInlineAction(HTMLInlineAction.BOLD);
     act.putValue(ActionManager.BUTTON_TYPE, ActionManager.BUTTON_TYPE_VALUE_TOGGLE);
     actionList.add(act);
-    addToToolBar(formatToolBar, act);
+    addToToolBar(textGroupComponents, act);
 
     act = new HTMLInlineAction(HTMLInlineAction.ITALIC);
     act.putValue(ActionManager.BUTTON_TYPE, ActionManager.BUTTON_TYPE_VALUE_TOGGLE);
     actionList.add(act);
-    addToToolBar(formatToolBar, act);
+    addToToolBar(textGroupComponents, act);
 
     act = new HTMLInlineAction(HTMLInlineAction.UNDERLINE);
     act.putValue(ActionManager.BUTTON_TYPE, ActionManager.BUTTON_TYPE_VALUE_TOGGLE);
     actionList.add(act);
-    addToToolBar(formatToolBar, act);
-    formatToolBar.addSeparator();
-
-    act = new UnorderedListItemAction();
-    actionList.add(act);
-    addToToolBar(formatToolBar, act);
-
-    act = new OrderedListItemAction();
-    actionList.add(act);
-    addToToolBar(formatToolBar, act);
+    addToToolBar(textGroupComponents, act);
 
     List alst = HTMLEditorActionFactory.createAlignActionList();
     for(Iterator it = alst.iterator(); it.hasNext();)
@@ -336,33 +344,40 @@ public class HTMLEditorPane extends JPanel
       act = (Action)it.next();
       act.putValue(ActionManager.BUTTON_TYPE, ActionManager.BUTTON_TYPE_VALUE_TOGGLE);
       actionList.add(act);
-      addToToolBar(formatToolBar, act);
+      addToToolBar(textGroupComponents, act);
     }
-    formatToolBar.addSeparator();
+
+    act = new UnorderedListItemAction();
+    actionList.add(act);
+    textAreaButtons.add(addToToolBar(insertGroupComponents, act));
+
+    act = new OrderedListItemAction();
+    actionList.add(act);
+    textAreaButtons.add(addToToolBar(insertGroupComponents, act));
 
     act = new HTMLLinkAction();
     actionList.add(act);
-    addToToolBar(formatToolBar, act);
+    addToToolBar(insertGroupComponents, act);
 
     act = new ImageAction();
     actionList.add(act);
-    addToToolBar(formatToolBar, act);
+    textAreaButtons.add(addToToolBar(insertGroupComponents, act));
 
     act = new TableAction();
     actionList.add(act);
-    addToToolBar(formatToolBar, act);
+    textAreaButtons.add(addToToolBar(insertGroupComponents, act));
 
     act = new StepnumberLinkAction();
     actionList.add(act);
-    addToToolBar(formatToolBar, act);
-
+    textAreaButtons.add(addToToolBar(insertGroupComponents, act));
   }
 
-  private void addToToolBar(JToolBar toolbar, Action act)
+  private AbstractButton addToToolBar(List<Component> group, Action act)
   {
     AbstractButton button = ActionUIFactory.getInstance().createButton(act);
     configToolbarButton(button);
-    toolbar.add(button);
+    group.add(button);
+    return button;
   }
 
   /**
@@ -388,10 +403,8 @@ public class HTMLEditorPane extends JPanel
   {
     button.setText(null);
     button.setMnemonic(0);
-    button.setMargin(new Insets(1, 1, 1, 1));
-    button.setMaximumSize(new Dimension(22, 22));
-    button.setMinimumSize(new Dimension(22, 22));
-    button.setPreferredSize(new Dimension(22, 22));
+    // same sizing as the DiagramToolBar buttons: no margin, size derived from the icon
+    button.setMargin(new Insets(0, 0, 0, 0));
     button.setFocusable(false);
     button.setFocusPainted(false);
     //button.setBorder(plainBorder);
@@ -460,6 +473,23 @@ public class HTMLEditorPane extends JPanel
   {
     actionList.putContextValueForAll(HTMLTextEditAction.EDITOR, focusedEditor);
     actionList.updateEnabledForAll();
+    applyTextAreaActionsEnabled();
+  }
+
+  /** Enables or disables the insert buttons that need a focused text area; survives SHEF's own state updates. */
+  public void setTextAreaActionsEnabled(boolean enabled)
+  {
+    textAreaActionsEnabled = enabled;
+    applyTextAreaActionsEnabled();
+  }
+
+  private void applyTextAreaActionsEnabled()
+  {
+    for (AbstractButton button : textAreaButtons)
+    {
+      Action action = button.getAction();
+      button.setEnabled(textAreaActionsEnabled && (action == null || action.isEnabled()));
+    }
   }
 
 
