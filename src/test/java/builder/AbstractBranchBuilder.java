@@ -11,11 +11,6 @@ abstract public class AbstractBranchBuilder<Q extends BranchSequenceModel_V002, 
     super(sequence);
   }
 
-  @Override
-  protected B withDefaults() {
-    return super.withDefaults().withHeading("");
-  }
-
   public B withHeading(String headingText) {
     sequence.heading = new EditorContentModel_V002(headingText, null);
     return self();

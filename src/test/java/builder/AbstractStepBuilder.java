@@ -2,6 +2,7 @@ package builder;
 
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.EditorContentModel_V002;
+import specman.model.v002.TextEditAreaModel_V002;
 
 /**
  * Base of all step builders. The second type parameter is the concrete builder type, so the
@@ -41,6 +42,11 @@ abstract public class AbstractStepBuilder<S extends AbstractStepModel_V002, B ex
   public B withText(String text) {
     step.content = new EditorContentModel_V002(text, null);
     return self();
+  }
+
+  /** The primary text of the step as it was specified by {@link #withText(String)}. */
+  public String text() {
+    return ((TextEditAreaModel_V002) step.content.areas.get(0)).text;
   }
 
   public S build() {

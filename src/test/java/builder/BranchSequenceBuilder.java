@@ -8,4 +8,9 @@ public class BranchSequenceBuilder extends AbstractBranchBuilder<BranchSequenceM
   public BranchSequenceBuilder() {
     super(new BranchSequenceModel_V002());
   }
+
+  @Override
+  protected BranchSequenceBuilder withDefaults() {
+    return super.withDefaults().withHeading("");
+  }
 }

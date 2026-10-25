@@ -6,11 +6,13 @@ import specman.model.v002.BreakStepModel_V002;
 import specman.model.v002.CatchSequenceModel_V002;
 import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.DoWhileStepModel_V002;
+import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.IfElseStepModel_V002;
 import specman.model.v002.IfStepModel_V002;
 import specman.model.v002.CaseStepModel_V002;
 import specman.model.v002.SimpleStepModel_V002;
 import specman.model.v002.SubsequenceStepModel_V002;
+import specman.model.v002.TextEditAreaModel_V002;
 import specman.model.v002.WhileStepModel_V002;
 import specman.model.v002.io.ModelParseException;
 import specman.model.v002.io.ModelParser_V002;
@@ -121,7 +123,7 @@ public class BuilderTest {
   /** A catch sequence in the main sequence is linked to its break step inside a loop via the break's id. */
   @Test
   void testBreakAndCatch() throws IOException, ModelParseException {
-    BreakStepBuilder breakInLoop = breakStep().withId("b1a2c3d4");
+    BreakStepBuilder breakInLoop = breakStep("Not found").withId("b1a2c3d4");
     File nsdFile = diagramm()
       .withMainSequence(sequence()
         .withStep(whileStep().withLoopSequence(sequence().withStep(breakInLoop)))
@@ -137,6 +139,27 @@ public class BuilderTest {
     assertEquals("b1a2c3d4", catches.get(0).id);
     assertEquals(1, catches.get(0).steps.size());
     assertEquals(SimpleStepModel_V002.class, catches.get(0).steps.get(0).getClass());
+  }
+
+  /** A catch sequence takes its heading from the break step it catches, and so do its co-catches. */
+  @Test
+  void testCatchHeadingsAreTakenFromBreakSteps() throws IOException, ModelParseException {
+    BreakStepBuilder notFound = breakStep("Not found");
+    BreakStepBuilder noAccess = breakStep("No access");
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(whileStep().withLoopSequence(sequence().withStep(notFound).withStep(noAccess)))
+        .withCatch(catchOf(notFound).withCoCatch(noAccess).withStep(simple())))
+      .persist();
+
+    CatchSequenceModel_V002 catchSequence = parse(nsdFile).mainSequence.catchArea.catchSequences.get(0);
+
+    assertEquals("Not found", headingText(catchSequence.heading));
+    assertEquals("No access", headingText(catchSequence.coCatches.get(0).heading));
+  }
+
+  private static String headingText(EditorContentModel_V002 heading) {
+    return ((TextEditAreaModel_V002) heading.areas.get(0)).text;
   }
 
   private static List<String> numbersOf(List<AbstractStepModel_V002> steps) {
