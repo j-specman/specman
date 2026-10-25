@@ -35,10 +35,15 @@ abstract class AbstractChangemodeTest {
     specman.selectChangeSet(changeSet);
   }
 
-  /** The text must be marked as changed by the given change set from its first to its last character.
-   * Markups covering no character at all, i.e. ending before they start, are not visible and don't count. */
+  /** The text must be marked as changed by the given change set from its first to its last character. An empty
+   * text has no character to mark, so it must not be marked at all. Markups covering no character at all,
+   * i.e. ending before they start, are not visible and don't count. */
   static void assertWholeTextMarkedAsChangedBy(TextEditArea textArea, ChangeSet changeSet) {
     List<Markup_V002> markups = visibleMarkups(textArea);
+    if (textArea.getPlainText().isEmpty()) {
+      assertEquals(List.of(), markups, "text markups in empty " + describe(textArea));
+      return;
+    }
     assertEquals(1, markups.size(), "text markups in " + describe(textArea));
     Markup_V002 markup = markups.get(0);
     assertEquals(MarkupType.Changed, markup.type, "markup type in " + describe(textArea));

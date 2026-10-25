@@ -31,6 +31,10 @@ public class EditorContentModel_V002 {
         return new EditorContentModel_V002(new TextEditAreaModel_V002(""));
     }
 
+    public static EditorContentModel_V002 empty(ChangeInfo changeInfo) {
+        return new EditorContentModel_V002("", changeInfo);
+    }
+
     @Deprecated
     @JsonIgnore
     public TextEditAreaModel_V002 getFirstAreaAsText() {

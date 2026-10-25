@@ -17,6 +17,7 @@ import java.awt.*;
 import static specman.TextInit.schrittHintergrund;
 
 import static specman.Specman.editor;
+import static specman.model.v002.EditorContentModel_V002.empty;
 
 /**
  * Im Gegensatz zum Struktogramm-Standard verwenden wird die <i>rechte</i> Seite für die Sequenz der
@@ -33,14 +34,14 @@ public class IfSchrittView extends IfElseSchrittView {
 	
 	public IfSchrittView(SchrittSequenzView parent, EditorContentModel_V002 initialerString, StepNumber id, ChangeInfo changeInfo) {
 		super(parent, initialerString, id, changeInfo, false);
-		initIfSequenz(new ZweigSchrittSequenzView(this, id.naechsteID().naechsteEbene(), EditorContentModel_V002.empty(), changeInfo));
+		initIfSequenz(new ZweigSchrittSequenzView(this, id.naechsteID().naechsteEbene(), empty(changeInfo), changeInfo));
 		initElseSequenz(new ZweigSchrittSequenzView(this, id.naechsteEbene(), EditContainer.right("step.branch.yes"), changeInfo));
 		ifBreite = SPALTENLAYOUT_UMGEHUNG_GROESSE + 2; /**@author PVN, Dueck */ 
 	}
 
 	public IfSchrittView(SchrittSequenzView parent, IfStepModel_V002 model) {
 		super(parent, model.content, model.id, model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED, model.shade);
-		initIfSequenz(new ZweigSchrittSequenzView(this, StepNumber.EMPTY, EditorContentModel_V002.empty(), this.changeInfo));
+		initIfSequenz(new ZweigSchrittSequenzView(this, StepNumber.EMPTY, empty(this.changeInfo), this.changeInfo));
 		initElseSequenz(new ZweigSchrittSequenzView(this, model.ifSequence));
 		ifBreiteSetzen(model.emptyWidth);
 		klappen.init(model.collapsed);

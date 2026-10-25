@@ -1,6 +1,5 @@
 package headless.changemode;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -41,6 +40,7 @@ class NewStepColoringTest extends AbstractChangemodeTest {
       CreateWhileStepOpButton.class,
       CreateWhileWhileStepOpButton.class,
       CreateIfElseStepOpButton.class,
+      CreateIfStepOpButton.class,
       CreateCaseStepOpButton.class,
       CreateSubsequenceStepOpButton.class,
       CreateBreakStepOpButton.class);
@@ -51,19 +51,6 @@ class NewStepColoringTest extends AbstractChangemodeTest {
   void testNewStepIsColoredUntilAccepted(Class<? extends AbstractCreateStepOpButton> buttonType) {
     enableChangeMode(CHANGE_SET);
     specman.click(buttonType);
-    AbstractSchrittView step = specman.findStepByStepID("1");
-    assertColoredBy(step, CHANGE_SET);
-
-    specman.click(ACCEPT_CHANGES_BUTTON);
-    assertUncolored(step);
-  }
-
-  @Disabled("The empty cell left of the if step's branch stays white in change mode: IfSchrittView creates its heading "
-    + "from EditorContentModel_V002.empty(), which is untracked, and initIfSequenz colors the sequence area but not the heading.")
-  @Test
-  void testNewIfStepIsColoredUntilAccepted() {
-    enableChangeMode(CHANGE_SET);
-    specman.click(CreateIfStepOpButton.class);
     AbstractSchrittView step = specman.findStepByStepID("1");
     assertColoredBy(step, CHANGE_SET);
 
