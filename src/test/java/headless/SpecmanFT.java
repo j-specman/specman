@@ -15,6 +15,7 @@ import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.ops.ExportPDFSpecmanOp;
 import specman.ops.buttons.CreateCatchSequenceADBLOpButton;
+import specman.ops.buttons.CreateBreakStepOpButton;
 import specman.ops.buttons.CreateSimpleStepOpButton;
 import specman.ops.buttons.CreateSubsequenceStepOpButton;
 import specman.view.AbstractSchrittView;
@@ -203,6 +204,11 @@ public class SpecmanFT extends Specman {
   /** Creates a subsequence step behind the focused step. Returns it, not its first substep, which comes along. */
   public SubsequenzSchrittView clickNewSubsequenceStep() {
     return clickNewStep(CreateSubsequenceStepOpButton.class, SubsequenzSchrittView.class);
+  }
+
+  /** Creates a break step behind the focused step. Returns it. */
+  public BreakSchrittView clickNewBreakStep() {
+    return clickNewStep(CreateBreakStepOpButton.class, BreakSchrittView.class);
   }
 
   /** Clicks the button and returns the one new step of the given type. Further new steps of other types, e.g. substeps, are fine. */

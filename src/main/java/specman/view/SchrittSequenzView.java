@@ -74,7 +74,7 @@ public class SchrittSequenzView {
 		panel = new JPanel();
 		huellLayout = new FormLayout("10px:grow", ZEILENLAYOUT_LETZTER_SCHRITT + ", " + ZEILENLAYOUT_CATCHBEREICH);
 		panel.setLayout(huellLayout);
-		panel.setBackground(TextInit.schrittHintergrund());
+		panel.setBackground(changeInfo.panelColor());
 		this.sequenzBasisId = sequenzBasisId;
 		sequenzBereich = new JPanel();
 		sequenzBereich.setBackground(DIAGRAMM_LINE_COLOR);
@@ -146,7 +146,11 @@ public class SchrittSequenzView {
 
 	public ChangeInfo getChangeInfo() { return changeInfo; }
 
-	public void setChangeInfo(ChangeInfo changeInfo) { this.changeInfo = changeInfo; }
+	/** The shell panel around the sequence follows the change info, so that it shows the right color wherever it gets visible. */
+	public void setChangeInfo(ChangeInfo changeInfo) {
+		this.changeInfo = changeInfo;
+		panel.setBackground(changeInfo.panelColor());
+	}
 
 	public List<AbstractSchrittView> getSchritte() { return schritte; }
 
@@ -549,7 +553,7 @@ public class SchrittSequenzView {
 		if (catchBereich != null) {
 			changesMade += catchBereich.aenderungenUebernehmen();
 		}
-		changeInfo = changeInfo.untrack(changeset());
+		setChangeInfo(changeInfo.untrack(changeset()));
 		return changesMade;
 	}
 
@@ -559,7 +563,7 @@ public class SchrittSequenzView {
 		for (AbstractSchrittView schritt: schritte) {
 			changesRejected += schritt.aenderungenVerwerfen();
 		}
-		changeInfo = changeInfo.untrack(currentSet);
+		setChangeInfo(changeInfo.untrack(currentSet));
 		if (catchBereich != null) {
 			changesRejected += catchBereich.aenderungenVerwerfen();
 		}

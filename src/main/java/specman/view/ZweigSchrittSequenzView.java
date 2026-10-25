@@ -34,7 +34,7 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 	public ZweigSchrittSequenzView(AbstractSchrittView parent, StepNumber sequenzBasisId, EditorContentModel_V002 initialerText, ChangeInfo changeInfo) {
 		super(parent, sequenzBasisId, changeInfo);
 		ueberschriftInitialisieren(initialerText, null);
-		this.changeInfo = TextInit.initialChangeInfo();
+		setChangeInfo(TextInit.initialChangeInfo());
 	}
 
 	protected void ueberschriftInitialisieren( EditorContentModel_V002 initialerText, StepNumber initialeSchrittnummer) {
@@ -129,7 +129,7 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 
 	public void aenderungsmarkierungenEntfernen() {
 		ueberschrift.aenderungsmarkierungenEntfernen(null);
-		changeInfo = changeInfo.untrack(changeset());
+		setChangeInfo(changeInfo.untrack(changeset()));
 	}
 
 	@Override

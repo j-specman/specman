@@ -25,6 +25,5 @@ public class BottomFiller extends JPanel {
     row = layout.getRowCount();
     parent.add(this, CC.xyw(1, row, layout.getColumnCount()));
     setBackground(changeInfo.panelColor());
-    setBackground(Color.red);
   }
 }

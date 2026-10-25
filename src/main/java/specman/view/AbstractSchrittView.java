@@ -11,6 +11,7 @@ import specman.StepNumber;
 import specman.Specman;
 
 import static specman.ChangeSet.changeset;
+import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.draganddrop.DragSource.Type.CatchSequenceCreation;
 import static specman.draganddrop.DragSource.Type.StepCreation;
 import static specman.draganddrop.DragSource.Type.StepMove;
@@ -326,9 +327,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	 * {@link #editAenderungenUebernehmen} bzw. {@link #editAenderungenVerwerfen()} entfernt. */
 	public void aenderungsmarkierungenEntfernen() {
 		editContainer.aenderungsmarkierungenEntfernen(number);
-		if (shadeColor != null) {
-			setBackgroundUDBL(shadeColor);
-		}
+		setBackgroundUDBL(shadeColor != null ? shadeColor : BACKGROUND_COLOR_STANDARD);
 	}
 
 	@Override
