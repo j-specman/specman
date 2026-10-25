@@ -52,6 +52,7 @@ public class IfSchrittView extends IfElseSchrittView {
 	protected void initIfSequenz(ZweigSchrittSequenzView pIfSequenz) {
 		super.initIfSequenz(pIfSequenz);
 		ifSequenz.sequenzBereich.setBackground(schrittHintergrund());
+		ifSequenz.getUeberschrift().getFirstEditArea().asTextArea().setEditable(false);
 	}
 
 	@Override
