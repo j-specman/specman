@@ -1,7 +1,9 @@
 package builder;
 
+import specman.editarea.markups.MarkupType;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.EditorContentModel_V002;
+import specman.model.v002.Markup_V002;
 import specman.model.v002.TextEditAreaModel_V002;
 
 /**
@@ -43,6 +45,24 @@ abstract public class AbstractStepBuilder<S extends AbstractStepModel_V002, B ex
     step.content = new EditorContentModel_V002(text, null);
     return self();
   }
+
+  /** Marks the first occurrence of the specified fragment of the primary text, e.g. as step link.
+   *  Must be called after {@link #withText(String)}, which resets the markups. */
+  public B withMarkup(String fragment, MarkupType type, String changeset) {
+    TextEditAreaModel_V002 textArea = primaryTextArea();
+    int from = textArea.text.indexOf(fragment);
+    if (from < 0) {
+      throw new IllegalArgumentException("'" + fragment + "' not found in '" + textArea.text + "'");
+    }
+    int to = from + fragment.length() - 1;
+    textArea.markups.add(new Markup_V002(from, to, type, changeset));
+    return self();
+  }
+
+  public B withSteplink(String fragment) {
+    return withMarkup(fragment, MarkupType.Steplink, null);
+  }
+
 
   /** Overrides the plain text rendition of the primary text. By default it equals the text itself.
    *  Must be called after {@link #withText(String)}, which resets it. */

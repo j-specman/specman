@@ -96,6 +96,37 @@ public class SanitizeTest {
     assertOK(sanitize(nsdFile));
   }
 
+  /** A step link follows the renumbering of the referenced step, the update is reported and the file is repaired. */
+  @Test
+  void testStepLinkFollowsRenumberedStep() throws IOException {
+    File nsdFile = diagramm()
+      .withRenumberSteps(false)
+      .withMainSequence(sequence()
+        .withStep(simple("first").withStepNumber("8"))
+        .withStep(simple("see step 8").withSteplink("8").withStepNumber("2")))
+      .persist();
+
+    CLIResult result = sanitize(nsdFile);
+
+    assertSANITIZED(result, "Steplink references updated (1)", "8 -> 1");
+    assertContains(Files.readString(nsdFile.toPath()), "`see step 1`");
+    assertOK(sanitize(nsdFile));
+  }
+
+  /** A step link to a step number which doesn't exist can't be repaired and is reported as ERROR. */
+  @Test
+  void testStepLinkToUnknownStep() {
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first"))
+        .withStep(simple("see step 9").withSteplink("9")))
+      .persist();
+
+    CLIResult result = sanitize(nsdFile);
+
+    assertERROR(result, "Unresolvable steplink references", "9");
+  }
+
   /** A file with a syntax error is reported as ERROR. The error is made by deleting the semicolons behind the steps. */
   @Test
   void testSyntaxError() throws IOException {
