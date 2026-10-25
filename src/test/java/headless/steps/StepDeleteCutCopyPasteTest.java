@@ -37,11 +37,12 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static specman.metatag.stepnumberlabel.StepnumberContextMenu.COPY_ITEM;
 import static specman.metatag.stepnumberlabel.StepnumberContextMenu.CUT_ITEM;
+import static specman.metatag.stepnumberlabel.StepnumberContextMenu.DELETE_ITEM;
 import static specman.metatag.stepnumberlabel.StepnumberContextMenu.PASTE_ITEM;
 
-/** Copying and cutting steps via the step number's context menu and pasting them elsewhere. */
+/** Deleting, copying and cutting steps via the step number's context menu and pasting them elsewhere. */
 @ExtendWith(HeadlessExtension.class)
-class StepCutCopyPasteTest {
+class StepDeleteCutCopyPasteTest {
 
   /**
    * Scenario: Step 1 is of the type under test, followed by a simple step 2. The user copies step 1 and pastes it
@@ -75,6 +76,30 @@ class StepCutCopyPasteTest {
     Set<String> existingIds = stepsBeforePaste.stream().map(AbstractSchrittView::getId).collect(toSet());
     pasted.forEach(step -> assertFalse(existingIds.contains(step.getId()), "pasted step " + step.getNumber() + " must have a new ID"));
     assertEquals(originalText, pasted.get(0).getFirstEditArea().asTextArea().getPlainText());
+  }
+
+  /** Scenario: Two simple steps, the user deletes step 1 via the context menu. The remaining step moves up to number 1.
+   * Undo restores the deleted step in its old place, redo deletes it again. */
+  @Test
+  void testDeleteUndoRedo() {
+    EinfacherSchrittView step1 = specman.clickNewSimpleStep();
+    String deletedText = step1.getFirstEditArea().asTextArea().getPlainText();
+    EinfacherSchrittView step2 = specman.clickNewSimpleStep();
+    String stayText = step2.getFirstEditArea().asTextArea().getPlainText();
+    assertNotEquals(deletedText, stayText, "the steps must be distinguishable by their texts");
+
+    specman.clickContextMenuItem(step1, DELETE_ITEM);
+    specman.assertStepNumbers(List.of("1"));
+    assertStepTexts(stayText);
+
+    specman.undo();
+    specman.assertStepNumbers(List.of("1", "2"));
+    assertStepTexts(deletedText, stayText);
+
+    specman.redo();
+    specman.assertStepNumbers(List.of("1"));
+    assertStepTexts(stayText);
+    assertEquals(List.of(), specman.shownMessages());
   }
 
   /** Scenario: Two simple steps, the user copies step 1 and pastes it behind step 2. Undoing removes the pasted
