@@ -6,20 +6,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import specman.ChangeSet;
 import specman.ops.buttons.AbstractCreateStepOpButton;
 import specman.ops.buttons.CreateBreakStepOpButton;
-import specman.ops.buttons.CreateCaseStepOpButton;
-import specman.ops.buttons.CreateIfElseStepOpButton;
-import specman.ops.buttons.CreateIfStepOpButton;
-import specman.ops.buttons.CreateSimpleStepOpButton;
-import specman.ops.buttons.CreateSubsequenceStepOpButton;
 import specman.ops.buttons.CreateWhileStepOpButton;
-import specman.ops.buttons.CreateWhileWhileStepOpButton;
 import specman.view.AbstractSchrittView;
 import specman.view.BreakSchrittView;
 import specman.view.CatchBereich;
 import specman.view.EinfacherSchrittView;
 import specman.view.SubsequenzSchrittView;
-
-import java.util.stream.Stream;
 
 import static headless.HeadlessExtension.specman;
 import static specman.DiagramToolBar.ACCEPT_CHANGES_BUTTON;
@@ -33,18 +25,6 @@ import static specman.DiagramToolBar.ACCEPT_CHANGES_BUTTON;
 class NewStepColoringTest extends AbstractChangemodeTest {
 
   private static final ChangeSet CHANGE_SET = ChangeSet.ALL.get("blue");
-
-  static Stream<Class<? extends AbstractCreateStepOpButton>> stepCreationButtons() {
-    return Stream.of(
-      CreateSimpleStepOpButton.class,
-      CreateWhileStepOpButton.class,
-      CreateWhileWhileStepOpButton.class,
-      CreateIfElseStepOpButton.class,
-      CreateIfStepOpButton.class,
-      CreateCaseStepOpButton.class,
-      CreateSubsequenceStepOpButton.class,
-      CreateBreakStepOpButton.class);
-  }
 
   @ParameterizedTest
   @MethodSource("stepCreationButtons")
