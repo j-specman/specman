@@ -44,9 +44,20 @@ abstract public class AbstractStepBuilder<S extends AbstractStepModel_V002, B ex
     return self();
   }
 
+  /** Overrides the plain text rendition of the primary text. By default it equals the text itself.
+   *  Must be called after {@link #withText(String)}, which resets it. */
+  public B withPlainText(String plainText) {
+    primaryTextArea().plainText = plainText;
+    return self();
+  }
+
   /** The primary text of the step as it was specified by {@link #withText(String)}. */
   public String text() {
-    return ((TextEditAreaModel_V002) step.content.areas.get(0)).text;
+    return primaryTextArea().text;
+  }
+
+  private TextEditAreaModel_V002 primaryTextArea() {
+    return (TextEditAreaModel_V002) step.content.areas.get(0);
   }
 
   public S build() {

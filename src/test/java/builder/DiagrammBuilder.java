@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -22,6 +23,7 @@ public class DiagrammBuilder {
 
   private DiagramModel_V002 diagramm;
   private StepSequenceBuilder mainSequence;
+  private boolean renumberSteps = true;
 
   public DiagrammBuilder() {
     this.diagramm = new DiagramModel_V002();
@@ -60,9 +62,16 @@ public class DiagrammBuilder {
     return this;
   }
 
+  public DiagrammBuilder withRenumberSteps(boolean renumberSteps) {
+    this.renumberSteps = renumberSteps;
+    return this;
+  }
+
   public DiagramModel_V002 build() {
     diagramm.mainSequence = mainSequence.build();
-    ModelRenumberer_V002.renumber(diagramm.mainSequence);
+    if (renumberSteps) {
+      ModelRenumberer_V002.renumber(diagramm.mainSequence);
+    }
     return diagramm;
   }
 
@@ -79,6 +88,19 @@ public class DiagrammBuilder {
       throw new UncheckedIOException(iox);
     }
     return nsdFile;
+  }
+
+  /** Deletes the files left by earlier test runs in {@link #NSD_DIRECTORY}. Test classes
+   *  call it in a {@code @BeforeAll} method. */
+  public static void deleteOldNsdFiles() throws IOException {
+    if (!Files.isDirectory(NSD_DIRECTORY)) {
+      return;
+    }
+    try (DirectoryStream<Path> oldFiles = Files.newDirectoryStream(NSD_DIRECTORY, "*.nsd")) {
+      for (Path oldFile : oldFiles) {
+        Files.delete(oldFile);
+      }
+    }
   }
 
   private static File nextNsdFile() {

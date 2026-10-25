@@ -1,5 +1,6 @@
 package builder;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.BreakStepModel_V002;
@@ -43,6 +44,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * by the model parser and contain what the builders were told to put into it.
  */
 public class BuilderTest {
+
+  @BeforeAll
+  static void deleteOldNsdFiles() throws IOException {
+    DiagrammBuilder.deleteOldNsdFiles();
+  }
 
   /** A persisted two-step diagram is parsed back with the given ids, texts and consecutive numbers. */
   @Test
