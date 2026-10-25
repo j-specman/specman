@@ -36,6 +36,7 @@ import javax.swing.border.MatteBorder;
 import javax.swing.text.JTextComponent;
 import javax.swing.undo.UndoableEdit;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
 import java.awt.event.FocusEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -842,6 +843,8 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
   public void deleteStepADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {
     new DeleteStepADBLOp(this, step, initiatingFragment).run();
   }
+
+  @Override public Clipboard clipboard() { return Toolkit.getDefaultToolkit().getSystemClipboard(); }
 
   @Override public void copyStepToClipboard(AbstractSchrittView step) { new CopyStepOp(step).run(); }
   @Override public void cutStepToClipboard(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) { new CutStepOp(this, step, initiatingFragment).run(); }

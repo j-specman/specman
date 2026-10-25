@@ -7,8 +7,6 @@ import specman.model.v002.io.ModelSerializer_V002;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
 
-import java.awt.Toolkit;
-
 import static specman.Specman.editor;
 
 public class CopyStepOp {
@@ -26,7 +24,7 @@ public class CopyStepOp {
       AbstractStepModel_V002 model = step.generiereModel(true);
       String serialized = new ModelSerializer_V002().serializeStep(model);
       SpecmanClipboardContent content = new SpecmanClipboardContent(editor().instanceId(), serialized);
-      Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new SpecmanStepsTransferable(content), null);
+      editor().clipboard().setContents(new SpecmanStepsTransferable(content), null);
     }
   }
 }

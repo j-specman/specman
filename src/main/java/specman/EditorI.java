@@ -16,6 +16,7 @@ import javax.swing.JEditorPane;
 import javax.swing.text.JTextComponent;
 import javax.swing.undo.UndoableEdit;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
 import java.awt.event.FocusListener;
 import java.io.File;
 import java.util.List;
@@ -60,6 +61,8 @@ public interface EditorI extends FocusListener {
   int showConfirmDialog(String message, String title, int optionType);
   void deleteStepADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   void newStepPostInit(AbstractSchrittView newStep);
+  /** The clipboard the step operations copy to and paste from. Tests substitute an in-memory clipboard. */
+  Clipboard clipboard();
   void copyStepToClipboard(AbstractSchrittView step);
   void cutStepToClipboard(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   void pasteStepsAfter(AbstractSchrittView referenceStep);

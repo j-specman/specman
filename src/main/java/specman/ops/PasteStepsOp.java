@@ -14,7 +14,6 @@ import specman.model.v002.io.StepIdRemapper_V002;
 import specman.view.AbstractSchrittView;
 import specman.view.SchrittSequenzView;
 
-import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.util.ArrayList;
@@ -101,7 +100,7 @@ public class PasteStepsOp extends AbstractADBLSpecmanOp {
 
   private SpecmanClipboardContent readClipboard() {
     try {
-      Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+      Clipboard clipboard = editor().clipboard();
       if (clipboard.isDataFlavorAvailable(SpecmanStepsTransferable.SPECMAN_STEPS_FLAVOR)) {
         return (SpecmanClipboardContent) clipboard.getData(SpecmanStepsTransferable.SPECMAN_STEPS_FLAVOR);
       }

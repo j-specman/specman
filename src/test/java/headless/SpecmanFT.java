@@ -19,7 +19,6 @@ import specman.view.AbstractSchrittView;
 import specman.view.BreakSchrittView;
 import specman.view.EinfacherSchrittView;
 import specman.view.SubsequenzSchrittView;
-import specman.editarea.InteractiveStepFragment;
 
 import javax.swing.AbstractButton;
 import javax.swing.Action;
@@ -30,6 +29,7 @@ import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.datatransfer.Clipboard;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -59,7 +59,8 @@ import static specman.i18n.Messages.i18n;
  *   so that errors do not vanish unnoticed. Confirmation dialogs are answered with YES/OK, unless
  *   {@link #answerConfirmDialogsWith(int)} says otherwise.</li>
  *   <li>Auto-save timer and working copy watcher are not started.</li>
- *   <li>The Specman-level clipboard operations do nothing.</li>
+ *   <li>Step copy and paste use an in-memory clipboard instead of the system clipboard. Table copy and
+ *   paste, which still access the system clipboard directly, do nothing.</li>
  * </ul>
  * Code which opens a dialog or accesses the system clipboard directly is not covered. It fails with
  * a {@link java.awt.HeadlessException}, which is the right outcome for an unexpected dialog.
@@ -72,6 +73,7 @@ import static specman.i18n.Messages.i18n;
 public class SpecmanFT extends Specman {
 
   private final List<String> shownMessages = new ArrayList<>();
+  private final Clipboard clipboard = new Clipboard("specman-test");
   private int confirmDialogAnswer = JOptionPane.YES_OPTION;
   private static final Dimension LAYOUT_SIZE = new Dimension(800, 600);
   private static final int MAX_LAYOUT_PASSES = 50;
@@ -199,9 +201,11 @@ public class SpecmanFT extends Specman {
    * Operates the step number's context menu like the user: Right-clicks the given step's number and
    * clicks the menu item with the given message key. The menu is not shown, but the item is only
    * clicked if the user could do so, i.e. if it is visible and enabled for that step.
-   * Check box items toggle their state when clicked.
+   * Check box items toggle their state when clicked. The layout is brought up to date first, like it always
+   * is when a user can click: Serializing a step reads the column widths of if/else steps from the layout.
    */
   public void clickContextMenuItem(AbstractSchrittView step, String itemMessageKey) {
+    layoutComponents();
     rightClick(findStepnumberLabel(step));
     String itemText = i18n(itemMessageKey);
     for (Component component : StepnumberContextMenu.popupMenu().getComponents()) {
@@ -290,6 +294,10 @@ public class SpecmanFT extends Specman {
 
   public void assertStepNumbers(String... expectedNumbers) {
     assertEquals(List.of(expectedNumbers), allStepNumbers());
+  }
+
+  public void assertStepNumbers(List<String> expectedNumbers) {
+    assertEquals(expectedNumbers, allStepNumbers());
   }
 
   /**
@@ -395,6 +403,11 @@ public class SpecmanFT extends Specman {
   }
 
   @Override
+  public Clipboard clipboard() {
+    return clipboard;
+  }
+
+  @Override
   public int showConfirmDialog(String message, String title, int optionType) {
     shownMessages.add(message);
     return confirmDialogAnswer;
@@ -403,9 +416,6 @@ public class SpecmanFT extends Specman {
   @Override public void openSettings() {}
   @Override public void addRecentFile(File file) {}
   @Override public void openMetaTagConfigs() {}
-  @Override public void copyStepToClipboard(AbstractSchrittView step) {}
-  @Override public void cutStepToClipboard(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {}
-  @Override public void pasteStepsAfter(AbstractSchrittView referenceStep) {}
   @Override public void copyTableToClipboard(TableEditArea table) {}
   @Override public void cutTableToClipboard(TableEditArea table) {}
   @Override public void pasteTableInto(TextEditArea initiatingTextArea) {}
