@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 public class IfElseStepModel_V002 extends StructuredStepModel_V002 {
-    public final BranchSequenceModel_V002 ifSequence;
-    public final BranchSequenceModel_V002 elseSequence;
-    public final float ifWidthRatio;
+    public BranchSequenceModel_V002 ifSequence;
+    public BranchSequenceModel_V002 elseSequence;
+    public float ifWidthRatio;
 
     @Deprecated public IfElseStepModel_V002() { // For Jackson only
         ifSequence = new BranchSequenceModel_V002();

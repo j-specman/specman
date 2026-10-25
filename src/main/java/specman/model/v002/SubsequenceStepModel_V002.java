@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public class SubsequenceStepModel_V002 extends StructuredStepModel_V002 {
-    public final StepSequenceModel_V002 subsequence;
-    public final boolean flatNumbering;
+    public StepSequenceModel_V002 subsequence;
+    public boolean flatNumbering;
 
     @Deprecated public SubsequenceStepModel_V002() { // For Jackson only
         subsequence = null;

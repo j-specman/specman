@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DiagramModel_V002 {
-    public final String name;
-    public final int width;
-    public final int zoomFactor;
-    public final boolean changeModeEnabled;
-    public final String changeSetName;
-    public final StepSequenceModel_V002 mainSequence;
-    public final EditorContentModel_V002 intro;
-    public final EditorContentModel_V002 outro;
-    public final PdfExportOptionsModel_V002 pdfExportOptions;
-    public final List<MetaTagConfigModel_V002> metaTagConfigs = new ArrayList<>();
+    public String name;
+    public int width;
+    public int zoomFactor;
+    public boolean changeModeEnabled;
+    public String changeSetName;
+    public StepSequenceModel_V002 mainSequence;
+    public EditorContentModel_V002 intro;
+    public EditorContentModel_V002 outro;
+    public PdfExportOptionsModel_V002 pdfExportOptions;
+    public List<MetaTagConfigModel_V002> metaTagConfigs = new ArrayList<>();
 
     @Deprecated public DiagramModel_V002() { // For Jackson only
         name = null;

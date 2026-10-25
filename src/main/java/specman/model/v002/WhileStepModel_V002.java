@@ -8,8 +8,8 @@ import specman.view.RoundedBorderDecorationStyle;
 import java.util.List;
 
 public class WhileStepModel_V002 extends StructuredStepModel_V002 {
-    public final StepSequenceModel_V002 loopSequence;
-    public final int barWidth;
+    public StepSequenceModel_V002 loopSequence;
+    public int barWidth;
 
     @Deprecated public WhileStepModel_V002() { // For Jackson only
         loopSequence = null;

@@ -33,7 +33,7 @@ public abstract class AbstractStepModel_V002 {
     public static final int ID_LENGTH = 8;
 
     public String id;
-    public final EditorContentModel_V002 content;
+    public EditorContentModel_V002 content;
     public final Integer shade;
     public ChangeInfoModel_V002 changeInfo;
     public String sourceStepId;

@@ -6,7 +6,7 @@ import specman.view.RoundedBorderDecorationStyle;
 import java.util.List;
 
 public class StructuredStepModel_V002 extends AbstractStepModel_V002 {
-    public final boolean collapsed;
+    public boolean collapsed;
 
     @Deprecated StructuredStepModel_V002() { // For Jackson only
         collapsed = false;

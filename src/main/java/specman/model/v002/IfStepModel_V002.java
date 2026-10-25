@@ -8,8 +8,8 @@ import specman.view.RoundedBorderDecorationStyle;
 import java.util.List;
 
 public class IfStepModel_V002 extends StructuredStepModel_V002 {
-    public final BranchSequenceModel_V002 ifSequence;
-    public final int emptyWidth;
+    public BranchSequenceModel_V002 ifSequence;
+    public int emptyWidth;
 
     @Deprecated public IfStepModel_V002() { // For Jackson only
         ifSequence = new BranchSequenceModel_V002();

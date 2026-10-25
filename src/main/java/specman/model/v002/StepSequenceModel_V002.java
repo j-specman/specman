@@ -8,8 +8,8 @@ import java.util.List;
 public class StepSequenceModel_V002 {
     public String id;
     public ChangeInfoModel_V002 changeInfo;
-    public final List<AbstractStepModel_V002> steps;
-    public final CatchAreaModel_V002 catchArea;
+    public List<AbstractStepModel_V002> steps;
+    public CatchAreaModel_V002 catchArea;
 
     @Deprecated public StepSequenceModel_V002() { // For Jackson only
         id = null;

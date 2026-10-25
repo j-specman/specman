@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 public class CaseStepModel_V002 extends StructuredStepModel_V002 {
-    public final BranchSequenceModel_V002 defaultSequence;
-    public final List<BranchSequenceModel_V002> caseSequences;
-    public final List<Float> columnWidthRatios;
+    public BranchSequenceModel_V002 defaultSequence;
+    public List<BranchSequenceModel_V002> caseSequences;
+    public List<Float> columnWidthRatios;
 
     @Deprecated public CaseStepModel_V002() { // For Jackson only
         defaultSequence = null;
