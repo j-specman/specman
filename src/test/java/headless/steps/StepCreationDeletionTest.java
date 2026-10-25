@@ -25,6 +25,7 @@ import specman.view.WhileWhileSchrittView;
 
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * For each step type: Click the creation button in an empty diagram and check that the matching step
@@ -70,6 +71,8 @@ class StepCreationDeletionTest {
   void testIfStep() throws Exception {
     IfSchrittView step = assertButtonCreatesStep(CreateIfStepOpButton.class, IfSchrittView.class);
     specman.findSubstep(step, "1.1", EinfacherSchrittView.class);
+    assertFalse(step.getIfSequenz().getUeberschrift().getFirstEditArea().asTextArea().isEditable(),
+      "the empty heading of the if step's left branch must not be editable");
     EinfacherSchrittView follower = assertFollowerStepNumber("2");
     assertStepDeletion(step, follower);
   }
