@@ -8,6 +8,7 @@ import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.IfStepModel_V002;
 import specman.editarea.EditContainer;
+import specman.editarea.TextEditArea;
 import specman.undo.props.UDBL;
 
 
@@ -52,7 +53,19 @@ public class IfSchrittView extends IfElseSchrittView {
 	protected void initIfSequenz(ZweigSchrittSequenzView pIfSequenz) {
 		super.initIfSequenz(pIfSequenz);
 		ifSequenz.sequenzBereich.setBackground(schrittHintergrund());
-		ifSequenz.getUeberschrift().getFirstEditArea().asTextArea().setEditable(false);
+		emptyHeading().setEditable(false);
+	}
+
+	/** Rejecting the deletion of the step makes all its texts editable again, but not the empty heading. */
+	@Override
+	protected int editAenderungenVerwerfen() {
+		int changesRejected = super.editAenderungenVerwerfen();
+		emptyHeading().setEditable(false);
+		return changesRejected;
+	}
+
+	private TextEditArea emptyHeading() {
+		return ifSequenz.getUeberschrift().getFirstEditArea().asTextArea();
 	}
 
 	@Override

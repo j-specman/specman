@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static specman.editarea.document.WrappedDocumentUtil.elementHatDurchgestrichenenText;
 import static specman.editarea.markups.MarkupSearchPurpose.All;
@@ -41,6 +42,8 @@ import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 import static specman.graphics.Styles.DELETED_BACKGROUND_COLOR;
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.graphics.Styles.Hintergrundfarbe_Deviderbar;
+import static specman.graphics.Styles.SCHRITTNUMMER_FARBE;
+import static specman.graphics.Styles.SCHRITTNUMMER_VORDERGRUNDFARBE;
 import static specman.graphics.Styles.Schriftfarbe_Geloescht;
 import static specman.graphics.ReadWriteColor.toHTMLColor;
 
@@ -113,9 +116,21 @@ abstract class AbstractChangemodeTest {
       textArea -> assertWholeTextMarkedAsChangedBy(textArea, changeSet));
   }
 
-  /** The opposite of {@link #assertColoredBy}: No text is marked as changed and the areas have the standard background. */
+  /**
+   * The opposite of {@link #assertColoredBy} and {@link #assertDeletedBy}: The step looks and behaves like a step
+   * which was never touched in change mode, e.g. after its changes have been accepted or its deletion has been
+   * rejected. The step is not tracked, its areas have the standard background, none of its texts is marked as
+   * changed or deleted, and all texts with content can be edited. Empty texts are not checked for editability because
+   * there might be ones which are not editable by design, like the empty heading of an if step. The step number labels
+   * have their standard colors.
+   */
   static void assertUncolored(AbstractSchrittView step) {
-    assertAreasBelow(step, BACKGROUND_COLOR_STANDARD, "standard background", AbstractChangemodeTest::assertNoChangeMarkups);
+    assertTrue(step.getChangeInfo().isUntracked(), "step " + step.getNumber() + " must not be tracked");
+    assertAreasBelow(step, BACKGROUND_COLOR_STANDARD, "standard background", AbstractChangemodeTest::assertTextUncolored);
+    for (StepnumberLabel label : visibleComponentsBelow(step.getDecoratedComponent(), StepnumberLabel.class)) {
+      assertEquals(SCHRITTNUMMER_FARBE.color, label.getBackground(), "background of " + describe(label));
+      assertEquals(SCHRITTNUMMER_VORDERGRUNDFARBE, label.getForeground(), "text color of " + describe(label));
+    }
   }
 
   /** The step is marked as deleted by the given change set: Its areas have the change set's panel color, like those
@@ -159,6 +174,26 @@ abstract class AbstractChangemodeTest {
   private static String cssColorOf(WrappedElement character, CSS.Attribute attribute) {
     Object color = character.getAttributes().getAttribute(attribute);
     return color != null ? color.toString() : null;
+  }
+
+  static void assertTextUncolored(TextEditArea textArea) {
+    assertNoChangeMarkups(textArea);
+    if (textArea.getPlainText().isEmpty()) {
+      return;
+    }
+    assertTrue(textArea.isEditable(), describe(textArea) + " must be editable");
+    WrappedDocument document = textArea.getWrappedDocument();
+    WrappedPosition position = document.start();
+    for (int index = 0; index < textArea.getPlainText().length(); index++) {
+      WrappedElement character = document.getCharacterElement(position);
+      String characterName = "character " + index + " of " + describe(textArea);
+      assertFalse(elementHatDurchgestrichenenText(character), characterName + " must not be struck through");
+      assertNotEquals(DELETED_BACKGROUND_COLOR.htmlColor, cssColorOf(character, CSS.Attribute.BACKGROUND_COLOR),
+        "background of " + characterName);
+      assertNotEquals(toHTMLColor(Schriftfarbe_Geloescht), cssColorOf(character, CSS.Attribute.COLOR),
+        "text color of " + characterName);
+      position = position.inc();
+    }
   }
 
   private static void assertAreasBelow(AbstractSchrittView step, Color areaColor, String areaColorName, Consumer<TextEditArea> textCheck) {
