@@ -151,7 +151,7 @@ Things to keep in mind:
 * During development, plain literals may be written in the code. The externalization into the bundles is done in a dedicated step and can usually be delegated to an AI assistant.
 
 ## Headless Tests
-The regression test suite runs without a display. The prerequisite is that `Specman` can be instantiated headless with the real component tree, without fakes. This is achieved by the following design:
+The regression test suite runs without a display even though most of the tests address UI functionality. The prerequisite is that `Specman` can be instantiated headless with the real component tree, without fakes. This is achieved by the following design:
 
 * `SpecmanFT` (`src/test/java/headless`) extends `Specman` and disables what can't work headless or must not touch the user's environment: dialogs and toasts (their messages are collected so errors don't vanish unnoticed), the auto-save timer and working copy watcher, and the Specman-level clipboard operations. Everything else is the real thing. It also offers convenience methods like `focus(step)` and `click(buttonType)` to express user behavior compactly.
 
@@ -161,7 +161,7 @@ The regression test suite runs without a display. The prerequisite is that `Spec
 
 * Tests which can't run headless, e.g. interactive experiments, live in the package `experiments` and are marked with `@NoSuiteTest`.
 
-* Headless tests read like a description of user behavior. They use the real buttons and menu items (e.g. `clickContextMenuItem` with the message key constants of the menu), and compact assertions like `assertStepNumbers("1", "2", "2.1")`.
+* Headless tests read like a description of user behavior. They use the real buttons and menu items and compact assertions like `assertStepNumbers("1", "2", "2.1")`. Toolbar buttons and menu items are addressed by their component name via `click(name)`, using the public name constants of `DiagramToolBar` and the menu classes (e.g. `DiagramToolBar.TRACK_CHANGES_BUTTON`). `clickContextMenuItem` takes the message key constants of the step number's context menu.
 
 * If something isn't reachable for a test, a small headless seam is added to the production class (e.g. `StepnumberContextMenu.popupMenu()`). Test-specific orchestration methods in `Specman` are not acceptable.
 
@@ -224,3 +224,5 @@ With every extension of the modeling features, and thereby of the file format, t
 * If all test methods of a class share the same aspect or scenario, it is enough to explain it once in the class-level Javadoc.
 
 * Tests should create a setup consisting only of the minimum required for the scenario. Avoid centralized setups shared by multiple tests that address different aspects. They are difficult to read and tend to become fragile over time.
+
+* Prefer sociable tests over isolated unit tests. A sociable test lets the real collaborating classes work together instead of replacing them by mocks or fakes. Define the unit under test as large as practical, to verify that functionality is not only present but correctly integrated into application features. Consider using a headless Specman instance (see <<Headless Tests>>).
