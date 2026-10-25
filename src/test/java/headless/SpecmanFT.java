@@ -4,6 +4,8 @@ import net.atlanticbb.tantlinger.ui.text.actions.BasicEditAction;
 import net.atlanticbb.tantlinger.ui.text.actions.StepnumberLinkAction;
 import net.atlanticbb.tantlinger.ui.text.actions.StepnumberLinkPanel;
 import specman.CatchLinkPanel;
+import specman.ChangeSet;
+import specman.DiagramToolBar;
 import specman.EditException;
 import specman.Specman;
 import specman.editarea.TableEditArea;
@@ -22,6 +24,7 @@ import specman.view.SubsequenzSchrittView;
 
 import javax.swing.AbstractButton;
 import javax.swing.Action;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
@@ -49,7 +52,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static specman.DiagramToolBar.TRACK_CHANGES_BUTTON;
 import static specman.i18n.Messages.i18n;
+import static specman.menubar.SpecmanMenuBar.changeSetItemName;
 
 /**
  * Specman <b>F</b>or <b>T</b>ests: the real Specman, instantiated without its {@link specman.SpecmanFrame}.
@@ -151,18 +156,57 @@ public class SpecmanFT extends Specman {
     waitForEventsProcessed();
   }
 
+  /** Clicks the toolbar button or menu item with the given name. Use the name constants of {@link DiagramToolBar}
+   * and the menu classes, e.g. {@link DiagramToolBar#TRACK_CHANGES_BUTTON}. The click works like the user's,
+   * except for menus, which are not opened first. */
+  public void click(String name) {
+    AbstractButton button = findByName(this, name);
+    if (button == null) {
+      throw new IllegalStateException("No button or menu item named '" + name + "'");
+    }
+    button.doClick(0);
+    waitForEventsProcessed();
+  }
+
+  /** Clicks the toolbar's toggle button for tracking changes, which switches the change mode on or off. */
+  public void toggleChangeMode() {
+    click(TRACK_CHANGES_BUTTON);
+  }
+
+  /** Chooses the given change set from the change set menu like the user would. */
+  public void selectChangeSet(ChangeSet changeSet) {
+    click(changeSetItemName(changeSet));
+  }
+
+  /** Menu items live in a menu's popup, which is not part of the menu's component children. */
+  private static AbstractButton findByName(Component component, String name) {
+    if (component instanceof AbstractButton button && name.equals(button.getName())) {
+      return button;
+    }
+    Component[] children = component instanceof JMenu menu ? menu.getMenuComponents()
+      : component instanceof Container container ? container.getComponents()
+      : new Component[0];
+    for (Component child : children) {
+      AbstractButton found = findByName(child, name);
+      if (found != null) {
+        return found;
+      }
+    }
+    return null;
+  }
+
   /** Creates a simple step like the user would by clicking the toolbar button, i.e. behind the focused step. Returns the new step. */
-  public EinfacherSchrittView createSimpleStep() {
-    return createStep(CreateSimpleStepOpButton.class, EinfacherSchrittView.class);
+  public EinfacherSchrittView clickNewSimpleStep() {
+    return clickNewStep(CreateSimpleStepOpButton.class, EinfacherSchrittView.class);
   }
 
   /** Creates a subsequence step behind the focused step. Returns it, not its first substep, which comes along. */
-  public SubsequenzSchrittView createSubsequenceStep() {
-    return createStep(CreateSubsequenceStepOpButton.class, SubsequenzSchrittView.class);
+  public SubsequenzSchrittView clickNewSubsequenceStep() {
+    return clickNewStep(CreateSubsequenceStepOpButton.class, SubsequenzSchrittView.class);
   }
 
   /** Clicks the button and returns the one new step of the given type. Further new steps of other types, e.g. substeps, are fine. */
-  private <T extends AbstractSchrittView> T createStep(Class<? extends AbstractButton> buttonType, Class<T> stepType) {
+  private <T extends AbstractSchrittView> T clickNewStep(Class<? extends AbstractButton> buttonType, Class<T> stepType) {
     List<AbstractSchrittView> stepsBefore = new ArrayList<>(listAllSteps());
     click(buttonType);
     List<AbstractSchrittView> newSteps = new ArrayList<>(listAllSteps());

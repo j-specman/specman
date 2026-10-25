@@ -24,7 +24,7 @@ class EmptiedTextTest extends AbstractTextTest {
 
   @BeforeEach
   void createStepWithText() {
-    step = specman.createSimpleStep();
+    step = specman.clickNewSimpleStep();
     text = textAreaOf(step);
     specman.focus(step);
   }

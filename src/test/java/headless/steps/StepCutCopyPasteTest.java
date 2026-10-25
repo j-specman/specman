@@ -57,7 +57,7 @@ class StepCutCopyPasteTest {
     AbstractSchrittView original = specman.findStepByStepID("1", stepType);
     String originalText = original.getFirstEditArea().asTextArea().getPlainText();
     specman.focus(original);
-    EinfacherSchrittView simpleStep = specman.createSimpleStep();
+    EinfacherSchrittView simpleStep = specman.clickNewSimpleStep();
     List<AbstractSchrittView> stepsBeforePaste = List.copyOf(specman.listAllSteps());
     int originalSize = stepsBeforePaste.size() - 1; // The original step with its substeps, i.e. all but the simple step
 
@@ -81,9 +81,9 @@ class StepCutCopyPasteTest {
    * step 3 only, the copy action itself is not part of the undo history. Redo brings the pasted step back with its text. */
   @Test
   void testPasteUndoRedo() {
-    EinfacherSchrittView step1 = specman.createSimpleStep();
+    EinfacherSchrittView step1 = specman.clickNewSimpleStep();
     String originalText = step1.getFirstEditArea().asTextArea().getPlainText();
-    EinfacherSchrittView step2 = specman.createSimpleStep();
+    EinfacherSchrittView step2 = specman.clickNewSimpleStep();
     specman.clickContextMenuItem(step1, COPY_ITEM);
     specman.clickContextMenuItem(step2, PASTE_ITEM);
     specman.assertStepNumbers(List.of("1", "2", "3"));
@@ -101,9 +101,9 @@ class StepCutCopyPasteTest {
    * Undo removes the pasted step, a second undo restores the cut step in its old place. Redo repeats both. */
   @Test
   void testCutPasteUndoRedo() {
-    EinfacherSchrittView step1 = specman.createSimpleStep();
+    EinfacherSchrittView step1 = specman.clickNewSimpleStep();
     String cutText = step1.getFirstEditArea().asTextArea().getPlainText();
-    EinfacherSchrittView step2 = specman.createSimpleStep();
+    EinfacherSchrittView step2 = specman.clickNewSimpleStep();
     String stayText = step2.getFirstEditArea().asTextArea().getPlainText();
     assertNotEquals(cutText, stayText, "the steps must be distinguishable by their texts");
 

@@ -8,10 +8,12 @@ public class IMenuItem extends JMenuItem {
 
   public IMenuItem(String messageKey) {
     super(i18n(messageKey));
+    setName(messageKey);
   }
 
   public IMenuItem(String messageKey, Icon icon) {
     super(i18n(messageKey), icon);
+    setName(messageKey);
   }
 
 }

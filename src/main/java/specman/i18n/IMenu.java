@@ -8,6 +8,7 @@ public class IMenu extends JMenu {
 
   public IMenu(String messageKey) {
     super(i18n(messageKey));
+    setName(messageKey);
   }
 
 }

@@ -35,9 +35,9 @@ class StepnumberLinkTest {
    * The linked step becomes step 3, so the link text in the old step 3, now step 4, changes from "2" to "3". */
   @Test
   void testLinkToStepIsInsertedIntoFocusedText() {
-    EinfacherSchrittView step1 = specman.createSimpleStep();
-    EinfacherSchrittView step2 = specman.createSimpleStep();
-    EinfacherSchrittView step3 = specman.createSimpleStep();
+    EinfacherSchrittView step1 = specman.clickNewSimpleStep();
+    EinfacherSchrittView step2 = specman.clickNewSimpleStep();
+    EinfacherSchrittView step3 = specman.clickNewSimpleStep();
     TextEditArea step3Text = step3.getFirstEditArea().asTextArea();
     step3Text.setText("");
 
@@ -50,7 +50,7 @@ class StepnumberLinkTest {
     assertTrue(step3Text.getPlainText().contains("2"));
 
     specman.focus(step1);
-    specman.createSimpleStep();
+    specman.clickNewSimpleStep();
     specman.assertStepNumbers("1", "2", "3", "4");
     assertSame(step3, specman.findStepByStepID("4", EinfacherSchrittView.class));
     assertFalse(step3Text.getPlainText().contains("2"));
@@ -90,11 +90,11 @@ class StepnumberLinkTest {
    * also unregistered at the referenced step. */
   @Test
   void testSingleBackspaceRemovesWholeLink() {
-    EinfacherSchrittView step1 = specman.createSimpleStep();
+    EinfacherSchrittView step1 = specman.clickNewSimpleStep();
     TextEditArea step1Text = step1.getFirstEditArea().asTextArea();
     step1Text.setText("");
 
-    SubsequenzSchrittView subsequence = specman.createSubsequenceStep();
+    SubsequenzSchrittView subsequence = specman.clickNewSubsequenceStep();
     EinfacherSchrittView substep = specman.findSubstep(subsequence, "2.1", EinfacherSchrittView.class);
 
     specman.focus(step1);
@@ -112,8 +112,8 @@ class StepnumberLinkTest {
    * redo brings back both. The steps themselves stay untouched. */
   @Test
   void testUndoRedoOfInsertingLink() {
-    EinfacherSchrittView step1 = specman.createSimpleStep();
-    EinfacherSchrittView step2 = specman.createSimpleStep();
+    EinfacherSchrittView step1 = specman.clickNewSimpleStep();
+    EinfacherSchrittView step2 = specman.clickNewSimpleStep();
     TextEditArea step2Text = step2.getFirstEditArea().asTextArea();
     String textWithoutLink = step2Text.getPlainText();
     specman.focus(step2);
@@ -137,9 +137,9 @@ class StepnumberLinkTest {
 
   /** Creates three simple steps with a link in step 3 to step 2 and returns step 2. */
   private EinfacherSchrittView createStepsWithLinkFromStep3ToStep2() {
-    specman.createSimpleStep();
-    EinfacherSchrittView step2 = specman.createSimpleStep();
-    EinfacherSchrittView step3 = specman.createSimpleStep();
+    specman.clickNewSimpleStep();
+    EinfacherSchrittView step2 = specman.clickNewSimpleStep();
+    EinfacherSchrittView step3 = specman.clickNewSimpleStep();
     specman.focus(step3);
     specman.choose(specman.doEditStepnumberLink(), step2);
     return step2;

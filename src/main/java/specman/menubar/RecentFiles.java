@@ -18,6 +18,8 @@ import static specman.Specman.editor;
  * resp. created to provide appropriate fast access menu itens. The list of files is persisted
  * as user preferences. */
 public class RecentFiles {
+    public static final String RECENT_FILES_MENU = "menu.file.recent";
+
     private static final String RECENT_FILES_PREF = "recent.files";
     private static final String FILENAME_SEPARATOR = ";";
     private static final int MAX_FILES = 5;
@@ -26,7 +28,7 @@ public class RecentFiles {
     List<File> recentFiles;
 
     RecentFiles() {
-        this.menu = new IMenu("menu.file.recent");
+        this.menu = new IMenu(RECENT_FILES_MENU);
         this.recentFiles = readLastFilesFromPreferences();
         populateMenuFromRecentFileList();
     }

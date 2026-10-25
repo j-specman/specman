@@ -15,6 +15,18 @@ import java.io.File;
 
 public class SpecmanMenuBar extends JMenuBar {
 
+  public static final String FILE_MENU = "menu.file";
+  public static final String NEW_ITEM = "menu.file.new";
+  public static final String LOAD_ITEM = "menu.file.load";
+  public static final String SAVE_ITEM = "menu.file.save";
+  public static final String SAVE_AS_ITEM = "menu.file.save.as";
+  public static final String EXPORT_PDF_ITEM = "menu.file.export.pdf";
+  public static final String EXPORT_GRAPHVIZ_ITEM = "menu.file.export.graphviz";
+  public static final String META_TAGS_ITEM = "menu.file.meta.tags";
+  public static final String SETTINGS_ITEM = "menu.file.settings";
+  public static final String EXIT_ITEM = "menu.file.exit";
+  public static final String CHANGESET_MENU = "menu.changeset";
+
   private final RecentFiles recentFiles;
   private JMenu changesetMenu;
 
@@ -33,40 +45,40 @@ public class SpecmanMenuBar extends JMenuBar {
   }
 
   private @NotNull JMenu createFileMenu(SpecmanOpContext context) {
-    JMenuItem neu = new IMenuItem("menu.file.new");
+    JMenuItem neu = new IMenuItem(NEW_ITEM);
     neu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK));
     neu.addActionListener(e -> context.diagrammNeu());
 
-    JMenuItem laden = new IMenuItem("menu.file.load");
+    JMenuItem laden = new IMenuItem(LOAD_ITEM);
     laden.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
     laden.addActionListener(e -> context.diagrammLaden());
 
-    JMenuItem speichern = new IMenuItem("menu.file.save");
+    JMenuItem speichern = new IMenuItem(SAVE_ITEM);
     speichern.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
     speichern.addActionListener(e -> context.diagrammSpeichern(false));
 
-    JMenuItem speichernUnter = new IMenuItem("menu.file.save.as");
+    JMenuItem speichernUnter = new IMenuItem(SAVE_AS_ITEM);
     speichernUnter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
     speichernUnter.addActionListener(e -> context.diagrammSpeichern(true));
 
-    JMenuItem exportAsPDF = new IMenuItem("menu.file.export.pdf");
+    JMenuItem exportAsPDF = new IMenuItem(EXPORT_PDF_ITEM);
     exportAsPDF.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK));
     exportAsPDF.addActionListener(e -> context.exportAsPDF());
 
-    JMenuItem exportAsGraphviz = new IMenuItem("menu.file.export.graphviz");
+    JMenuItem exportAsGraphviz = new IMenuItem(EXPORT_GRAPHVIZ_ITEM);
     exportAsGraphviz.addActionListener(e -> context.exportAsGraphviz());
 
-    JMenuItem exit = new IMenuItem("menu.file.exit");
+    JMenuItem exit = new IMenuItem(EXIT_ITEM);
     exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
     exit.addActionListener(e -> context.exit());
 
-    JMenuItem metaTags = new IMenuItem("menu.file.meta.tags", IconReader.readImageIcon("tags"));
+    JMenuItem metaTags = new IMenuItem(META_TAGS_ITEM, IconReader.readImageIcon("tags"));
     metaTags.addActionListener(e -> context.openMetaTagConfigs());
 
-    JMenuItem settings = new IMenuItem("menu.file.settings");
+    JMenuItem settings = new IMenuItem(SETTINGS_ITEM);
     settings.addActionListener(e -> context.openSettings());
 
-    JMenu dateiMenu = new IMenu("menu.file");
+    JMenu dateiMenu = new IMenu(FILE_MENU);
     dateiMenu.add(neu);
     dateiMenu.add(laden);
     dateiMenu.add(recentFiles.menu());
@@ -97,7 +109,7 @@ public class SpecmanMenuBar extends JMenuBar {
    * </ul>
    */
   private void createChangesetMenu(SpecmanOpContext context) {
-    changesetMenu = new IMenu("menu.changeset");
+    changesetMenu = new IMenu(CHANGESET_MENU);
     changesetMenu.setIcon(new ChangeSetDotIcon(ChangeSet.changeset()));
     for (ChangeSet cs : ChangeSet.ALL.values()) {
       String hoveredLabel = "<html><table cellspacing='0' cellpadding='0'><tr><td bgcolor='"
@@ -105,6 +117,7 @@ public class SpecmanMenuBar extends JMenuBar {
       JMenuItem item = new JMenuItem(cs.name, new ChangeSetDotIcon(cs));
       item.getModel().addChangeListener(e ->
           item.setText(item.getModel().isArmed() ? hoveredLabel : cs.name));
+      item.setName(changeSetItemName(cs));
       item.setBackground(cs.panelColor());
       item.setForeground(Color.BLACK);
       item.setOpaque(true);
@@ -112,6 +125,11 @@ public class SpecmanMenuBar extends JMenuBar {
       item.addActionListener(e -> context.updateChangeSet(cs));
       changesetMenu.add(item);
     }
+  }
+
+  /** The name of the menu item for choosing the given change set. Unlike the other menu items, there is no constant for it. */
+  public static String changeSetItemName(ChangeSet changeSet) {
+    return CHANGESET_MENU + "." + changeSet.name;
   }
 
   public void addRecentFile(File file) {
