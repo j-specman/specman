@@ -285,6 +285,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	@Override
+	public void focus(EditArea editArea) {
+		editArea.requestFocus();
+	}
+
+	@Override
 	public void setLastFocusedTextArea(TextEditArea area) {
 		lastFocusedTextArea = area;
   }

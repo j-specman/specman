@@ -35,6 +35,10 @@ public interface EditorI extends FocusListener {
 	void diagrammAktualisieren(EditArea editArea);
 	TextEditArea getLastFocusedTextArea();
 	void setLastFocusedTextArea(TextEditArea area);
+	/** Gives the keyboard focus to the passed edit area. Tests override this, as there is no real focus without a displayed frame. */
+	void focus(EditArea editArea);
+	/** The panel all steps live in, i.e. the common coordinate system of all edit areas. */
+	Container getArbeitsbereich();
 	void addEdit(UndoableEdit edit);
 	UndoRecording pauseUndo();
 	UndoRecording composeUndo();

@@ -4,6 +4,7 @@ Release notes Specman 1.4.0
 - Meta Tags
 - Beschriftungen internationalisieren
 - Sprache wählen
+- Hoch/Runter über Grenzen von Schritten wäre cool
 
 Aus aktueller Anwendung
 - Durchgestrichen kann der User als Schriftformatierung auswählen. Da beißt sich aber mit Durchstreichungen durch den Änderungmodus
@@ -12,7 +13,6 @@ Aus aktueller Anwendung
 - beim Öffnen und einer vorhandenen .wrk, *drei* Optionen: 1) nicht laden, 2) laden, 3) ist in Arbeit - nicht laden aber auch nicht überschreiben und beim Schließen löschen
 - Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
 - PDF-Option "Export beim Speichern"
-- Hoch/Runter über Grenzen von Schritten wäre cool
 
 Rechtschreibprüfung
 - Ist einer der Punkte, die wirklich als Verlust gegenüber Word als Spezifikationstool auffallen

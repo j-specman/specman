@@ -8,6 +8,7 @@ import specman.ChangeSet;
 import specman.DiagramToolBar;
 import specman.EditException;
 import specman.Specman;
+import specman.editarea.EditArea;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.metatag.stepnumberlabel.StepnumberContextMenu;
@@ -25,6 +26,7 @@ import specman.view.SubsequenzSchrittView;
 
 import javax.swing.AbstractButton;
 import javax.swing.Action;
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -81,6 +83,7 @@ public class SpecmanFT extends Specman {
   private final List<String> shownMessages = new ArrayList<>();
   private final Clipboard clipboard = new Clipboard("specman-test");
   private int confirmDialogAnswer = JOptionPane.YES_OPTION;
+  private EditArea focusedArea;
   private static final Dimension LAYOUT_SIZE = new Dimension(800, 600);
   private static final int MAX_LAYOUT_PASSES = 50;
 
@@ -120,11 +123,46 @@ public class SpecmanFT extends Specman {
    * on that text, see {@link #doEdit(Class)}.
    */
   public void focus(AbstractSchrittView step) {
-    TextEditArea textArea = step.getFirstEditArea().asTextArea();
-    FocusEvent focusGained = new FocusEvent(textArea, FocusEvent.FOCUS_GAINED);
-    for (FocusListener listener : textArea.getFocusListeners()) {
-      listener.focusGained(focusGained);
+    focus(step.getFirstEditArea());
+  }
+
+  /**
+   * Simulates the keyboard focus moving to the given edit area: The previously focused area is notified
+   * about losing and the given area about gaining the focus, like on a real focus change.
+   */
+  @Override
+  public void focus(EditArea editArea) {
+    if (focusedArea != null) {
+      notifyFocus(focusedArea, new FocusEvent(focusedArea.asComponent(), FocusEvent.FOCUS_LOST));
     }
+    focusedArea = editArea;
+    notifyFocus(editArea, new FocusEvent(editArea.asComponent(), FocusEvent.FOCUS_GAINED));
+  }
+
+  private static void notifyFocus(EditArea editArea, FocusEvent event) {
+    for (FocusListener listener : editArea.asComponent().getFocusListeners()) {
+      if (event.getID() == FocusEvent.FOCUS_GAINED) {
+        listener.focusGained(event);
+      }
+      else {
+        listener.focusLost(event);
+      }
+    }
+  }
+
+  /** The edit area which got the focus last via {@link #focus(EditArea)}, e.g. by the user's arrow keys. */
+  public EditArea focusedArea() {
+    return focusedArea;
+  }
+
+  /** Simulates the user pressing a key in the edit area which currently has the focus. */
+  public void press(int keyCode) {
+    press(focusedArea.asComponent(), keyCode, 0);
+  }
+
+  /** Simulates the user pressing a key together with the given modifiers, e.g. {@link KeyEvent#SHIFT_DOWN_MASK}, in the focused edit area. */
+  public void press(int keyCode, int modifiers) {
+    press(focusedArea.asComponent(), keyCode, modifiers);
   }
 
   /**
@@ -135,17 +173,21 @@ public class SpecmanFT extends Specman {
    * ask the text area for its rows, which requires the layout to be up to date.
    */
   public void press(AbstractSchrittView step, int keyCode) {
+    press(step.getFirstEditArea().asComponent(), keyCode, 0);
+  }
+
+  private void press(Component component, int keyCode, int modifiers) {
     layoutComponents();
-    TextEditArea textArea = step.getFirstEditArea().asTextArea();
-    KeyEvent keyEvent = new KeyEvent(textArea, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0, keyCode, KeyEvent.CHAR_UNDEFINED);
-    for (KeyListener listener : textArea.getKeyListeners()) {
+    JComponent target = (JComponent) component;
+    KeyEvent keyEvent = new KeyEvent(target, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), modifiers, keyCode, KeyEvent.CHAR_UNDEFINED);
+    for (KeyListener listener : target.getKeyListeners()) {
       listener.keyPressed(keyEvent);
     }
     if (!keyEvent.isConsumed()) {
-      Object actionKey = textArea.getInputMap().get(KeyStroke.getKeyStrokeForEvent(keyEvent));
-      Action action = actionKey == null ? null : textArea.getActionMap().get(actionKey);
+      Object actionKey = target.getInputMap().get(KeyStroke.getKeyStrokeForEvent(keyEvent));
+      Action action = actionKey == null ? null : target.getActionMap().get(actionKey);
       if (action != null) {
-        action.actionPerformed(new ActionEvent(textArea, ActionEvent.ACTION_PERFORMED, null));
+        action.actionPerformed(new ActionEvent(target, ActionEvent.ACTION_PERFORMED, null));
       }
     }
     waitForEventsProcessed();
@@ -373,7 +415,7 @@ public class SpecmanFT extends Specman {
    * until no bounds change anymore. The layout managers must be invalidated for every pass, otherwise
    * they keep working with their cached preferred sizes.
    */
-  void layoutComponents() {
+  public void layoutComponents() {
     setSize(LAYOUT_SIZE);
     int previousBoundsHash;
     int boundsHash = 0;

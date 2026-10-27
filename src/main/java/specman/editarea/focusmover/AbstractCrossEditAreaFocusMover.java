@@ -1,12 +1,27 @@
 package specman.editarea.focusmover;
 
-import specman.editarea.AbstractListItemEditArea;
 import specman.editarea.EditArea;
-import specman.editarea.EditContainer;
-import specman.editarea.TableEditArea;
+import specman.editarea.ImageEditArea;
+import specman.editarea.TextEditArea;
+import specman.editarea.document.WrappedBadLocationException;
+import specman.editarea.focusmover.EditAreaNeighbourFinder.Direction;
 
-import java.awt.*;
+import javax.swing.SwingUtilities;
+import javax.swing.text.BadLocationException;
+import java.awt.Container;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
+import java.util.Optional;
 
+import static specman.Specman.editor;
+import static specman.editarea.document.WrappedDocument.VISIBLE_TEXT_START;
+
+/**
+ * Moves the focus with the arrow keys up and down from the current edit area to the graphically next one,
+ * which can be anywhere in the diagram: in the same step, in another step or in a table cell. The caret
+ * lands as close as possible to the x position it came from.
+ */
 abstract class AbstractCrossEditAreaFocusMover<EDITAREATYPE extends EditArea> {
   protected final EDITAREATYPE currentFocusArea;
 
@@ -14,113 +29,56 @@ abstract class AbstractCrossEditAreaFocusMover<EDITAREATYPE extends EditArea> {
     this.currentFocusArea = currentFocusArea;
   }
 
-  protected void focus(EditArea editArea) {
-    editArea.requestFocus();
+  /** @return true if the focus has been moved. False if the caret isn't in the last row, or if there's nothing below. */
+  public boolean moveFocusToSucceedingEditArea() {
+    return caretAtBottom() && moveFocusTo(Direction.DOWN);
   }
 
-  protected AbstractListItemEditArea findNestingListItem(EDITAREATYPE editAreaInListItem) {
-    Component containerParent = editAreaInListItem.getParent().getParent();
-    return (containerParent instanceof AbstractListItemEditArea)
-      ? (AbstractListItemEditArea) containerParent
-      : null;
+  /** @return true if the focus has been moved. False if the caret isn't in the first row, or if there's nothing above. */
+  public boolean moveFocusToPreceedingEditArea() {
+    return caretAtTop() && moveFocusTo(Direction.UP);
   }
 
-  private TableEditArea findNestingTable(EDITAREATYPE editAreaInTableItem) {
-    Component containerParent = editAreaInTableItem.getParent().getParent().getParent();
-    return (containerParent instanceof TableEditArea)
-      ? (TableEditArea) containerParent
-      : null;
+  private boolean moveFocusTo(Direction direction) {
+    Container workingArea = editor().getArbeitsbereich();
+    int desiredX = SwingUtilities.convertPoint(currentFocusArea.asComponent(), desiredLocalX(), 0, workingArea).x;
+    Optional<EditArea> target = new EditAreaNeighbourFinder(workingArea).find(currentFocusArea, desiredX, direction);
+    target.ifPresent(area -> enter(area, desiredX, direction, workingArea));
+    return target.isPresent();
   }
 
-  protected EditArea succeedingEditAreaInSameContainer(EditArea editArea) {
-    EditContainer container = editArea.getParent();
-    int areaIndex = container.indexOf(editArea);
-    if (container.getLastEditArea() != editArea) {
-      return container.getEditAreaAt(areaIndex + 1);
+  private void enter(EditArea target, int desiredX, Direction direction, Container workingArea) {
+    int localX = SwingUtilities.convertPoint(workingArea, desiredX, 0, target.asComponent()).x;
+    if (target.isTextArea()) {
+      placeCaret(target.asTextArea(), localX, direction == Direction.DOWN);
     }
-    return null;
+    else {
+      ImageEditArea image = target.asImageArea();
+      image.setNavigationX(localX);
+      image.scrollRectToVisible(new Rectangle(image.getWidth(), image.getHeight()));
+    }
+    editor().focus(target);
   }
 
-  protected EditArea findSucceedingEditAreaOfListItem(EDITAREATYPE editAreaInListItem) {
-    AbstractListItemEditArea listItemEditArea = findNestingListItem(editAreaInListItem);
-    if (listItemEditArea != null) {
-      return succeedingEditAreaInSameContainer(listItemEditArea);
+  /** Puts the caret in the text's first or last row at the given x position, as close as the row's text allows. */
+  private static void placeCaret(TextEditArea text, int x, boolean inFirstRow) {
+    try {
+      int rowOffset = inFirstRow ? VISIBLE_TEXT_START : text.getDocument().getLength();
+      Rectangle2D row = text.modelToView2D(rowOffset);
+      Point wanted = new Point(x, (int) row.getCenterY());
+      text.setCaretPosition(text.viewToModel2D(wanted));
+      // Setting the caret position resets Swing's memory of the column. It is what lets the next arrow key press
+      // in this text, or the next jump, continue at the wanted x position although this row may be shorter.
+      text.getCaret().setMagicCaretPosition(wanted);
+      text.scrollRectToVisible(text.modelToView2D(text.getCaretPosition()).getBounds());
     }
-    return null;
-  }
-
-  protected EditArea findPreceedingEditArea() {
-    EditArea preceedingEditArea = preceedingEditAreaInSameContainer(currentFocusArea);
-    if (preceedingEditArea == null) {
-      preceedingEditArea = findPreceedingEditAreaOfListItem(currentFocusArea);
-    }
-    if (preceedingEditArea == null) {
-      preceedingEditArea = findPreceedingEditAreaOfTable(currentFocusArea);
-    }
-    return preceedingEditArea;
-  }
-
-  protected EditArea preceedingEditAreaInSameContainer(EditArea editArea) {
-    EditContainer container = editArea.getParent();
-    int areaIndex = container.indexOf(editArea);
-    if (container.getFirstEditArea() != editArea) {
-      return container.getEditAreaAt(areaIndex-1);
-    }
-    return null;
-  }
-
-  private EditArea findPreceedingEditAreaOfListItem(EDITAREATYPE editAreaInListItem) {
-    AbstractListItemEditArea listItemEditArea = findNestingListItem(editAreaInListItem);
-    if (listItemEditArea != null) {
-      return preceedingEditAreaInSameContainer(listItemEditArea);
-    }
-    return null;
-  }
-
-  protected EditArea findSucceedingEditArea() {
-    EditArea succeedingEditArea = succeedingEditAreaInSameContainer(currentFocusArea);
-    if (succeedingEditArea == null) {
-      succeedingEditArea = findSucceedingEditAreaOfListItem(currentFocusArea);
-    }
-    if (succeedingEditArea == null) {
-      succeedingEditArea = findSucceedingEditAreaOfTableItem(currentFocusArea);
-    }
-    return succeedingEditArea;
-  }
-
-  protected EditArea findSucceedingEditAreaOfTableItem(EDITAREATYPE editAreaInTableItem) {
-    TableEditArea tableEditArea = findNestingTable(editAreaInTableItem);
-    if (tableEditArea != null) {
-      return succeedingEditAreaInSameContainer(tableEditArea);
-    }
-    return null;
-  }
-
-  private EditArea findPreceedingEditAreaOfTable(EDITAREATYPE editAreaInTableItem) {
-    TableEditArea tableEditArea = findNestingTable(editAreaInTableItem);
-    if (tableEditArea != null) {
-      return preceedingEditAreaInSameContainer(tableEditArea);
-    }
-    return null;
-  }
-
-  public void moveFocusToSucceedingEditArea() {
-    if (caretAtBottom()) {
-      EditArea succeedingEditArea = findSucceedingEditArea();
-      if (succeedingEditArea != null) {
-        focus(succeedingEditArea);
-      }
+    catch (BadLocationException blx) {
+      throw new WrappedBadLocationException(blx);
     }
   }
 
-  public void moveFocusToPreceedingEditArea() {
-    if (caretAtTop()) {
-      EditArea preceedingEditArea = findPreceedingEditArea();
-      if (preceedingEditArea != null) {
-        focus(preceedingEditArea);
-      }
-    }
-  }
+  /** The x position to continue from, in the coordinates of the current focus area. */
+  abstract protected int desiredLocalX();
 
   abstract protected boolean caretAtTop();
 

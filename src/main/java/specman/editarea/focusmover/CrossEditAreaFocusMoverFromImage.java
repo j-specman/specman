@@ -17,4 +17,9 @@ public class CrossEditAreaFocusMoverFromImage extends AbstractCrossEditAreaFocus
   protected boolean caretAtTop() {
     return true;
   }
+
+  @Override
+  protected int desiredLocalX() {
+    return currentFocusArea.getNavigationX();
+  }
 }

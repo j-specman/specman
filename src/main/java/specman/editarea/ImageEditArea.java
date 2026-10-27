@@ -68,6 +68,8 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   private float individualScalePercent;
   private JLabel image;
   private ImageEditAreaGlassPane focusGlass;
+  /** Where the arrow key navigation came in horizontally, in this area's coordinates. Null if it didn't, e.g. after a mouse click. */
+  private Integer navigationX;
   private ChangeInfo changeInfo;
 
   ImageEditArea(BufferedImage fullSizeImage, ChangeInfo changeInfo) {
@@ -143,6 +145,16 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     }
   }
 
+  /** Called by the arrow key navigation when moving the focus into this image, so that the next move can continue at the same x position. */
+  public void setNavigationX(int x) {
+    navigationX = x;
+  }
+
+  /** The x position, in this area's coordinates, the arrow key navigation continues from: where it came in, or the image's center. */
+  public int getNavigationX() {
+    return navigationX != null ? navigationX : getWidth() / 2;
+  }
+
   private void keyCopyPressed(KeyEvent e) {
     if (e.isControlDown()) {
       Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -205,6 +217,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public void focusLost(FocusEvent e) {
+    navigationX = null;
     if (!changeInfo.isDeleted()) {
       image.setBorder(changetype2border());
       removeGlassPanel();

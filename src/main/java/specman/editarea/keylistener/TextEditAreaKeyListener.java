@@ -80,12 +80,17 @@ public class TextEditAreaKeyListener extends AbstractKeyHandler implements KeyLi
 
   private void keyLeftPressed(KeyEvent e) { new LeftKeyPressedHandler(textArea, e).handle(); }
 
+  /** With a modifier like Shift, the arrow key extends the selection inside the text rather than leaving it. */
   private void keyUpPressed(KeyEvent e) {
-    new CrossEditAreaFocusMoverFromText(textArea).moveFocusToPreceedingEditArea();
+    if (e.getModifiersEx() == 0 && new CrossEditAreaFocusMoverFromText(textArea).moveFocusToPreceedingEditArea()) {
+      e.consume();
+    }
   }
 
   private void keyDownPressed(KeyEvent e) {
-    new CrossEditAreaFocusMoverFromText(textArea).moveFocusToSucceedingEditArea();
+    if (e.getModifiersEx() == 0 && new CrossEditAreaFocusMoverFromText(textArea).moveFocusToSucceedingEditArea()) {
+      e.consume();
+    }
   }
 
   @Override

@@ -1,0 +1,132 @@
+package specman.editarea.focusmover;
+
+import specman.editarea.EditArea;
+import specman.editarea.ImageEditArea;
+import specman.editarea.TextEditArea;
+
+import javax.swing.SwingUtilities;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Finds the edit area graphically next to a given one, no matter which step or table cell it belongs to.
+ * All geometry is expressed in the coordinates of the working area, which all edit areas live in.
+ * <p>
+ * Of the candidates above / below the source area, the ones overlapping the source horizontally are preferred,
+ * because these are what the user sees when looking straight up or down. Among them the vertically nearest wins.
+ * If several candidates are equally near (e.g. the branches of an if-else step), the one horizontally closest to the
+ * desired x position wins. Only if nothing overlaps, the candidate with the smallest distance wins, however far
+ * beside it is.
+ */
+class EditAreaNeighbourFinder {
+
+  enum Direction { UP, DOWN }
+
+  /** Neighbouring areas may overlap by the width of shared border lines, they still count as being above / below. */
+  private static final int BORDER_SLACK = 4;
+  /** Candidates differing by less than this in their vertical distance are considered to be in the same row. */
+  private static final int ROW_TOLERANCE = 4;
+
+  private record Candidate(EditArea area, Rectangle bounds) {}
+
+  private final Container workingArea;
+
+  EditAreaNeighbourFinder(Container workingArea) {
+    this.workingArea = workingArea;
+  }
+
+  Optional<EditArea> find(EditArea source, int desiredX, Direction direction) {
+    Rectangle sourceBounds = boundsInWorkingArea(source.asComponent());
+    List<Candidate> candidates = new ArrayList<>();
+    collectCandidates(workingArea, source, candidates);
+    List<Candidate> inDirection = candidates.stream()
+      .filter(candidate -> gap(sourceBounds, candidate.bounds(), direction) >= -BORDER_SLACK)
+      .toList();
+    List<Candidate> overlapping = inDirection.stream()
+      .filter(candidate -> overlapsHorizontally(sourceBounds, candidate.bounds()))
+      .toList();
+    Optional<Candidate> neighbour = overlapping.isEmpty()
+      ? nearest(inDirection, sourceBounds, desiredX, direction)
+      : nearestInRow(overlapping, sourceBounds, desiredX, direction);
+    return neighbour.map(Candidate::area);
+  }
+
+  private Optional<Candidate> nearestInRow(List<Candidate> candidates, Rectangle sourceBounds, int desiredX, Direction direction) {
+    int smallestGap = candidates.stream().mapToInt(candidate -> gap(sourceBounds, candidate.bounds(), direction)).min().orElseThrow();
+    return candidates.stream()
+      .filter(candidate -> gap(sourceBounds, candidate.bounds(), direction) <= smallestGap + ROW_TOLERANCE)
+      .min(Comparator.comparingInt(candidate -> horizontalDistance(candidate.bounds(), desiredX)));
+  }
+
+  private Optional<Candidate> nearest(List<Candidate> candidates, Rectangle sourceBounds, int desiredX, Direction direction) {
+    return candidates.stream().min(Comparator.comparingDouble(candidate -> {
+      int dx = horizontalDistance(candidate.bounds(), desiredX);
+      int dy = Math.max(0, gap(sourceBounds, candidate.bounds(), direction));
+      return Math.hypot(dx, dy);
+    }));
+  }
+
+  /** The vertical distance between the source and a candidate in the given direction. Negative if they overlap. */
+  private static int gap(Rectangle source, Rectangle candidate, Direction direction) {
+    return direction == Direction.DOWN
+      ? candidate.y - (source.y + source.height)
+      : source.y - (candidate.y + candidate.height);
+  }
+
+  private static boolean overlapsHorizontally(Rectangle a, Rectangle b) {
+    return Math.min(a.x + a.width, b.x + b.width) > Math.max(a.x, b.x);
+  }
+
+  /** 0 if the x position is within the bounds' horizontal extent. */
+  private static int horizontalDistance(Rectangle bounds, int x) {
+    if (x < bounds.x) {
+      return bounds.x - x;
+    }
+    return Math.max(0, x - (bounds.x + bounds.width));
+  }
+
+  /**
+   * Walks the component tree below the container. Invisible containers (e.g. collapsed sections) are not entered.
+   * Tables and list items are plain panels, so the walk finds the areas inside them.
+   */
+  private void collectCandidates(Container container, EditArea source, List<Candidate> candidates) {
+    for (Component child : container.getComponents()) {
+      if (!child.isVisible()) {
+        continue;
+      }
+      if (child instanceof TextEditArea || child instanceof ImageEditArea) {
+        addIfTarget((EditArea<?>) child, source, candidates);
+      }
+      else if (child instanceof Container childContainer) {
+        collectCandidates(childContainer, source, candidates);
+      }
+    }
+  }
+
+  private void addIfTarget(EditArea<?> candidate, EditArea source, List<Candidate> candidates) {
+    if (candidate == source || !canTakeCaret(candidate)) {
+      return;
+    }
+    Rectangle bounds = boundsInWorkingArea(candidate.asComponent());
+    if (!bounds.isEmpty()) {
+      candidates.add(new Candidate(candidate, bounds));
+    }
+  }
+
+  /** Areas the user can't edit show no caret, and deleted images don't react to keys, so one could never leave them again. */
+  private static boolean canTakeCaret(EditArea<?> editArea) {
+    if (editArea instanceof TextEditArea textArea) {
+      return textArea.isEditable();
+    }
+    return !editArea.getChangeInfo().isDeleted();
+  }
+
+  private Rectangle boundsInWorkingArea(Component component) {
+    return SwingUtilities.convertRectangle(component.getParent(), component.getBounds(), workingArea);
+  }
+}
