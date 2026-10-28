@@ -547,6 +547,7 @@ public class CaseSchrittView extends VerzweigungSchrittView {
 		applyEffectiveBackgroundUDBL();
 		return changesRejected;
 	}
+
 	@Override
 	public Shape getShape() {
 		Shape shape = new Shape(getPanel())
