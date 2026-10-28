@@ -242,11 +242,17 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         return new TextEditAreaModel_V002(text, getPlainText(), markups, changeInfo);
     }
 
+    /** Resets the complete text content to clean up the UI and recovers the markups.
+     * The reset moves the caret to the end of the text, so the selection (and thus
+     * the caret position) is restored afterwards. */
     public void cleanupText() {
         MarkedCharSequence marksBackup = findMarkups();
+        int selectionStart = getSelectionStart();
+        int selectionEnd = getSelectionEnd();
         setText(getText());
         List<Markup_V002> recoveredChangemarks = new MarkupRecovery(getWrappedDocument(), marksBackup).recover();
         new MarkupBackgroundStyleInitializer(this, recoveredChangemarks).styleChangedTextSections();
+        select(selectionStart, selectionEnd);
     }
 
     public java.util.List<Markup_V002> findMarkups(MarkupSearchPurpose searchPurpose) {
