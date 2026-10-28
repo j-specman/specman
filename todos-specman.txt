@@ -55,7 +55,8 @@ Globale Links:
     - Toast-Feedback, wenn die Schrittnummer in der URL nicht mehr mit der ID übereinstimmt
     - Bei einem verschobenen Schritt trägt der Zielschritt die ID - das ist genau richtig.
   - Wenn schon ein Specman läuft, das die Datei geöffnet hat, dann wird die Datei nicht nochmal geöffnet,
-     sondern der Fokus auf das bereits geöffnete Fenster gesetzt und zum ggf. in der URL adressierten Schritt navigiert
+    - Stattdessen Fokus auf das bereits geöffnete Fenster setzen und zum ggf. in der URL adressierten Schritt navigieren
+    - Ist der anspruchsvollste Teil, der Interprozess-Kommunikation erfordert.
 - Nutzung der Links außerdem später auch als Hyperlinks in Schritttexten, um von einer Spezifikation auf eine andere zu verweisen.
 
 
