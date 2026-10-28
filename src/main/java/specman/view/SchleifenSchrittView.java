@@ -166,7 +166,6 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 		if (!enthaeltAenderungsmarkierungen()) {
 			klappen.init(true);
 		}
-		super.zusammenklappenFuerReview();
 	}
 
 public void skalieren(int prozentNeu, int prozentAktuell) {

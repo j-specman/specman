@@ -430,13 +430,6 @@ public class SchrittSequenzView {
 		catchBereich.entfernen(this, purpose);
 	}
 
-	public void zusammenklappenFuerReview() {
-		for (AbstractSchrittView schritt: schritte) {
-			schritt.zusammenklappenFuerReview();
-		}
-		catchBereich.zusammenklappenFuerReview();
-	}
-
 	public void skalieren(int prozentNeu, int prozentAktuell) {
 		for (AbstractSchrittView schritt: schritte) {
 			schritt.skalieren(prozentNeu, prozentAktuell);

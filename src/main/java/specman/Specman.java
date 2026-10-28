@@ -33,6 +33,7 @@ import specman.visitor.DiagramVisitor;
 import specman.visitor.StepByNumberFinder;
 import specman.visitor.StepCollector;
 import specman.visitor.TextAreaCollector;
+import specman.visitor.ReviewCollapser;
 import specman.view.*;
 
 import javax.swing.*;
@@ -711,7 +712,7 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 
 	@Override
 	public void zusammenklappenFuerReview() {
-		getHauptSequenz().zusammenklappenFuerReview();
+		getHauptSequenz().traverse(new ReviewCollapser());
 	}
 
 	@Override public int getZoomFactor() {

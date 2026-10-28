@@ -126,7 +126,6 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		if (!enthaeltAenderungsmarkierungen()) {
 			klappen.init(true);
 		}
-		super.zusammenklappenFuerReview();
 	}
 
 @Override

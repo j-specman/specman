@@ -294,9 +294,9 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return parent != null ? parent.getParent() : null;
 	}
 
-	public void zusammenklappenFuerReview() {
-		unterSequenzen().forEach(SchrittSequenzView::zusammenklappenFuerReview);
-	}
+	/** Folds the step if it is foldable and contains no change marks. Does nothing by default, as most steps
+	 * are not foldable. Doesn't descend, see {@link specman.visitor.ReviewCollapser}. */
+	public void zusammenklappenFuerReview() {}
 
 	public void setGeloeschtMarkiertStilUDBL() {
 		setAenderungsartUDBL(Geloescht);

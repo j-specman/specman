@@ -1,12 +1,23 @@
 package headless.changemode;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import specman.ChangeSet;
+import specman.ops.buttons.AbstractCreateStepOpButton;
 import specman.ops.buttons.CreateBreakStepOpButton;
+import specman.ops.buttons.CreateCaseStepOpButton;
+import specman.ops.buttons.CreateIfElseStepOpButton;
+import specman.ops.buttons.CreateIfStepOpButton;
+import specman.ops.buttons.CreateSubsequenceStepOpButton;
 import specman.ops.buttons.CreateWhileStepOpButton;
+import specman.ops.buttons.CreateWhileWhileStepOpButton;
+import specman.view.AbstractSchrittView;
 import specman.view.BreakSchrittView;
 import specman.view.EinfacherSchrittView;
 import specman.view.WhileSchrittView;
+
+import java.util.stream.Stream;
 
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -17,6 +28,29 @@ import static specman.DiagramToolBar.REVIEW_BUTTON;
 class ReviewCollapseTest extends AbstractChangemodeTest {
 
   private static final ChangeSet CHANGE_SET = ChangeSet.ALL.get("blue");
+
+  static Stream<Class<? extends AbstractCreateStepOpButton>> foldableStepCreationButtons() {
+    return Stream.of(
+      CreateWhileStepOpButton.class,
+      CreateWhileWhileStepOpButton.class,
+      CreateIfElseStepOpButton.class,
+      CreateIfStepOpButton.class,
+      CreateCaseStepOpButton.class,
+      CreateSubsequenceStepOpButton.class);
+  }
+
+  @ParameterizedTest
+  @MethodSource("foldableStepCreationButtons")
+  void testEveryFoldableStepTypeWithoutChangesIsFolded(Class<? extends AbstractCreateStepOpButton> buttonType) {
+    specman.click(buttonType);
+    AbstractSchrittView step = specman.findStepByStepID("1");
+    enableChangeMode(CHANGE_SET);
+
+    specman.click(REVIEW_BUTTON);
+
+    assertTrue(step.unterSequenzen().stream().noneMatch(sequence -> sequence.getShapeSequence() != null),
+      "no sequence of the " + step.getClass().getSimpleName() + " may be visible");
+  }
 
   @Test
   void testStepWithoutChangesIsFolded() {

@@ -191,14 +191,6 @@ public class IfElseSchrittView extends VerzweigungSchrittView implements Compone
 		elseSequenz.setVisible(auf);
 	}
 
-	@Override
-	public void zusammenklappenFuerReview() {
-		if (!enthaeltAenderungsmarkierungen()) {
-			klappen.init(true);
-		}
-		super.zusammenklappenFuerReview();
-	}
-
 /** @author PVN */
 	public static int spalteUmrechnen(int prozentNeu) {
 		int breiteSpaltenLayout = 20*prozentNeu/100;

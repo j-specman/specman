@@ -197,6 +197,13 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 		return null;
 	}
 
+	@Override
+	public void zusammenklappenFuerReview() {
+		if (!enthaeltAenderungsmarkierungen()) {
+			klappen.init(true);
+		}
+	}
+
 	public void skalieren(int prozentNeu, int prozentAktuell) {
 		super.skalieren(prozentNeu, prozentAktuell);
 		klappen.scale(prozentNeu, prozentAktuell);
