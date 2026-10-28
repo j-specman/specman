@@ -430,16 +430,9 @@ public class SchrittSequenzView {
 		catchBereich.entfernen(this, purpose);
 	}
 
-	public void skalieren(int prozentNeu, int prozentAktuell) {
-		for (AbstractSchrittView schritt: schritte) {
-			schritt.skalieren(prozentNeu, prozentAktuell);
-		}
-		catchBereichSkalieren(prozentNeu, prozentAktuell);
-	}
-
-	protected void catchBereichSkalieren(int prozentNeu, int prozentAktuell) {
-		catchBereich.skalieren(prozentNeu, prozentAktuell);
-	}
+	/** Scales the layout of the sequence itself. A plain sequence has nothing to scale, steps, catch area
+	 * and headings are scaled on their own, see {@link specman.visitor.DiagramScaler}. */
+	public void skalieren(int prozentNeu, int prozentAktuell) {}
 
 	public void resyncStepnumberStyleADBL() {
 		for (AbstractSchrittView schritt : schritte) {

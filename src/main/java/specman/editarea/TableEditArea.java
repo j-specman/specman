@@ -216,9 +216,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     return new TableEditAreaModel_V002(cellsModel, tableWidthPercent, columnsWidthPercent, changeInfo);
   }
 
-  @Override
   public void skalieren(int prozentNeu, int prozentAktuell) {
-    cellstream().forEach(cell -> cell.skalieren(prozentNeu, prozentAktuell));
     refreshBorderSpaceGeometricsAndColor();
   }
 

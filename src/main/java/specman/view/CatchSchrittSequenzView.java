@@ -189,7 +189,6 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
 
   @Override
   public void skalieren(int prozentNeu, int prozentAktuell) {
-    super.skalieren(prozentNeu, prozentAktuell);
     primaryCatchHeading.skalieren(prozentNeu, prozentAktuell);
     coCatchHeadings.stream().forEach(coCatchHeading -> coCatchHeading.skalieren(prozentNeu, prozentAktuell));
     updateBarWidthInLayout(groesseUmrechnen(headingRightBarWidth, prozentNeu, prozentAktuell));
@@ -208,7 +207,6 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
     // There is no catch area in a catch sequence ;-)
   }
 
-  protected void catchBereichSkalieren(int prozentNeu, int prozentAktuell) {}
 
   public Component getHeadingPanel() { return headingPanel; }
 

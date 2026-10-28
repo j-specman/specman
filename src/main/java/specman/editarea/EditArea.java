@@ -27,8 +27,6 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V002> extends Inte
   /** The text a user can see in this area, without anything invisible like the leading newline of a text. */
   String getPlainText();
 
-  void skalieren(int prozentNeu, int prozentAktuell);
-
   void addFocusListener(FocusListener focusListener);
 
   void requestFocus();

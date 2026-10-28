@@ -7,6 +7,7 @@ import specman.undo.UndoableZweigHinzugefuegt;
 import specman.view.AbstractSchrittView;
 import specman.view.CaseSchrittView;
 import specman.view.ZweigSchrittSequenzView;
+import specman.visitor.DiagramScaler;
 
 
 public class CreateCaseBranchADBLOpButton extends AbstractADBLSpecmanOpButton implements DragSourceProvider {
@@ -32,7 +33,7 @@ public class CreateCaseBranchADBLOpButton extends AbstractADBLSpecmanOpButton im
     ZweigSchrittSequenzView neuerZweig = caseSchritt.neuenZweigHinzufuegen(ausgewaehlterZweig);
     resyncStepnumberStyleADBL();
     addEdit(new UndoableZweigHinzugefuegt(neuerZweig, caseSchritt));
-    schritt.skalieren(getZoomFactor(), 100);
+    DiagramScaler.scale(schritt::traverse, getZoomFactor(), 100);
     diagrammAktualisieren(schritt.getFirstEditArea());
   }
 

@@ -379,13 +379,13 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		unterSequenzen().forEach(sequenz -> sequenz.entfernen(this, purpose));
 	}
 
+	/** Scales the layout of the step itself. Requires the step's edit container to be scaled already,
+	 * see {@link specman.visitor.DiagramScaler}. */
 	public void skalieren(int prozentNeu, int prozentAktuell) {
-		editContainer.skalieren(prozentNeu, prozentAktuell);
 		editContainer.updateBounds();
 		if (roundedBorderDecorator != null) {
 			roundedBorderDecorator.skalieren(prozentNeu, editContainer.getStepNumberBounds().getHeight());
 		}
-		unterSequenzen().forEach(sequenz -> sequenz.skalieren(prozentNeu, prozentAktuell));
 	}
 
 	public boolean enthaelt(InteractiveStepFragment fragment) {

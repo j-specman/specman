@@ -7,6 +7,7 @@ import specman.undo.UndoableZweigHinzugefuegt;
 import specman.view.AbstractSchrittView;
 import specman.view.CaseSchrittView;
 import specman.view.ZweigSchrittSequenzView;
+import specman.visitor.DiagramScaler;
 
 public class InsertCaseBranchOperation implements DragOperation {
 
@@ -28,7 +29,7 @@ public class InsertCaseBranchOperation implements DragOperation {
         ZweigSchrittSequenzView newBranch = caseStep.neuenZweigHinzufuegen(targetedBranch);
         specman.addEdit(new UndoableZweigHinzugefuegt(newBranch, caseStep));
         AbstractSchrittView step = caseStep;
-        step.skalieren(specman.getZoomFactor(), 100);
+        DiagramScaler.scale(step::traverse, specman.getZoomFactor(), 100);
         specman.diagrammAktualisieren(step.getFirstEditArea());
     }
 }

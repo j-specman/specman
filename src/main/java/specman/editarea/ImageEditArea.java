@@ -340,11 +340,6 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   public String getPlainText() { return ""; }
 
   @Override
-  public void skalieren(int prozentNeu, int prozentAktuell) {
-    // Nothing to do: image is automatically resized by the pack() method if necessary
-  }
-
-  @Override
   public int aenderungenUebernehmen() {
     ChangeSet currentSet = changeset();
     int changesMade = changeInfo.numChangesBy(currentSet);

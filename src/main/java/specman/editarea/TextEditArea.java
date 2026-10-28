@@ -465,7 +465,6 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         : getTextWithMarkups(formatierterText);
     }
 
-    @Override
     public void skalieren(int prozentNeu, int prozentAktuell) {
         setFont(DEFAULTFONT.deriveFont((float) FONTSIZE * prozentNeu / 100));
     }

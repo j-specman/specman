@@ -46,12 +46,6 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 		ueberschrift = new EditContainer(content, null);
 	}
 
-	@Override
-	public void skalieren(int prozentNeu, int prozentAktuell) {
-		super.skalieren(prozentNeu, prozentAktuell);
-		ueberschrift.skalieren(prozentNeu, prozentAktuell);
-	}
-
 	public BranchSequenceModel_V002 generiereZweigSchrittSequenzModel(boolean formatierterText) {
 		BranchSequenceModel_V002 model = new BranchSequenceModel_V002(
 				sequenceId,

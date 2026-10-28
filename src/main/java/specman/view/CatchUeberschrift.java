@@ -84,7 +84,6 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
   }
 
   public void skalieren(int prozentNeu, int prozentAktuell) {
-    ueberschrift.skalieren(prozentNeu, prozentAktuell);
     layout.setColumnSpec(1, ColumnSpec.decode(umgehungLayout()));
   }
 

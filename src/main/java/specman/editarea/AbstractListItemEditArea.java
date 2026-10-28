@@ -94,9 +94,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
 
   abstract protected boolean ordered();
 
-  @Override
   public void skalieren(int prozentNeu, int prozentAktuell) {
-    content.skalieren(prozentNeu, prozentAktuell);
     promptSpace = DEFAULT_PROMPT_SPACE * prozentNeu / 100;
     layout.setColumnSpec(1, ColumnSpec.decode(promptSpace + "px"));
   }

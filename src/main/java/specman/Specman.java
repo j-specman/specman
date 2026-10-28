@@ -29,6 +29,7 @@ import specman.undo.UndoableSchrittHinzugefuegt;
 import specman.undo.manager.SpecmanUndoManager;
 import specman.undo.manager.UndoRecording;
 import specman.undo.manager.UndoRecordingMode;
+import specman.visitor.DiagramScaler;
 import specman.visitor.DiagramVisitor;
 import specman.visitor.StepByNumberFinder;
 import specman.visitor.StepCollector;
@@ -374,9 +375,7 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 		float diagrammbreite100Prozent = (float)diagrammbreite / bisherigerFaktor * 100;
 		int neueDiagrammbreite = (int)(diagrammbreite100Prozent * prozent / 100);
 		spaltenbreitenAnpassenNachMausDragging(neueDiagrammbreite - diagrammbreite, 0);
-		hauptSequenz.skalieren(prozent, bisherigerFaktor);
-		intro.skalieren(prozent, bisherigerFaktor);
-		outro.skalieren(prozent, bisherigerFaktor);
+		DiagramScaler.scale(this::traverseDiagram, prozent, bisherigerFaktor);
 		return bisherigerFaktor;
 	}
 
@@ -482,7 +481,7 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	public void newStepPostInit(AbstractSchrittView newStep) {
     resyncStepnumberStyleADBL();
 		addEdit(new UndoableSchrittHinzugefuegt(newStep, newStep.getParent()));
-		newStep.skalieren(zoomFaktor, 100);
+		DiagramScaler.scale(newStep::traverse, zoomFaktor, 100);
 		newStep.initInheritedTextFieldIndentions();
 		diagrammAktualisieren(newStep.getFirstEditArea());
 	}

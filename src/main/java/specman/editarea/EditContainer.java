@@ -32,6 +32,7 @@ import specman.undo.UndoableEditAreaRemoved;
 import specman.undo.UndoableEditAreaAdded;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
+import specman.visitor.DiagramScaler;
 import specman.visitor.DiagramVisitor;
 import specman.visitor.StopTraversalException;
 import specman.visitor.TextAreaCollector;
@@ -115,7 +116,7 @@ public class EditContainer extends JPanel {
 	public EditContainer(TextEditArea initialContent, StepNumber stepNumber) {
 		this(new EditorContentModel_V002(), stepNumber);
 		addEditArea(initialContent, 0);
-    skalieren(editor().getZoomFactor(), 0);
+    DiagramScaler.scale(this::traverse, editor().getZoomFactor(), 0);
 	}
 
 	public EditContainer(EditorContentModel_V002 initialContent, StepNumber stepNumber) {
@@ -129,7 +130,7 @@ public class EditContainer extends JPanel {
 		initLayoutAndEditAreas(initialContent);
 		updateDecorationIndentions(new Indentions());
 
-		skalieren(editor().getZoomFactor(), 0);
+		DiagramScaler.scale(this::traverse, editor().getZoomFactor(), 0);
 
 		addEditAreasFocusListener(editor());
 	}
@@ -188,7 +189,7 @@ public class EditContainer extends JPanel {
 					metaPanel.setBackground(getBackground());
 			}
 		}
-		skalieren(editor().getZoomFactor(), 0);
+		DiagramScaler.scale(this::traverse, editor().getZoomFactor(), 0);
 	}
 
 	public EditContainer() {
@@ -278,7 +279,6 @@ public class EditContainer extends JPanel {
 	}
 
 	public void skalieren(int prozentNeu, int prozentAktuell) {
-		editAreas.forEach(ea -> ea.skalieren(prozentNeu, prozentAktuell));
 		if (schrittNummer != null) {
 			schrittNummer.applyZoom(prozentNeu);
 		}
