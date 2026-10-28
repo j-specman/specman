@@ -1,3 +1,7 @@
 .idea
 /target/
 /src/main/resources/specman-version.properties
+
+# local agent files (Claude instructions, analysis output), not for the upstream repo
+CLAUDE.md
+.analysis/

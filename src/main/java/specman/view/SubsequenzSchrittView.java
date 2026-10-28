@@ -129,6 +129,12 @@ public class SubsequenzSchrittView extends AbstractSchrittView {
 		super.zusammenklappenFuerReview();
 	}
 
+	@Override
+	public void alleKlappen(boolean zuklappen) {
+		klappen.setGeklapptProgrammatisch(zuklappen);
+		super.alleKlappen(zuklappen);
+	}
+
 @Override
 	public void skalieren(int prozent, int prozentAktuell) {
 		super.skalieren(prozent, prozentAktuell);

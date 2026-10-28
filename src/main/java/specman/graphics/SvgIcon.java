@@ -13,7 +13,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Square {@link Icon} rendering a vector graphic from {@code images/<name>.svg} via FlatLaf
+ * Square {@link Icon} rendering a vector graphic from an SVG resource via FlatLaf
  * Extras, instead of a bitmap - stays crisp at any zoom level rather than pixelating like
  * {@link IconReader}'s PNG icons do when scaled up.
  * <p>
@@ -26,8 +26,9 @@ public class SvgIcon implements Icon, FlatLaf.DisabledIconProvider {
   private FlatSVGIcon icon;
   private int size;
 
-  public SvgIcon(String iconBasename, int size) {
-    this(loadResource(iconBasename), size);
+  /** @param resourcePath classpath path of the SVG file, see {@link SpecmanIcons} */
+  public SvgIcon(String resourcePath, int size) {
+    this(loadResource(resourcePath), size);
   }
 
   /** Icon from SVG markup held in memory, e.g. read from a user-chosen file or a model file. */
@@ -40,11 +41,10 @@ public class SvgIcon implements Icon, FlatLaf.DisabledIconProvider {
     this.size = size;
   }
 
-  private static FlatSVGIcon loadResource(String iconBasename) {
-    String resource = "images/" + iconBasename + ".svg";
-    URL url = SvgIcon.class.getClassLoader().getResource(resource);
+  private static FlatSVGIcon loadResource(String resourcePath) {
+    URL url = SvgIcon.class.getClassLoader().getResource(resourcePath);
     if (url == null) {
-      throw new IllegalArgumentException("Can't load SVG icon " + resource);
+      throw new IllegalArgumentException("Can't load SVG icon " + resourcePath);
     }
     return new FlatSVGIcon(url);
   }

@@ -4,6 +4,7 @@ import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeSet;
 import specman.graphics.IconReader;
+import specman.graphics.SpecmanIcons;
 import specman.i18n.IMenu;
 import specman.i18n.IMenuItem;
 import specman.ops.SpecmanOpContext;
@@ -32,6 +33,7 @@ public class SpecmanMenuBar extends JMenuBar {
 
   public SpecmanMenuBar(SpecmanOpContext context, HTMLEditorPane shefEditorPane) {
     recentFiles = new RecentFiles();
+    setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, UIManager.getColor("Component.borderColor")));
 
     JMenu fileMenu = createFileMenu(context);
     add(fileMenu);
@@ -39,48 +41,50 @@ public class SpecmanMenuBar extends JMenuBar {
     add(shefEditorPane.getEditMenu());
     add(shefEditorPane.getFormatMenu());
     add(shefEditorPane.getInsertMenu());
+    add(createViewMenu(context));
 
     createChangesetMenu(context);
     add(changesetMenu);
   }
 
   private @NotNull JMenu createFileMenu(SpecmanOpContext context) {
-    JMenuItem neu = new IMenuItem(NEW_ITEM);
+    JMenuItem neu = new IMenuItem(NEW_ITEM, icon(SpecmanIcons.FILE_NEW));
     neu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK));
     neu.addActionListener(e -> context.diagrammNeu());
 
-    JMenuItem laden = new IMenuItem(LOAD_ITEM);
+    JMenuItem laden = new IMenuItem(LOAD_ITEM, icon(SpecmanIcons.FILE_OPEN));
     laden.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
     laden.addActionListener(e -> context.diagrammLaden());
 
-    JMenuItem speichern = new IMenuItem(SAVE_ITEM);
+    JMenuItem speichern = new IMenuItem(SAVE_ITEM, icon(SpecmanIcons.FILE_SAVE));
     speichern.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
     speichern.addActionListener(e -> context.diagrammSpeichern(false));
 
-    JMenuItem speichernUnter = new IMenuItem(SAVE_AS_ITEM);
+    JMenuItem speichernUnter = new IMenuItem(SAVE_AS_ITEM, icon(SpecmanIcons.FILE_SAVE_AS));
     speichernUnter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
     speichernUnter.addActionListener(e -> context.diagrammSpeichern(true));
 
-    JMenuItem exportAsPDF = new IMenuItem(EXPORT_PDF_ITEM);
+    JMenuItem exportAsPDF = new IMenuItem(EXPORT_PDF_ITEM, icon(SpecmanIcons.PDF));
     exportAsPDF.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK));
     exportAsPDF.addActionListener(e -> context.exportAsPDF());
 
-    JMenuItem exportAsGraphviz = new IMenuItem(EXPORT_GRAPHVIZ_ITEM);
+    JMenuItem exportAsGraphviz = new IMenuItem(EXPORT_GRAPHVIZ_ITEM, icon(SpecmanIcons.EXPORT_GRAPHVIZ));
     exportAsGraphviz.addActionListener(e -> context.exportAsGraphviz());
 
-    JMenuItem exit = new IMenuItem(EXIT_ITEM);
+    JMenuItem exit = new IMenuItem(EXIT_ITEM, icon(SpecmanIcons.EXIT));
     exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
     exit.addActionListener(e -> context.exit());
 
-    JMenuItem metaTags = new IMenuItem(META_TAGS_ITEM, IconReader.readImageIcon("tags"));
+    JMenuItem metaTags = new IMenuItem(META_TAGS_ITEM, icon(SpecmanIcons.META_TAGS));
     metaTags.addActionListener(e -> context.openMetaTagConfigs());
 
-    JMenuItem settings = new IMenuItem(SETTINGS_ITEM);
+    JMenuItem settings = new IMenuItem(SETTINGS_ITEM, icon(SpecmanIcons.SETTINGS));
     settings.addActionListener(e -> context.openSettings());
 
     JMenu dateiMenu = new IMenu(FILE_MENU);
     dateiMenu.add(neu);
     dateiMenu.add(laden);
+    recentFiles.menu().setIcon(icon(SpecmanIcons.FILE_RECENT));
     dateiMenu.add(recentFiles.menu());
     dateiMenu.add(speichern);
     dateiMenu.add(speichernUnter);
@@ -91,6 +95,23 @@ public class SpecmanMenuBar extends JMenuBar {
     dateiMenu.add(settings);
     dateiMenu.add(exit);
     return dateiMenu;
+  }
+
+  private static JMenu createViewMenu(SpecmanOpContext context) {
+    JMenuItem collapseAll = new IMenuItem("menu.view.collapse.all", icon(SpecmanIcons.COLLAPSE_ALL));
+    collapseAll.addActionListener(e -> context.alleSchritteKlappen(true));
+
+    JMenuItem expandAll = new IMenuItem("menu.view.expand.all", icon(SpecmanIcons.EXPAND_ALL));
+    expandAll.addActionListener(e -> context.alleSchritteKlappen(false));
+
+    JMenu viewMenu = new IMenu("menu.view");
+    viewMenu.add(collapseAll);
+    viewMenu.add(expandAll);
+    return viewMenu;
+  }
+
+  private static Icon icon(String svgPath) {
+    return IconReader.readSvgIcon(svgPath, SpecmanIcons.SIZE_SMALL);
   }
 
   /**

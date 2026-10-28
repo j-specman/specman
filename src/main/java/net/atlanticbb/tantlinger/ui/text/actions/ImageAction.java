@@ -1,6 +1,8 @@
 package net.atlanticbb.tantlinger.ui.text.actions;
 
-import net.atlanticbb.tantlinger.ui.UIUtils;
+import specman.graphics.IconReader;
+import specman.graphics.SpecmanIcons;
+
 import specman.Specman;
 import static specman.Specman.editor;
 
@@ -14,7 +16,7 @@ public class ImageAction extends BasicEditAction {
 
     public ImageAction() {
         super(i18n.str("image_"));
-        this.putValue("SmallIcon", UIUtils.getIcon("resources/images/x16/", "image.png"));
+        this.putValue("SmallIcon", IconReader.readSvgIcon(SpecmanIcons.IMAGE, SpecmanIcons.SIZE_SMALL));
         this.putValue("ShortDescription", this.getValue("Name"));
     }
 

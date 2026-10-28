@@ -19,6 +19,10 @@ public class ToneOpButton extends AbstractADBLSpecmanOpButton {
       return;
     }
     AbstractSchrittView schritt = getHauptSequenz().findeSchritt(getLastFocusedTextArea());
+    // A keyboard shortcut can trigger this without the button being enabled, e.g. in intro or outro.
+    if (schritt == null) {
+      return;
+    }
     Color alteShadeColor = schritt.getShadeColor();
     Color neueShadeColor = alteShadeColor != null ? null : new Color(220, 220, 220);
     schritt.setShadeColorUDBL(neueShadeColor);

@@ -1,6 +1,7 @@
 package specman.settings;
 
 
+import javax.swing.*;
 import java.util.List;
 
 
@@ -17,6 +18,15 @@ public class SettingAutoSave extends AbstractSelectSetting<Integer> {
 
   public SettingAutoSave() {
     super("settings.autosave", AUTOSAVE_PREF, OPTIONS);
+  }
+
+  /**
+   * The combo box for the toolbar. Selecting an entry writes the preference immediately; the dialog's own
+   * instance only reads it on creation, so the toolbar calls {@link #reloadFromPreferences()} after the dialog closes.
+   */
+  public JComponent toolbarComponent() {
+    comboBox().addActionListener(e -> savePreference());
+    return comboBox();
   }
 
   public static Integer getIntervalSeconds() {

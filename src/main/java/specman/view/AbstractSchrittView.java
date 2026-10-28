@@ -295,6 +295,14 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		unterSequenzen().forEach(SchrittSequenzView::zusammenklappenFuerReview);
 	}
 
+	/**
+	 * Folds or unfolds this step and all steps below it, regardless of change marks.
+	 * Foldable step types override this method and call super afterwards.
+	 */
+	public void alleKlappen(boolean zuklappen) {
+		unterSequenzen().forEach(sequenz -> sequenz.alleKlappen(zuklappen));
+	}
+
 	public void setGeloeschtMarkiertStilUDBL() {
 		setAenderungsartUDBL(Geloescht);
 		editContainer.setGeloeschtMarkiertStilUDBL(number, changeInfo.changeSet());

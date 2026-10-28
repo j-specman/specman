@@ -39,6 +39,7 @@ public interface SpecmanOpContext extends EditorI {
   void markAsUnsavedWorkingCopy();
   void notifyWorkingCopyInitialized(long timestamp);
   void zusammenklappenFuerReview();
+  void alleSchritteKlappen(boolean zuklappen);
   void showMessage(String messageKey, Object... args);
   void showToast(String briefMessage, String detailMessage);
   void dropWelcomeMessage();

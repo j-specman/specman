@@ -74,8 +74,6 @@ public class ChangeSet {
   public Color menuColor() { return colors.menuColor; }
 
   public Color panelColor() { return colors.panelColor; }
-  public Color buttonColor() { return colors.panelColor; }
-  public Color activeButtonColor() { return colors.text.color; }
   public boolean isAnyBackground(String cssColor) { return colors.isAnyBackground(cssColor); }
   public Color textColor() { return colors.text.color; }
   public String textHtmlColor() { return colors.text.htmlColor; }
