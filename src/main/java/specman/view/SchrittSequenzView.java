@@ -21,6 +21,7 @@ import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TextEditArea;
 import specman.undo.props.UDBL;
 import specman.visitor.DiagramVisitor;
+import specman.visitor.StepByIdOutsideCatchAreasFinder;
 import specman.visitor.StopTraversalException;
 
 import javax.swing.JComponent;
@@ -105,19 +106,10 @@ public class SchrittSequenzView {
 		}
 	}
 
-	public AbstractSchrittView findStepById(String id) {
-		for (AbstractSchrittView schritt : schritte) {
-			if (id.equals(schritt.id)) {
-				return schritt;
-			}
-			for (SchrittSequenzView seq : schritt.unterSequenzen()) {
-				AbstractSchrittView result = seq.findStepById(id);
-				if (result != null) {
-					return result;
-				}
-			}
-		}
-		return null;
+	public AbstractSchrittView findStepByIdOutsideCatchAreas(String id) {
+		StepByIdOutsideCatchAreasFinder finder = new StepByIdOutsideCatchAreasFinder(id);
+		traverse(finder);
+		return finder.step();
 	}
 
 	public ChangeInfo getChangeInfo() { return changeInfo; }
