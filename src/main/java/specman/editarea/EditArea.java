@@ -1,6 +1,5 @@
 package specman.editarea;
 
-import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.model.v002.AbstractEditAreaModel_V002;
@@ -54,8 +53,6 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V002> extends Inte
   void setQuellStil(ChangeSet changeSet);
 
   void aenderungsmarkierungenEntfernen();
-
-  void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups);
 
   Shape getShape();
 

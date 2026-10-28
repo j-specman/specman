@@ -1,6 +1,5 @@
 package specman.view;
 
-import org.jetbrains.annotations.NotNull;
 import specman.ChangeSet;
 import static specman.ChangeSet.changeset;
 import specman.EditException;
@@ -94,12 +93,6 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 
 	protected void ueberschriftAlsGeloeschtMarkierenUDBL() {
 		ueberschrift.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet());
-	}
-
-	@Override
-	public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
-		super.mergeChangeSetUDBL(target, source);
-		ueberschrift.mergeChangeSetUDBL(target, source, true);
 	}
 
 	@Override

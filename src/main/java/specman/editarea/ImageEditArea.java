@@ -275,7 +275,6 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     changeInfo = changeInfo.untrack(changeset());
   }
 
-  @Override
   public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
     if (changeInfo.changedBy(source)) {
       setChangeInfoUDBL(changeInfo.reassign(target));

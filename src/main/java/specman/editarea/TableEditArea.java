@@ -311,13 +311,11 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     setBackgroundUDBL(Styles.BACKGROUND_COLOR_STANDARD);
   }
 
-  @Override
   public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
     if (changeInfo.changedBy(source)) {
       setChangeInfoUDBL(changeInfo.reassign(target));
       setEditBackgroundUDBL(null);
     }
-    cellstream().forEach(cell -> cell.mergeChangeSetUDBL(target, source, withMarkups));
   }
 
   @Override

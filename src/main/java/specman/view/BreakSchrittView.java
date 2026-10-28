@@ -12,6 +12,7 @@ import specman.model.v002.BreakStepModel_V002;
 import specman.pdf.LineShape;
 import specman.pdf.Shape;
 import specman.undo.props.UDBL;
+import specman.visitor.ChangeSetMerger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -175,7 +176,7 @@ public class BreakSchrittView extends AbstractSchrittView {
 		editContainer.setEditorContent(content);
 		ChangeSet breakStepChangeSet = changeInfo.changeSet();
 		if (sourceChangeSet != null && breakStepChangeSet != null && sourceChangeSet != breakStepChangeSet) {
-			editContainer.mergeChangeSetUDBL(breakStepChangeSet, sourceChangeSet, false);
+			editContainer.traverse(new ChangeSetMerger(breakStepChangeSet, sourceChangeSet, false));
 		}
 	}
 

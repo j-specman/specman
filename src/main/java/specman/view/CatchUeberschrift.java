@@ -14,6 +14,7 @@ import specman.model.v002.EditorContentModel_V002;
 import specman.pdf.LineShape;
 import specman.pdf.Shape;
 import specman.undo.props.UDBL;
+import specman.visitor.ChangeSetMerger;
 
 import javax.swing.*;
 
@@ -93,7 +94,6 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
       UDBL.setBackgroundUDBL(this, changeInfo.panelColor());
       ueberschrift.setBackgroundUDBL(changeInfo.panelColor());
     }
-    ueberschrift.mergeChangeSetUDBL(target, source, true);
   }
 
   public int aenderungenUebernehmen() {
@@ -159,7 +159,7 @@ public class CatchUeberschrift extends JPanel implements ComponentListener {
       ChangeSet breakStepChangeSet = linkedBreakStep.getChangeInfo().changeSet();
       ChangeSet headingChangeSet = changeInfo.changeSet();
       if (breakStepChangeSet != null && breakStepChangeSet != headingChangeSet) {
-        ueberschrift.mergeChangeSetUDBL(headingChangeSet, breakStepChangeSet, false);
+        ueberschrift.traverse(new ChangeSetMerger(headingChangeSet, breakStepChangeSet, false));
       }
     }
   }

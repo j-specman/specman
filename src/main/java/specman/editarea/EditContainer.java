@@ -595,10 +595,6 @@ public class EditContainer extends JPanel {
 		initLayoutAndEditAreas(content);
 	}
 
-	public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
-		editAreas.forEach(ea -> ea.mergeChangeSetUDBL(target, source, withMarkups));
-	}
-
 	public void addEditComponentListener(ComponentListener componentListener) {
 		editAreasComponentListeners.add(componentListener);
 		editAreas.forEach(ea -> addComponentListener(componentListener));
@@ -639,6 +635,10 @@ public class EditContainer extends JPanel {
 			ChangeInfo ci = ea.getChangeInfo();
 			return ci.art() == aenderungsart && ci.changeSet() == changeset();
 		});
+	}
+
+	public void traverse(DiagramVisitor visitor) {
+		DiagramVisitor.traverse(() -> accept(visitor));
 	}
 
 	public void accept(DiagramVisitor visitor) throws StopTraversalException {
@@ -865,7 +865,7 @@ public class EditContainer extends JPanel {
   public void registerAllExistingStepnumbers() {
     EditorI editor = editor();
     TextAreaCollector textAreaCollector = new TextAreaCollector();
-    DiagramVisitor.traverse(() -> accept(textAreaCollector));
+    traverse(textAreaCollector);
     for (TextEditArea referencingTextEditArea : textAreaCollector.textAreas()) {
       for (String stepID : referencingTextEditArea.stepnumberLinkIDs()) {
         if (!StepnumberLink.isStepnumberLinkDefect(stepID)) {

@@ -222,12 +222,11 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   @Override public synchronized void addComponentListener(ComponentListener l) { content.addEditComponentListener(l); }
   @Override public void requestFocus() { content.requestFocus(); }
 
-  @Override public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
+  public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
     if (changeInfo.changedBy(source)) {
       UDBL.setChangeInfo(this, changeInfo.reassign(target));
       setEditBackgroundUDBL(null);
     }
-    content.mergeChangeSetUDBL(target, source, withMarkups);
   }
 
   //**************** canonical EditArea method implementations ************************

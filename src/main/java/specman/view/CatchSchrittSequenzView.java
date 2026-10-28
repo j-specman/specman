@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import specman.undo.props.UDBL;
+import specman.visitor.ChangeSetMerger;
 import specman.visitor.DiagramVisitor;
 import specman.visitor.StopTraversalException;
 import static specman.ColumnSpecByPercent.copyOf;
@@ -66,7 +67,7 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   private void initHeadingChangeSet(BreakSchrittView linkedBreakStep) {
     ChangeInfo breakStepChangeInfo = linkedBreakStep.getChangeInfo();
     if (breakStepChangeInfo.isChange() && breakStepChangeInfo.changeSet() != changeset()) {
-      ueberschrift.mergeChangeSetUDBL(changeset(), breakStepChangeInfo.changeSet(), false);
+      ueberschrift.traverse(new ChangeSetMerger(changeset(), breakStepChangeInfo.changeSet(), false));
     }
   }
 

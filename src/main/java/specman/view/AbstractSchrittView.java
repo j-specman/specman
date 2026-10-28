@@ -539,8 +539,6 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 			UDBL.setChangeInfo(this, changeInfo.reassign(target));
 			applyEffectiveBackgroundUDBL();
 		}
-		editContainer.mergeChangeSetUDBL(target, source, true);
-		unterSequenzen().forEach(seq -> seq.mergeChangeSetUDBL(target, source));
 	}
 
 	public int aenderungenUebernehmen() throws EditException {

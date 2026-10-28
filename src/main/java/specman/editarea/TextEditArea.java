@@ -184,7 +184,6 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         // Nothing to do for text areas - job is completely done in aenderungenVerwerfen/Uebernehmen
     }
 
-    @Override
     public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
         if (changeInfo.changedBy(source)) {
             setChangeInfoUDBL(changeInfo.reassign(target));

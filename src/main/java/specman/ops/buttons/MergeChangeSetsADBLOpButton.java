@@ -6,6 +6,7 @@ import specman.EditException;
 import specman.menubar.ChangeSetDotIcon;
 import specman.ops.SpecmanOpContext;
 import specman.undo.manager.UndoRecording;
+import specman.visitor.ChangeSetMerger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,16 +36,17 @@ public class MergeChangeSetsADBLOpButton extends AbstractSpecmanOpButton {
     item.setBackground(cs.panelColor());
     item.setForeground(Color.BLACK);
     item.setOpaque(true);
-    item.addActionListener(e -> {
-      try (UndoRecording ur = composeUndo()) {
-        ChangeSet targetSet = ChangeSet.changeset();
-        getIntro().mergeChangeSetUDBL(targetSet, cs, true);
-        getHauptSequenz().mergeChangeSetUDBL(targetSet, cs);
-        getOutro().mergeChangeSetUDBL(targetSet, cs, true);
-        diagrammAktualisieren(null);
-      }
-    });
+    item.addActionListener(e -> mergeChangeSets(cs));
     return item;
+  }
+
+  /** Makes all changes of the given change set changes of the current change set. */
+  public void mergeChangeSets(ChangeSet source) {
+    try (UndoRecording ur = composeUndo()) {
+      ChangeSet targetSet = ChangeSet.changeset();
+      context().traverseDiagram(new ChangeSetMerger(targetSet, source, true));
+      diagrammAktualisieren(null);
+    }
   }
 
 }

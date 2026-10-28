@@ -467,10 +467,6 @@ public class SchrittSequenzView {
 		if (changeInfo.changedBy(source)) {
 			UDBL.setChangeInfo(this, changeInfo.reassign(target));
 		}
-		schritte.forEach(s -> s.mergeChangeSetUDBL(target, source));
-		if (catchBereich != null) {
-			catchBereich.mergeChangeSetUDBL(target, source);
-		}
 	}
 
 	public int aenderungenUebernehmen() throws EditException {
