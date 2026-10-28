@@ -39,8 +39,9 @@ public class CrossEditAreaFocusMoverFromText extends AbstractCrossEditAreaFocusM
   }
 
   /**
-   * Swing remembers the column the caret came from, so that moving through a short row doesn't lose it.
-   * That's the x position we want to keep, falling back to the caret's own one.
+   * The column the caret wants to be in, which is not necessarily where it currently stands, see the
+   * <i>magic caret position</i> in the {@link AbstractCrossEditAreaFocusMover class comment}. Only if Swing
+   * doesn't know one yet, the caret's actual x position is used.
    */
   @Override
   protected int desiredLocalX() {

@@ -68,7 +68,9 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   private float individualScalePercent;
   private JLabel image;
   private ImageEditAreaGlassPane focusGlass;
-  /** Where the arrow key navigation came in horizontally, in this area's coordinates. Null if it didn't, e.g. after a mouse click. */
+  /** Where the arrow key navigation came in horizontally, in this area's coordinates. Null if it didn't,
+   * e.g. after a mouse click. See comment on {@link specman.editarea.focusmover.AbstractCrossEditAreaFocusMover}
+   * for details on the arrow key navigation concept. */
   private Integer navigationX;
   private ChangeInfo changeInfo;
 
@@ -145,12 +147,16 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
     }
   }
 
-  /** Called by the arrow key navigation when moving the focus into this image, so that the next move can continue at the same x position. */
+  /** Called by the arrow key navigation when moving the focus into this image,
+   * so that the next move can continue at the same x position. See comment on
+   * {@link specman.editarea.focusmover.AbstractCrossEditAreaFocusMover} for
+   * details. */
   public void setNavigationX(int x) {
     navigationX = x;
   }
 
-  /** The x position, in this area's coordinates, the arrow key navigation continues from: where it came in, or the image's center. */
+  /** The x position, in this area's coordinates, the arrow key navigation continues from:
+   * where it came in, or the image's center. */
   public int getNavigationX() {
     return navigationX != null ? navigationX : getWidth() / 2;
   }

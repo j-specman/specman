@@ -21,6 +21,21 @@ import static specman.editarea.document.WrappedDocument.VISIBLE_TEXT_START;
  * Moves the focus with the arrow keys up and down from the current edit area to the graphically next one,
  * which can be anywhere in the diagram: in the same step, in another step or in a table cell. The caret
  * lands as close as possible to the x position it came from.
+ * <p>
+ * <b>Keeping the column over several moves.</b> A row may be shorter than the column the user is aiming at,
+ * e.g. an empty text between two long ones. If the caret simply stood at the end of that short row, the next
+ * move would continue from there and the original column would be lost. Text editors avoid this by remembering
+ * the column separately from the caret position, and so does Swing: Its <i>magic caret position</i>
+ * ({@link javax.swing.text.Caret#getMagicCaretPosition()}) is the point the caret <i>wants</i> to be at. Swing's own
+ * up and down actions read it and put it back after moving the caret. Any other caret movement (typing, left and
+ * right arrow, clicking) replaces it by the caret's actual position, which is exactly when the user gives up the old
+ * column.
+ * <p>
+ * We use it for the moves across edit areas, too: Before leaving a text, the desired x position is read from its
+ * magic caret position, see {@link CrossEditAreaFocusMoverFromText#desiredLocalX()}. After entering the target text,
+ * its magic caret position is set to that wanted point, even if the caret itself had to stop earlier,
+ * see {@link #placeCaret(TextEditArea, int, boolean)}. Images have no caret, they remember the x position
+ * themselves, see {@link ImageEditArea#setNavigationX(int)}.
  */
 abstract class AbstractCrossEditAreaFocusMover<EDITAREATYPE extends EditArea> {
   protected final EDITAREATYPE currentFocusArea;
@@ -60,15 +75,18 @@ abstract class AbstractCrossEditAreaFocusMover<EDITAREATYPE extends EditArea> {
     editor().focus(target);
   }
 
-  /** Puts the caret in the text's first or last row at the given x position, as close as the row's text allows. */
+  /**
+   * Puts the caret in the text's first or last row at the given x position, as close as the row's text allows.
+   * The caret may end up left of the wanted x position if the row is shorter, so the wanted point is also stored as
+   * the text's magic caret position, see the class comment.
+   */
   private static void placeCaret(TextEditArea text, int x, boolean inFirstRow) {
     try {
       int rowOffset = inFirstRow ? VISIBLE_TEXT_START : text.getDocument().getLength();
       Rectangle2D row = text.modelToView2D(rowOffset);
       Point wanted = new Point(x, (int) row.getCenterY());
       text.setCaretPosition(text.viewToModel2D(wanted));
-      // Setting the caret position resets Swing's memory of the column. It is what lets the next arrow key press
-      // in this text, or the next jump, continue at the wanted x position although this row may be shorter.
+      // Must come after setCaretPosition(), which overwrites the magic caret position with the caret's actual one.
       text.getCaret().setMagicCaretPosition(wanted);
       text.scrollRectToVisible(text.modelToView2D(text.getCaretPosition()).getBounds());
     }
