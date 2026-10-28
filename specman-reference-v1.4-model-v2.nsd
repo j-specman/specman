@@ -9,7 +9,7 @@
 settings {
     width=840
     zoom=120
-    changeModeEnabled=true
+    changeModeEnabled=false
     changeSetName=yellow
     metaTags {
         tag(`user`, background=#ffcccc, border=#ff0033, label=`User`, icon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -100,14 +100,14 @@ mainSequence {
     ifElse(13, 1e278bd4, `<div align="center">
       If-else step with a modified width ratio of its branches. This is 
       supported for if and case steps as well.
-    </div>`, plain=`If-else step with a modified width ratio of its branches. This is supported for if and case steps as well.`, ifRatio=13.32%) {
+    </div>`, plain=`If-else step with a modified width ratio of its branches. This is supported for if and case steps as well.`, ifRatio=10.66%) {
         if_branch(`Small width branch`, plain=`Small width branch`) {
-            simple(13.1, a11bbefb, ``, plain=``);
+            simple(13.1, a11bbefb, ``);
         }
         else_branch(`<div align="right">
       Big width branch
     </div>`, plain=`Big width branch`) {
-            simple(14.1, a9ca3151, ``, plain=``);
+            simple(14.1, a9ca3151, ``);
         }
     }
     break(15, 79866663, `<b>Exception 2</b>`, plain=`Exception 2`, tags=[(`transparent_background`)]);
@@ -197,7 +197,19 @@ Lists are not expressed by HTML but by appropriate edit areas like that for unor
             row { cell(`You might place nested tables or list items in the cells of a table`, plain=`You might place nested tables or list items in the cells of a table`) | cell(`Zelle 2.1`, plain=`Zelle 2.1`) | cell(`Zelle 3.1`, plain=`Zelle 3.1`) }
         }
     }
-    simple(26, 796e7722, `<div>
+    simple(26, a98326a9, `Table added in yellow change set:`, plain=`Table added in yellow change set:`) {
+        table(width=100%, change=(added, yellow)) {
+            row { cell(`<b>Spalte 1</b>`, plain=`Spalte 1`, change=(added, yellow)) | cell(`<b>Spalte 2</b>`, plain=`Spalte 2`, change=(added, yellow)) | cell(`<b>Spalte 3</b>`, plain=`Spalte 3`, change=(added, yellow)) }
+            row { cell(`Zelle 1.1`, plain=`Zelle 1.1`, change=(added, yellow)) | cell(`Zelle 2.1`, plain=`Zelle 2.1`, change=(added, yellow)) | cell(`Zelle 3.1`, plain=`Zelle 3.1`, change=(added, yellow)) }
+        }
+    }
+    simple(27, 2d34f85e, `Table with row added in yellow change set:`, plain=`Table with row added in yellow change set:`) {
+        table(width=100%) {
+            row { cell(`<b>Spalte 1</b>`, plain=`Spalte 1`) | cell(`<b>Spalte 2</b>`, plain=`Spalte 2`) | cell(`<b>Spalte 3</b>`, plain=`Spalte 3`) }
+            row { cell(`New`, plain=`New`, markups=[(0,2,Changed,yellow)], change=(added, yellow)) | cell(`row`, plain=`row`, markups=[(0,2,Changed,yellow)], change=(added, yellow)) | cell(``, change=(added, yellow)) }
+        }
+    }
+    simple(28, 796e7722, `<div>
       Supported headings
     </div>
     <h1>
@@ -224,7 +236,7 @@ Heading 3
 Heading 4
 Heading 5
 Heading 6`);
-    simple(27, de07e4fa, `<div>
+    simple(29, de07e4fa, `<div>
       Supported font sizes
     </div>
     <div>
@@ -255,7 +267,7 @@ middle (default)
 big
 x-big
 xx-big`);
-    simple(28, 8f91e946, `<div>
+    simple(30, 8f91e946, `<div>
       Supported fonts are
     </div>
     <div>
@@ -270,7 +282,7 @@ xx-big`);
 Sitka - Serif (default font)
 Roboto - Sans Serif
 Courier - Monospace`);
-    simple(29, 776adb0b, `<div>
+    simple(31, 776adb0b, `<div>
       Text might have a pre-formatted text section. Only preformatted text 
       keeps all its whitespaces while multiple whitespaces in other text 
       sections are eliminated when saving. Pre-formatted text is always 
@@ -278,46 +290,46 @@ Courier - Monospace`);
     </div>
     <pre>This<br>  text<br>    is<br>  pre  -  formatted<br></pre>`, plain=`Text might have a pre-formatted text section. Only preformatted text keeps all its whitespaces while multiple whitespaces in other text sections are eliminated when saving. Pre-formatted text is always displayed in a monospaced font.
 This   text     is   pre  -  formatted `);
-    simple(30, 24a10aa0, `Step with rounded border decoration.`, plain=`Step with rounded border decoration.`, deco=Full);
-    simple(31, e7290917, `Following step with border decoration. There is no gap line displayed in a 
+    simple(32, 24a10aa0, `Step with rounded border decoration.`, plain=`Step with rounded border decoration.`, deco=Full);
+    simple(33, e7290917, `Following step with border decoration. There is no gap line displayed in a 
     sequence of steps with this decoration.`, plain=`Following step with border decoration. There is no gap line displayed in a sequence of steps with this decoration.`, deco=Co);
-    subsequence(32, fde99ef2, `<b>Subsequence with special catch sequence</b>`, plain=`Subsequence with special catch sequence`, deco=Co) {
-        simple(32.1, 15856508, `The catch area of the subsequence has a modified width ratio of its 
+    subsequence(34, fde99ef2, `<b>Subsequence with special catch sequence</b>`, plain=`Subsequence with special catch sequence`, deco=Co) {
+        simple(34.1, 15856508, `The catch area of the subsequence has a modified width ratio of its 
     branches, a modified righ bar width in the co-catch, and the catch area is 
     collapsed`, plain=`The catch area of the subsequence has a modified width ratio of its branches, a modified righ bar width in the co-catch, and the catch area is collapsed`);
-        break(32.2, 074ad64c, `<b>Sub X1</b>`, plain=`Sub X1`);
-        break(32.3, 77f1ab52, `<b>Sub X2</b>`, plain=`Sub X2`);
-        break(32.4, 4f9e39ae, `<b>Sub X3</b>`, plain=`Sub X3`);
+        break(34.2, 074ad64c, `<b>Sub X1</b>`, plain=`Sub X1`);
+        break(34.3, 77f1ab52, `<b>Sub X2</b>`, plain=`Sub X2`);
+        break(34.4, 4f9e39ae, `<b>Sub X3</b>`, plain=`Sub X3`);
         catchArea(collapsed=true, cols=[20%, 79%]) {
-            catch(32.2, `<b>Sub X1</b>`, plain=`Sub X1`, headingWidth=21) {
-                simple(32.2.1, fe4d5e16, `Small width`, plain=`Small width`);
+            catch(34.2, `<b>Sub X1</b>`, plain=`Sub X1`, headingWidth=21) {
+                simple(34.2.1, fe4d5e16, `Small width`, plain=`Small width`);
             }
-            catch(32.3, `<b>Sub X2</b>`, plain=`Sub X2`, headingWidth=78) {
-                coCatch(32.4, `<b>Sub X3</b>`, plain=`Sub X3`);
-                simple(32.3.1, 142ae6b6, `Big width, big right bar width`, plain=`Big width, big right bar width`);
+            catch(34.3, `<b>Sub X2</b>`, plain=`Sub X2`, headingWidth=78) {
+                coCatch(34.4, `<b>Sub X3</b>`, plain=`Sub X3`);
+                simple(34.3.1, 142ae6b6, `Big width, big right bar width`, plain=`Big width, big right bar width`);
             }
         }
     }
-    while(33, ee92204e, `Collapsed while loop. Each structured step allows to hide its sub sequences`, plain=`Collapsed while loop. Each structured step allows to hide its sub sequences`, barWidth=21, collapsed=true) {
-        simple(33.1, 6320fb89, `Neuer Schritt 1`, plain=`Neuer Schritt 1`);
+    while(35, ee92204e, `Collapsed while loop. Each structured step allows to hide its sub sequences`, plain=`Collapsed while loop. Each structured step allows to hide its sub sequences`, barWidth=21, collapsed=true) {
+        simple(35.1, 6320fb89, `Neuer Schritt 1`, plain=`Neuer Schritt 1`);
     }
-    doWhile(34, dfce79d0, `Loop with shaded background`, plain=`Loop with shaded background`, barWidth=21, shade=#dcdcdc) {
-        simple(34.1, 81ed3633, `Neuer Schritt 1`, plain=`Neuer Schritt 1`);
+    doWhile(36, dfce79d0, `Loop with shaded background`, plain=`Loop with shaded background`, barWidth=21, shade=#dcdcdc) {
+        simple(36.1, 81ed3633, `Neuer Schritt 1`, plain=`Neuer Schritt 1`);
     }
-    ifElse(35, 717e5669, `<div align="center">
+    ifElse(37, 717e5669, `<div align="center">
       New if step with shading, resulting in a mixed background color
     </div>`, plain=`New if step with shading, resulting in a mixed background color`, markups=[(0,62,Changed,yellow)], ifRatio=50.00%, change=(added, yellow), shade=#dcdcdc) {
         if_branch(`Branch headings shaded too`, plain=`Branch headings shaded too`, markups=[(0,25,Changed,yellow)], change=(added, yellow)) {
-            simple(35.1, afbac578, `Steps within the sequences not shaded`, plain=`Steps within the sequences not shaded`, markups=[(0,36,Changed,yellow)], change=(added, yellow));
+            simple(37.1, afbac578, `Steps within the sequences not shaded`, plain=`Steps within the sequences not shaded`, markups=[(0,36,Changed,yellow)], change=(added, yellow));
         }
         else_branch(`<div align="right">
       Branch heading shaded too
     </div>`, plain=`Branch heading shaded too`, markups=[(0,24,Changed,yellow)], change=(added, yellow)) {
-            simple(36.1, 27ce0689, ``, plain=``, change=(added, yellow));
+            simple(38.1, 27ce0689, ``, change=(added, yellow));
         }
     }
-    source(37, cf97c413, `<strike><font color="#c0c0c0" size="1">.</font></strike>`, plain=`.`, markups=[(0,0,Changed,yellow)], yellow, sourceStep=1a9866f8);
-    simple(38, f9016c65, `Step with meta tags`, plain=`Step with meta tags`, tags=[(`user`, `Tag from a full-featured tag configuration, including
+    source(39, cf97c413, `<strike><font color="#c0c0c0" size="1">.</font></strike>`, plain=`.`, markups=[(0,0,Changed,yellow)], yellow, sourceStep=1a9866f8);
+    simple(40, f9016c65, `Step with meta tags`, plain=`Step with meta tags`, tags=[(`user`, `Tag from a full-featured tag configuration, including
 - SVG icon
 - Label text, differing from tag configuration identifier
 - Background color
@@ -331,15 +343,15 @@ Editing the freetext is initiated either by a single click on the tag or by sele
 The tag order can be changed by either pressing the left mouse button and dragging the tag or by selecting "Move right" or "Move left" from the tag's context menu`), (`no_freetext`), (`icon_only`, `A meta tag can be configured to have either an icon or a label or both.`), (`transparent_background`, `Background coloring supports transparency`), (`label_only`, `<html>
 This will not be treated as HTML as freetext of tags is only unformatted <b>plain text</b>.
 </html>`)]);
-    while(39, 3e4ceb15, `Sub-structured step with meta tag, demonstrating the position of the fold 
+    while(41, 3e4ceb15, `Sub-structured step with meta tag, demonstrating the position of the fold 
     button`, plain=`Sub-structured step with meta tag, demonstrating the position of the fold button`, barWidth=21, tags=[(`user`, `The fold button of a structured step is always located left from the step's last meta tag. This is especially reasonable as the fold button is *not* permanently displayed while the step is unfolded, but only when the user hovers over its location.
 Tags - just like the step number - will not change on folding the step.`)]) {
-        simple(39.1, c2f1666d, ``, plain=``);
+        simple(41.1, c2f1666d, ``);
     }
-    simple(40, d3b571df, `Deleted step with tags`, plain=`Deleted step with tags`, change=(removed, yellow), tags=[(`user`, `Tags of deleted steps are displayed with black background, grey (disabled) icon and grey border. They can no longer be edited nor moved nor deleted. Any freetext is still displayed as tooltip. `), (`icon_only`), (`label_only`)]);
-    break(41, 220753bc, `<b>Tagged break</b>`, plain=`Tagged break`, tags=[(`user`, `Tags of break steps are not mirrored in the corresponding catch area's heading.`)]);
-    simple(42, c01bc240, `Tagged step with border decoration and shading.`, plain=`Tagged step with border decoration and shading.`, deco=Full, shade=#dcdcdc, tags=[(`user`)]);
-    simple(43, 1a9866f8, `Moved step with tags. The tags move to the target step together with 
+    simple(42, d3b571df, `Deleted step with tags`, plain=`Deleted step with tags`, change=(removed, yellow), tags=[(`user`, `Tags of deleted steps are displayed with black background, grey (disabled) icon and grey border. They can no longer be edited nor moved nor deleted. Any freetext is still displayed as tooltip. `), (`icon_only`), (`label_only`)]);
+    break(43, 220753bc, `<b>Tagged break</b>`, plain=`Tagged break`, tags=[(`user`, `Tags of break steps are not mirrored in the corresponding catch area's heading.`)]);
+    simple(44, c01bc240, `Tagged step with border decoration and shading.`, plain=`Tagged step with border decoration and shading.`, deco=Full, shade=#dcdcdc, tags=[(`user`)]);
+    simple(45, 1a9866f8, `Moved step with tags. The tags move to the target step together with 
     content. The source step does not keep them.`, plain=`Moved step with tags. The tags move to the target step together with content. The source step does not keep them.`, change=(target, yellow, sourceStep=cf97c413), tags=[(`user`)]);
     catchArea {
         catch(10, `<b>Exception 1 - should have single line text</b>`, plain=`Exception 1 - should have single line text`, headingWidth=21) {
@@ -354,8 +366,8 @@ Tags - just like the step number - will not change on folding the step.`)]) {
         catch(15, `<b>Exception 2</b>`, plain=`Exception 2`, headingWidth=21) {
             simple(15.1, e1b5c243, `Sequence for handling the second exception`, plain=`Sequence for handling the second exception`);
         }
-        catch(41, `<b>Tagged break</b>`, plain=`Tagged break`) {
-            simple(41.1, f7dc3b9f, `Neuer Schritt 1`, plain=`Neuer Schritt 1`, tags=[(`label_only`, `Catch area headings are not actually steps and therefore don't support the attachment of tags. The steps in the handling sequence of course do.`)]);
+        catch(43, `<b>Tagged break</b>`, plain=`Tagged break`) {
+            simple(43.1, f7dc3b9f, `Neuer Schritt 1`, plain=`Neuer Schritt 1`, tags=[(`label_only`, `Catch area headings are not actually steps and therefore don't support the attachment of tags. The steps in the handling sequence of course do.`)]);
         }
     }
 }
@@ -388,5 +400,5 @@ Image added in yellow change set`)
       Image removed in yellow change set
     </h3>`, plain=`Image removed in yellow change set`)
     image(scale=100%, type=png, change=(removed, yellow)) { [base64:iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADzklEQVR4XrWXbUhTURjHr1aCUPSiRpSkmVlaNr1TR2XLaRr6wQ+6WFkrddPZULGVEETlKiNCey+MKEx70UTCXrUG1sSKSCtCrbSyrMSgKIrSMp/OGSx2zzl3L6Yffvtwn3P/z/+cPee553AAwGH6+/u50tLSFXq9/lJqamp3enr6QFZWFowEmZmZg8nJyd1Iu8FoNCr7+vrcrXktP2az2TM/P79GJpOBVCodVSIiIkCj0Zhqa2u9LAZ6e3vdcnNz68iBo41Wq31gMpnGccXFxSuxK3KAGAmKcDi4IxgaKgLgYZ0vPLk+HR5dnQF3qvzhTOlcUCslwDPeY1FYWFjApaWl3SQDLDZqF1oSDnSMAejiRBnqdIOXt33giDGY0iBRq9WvOJVKNUgGbElQ8GCu9oPBF25UMke8bPSBHLWE0rQil8uBi4uLowJWNKsl8OHeZErYFX60ecD+bSGUthVOoVBQDzEZqjD41DKBErQFr8rnVk/4/dyditmC44eL2H8J00DMUh56mqdQQrZ8fDARNqxbCDwvhTUpYfCmyZsaY8vP9nGWOiJzMQ3cqpxFCZCQy1qAxIcY46x0NU6FrDS6HigDGSoJDDyzX+kY/XrhbOTRPNPAL6RVezwQoiKFiUUNNF7wp0RYXDs9W/Ae7gHkmJ5mL8vKkElFDURFSeHLY09KiMUfVIC4+eCmVF8eYJmpNYaL7gZ6Fr2YpxKSCAxszgmlErlKHyrOrXmhVCIxBAbOHwqiBJ3lTydeET+IXeZ41qIG8FKSws7wuXU87N0ynxJ3BoGBxnOOtx/J96cesCnb+SUnERhoGOYK4KJruewLhmz7Fc9CYODC4eHXAAbXQfvNaWA0LKASiTHiuwCDG9KrO95wYHsIRIo0IKYBmQt9wFnw1/TUvrmwZBF7d1CdEDcXUmQkwF/Wi0fnQHyM0AhlQIvOAL+e2f+8/g+VB4LsG8CYzrq+HZ3hPfo7FskcrAAmVs7Du7v2zwOuMtAxFrbo6X7BNIDBxzHc4Uih4TCI+sTx3SInInRjoR5a0a2VQO/9SZSgK/S3j4UjO9nJ8UUIH8s7yIAtSct5aK6ZaWkypLgjutExrUAj3h2VSuVXzmAwFJEBFoW6UGi9MsPhDhnqRInN3nBizzx0DaN1bNHpdCe5+vr6iSkpKa/JoBiJy8Ph2K5gMKFzY8sVX2hrmGa5HTVV+0PlwSDIXEWf+1ig2X+rqKjw4/AFsaSkZEFSUtJbctBogeruG7oSLvt3O8ZUVVVNz8vLK09MTPxOvjBSxMfH/0Q345qysrJAa96/tcrK/SUbmoIAAAAASUVORK5CYII=] }
-    text(``, plain=``)
+    text(``)
 }
