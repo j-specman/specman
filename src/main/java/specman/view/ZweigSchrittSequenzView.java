@@ -148,18 +148,6 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 		return ueberschrift.aenderungenVerwerfen();
 	}
 
-	@Override
-	public List<TextEditArea> getTextAreas() {
-		List<TextEditArea> result = headingTextAreas();
-		result.addAll(super.getTextAreas());
-		return result;
-	}
-
-	/** @return a modifiable list of the text areas of the heading(s) of the branch, in layout order */
-	protected List<TextEditArea> headingTextAreas() {
-		return ueberschrift.getTextAreas();
-	}
-
 	/** Visits the heading of the branch. */
 	@Override
 	protected void acceptHeadings(DiagramVisitor visitor) throws StopTraversalException {

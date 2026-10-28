@@ -600,15 +600,6 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   @Override
-  public List<TextEditArea> getTextAreas() {
-    List<TextEditArea> result = new ArrayList<>();
-    for (List<EditContainer> row : cells) {
-      row.stream().forEach(ec -> result.addAll(ec.getTextAreas()));
-    }
-    return result;
-  }
-
-  @Override
   public void accept(DiagramVisitor visitor) throws StopTraversalException {
     if (!DiagramVisitor.mayDescend(() -> visitor.visitTable(this))) {
       return;

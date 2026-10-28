@@ -248,7 +248,6 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   @Override public void setQuellStil(ChangeSet changeSet) { /* Not required for list items - source steps only contain an empty text area */ }
   @Override public void setEditDecorationIndentions(Indentions indentions) { /* Nothing to do here */ }
   @Override public String getText() { return "list item"; }
-  @Override public List<TextEditArea> getTextAreas() { return content.getTextAreas(); }
   @Override public void accept(DiagramVisitor visitor) throws StopTraversalException {
     if (DiagramVisitor.mayDescend(() -> visitor.visitListItem(this))) {
       content.accept(visitor);

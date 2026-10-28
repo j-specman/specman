@@ -11,6 +11,9 @@ import specman.editarea.EditContainer;
 import specman.editarea.ImageEditArea;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
+import specman.model.v002.DiagramModel_V002;
+import specman.model.v002.io.ModelParser_V002;
+import specman.model.v002.io.ModelRenumberer_V002;
 import specman.view.AbstractSchrittView;
 import specman.view.CaseSchrittView;
 import specman.view.CatchBereich;
@@ -18,15 +21,19 @@ import specman.view.CatchSchrittSequenzView;
 import specman.view.SchrittSequenzView;
 import specman.visitor.DiagramVisitor;
 import specman.visitor.IgnoreChildrenException;
+import specman.visitor.StepNumberIndexCollector;
 import specman.visitor.StopTraversalException;
 
 import java.awt.Component;
 import java.awt.Container;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,8 +44,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * A {@link DiagramVisitor} gets to see every step and edit area of the diagram, no matter how deeply nested in
  * if-else or case branches, catch areas, tables or list items. The tests traverse the reference model, which
- * contains all step types and constellations. As long as the visitor based traversal coexists with the older,
- * hand-written ones, the latter serve as the reference.
+ * contains all step types and constellations. What the visitor sees is compared with independent references:
+ * the Swing component tree for the edit areas, the saved model for the steps.
  */
 @ExtendWith(HeadlessExtension.class)
 class DiagramVisitorTest {
@@ -49,29 +56,37 @@ class DiagramVisitorTest {
   }
 
   @Test
-  void testVisitorSeesTheSameTextAreasInTheSameOrderAsTheTextAreaTraversal() {
+  void testVisitorSeesAllTextAreas() {
+    assertVisitorSeesAllInComponentTreeInAnyOrder(TextEditArea.class, collector -> collector.textAreas);
+  }
+
+  /** The model is an independent reference: It is traversed by its own code, not by the views' one. */
+  @Test
+  void testVisitorSeesTheSameStepsAsTheModel() throws Exception {
     Collector collector = new Collector();
     specman.traverseDiagram(collector);
 
-    assertEquals(specman.queryAllTextComponents(null), collector.textAreas);
-  }
-
-  /** The step number index is built by a hand-written traversal over all steps, in document order. */
-  @Test
-  void testVisitorSeesTheSameStepsAsTheStepNumberIndex() {
-    Collector collector = new Collector();
-    specman.traverseDiagram(collector);
-
-    assertEquals(stepIdsInStepNumberIndex(), idsOf(collector.steps));
+    assertEquals(new ArrayList<>(stepNumbersSavedInModel().keySet()), idsOf(collector.steps));
   }
 
   @Test
-  void testListAllStepsReturnsTheSameStepsAsTheStepNumberIndex() {
-    assertEquals(stepIdsInStepNumberIndex(), idsOf(specman.listAllSteps()));
+  void testListAllStepsReturnsTheSameStepsAsTheModel() throws Exception {
+    assertEquals(new ArrayList<>(stepNumbersSavedInModel().keySet()), idsOf(specman.listAllSteps()));
   }
 
-  private static List<String> stepIdsInStepNumberIndex() {
-    return List.copyOf(specman.getHauptSequenz().buildStepNumberIndex().keySet());
+  @Test
+  void testStepNumberIndexMatchesTheNumbersSavedInTheModel() throws Exception {
+    StepNumberIndexCollector indexCollector = new StepNumberIndexCollector();
+    specman.traverseDiagram(indexCollector);
+
+    assertEquals(stepNumbersSavedInModel(), indexCollector.index());
+  }
+
+  /** Step numbers by step id, as saved in the reference model file. */
+  private static Map<String, String> stepNumbersSavedInModel() throws Exception {
+    String modelText = Files.readString(ModelCopyLoader.referenceModelFile().toPath(), StandardCharsets.UTF_8);
+    DiagramModel_V002 model = new ModelParser_V002().parse(modelText);
+    return ModelRenumberer_V002.collectNumbers(model.mainSequence);
   }
 
   private static List<String> idsOf(List<AbstractSchrittView> steps) {

@@ -790,9 +790,6 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     }
 
   @Override
-  public List<TextEditArea> getTextAreas() { return List.of(this); }
-
-  @Override
   public void accept(DiagramVisitor visitor) throws StopTraversalException { visitor.visitTextArea(this); }
 
   public CatchUeberschrift containingCatchHeading() {

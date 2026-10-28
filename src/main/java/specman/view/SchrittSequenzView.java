@@ -123,29 +123,6 @@ public class SchrittSequenzView {
 		return null;
 	}
 
-	public Map<String, String> buildStepNumberIndex() {
-		Map<String, String> index = new LinkedHashMap<>();
-		collectStepNumbers(index);
-		return index;
-	}
-
-	private void collectStepNumbers(Map<String, String> result) {
-		for (AbstractSchrittView step : schritte) {
-			StepNumber number = step.getNumber();
-			if (number != null) {
-				result.put(step.id, number.toString());
-			}
-			for (SchrittSequenzView seq : step.unterSequenzen()) {
-				seq.collectStepNumbers(result);
-			}
-		}
-		if (catchBereich != null) {
-			for (SchrittSequenzView catchSeq : catchBereich.unterSequenzen()) {
-				catchSeq.collectStepNumbers(result);
-			}
-		}
-	}
-
 	public ChangeInfo getChangeInfo() { return changeInfo; }
 
 	/** The shell panel around the sequence follows the change info, so that it shows the right color wherever it gets visible. */
@@ -512,31 +489,6 @@ public class SchrittSequenzView {
 		}
 	}
 
-	public AbstractSchrittView findeSchrittZuId(StepNumber id){
-		for(AbstractSchrittView schritt: schritte) {
-			AbstractSchrittView result = schritt.findeSchrittZuId(id);
-			if (result != null) {
-				return result;
-			}
-		}
-		return null;
-	}
-
-	public AbstractSchrittView findViewByStepId(String stepId) {
-		for (AbstractSchrittView schritt : schritte) {
-			if (stepId.equals(schritt.id)) {
-				return schritt;
-			}
-			for (SchrittSequenzView seq : schritt.unterSequenzen()) {
-				AbstractSchrittView result = seq.findViewByStepId(stepId);
-				if (result != null) {
-					return result;
-				}
-			}
-		}
-		return null;
-	}
-
 	public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
 		if (changeInfo.changedBy(source)) {
 			UDBL.setChangeInfo(this, changeInfo.reassign(target));
@@ -678,19 +630,6 @@ public class SchrittSequenzView {
 			}
 		}
 		return Co;
-	}
-
-	public List<TextEditArea> getTextAreas() {
-		List<TextEditArea> result = new ArrayList<>();
-		for (AbstractSchrittView schritt : schritte) {
-			result.addAll(schritt.getTextAreas());
-		}
-		if (catchBereich != null) {
-			for (SchrittSequenzView catchSeq : catchBereich.unterSequenzen()) {
-				result.addAll(catchSeq.getTextAreas());
-			}
-		}
-		return result;
 	}
 
 	/** Visits the sequence, then its heading(s), its steps and its catch area. */

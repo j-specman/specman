@@ -23,6 +23,11 @@ public class ModelCopyLoader {
     this.specman = specman;
   }
 
+  /** The original reference model file, for tests which read it directly. Don't load this one, load a copy. */
+  public static File referenceModelFile() {
+    return REFERENCE_MODEL;
+  }
+
   /** Loads a copy of the given model file, located in the given directory. */
   public void loadModelCopy(File modelFile, Path copyDirectory) throws IOException {
     File copy = copyDirectory.resolve(modelFile.getName()).toFile();

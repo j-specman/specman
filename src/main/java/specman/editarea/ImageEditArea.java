@@ -475,9 +475,6 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   }
 
   @Override
-  public List<TextEditArea> getTextAreas() { return List.of(); }
-
-  @Override
   public void accept(DiagramVisitor visitor) throws StopTraversalException { visitor.visitImageArea(this); }
 
   @Override

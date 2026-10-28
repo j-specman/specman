@@ -17,6 +17,8 @@ import specman.model.v002.io.ModelParseException;
 import specman.model.v002.io.ModelRenumberer_V002;
 import specman.model.v002.io.ModelSerializer_V002;
 import specman.view.QuellSchrittView;
+import specman.visitor.StepNumberIndexCollector;
+import specman.visitor.TextAreaCollector;
 import specman.view.SchrittSequenzView;
 import specman.view.AbstractSchrittView;
 
@@ -283,23 +285,17 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
   private void rewriteStaleStepNumberLinks(DiagramModel_V002 model) {
     Map<String, String> savedNumbers = ModelRenumberer_V002.collectNumbers(model.mainSequence);
     if (!savedNumbers.isEmpty()) {
-      Map<String, String> computedIndex = getHauptSequenz().buildStepNumberIndex();
-      Map<String, String> changedNumbers = queryChangedNumbers(savedNumbers, computedIndex);
+      StepNumberIndexCollector computedIndex = new StepNumberIndexCollector();
+      context().traverseDiagram(computedIndex);
+      Map<String, String> changedNumbers = queryChangedNumbers(savedNumbers, computedIndex.index());
       if (!changedNumbers.isEmpty()) {
-        List<TextEditArea> allAreas = collectAllTextAreas();
-        for (TextEditArea area : allAreas) {
+        TextAreaCollector allAreas = new TextAreaCollector();
+        context().traverseDiagram(allAreas);
+        for (TextEditArea area : allAreas.textAreas()) {
           remapStepNumberLinksInArea(area, changedNumbers);
         }
       }
     }
-  }
-
-  private List<TextEditArea> collectAllTextAreas() {
-    List<TextEditArea> allAreas = new ArrayList<>();
-    allAreas.addAll(getIntro().getTextAreas());
-    allAreas.addAll(getHauptSequenz().getTextAreas());
-    allAreas.addAll(getOutro().getTextAreas());
-    return allAreas;
   }
 
   private Map<String, String> queryChangedNumbers(Map<String, String> savedNumbers, Map<String, String> computedIndex) {
@@ -336,8 +332,8 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
   private void quellZielZuweisungV002(DiagramModel_V002 model) {
     for (AbstractStepModel_V002 step : model.queryAllSteps()) {
       if (step.isTargetStep()) {
-        AbstractSchrittView zielView = getHauptSequenz().findViewByStepId(step.id);
-        QuellSchrittView quellView = (QuellSchrittView) getHauptSequenz().findViewByStepId(
+        AbstractSchrittView zielView = getHauptSequenz().findStepById(step.id);
+        QuellSchrittView quellView = (QuellSchrittView) getHauptSequenz().findStepById(
           AbstractStepModel_V002.normalizeId(step.sourceStepId));
         zielView.setQuellschritt(quellView);
         quellView.setZielschritt(zielView);

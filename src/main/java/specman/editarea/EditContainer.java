@@ -658,12 +658,6 @@ public class EditContainer extends JPanel {
 		});
 	}
 
-	public List<TextEditArea> getTextAreas() {
-    List<TextEditArea> result = new ArrayList<>();
-    editAreas.stream().forEach(ea -> result.addAll(ea.getTextAreas()));
-    return result;
-	}
-
 	public void accept(DiagramVisitor visitor) throws StopTraversalException {
 		if (!DiagramVisitor.mayDescend(() -> visitor.visitEditContainer(this))) {
 			return;

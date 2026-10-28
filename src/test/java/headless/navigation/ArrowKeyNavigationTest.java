@@ -15,6 +15,7 @@ import specman.view.AbstractSchrittView;
 import specman.view.EinfacherSchrittView;
 import specman.view.IfElseSchrittView;
 import specman.view.WhileSchrittView;
+import specman.visitor.TextAreaCollector;
 
 import javax.swing.SwingUtilities;
 import java.awt.Point;
@@ -237,7 +238,7 @@ class ArrowKeyNavigationTest {
     placeCaret(upper, 10);
     TableEditArea table = (TableEditArea) upper.addTable(2, 2);
     TextEditArea lower = upper.getParent().getEditAreaAt(2).asTextArea();
-    List<TextEditArea> cells = table.getTextAreas();
+    List<TextEditArea> cells = textAreasIn(table);
     TextEditArea topLeft = cells.get(0);
     TextEditArea topRight = cells.get(1);
     TextEditArea bottomLeft = cells.get(2);
@@ -266,6 +267,15 @@ class ArrowKeyNavigationTest {
     TextEditArea text = textOf(step);
     text.setText(html);
     return text;
+  }
+
+  /** The text areas in the cells of the table, row by row. */
+  private static List<TextEditArea> textAreasIn(TableEditArea table) {
+    TextAreaCollector collector = new TextAreaCollector();
+    specman.traverseDiagram(collector);
+    return collector.textAreas().stream()
+      .filter(textArea -> SwingUtilities.isDescendingFrom(textArea, table))
+      .toList();
   }
 
   private static TextEditArea textOf(AbstractSchrittView step) {

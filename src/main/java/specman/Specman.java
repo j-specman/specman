@@ -32,6 +32,7 @@ import specman.undo.manager.UndoRecordingMode;
 import specman.visitor.DiagramVisitor;
 import specman.visitor.StepCollector;
 import specman.visitor.StopTraversalException;
+import specman.visitor.TextAreaCollector;
 import specman.view.*;
 
 import javax.swing.*;
@@ -793,11 +794,9 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 
 	@Override
 	public List<JTextComponent> queryAllTextComponents(JTextComponent tc) {
-		List<JTextComponent> result = new ArrayList<>();
-		result.addAll(intro.getTextAreas());
-		result.addAll(hauptSequenz.getTextAreas());
-		result.addAll(outro.getTextAreas());
-		return result;
+		TextAreaCollector textAreaCollector = new TextAreaCollector();
+		traverseDiagram(textAreaCollector);
+		return new ArrayList<>(textAreaCollector.textAreas());
 	}
 
 	@Override

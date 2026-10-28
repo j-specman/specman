@@ -550,15 +550,6 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
     editContainer.registerAllExistingStepnumbers();
 	}
 
-	public AbstractSchrittView findeSchrittZuId(StepNumber id) {
-		if (this.number.equals(id)) return this;
-		for (SchrittSequenzView seq : unterSequenzen()) {
-			AbstractSchrittView result = seq.findeSchrittZuId(id);
-			if (result != null) return result;
-		}
-		return null;
-	}
-
 	public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
 		if (changeInfo.changedBy(source)) {
 			UDBL.setChangeInfo(this, changeInfo.reassign(target));
@@ -669,12 +660,6 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	@Override
 	public String toString() {
 		return number + " - " + getTextShef().getPlainText();
-	}
-
-	public List<TextEditArea> getTextAreas() {
-		List<TextEditArea> result = editContainer.getTextAreas();
-		unterSequenzen().forEach(seq -> result.addAll(seq.getTextAreas()));
-		return result;
 	}
 
 	public List<BreakSchrittView> queryLinkedBreakSteps() {
