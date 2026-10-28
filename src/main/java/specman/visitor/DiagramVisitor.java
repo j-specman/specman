@@ -60,6 +60,22 @@ public interface DiagramVisitor {
     void run() throws IgnoreChildrenException, StopTraversalException;
   }
 
+  /** One complete traversal, i.e. one or more {@code accept} calls. */
+  @FunctionalInterface
+  interface Traversal {
+    void run() throws StopTraversalException;
+  }
+
+  /** Runs the traversal and swallows the {@link StopTraversalException}, as the visitor ending the traversal is intended. */
+  static void traverse(Traversal traversal) {
+    try {
+      traversal.run();
+    }
+    catch (StopTraversalException x) {
+      // The visitor has seen enough, which ends the traversal as intended
+    }
+  }
+
   /**
    * Makes the call and tells whether the traversal is supposed to descend into the children of the reported node.
    * All {@code accept} methods of nodes having children report themselves this way, so this is the one place

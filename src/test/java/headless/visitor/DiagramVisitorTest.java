@@ -15,12 +15,14 @@ import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.io.ModelParser_V002;
 import specman.model.v002.io.ModelRenumberer_V002;
 import specman.view.AbstractSchrittView;
+import specman.view.BreakSchrittView;
 import specman.view.CaseSchrittView;
 import specman.view.CatchBereich;
 import specman.view.CatchSchrittSequenzView;
 import specman.view.SchrittSequenzView;
 import specman.visitor.DiagramVisitor;
 import specman.visitor.IgnoreChildrenException;
+import specman.visitor.LinkedBreakStepCollector;
 import specman.visitor.StepNumberIndexCollector;
 import specman.visitor.StopTraversalException;
 
@@ -97,6 +99,36 @@ class DiagramVisitorTest {
   @Test
   void testNoStepIsFoundForAnUnknownNumber() {
     assertNull(specman.findStepByStepID("99.99"));
+  }
+
+  @Test
+  void testLinkedBreakStepIsExternallyLinkedWhenCutAlone() {
+    List<BreakSchrittView> linkedBreakSteps = linkedBreakStepsOutsideCatchSequences();
+
+    for (BreakSchrittView breakStep : linkedBreakSteps) {
+      assertEquals(List.of(breakStep), breakStep.queryExternallyLinkedBreakSteps());
+    }
+  }
+
+  @Test
+  void testBreakStepsWithTheirCatchSequenceInsideTheCutStepAreNotExternallyLinked() {
+    boolean someBreakStepIsLinkedInternally = specman.listAllSteps().stream().anyMatch(step -> {
+      LinkedBreakStepCollector collector = new LinkedBreakStepCollector();
+      step.traverse(collector);
+      return step.queryExternallyLinkedBreakSteps().size() < collector.breakSteps().size();
+    });
+
+    assertTrue(someBreakStepIsLinkedInternally,
+      "test setup: reference model must contain a step enclosing a break step and its catch sequence");
+  }
+
+  private static List<BreakSchrittView> linkedBreakStepsOutsideCatchSequences() {
+    List<BreakSchrittView> result = specman.listAllSteps().stream()
+      .filter(step -> step instanceof BreakSchrittView breakStep && breakStep.isLinked() && !isInCatchSequence(step))
+      .map(step -> (BreakSchrittView) step)
+      .toList();
+    assertFalse(result.isEmpty(), "test setup: reference model must contain linked break steps");
+    return result;
   }
 
   /** Step numbers by step id, as saved in the reference model file. */

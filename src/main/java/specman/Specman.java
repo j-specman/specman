@@ -32,7 +32,6 @@ import specman.undo.manager.UndoRecordingMode;
 import specman.visitor.DiagramVisitor;
 import specman.visitor.StepByNumberFinder;
 import specman.visitor.StepCollector;
-import specman.visitor.StopTraversalException;
 import specman.visitor.TextAreaCollector;
 import specman.view.*;
 
@@ -804,14 +803,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 
 	@Override
 	public void traverseDiagram(DiagramVisitor visitor) {
-		try {
+		DiagramVisitor.traverse(() -> {
 			intro.accept(visitor);
 			hauptSequenz.accept(visitor);
 			outro.accept(visitor);
-		}
-		catch (StopTraversalException x) {
-			// The visitor has seen enough, which ends the traversal as intended
-		}
+		});
 	}
 
   @Override

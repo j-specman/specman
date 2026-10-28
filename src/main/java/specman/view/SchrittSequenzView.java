@@ -26,12 +26,9 @@ import specman.visitor.StopTraversalException;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import java.awt.Component;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static specman.Aenderungsart.Geloescht;
@@ -651,12 +648,7 @@ public class SchrittSequenzView {
 
 	/** Starts a traversal at this sequence. Returns when the traversal is done or the visitor has stopped it. */
 	public void traverse(DiagramVisitor visitor) {
-		try {
-			accept(visitor);
-		}
-		catch (StopTraversalException x) {
-			// The visitor has seen enough, which ends the traversal as intended
-		}
+		DiagramVisitor.traverse(() -> accept(visitor));
 	}
 
 	public Shape getShapeSequence() {
@@ -677,23 +669,6 @@ public class SchrittSequenzView {
 
 	public CatchSchrittSequenzView catchSequenzAnhaengenUDBL(BreakSchrittView breakStepToLink) {
 		return catchBereich.catchSequenzAnhaengenUDBL(breakStepToLink);
-	}
-
-	public List<BreakSchrittView> queryLinkedBreakSteps() {
-		List<BreakSchrittView> result = new ArrayList<>();
-		for (AbstractSchrittView schritt: schritte) {
-			result.addAll(schritt.queryLinkedBreakSteps());
-		}
-		return result;
-	}
-
-	public Set<CatchBereich> queryCatchBereiche() {
-		Set<CatchBereich> result = new HashSet<>();
-		result.add(catchBereich);
-		for (AbstractSchrittView schritt : schritte) {
-			result.addAll(schritt.queryCatchBereiche());
-		}
-		return result;
 	}
 
   public void scrollTo() {

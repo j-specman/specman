@@ -18,7 +18,6 @@ import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static specman.view.StepRemovalPurpose.Discard;
@@ -170,11 +169,6 @@ public class BreakSchrittView extends AbstractSchrittView {
 	/** A break step is linked as soon as a catch sequence exists for it. */
 	public boolean isLinked() {
 		return catchHeading != null;
-	}
-
-	@Override
-	public List<BreakSchrittView> queryLinkedBreakSteps() {
-		return (catchHeading != null) ? Arrays.asList(this) : Arrays.asList();
 	}
 
 	public void updateContent(EditorContentModel_V002 content, ChangeSet sourceChangeSet) {
