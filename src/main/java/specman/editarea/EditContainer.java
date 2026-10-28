@@ -908,7 +908,6 @@ public class EditContainer extends JPanel {
   }
 
   public void viewsNachinitialisieren() {
-    editAreas.forEach(ea -> ea.viewsNachinitialisieren());
     // Re-run after construction, not just during it: step numbers can still change later in
     // the same load (e.g. renummerieren() runs after the views are built), and the label's
     // bounds from the original construction-time call may be stale for the final text/width.

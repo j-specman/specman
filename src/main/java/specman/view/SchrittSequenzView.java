@@ -440,15 +440,6 @@ public class SchrittSequenzView {
 		}
 	}
 
-	public void viewsNachinitialisieren() {
-		for(AbstractSchrittView schritt: schritte) {
-			schritt.viewsNachinitialisieren();
-		}
-		if (catchBereich != null) {
-			catchBereich.viewsNachinitialisieren();
-		}
-	}
-
 	public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source) {
 		if (changeInfo.changedBy(source)) {
 			UDBL.setChangeInfo(this, changeInfo.reassign(target));

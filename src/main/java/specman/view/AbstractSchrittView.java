@@ -507,6 +507,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		unterSequenzen().forEach(SchrittSequenzView::resyncStepnumberStyleADBL);
 	}
 
+	/** Applies the styles of the step's change info. Doesn't descend and doesn't register the step number links,
+	 * see {@link specman.visitor.DiagramPostInitializer}. */
 	public void viewsNachinitialisieren() {
     switch (changeInfo.art()) {
       case Hinzugefuegt -> {} // panel color handled by applyEffectiveBackgroundUDBL below
@@ -515,9 +517,6 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
       case Zielschritt -> setZielschrittStilUDBL();
     }
     applyEffectiveBackgroundUDBL();
-    editContainer.viewsNachinitialisieren();
-		registerAllExistingStepnumbers();
-		unterSequenzen().forEach(SchrittSequenzView::viewsNachinitialisieren);
 	}
 
 	/**

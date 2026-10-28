@@ -76,6 +76,4 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V002> extends Inte
 
   /** Reports the edit area to the visitor. Containers (table, list item) then pass the visitor on to the areas inside them. */
   void accept(DiagramVisitor visitor) throws StopTraversalException;
-
-  void viewsNachinitialisieren();
 }

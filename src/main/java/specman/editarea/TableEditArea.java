@@ -588,15 +588,11 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     }
   }
 
-  @Override
   public void viewsNachinitialisieren() {
     if (changeInfo.isDeleted()) {
       for (List<EditContainer> row : cells) {
         row.stream().forEach(ec -> ec.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet()));
       }
-    }
-    for (List<EditContainer> row : cells) {
-      row.stream().forEach(ec -> ec.viewsNachinitialisieren());
     }
   }
 

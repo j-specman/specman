@@ -200,12 +200,10 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
     return lastArea;
   }
 
-  @Override
   public void viewsNachinitialisieren() {
     if (changeInfo.isDeleted()) {
       content.setGeloeschtMarkiertStilUDBL(null, changeInfo.changeSet());
     }
-    content.viewsNachinitialisieren();
   }
 
   public EditArea getFirstEditArea() { return content.getFirstEditArea(); }

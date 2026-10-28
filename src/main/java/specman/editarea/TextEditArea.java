@@ -791,7 +791,6 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     return getParent().getContainer(CatchUeberschrift.class);
   }
 
-  @Override
   public void viewsNachinitialisieren() {
     if (changeInfo.isDeleted()) {
       setGeloeschtMarkiertStilUDBL(changeInfo.changeSet());

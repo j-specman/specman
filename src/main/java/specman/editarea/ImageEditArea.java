@@ -464,7 +464,6 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   @Override
   public void accept(DiagramVisitor visitor) throws StopTraversalException { visitor.visitImageArea(this); }
 
-  @Override
   public void viewsNachinitialisieren() {
     if (changeInfo.isDeleted()) {
       setGeloeschtMarkiertStilUDBL(changeInfo.changeSet());

@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import static specman.Specman.editor;
 import static specman.view.RelativeStepPosition.After;
 import static specman.i18n.Messages.i18n;
+import specman.visitor.DiagramPostInitializer;
 
 public class PasteStepsOp extends AbstractADBLSpecmanOp {
 
@@ -63,7 +64,7 @@ public class PasteStepsOp extends AbstractADBLSpecmanOp {
       AbstractSchrittView newStep = AbstractSchrittView.baueSchrittViewFrom(parent, stepModel);
       parent.insertStep(newStep, After, reference);
       parent.renumberFollowingSteps(reference);
-      newStep.viewsNachinitialisieren();
+      DiagramPostInitializer.initialize(newStep::traverse);
       newStepPostInit(newStep);
       reference = newStep;
     }

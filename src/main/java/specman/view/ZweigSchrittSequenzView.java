@@ -112,12 +112,6 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 		setChangeInfo(changeInfo.untrack(changeset()));
 	}
 
-	@Override
-	public void viewsNachinitialisieren() {
-		super.viewsNachinitialisieren();
-		ueberschrift.viewsNachinitialisieren();
-	}
-
 	public int ueberschriftAenderungenUebernehmen() {
 		return ueberschrift.aenderungenUebernehmen();
 	}
