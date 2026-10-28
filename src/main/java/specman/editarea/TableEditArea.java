@@ -132,7 +132,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   @Override
   public void setEditBackgroundUDBL(Color bg) {
     cellstream().forEach(cell -> cell.setBackgroundUDBL(cellPanelColor(cell)));
-    setBackgroundUDBL(bg);
+    setBackgroundUDBL(changeInfo.isChange() ? changeInfo.panelColor() : bg);
   }
 
   /** Cells added in change mode to an otherwise untracked table (rows, columns) keep their own change color.

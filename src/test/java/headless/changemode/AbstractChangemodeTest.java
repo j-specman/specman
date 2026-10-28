@@ -50,7 +50,7 @@ import static specman.graphics.ReadWriteColor.toHTMLColor;
 /** Base class for tests about the change mode. It provides the headless Specman, switching the change mode
  * on and the checks for what a change set's coloring is supposed to look like. */
 @ExtendWith(HeadlessExtension.class)
-abstract class AbstractChangemodeTest {
+abstract public class AbstractChangemodeTest {
 
   /** The buttons creating one step of each type, except catch sequences, which need a break step first. */
   static Stream<Class<? extends AbstractCreateStepOpButton>> stepCreationButtons() {
@@ -66,7 +66,7 @@ abstract class AbstractChangemodeTest {
   }
 
   /** Switches the change mode on and chooses the given change set, like the user would. */
-  static void enableChangeMode(ChangeSet changeSet) {
+  protected static void enableChangeMode(ChangeSet changeSet) {
     specman.toggleChangeMode();
     assertTrue(specman.aenderungenVerfolgen(), "change mode must be on");
     specman.selectChangeSet(changeSet);
@@ -75,7 +75,7 @@ abstract class AbstractChangemodeTest {
   /** The text must be marked as changed by the given change set from its first to its last character. An empty
    * text has no character to mark, so it must not be marked at all. Markups covering no character at all,
    * i.e. ending before they start, are not visible and don't count. */
-  static void assertWholeTextMarkedAsChangedBy(TextEditArea textArea, ChangeSet changeSet) {
+  protected static void assertWholeTextMarkedAsChangedBy(TextEditArea textArea, ChangeSet changeSet) {
     List<Markup_V002> markups = visibleMarkups(textArea);
     if (textArea.getPlainText().isEmpty()) {
       assertEquals(List.of(), markups, "text markups in empty " + describe(textArea));
