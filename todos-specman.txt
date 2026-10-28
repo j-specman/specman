@@ -7,6 +7,8 @@ Release notes Specman 1.4.0
 - Hoch/Runter über Grenzen von Schritten wäre cool
 
 Aus aktueller Anwendung
+- Hat man 5 Sekunden Autosave-Intervall eingestellt, dann wird es auffällig, dass ein abhängendes Leerzeichen wegbereinigt wird.
+   Wenn der User aber grade editiert, dann ist das eine häufige Situation, und dem User gehen ständig Leerzeichen verloren.
 - Durchgestrichen kann der User als Schriftformatierung auswählen. Da beißt sich aber mit Durchstreichungen durch den Änderungmodus
   - Führt z.B. zu Fehlern, wenn man Text durchstreicht, den entsprechenden Schritt dann löscht und dann die Änderungen zurücknimmt
   x Durchgestrichen ist als Workaround als Schriftformatierung nicht mehr auswählbar (siehe HTMLEditorPane, HTML.Tag.STRIKE)
