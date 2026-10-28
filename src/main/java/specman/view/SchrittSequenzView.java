@@ -696,29 +696,6 @@ public class SchrittSequenzView {
 		return result;
 	}
 
-	public AbstractSchrittView findStepByStepID(String stepID) {
-		for (AbstractSchrittView step: schritte) {
-			if (stepID.equals(step.getNumber().toString())) {
-				return step;
-			}
-			for (SchrittSequenzView unterSequenz : step.unterSequenzen()) {
-				AbstractSchrittView result = unterSequenz.findStepByStepID(stepID);
-				if (result != null) {
-					return result;
-				}
-			}
-		}
-		if (catchBereich != null) {
-			for (CatchSchrittSequenzView catchSequence: catchBereich.catchSequences) {
-				AbstractSchrittView result = catchSequence.findStepByStepID(stepID);
-				if (result != null) {
-					return result;
-				}
-			}
-		}
-		return null;
-	}
-
   public void scrollTo() {
     schritte.get(0).scrollTo();
   }

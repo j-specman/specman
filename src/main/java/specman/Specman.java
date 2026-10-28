@@ -30,6 +30,7 @@ import specman.undo.manager.SpecmanUndoManager;
 import specman.undo.manager.UndoRecording;
 import specman.undo.manager.UndoRecordingMode;
 import specman.visitor.DiagramVisitor;
+import specman.visitor.StepByNumberFinder;
 import specman.visitor.StepCollector;
 import specman.visitor.StopTraversalException;
 import specman.visitor.TextAreaCollector;
@@ -776,11 +777,13 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	/**
-	 * Finds a step by their StepID and throws an exception if it doesn't exist.
+	 * Finds a step by its StepID, which is the step number. Returns null if there is no such step.
 	 */
 	@Override
 	public AbstractSchrittView findStepByStepID(String stepID) {
-		return getHauptSequenz().findStepByStepID(stepID);
+		StepByNumberFinder stepFinder = new StepByNumberFinder(stepID);
+		traverseDiagram(stepFinder);
+		return stepFinder.step();
 	}
 
 	public boolean isKeyPressed(int keyCode) {

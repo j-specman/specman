@@ -38,6 +38,7 @@ import java.util.function.Function;
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -80,6 +81,22 @@ class DiagramVisitorTest {
     specman.traverseDiagram(indexCollector);
 
     assertEquals(stepNumbersSavedInModel(), indexCollector.index());
+  }
+
+  @Test
+  void testStepsAreFoundByTheirNumberAlsoInCatchSequences() {
+    List<AbstractSchrittView> allSteps = specman.listAllSteps();
+    assertTrue(allSteps.stream().anyMatch(DiagramVisitorTest::isInCatchSequence),
+      "test setup: reference model must contain steps in catch sequences");
+
+    for (AbstractSchrittView step : allSteps) {
+      assertSame(step, specman.findStepByStepID(step.getNumber().toString()));
+    }
+  }
+
+  @Test
+  void testNoStepIsFoundForAnUnknownNumber() {
+    assertNull(specman.findStepByStepID("99.99"));
   }
 
   /** Step numbers by step id, as saved in the reference model file. */
