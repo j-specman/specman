@@ -12,8 +12,6 @@ import javax.swing.border.Border;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.FocusListener;
-import java.util.HashMap;
-import java.util.List;
 
 public interface EditArea<MODEL extends AbstractEditAreaModel_V002> extends InteractiveStepFragment {
   int getWidth();
@@ -61,8 +59,6 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V002> extends Inte
 
   /** @return the changeset of the first change mark found in this area, or null if there is none */
   ChangeSet firstChangeSet();
-
-  void findStepnumberLinkIDs(HashMap<TextEditArea, List<String>> stepnumberLinkMap);
 
   Shape getShape();
 

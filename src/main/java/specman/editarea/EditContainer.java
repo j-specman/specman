@@ -34,6 +34,7 @@ import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
 import specman.visitor.DiagramVisitor;
 import specman.visitor.StopTraversalException;
+import specman.visitor.TextAreaCollector;
 
 import javax.swing.*;
 import java.awt.*;
@@ -41,9 +42,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.FocusListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import specman.graphics.Styles;
@@ -637,12 +636,6 @@ public class EditContainer extends JPanel {
 		return shape;
 	}
 
-	public void findStepnumberLinkIDs(HashMap<TextEditArea, List<String>> stepnumberLinkMap) {
-		for (EditArea editArea : editAreas) {
-			editArea.findStepnumberLinkIDs(stepnumberLinkMap);
-		}
-	}
-
 	public void setBackgroundUDBL(Color bg) {
 		UDBL.setBackgroundUDBL(this, bg);
 		if (editAreas != null) {
@@ -881,13 +874,10 @@ public class EditContainer extends JPanel {
 
   public void registerAllExistingStepnumbers() {
     EditorI editor = editor();
-    HashMap<TextEditArea, List<String>> stepnumberLinks = new HashMap<>();
-    findStepnumberLinkIDs(stepnumberLinks);
-    for (Map.Entry<TextEditArea, List<String>> listEntry : stepnumberLinks.entrySet()) {
-      TextEditArea referencingTextEditArea = listEntry.getKey();
-      List<String> stepIDs = listEntry.getValue();
-
-      for (String stepID : stepIDs) {
+    TextAreaCollector textAreaCollector = new TextAreaCollector();
+    DiagramVisitor.traverse(() -> accept(textAreaCollector));
+    for (TextEditArea referencingTextEditArea : textAreaCollector.textAreas()) {
+      for (String stepID : referencingTextEditArea.stepnumberLinkIDs()) {
         if (!StepnumberLink.isStepnumberLinkDefect(stepID)) {
           AbstractSchrittView step = editor.findStepByStepID(stepID);
           if (step == null) {

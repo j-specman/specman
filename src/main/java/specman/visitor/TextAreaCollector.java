@@ -5,7 +5,7 @@ import specman.editarea.TextEditArea;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Collects all text areas of the diagram in document order: Intro, the areas of the steps, outro. */
+/** Collects all text areas of the traversed part of the diagram in document order. For the whole diagram: Intro, the areas of the steps, outro. */
 public class TextAreaCollector implements DiagramVisitor {
 
   private final List<TextEditArea> textAreas = new ArrayList<>();

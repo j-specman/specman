@@ -347,17 +347,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return null;
 	}
 
-	public AbstractSchrittView findeSchritt(InteractiveStepFragment fragment) {
-		for (SchrittSequenzView unterSequenz: unterSequenzen()) {
-			AbstractSchrittView schritt = unterSequenz.findeSchritt(fragment);
-			if (schritt != null)
-				return schritt;
-		}
-		return null;
-	}
-
 	/** Liefert alle in einem Schritt enthalten Untersequenzen, um damit die verschiedenen
-	 * Traversierungsfunktionen wie {@link #findeSchritt(InteractiveStepFragment)} zu füttern. Damit
+	 * Traversierungsfunktionen wie {@link #accept(DiagramVisitor)} zu füttern. Damit
 	 * spart man sich das rekursive Absteigen in allen Ableitungen für jede dieser
 	 * Funktionen zu dublizieren
 	 */

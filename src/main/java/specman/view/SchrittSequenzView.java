@@ -21,6 +21,7 @@ import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TextEditArea;
 import specman.undo.props.UDBL;
 import specman.visitor.DiagramVisitor;
+import specman.visitor.StepByFragmentFinder;
 import specman.visitor.StepByIdOutsideCatchAreasFinder;
 import specman.visitor.StopTraversalException;
 
@@ -399,15 +400,9 @@ public class SchrittSequenzView {
 	}
 
 	public AbstractSchrittView findeSchritt(InteractiveStepFragment fragment) {
-		for (AbstractSchrittView schritt: schritte) {
-			if (schritt.enthaelt(fragment))
-				return schritt;
-			AbstractSchrittView subStep = schritt.findeSchritt(fragment);
-			if (subStep != null) {
-				return subStep;
-			}
-		}
-		return (catchBereich != null) ? catchBereich.findeSchritt(fragment) : null;
+		StepByFragmentFinder finder = new StepByFragmentFinder(fragment);
+		traverse(finder);
+		return finder.step();
 	}
 
 	public StepSequenceModel_V002 generiereSchrittSequenzModel(boolean formatierterText) {

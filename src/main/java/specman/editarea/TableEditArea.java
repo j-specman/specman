@@ -29,7 +29,6 @@ import java.awt.*;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -337,11 +336,6 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       }
     }
     return null;
-  }
-
-  @Override
-  public void findStepnumberLinkIDs(HashMap<TextEditArea, List<String>> stepnumberLinkMap) {
-    cellstream().forEach(cell -> cell.findStepnumberLinkIDs(stepnumberLinkMap));
   }
 
   @Override

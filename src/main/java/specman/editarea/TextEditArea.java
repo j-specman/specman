@@ -39,7 +39,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -715,14 +714,12 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         return stepnumberLinks;
     }
 
-    public void findStepnumberLinkIDs(HashMap<TextEditArea, List<String>> stepnumberLinkMap) {
-        List<String> stepnumberLinkIDs = findStepnumberLinks()
+    /** @return the IDs of the steps linked in this text, in text order */
+    public List<String> stepnumberLinkIDs() {
+        return findStepnumberLinks()
             .stream()
             .map(this::getStepnumberLinkIDFromElement)
             .collect(Collectors.toList());
-        if (!stepnumberLinkIDs.isEmpty()) {
-            stepnumberLinkMap.put(this, stepnumberLinkIDs);
-        }
     }
 
     private String getStepnumberLinkIDFromElement(WrappedElement element) {

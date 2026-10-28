@@ -147,19 +147,6 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
     return index;
   }
 
-  public AbstractSchrittView findeSchritt(InteractiveStepFragment fragment) {
-    for (CatchSchrittSequenzView seq: catchSequences) {
-      if (seq.enthaelt(fragment)) {
-        return this;
-      }
-      AbstractSchrittView result = seq.findeSchritt(fragment);
-      if (result != null) {
-        return result;
-      }
-    }
-    return null;
-  }
-
   public void entfernen(SchrittSequenzView schrittSequenzView, StepRemovalPurpose purpose) {
   }
 
