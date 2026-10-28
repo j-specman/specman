@@ -11,6 +11,7 @@ import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
+import specman.visitor.DiagramVisitor;
 
 import javax.swing.JEditorPane;
 import javax.swing.text.JTextComponent;
@@ -55,6 +56,9 @@ public interface EditorI extends FocusListener {
 	void toggleListItem(boolean ordered);
   ScrollPause pauseScrolling();
   List<JTextComponent> queryAllTextComponents(JTextComponent tc);
+  /** Lets the visitor traverse the whole diagram: intro, steps and outro. Returns once the traversal is done,
+   * or the visitor has stopped it by throwing a {@link specman.visitor.StopTraversalException}. */
+  void traverseDiagram(DiagramVisitor visitor);
   AbstractSchrittView findStep(InteractiveStepFragment fragment);
   boolean unfoldToShow(InteractiveStepFragment fragment);
   List<GenericMetaTag> queryTagsWithFreetext();

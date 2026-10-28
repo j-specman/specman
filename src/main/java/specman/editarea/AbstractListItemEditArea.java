@@ -14,6 +14,8 @@ import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.undo.UndoableListItemSplitted;
 import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
+import specman.visitor.DiagramVisitor;
+import specman.visitor.StopTraversalException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -247,5 +249,10 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   @Override public void setEditDecorationIndentions(Indentions indentions) { /* Nothing to do here */ }
   @Override public String getText() { return "list item"; }
   @Override public List<TextEditArea> getTextAreas() { return content.getTextAreas(); }
+  @Override public void accept(DiagramVisitor visitor) throws StopTraversalException {
+    if (DiagramVisitor.mayDescend(() -> visitor.visitListItem(this))) {
+      content.accept(visitor);
+    }
+  }
 
 }

@@ -43,9 +43,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -390,16 +387,6 @@ public class SpecmanFT extends Specman {
 
   public void assertStepNumbers(List<String> expectedNumbers) {
     assertEquals(expectedNumbers, allStepNumbers());
-  }
-
-  /**
-   * Loads a copy of the given diagram file located in the given directory. Loading may create or delete a
-   * working copy beside the loaded file, which must not happen to the original.
-   */
-  public void loadDiagramCopy(File diagramFile, Path copyDirectory) throws IOException {
-    File copy = copyDirectory.resolve(diagramFile.getName()).toFile();
-    Files.copy(diagramFile.toPath(), copy.toPath());
-    diagrammLaden(copy);
   }
 
   /** Exports the diagram to the given PDF file like the user would, but without file chooser dialog. */

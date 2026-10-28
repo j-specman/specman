@@ -21,6 +21,8 @@ import specman.undo.UndoableTableRowRemoved;
 import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
 import specman.view.AbstractSchrittView;
+import specman.visitor.DiagramVisitor;
+import specman.visitor.StopTraversalException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -604,6 +606,18 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       row.stream().forEach(ec -> result.addAll(ec.getTextAreas()));
     }
     return result;
+  }
+
+  @Override
+  public void accept(DiagramVisitor visitor) throws StopTraversalException {
+    if (!DiagramVisitor.mayDescend(() -> visitor.visitTable(this))) {
+      return;
+    }
+    for (List<EditContainer> row : cells) {
+      for (EditContainer cell : row) {
+        cell.accept(visitor);
+      }
+    }
   }
 
   @Override

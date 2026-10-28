@@ -26,6 +26,8 @@ import specman.model.v002.CatchAreaModel_V002;
 import specman.model.v002.CatchSequenceModel_V002;
 import specman.pdf.Shape;
 import specman.undo.UndoableCatchSequenceAdded;
+import specman.visitor.DiagramVisitor;
+import specman.visitor.StopTraversalException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -286,6 +288,18 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
   @Override
   public List<SchrittSequenzView> unterSequenzen() {
     return sequenzenAuflisten(catchSequences);
+  }
+
+  /** The catch area is no real step: It is reported as catch area, not as step, and has no edit areas of its own.
+   * Unless the visitor wants to keep out of it, the catch sequences are visited. */
+  @Override
+  public void accept(DiagramVisitor visitor) throws StopTraversalException {
+    if (!DiagramVisitor.mayDescend(() -> visitor.visitCatchArea(this))) {
+      return;
+    }
+    for (CatchSchrittSequenzView catchSequence : catchSequences) {
+      catchSequence.accept(visitor);
+    }
   }
 
   public CatchAreaModel_V002 generiereCatchBereichModel(boolean formatierterText) {

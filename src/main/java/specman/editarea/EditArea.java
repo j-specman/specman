@@ -5,6 +5,8 @@ import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.pdf.Shape;
+import specman.visitor.DiagramVisitor;
+import specman.visitor.StopTraversalException;
 
 import javax.swing.border.Border;
 import java.awt.Color;
@@ -85,6 +87,9 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V002> extends Inte
   default AbstractListItemEditArea asListItemArea() { return null; };
 
   List<TextEditArea> getTextAreas();
+
+  /** Reports the edit area to the visitor. Containers (table, list item) then pass the visitor on to the areas inside them. */
+  void accept(DiagramVisitor visitor) throws StopTraversalException;
 
   void viewsNachinitialisieren();
 }

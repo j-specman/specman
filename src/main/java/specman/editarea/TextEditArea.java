@@ -4,6 +4,8 @@ import net.atlanticbb.tantlinger.ui.text.CompoundUndoManager;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
+import specman.visitor.DiagramVisitor;
+import specman.visitor.StopTraversalException;
 
 import specman.EditorI;
 import specman.Specman;
@@ -789,6 +791,9 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
   @Override
   public List<TextEditArea> getTextAreas() { return List.of(this); }
+
+  @Override
+  public void accept(DiagramVisitor visitor) throws StopTraversalException { visitor.visitTextArea(this); }
 
   public CatchUeberschrift containingCatchHeading() {
     return getParent().getContainer(CatchUeberschrift.class);

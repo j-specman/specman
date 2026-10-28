@@ -20,6 +20,8 @@ import specman.editarea.Indentions;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TextEditArea;
 import specman.undo.props.UDBL;
+import specman.visitor.DiagramVisitor;
+import specman.visitor.StopTraversalException;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -690,6 +692,23 @@ public class SchrittSequenzView {
 		}
 		return result;
 	}
+
+	/** Visits the sequence, then its heading(s), its steps and its catch area. */
+	public void accept(DiagramVisitor visitor) throws StopTraversalException {
+		if (!DiagramVisitor.mayDescend(() -> visitor.visitSequence(this))) {
+			return;
+		}
+		acceptHeadings(visitor);
+		for (AbstractSchrittView step : schritte) {
+			step.accept(visitor);
+		}
+		if (catchBereich != null) {
+			catchBereich.accept(visitor);
+		}
+	}
+
+	/** Plain sequences have no headings, only branch sequences do. */
+	protected void acceptHeadings(DiagramVisitor visitor) throws StopTraversalException {}
 
 	public Shape getShapeSequence() {
 		if (!sequenzBereich.isVisible()) {

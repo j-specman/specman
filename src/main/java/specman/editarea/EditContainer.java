@@ -32,6 +32,8 @@ import specman.undo.UndoableEditAreaRemoved;
 import specman.undo.UndoableEditAreaAdded;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
+import specman.visitor.DiagramVisitor;
+import specman.visitor.StopTraversalException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -660,6 +662,15 @@ public class EditContainer extends JPanel {
     List<TextEditArea> result = new ArrayList<>();
     editAreas.stream().forEach(ea -> result.addAll(ea.getTextAreas()));
     return result;
+	}
+
+	public void accept(DiagramVisitor visitor) throws StopTraversalException {
+		if (!DiagramVisitor.mayDescend(() -> visitor.visitEditContainer(this))) {
+			return;
+		}
+		for (EditArea<?> editArea : editAreas) {
+			editArea.accept(visitor);
+		}
 	}
 
 	public int indexOf(EditArea initiatingEditArea) {

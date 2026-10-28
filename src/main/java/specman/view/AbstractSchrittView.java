@@ -47,6 +47,8 @@ import specman.editarea.TextEditArea;
 import specman.undo.UndoableMetaTagMoved;
 import specman.undo.UndoableMetaTagRemoved;
 import specman.undo.props.UDBL;
+import specman.visitor.DiagramVisitor;
+import specman.visitor.StopTraversalException;
 
 import javax.swing.JComponent;
 import java.awt.*;
@@ -362,6 +364,17 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	public List<SchrittSequenzView> unterSequenzen() {
 		return KEINE_SEQUENZEN;
+	}
+
+	/** Visits this step, then everything in it: its own edit areas, then its sub sequences. */
+	public void accept(DiagramVisitor visitor) throws StopTraversalException {
+		if (!DiagramVisitor.mayDescend(() -> visitor.visitStep(this))) {
+			return;
+		}
+		editContainer.accept(visitor);
+		for (SchrittSequenzView sequence : unterSequenzen()) {
+			sequence.accept(visitor);
+		}
 	}
 
 	/** Bisschen Convenience, um die Funktion unterSequenz als Einzeiler schreiben zu können */

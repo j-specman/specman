@@ -166,7 +166,7 @@ class StepDeleteCutCopyPasteTest {
       Arguments.of(CreateIfElseStepOpButton.class, IfElseSchrittView.class, List.of("1", "1.1", "2.1", "3", "4", "4.1", "5.1")),
       Arguments.of(CreateIfStepOpButton.class, IfSchrittView.class, List.of("1", "1.1", "2", "3", "3.1")),
       Arguments.of(CreateCaseStepOpButton.class, CaseSchrittView.class,
-        List.of("1", "2.1", "3.1", "1.1", "4", "5", "6.1", "7.1", "5.1")),
+        List.of("1", "1.1", "2.1", "3.1", "4", "5", "5.1", "6.1", "7.1")),
       Arguments.of(CreateSubsequenceStepOpButton.class, SubsequenzSchrittView.class, List.of("1", "1.1", "2", "3", "3.1")),
       Arguments.of(CreateBreakStepOpButton.class, BreakSchrittView.class, List.of("1", "2", "3")));
   }

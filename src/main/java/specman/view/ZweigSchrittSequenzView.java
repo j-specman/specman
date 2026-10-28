@@ -12,6 +12,8 @@ import specman.editarea.EditContainer;
 import specman.editarea.Indentions;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TextEditArea;
+import specman.visitor.DiagramVisitor;
+import specman.visitor.StopTraversalException;
 
 import java.awt.Color;
 import java.util.List;
@@ -156,6 +158,12 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 	/** @return a modifiable list of the text areas of the heading(s) of the branch, in layout order */
 	protected List<TextEditArea> headingTextAreas() {
 		return ueberschrift.getTextAreas();
+	}
+
+	/** Visits the heading of the branch. */
+	@Override
+	protected void acceptHeadings(DiagramVisitor visitor) throws StopTraversalException {
+		ueberschrift.accept(visitor);
 	}
 
   @Override

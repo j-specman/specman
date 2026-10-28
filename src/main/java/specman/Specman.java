@@ -29,6 +29,8 @@ import specman.undo.UndoableSchrittHinzugefuegt;
 import specman.undo.manager.SpecmanUndoManager;
 import specman.undo.manager.UndoRecording;
 import specman.undo.manager.UndoRecordingMode;
+import specman.visitor.DiagramVisitor;
+import specman.visitor.StopTraversalException;
 import specman.view.*;
 
 import javax.swing.*;
@@ -793,6 +795,18 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 		result.addAll(hauptSequenz.getTextAreas());
 		result.addAll(outro.getTextAreas());
 		return result;
+	}
+
+	@Override
+	public void traverseDiagram(DiagramVisitor visitor) {
+		try {
+			intro.accept(visitor);
+			hauptSequenz.accept(visitor);
+			outro.accept(visitor);
+		}
+		catch (StopTraversalException x) {
+			// The visitor has seen enough, which ends the traversal as intended
+		}
 	}
 
   @Override

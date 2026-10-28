@@ -1,11 +1,11 @@
 package headless.pdf;
 
 import headless.HeadlessExtension;
+import headless.ModelCopyLoader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import specman.SpecmanVersion;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,10 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PdfExportSmokeTest {
 
   private static final Path PDF_DIRECTORY = Path.of("target", "pdf-tests");
-  private static final File REFERENCE_MODEL = new File(
-    "specman-reference-v" +
-      SpecmanVersion.getCompatibilityVersionPrefix() +
-      "-model-v2.nsd");
   private static final long MIN_REFERENCE_PDF_BYTES = 130_000;
 
   private static int pdfCounter = 0;
@@ -54,7 +50,7 @@ class PdfExportSmokeTest {
   @Test
   void testReferenceModelExport(@TempDir Path modelCopyDirectory) throws IOException {
     File pdf = nextPdfFile();
-    specman.loadDiagramCopy(REFERENCE_MODEL, modelCopyDirectory);
+    new ModelCopyLoader(specman).loadReferenceModelCopy(modelCopyDirectory);
 
     specman.exportPdf(pdf, "A3", false, false);
 

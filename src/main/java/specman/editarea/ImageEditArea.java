@@ -14,6 +14,8 @@ import specman.pdf.ShapeImage;
 import specman.undo.UndoableEditAreaAdded;
 import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
+import specman.visitor.DiagramVisitor;
+import specman.visitor.StopTraversalException;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -474,6 +476,9 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
 
   @Override
   public List<TextEditArea> getTextAreas() { return List.of(); }
+
+  @Override
+  public void accept(DiagramVisitor visitor) throws StopTraversalException { visitor.visitImageArea(this); }
 
   @Override
   public void viewsNachinitialisieren() {
