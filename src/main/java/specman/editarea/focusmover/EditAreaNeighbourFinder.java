@@ -1,14 +1,11 @@
 package specman.editarea.focusmover;
 
+import specman.EditorI;
 import specman.editarea.EditArea;
-import specman.editarea.ImageEditArea;
-import specman.editarea.TextEditArea;
+import specman.editarea.focusmover.FocusCandidateCollector.Candidate;
 
-import javax.swing.SwingUtilities;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -32,19 +29,19 @@ class EditAreaNeighbourFinder {
   /** Candidates differing by less than this in their vertical distance are considered to be in the same row. */
   private static final int ROW_TOLERANCE = 4;
 
-  private record Candidate(EditArea area, Rectangle bounds) {}
-
+  private final EditorI editor;
   private final Container workingArea;
 
-  EditAreaNeighbourFinder(Container workingArea) {
-    this.workingArea = workingArea;
+  EditAreaNeighbourFinder(EditorI editor) {
+    this.editor = editor;
+    this.workingArea = editor.getArbeitsbereich();
   }
 
   Optional<EditArea> find(EditArea source, int desiredX, Direction direction) {
-    Rectangle sourceBounds = boundsInWorkingArea(source.asComponent());
-    List<Candidate> candidates = new ArrayList<>();
-    collectCandidates(workingArea, source, candidates);
-    List<Candidate> inDirection = candidates.stream()
+    Rectangle sourceBounds = FocusCandidateCollector.boundsInWorkingArea(workingArea, source.asComponent());
+    FocusCandidateCollector focusCandidateCollector = new FocusCandidateCollector(workingArea, source);
+    editor.traverseDiagram(focusCandidateCollector);
+    List<Candidate> inDirection = focusCandidateCollector.candidates().stream()
       .filter(candidate -> gap(sourceBounds, candidate.bounds(), direction) >= -BORDER_SLACK)
       .toList();
     List<Candidate> overlapping = inDirection.stream()
@@ -88,45 +85,5 @@ class EditAreaNeighbourFinder {
       return bounds.x - x;
     }
     return Math.max(0, x - (bounds.x + bounds.width));
-  }
-
-  /**
-   * Walks the component tree below the container. Invisible containers (e.g. collapsed sections) are not entered.
-   * Tables and list items are plain panels, so the walk finds the areas inside them.
-   */
-  private void collectCandidates(Container container, EditArea source, List<Candidate> candidates) {
-    for (Component child : container.getComponents()) {
-      if (!child.isVisible()) {
-        continue;
-      }
-      if (child instanceof TextEditArea || child instanceof ImageEditArea) {
-        addIfTarget((EditArea<?>) child, source, candidates);
-      }
-      else if (child instanceof Container childContainer) {
-        collectCandidates(childContainer, source, candidates);
-      }
-    }
-  }
-
-  private void addIfTarget(EditArea<?> candidate, EditArea source, List<Candidate> candidates) {
-    if (candidate == source || !canTakeCaret(candidate)) {
-      return;
-    }
-    Rectangle bounds = boundsInWorkingArea(candidate.asComponent());
-    if (!bounds.isEmpty()) {
-      candidates.add(new Candidate(candidate, bounds));
-    }
-  }
-
-  /** Areas the user can't edit show no caret, and deleted images don't react to keys, so one could never leave them again. */
-  private static boolean canTakeCaret(EditArea<?> editArea) {
-    if (editArea instanceof TextEditArea textArea) {
-      return textArea.isEditable();
-    }
-    return !editArea.getChangeInfo().isDeleted();
-  }
-
-  private Rectangle boundsInWorkingArea(Component component) {
-    return SwingUtilities.convertRectangle(component.getParent(), component.getBounds(), workingArea);
   }
 }

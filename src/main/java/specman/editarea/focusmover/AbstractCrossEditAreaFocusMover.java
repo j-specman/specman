@@ -57,7 +57,7 @@ abstract class AbstractCrossEditAreaFocusMover<EDITAREATYPE extends EditArea> {
   private boolean moveFocusTo(Direction direction) {
     Container workingArea = editor().getArbeitsbereich();
     int desiredX = SwingUtilities.convertPoint(currentFocusArea.asComponent(), desiredLocalX(), 0, workingArea).x;
-    Optional<EditArea> target = new EditAreaNeighbourFinder(workingArea).find(currentFocusArea, desiredX, direction);
+    Optional<EditArea> target = new EditAreaNeighbourFinder(editor()).find(currentFocusArea, desiredX, direction);
     target.ifPresent(area -> enter(area, desiredX, direction, workingArea));
     return target.isPresent();
   }

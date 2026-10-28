@@ -710,6 +710,16 @@ public class SchrittSequenzView {
 	/** Plain sequences have no headings, only branch sequences do. */
 	protected void acceptHeadings(DiagramVisitor visitor) throws StopTraversalException {}
 
+	/** Starts a traversal at this sequence. Returns when the traversal is done or the visitor has stopped it. */
+	public void traverse(DiagramVisitor visitor) {
+		try {
+			accept(visitor);
+		}
+		catch (StopTraversalException x) {
+			// The visitor has seen enough, which ends the traversal as intended
+		}
+	}
+
 	public Shape getShapeSequence() {
 		if (!sequenzBereich.isVisible()) {
 			return null;
@@ -728,14 +738,6 @@ public class SchrittSequenzView {
 
 	public CatchSchrittSequenzView catchSequenzAnhaengenUDBL(BreakSchrittView breakStepToLink) {
 		return catchBereich.catchSequenzAnhaengenUDBL(breakStepToLink);
-	}
-
-	public List<BreakSchrittView> queryUnlinkedBreakSteps() {
-		List<BreakSchrittView> result = new ArrayList<>();
-		for (AbstractSchrittView schritt: schritte) {
-			result.addAll(schritt.queryUnlinkedBreakSteps());
-		}
-		return result;
 	}
 
 	public List<BreakSchrittView> queryLinkedBreakSteps() {

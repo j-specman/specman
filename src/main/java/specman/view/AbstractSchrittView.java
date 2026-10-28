@@ -677,12 +677,6 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 		return result;
 	}
 
-	public List<BreakSchrittView> queryUnlinkedBreakSteps() {
-		List<BreakSchrittView> result = new ArrayList<>();
-		unterSequenzen().forEach(seq -> result.addAll(seq.queryUnlinkedBreakSteps()));
-		return result;
-	}
-
 	public List<BreakSchrittView> queryLinkedBreakSteps() {
 		List<BreakSchrittView> result = new ArrayList<>();
 		unterSequenzen().forEach(seq -> result.addAll(seq.queryLinkedBreakSteps()));

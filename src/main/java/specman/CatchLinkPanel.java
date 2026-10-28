@@ -10,6 +10,7 @@ import specman.view.BreakSchrittView;
 import specman.view.CatchSchrittSequenzView;
 import specman.view.CatchUeberschrift;
 import specman.view.SchrittSequenzView;
+import specman.visitor.UnlinkedBreakStepCollector;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -104,7 +105,9 @@ public class CatchLinkPanel extends JPanel {
   }
 
   private void init() {
-    listModel.addAll(sequenz.queryUnlinkedBreakSteps());
+    UnlinkedBreakStepCollector unlinkedBreakSteps = new UnlinkedBreakStepCollector();
+    sequenz.traverse(unlinkedBreakSteps);
+    listModel.addAll(unlinkedBreakSteps.breakSteps());
     JList<BreakSchrittView> jlist = new JList<>(listModel);
     jlist.addMouseListener(new MouseAdapter() {
       @Override

@@ -167,9 +167,9 @@ public class BreakSchrittView extends AbstractSchrittView {
 			.add(buildTriangle());
 	}
 
-	@Override
-	public List<BreakSchrittView> queryUnlinkedBreakSteps() {
-		return (catchHeading == null) ? Arrays.asList(this) : Arrays.asList();
+	/** A break step is linked as soon as a catch sequence exists for it. */
+	public boolean isLinked() {
+		return catchHeading != null;
 	}
 
 	@Override

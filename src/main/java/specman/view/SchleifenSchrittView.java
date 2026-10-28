@@ -239,10 +239,6 @@ public void skalieren(int prozentNeu, int prozentAktuell) {
 		return panel;
 	}
 
-	public List<BreakSchrittView> queryUnlinkedBreakSteps() {
-		return wiederholSequenz.queryUnlinkedBreakSteps();
-	}
-
 	@Override
 	public DropTarget findDropTarget(LocalCursor localCursor, DragSource dragSource) throws UnsupportedDragSourceException {
 		dragSource.supported(StepMove, StepCreation);
