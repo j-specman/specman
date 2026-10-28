@@ -281,10 +281,11 @@ tableRow
     : 'row' '{' tableCell ('|' tableCell)* '}'
     ;
 
-// Table cell is EditorContentModel_V002 — EditContainer pattern applies.
+// Table cell is EditorContentModel_V002 — EditContainer pattern applies. The optional change parameter
+// belongs to the cell's first text area (the head), like it does for steps, list items and branches.
 tableCell
-    : 'cell' '(' editContainerHead ')'
-    | 'cell' '(' editContainerHead ')' '{' editContainerTail '}'
+    : 'cell' '(' editContainerHead (',' changeParam)? ')'
+    | 'cell' '(' editContainerHead (',' changeParam)? ')' '{' editContainerTail '}'
     ;
 
 // ImageEditAreaModel_V002 — agents must skip this block entirely.

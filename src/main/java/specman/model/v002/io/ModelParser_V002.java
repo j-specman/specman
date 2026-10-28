@@ -671,8 +671,14 @@ public class ModelParser_V002 {
 
     private EditorContentModel_V002 buildEditContainer(SpecmanModel_V002Parser.EditContainerHeadContext head,
                                                         SpecmanModel_V002Parser.EditContainerTailContext tail) {
+        return buildEditContainer(head, null, tail);
+    }
+
+    private EditorContentModel_V002 buildEditContainer(SpecmanModel_V002Parser.EditContainerHeadContext head,
+                                                        SpecmanModel_V002Parser.ChangeParamContext headChangeParam,
+                                                        SpecmanModel_V002Parser.EditContainerTailContext tail) {
         EditorContentModel_V002 content = new EditorContentModel_V002();
-        content.areas.add(buildText(head.htmlContent()));
+        content.areas.add(buildText(head.htmlContent(), headChangeParam));
         if (tail != null) {
             for (SpecmanModel_V002Parser.AreaContext a : tail.area()) {
                 content.areas.addAll(buildAreas(a));
@@ -767,9 +773,9 @@ public class ModelParser_V002 {
             for (SpecmanModel_V002Parser.TableCellContext cell : row.tableCell()) {
                 EditorContentModel_V002 cellContent;
                 if (cell.editContainerTail() != null) {
-                    cellContent = buildEditContainer(cell.editContainerHead(), cell.editContainerTail());
+                    cellContent = buildEditContainer(cell.editContainerHead(), cell.changeParam(), cell.editContainerTail());
                 } else {
-                    cellContent = buildEditContainer(cell.editContainerHead(), null);
+                    cellContent = buildEditContainer(cell.editContainerHead(), cell.changeParam(), null);
                 }
                 rowCells.add(cellContent);
             }

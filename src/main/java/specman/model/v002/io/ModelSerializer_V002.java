@@ -270,6 +270,13 @@ public class ModelSerializer_V002 {
         return "``";
     }
 
+    private String firstAreaChangeAnno(EditorContentModel_V002 container) {
+        if (hasContent(container) && container.areas.get(0) instanceof TextEditAreaModel_V002 textArea) {
+            return changeAnno(textArea.changeInfo);
+        }
+        return null;
+    }
+
     // ---- EditContainer tail: areas[fromIndex..n] in block ----
 
     private void appendEditContainerTail(EditorContentModel_V002 container, int fromIndex) {
@@ -362,11 +369,16 @@ public class ModelSerializer_V002 {
     private void appendCell(EditorContentModel_V002 cell) {
         boolean isSimple = cell.areas != null && cell.areas.size() == 1
                            && cell.areas.get(0) instanceof TextEditAreaModel_V002;
+        String anno = firstAreaChangeAnno(cell);
         if (isSimple) {
-            sb.append(CELL).append("(").append(editContainerHead(cell)).append(")");
+            sb.append(CELL).append("(").append(editContainerHead(cell));
+            if (anno != null) {
+                sb.append(", ").append(anno);
+            }
+            sb.append(")");
         }
         else {
-            blockOpen(CELL, editContainerHead(cell));
+            blockOpen(CELL, editContainerHead(cell), anno);
             appendEditContainerTail(cell, 1);
             blockClose();
         }
