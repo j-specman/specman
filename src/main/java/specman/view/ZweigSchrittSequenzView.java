@@ -63,15 +63,6 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 		return model;
 	}
 
-  @Override
-  public ChangeSet firstChangeSet() {
-    ChangeSet changeSet = ueberschrift.firstChangeSet();
-    if (changeSet != null) {
-      return changeSet;
-    }
-    return super.firstChangeSet();
-  }
-
   public boolean hatUeberschrift(InteractiveStepFragment fragment) {
 		return ueberschrift.enthaelt(fragment);
 	}

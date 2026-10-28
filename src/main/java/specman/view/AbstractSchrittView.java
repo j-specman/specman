@@ -48,6 +48,7 @@ import specman.undo.UndoableMetaTagMoved;
 import specman.undo.UndoableMetaTagRemoved;
 import specman.undo.props.UDBL;
 import specman.visitor.DiagramVisitor;
+import specman.visitor.FirstChangeSetFinder;
 import specman.visitor.LinkedBreakStepCollector;
 import specman.visitor.StopTraversalException;
 
@@ -334,17 +335,9 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	@Override
 	public ChangeSet firstChangeSet() {
-		ChangeSet changeSet = editContainer.firstChangeSet();
-		if (changeSet != null) {
-			return changeSet;
-		}
-		for (SchrittSequenzView untersequenz : unterSequenzen()) {
-			changeSet = untersequenz.firstChangeSet();
-			if (changeSet != null) {
-				return changeSet;
-			}
-		}
-		return null;
+		FirstChangeSetFinder finder = new FirstChangeSetFinder();
+		traverse(finder);
+		return finder.changeSet();
 	}
 
 	/** Liefert alle in einem Schritt enthalten Untersequenzen, um damit die verschiedenen

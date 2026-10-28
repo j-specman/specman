@@ -604,16 +604,6 @@ public class EditContainer extends JPanel {
 		editAreas.forEach(ea -> addComponentListener(componentListener));
 	}
 
-	public ChangeSet firstChangeSet() {
-		for (EditArea<?> editArea : editAreas) {
-			ChangeSet changeSet = editArea.firstChangeSet();
-			if (changeSet != null) {
-				return changeSet;
-			}
-		}
-		return null;
-	}
-
 	public specman.pdf.Shape getShape() {
 		Shape shape = new Shape(this);
 		editAreas.forEach(ea -> shape.add(ea.getShape()));

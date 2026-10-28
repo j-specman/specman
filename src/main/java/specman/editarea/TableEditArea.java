@@ -326,19 +326,6 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   }
 
   @Override
-  public ChangeSet firstChangeSet() {
-    for (List<EditContainer> row : cells) {
-      for (EditContainer cell : row) {
-        ChangeSet changeSet = cell.firstChangeSet();
-        if (changeSet != null) {
-          return changeSet;
-        }
-      }
-    }
-    return null;
-  }
-
-  @Override
   public Shape getShape() {
     Shape tablePanelShape = new Shape(tablePanel);
     cellstream().forEach(cell -> tablePanelShape.add(cell.getShape()));

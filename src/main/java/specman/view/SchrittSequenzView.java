@@ -419,16 +419,6 @@ public class SchrittSequenzView {
 		}
 	}
 
-	public ChangeSet firstChangeSet() {
-		for (AbstractSchrittView schritt : schritte) {
-			ChangeSet changeSet = schritt.firstChangeSet();
-			if (changeSet != null) {
-				return changeSet;
-			}
-		}
-		return null;
-	}
-
 	public void setVisible(boolean auf) {
 		sequenzBereich.setVisible(auf);
 	}

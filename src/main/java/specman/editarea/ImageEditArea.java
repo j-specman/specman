@@ -378,7 +378,7 @@ public class ImageEditArea extends JPanel implements EditArea<ImageEditAreaModel
   @Override public ImageEditArea asImageArea() { return this; }
   @Override public boolean isImageEditArea() { return true; }
 
-  @Override
+  /** @return the change set of the image's own change mark, or null if the image is not changed */
   public ChangeSet firstChangeSet() {
     return changeInfo.isChange() ? changeInfo.changeSet() : null;
   }

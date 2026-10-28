@@ -123,17 +123,6 @@ public class CatchBereich extends AbstractSchrittView implements KlappbarerBerei
     bottomBar.setVisible(auf);
   }
 
-  @Override
-  public ChangeSet firstChangeSet() {
-    for (CatchSchrittSequenzView seq : catchSequences) {
-      ChangeSet changeSet = seq.firstChangeSet();
-      if (changeSet != null) {
-        return changeSet;
-      }
-    }
-    return null;
-  }
-
   public int catchEntfernen(CatchSchrittSequenzView catchSequence) {
     int index = catchSequences.indexOf(catchSequence);
     catchSequences.remove(index);

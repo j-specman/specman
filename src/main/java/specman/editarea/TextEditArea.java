@@ -609,7 +609,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         return editor().aenderungenVerfolgen() && isEditable();
     }
 
-    @Override
+    /** @return the change set of the first change mark in the text, or null if there is none */
     public ChangeSet firstChangeSet() {
         if (changeInfo.isChange()) {
             return changeInfo.changeSet();

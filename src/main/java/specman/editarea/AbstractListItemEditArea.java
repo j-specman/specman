@@ -231,7 +231,6 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   }
 
   //**************** canonical EditArea method implementations ************************
-  @Override public ChangeSet firstChangeSet() { return changeInfo.isChange() ? changeInfo.changeSet() : content.firstChangeSet(); }
   @Override public void aenderungsmarkierungenEntfernen() { content.aenderungsmarkierungenEntfernen(null); }
   @Override public boolean enthaelt(InteractiveStepFragment fragment) { return content.enthaelt(fragment); }
   @Override public ChangeInfo getChangeInfo() { return changeInfo; }
