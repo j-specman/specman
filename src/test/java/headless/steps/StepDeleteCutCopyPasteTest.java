@@ -25,6 +25,7 @@ import specman.view.SubsequenzSchrittView;
 import specman.view.WhileSchrittView;
 import specman.view.WhileWhileSchrittView;
 
+import javax.swing.JOptionPane;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -35,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static specman.i18n.Messages.i18n;
 import static specman.metatag.stepnumberlabel.StepnumberContextMenu.COPY_ITEM;
 import static specman.metatag.stepnumberlabel.StepnumberContextMenu.CUT_ITEM;
 import static specman.metatag.stepnumberlabel.StepnumberContextMenu.DELETE_ITEM;
@@ -156,6 +158,64 @@ class StepDeleteCutCopyPasteTest {
       .map(step -> step.getFirstEditArea().asTextArea().getPlainText())
       .toList();
     assertEquals(List.of(expectedTexts), texts);
+  }
+
+  /**
+   * Scenario: While step 1 contains a simple step 1.1 and a break step 1.2 with the catch sequence 1.2.1.
+   * A simple step 2 follows, as the last step of the diagram can't be removed. Cutting the while step takes the
+   * break step and its catch sequence along, so nothing gets lost and the user is not asked.
+   */
+  @Test
+  void testCutStepWithBreakStepAndItsCatchSequenceAsksNothing() {
+    WhileSchrittView whileStep = createWhileStepWithLinkedBreakStep();
+    specman.focus(whileStep);
+    specman.clickNewSimpleStep();
+    specman.assertStepNumbers(List.of("1", "1.1", "1.2", "1.2.1", "2"));
+
+    specman.clickContextMenuItem(whileStep, CUT_ITEM);
+
+    specman.assertStepNumbers(List.of("1"));
+    assertEquals(List.of(), specman.shownMessages());
+  }
+
+  /**
+   * Scenario: Same diagram as above, but the user cuts the break step alone. Its catch sequence stays behind in
+   * the while step and would be removed, so the user is warned. Cancelling the warning cuts nothing.
+   */
+  @Test
+  void testCutBreakStepWithCatchSequenceOutsideCanBeCancelled() {
+    createWhileStepWithLinkedBreakStep();
+    BreakSchrittView breakStep = specman.findStepByStepID("1.2", BreakSchrittView.class);
+    specman.answerConfirmDialogsWith(JOptionPane.CANCEL_OPTION);
+
+    specman.clickContextMenuItem(breakStep, CUT_ITEM);
+
+    assertEquals(List.of(i18n("msg.cut.external.catches.message", 1)), specman.shownMessages());
+    specman.assertStepNumbers(List.of("1", "1.1", "1.2", "1.2.1"));
+  }
+
+  /** Scenario: Same as above, but the user confirms the warning. The break step and its catch sequence are gone. */
+  @Test
+  void testCutBreakStepWithCatchSequenceOutsideCanBeConfirmed() {
+    createWhileStepWithLinkedBreakStep();
+    BreakSchrittView breakStep = specman.findStepByStepID("1.2", BreakSchrittView.class);
+
+    specman.clickContextMenuItem(breakStep, CUT_ITEM);
+
+    assertEquals(List.of(i18n("msg.cut.external.catches.message", 1)), specman.shownMessages());
+    specman.assertStepNumbers(List.of("1", "1.1"));
+  }
+
+  /** Creates the diagram 1 (while) containing 1.1 (simple) and 1.2 (break) with the catch sequence 1.2.1 in the while step. */
+  private static WhileSchrittView createWhileStepWithLinkedBreakStep() {
+    specman.click(CreateWhileStepOpButton.class);
+    WhileSchrittView whileStep = specman.findStepByStepID("1", WhileSchrittView.class);
+    specman.focus(specman.findSubstep(whileStep, "1.1", EinfacherSchrittView.class));
+    specman.click(CreateBreakStepOpButton.class);
+    BreakSchrittView breakStep = specman.findStepByStepID("1.2", BreakSchrittView.class);
+    specman.focus(specman.findSubstep(whileStep, "1.1", EinfacherSchrittView.class));
+    specman.choose(specman.clickCreateCatchButton(), breakStep);
+    return whileStep;
   }
 
   static Stream<Arguments> testCopyPasteBehindOtherStep_params() {
