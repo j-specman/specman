@@ -56,12 +56,26 @@ class DiagramVisitorTest {
     assertEquals(specman.queryAllTextComponents(null), collector.textAreas);
   }
 
+  /** The step number index is built by a hand-written traversal over all steps, in document order. */
   @Test
-  void testVisitorSeesTheSameStepsAsListAllSteps() {
+  void testVisitorSeesTheSameStepsAsTheStepNumberIndex() {
     Collector collector = new Collector();
     specman.traverseDiagram(collector);
 
-    assertEquals(specman.listAllSteps(), collector.steps);
+    assertEquals(stepIdsInStepNumberIndex(), idsOf(collector.steps));
+  }
+
+  @Test
+  void testListAllStepsReturnsTheSameStepsAsTheStepNumberIndex() {
+    assertEquals(stepIdsInStepNumberIndex(), idsOf(specman.listAllSteps()));
+  }
+
+  private static List<String> stepIdsInStepNumberIndex() {
+    return List.copyOf(specman.getHauptSequenz().buildStepNumberIndex().keySet());
+  }
+
+  private static List<String> idsOf(List<AbstractSchrittView> steps) {
+    return steps.stream().map(AbstractSchrittView::getId).toList();
   }
 
   @Test

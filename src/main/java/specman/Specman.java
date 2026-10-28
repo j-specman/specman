@@ -30,6 +30,7 @@ import specman.undo.manager.SpecmanUndoManager;
 import specman.undo.manager.UndoRecording;
 import specman.undo.manager.UndoRecordingMode;
 import specman.visitor.DiagramVisitor;
+import specman.visitor.StepCollector;
 import specman.visitor.StopTraversalException;
 import specman.view.*;
 
@@ -768,7 +769,9 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 
 	@Override
 	public List<AbstractSchrittView> listAllSteps() {
-		return getHauptSequenz().listSteps();
+		StepCollector stepCollector = new StepCollector();
+		traverseDiagram(stepCollector);
+		return stepCollector.steps();
 	}
 
 	/**

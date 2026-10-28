@@ -778,24 +778,6 @@ public class SchrittSequenzView {
 		return null;
 	}
 
-
-	public List<AbstractSchrittView> listSteps() {
-		List<AbstractSchrittView> stepList = new ArrayList<>();
-		for (AbstractSchrittView step : getSchritte()) {
-			stepList.add(step);
-			for (SchrittSequenzView unterSequenz : step.unterSequenzen()) {
-				List<AbstractSchrittView> subStepList = unterSequenz.listSteps();
-				stepList.addAll(subStepList);
-			}
-		}
-		if (catchBereich != null) {
-			for (CatchSchrittSequenzView catchSequence: catchBereich.catchSequences) {
-				stepList.addAll(catchSequence.listSteps());
-			}
-		}
-		return stepList;
-	}
-
   public void scrollTo() {
     schritte.get(0).scrollTo();
   }
