@@ -12,6 +12,10 @@ import com.itextpdf.kernel.pdf.canvas.PdfCanvasConstants.LineJoinStyle;
 import com.itextpdf.kernel.pdf.extgstate.PdfExtGState;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.layout.Document;
+import specman.pdf.navigation.PdfNavigationRenderContext;
+import specman.pdf.navigation.PdfNavigationWriter;
+import specman.pdf.navigation.PdfNavigationData;
+import specman.pdf.navigation.PdfPageTiling;
 
 import java.awt.*;
 import java.io.ByteArrayInputStream;
@@ -61,20 +65,31 @@ public class PDFRenderer {
   }
 
   private void initWriterAndDocument() {
+    notes.clear();
     pdfOutputStream = new ByteArrayOutputStream();
     writer = new PdfWriter(pdfOutputStream);
     pdfDoc = new PdfDocument(writer);
     document = new Document(pdfDoc);
   }
 
+  /** Real export entry point, including navigation after optional page tiling. */
+  public void render(PreparedPdfExport preparedExport) throws IOException {
+    PdfNavigationRenderContext navigation = new PdfNavigationRenderContext(preparedExport.navigation());
+    render(preparedExport.diagramShape(), navigation);
+  }
+
   public void render(Shape rootShape) throws IOException {
+    render(rootShape, null);
+  }
+
+  private void render(Shape rootShape, PdfNavigationRenderContext navigation) throws IOException {
     initWriterAndDocument();
     PageSize overlengthPagesize = initPdfCanvasAndScaleFactor(rootShape);
     int yTop = hasOverlength(overlengthPagesize)
       ? rootShape.getHeight()
       : (int)(pageSize.getHeight() / swing2pdfScaleFactor);
     Point topLeftCorner = new Point(0, yTop);
-    render(rootShape, topLeftCorner, overlengthPagesize);
+    render(rootShape, topLeftCorner, overlengthPagesize, navigation);
   }
 
   private PageSize initPdfCanvasAndScaleFactor(Shape rootShape) {
@@ -105,19 +120,28 @@ public class PDFRenderer {
     return overlengthPagesize;
   }
 
-  private void render(Shape rootShape, Point renderOffset, PageSize overlengthPagesize) throws IOException {
-    drawShape(rootShape, renderOffset);
-    if (!isTiled(overlengthPagesize)) {
+  private void render(Shape rootShape, Point renderOffset, PageSize overlengthPagesize,
+                      PdfNavigationRenderContext navigation) throws IOException {
+    drawShape(rootShape, renderOffset, navigation);
+    PdfPageTiling tiling = isTiled(overlengthPagesize)
+      ? new PdfPageTiling(overlengthPagesize.getHeight(), pageSize.getHeight()) : null;
+    if (tiling == null) {
       addNotes(pdfDoc.getFirstPage(), Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, 0);
     }
     document.close();
     pdfOutputStream.close();
 
-    tileOverlengthPage(overlengthPagesize);
+    if (tiling != null) tileOverlengthPage(tiling);
 
-    FileOutputStream fos = new FileOutputStream(pdfFilename);
-    fos.write(pdfOutputStream.toByteArray());
-    fos.close();
+    byte[] bytes = pdfOutputStream.toByteArray();
+    if (navigation != null) {
+      PdfNavigationData data = navigation.finish(overlengthPagesize.getWidth(), overlengthPagesize.getHeight());
+      if (tiling != null) data = tiling.map(data);
+      bytes = new PdfNavigationWriter().addNavigation(bytes, data);
+    }
+    try (FileOutputStream fos = new FileOutputStream(pdfFilename)) {
+      fos.write(bytes);
+    }
   }
 
   private boolean hasOverlength(PageSize overlengthPagesize) {
@@ -142,31 +166,24 @@ public class PDFRenderer {
     }
   }
 
-  private void tileOverlengthPage(PageSize overlengthPagesize) throws IOException {
-    if (!isTiled(overlengthPagesize)) {
-      return;
-    }
+  private void tileOverlengthPage(PdfPageTiling tiling) throws IOException {
     ByteArrayInputStream is = new ByteArrayInputStream(pdfOutputStream.toByteArray());
     PdfReader overlengthReader = new PdfReader(is);
     PdfDocument overlengthPdf = new PdfDocument(overlengthReader);
     PdfPage overlengthPage = overlengthPdf.getPage(1); // Overlength PDF has only one page
-    com.itextpdf.kernel.geom.Rectangle overlengthRect = overlengthPage.getPageSizeWithRotation();
 
     pdfOutputStream = new ByteArrayOutputStream();
     PdfDocument tilePdf = new PdfDocument(new PdfWriter(pdfOutputStream));
     PdfFormXObject overlengthForm = overlengthPage.copyAsFormXObject(tilePdf);
 
-    float tileHeight = pageSize.getHeight();
 //    PdfFont pageNumberingFont = AbstractShapeText.createFont("Helvetica");
 
-    for (int tileNo = 1; (tileNo-1) * tileHeight < overlengthRect.getHeight(); tileNo++) {
+    for (int tileNo = 1; tileNo <= tiling.pageCount(); tileNo++) {
       PdfPage tilePage = tilePdf.addNewPage(pageSize);
       PdfCanvas canvas = new PdfCanvas(tilePage);
-      canvas.addXObjectAt(overlengthForm, 0, -overlengthRect.getHeight() + tileHeight * tileNo);
-      addNotes(tilePage,
-        overlengthRect.getHeight() - tileHeight * tileNo,
-        overlengthRect.getHeight() - tileHeight * (tileNo - 1),
-        -overlengthRect.getHeight() + tileHeight * tileNo);
+      float offsetY = tiling.offsetY(tileNo);
+      canvas.addXObjectAt(overlengthForm, 0, offsetY);
+      addNotes(tilePage, -offsetY, pageSize.getHeight() - offsetY, offsetY);
 //      canvas
 //        .beginText()
 //        .setFontAndSize(pageNumberingFont, 10)
@@ -176,10 +193,11 @@ public class PDFRenderer {
 //        .endText();
     }
     tilePdf.close();
+    overlengthPdf.close();
     pdfOutputStream.close();
   }
 
-  private void drawShape(Shape shape, Point renderOffset) {
+  private void drawShape(Shape shape, Point renderOffset, PdfNavigationRenderContext navigation) {
     if (shape.hasForm()) {
         if (!shape.isLine()) {
           float fillOpacity = shape.getFillOpacity();
@@ -212,10 +230,14 @@ public class PDFRenderer {
     if (note != null) {
       notes.add(new PlacedNote(note, note.placeOnPage(renderOffset, swing2pdfScaleFactor)));
     }
-    writeShapeText(shape, renderOffset);
+    if (navigation != null) {
+      navigation.target(shape.getNavigationTarget(), renderOffset.x * swing2pdfScaleFactor,
+        renderOffset.y * swing2pdfScaleFactor);
+    }
+    writeShapeText(shape, renderOffset, navigation);
     drawShapeImage(shape, renderOffset);
     for (Shape subshape: shape.getSubshapes()) {
-      drawShape(subshape, renderOffset);
+      drawShape(subshape, renderOffset, navigation);
     }
     shape.applyDecoration(renderOffset, swing2pdfScaleFactor, pdfCanvas);
   }
@@ -227,10 +249,11 @@ public class PDFRenderer {
     }
   }
 
-  private void writeShapeText(Shape shape, Point renderOffset) {
+  private void writeShapeText(Shape shape, Point renderOffset, PdfNavigationRenderContext navigation) {
     AbstractShapeText text = shape.getText();
     if (text != null) {
-      text.writeToPDF(renderOffset, swing2pdfScaleFactor, pdfCanvas, document);
+      text.writeToPDF(renderOffset, swing2pdfScaleFactor, pdfCanvas, document,
+        navigation, shape.getNavigationTextKey());
     }
   }
 
