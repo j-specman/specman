@@ -26,7 +26,7 @@ x Beim ersten Mal in einer Datei, erscheint ein Dialog mit dem Vorschlag, einen 
   x Darunter sieht man die URL, bei leerem Alias wird der Dateiname verwendet, also z.B. specman:///C:/project/UC-720%20Eins%20Zwei.nsd,2d34f85e,1.3
   x Komma im Dateinamen muss als %2C kodiert werden, damit das Komma als Trennzeichen zur Schritt-ID und Schrittnummer eindeutig erkennbar ist.
   x Ändern des Alias ist jederzeit möglich, dann ändert sich auch die URL
-  - Hinweis, dass man die Aliase jederzeit über Datei -> Alias ändern kann
+  x Hinweis, dass man die Aliase jederzeit über Datei -> Alias ändern kann
   x Zuordnung von Alias zu Datei wird in den User Preferences abgelegt, wenn der User OK drückt
   - Idee der Aliase für Team-Kollaboration und Pfadunabhängigkeit der Links muss im Manual erklärt werden.
   x OK geht nur, wenn der Alias case-insensitiv eindeutig oder leer ist
