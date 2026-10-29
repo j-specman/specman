@@ -16,7 +16,8 @@ public class AliasListDialog extends IDialog {
     panel.onClose(() -> setVisible(false));
     getContentPane().add(panel);
     pack();
-    setResizable(false);
+    // Long paths are what the user may want more room for, but not less than the initial size
+    setMinimumSize(getSize());
     setLocationRelativeTo(owner);
     setVisible(true);
   }

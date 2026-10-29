@@ -8,8 +8,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -25,6 +27,7 @@ public final class LinkAliases {
   public static final int MAX_ALIAS_LENGTH = 20;
   public static final String PROBLEM_INVALID = "dialog.link.alias.problem.invalid";
   public static final String PROBLEM_TAKEN = "dialog.link.alias.problem.taken";
+  public static final String PROBLEM_FILE_TWICE = "dialog.link.aliases.problem.file.twice";
 
   /** The alias the user chose for a file. */
   public record Entry(File file, String alias) {}
@@ -87,13 +90,63 @@ public final class LinkAliases {
 
   /** The message key of the reason why the alias can't be assigned to the file, null if it can. */
   public static String problemKeyFor(File file, String alias) {
+    String ownPath = absolutePath(file);
+    List<String> aliasesOfOtherFiles = entries().stream()
+      .filter(entry -> !ownPath.equals(absolutePath(entry.file())))
+      .map(Entry::alias)
+      .toList();
+    return problemKeyOfAlias(alias, aliasesOfOtherFiles);
+  }
+
+  /** The message key of the first reason why the passed entries can't be stored together, null if they can. */
+  public static String problemKeyFor(List<Entry> edited) {
+    Set<String> paths = new HashSet<>();
+    for (int i = 0; i < edited.size(); i++) {
+      List<String> otherAliases = new ArrayList<>();
+      for (int j = 0; j < edited.size(); j++) {
+        if (j != i) {
+          otherAliases.add(edited.get(j).alias());
+        }
+      }
+      String problemKey = problemKeyOfAlias(edited.get(i).alias(), otherAliases);
+      if (problemKey != null) {
+        return problemKey;
+      }
+      if (!paths.add(absolutePath(edited.get(i).file()))) {
+        return PROBLEM_FILE_TWICE;
+      }
+    }
+    return null;
+  }
+
+  private static String problemKeyOfAlias(String alias, List<String> aliasesOfOtherFiles) {
     if (!VALID_ALIAS.matcher(alias).matches()) {
       return PROBLEM_INVALID;
     }
-    if (!alias.isEmpty() && isUsedForOtherFile(file, alias)) {
+    if (!alias.isEmpty() && aliasesOfOtherFiles.stream().anyMatch(alias::equalsIgnoreCase)) {
       return PROBLEM_TAKEN;
     }
     return null;
+  }
+
+  /** Replaces all aliases shown by {@link #entries()} with the passed ones: A file missing in the passed entries
+   * loses its alias and will be asked about again, a file with an empty alias counts as decided against an alias.
+   * Files the user decided against an alias for and which {@link #entries()} doesn't list are left alone.
+   * @throws IllegalArgumentException if the entries can't be stored together, see {@link #problemKeyFor(List)} */
+  public static void replaceAll(List<Entry> edited) {
+    String problemKey = problemKeyFor(edited);
+    if (problemKey != null) {
+      throw new IllegalArgumentException("Aliases not allowed: " + problemKey);
+    }
+    try {
+      for (Entry entry : entries()) {
+        aliases().node(entryName(entry.file())).removeNode();
+      }
+    }
+    catch (BackingStoreException e) {
+      throw new IllegalStateException("Link aliases can't be changed", e);
+    }
+    edited.forEach(entry -> assign(entry.file(), entry.alias()));
   }
 
   /** All aliases in use, sorted by alias regardless of case. Files the user decided against an alias for are left out. */
@@ -113,12 +166,6 @@ public final class LinkAliases {
     catch (BackingStoreException e) {
       throw new IllegalStateException("Link aliases can't be read", e);
     }
-  }
-
-  private static boolean isUsedForOtherFile(File file, String alias) {
-    String ownPath = absolutePath(file);
-    return entries().stream().anyMatch(entry ->
-      !ownPath.equals(absolutePath(entry.file())) && alias.equalsIgnoreCase(entry.alias()));
   }
 
   private static Preferences aliases() {

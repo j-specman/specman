@@ -23,6 +23,7 @@ public class SpecmanMenuBar extends JMenuBar {
   public static final String EXPORT_PDF_ITEM = "menu.file.export.pdf";
   public static final String EXPORT_GRAPHVIZ_ITEM = "menu.file.export.graphviz";
   public static final String OPEN_LINK_ITEM = "menu.file.open.link";
+  public static final String ALIASES_ITEM = "menu.file.aliases";
   public static final String META_TAGS_ITEM = "menu.file.meta.tags";
   public static final String SETTINGS_ITEM = "menu.file.settings";
   public static final String EXIT_ITEM = "menu.file.exit";
@@ -80,6 +81,9 @@ public class SpecmanMenuBar extends JMenuBar {
     JMenuItem metaTags = new IMenuItem(META_TAGS_ITEM, IconReader.readImageIcon("tags"));
     metaTags.addActionListener(e -> context.openMetaTagConfigs());
 
+    JMenuItem aliases = new IMenuItem(ALIASES_ITEM);
+    aliases.addActionListener(e -> context.openAliases());
+
     JMenuItem settings = new IMenuItem(SETTINGS_ITEM);
     settings.addActionListener(e -> context.openSettings());
 
@@ -94,6 +98,7 @@ public class SpecmanMenuBar extends JMenuBar {
     dateiMenu.add(exportAsGraphviz);
     dateiMenu.addSeparator();
     dateiMenu.add(metaTags);
+    dateiMenu.add(aliases);
     dateiMenu.add(settings);
     dateiMenu.add(exit);
     return dateiMenu;

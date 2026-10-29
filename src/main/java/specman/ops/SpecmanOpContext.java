@@ -37,6 +37,7 @@ public interface SpecmanOpContext extends EditorI {
   File chooseFileForAlias(String alias);
   void exit();
   void openSettings();
+  void openAliases();
   void setMetaTagConfigs(List<MetaTagConfig> configs);
   boolean hasUnsavedChanges();
   void markAsUnsavedWorkingCopy();

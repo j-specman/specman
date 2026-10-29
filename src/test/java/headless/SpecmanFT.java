@@ -11,6 +11,7 @@ import specman.Specman;
 import specman.editarea.EditArea;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
+import specman.link.AliasListPanel;
 import specman.metatag.stepnumberlabel.StepnumberContextMenu;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.PdfExportOptionsModel_V002;
@@ -81,6 +82,7 @@ public class SpecmanFT extends Specman {
   private final Clipboard clipboard = new Clipboard("specman-test");
   private int confirmDialogAnswer = JOptionPane.YES_OPTION;
   private File fileChoiceAnswer;
+  private AliasListPanel openedAliasListPanel;
   private final List<String> aliasesAskedFor = new ArrayList<>();
   private EditArea focusedArea;
   private static final Dimension LAYOUT_SIZE = new Dimension(800, 600);
@@ -541,6 +543,12 @@ public class SpecmanFT extends Specman {
   }
 
   @Override public void openSettings() {}
+  @Override public void openAliases() { openedAliasListPanel = new AliasListPanel(); }
+
+  /** The panel of the dialog the last "Aliases..." menu click would have opened, null if there was none. */
+  public AliasListPanel openedAliasListPanel() {
+    return openedAliasListPanel;
+  }
   @Override public void addRecentFile(File file) {}
   @Override public void openMetaTagConfigs() {}
   @Override public void copyTableToClipboard(TableEditArea table) {}

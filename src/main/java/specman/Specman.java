@@ -8,6 +8,8 @@ import specman.cli.CLIOperation;
 import specman.cli.SpecmanCLI;
 import specman.i18n.IFileNameExtensionFilter;
 import specman.i18n.Messages;
+import specman.link.AliasListDialog;
+import specman.link.AliasListPanel;
 import specman.link.SpecmanLink;
 import specman.menubar.SpecmanMenuBar;
 import specman.draganddrop.DragMouseAdapter;
@@ -674,6 +676,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	public void exportAsPDF() {
 		exportPDFOp.export();
 	}
+
+  @Override
+  public void openAliases() {
+    new AliasListDialog(frame, new AliasListPanel());
+  }
 
   @Override
   public void openSettings() {

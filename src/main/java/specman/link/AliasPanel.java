@@ -45,7 +45,7 @@ public class AliasPanel extends JPanel {
   public static final String CANCEL_BUTTON = "link.alias.cancel";
 
   static final Icon ICON = UIUtils.getIcon("resources/images/x32/", "link3.png");
-  private static final Color PROBLEM_COLOR = new Color(192, 0, 0);
+  static final Color PROBLEM_COLOR = new Color(160, 0, 0);
   private static final Color LINK_COLOR = new Color(0, 102, 204);
   private static final int ALIAS_FIELD_COLUMNS = 20;
   private static final int PREVIEW_FIELD_COLUMNS = 40;
@@ -121,6 +121,8 @@ public class AliasPanel extends JPanel {
     aliasListPanel = new AliasListPanel();
     if (dialogDisplayed) {
       new AliasListDialog(SwingUtilities.getWindowAncestor(this), aliasListPanel);
+      // The user may have freed the alias just typed, or changed what the link looks like
+      refresh();
     }
   }
 

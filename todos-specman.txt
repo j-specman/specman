@@ -35,14 +35,14 @@ x Beim ersten Mal in einer Datei, erscheint ein Dialog mit dem Vorschlag, einen 
 x Aus der Zwischenablage kann man den Link anschließend in beliebige andere Tools einfügen
 x Schrittnummer in der URL ist nur informativ, kann entfallen
 x Schritt-ID kann in der URL entfallen, dann adressiert die URL nur die Datei und keinen Schritt darin
-- Über Datei -> Alias: Dialog mit allen Dateien, für die ein Alias definiert ist, jeweils Alias und Datei mit Pfad.
-  - Aliase sind editierbar - Einschränkungen s.o.
-  - Nicht mehr existierende Dateien sind als verwaist markiert. Der User kann die Datei wieder neu auswählen
-  - Zeilen können auch gelöscht werden
-  - Über Abbrechen können die Änderungen verworfen werden
-  - Speichern geht nur, wenn die Aliase case-insensitiv eindeutig sind (ausgenommen alle leeren Aliase)
+x Über Datei -> Alias: Dialog mit allen Dateien, für die ein Alias definiert ist, jeweils Alias und Datei mit Pfad.
+  x Aliase sind editierbar - Einschränkungen s.o.
+  x Nicht mehr existierende Dateien sind als verwaist markiert. Der User kann die Datei wieder neu auswählen
+  x Zeilen können auch gelöscht werden
+  x Über Abbrechen können die Änderungen verworfen werden
+  x Speichern geht nur, wenn die Aliase case-insensitiv eindeutig sind (ausgenommen alle leeren Aliase)
 x Bei "Speichern unter..." bleibt ein etwaiger bereits zugeordneter Alias mit der alten Datei assoziiert.
-  - Der User muss ggf. die Zuordnung zur neuen Datei über Datei -> Alias selbst nachtragen.
+  x Der User muss ggf. die Zuordnung zur neuen Datei über Datei -> Alias selbst nachtragen.
 x Einfache Navigation über einen Link
   x Link aus irgendeinem Quelldokument in die Zwischenablage kopieren
   x User startet Specman bzw. klickt ein laufendes Specman an und löst mit STRG+L das Navigieren zum Link in der Zwischenablage aus (STRG+L als Shortcut für einen Menüpunkt)
