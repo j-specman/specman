@@ -80,6 +80,8 @@ public class SpecmanFT extends Specman {
   private final List<String> shownMessages = new ArrayList<>();
   private final Clipboard clipboard = new Clipboard("specman-test");
   private int confirmDialogAnswer = JOptionPane.YES_OPTION;
+  private File fileChoiceAnswer;
+  private final List<String> aliasesAskedFor = new ArrayList<>();
   private EditArea focusedArea;
   private static final Dimension LAYOUT_SIZE = new Dimension(800, 600);
   private static final int MAX_LAYOUT_PASSES = 50;
@@ -520,6 +522,22 @@ public class SpecmanFT extends Specman {
   public int showConfirmDialog(String message, String title, int optionType) {
     shownMessages.add(message);
     return confirmDialogAnswer;
+  }
+
+  /** Defines the file the user picks when asked which file an unknown alias stands for, null for cancelling the choice. */
+  public void answerFileChoicesWith(File file) {
+    fileChoiceAnswer = file;
+  }
+
+  /** The aliases the user was asked a file for, in the order of asking. */
+  public List<String> aliasesAskedFor() {
+    return Collections.unmodifiableList(aliasesAskedFor);
+  }
+
+  @Override
+  public File chooseFileForAlias(String alias) {
+    aliasesAskedFor.add(alias);
+    return fileChoiceAnswer;
   }
 
   @Override public void openSettings() {}

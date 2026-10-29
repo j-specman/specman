@@ -4,12 +4,14 @@ import headless.HeadlessExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 import specman.link.AliasPanel;
 import specman.link.CopyStepLinkMenuItem;
+import specman.ops.AutoSaveOp;
 import specman.view.EinfacherSchrittView;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.nio.file.Path;
 
@@ -23,10 +25,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(HeadlessExtension.class)
 abstract class AbstractLinkTest {
 
+  /** Saves the diagram like "Save as..." does, which includes the working copy of the file left being discarded. */
   static File saveDiagram(Path directory, String filename) {
     File file = directory.resolve(filename).toFile();
+    File previousFile = specman.getDiagrammDatei();
     specman.setDiagrammDatei(file);
     specman.diagrammSpeichern(false);
+    if (previousFile != null && !previousFile.equals(file)) {
+      AutoSaveOp.deleteWorkingCopyFor(previousFile);
+    }
     return file;
   }
 
@@ -74,5 +81,18 @@ abstract class AbstractLinkTest {
   static String clipboardText() throws Exception {
     assertNotNull(specman.clipboard().getContents(null), "nothing in the clipboard");
     return (String) specman.clipboard().getData(DataFlavor.stringFlavor);
+  }
+
+  static void putIntoClipboard(String text) {
+    specman.clipboard().setContents(new StringSelection(text), null);
+  }
+
+  /** Copies the link to the step like the user does who decides against an alias for the file, if asked. */
+  static String copyLink(EinfacherSchrittView step) throws Exception {
+    AliasPanel panel = clickCopyLink(step);
+    if (panel != null) {
+      click(panel, AliasPanel.OK_BUTTON);
+    }
+    return clipboardText();
   }
 }

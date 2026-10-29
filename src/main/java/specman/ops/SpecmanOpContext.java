@@ -32,6 +32,9 @@ public interface SpecmanOpContext extends EditorI {
   void diagrammSpeichern(boolean dateiauswahlErzwingen);
   void exportAsPDF();
   void exportAsGraphviz();
+  void navigateToLinkInClipboard();
+  /** Asks the user which file the alias of a link stands for, null if the user doesn't choose any. */
+  File chooseFileForAlias(String alias);
   void exit();
   void openSettings();
   void setMetaTagConfigs(List<MetaTagConfig> configs);

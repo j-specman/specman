@@ -22,6 +22,7 @@ public class SpecmanMenuBar extends JMenuBar {
   public static final String SAVE_AS_ITEM = "menu.file.save.as";
   public static final String EXPORT_PDF_ITEM = "menu.file.export.pdf";
   public static final String EXPORT_GRAPHVIZ_ITEM = "menu.file.export.graphviz";
+  public static final String OPEN_LINK_ITEM = "menu.file.open.link";
   public static final String META_TAGS_ITEM = "menu.file.meta.tags";
   public static final String SETTINGS_ITEM = "menu.file.settings";
   public static final String EXIT_ITEM = "menu.file.exit";
@@ -68,6 +69,10 @@ public class SpecmanMenuBar extends JMenuBar {
     JMenuItem exportAsGraphviz = new IMenuItem(EXPORT_GRAPHVIZ_ITEM);
     exportAsGraphviz.addActionListener(e -> context.exportAsGraphviz());
 
+    JMenuItem openLink = new IMenuItem(OPEN_LINK_ITEM);
+    openLink.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK));
+    openLink.addActionListener(e -> context.navigateToLinkInClipboard());
+
     JMenuItem exit = new IMenuItem(EXIT_ITEM);
     exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
     exit.addActionListener(e -> context.exit());
@@ -82,6 +87,7 @@ public class SpecmanMenuBar extends JMenuBar {
     dateiMenu.add(neu);
     dateiMenu.add(laden);
     dateiMenu.add(recentFiles.menu());
+    dateiMenu.add(openLink);
     dateiMenu.add(speichern);
     dateiMenu.add(speichernUnter);
     dateiMenu.add(exportAsPDF);

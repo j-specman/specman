@@ -43,7 +43,7 @@ Globale Links:
   - Speichern geht nur, wenn die Aliase case-insensitiv eindeutig sind (ausgenommen alle leeren Aliase)
 - Bei "Speichern unter..." bleibt ein etwaiger bereits zugeordneter Alias mit der alten Datei assoziiert.
   - Der User muss ggf. die Zuordnung zur neuen Datei über Datei -> Alias selbst nachtragen.
-- Einfache Navigation über einen Link
+x Einfache Navigation über einen Link
   - Link aus irgendeinem Quelldokument in die Zwischenablage kopieren
   - User startet Specman bzw. klickt ein laufendes Specman an und löst mit STRG+L das Navigieren zum Link in der Zwischenablage aus (STRG+L als Shortcut für einen Menüpunkt)
   - URL parsen (bedenken: Copy aus Quelldokument könnte einen Slash hinten ergänzt haben)

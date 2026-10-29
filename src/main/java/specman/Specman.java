@@ -6,6 +6,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import specman.cli.CLIOperation;
 import specman.cli.SpecmanCLI;
+import specman.i18n.IFileNameExtensionFilter;
 import specman.i18n.Messages;
 import specman.menubar.SpecmanMenuBar;
 import specman.draganddrop.DragMouseAdapter;
@@ -630,6 +631,19 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	@Override
 	public void exportAsGraphviz() {
 		new ExportGraphvizSpecmanOp(this).export();
+	}
+
+	@Override
+	public void navigateToLinkInClipboard() {
+		new NavigateToLinkOp(this).run();
+	}
+
+	@Override
+	public File chooseFileForAlias(String alias) {
+		JFileChooser fileChooser = new JFileChooser(diagrammDatei != null ? diagrammDatei.getParentFile() : null);
+		fileChooser.setDialogTitle(i18n("dialog.link.open.choose.file", alias));
+		fileChooser.setFileFilter(new IFileNameExtensionFilter("msg.filter.diagrams", "nsd"));
+		return fileChooser.showOpenDialog(scrollPane) == JFileChooser.APPROVE_OPTION ? fileChooser.getSelectedFile() : null;
 	}
 
 	/** Called while Specman is being constructed. Overrides must not depend on their own fields. */

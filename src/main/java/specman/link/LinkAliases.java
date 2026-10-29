@@ -71,6 +71,15 @@ public final class LinkAliases {
     entry.put(ALIAS_KEY, alias);
   }
 
+  /** The file the alias is assigned to regardless of the alias' case, null if there is none. */
+  public static File fileOf(String alias) {
+    return entries().stream()
+      .filter(entry -> entry.alias().equalsIgnoreCase(alias))
+      .map(Entry::file)
+      .findFirst()
+      .orElse(null);
+  }
+
   /** The text without the characters an alias must not contain. */
   public static String keepAllowedCharacters(String text) {
     return text.replaceAll("[^" + ALLOWED_CHARACTERS + "]", "");
@@ -128,7 +137,8 @@ public final class LinkAliases {
     }
   }
 
-  private static String absolutePath(File file) {
+  /** The identity of a file, which is what makes the same file recognizable however its path was written. */
+  public static String absolutePath(File file) {
     return file.toPath().toAbsolutePath().normalize().toString();
   }
 }

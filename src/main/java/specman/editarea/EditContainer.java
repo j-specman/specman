@@ -893,7 +893,7 @@ public class EditContainer extends JPanel {
     firstArea.setCaretPosition(1);
     // It is important to request the focus as otherwise the viewport may immediately
     // scroll back to the edit area where we came from.
-    firstArea.requestFocus();
+    editor().focus(firstArea);
   }
 
   public <T> T getContainer(Class<T> containerClass) {
