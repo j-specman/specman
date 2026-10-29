@@ -46,7 +46,7 @@ Globale Links:
 - Einfache Navigation über einen Link
   - Link aus irgendeinem Quelldokument in die Zwischenablage kopieren
   - User startet Specman bzw. klickt ein laufendes Specman an und löst mit STRG+L das Navigieren zum Link in der Zwischenablage aus (STRG+L als Shortcut für einen Menüpunkt)
-  - URL parsen (bedenken: Copy aus Quelldokument könnte einen Slash hinten ergänzt haben
+  - URL parsen (bedenken: Copy aus Quelldokument könnte einen Slash hinten ergänzt haben)
   - Wenn Datei nicht gefunden: Fehler
   - Wenn Alias, Datei über die User Preferences auflösen
   - Wenn der Alias unbekannt ist: Dialog für eine on-the-fly Dateizuordnung
