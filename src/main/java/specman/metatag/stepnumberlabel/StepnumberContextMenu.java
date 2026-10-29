@@ -7,6 +7,7 @@ import specman.i18n.IMenu;
 import specman.i18n.IMenuItem;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
+import specman.ops.CopyStepLinkOp;
 import specman.undo.UndoableFlatNumberingToggled;
 import specman.undo.UndoableMetaTagAssigned;
 import specman.undo.manager.UndoRecording;
@@ -25,6 +26,7 @@ public class StepnumberContextMenu implements MouseListener {
   public static final String COPY_ITEM = "menu.context.copy";
   public static final String CUT_ITEM = "menu.context.cut";
   public static final String PASTE_ITEM = "menu.context.paste";
+  public static final String COPY_LINK_ITEM = "menu.context.copy.link";
   public static final String MOVE_LEFT_ITEM = "menu.context.move.left";
   public static final String MOVE_RIGHT_ITEM = "menu.context.move.right";
   public static final String MOVE_UP_ITEM = "menu.context.move.up";
@@ -34,12 +36,14 @@ public class StepnumberContextMenu implements MouseListener {
   public static final String CONFIGURE_TAGS_ITEM = "menu.context.configure";
 
   private static final int META_TAG_ICON_SIZE = 16;
+  private static final int MENU_ICON_SIZE = 16;
 
   private final JPopupMenu popup;
   private final JMenuItem delete;
   private final JMenuItem copy;
   private final JMenuItem cut;
   private final JMenuItem paste;
+  private final JMenuItem copyLink;
   private final JMenuItem left;
   private final JMenuItem right;
   private final JMenuItem up;
@@ -58,6 +62,7 @@ public class StepnumberContextMenu implements MouseListener {
     copy = createCopyItem();
     cut = createCutItem();
     paste = createPasteItem();
+    copyLink = createCopyLinkItem();
     left = createLeftItem();
     right = createRightItem();
     up = createUpItem();
@@ -124,6 +129,13 @@ public class StepnumberContextMenu implements MouseListener {
     return createItem(PASTE_ITEM,"paste", e -> editor().pasteStepsAfter(currentStep));
   }
 
+  private JMenuItem createCopyLinkItem() {
+    JMenuItem item = new IMenuItem(COPY_LINK_ITEM, new SvgIcon("copy-link", MENU_ICON_SIZE));
+    item.addActionListener(e -> new CopyStepLinkOp(currentStep).run());
+    popup.add(item);
+    return item;
+  }
+
   private JMenuItem createLeftItem() {
     return createItem(MOVE_LEFT_ITEM,"arrow-left",
       e -> editor().moveBranchSequenceLeftADBL(currentStep, initiatingLabel));
@@ -163,6 +175,8 @@ public class StepnumberContextMenu implements MouseListener {
     this.copy.setEnabled(clipboardAllowed);
     this.cut.setEnabled(clipboardAllowed);
     this.paste.setEnabled(clipboardAllowed);
+    // A link needs a file name, which an unsaved diagram doesn't have yet
+    this.copyLink.setEnabled(editor().getDiagrammDatei() != null);
     this.toggleFlatNumbering.setVisible(currentStep.getFlatNumbering() != null);
     if (toggleFlatNumbering.isVisible()) {
       toggleFlatNumbering.setState(currentStep.getFlatNumbering());

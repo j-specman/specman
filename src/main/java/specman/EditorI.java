@@ -30,6 +30,8 @@ import java.util.Set;
 public interface EditorI extends FocusListener {
 	void vertikalLinieSetzen(int x, Component source);
 	void diagrammLaden(File diagramFile);
+	/** The file the diagram was loaded from or saved to, null as long as there is none. */
+	File getDiagrammDatei();
 	int getZoomFactor();
 	String instanceId();
 	void instrumentWysEditor(JEditorPane ed, String initialText, Integer orientation);

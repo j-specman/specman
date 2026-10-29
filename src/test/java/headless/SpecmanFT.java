@@ -294,16 +294,22 @@ public class SpecmanFT extends Specman {
    * is when a user can click: Serializing a step reads the column widths of if/else steps from the layout.
    */
   public void clickContextMenuItem(AbstractSchrittView step, String itemMessageKey) {
+    JMenuItem item = contextMenuItem(step, itemMessageKey);
+    assertTrue(item.isVisible() && item.isEnabled(),
+      "context menu item '" + item.getText() + "' must be available for step " + step.getNumber());
+    item.doClick(0);
+    waitForEventsProcessed();
+  }
+
+  /** Right-clicks the given step's number and returns the context menu item with the given message key
+   * as initialized for that step, without clicking it. Allows tests to check visibility and enablement. */
+  public JMenuItem contextMenuItem(AbstractSchrittView step, String itemMessageKey) {
     layoutComponents();
     rightClick(findStepnumberLabel(step));
     String itemText = i18n(itemMessageKey);
     for (Component component : StepnumberContextMenu.popupMenu().getComponents()) {
       if (component instanceof JMenuItem item && itemText.equals(item.getText())) {
-        assertTrue(item.isVisible() && item.isEnabled(),
-          "context menu item '" + itemText + "' must be available for step " + step.getNumber());
-        item.doClick(0);
-        waitForEventsProcessed();
-        return;
+        return item;
       }
     }
     throw new IllegalStateException("No context menu item '" + itemText + "'");

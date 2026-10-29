@@ -46,7 +46,6 @@ public interface SpecmanOpContext extends EditorI {
   void displayException(Exception e);
   Container getArbeitsbereich();
   void scrollBy(int delta);
-  File getDiagrammDatei();
   JScrollPane getScrollPane();
   SpaltenResizer getBreitenAnpasser();
   void setDiagrammDatei(File file);
