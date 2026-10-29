@@ -43,20 +43,24 @@ Globale Links:
   - Speichern geht nur, wenn die Aliase case-insensitiv eindeutig sind (ausgenommen alle leeren Aliase)
 - Bei "Speichern unter..." bleibt ein etwaiger bereits zugeordneter Alias mit der alten Datei assoziiert.
   - Der User muss ggf. die Zuordnung zur neuen Datei über Datei -> Alias selbst nachtragen.
-- Navigieren über einen Link kommt später. Grundprinzip
-  - Unter Windows: Eintragen des specman-Protokolls in der Windows Registry
-  - Specman starten, URL parsen
+- Einfache Navigation über einen Link
+  - Link aus irgendeinem Quelldokument in die Zwischenablage kopieren
+  - User startet Specman bzw. klickt ein laufendes Specman an und löst mit STRG+L das Navigieren zum Link in der Zwischenablage aus (STRG+L als Shortcut für einen Menüpunkt)
+  - URL parsen (bedenken: Copy aus Quelldokument könnte einen Slash hinten ergänzt haben
   - Wenn Datei nicht gefunden: Fehler
   - Wenn Alias, Datei über die User Preferences auflösen
   - Wenn der Alias unbekannt ist: Dialog für eine on-the-fly Dateizuordnung
-  - Datei öffnen, ggf. in der URL adressierten Schritt suchen und den Fokus darauf setzen
+  - Datei öffnen, wenn nicht schon geöffnet, ggf. in der URL adressierten Schritt suchen und den Fokus darauf setzen
     - Ist der Schritt unbekannt, Toast-Feedback, dass der Schritt nicht gefunden wurde
     - Schritt wird über die ID adressiert, nicht über die Schrittnummer, weil die sich ja ändern kann
     - Toast-Feedback, wenn die Schrittnummer in der URL nicht mehr mit der ID übereinstimmt
     - Bei einem verschobenen Schritt trägt der Zielschritt die ID - das ist genau richtig.
-  - Wenn schon ein Specman läuft, das die Datei geöffnet hat, dann wird die Datei nicht nochmal geöffnet,
+- Integration der Navigation ins Betriebssystem kommt später. Grundprinzip
+  - Unter Windows: Eintragen des specman-Protokolls in der Windows Registry
+  - Betriebssystem startet auf dieser Basis Specman, danach wie oben beschrieben
+  - Besonderheit: Wenn schon eine andere Specman-Instanz läuft, das die Datei geöffnet hat, dann wird die Datei nicht nochmal geöffnet,
     - Stattdessen Fokus auf das bereits geöffnete Fenster setzen und zum ggf. in der URL adressierten Schritt navigieren
-    - Ist der anspruchsvollste Teil, der Interprozess-Kommunikation erfordert.
+    - Das ist anspruchsvoll, weil es Interprozess-Kommunikation erfordert.
 - Nice to have: Dialog für Alias-Vergabe schlägt initial einen Alias vor, wenn sich aus den bereits in den User Preferences abgelegten Aliase ein Muster ablesen lässt, das auch auf die aktuelle Datei anwendbar ist
   - Beispiel: es liegt bereits vor: Alias "uc730" für Datei "C:/project/BALI UC-730 Kundendaten pflegen.nsd"
   - Dann sind alle Zeichen des Alias von links nach rechts im Präfix der Datei enthalten, und ergeben sich durch Auslassung bestimmter Zeichenfolgen.
