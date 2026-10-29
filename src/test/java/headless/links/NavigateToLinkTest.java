@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import specman.editarea.TextEditArea;
 import specman.link.AliasPanel;
 import specman.link.LinkAliases;
+import specman.ops.NavigateToLinkOp;
 import specman.view.AbstractSchrittView;
 import specman.view.EinfacherSchrittView;
 
@@ -231,6 +232,31 @@ class NavigateToLinkTest extends AbstractLinkTest {
 
     assertSame(step2, focusedStep());
     assertEquals(List.of(), specman.shownMessages());
+  }
+
+  /** Scenario: The operating system hands a link over, e.g. as the startup argument, while the clipboard holds
+   * something else. The link is followed regardless of the clipboard. */
+  @Test
+  void testNavigateToLinkHandedOverFromOutside(@TempDir Path directory) throws Exception {
+    EinfacherSchrittView step1 = specman.clickNewSimpleStep();
+    EinfacherSchrittView step2 = specman.clickNewSimpleStep();
+    saveDiagram(directory, "UC-720.nsd");
+    String link = copyLink(step2);
+    putIntoClipboard("something else");
+    specman.focus(step1);
+
+    new NavigateToLinkOp(specman).run(link);
+
+    assertSame(step2, focusedStep());
+    assertEquals(List.of(), specman.shownMessages());
+  }
+
+  /** Scenario: The link handed over from outside is broken. The user is told so. */
+  @Test
+  void testInvalidLinkHandedOverFromOutsideIsReported() {
+    new NavigateToLinkOp(specman).run("specman://");
+
+    assertEquals(List.of(i18n("msg.link.invalid")), specman.shownMessages());
   }
 
   /** Scenario: The clipboard holds something which is not a Specman link. The user is told so. */

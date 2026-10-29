@@ -8,6 +8,7 @@ import specman.cli.CLIOperation;
 import specman.cli.SpecmanCLI;
 import specman.i18n.IFileNameExtensionFilter;
 import specman.i18n.Messages;
+import specman.link.SpecmanLink;
 import specman.menubar.SpecmanMenuBar;
 import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
@@ -99,6 +100,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	 * by the {@link SpecmanFrame}.
 	 */
 	public Specman(File fileToOpen) throws Exception {
+		this(fileToOpen, null);
+	}
+
+	/** @param linkToOpen a global link to navigate to once Specman is up, may be null. Mutually exclusive with {@code fileToOpen}. */
+	public Specman(File fileToOpen, String linkToOpen) throws Exception {
 		instance = this;
 		undoManager = new SpecmanUndoManager(this);
 
@@ -119,6 +125,7 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 		configureKeyboardManager();
 
 		openInitialFile(fileToOpen);
+		openInitialLink(linkToOpen);
     initAutoSaveAndLoad();
 	}
 
@@ -187,6 +194,13 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 			// einen PDF-Export vornimmt. Der Export übernimmt nämlich das Layout aus dem UI, und wenn das noch nicht
 			// vollständig aufgebaut ist, wird der Export Murks (abgeschnittene Texte, zu kleine Boxen...)
 			SwingUtilities.invokeLater(() -> diagrammLaden(fileToOpen));
+		}
+	}
+
+	/** Delayed for the same reason as {@link #openInitialFile(File)}. */
+	private void openInitialLink(String linkToOpen) {
+		if (linkToOpen != null) {
+			SwingUtilities.invokeLater(() -> new NavigateToLinkOp(this).run(linkToOpen));
 		}
 	}
 
@@ -590,11 +604,12 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 		}
     Messages.applyLanguagePreference();
     setLookAndFeel();
-		File initialFileToOpen = readFileFromArgs(args);
+		String linkToOpen = readLinkFromArgs(args);
+		File initialFileToOpen = linkToOpen == null ? readFileFromArgs(args) : null;
 		SwingUtilities.invokeAndWait(() -> {
 			try {
 				SpecmanFrame frame = new SpecmanFrame();
-				Specman specman = new Specman(initialFileToOpen);
+				Specman specman = new Specman(initialFileToOpen, linkToOpen);
 				frame.open(specman);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
@@ -609,6 +624,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
       System.err.println("Failed to initialize LaF");
     }
   }
+
+  /** The operating system hands a link over as the only argument when the user opens a specman:// link. */
+  private static String readLinkFromArgs(String[] args) {
+		return args.length > 0 && args[0].startsWith(SpecmanLink.SCHEME) ? args[0] : null;
+	}
 
   private static File readFileFromArgs(String[] args) {
 		if (args.length > 0) {
