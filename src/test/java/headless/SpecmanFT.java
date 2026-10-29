@@ -294,7 +294,15 @@ public class SpecmanFT extends Specman {
    * is when a user can click: Serializing a step reads the column widths of if/else steps from the layout.
    */
   public void clickContextMenuItem(AbstractSchrittView step, String itemMessageKey) {
-    JMenuItem item = contextMenuItem(step, itemMessageKey);
+    click(step, contextMenuItem(step, itemMessageKey));
+  }
+
+  /** Like {@link #clickContextMenuItem(AbstractSchrittView, String)}, but finds the item by its type. */
+  public void clickContextMenuItem(AbstractSchrittView step, Class<? extends JMenuItem> itemType) {
+    click(step, contextMenuItem(step, itemType));
+  }
+
+  private void click(AbstractSchrittView step, JMenuItem item) {
     assertTrue(item.isVisible() && item.isEnabled(),
       "context menu item '" + item.getText() + "' must be available for step " + step.getNumber());
     item.doClick(0);
@@ -304,15 +312,30 @@ public class SpecmanFT extends Specman {
   /** Right-clicks the given step's number and returns the context menu item with the given message key
    * as initialized for that step, without clicking it. Allows tests to check visibility and enablement. */
   public JMenuItem contextMenuItem(AbstractSchrittView step, String itemMessageKey) {
-    layoutComponents();
-    rightClick(findStepnumberLabel(step));
     String itemText = i18n(itemMessageKey);
-    for (Component component : StepnumberContextMenu.popupMenu().getComponents()) {
+    for (Component component : openContextMenu(step)) {
       if (component instanceof JMenuItem item && itemText.equals(item.getText())) {
         return item;
       }
     }
     throw new IllegalStateException("No context menu item '" + itemText + "'");
+  }
+
+  /** Like {@link #contextMenuItem(AbstractSchrittView, String)}, but finds the item by its type, which is
+   * the way to get hold of items with a behavior of their own. */
+  public <T extends JMenuItem> T contextMenuItem(AbstractSchrittView step, Class<T> itemType) {
+    for (Component component : openContextMenu(step)) {
+      if (itemType.isInstance(component)) {
+        return itemType.cast(component);
+      }
+    }
+    throw new IllegalStateException("No context menu item of type " + itemType.getSimpleName());
+  }
+
+  private Component[] openContextMenu(AbstractSchrittView step) {
+    layoutComponents();
+    rightClick(findStepnumberLabel(step));
+    return StepnumberContextMenu.popupMenu().getComponents();
   }
 
   private StepnumberLabel findStepnumberLabel(AbstractSchrittView step) {

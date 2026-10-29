@@ -4,6 +4,7 @@ import headless.HeadlessExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import specman.link.CopyStepLinkMenuItem;
 import specman.view.EinfacherSchrittView;
 
 import java.awt.datatransfer.DataFlavor;
@@ -18,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static specman.link.SpecmanLink.SCHEME;
 import static specman.link.SpecmanLink.SEPARATOR;
-import static specman.metatag.stepnumberlabel.StepnumberContextMenu.COPY_LINK_ITEM;
 
 /** Copying a global link to a step via the step number's context menu. */
 @ExtendWith(HeadlessExtension.class)
@@ -30,7 +30,7 @@ class CopyLinkTest {
   void testCopyLinkDisabledForUnsavedDiagram() {
     EinfacherSchrittView step = specman.clickNewSimpleStep();
 
-    assertFalse(specman.contextMenuItem(step, COPY_LINK_ITEM).isEnabled());
+    assertFalse(specman.contextMenuItem(step, CopyStepLinkMenuItem.class).isEnabled());
   }
 
   /** Scenario: The diagram is saved in a file with blanks and a comma in its name. The user copies the link of
@@ -45,7 +45,7 @@ class CopyLinkTest {
     specman.setDiagrammDatei(file);
     specman.diagrammSpeichern(false);
 
-    specman.clickContextMenuItem(step2, COPY_LINK_ITEM);
+    specman.clickContextMenuItem(step2, CopyStepLinkMenuItem.class);
 
     String link = clipboardText();
     String[] parts = link.split(SEPARATOR, -1);
