@@ -1,9 +1,9 @@
 package specman;
 
-import net.atlanticbb.tantlinger.ui.HeaderPanel;
 import net.atlanticbb.tantlinger.ui.UIUtils;
 import org.apache.commons.lang.StringUtils;
 import specman.i18n.IButton;
+import specman.i18n.IHeaderPanel;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
 import specman.view.BreakSchrittView;
@@ -45,6 +45,7 @@ import static specman.i18n.Messages.i18n;
 public class CatchLinkPanel extends JPanel {
   @Serial
   private static final long serialVersionUID = 1L;
+  private static final String TITLE_KEY = "dialog.catch.link.title";
   private static final Icon icon = UIUtils.getIcon("resources/images/x32/", "link3.png");
   private static final Color DEFAULT_BACKGROUND = Color.white;
   private static final Color HOVERED_BACKGROUND = Color.lightGray;
@@ -66,7 +67,7 @@ public class CatchLinkPanel extends JPanel {
   }
 
   public static String title() {
-    return i18n("dialog.catch.link.title");
+    return i18n(TITLE_KEY);
   }
 
   /** Defines what to do when the panel is done, i.e. after a break step was chosen or the user closed the panel. */
@@ -136,7 +137,7 @@ public class CatchLinkPanel extends JPanel {
     close.addActionListener(e -> closeAction.run());
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     buttonPanel.add(close);
-    add(new HeaderPanel(title(), i18n("dialog.catch.link.description"), icon), BorderLayout.NORTH);
+    add(new IHeaderPanel(TITLE_KEY, "dialog.catch.link.description", icon), BorderLayout.NORTH);
     add(jlist, BorderLayout.CENTER);
     add(buttonPanel, BorderLayout.SOUTH);
   }

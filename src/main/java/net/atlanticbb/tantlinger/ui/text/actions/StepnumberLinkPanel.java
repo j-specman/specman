@@ -2,11 +2,11 @@ package net.atlanticbb.tantlinger.ui.text.actions;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
-import net.atlanticbb.tantlinger.ui.HeaderPanel;
 import net.atlanticbb.tantlinger.ui.UIUtils;
 import org.apache.commons.lang.StringUtils;
 import specman.editarea.TextEditArea;
 import specman.i18n.IButton;
+import specman.i18n.IHeaderPanel;
 import specman.view.AbstractSchrittView;
 
 import javax.swing.BorderFactory;
@@ -46,6 +46,7 @@ import static specman.i18n.Messages.i18n;
 public class StepnumberLinkPanel extends JPanel {
     @Serial
     private static final long serialVersionUID = 1L;
+    private static final String TITLE_KEY = "action.stepnumberlink";
     private static final Icon icon = UIUtils.getIcon("resources/images/x32/", "link3.png");
     private static final Color DEFAULT_BACKGROUND = Color.white;
     private static final Color HOVERED_BACKGROUND = Color.lightGray;
@@ -72,7 +73,7 @@ public class StepnumberLinkPanel extends JPanel {
     }
 
     public static String title() {
-        return i18n("action.stepnumberlink");
+        return i18n(TITLE_KEY);
     }
 
     /** Defines what to do when the panel is done, i.e. after a step was chosen or the user closed the panel. */
@@ -149,7 +150,7 @@ public class StepnumberLinkPanel extends JPanel {
             }
         });
 
-        add(new HeaderPanel(title(), i18n("dialog.stepnumberlink.description"), icon), CC.xy(1, 1));
+        add(new IHeaderPanel(TITLE_KEY, "dialog.stepnumberlink.description", icon), CC.xy(1, 1));
         add(filter, CC.xy(1, 2));
         add(new JScrollPane(stepsList), CC.xy(1, 3));
         add(buttonPanel, CC.xy(1, 4));

@@ -11,6 +11,7 @@ import specman.pdf.LabelShapeText;
 import specman.pdf.Shape;
 import specman.pdf.ShapeNote;
 import specman.undo.UndoableMetaTagFreetextChanged;
+import specman.util.WrappedHtml;
 
 import javax.swing.BorderFactory;
 import javax.swing.JToolTip;
@@ -230,8 +231,7 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     if (text == null || text.isBlank()) {
       return null;
     }
-    String escaped = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>");
-    return "<html><body style='width: " + TOOLTIP_WIDTH + "px'>" + escaped + "</body></html>";
+    return WrappedHtml.of(text, TOOLTIP_WIDTH);
   }
 
   public void scale() {

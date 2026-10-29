@@ -200,7 +200,7 @@ public class SpecmanFT extends Specman {
    * and the menu classes, e.g. {@link DiagramToolBar#TRACK_CHANGES_BUTTON}. The click works like the user's,
    * except for menus, which are not opened first. */
   public void click(String name) {
-    AbstractButton button = findByName(this, name);
+    AbstractButton button = findByName(this, name, AbstractButton.class);
     if (button == null) {
       throw new IllegalStateException("No button or menu item named '" + name + "'");
     }
@@ -218,16 +218,17 @@ public class SpecmanFT extends Specman {
     click(changeSetItemName(changeSet));
   }
 
-  /** Menu items live in a menu's popup, which is not part of the menu's component children. */
-  private static AbstractButton findByName(Component component, String name) {
-    if (component instanceof AbstractButton button && name.equals(button.getName())) {
-      return button;
+  /** Finds the component with the given name below the passed one, e.g. in a dialog panel. Menu items live in a
+   * menu's popup, which is not part of the menu's component children. */
+  public static <T extends Component> T findByName(Component component, String name, Class<T> type) {
+    if (type.isInstance(component) && name.equals(component.getName())) {
+      return type.cast(component);
     }
     Component[] children = component instanceof JMenu menu ? menu.getMenuComponents()
       : component instanceof Container container ? container.getComponents()
       : new Component[0];
     for (Component child : children) {
-      AbstractButton found = findByName(child, name);
+      T found = findByName(child, name, type);
       if (found != null) {
         return found;
       }

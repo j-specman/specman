@@ -4,7 +4,10 @@ import specman.graphics.SvgIcon;
 import specman.i18n.IMenuItem;
 import specman.view.AbstractSchrittView;
 
-import java.awt.datatransfer.StringSelection;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
+import java.awt.Component;
+import java.awt.Frame;
 
 import static specman.Specman.editor;
 
@@ -15,10 +18,12 @@ public class CopyStepLinkMenuItem extends IMenuItem {
   private static final int ICON_SIZE = 16;
 
   private AbstractSchrittView currentStep;
+  private boolean dialogDisplayed = true;
+  private AliasPanel aliasPanel;
 
   public CopyStepLinkMenuItem() {
     super(MESSAGE_KEY, new SvgIcon("copy-link", ICON_SIZE));
-    addActionListener(e -> copyLink());
+    addActionListener(e -> openAliasDialog());
   }
 
   /** Prepares the item for the step whose number the user right-clicked. */
@@ -28,8 +33,25 @@ public class CopyStepLinkMenuItem extends IMenuItem {
     setEnabled(editor().getDiagrammDatei() != null);
   }
 
-  private void copyLink() {
-    String link = SpecmanLink.of(editor().getDiagrammDatei(), currentStep);
-    editor().clipboard().setContents(new StringSelection(link), null);
+  /** Allows tests to operate the {@link AliasPanel} without displaying the dialog around it */
+  public void setDialogDisplayed(boolean dialogDisplayed) {
+    this.dialogDisplayed = dialogDisplayed;
+  }
+
+  /** The panel of the dialog opened by the last click. */
+  public AliasPanel aliasPanel() {
+    return aliasPanel;
+  }
+
+  private void openAliasDialog() {
+    aliasPanel = new AliasPanel(editor().getDiagrammDatei(), currentStep);
+    if (dialogDisplayed) {
+      new AliasDialog(owner(), aliasPanel);
+    }
+  }
+
+  private Frame owner() {
+    Component invoker = getParent() instanceof JPopupMenu popup ? popup.getInvoker() : null;
+    return invoker == null ? null : (Frame) SwingUtilities.getAncestorOfClass(Frame.class, invoker);
   }
 }

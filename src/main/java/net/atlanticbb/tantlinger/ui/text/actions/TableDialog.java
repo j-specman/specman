@@ -3,8 +3,8 @@ package net.atlanticbb.tantlinger.ui.text.actions;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import net.atlanticbb.tantlinger.i18n.I18n;
-import net.atlanticbb.tantlinger.ui.HeaderPanel;
 import net.atlanticbb.tantlinger.ui.UIUtils;
+import specman.i18n.IHeaderPanel;
 import specman.i18n.ILabel;
 import static specman.Specman.editor;
 import static specman.i18n.Messages.i18n;
@@ -15,8 +15,8 @@ import java.awt.*;
 public class TableDialog extends JDialog {
     private static final I18n i18n = I18n.getInstance("net.atlanticbb.tantlinger.ui");
     private static final Icon icon = UIUtils.getIcon("resources/images/x32/", "table.png");
-    private static final String title = i18n("dialog.table.title");
-    private static final String desc = i18n("dialog.table.description");
+    private static final String TITLE_KEY = "dialog.table.title";
+    private static final String title = i18n(TITLE_KEY);
     private JTextField columns = new JTextField("3");
     private JTextField rows = new JTextField("2");
     private JButton ok = new JButton(i18n.str("ok"));
@@ -35,10 +35,10 @@ public class TableDialog extends JDialog {
     private void init() {
         FormLayout layout = new FormLayout(
           "10px, 150px, 10px, 150px, 10px",
-          "50px, 20px, 20px, 20px, 10px, 30px, 10px");
+          "pref, 20px, 20px, 20px, 10px, 30px, 10px");
         Container contentPane = this.getContentPane();
         contentPane.setLayout(layout);
-        JPanel headerPanel = new HeaderPanel(title, desc, icon);
+        JPanel headerPanel = new IHeaderPanel(TITLE_KEY, "dialog.table.description", icon);
         contentPane.add(headerPanel, CC.xywh(1, 1, 5, 1));
         contentPane.add(new ILabel("dialog.table.size"), CC.xywh(1, 2, 3, 1));
         contentPane.add(new ILabel("dialog.table.columns"), CC.xywh(2, 3, 1, 1));
