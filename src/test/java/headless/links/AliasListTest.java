@@ -45,7 +45,7 @@ class AliasListTest extends AbstractLinkTest {
       rowsOf(listPanel));
     AtomicBoolean closed = new AtomicBoolean();
     listPanel.onClose(() -> closed.set(true));
-    click(findByName(listPanel, AliasListPanel.CLOSE_BUTTON, JButton.class), "close");
+    click(findByName(listPanel, AliasListPanel.CLOSE_BUTTON, JButton.class));
     assertTrue(closed.get());
   }
 

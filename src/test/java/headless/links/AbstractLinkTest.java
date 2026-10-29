@@ -63,11 +63,11 @@ abstract class AbstractLinkTest {
   }
 
   static void click(AliasPanel panel, String buttonName) {
-    click(findByName(panel, buttonName, JButton.class), buttonName);
+    click(findByName(panel, buttonName, JButton.class));
   }
 
-  static void click(JButton button, String buttonName) {
-    assertTrue(button.isEnabled(), buttonName + " must be enabled");
+  static void click(JButton button) {
+    assertTrue(button.isEnabled(), button.getName() + " must be enabled");
     button.doClick(0);
   }
 
