@@ -1,13 +1,18 @@
 package headless;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import specman.link.LinkAliases;
 
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import java.awt.GraphicsEnvironment;
+import java.util.UUID;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 /**
  * Switches AWT to headless mode for tests and provides each test with a fresh {@link SpecmanFT}.
@@ -16,9 +21,11 @@ import java.awt.GraphicsEnvironment;
  * the test class is instantiated.
  * <p>
  * Tests access the instance by statically importing {@link #specman}. It is replaced before each
- * test, so no state leaks from one test into the next.
+ * test, so no state leaks from one test into the next. The same holds for the user preferences
+ * the link aliases live in: Each test gets a preferences node of its own, which is removed afterwards,
+ * so tests neither see nor touch the aliases of the user running them.
  */
-public class HeadlessExtension implements BeforeAllCallback, BeforeEachCallback {
+public class HeadlessExtension implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
 
   static {
     System.setProperty("java.awt.headless", "true");
@@ -32,6 +39,8 @@ public class HeadlessExtension implements BeforeAllCallback, BeforeEachCallback 
 
   public static SpecmanFT specman;
 
+  private Preferences testPreferences;
+
   @Override
   public void beforeAll(ExtensionContext context) {
     if (!GraphicsEnvironment.isHeadless()) {
@@ -43,6 +52,14 @@ public class HeadlessExtension implements BeforeAllCallback, BeforeEachCallback 
 
   @Override
   public void beforeEach(ExtensionContext context) throws Exception {
+    testPreferences = Preferences.userRoot().node("specman-test-" + UUID.randomUUID());
+    LinkAliases.useNode(testPreferences);
     specman = new SpecmanFT();
+  }
+
+  @Override
+  public void afterEach(ExtensionContext context) throws BackingStoreException {
+    LinkAliases.useNode(null);
+    testPreferences.removeNode();
   }
 }
