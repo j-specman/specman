@@ -6,7 +6,10 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -22,6 +25,9 @@ public final class LinkAliases {
   public static final int MAX_ALIAS_LENGTH = 20;
   public static final String PROBLEM_INVALID = "dialog.link.alias.problem.invalid";
   public static final String PROBLEM_TAKEN = "dialog.link.alias.problem.taken";
+
+  /** The alias the user chose for a file. */
+  public record Entry(File file, String alias) {}
 
   private static final String ALLOWED_CHARACTERS = "A-Za-z0-9_-";
   private static final Pattern VALID_ALIAS = Pattern.compile("[" + ALLOWED_CHARACTERS + "]{0," + MAX_ALIAS_LENGTH + "}");
@@ -81,20 +87,29 @@ public final class LinkAliases {
     return null;
   }
 
-  private static boolean isUsedForOtherFile(File file, String alias) {
+  /** All aliases in use, sorted by alias regardless of case. Files the user decided against an alias for are left out. */
+  public static List<Entry> entries() {
     try {
-      String ownPath = absolutePath(file);
+      List<Entry> entries = new ArrayList<>();
       for (String name : aliases().childrenNames()) {
         Preferences entry = aliases().node(name);
-        if (!ownPath.equals(entry.get(FILE_KEY, "")) && alias.equalsIgnoreCase(entry.get(ALIAS_KEY, ""))) {
-          return true;
+        String alias = entry.get(ALIAS_KEY, "");
+        if (!alias.isEmpty()) {
+          entries.add(new Entry(new File(entry.get(FILE_KEY, "")), alias));
         }
       }
-      return false;
+      entries.sort(Comparator.comparing(entry -> entry.alias().toLowerCase()));
+      return List.copyOf(entries);
     }
     catch (BackingStoreException e) {
       throw new IllegalStateException("Link aliases can't be read", e);
     }
+  }
+
+  private static boolean isUsedForOtherFile(File file, String alias) {
+    String ownPath = absolutePath(file);
+    return entries().stream().anyMatch(entry ->
+      !ownPath.equals(absolutePath(entry.file())) && alias.equalsIgnoreCase(entry.alias()));
   }
 
   private static Preferences aliases() {

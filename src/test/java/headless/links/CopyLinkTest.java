@@ -1,8 +1,6 @@
 package headless.links;
 
-import headless.HeadlessExtension;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -10,9 +8,6 @@ import specman.link.AliasPanel;
 import specman.link.CopyStepLinkMenuItem;
 import specman.view.EinfacherSchrittView;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
@@ -22,7 +17,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static headless.HeadlessExtension.specman;
-import static headless.SpecmanFT.findByName;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,8 +28,7 @@ import static specman.link.SpecmanLink.SCHEME;
 import static specman.link.SpecmanLink.SEPARATOR;
 
 /** Copying a global link to a step via the step number's context menu. */
-@ExtendWith(HeadlessExtension.class)
-class CopyLinkTest {
+class CopyLinkTest extends AbstractLinkTest {
 
   /** Scenario: The diagram was not saved yet, so there is no file name a link could point to.
    * The user can see the menu item, but can't use it. */
@@ -177,55 +170,5 @@ class CopyLinkTest {
     typeAlias(secondFilePanel, "");
 
     assertTrue(okButton(secondFilePanel).isEnabled());
-  }
-
-  private static File saveDiagram(Path directory, String filename) {
-    File file = directory.resolve(filename).toFile();
-    specman.setDiagrammDatei(file);
-    specman.diagrammSpeichern(false);
-    return file;
-  }
-
-  /** Clicks the menu item without displaying the dialog and returns the panel the dialog would show, null
-   * if the click didn't ask for an alias. */
-  private static AliasPanel clickCopyLink(EinfacherSchrittView step) {
-    CopyStepLinkMenuItem item = specman.contextMenuItem(step, CopyStepLinkMenuItem.class);
-    item.setDialogDisplayed(false);
-    specman.clickContextMenuItem(step, CopyStepLinkMenuItem.class);
-    return item.aliasPanel();
-  }
-
-  /** Types the text like the user would after selecting the field's content, i.e. it replaces what is there. */
-  private static void typeAlias(AliasPanel panel, String alias) {
-    JTextField field = aliasField(panel);
-    field.selectAll();
-    field.replaceSelection(alias);
-  }
-
-  private static JTextField aliasField(AliasPanel panel) {
-    return findByName(panel, AliasPanel.ALIAS_FIELD, JTextField.class);
-  }
-
-  private static String preview(AliasPanel panel) {
-    return findByName(panel, AliasPanel.PREVIEW_FIELD, JTextField.class).getText();
-  }
-
-  private static String problem(AliasPanel panel) {
-    return findByName(panel, AliasPanel.PROBLEM_LABEL, JLabel.class).getText();
-  }
-
-  private static JButton okButton(AliasPanel panel) {
-    return findByName(panel, AliasPanel.OK_BUTTON, JButton.class);
-  }
-
-  private static void click(AliasPanel panel, String buttonName) {
-    JButton button = findByName(panel, buttonName, JButton.class);
-    assertTrue(button.isEnabled(), buttonName + " must be enabled");
-    button.doClick(0);
-  }
-
-  private static String clipboardText() throws Exception {
-    assertNotNull(specman.clipboard().getContents(null), "nothing in the clipboard");
-    return (String) specman.clipboard().getData(DataFlavor.stringFlavor);
   }
 }

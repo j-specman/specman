@@ -2,7 +2,7 @@ package specman.link;
 
 import specman.i18n.IDialog;
 
-import java.awt.Frame;
+import java.awt.Window;
 import java.io.Serial;
 
 /** Window around the {@link AliasPanel}. The separation allows to use the panel in headless tests while the
@@ -11,7 +11,7 @@ public class AliasDialog extends IDialog {
   @Serial
   private static final long serialVersionUID = 1L;
 
-  public AliasDialog(Frame owner, AliasPanel panel) {
+  public AliasDialog(Window owner, AliasPanel panel) {
     super(owner, "dialog.link.alias.title");
     panel.onClose(() -> setVisible(false));
     getContentPane().add(panel);

@@ -62,6 +62,7 @@ public class CopyStepLinkMenuItem extends IMenuItem {
       LinkAliases.assign(file, alias);
       copyLinkToClipboard(file);
     });
+    aliasPanel.setDialogDisplayed(dialogDisplayed);
     if (dialogDisplayed) {
       new AliasDialog(owner(), aliasPanel);
     }

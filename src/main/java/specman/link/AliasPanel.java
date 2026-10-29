@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
@@ -43,7 +44,7 @@ public class AliasPanel extends JPanel {
   public static final String OK_BUTTON = "link.alias.ok";
   public static final String CANCEL_BUTTON = "link.alias.cancel";
 
-  private static final Icon ICON = UIUtils.getIcon("resources/images/x32/", "link3.png");
+  static final Icon ICON = UIUtils.getIcon("resources/images/x32/", "link3.png");
   private static final Color PROBLEM_COLOR = new Color(192, 0, 0);
   private static final Color LINK_COLOR = new Color(0, 102, 204);
   private static final int ALIAS_FIELD_COLUMNS = 20;
@@ -61,6 +62,8 @@ public class AliasPanel extends JPanel {
   private final JButton ok = new IButton("button.ok");
   private final JButton cancel = new IButton("button.cancel");
   private Runnable closeAction = () -> { };
+  private boolean dialogDisplayed = true;
+  private AliasListPanel aliasListPanel;
 
   /** @param aliasAccepted called with the alias, possibly empty for "no alias", when the user confirms, before the panel closes */
   public AliasPanel(File file, AbstractSchrittView step, Consumer<String> aliasAccepted) {
@@ -78,6 +81,7 @@ public class AliasPanel extends JPanel {
     problemLabel.setForeground(PROBLEM_COLOR);
     allAliases.setName(ALL_ALIASES_BUTTON);
     makeLookLikeWebLink(allAliases);
+    allAliases.addActionListener(e -> showAllAliases());
     ok.setName(OK_BUTTON);
     ok.addActionListener(e -> confirm());
     cancel.setName(CANCEL_BUTTON);
@@ -101,6 +105,23 @@ public class AliasPanel extends JPanel {
   /** Defines what to do when the panel is done, i.e. after the user confirmed or cancelled. */
   public void onClose(Runnable closeAction) {
     this.closeAction = closeAction;
+  }
+
+  /** Allows tests to operate the {@link AliasListPanel} without displaying the dialog around it */
+  public void setDialogDisplayed(boolean dialogDisplayed) {
+    this.dialogDisplayed = dialogDisplayed;
+  }
+
+  /** The panel of the dialog opened by the last click on the link to all aliases, null if there was none. */
+  public AliasListPanel aliasListPanel() {
+    return aliasListPanel;
+  }
+
+  private void showAllAliases() {
+    aliasListPanel = new AliasListPanel();
+    if (dialogDisplayed) {
+      new AliasListDialog(SwingUtilities.getWindowAncestor(this), aliasListPanel);
+    }
   }
 
   /** Once the panel is part of a window, Enter confirms and the cursor is where the user types the alias. */
