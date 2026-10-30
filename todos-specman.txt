@@ -62,14 +62,14 @@ x Einfache Navigation über einen Link
     - Stattdessen Fokus auf das bereits geöffnete Fenster setzen und zum ggf. in der URL adressierten Schritt navigieren
     - Das ist anspruchsvoll, weil es Interprozess-Kommunikation erfordert.
 x Nice to have: Dialog für Alias-Vergabe schlägt initial einen Alias vor, wenn sich aus den bereits in den User Preferences abgelegten Aliasse ein Muster ablesen lässt, das auch auf die aktuelle Datei anwendbar ist
-  - Beispiel: es liegt bereits vor: Alias "uc730" für Datei "C:/project/BALI UC-730 Kundendaten pflegen.nsd"
-  - Dann sind alle Zeichen des Alias von links nach rechts im Präfix der Datei enthalten, und ergeben sich durch Auslassung bestimmter Zeichenfolgen.
-  - Quasi aus dem regulären Ausdruck: ".{16}(.{2}).{1}(.{3}).*" -> Alias = $1$2
-  - Eine aktuelle Datei "C:/project/BALI UC-135 Was Anderes.nsd" erfüllt diesen Ausdruck ebenfalls, und der Alias ergibt sich zu "uc135"
-  - Der erste Treffer in den Preferences ist ausschlaggebend.
-  - Vorschlag nur, wenn der abgeleitete Alias eindeutig ist
-  - Ganz genaues Verfahren inkl. genauer Umgang mit Groß/Kleinschreibung wird im Rahmen der Umsetzung geklärt
-  - Details könnten tricky sein, deswegen nicht Teil der ersten Ausbaustufe
+  x Beispiel: es liegt bereits vor: Alias "uc730" für Datei "C:/project/BALI UC-730 Kundendaten pflegen.nsd"
+  x Dann sind alle Zeichen des Alias von links nach rechts im Präfix der Datei enthalten, und ergeben sich durch Auslassung bestimmter Zeichenfolgen.
+  x Quasi aus dem regulären Ausdruck: ".{16}(.{2}).{1}(.{3}).*" -> Alias = $1$2
+  x Eine aktuelle Datei "C:/project/BALI UC-135 Was Anderes.nsd" erfüllt diesen Ausdruck ebenfalls, und der Alias ergibt sich zu "uc135"
+  x Ausschlaggebend ist der Treffer mit dem längsten Alias, bei mehreren der erste (nur Zuordnungen aus demselben Verzeichnis)
+  x Vorschlag nur, wenn der abgeleitete Alias eindeutig ist
+  x Ganz genaues Verfahren inkl. genauer Umgang mit Groß/Kleinschreibung wird im Rahmen der Umsetzung geklärt
+  x Details könnten tricky sein, deswegen nicht Teil der ersten Ausbaustufe
 - Nice to have: Dialog für eine on-the-fly Dateizuordnung schlägt Datei vor, wenn sich aus den bereits in den User Preferences abgelegten Aliasse ein Muster ablesen lässt, das auch auf die aktuelle URL anwendbar ist
   - Quasi in umgekehrter Richtung für den Vorschlag eines Alias oben bei Aliasvergabe.
     - Aus einer bestehenden Zuordnung das Verzeichnis der Datei extrahieren
