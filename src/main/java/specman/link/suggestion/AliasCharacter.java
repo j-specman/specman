@@ -1,5 +1,8 @@
 package specman.link.suggestion;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** A character of an alias together with its type and the position where it was found in the file name of the alias' example. */
 class AliasCharacter {
   private final char c;
@@ -26,8 +29,31 @@ class AliasCharacter {
     return null;
   }
 
+  /** @return the characters of the alias with their indices in the file name, null if they can't all be found in order or the alias is empty */
+  static List<AliasCharacter> locateAll(String alias, String fileName) {
+    List<AliasCharacter> located = new ArrayList<>();
+    int searchFrom = 0;
+    for (char c : alias.toCharArray()) {
+      AliasCharacter aliasCharacter = locate(c, fileName, searchFrom);
+      if (aliasCharacter == null) {
+        return null;
+      }
+      located.add(aliasCharacter);
+      searchFrom = aliasCharacter.index() + 1;
+    }
+    return located.isEmpty() ? null : located;
+  }
+
   int index() {
     return index;
+  }
+
+  /** @return whether the file name has the character of another alias at this alias character's position, which means
+   * the same type, the same letter ignoring case or any separator for a separator */
+  boolean isMatchedBy(char otherAliasCharacter, String fileName) {
+    return index < fileName.length()
+      && AliasCharacterType.of(otherAliasCharacter) == type
+      && type.accepts(otherAliasCharacter, fileName.charAt(index));
   }
 
   /** @return whether a file name has a character of this alias character's type at its position */

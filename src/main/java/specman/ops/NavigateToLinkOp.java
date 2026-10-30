@@ -4,6 +4,7 @@ import specman.editarea.TextEditArea;
 import specman.link.LinkAliases;
 import specman.link.SpecmanLink;
 import specman.link.SpecmanLink.Reference;
+import specman.link.suggestion.FileSuggestion;
 import specman.view.AbstractSchrittView;
 import specman.visitor.StepByIdFinder;
 
@@ -81,8 +82,8 @@ public class NavigateToLinkOp extends AbstractSpecmanOp {
     }
   }
 
-  /** The file the link points to. For an alias nobody knows, the user is asked which file it stands for, and the
-   * answer is remembered. Null if the user doesn't tell. */
+  /** The file the link points to. For an alias nobody knows, the user is asked which file it stands for, with the
+   * file the existing aliases hint at preselected, and the answer is remembered. Null if the user doesn't tell. */
   private File fileOf(Reference reference) {
     if (!reference.hasAlias()) {
       return reference.file();
@@ -91,7 +92,8 @@ public class NavigateToLinkOp extends AbstractSpecmanOp {
     if (knownFile != null) {
       return knownFile;
     }
-    File chosen = context.chooseFileForAlias(reference.alias());
+    File suggestedFile = new FileSuggestion(LinkAliases.entries()).suggest(reference.alias());
+    File chosen = context.chooseFileForAlias(reference.alias(), suggestedFile);
     if (chosen != null) {
       LinkAliases.assign(chosen, reference.alias());
     }

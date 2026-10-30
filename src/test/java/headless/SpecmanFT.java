@@ -84,6 +84,7 @@ public class SpecmanFT extends Specman {
   private File fileChoiceAnswer;
   private AliasListPanel openedAliasListPanel;
   private final List<String> aliasesAskedFor = new ArrayList<>();
+  private final List<File> fileSuggestionsOffered = new ArrayList<>();
   private EditArea focusedArea;
   private static final Dimension LAYOUT_SIZE = new Dimension(800, 600);
   private static final int MAX_LAYOUT_PASSES = 50;
@@ -536,9 +537,15 @@ public class SpecmanFT extends Specman {
     return Collections.unmodifiableList(aliasesAskedFor);
   }
 
+  /** The files the user was offered as probable answer when asked for a file, in the order of asking, null for no offer. */
+  public List<File> fileSuggestionsOffered() {
+    return Collections.unmodifiableList(fileSuggestionsOffered);
+  }
+
   @Override
-  public File chooseFileForAlias(String alias) {
+  public File chooseFileForAlias(String alias, File suggestedFile) {
     aliasesAskedFor.add(alias);
+    fileSuggestionsOffered.add(suggestedFile);
     return fileChoiceAnswer;
   }
 

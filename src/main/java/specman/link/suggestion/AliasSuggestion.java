@@ -3,7 +3,6 @@ package specman.link.suggestion;
 import specman.link.LinkAliases;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -113,18 +112,6 @@ public class AliasSuggestion {
 
   /** @return the characters of the alias with their indices in the example's base name, null if they can't all be found */
   private List<AliasCharacter> locateInExample(LinkAliases.Entry entry) {
-    String alias = entry.alias();
-    String exampleName = getBaseName(entry.file().getName());
-    List<AliasCharacter> located = new ArrayList<>();
-    int searchFrom = 0;
-    for (char c : alias.toCharArray()) {
-      AliasCharacter aliasCharacter = AliasCharacter.locate(c, exampleName, searchFrom);
-      if (aliasCharacter == null) {
-        return null;
-      }
-      located.add(aliasCharacter);
-      searchFrom = aliasCharacter.index() + 1;
-    }
-    return located.isEmpty() ? null : located;
+    return AliasCharacter.locateAll(entry.alias(), getBaseName(entry.file().getName()));
   }
 }

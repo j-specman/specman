@@ -33,8 +33,9 @@ public interface SpecmanOpContext extends EditorI {
   void exportAsPDF();
   void exportAsGraphviz();
   void navigateToLinkInClipboard();
-  /** Asks the user which file the alias of a link stands for, null if the user doesn't choose any. */
-  File chooseFileForAlias(String alias);
+  /** Asks the user which file the alias of a link stands for, null if the user doesn't choose any.
+   * @param suggestedFile the file the user is offered as the probable answer, null if there is none */
+  File chooseFileForAlias(String alias, File suggestedFile);
   void exit();
   void openSettings();
   void openAliases();

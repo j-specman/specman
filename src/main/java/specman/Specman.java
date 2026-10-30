@@ -661,10 +661,13 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	@Override
-	public File chooseFileForAlias(String alias) {
+	public File chooseFileForAlias(String alias, File suggestedFile) {
 		JFileChooser fileChooser = new JFileChooser(diagrammDatei != null ? diagrammDatei.getParentFile() : null);
 		fileChooser.setDialogTitle(i18n("dialog.link.open.choose.file", alias));
 		fileChooser.setFileFilter(new IFileNameExtensionFilter("msg.filter.diagrams", "nsd"));
+		if (suggestedFile != null) {
+			fileChooser.setSelectedFile(suggestedFile);
+		}
 		return fileChooser.showOpenDialog(scrollPane) == JFileChooser.APPROVE_OPTION ? fileChooser.getSelectedFile() : null;
 	}
 

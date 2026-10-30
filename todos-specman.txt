@@ -70,13 +70,13 @@ x Nice to have: Dialog für Alias-Vergabe schlägt initial einen Alias vor, wenn
   x Vorschlag nur, wenn der abgeleitete Alias eindeutig ist
   x Ganz genaues Verfahren inkl. genauer Umgang mit Groß/Kleinschreibung wird im Rahmen der Umsetzung geklärt
   x Details könnten tricky sein, deswegen nicht Teil der ersten Ausbaustufe
-- Nice to have: Dialog für eine on-the-fly Dateizuordnung schlägt Datei vor, wenn sich aus den bereits in den User Preferences abgelegten Aliasse ein Muster ablesen lässt, das auch auf die aktuelle URL anwendbar ist
-  - Quasi in umgekehrter Richtung für den Vorschlag eines Alias oben bei Aliasvergabe.
-    - Aus einer bestehenden Zuordnung das Verzeichnis der Datei extrahieren
-    - Den regulären Ausdruck für die Ableitung des Alias ableiten
-    - Dann im Verzeichnis nach Dateien suchen, die den regulären Ausdruck erfüllen, der sich aus dem Alias des Links ergibt
-    - Ganz genaues Verfahren wird im Rahmen der Umsetzung geklärt
-  - Details könnten tricky sein, deswegen nicht Teil der ersten Ausbaustufe
+x Nice to have: Dialog für eine on-the-fly Dateizuordnung schlägt Datei vor, wenn sich aus den bereits in den User Preferences abgelegten Aliasse ein Muster ablesen lässt, das auch auf die aktuelle URL anwendbar ist
+  x Quasi in umgekehrter Richtung für den Vorschlag eines Alias oben bei Aliasvergabe.
+    x Aus einer bestehenden Zuordnung das Verzeichnis der Datei extrahieren
+    x Den regulären Ausdruck für die Ableitung des Alias ableiten
+    x Dann im Verzeichnis nach Dateien suchen, die den regulären Ausdruck erfüllen, der sich aus dem Alias des Links ergibt
+    x Ganz genaues Verfahren wird im Rahmen der Umsetzung geklärt
+  x Details könnten tricky sein, deswegen nicht Teil der ersten Ausbaustufe
 - Nice to have: Nutzung der Links auch als Hyperlinks in Schritttexten, um von einer Spezifikation auf eine andere zu verweisen.
 
 

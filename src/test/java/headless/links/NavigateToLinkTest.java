@@ -13,6 +13,7 @@ import specman.view.EinfacherSchrittView;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 
 import static headless.HeadlessExtension.specman;
@@ -152,6 +153,33 @@ class NavigateToLinkTest extends AbstractLinkTest {
     assertEquals(List.of("uc720"), specman.aliasesAskedFor());
     assertSame(step2, focusedStep());
   }
+
+  /** Scenario: The user already has the alias uc720 for UC-720 and gets a link with the alias uc721, which is new to
+   * them. The file chooser offers UC-721 in the same directory, the user confirms, and the file is opened. */
+  @Test
+  void testUnknownAliasOffersFileMatchingTheExistingAliases(@TempDir Path directory) {
+    File linkedFile = saveDiagram(directory, "BALI UC-721 Bilanzen.nsd");
+    LinkAliases.assign(saveDiagram(directory, "BALI UC-720 Kunden.nsd"), "uc720");
+    putIntoClipboard(SCHEME + "uc721");
+    specman.answerFileChoicesWith(linkedFile);
+
+    openLinkFromClipboard();
+
+    assertEquals(List.of(linkedFile), specman.fileSuggestionsOffered());
+    assertEquals(linkedFile, specman.getDiagrammDatei());
+  }
+
+  /** Scenario: There is no alias to learn from, so the user is asked for the file without any suggestion. */
+  @Test
+  void testUnknownAliasOffersNoFileWithoutExistingAliases() {
+    putIntoClipboard(SCHEME + "uc721");
+    specman.answerFileChoicesWith(null);
+
+    openLinkFromClipboard();
+
+    assertEquals(Collections.singletonList(null), specman.fileSuggestionsOffered());
+  }
+
 
   /** Scenario: The link has an alias the user never assigned to a file, and the user doesn't choose a file when
    * asked. Nothing happens and nothing is remembered. */
