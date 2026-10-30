@@ -61,10 +61,10 @@ import static org.apache.commons.io.FilenameUtils.getBaseName;
  * denn der Vorschlag wird im Dialog nur vorbelegt und vom Nutzer korrigiert. Der korrigierte Alias "uc1350" ist länger als
  * "uc730" und wird deshalb bei der nächsten Datei mit vierstelliger Nummer bevorzugt, das Problem heilt sich also selbst.
  * Bei einer dreistelligen Nummer scheitert "uc1350" an der Typprüfung, sodass weiterhin "uc730" greift.*/
-public class AliasSuggestion {
+public class AliasSuggester {
   private final List<LinkAliases.Entry> entries;
 
-  public AliasSuggestion(List<LinkAliases.Entry> entries) {
+  public AliasSuggester(List<LinkAliases.Entry> entries) {
     this.entries = entries;
   }
 

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import specman.link.LinkAliases;
-import specman.link.suggestion.FileSuggestion;
+import specman.link.suggestion.FileSuggester;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 /** Works on real files in a temporary directory, which are searched for the one an alias stands for.
  * Needs neither a Specman instance nor the user preferences. */
-class FileSuggestionTest {
+class FileSuggesterTest {
 
   private static final String EXAMPLE_NAME = "BALI UC-730 Kundendaten pflegen.nsd";
 
@@ -38,7 +38,7 @@ class FileSuggestionTest {
   }
 
   private static File suggest(List<LinkAliases.Entry> examples, String alias) {
-    return new FileSuggestion(examples).suggest(alias);
+    return new FileSuggester(examples).suggest(alias);
   }
 
   private File suggest(String exampleName, String exampleAlias, String alias) {

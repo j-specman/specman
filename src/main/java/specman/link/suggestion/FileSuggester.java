@@ -9,12 +9,12 @@ import java.util.List;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
-/** The reverse of {@link AliasSuggestion}: Suggests the file an alias nobody knows yet stands for, derived from the existing
+/** The reverse of {@link AliasSuggester}:Suggests the file an alias nobody knows yet stands for, derived from the existing
  * assignments of aliases to files.
  * <ul>
  * <li>An assignment is an example if the alias has the same length as the example's alias and the same type of character
  * (letter, digit, separator) at every position</li>
- * <li>The example's alias characters are located in its file's base name like {@link AliasSuggestion} does. A diagram in the
+ * <li>The example's alias characters are located in its file's base name like {@link AliasSuggester} does. A diagram in the
  * example's directory follows the pattern if its base name has the alias' characters at these positions. Letters are compared
  * ignoring case, and "-" and "_" are the same separator</li>
  * <li>There is only a suggestion if all examples together have exactly one file following their patterns. If there are
@@ -22,12 +22,12 @@ import static org.apache.commons.io.FilenameUtils.getExtension;
  * </ul>
  * Example: The alias "uc730" for "C:/project/BALI UC-730 Kundendaten pflegen.nsd" makes "C:/project/BALI UC-135 Was Anderes.nsd"
  * the suggestion for the alias "uc135", provided no other diagram in the directory has "UC-135" at the same place. */
-public class FileSuggestion {
+public class FileSuggester {
   private static final String DIAGRAM_EXTENSION = "nsd";
 
   private final List<LinkAliases.Entry> entries;
 
-  public FileSuggestion(List<LinkAliases.Entry> entries) {
+  public FileSuggester(List<LinkAliases.Entry> entries) {
     this.entries = entries;
   }
 

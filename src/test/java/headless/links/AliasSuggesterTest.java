@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import specman.link.LinkAliases;
-import specman.link.suggestion.AliasSuggestion;
+import specman.link.suggestion.AliasSuggester;
 
 import java.io.File;
 import java.util.List;
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /** Works on plain file names and aliases, needs neither a Specman instance nor the user preferences. */
-class AliasSuggestionTest {
+class AliasSuggesterTest {
 
   private static final String PROJECT = "C:/project/";
   private static final String EXAMPLE_NAME = "BALI UC-730 Kundendaten pflegen.nsd";
@@ -24,7 +24,7 @@ class AliasSuggestionTest {
   }
 
   private static String suggest(List<LinkAliases.Entry> entries, String newFileName) {
-    return new AliasSuggestion(entries).suggest(new File(PROJECT + newFileName));
+    return new AliasSuggester(entries).suggest(new File(PROJECT + newFileName));
   }
 
   private static String suggest(String exampleName, String exampleAlias, String newName) {
@@ -102,7 +102,7 @@ class AliasSuggestionTest {
   void testSuggestsNothingFromExampleInOtherDirectory() {
     List<LinkAliases.Entry> entries = List.of(entry(EXAMPLE_NAME, "uc730"));
 
-    String suggestion = new AliasSuggestion(entries).suggest(new File("D:/other/dir/" + NEW_NAME));
+    String suggestion = new AliasSuggester(entries).suggest(new File("D:/other/dir/" + NEW_NAME));
 
     assertNull(suggestion);
   }

@@ -4,7 +4,7 @@ import specman.editarea.TextEditArea;
 import specman.link.LinkAliases;
 import specman.link.SpecmanLink;
 import specman.link.SpecmanLink.Reference;
-import specman.link.suggestion.FileSuggestion;
+import specman.link.suggestion.FileSuggester;
 import specman.view.AbstractSchrittView;
 import specman.visitor.StepByIdFinder;
 
@@ -92,7 +92,7 @@ public class NavigateToLinkOp extends AbstractSpecmanOp {
     if (knownFile != null) {
       return knownFile;
     }
-    File suggestedFile = new FileSuggestion(LinkAliases.entries()).suggest(reference.alias());
+    File suggestedFile = new FileSuggester(LinkAliases.entries()).suggest(reference.alias());
     File chosen = context.chooseFileForAlias(reference.alias(), suggestedFile);
     if (chosen != null) {
       LinkAliases.assign(chosen, reference.alias());
