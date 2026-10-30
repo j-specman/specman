@@ -6,6 +6,7 @@ import net.atlanticbb.tantlinger.ui.UIUtils;
 import specman.i18n.IButton;
 import specman.i18n.IHeaderPanel;
 import specman.i18n.ILabel;
+import specman.link.suggestion.AliasSuggestion;
 import specman.view.AbstractSchrittView;
 
 import javax.swing.AbstractAction;
@@ -98,6 +99,7 @@ public class AliasPanel extends JPanel {
       @Override public void removeUpdate(DocumentEvent e) { refresh(); }
       @Override public void changedUpdate(DocumentEvent e) { refresh(); }
     });
+    prefillSuggestedAlias();
     registerEscapeAsCancel();
     refresh();
   }
@@ -139,6 +141,16 @@ public class AliasPanel extends JPanel {
     // A plain Color, not the UIResource of the look and feel, which would paint a read-only field gray
     field.setBackground(new Color(getBackground().getRGB()));
     field.setBorder(BorderFactory.createEmptyBorder());
+  }
+
+  /** Offers an alias made like the existing ones, selected so the user can take it over or just type another one.
+   * A suggestion which isn't valid for the file or already used for another file is dropped. */
+  private void prefillSuggestedAlias() {
+    String suggestion = new AliasSuggestion(LinkAliases.entries()).suggest(file);
+    if (suggestion != null && LinkAliases.problemKeyFor(file, suggestion) == null) {
+      aliasField.setText(suggestion);
+      aliasField.selectAll();
+    }
   }
 
   private void refresh() {

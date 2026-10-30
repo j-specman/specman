@@ -1,4 +1,5 @@
 :toc:
+:sectnums:
 
 # Specman 1.4 Manual
 
