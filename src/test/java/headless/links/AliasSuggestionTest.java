@@ -35,7 +35,7 @@ class AliasSuggestionTest {
    * letter case and kind of separator from the alias. */
   @ParameterizedTest(name = "{1} for {0} makes {3} for {2}")
   @CsvSource(delimiter = '|', value = {
-    // The example of the todo
+    // The example from the original concept
     "BALI UC-730 Kundendaten pflegen.nsd | uc730 | BALI UC-135 Was Anderes.nsd | uc135",
     // Characters after the ones used by the alias may be anything, or missing
     "BALI UC-730 Kundendaten pflegen.nsd | uc730 | BALI UC-135.nsd | uc135",
