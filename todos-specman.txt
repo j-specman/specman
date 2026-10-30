@@ -26,9 +26,9 @@ x Beim ersten Mal in einer Datei, erscheint ein Dialog mit dem Vorschlag, einen 
   x Darunter sieht man die URL, bei leerem Alias wird der Dateiname verwendet, also z.B. specman:///C:/project/UC-720%20Eins%20Zwei.nsd,2d34f85e,1.3
   x Komma im Dateinamen muss als %2C kodiert werden, damit das Komma als Trennzeichen zur Schritt-ID und Schrittnummer eindeutig erkennbar ist.
   x Ändern des Alias ist jederzeit möglich, dann ändert sich auch die URL
-  x Hinweis, dass man die Aliase jederzeit über Datei -> Alias ändern kann
+  x Hinweis, dass man die Aliasse jederzeit über Datei -> Alias ändern kann
   x Zuordnung von Alias zu Datei wird in den User Preferences abgelegt, wenn der User OK drückt
-  - Idee der Aliase für Team-Kollaboration und Pfadunabhängigkeit der Links muss im Manual erklärt werden.
+  - Idee der Aliasse für Team-Kollaboration und Pfadunabhängigkeit der Links muss im Manual erklärt werden.
   x OK geht nur, wenn der Alias case-insensitiv eindeutig oder leer ist
   x Cancel sorgt dafür, dass nichts in der Zwischenablage landet und auch keine Zuordnung in den User Preferences abgelegt wird
   x Eine leere Eingabe wird ebenfalls in den User Preferences abgelegt, um zu verhindern, dass der Dialog bei jedem Öffnen der Datei wieder erscheint
@@ -36,11 +36,11 @@ x Aus der Zwischenablage kann man den Link anschließend in beliebige andere Too
 x Schrittnummer in der URL ist nur informativ, kann entfallen
 x Schritt-ID kann in der URL entfallen, dann adressiert die URL nur die Datei und keinen Schritt darin
 x Über Datei -> Alias: Dialog mit allen Dateien, für die ein Alias definiert ist, jeweils Alias und Datei mit Pfad.
-  x Aliase sind editierbar - Einschränkungen s.o.
+  x Aliasse sind editierbar - Einschränkungen s.o.
   x Nicht mehr existierende Dateien sind als verwaist markiert. Der User kann die Datei wieder neu auswählen
   x Zeilen können auch gelöscht werden
   x Über Abbrechen können die Änderungen verworfen werden
-  x Speichern geht nur, wenn die Aliase case-insensitiv eindeutig sind (ausgenommen alle leeren Aliase)
+  x Speichern geht nur, wenn die Aliasse case-insensitiv eindeutig sind (ausgenommen alle leeren Aliasse)
 x Bei "Speichern unter..." bleibt ein etwaiger bereits zugeordneter Alias mit der alten Datei assoziiert.
   x Der User muss ggf. die Zuordnung zur neuen Datei über Datei -> Alias selbst nachtragen.
 x Einfache Navigation über einen Link
@@ -61,7 +61,7 @@ x Einfache Navigation über einen Link
   - Besonderheit: Wenn schon eine andere Specman-Instanz läuft, das die Datei geöffnet hat, dann wird die Datei nicht nochmal geöffnet,
     - Stattdessen Fokus auf das bereits geöffnete Fenster setzen und zum ggf. in der URL adressierten Schritt navigieren
     - Das ist anspruchsvoll, weil es Interprozess-Kommunikation erfordert.
-- Nice to have: Dialog für Alias-Vergabe schlägt initial einen Alias vor, wenn sich aus den bereits in den User Preferences abgelegten Aliase ein Muster ablesen lässt, das auch auf die aktuelle Datei anwendbar ist
+x Nice to have: Dialog für Alias-Vergabe schlägt initial einen Alias vor, wenn sich aus den bereits in den User Preferences abgelegten Aliasse ein Muster ablesen lässt, das auch auf die aktuelle Datei anwendbar ist
   - Beispiel: es liegt bereits vor: Alias "uc730" für Datei "C:/project/BALI UC-730 Kundendaten pflegen.nsd"
   - Dann sind alle Zeichen des Alias von links nach rechts im Präfix der Datei enthalten, und ergeben sich durch Auslassung bestimmter Zeichenfolgen.
   - Quasi aus dem regulären Ausdruck: ".{16}(.{2}).{1}(.{3}).*" -> Alias = $1$2
@@ -70,7 +70,7 @@ x Einfache Navigation über einen Link
   - Vorschlag nur, wenn der abgeleitete Alias eindeutig ist
   - Ganz genaues Verfahren inkl. genauer Umgang mit Groß/Kleinschreibung wird im Rahmen der Umsetzung geklärt
   - Details könnten tricky sein, deswegen nicht Teil der ersten Ausbaustufe
-- Nice to have: Dialog für eine on-the-fly Dateizuordnung schlägt Datei vor, wenn sich aus den bereits in den User Preferences abgelegten Aliase ein Muster ablesen lässt, das auch auf die aktuelle URL anwendbar ist
+- Nice to have: Dialog für eine on-the-fly Dateizuordnung schlägt Datei vor, wenn sich aus den bereits in den User Preferences abgelegten Aliasse ein Muster ablesen lässt, das auch auf die aktuelle URL anwendbar ist
   - Quasi in umgekehrter Richtung für den Vorschlag eines Alias oben bei Aliasvergabe.
     - Aus einer bestehenden Zuordnung das Verzeichnis der Datei extrahieren
     - Den regulären Ausdruck für die Ableitung des Alias ableiten
