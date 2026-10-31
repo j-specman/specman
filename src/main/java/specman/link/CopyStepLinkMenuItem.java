@@ -1,6 +1,5 @@
 package specman.link;
 
-import specman.graphics.SvgIcon;
 import specman.i18n.IMenuItem;
 import specman.view.AbstractSchrittView;
 
@@ -18,14 +17,13 @@ import static specman.Specman.editor;
 public class CopyStepLinkMenuItem extends IMenuItem {
 
   private static final String MESSAGE_KEY = "menu.context.copy.link";
-  private static final int ICON_SIZE = 16;
 
   private AbstractSchrittView currentStep;
   private boolean dialogDisplayed = true;
   private AliasPanel aliasPanel;
 
   public CopyStepLinkMenuItem() {
-    super(MESSAGE_KEY, new SvgIcon("copy-link", ICON_SIZE));
+    super(MESSAGE_KEY);
     addActionListener(e -> copyLink());
   }
 
