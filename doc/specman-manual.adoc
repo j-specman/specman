@@ -187,7 +187,7 @@ The following link types are supported:
 
 * Links of type `http`, `https`, and `mailto` are handed to the system, which opens them in the default browser or mail program.
 
-* `specman://` links point to another Specman document, or to a step in it. This is Specman's own URL scheme. How such links are created and followed is described in chapter <<speclinks,Links to other specifications>>.
+* `specman://` URLs point to another Specman document, or to a step in it. This is Specman's own URL scheme. How such URLs are created and followed is described in chapter <<specurls,Specman URLs>>.
 
 * Everything else, e.g. `file:` or `ftp:`, is refused with a message. Following a link in a document must not be able to start programs.
 
@@ -362,6 +362,81 @@ image::metatags-find-replace.png[Meta Tags Find & Replace]
 
 #### Copy & Paste
 Tags are kept when steps are moved or copied within a diagram. Copying steps to another diagram only takes their tags along if the target diagram has a configuration of the same name. Configurations are never taken over into the target diagram on pasting. Specman reports the names of the missing configurations in a short notification, so you can create them in the target diagram and paste again. If the target diagram has the configuration but it doesn't allow freetexts there, the tag is pasted without its freetext. The freetext is dropped silently, without a notification.
+
+[#specurls]
+## Specman URLs
+Specman defines a custom URL scheme to address specification documents and the steps in them. This is useful to let tickets, source code comments and other documents refer to specifications or let specifications refer to each other. A Specman URL is copied to the clipboard by an appropriate item in a step's context menu and can be pasted wherever needed. Following such a URL opens the file and scrolls to the step. There are two terms to understand:
+
+Specman URL:: A piece of text starting with `specman://`, which addresses a Specman file and optionally a step in it. In this chapter, just called _URL_.
+
+Alias:: A short name you give to a Specman file. It stands for the file in URLs instead of its path. Aliases are part of your user settings, not of the diagram.
+
+A Specman URL looks like this:
+
+----
+specman://uc720,2d34f85e,1.3
+----
+
+`uc720` is the alias of the file, `2d34f85e` the ID of the step, and `1.3` the number the step had when the URL was copied. Specman finds the step by its ID, so a URL keeps working when the step is moved or renumbered. The number is merely informative. The ID and number can be omitted. A URL without them addresses the file only.
+
+Without an alias, the file is addressed by its path, e.g.
+
+----
+specman:///C:/project/UC-720.nsd,2d34f85e,1.3
+----
+
+### Copying a URL
+Right-click the number label of a step and choose _Copy Link_ from the context menu. The URL is in the clipboard now, ready to be pasted into a ticket, a source code comment or the URL field of a hyperlink in the text of another diagram (see <<_hyperlinks,Hyperlinks>>). The menu item is grayed out as long as the diagram hasn't been saved, because there is no file to address yet.
+
+The first time you copy a URL to a file, Specman asks for an alias for it.
+
+image::link-alias.png[Alias Dialog]
+
+The reason for aliases: a path is different on every computer, so a URL with a path only works for the one who copied it. An alias is the same for everybody. Each team member tells Specman once, on their own computer, which file the alias stands for, and the same URL works for all of them.
+
+The dialog shows the resulting URL while you type. An alias consists of letters, digits, underscores and hyphens, has up to 20 characters, and must be unique regardless of letter case. Specman proposes an alias if the aliases of other files in the same directory show a pattern which fits the new file name. E.g. if you have `uc730` for `CRM UC-730 Delete Customer.nsd`, it proposes `uc135` for `CRM UC-135 Send Newsletter.nsd`. If you leave the alias empty, URLs to this file contain its path. Both an alias and an empty alias are remembered, so the dialog doesn't come up again for this file.
+
+_File_ > _Aliases..._ lists the aliases you have so far, together with their files. A double click on an alias edits it, a double click on a file chooses another file, which you need when a file has moved or was renamed. Files which don't exist any more are marked as missing. _Delete_ removes the selected row, after which Specman asks for an alias again the next time you copy a URL in that file. Nothing is stored before you save, and saving is only possible while the aliases are unique. The list can also be opened with the _All..._ button of the alias dialog.
+
+### Following a URL
+There are three ways to follow a URL:
+
+* _File_ > _Open Link from Clipboard_ (Ctrl+L) follows the URL in the clipboard. Spaces around the URL and a slash at its end, which some tools add when copying, are ignored.
+
+* Ctrl+click on a hyperlink in a step text whose target is a Specman URL, see <<_hyperlinks,Hyperlinks>>.
+
+* Starting Specman with the URL as its only argument opens the file and scrolls to the step. This is the hook for registering the `specman://` protocol with the operating system, so a click on a URL in any other tool starts Specman. Specman doesn't register itself.
+
+If the file of the URL is the one shown in the window, Specman scrolls to the addressed step, and Ctrl+Alt+Left takes you back to where you came from, as with step links. If the URL refers to a different file, it depends on the way you follow it: Ctrl+L loads the file into the window, after asking whether to save unsaved changes, while a hyperlink opens it in a new Specman window, because a window shows only one diagram.
+
+If the alias of a URL is unknown in your user settings, Specman asks which file it stands for, and remembers the answer. A file chooser opens, with a file preselected if the other existing aliases allow a suggestion.
+
+NOTE: Specman doesn't notice if a file is already open in another Specman window. A URL to it opens it a second time.
+
+### Command line URL resolution
+Specman's command-line interface provides the operation `--resolve-link` for two reasons:
+
+* When the specification work is assisted by AI agents (see <<aiassisted,AI-assisted specification>>), they might need to follow URLs in the specification for a complete understanding. The resolver locates the file which belongs to the alias of a URL.
+
+* As step numbers in URLs go out of date when the addressed step changes its position in the diagram, the resolver checks the validity of a URL and reports the current step number.
+
+The resolver is started with the same launchers as the sanitizer (see <<_the_sanitizer,The sanitizer>>), e.g.
+
+----
+specman --resolve-link <URL> <URL> ...
+----
+
+Without URLs as arguments it reads them from standard input, one per line, so other tools can feed it.
+
+The output has exactly one line per URL, in the same order. Each line consists of three fields, separated by a tab (so it can be pasted into a spreadsheet): the status, the file the URL leads to, and a detail. The status is
+
+* `OK`: the URL is fine. The detail is the URL, with the current step number.
+
+* `SANITIZED`: the URL leads to its step, but the number in the URL is out of date. The detail is the URL with the current number, i.e. what the URL should say.
+
+* `ERROR`: the URL can't be followed, and the detail tells why, e.g. it is no Specman URL, its alias is unknown, the file or the step doesn't exist.
+
+The exit code is 1 if at least one line is an `ERROR`, otherwise 0. Aliases are taken from the settings of the user who runs the command.
 
 [#aiassisted]
 ## AI-assisted specification
