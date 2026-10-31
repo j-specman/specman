@@ -57,7 +57,7 @@ PlantUML
 - Copy / Cut / Paste /Drag&Drop von Schritten mit PlantUML-Images prüfen. Sollte ganz normal funktionieren
 - Erweiterung Manual
 - Suche berücksichtigt (zunächst) keine PlantUML-Quelltexte
-
+- Nice-to-have: Quelltexteditor mit Zeilennummern versehen.
 
 Specman URLs:
 x Custom URL Scheme, z.B. specman://uc730,2d34f85e,1.3
