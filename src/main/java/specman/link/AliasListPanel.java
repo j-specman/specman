@@ -3,6 +3,7 @@ package specman.link;
 import com.formdev.flatlaf.util.UIScale;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
+import specman.graphics.Styles;
 import specman.i18n.IButton;
 import specman.i18n.IFileNameExtensionFilter;
 import specman.i18n.IHeaderPanel;
@@ -61,7 +62,7 @@ public class AliasListPanel extends JPanel {
   // Typical aliases are short, and the width is measured in the widest character
   private static final int ALIAS_COLUMN_CHARACTERS = 9;
   private static final int HEADER_ICON_AND_MARGINS_WIDTH = 40;
-  private static final Color PROBLEM_COLOR = AliasPanel.PROBLEM_COLOR;
+  private static final Color PROBLEM_COLOR = Styles.PROBLEM_COLOR;
   // Keeps the row of the problem label at its height while there is no problem, so the dialog doesn't have to grow
   private static final String NO_PROBLEM_TEXT = " ";
 

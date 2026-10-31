@@ -3,8 +3,10 @@ package specman.editarea.plantuml;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import specman.graphics.Styles;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -16,6 +18,16 @@ public class PlantUmlRenderer {
   private static final String PRELUDE = "\n!pragma layout elk"
       + "\nskinparam defaultFontName \"" + Styles.labelFont.getFamily() + "\""
       + "\nskinparam monospacedFontName \"Courier Prime\"";
+
+  /** Syntax errors do not throw - PlantUML renders them as an error graphic. */
+  public FlatSVGIcon renderDiagram(String plantUmlSource) {
+    try {
+      return new FlatSVGIcon(new ByteArrayInputStream(renderSvg(plantUmlSource)));
+    }
+    catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
 
   /** Syntax errors do not throw - PlantUML renders them as an error graphic. */
   public byte[] renderSvg(String plantUmlSource) {

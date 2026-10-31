@@ -4,7 +4,7 @@ import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.Specman;
 import specman.editarea.EditArea;
-import specman.editarea.ImageEditArea;
+import specman.editarea.plantuml.PlantUmlImageEditArea;
 import specman.editarea.EditArea;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.metatag.stepnumberlabel.StepnumberLabel.LabelStructure;
@@ -68,6 +68,14 @@ public class UDBL {
     if (!Objects.equals(undoColor, color)) {
       label.setBorderSourceColor(color);
       addEdit(new UndoableSetLabelBorderSourceColor(label, undoColor));
+    }
+  }
+
+  public static void setPlantUmlSourceUDBL(PlantUmlImageEditArea diagram, String source) {
+    String undoSource = diagram.getSource();
+    if (!Objects.equals(undoSource, source)) {
+      diagram.setSource(source);
+      addEdit(new UndoableSetProperty<>(undoSource, diagram::setSource, diagram::getSource));
     }
   }
 

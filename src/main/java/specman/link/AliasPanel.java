@@ -3,6 +3,7 @@ package specman.link;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import net.atlanticbb.tantlinger.ui.UIUtils;
+import specman.graphics.Styles;
 import specman.i18n.IButton;
 import specman.i18n.IHeaderPanel;
 import specman.i18n.ILabel;
@@ -46,7 +47,6 @@ public class AliasPanel extends JPanel {
   public static final String CANCEL_BUTTON = "link.alias.cancel";
 
   static final Icon ICON = UIUtils.getIcon("resources/images/x32/", "link3.png");
-  static final Color PROBLEM_COLOR = new Color(160, 0, 0);
   private static final Color LINK_COLOR = new Color(0, 102, 204);
   private static final int ALIAS_FIELD_COLUMNS = 20;
   private static final int PREVIEW_FIELD_COLUMNS = 40;
@@ -79,7 +79,7 @@ public class AliasPanel extends JPanel {
     previewField.setEditable(false);
     makeLookLikeLabel(previewField);
     problemLabel.setName(PROBLEM_LABEL);
-    problemLabel.setForeground(PROBLEM_COLOR);
+    problemLabel.setForeground(Styles.PROBLEM_COLOR);
     allAliases.setName(ALL_ALIASES_BUTTON);
     makeLookLikeWebLink(allAliases);
     allAliases.addActionListener(e -> showAllAliases());

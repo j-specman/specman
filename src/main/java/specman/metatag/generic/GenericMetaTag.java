@@ -3,6 +3,7 @@ package specman.metatag.generic;
 import specman.editarea.InteractiveStepFragment;
 import specman.metatag.AbstractMetaTag;
 import specman.metatag.MetaLabelLayout;
+import specman.util.NoteEditorPopup;
 import specman.metatag.MetaTagPanel;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.pdf.HangingTabShape;
@@ -136,7 +137,7 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
   /** Opens the freetext editor with the given part of the text selected, e.g. a search hit. */
   public void editFreetext(int selectionStart, int selectionEnd) {
     if (canEditFreetext()) {
-      FreetextEditorPopup popup = createFreetextEditor();
+      NoteEditorPopup popup = createFreetextEditor();
       popup.select(selectionStart, selectionEnd);
       popup.showNear(this);
     }
@@ -146,12 +147,12 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     return config.allowsFreetext() && !deleted;
   }
 
-  private FreetextEditorPopup createFreetextEditor() {
+  private NoteEditorPopup createFreetextEditor() {
     hideFreetextFeedback();
     // Without this, the tooltip would pop up on top of the editor as soon as the mouse (still
     // resting on the tag after the click) moves a little.
     setToolTipText(null);
-    return new FreetextEditorPopup(getFont(), freetext, this::commitFreetext, this::updateTooltip);
+    return new NoteEditorPopup(getFont(), freetext, this::commitFreetext, this::updateTooltip);
   }
 
   /** Changes the freetext like the editor does when it commits, i.e. as an undoable edit. */

@@ -67,6 +67,7 @@ public class Styles {
     public static final Color Schriftfarbe_Geloescht = Color.LIGHT_GRAY;
     public static final Color Hintergrundfarbe_Deviderbar = Color.LIGHT_GRAY;
     public static final Color DIAGRAMM_LINE_COLOR = Color.black;
+    public static final Color PROBLEM_COLOR = new Color(160, 0, 0);
     public static final Color TEXT_BACKGROUND_COLOR_STANDARD = new Color(255, 255, 255, 0);
     public static final Color BACKGROUND_COLOR_STANDARD = Color.white;
     public static final Color SCHRITTNUMMER_VORDERGRUNDFARBE = BACKGROUND_COLOR_STANDARD;

@@ -417,6 +417,12 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<I
     }
   }
 
+  /** Subclasses call this after their picture changed, so it is scaled and shown anew. */
+  protected void imageChanged() {
+    scaledIcon = null;
+    adaptImageSize();
+  }
+
   @Override
   /** On component resize we scale the image if necessary, depending on the available width.
    * If the component width exceeds the image width, we display the image in full size.
