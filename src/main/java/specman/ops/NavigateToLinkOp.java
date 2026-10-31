@@ -28,12 +28,12 @@ public class NavigateToLinkOp extends AbstractSpecmanOp {
 
   /** Navigates to the link in the clipboard. */
   public void run() {
-    navigateTo(parseOrNull(clipboardText()), "msg.link.clipboard.invalid");
+    navigateTo(SpecmanLink.parseOrNull(clipboardText()), "msg.link.clipboard.invalid");
   }
 
   /** Navigates to the link the user opened from outside, e.g. as the startup argument. */
   public void run(String linkText) {
-    navigateTo(parseOrNull(linkText), "msg.link.invalid");
+    navigateTo(SpecmanLink.parseOrNull(linkText), "msg.link.invalid");
   }
 
   private void navigateTo(Reference reference, String invalidLinkMessageKey) {
@@ -47,6 +47,10 @@ public class NavigateToLinkOp extends AbstractSpecmanOp {
     }
     if (!file.isFile()) {
       fehler("msg.link.file.missing", file.getPath());
+      return;
+    }
+    if (isOpen(file) && !reference.hasStep()) {
+      context.showToast(i18n("msg.link.file.already.open"));
       return;
     }
     if (!isOpen(file)) {
@@ -70,18 +74,6 @@ public class NavigateToLinkOp extends AbstractSpecmanOp {
     }
   }
 
-  private static Reference parseOrNull(String text) {
-    if (text == null) {
-      return null;
-    }
-    try {
-      return SpecmanLink.parse(text);
-    }
-    catch (IllegalArgumentException e) {
-      return null;
-    }
-  }
-
   /** The file the link points to. For an alias nobody knows, the user is asked which file it stands for, with the
    * file the existing aliases hint at preselected, and the answer is remembered. Null if the user doesn't tell. */
   private File fileOf(Reference reference) {
@@ -98,11 +90,6 @@ public class NavigateToLinkOp extends AbstractSpecmanOp {
       LinkAliases.assign(chosen, reference.alias());
     }
     return chosen;
-  }
-
-  private boolean isOpen(File file) {
-    return getDiagrammDatei() != null
-      && LinkAliases.absolutePath(getDiagrammDatei()).equals(LinkAliases.absolutePath(file));
   }
 
   private void navigateToStep(Reference reference) {

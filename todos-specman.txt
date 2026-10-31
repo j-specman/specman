@@ -55,12 +55,6 @@ x Einfache Navigation über einen Link
     x Schritt wird über die ID adressiert, nicht über die Schrittnummer, weil die sich ja ändern kann
     x Toast-Feedback, wenn die Schrittnummer in der URL nicht mehr mit der ID übereinstimmt
     x Bei einem verschobenen Schritt trägt der Zielschritt die ID - das ist genau richtig.
-- Integration der Navigation ins Betriebssystem kommt später. Grundprinzip
-  - Unter Windows: Eintragen des specman-Protokolls in der Windows Registry
-  - Betriebssystem startet auf dieser Basis Specman, danach wie oben beschrieben
-  - Besonderheit: Wenn schon eine andere Specman-Instanz läuft, das die Datei geöffnet hat, dann wird die Datei nicht nochmal geöffnet,
-    - Stattdessen Fokus auf das bereits geöffnete Fenster setzen und zum ggf. in der URL adressierten Schritt navigieren
-    - Das ist anspruchsvoll, weil es Interprozess-Kommunikation erfordert.
 x Nice to have: Dialog für Alias-Vergabe schlägt initial einen Alias vor, wenn sich aus den bereits in den User Preferences abgelegten Aliasse ein Muster ablesen lässt, das auch auf die aktuelle Datei anwendbar ist
   x Beispiel: es liegt bereits vor: Alias "uc730" für Datei "C:/project/BALI UC-730 Kundendaten pflegen.nsd"
   x Dann sind alle Zeichen des Alias von links nach rechts im Präfix der Datei enthalten, und ergeben sich durch Auslassung bestimmter Zeichenfolgen.
@@ -77,7 +71,16 @@ x Nice to have: Dialog für eine on-the-fly Dateizuordnung schlägt Datei vor, w
     x Dann im Verzeichnis nach Dateien suchen, die den regulären Ausdruck erfüllen, der sich aus dem Alias des Links ergibt
     x Ganz genaues Verfahren wird im Rahmen der Umsetzung geklärt
   x Details könnten tricky sein, deswegen nicht Teil der ersten Ausbaustufe
-- Nice to have: Nutzung der Links auch als Hyperlinks in Schritttexten, um von einer Spezifikation auf eine andere zu verweisen.
+x Nice to have: Nutzung der Links auch als Hyperlinks in Schritttexten, um von einer Spezifikation auf eine andere zu verweisen.
+  x STRG+Klick auf Hyperlink; Specman-Link auf andere Datei startet neue Instanz (Fenster kommt in den Vordergrund), auf die offene Datei navigiert im Fenster
+  x Web- und Mail-Links (http, https, mailto) öffnen im Standardprogramm, andere Schemata werden abgelehnt
+  - Tests fehlen noch
+- Integration der Navigation ins Betriebssystem kommt später. Grundprinzip
+  - Unter Windows: Eintragen des specman-Protokolls in der Windows Registry
+  - Betriebssystem startet auf dieser Basis Specman, danach wie oben beschrieben
+  - Besonderheit: Wenn schon eine andere Specman-Instanz läuft, das die Datei geöffnet hat, dann wird die Datei nicht nochmal geöffnet,
+    - Stattdessen Fokus auf das bereits geöffnete Fenster setzen und zum ggf. in der URL adressierten Schritt navigieren
+    - Das ist anspruchsvoll, weil es Interprozess-Kommunikation erfordert.
 
 
 Rechtschreibprüfung

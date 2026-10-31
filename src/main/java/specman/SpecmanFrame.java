@@ -30,6 +30,7 @@ public class SpecmanFrame extends JFrame {
     Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
     setLocation((screen.width - INITIAL_WIDTH) / 2, (screen.height - INITIAL_HEIGHT) / 2);
     setVisible(true);
+    bringToFront();
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     specman.installGlassPane();
     addWindowListener(new WindowAdapter() {
@@ -41,5 +42,14 @@ public class SpecmanFrame extends JFrame {
         }
       }
     });
+  }
+
+  /** Windows doesn't let a process which another one started take the foreground, so a Specman instance started for
+   * a link would appear behind the window the user clicked in. Being always on top for a moment gets around that. */
+  private void bringToFront() {
+    setAlwaysOnTop(true);
+    toFront();
+    requestFocus();
+    setAlwaysOnTop(false);
   }
 }

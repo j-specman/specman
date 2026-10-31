@@ -90,4 +90,6 @@ public interface EditorI extends FocusListener {
   Set<String> queryMetaTagConfigsInUse();
   void openMetaTagConfigs();
   void showToast(String message);
+  /** Follows the target of a hyperlink in a text, e.g. a Specman link, a web address or a mail address. */
+  void followHyperlink(String target);
 }

@@ -36,6 +36,10 @@ public interface SpecmanOpContext extends EditorI {
   /** Asks the user which file the alias of a link stands for, null if the user doesn't choose any.
    * @param suggestedFile the file the user is offered as the probable answer, null if there is none */
   File chooseFileForAlias(String alias, File suggestedFile);
+  /** Starts another Specman instance, which follows the link. */
+  void openInNewInstance(String link);
+  /** Hands the web or mail address to the system, which opens it with the user's browser or mail program. */
+  void openInBrowser(String address);
   void exit();
   void openSettings();
   void openAliases();

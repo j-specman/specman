@@ -10,6 +10,7 @@ import specman.i18n.IFileNameExtensionFilter;
 import specman.i18n.Messages;
 import specman.link.AliasListDialog;
 import specman.link.AliasListPanel;
+import specman.link.SpecmanInstanceStarter;
 import specman.link.SpecmanLink;
 import specman.menubar.SpecmanMenuBar;
 import specman.draganddrop.DragMouseAdapter;
@@ -50,6 +51,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.event.FocusEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -658,6 +661,31 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	@Override
 	public void navigateToLinkInClipboard() {
 		new NavigateToLinkOp(this).run();
+	}
+
+	@Override
+	public void followHyperlink(String target) {
+		new FollowHyperlinkOp(this).run(target);
+	}
+
+	@Override
+	public void openInNewInstance(String link) {
+		try {
+			SpecmanInstanceStarter.ofRunningInstance().start(link);
+		}
+		catch (IOException e) {
+			fehler("msg.hyperlink.instance.failed", e.getMessage());
+		}
+	}
+
+	@Override
+	public void openInBrowser(String address) {
+		try {
+			Desktop.getDesktop().browse(URI.create(address));
+		}
+		catch (IOException | IllegalArgumentException | UnsupportedOperationException e) {
+			fehler("msg.hyperlink.browser.failed", address);
+		}
 	}
 
 	@Override

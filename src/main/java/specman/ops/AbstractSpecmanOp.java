@@ -1,5 +1,9 @@
 package specman.ops;
 
+import specman.link.LinkAliases;
+
+import java.io.File;
+
 /**
  * Base class for functionality extracted from the {@link specman.Specman} monolith.
  * <p>
@@ -19,4 +23,9 @@ public abstract class AbstractSpecmanOp implements SpecmanOpContextMixin {
   @Override
   public SpecmanOpContext context() { return context; }
 
+  /** @return whether the file is the one shown right now, however its path is written */
+  protected boolean isOpen(File file) {
+    return getDiagrammDatei() != null
+      && LinkAliases.absolutePath(getDiagrammDatei()).equals(LinkAliases.absolutePath(file));
+  }
 }

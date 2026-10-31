@@ -51,6 +51,19 @@ public final class SpecmanLink {
     return new Reference(file, alias, partOrNull(parts, 1), partOrNull(parts, 2));
   }
 
+  /** @return what the link points to, null if the text isn't a link, see {@link #parse(String)} */
+  public static Reference parseOrNull(String text) {
+    if (text == null) {
+      return null;
+    }
+    try {
+      return parse(text);
+    }
+    catch (IllegalArgumentException e) {
+      return null;
+    }
+  }
+
   private static String partOrNull(String[] parts, int index) {
     return index < parts.length && !parts[index].isBlank() ? parts[index].strip() : null;
   }

@@ -5,6 +5,7 @@ import specman.ChangeSet;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.html.CSS;
+import javax.swing.text.html.HTML;
 
 import static specman.ChangeSet.STEPNUMBER_LINK_COLOR;
 
@@ -54,6 +55,19 @@ public class WrappedDocumentUtil {
   public static boolean stepnumberLinkStyleSet(WrappedElement element) {
     return element != null &&
       (stepnumberLinkNormalStyleSet(element) || stepnumberLinkChangedStyleSet(element));
+  }
+
+  /** @return the target of the hyperlink the element is part of, null if it isn't part of a hyperlink */
+  public static String hyperlinkTarget(WrappedElement element) {
+    if (element == null) {
+      return null;
+    }
+    Object anchor = element.getAttributes().getAttribute(HTML.Tag.A);
+    if (!(anchor instanceof AttributeSet)) {
+      return null;
+    }
+    Object target = ((AttributeSet) anchor).getAttribute(HTML.Attribute.HREF);
+    return target != null ? target.toString() : null;
   }
 
   static String getBackgroundColorFromElement(WrappedElement element) {

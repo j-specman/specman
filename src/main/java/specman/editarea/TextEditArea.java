@@ -110,9 +110,19 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
                 if (stepnumberLinkStyleSetAt(getWrappedCaretPosition())) {
                     scrollToStepnumber();
                 }
+                else {
+                    followHyperlinkAt(e.getPoint());
+                }
             }
             }
         });
+    }
+
+    private void followHyperlinkAt(Point point) {
+        String target = hyperlinkTarget(getWrappedDocument().getCharacterElement(viewToModel2D(point)));
+        if (target != null) {
+            editor().followHyperlink(target);
+        }
     }
 
     private void addMouseMotionListener() {
@@ -143,7 +153,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
         EditorI editor = editor();
         Cursor cursorToUse;
-        if (editor.isKeyPressed(KeyEvent.VK_CONTROL) && stepnumberLinkStyleSet(hoveredElement)) {
+        if (editor.isKeyPressed(KeyEvent.VK_CONTROL) && isFollowableLink(hoveredElement)) {
             cursorToUse = BreakCatchScrollMouseAdapter.SCROLL_CURSOR;
         } else {
             cursorToUse = Cursor.getDefaultCursor();
@@ -158,10 +168,14 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     @Override
     public String getToolTipText() {
-        if (stepnumberLinkStyleSet(hoveredElement)) {
+        if (isFollowableLink(hoveredElement)) {
             return BreakCatchScrollMouseAdapter.SCROLL_TOOLTIP;
         }
         return super.getToolTipText();
+    }
+
+    private boolean isFollowableLink(WrappedElement element) {
+        return stepnumberLinkStyleSet(element) || hyperlinkTarget(element) != null;
     }
 
     private void setStyleUDBL(MutableAttributeSet attr, Color backgroundColor, boolean editable) {
