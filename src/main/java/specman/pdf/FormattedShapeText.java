@@ -10,6 +10,7 @@ import com.itextpdf.layout.font.FontInfo;
 import specman.editarea.TextEditArea;
 import specman.graphics.Styles;
 
+import static specman.editarea.document.WrappedDocumentUtil.hyperlinkTarget;
 import static specman.util.ObjectUtils.nvl;
 
 import javax.swing.text.*;
@@ -24,6 +25,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FormattedShapeText extends AbstractShapeText {
+
+  /** Hyperlinks look like in the editor: blue and underlined. */
+  private static final Color HYPERLINK_COLOR = Color.BLUE;
 
   public static FontProvider fontProvider;
 
@@ -76,9 +80,10 @@ public class FormattedShapeText extends AbstractShapeText {
 
       Element charElement = swingDoc.getCharacterElement(offset);
       AttributeSet attrs = charElement.getAttributes();
+      boolean isHyperlink = hyperlinkTarget(attrs) != null;
       Font resolvedFont = getResolvedFont(offset);
       float fontSize = resolvedFont.getSize2D();
-      Color fg = StyleConstants.getForeground(attrs);
+      Color fg = isHyperlink ? HYPERLINK_COLOR : StyleConstants.getForeground(attrs);
 
       PdfFont pdfFont = resolvePdfFont(resolvedFont);
 
@@ -95,7 +100,7 @@ public class FormattedShapeText extends AbstractShapeText {
       pdfCanvas.setTextMatrix(pdfX, pdfY);
       pdfCanvas.showText(ch);
 
-      if (StyleConstants.isUnderline(attrs)) {
+      if (isHyperlink || StyleConstants.isUnderline(attrs)) {
         float decorY = pdfY - (lm.getUnderlineOffset() + lm.getDescent() * 0.5f) * swing2pdfScaleFactor;
         float thickness = Math.max(lm.getUnderlineThickness() * swing2pdfScaleFactor, 0.5f);
         collectDecoration(underlines, pdfX, charWidth, decorY, thickness, fg);

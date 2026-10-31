@@ -440,9 +440,11 @@ public class SpecmanFT extends Specman {
    * pass is not enough: The height of a text depends on the width it has been given, which in turn
    * changes the height of its parents. Each pass settles roughly one nesting level, so we lay out
    * until no bounds change anymore. The layout managers must be invalidated for every pass, otherwise
-   * they keep working with their cached preferred sizes.
+   * they keep working with their cached preferred sizes. Pending events are processed first, as Specman defers
+   * parts of the relayout (e.g. after a text was set) and the layout must not run in parallel to them.
    */
   public void layoutComponents() {
+    waitForEventsProcessed();
     setSize(LAYOUT_SIZE);
     int previousBoundsHash;
     int boundsHash = 0;
@@ -585,7 +587,6 @@ public class SpecmanFT extends Specman {
   }
 
   private void pressMouseOnFirstCharacter(TextEditArea text, int modifiers) {
-    waitForEventsProcessed();
     layoutComponents();
     try {
       Rectangle2D firstCharacter = text.modelToView2D(VISIBLE_TEXT_START);

@@ -59,10 +59,12 @@ public class WrappedDocumentUtil {
 
   /** @return the target of the hyperlink the element is part of, null if it isn't part of a hyperlink */
   public static String hyperlinkTarget(WrappedElement element) {
-    if (element == null) {
-      return null;
-    }
-    Object anchor = element.getAttributes().getAttribute(HTML.Tag.A);
+    return element == null ? null : hyperlinkTarget(element.getAttributes());
+  }
+
+  /** @return the target of the hyperlink the attributes of a character belong to, null if it isn't part of a hyperlink */
+  public static String hyperlinkTarget(AttributeSet attributes) {
+    Object anchor = attributes.getAttribute(HTML.Tag.A);
     if (!(anchor instanceof AttributeSet)) {
       return null;
     }

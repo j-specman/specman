@@ -139,7 +139,7 @@ Formatting is done with the formatting toolbar above the diagram and the menus _
 
 Pasting with Ctrl+V depends on where the content comes from:
 
-* Text copied within Specman keeps its formatting, including step references and tables.
+* Text copied within Specman keeps its formatting, including step links and tables.
 * Text from other applications, like Word or a browser, is reduced to plain text. Formatting is dropped.
 * A pure image in the clipboard, e.g. a screenshot, becomes an image at the caret. If the clipboard contains text as well, the text wins.
 
@@ -167,14 +167,31 @@ The image button of the formatting toolbar opens a file chooser for JPG, PNG, GI
 
 Clicking an image selects it. Delete or Backspace removes it, and Ctrl+C or Ctrl+X copies or cuts it. To continue typing below the image, press Enter. Dragging the narrow bar at the right edge of the image changes its size. An image is never wider than the diagram, and its size follows the zoom factor.
 
-### Step references
-Step references are links to other steps within the text, like "see step 2.3". They are inserted with the step reference button of the formatting toolbar, or by _Insert_ > _Link to Stepnumber..._. The dialog lists all steps by number and the beginning of their text. A filter field narrows the list, and a click on an entry inserts the reference at the caret.
+### Step links
+Step links are links to other steps within the text, like "see step 2.3". They are inserted with the step link button of the formatting toolbar, or by _Insert_ > _Link to Stepnumber..._. The dialog lists all steps by number and the beginning of their text. A filter field narrows the list, and a click on an entry inserts the link at the caret.
 
-A step reference is displayed as the step number on a light gray background. It behaves like a single character: you cannot type into it, the cursor jumps over it, and Backspace removes it entirely. If it needs to point somewhere else, remove it and insert a new one.
+A step link is displayed as the step number on a light gray background. It behaves like a single character: you cannot type into it, the cursor jumps over it, and Backspace removes it entirely. If it needs to point somewhere else, remove it and insert a new one.
 
-The reference number follows its step automatically when the numbering changes. If the step is deleted, the reference remains with a question mark behind the number, e.g. _2.3?_. Deleting a referenced step causes a confirmation message to appear.
+The number in a step link follows its step automatically when the numbering changes. If the step is deleted, the link remains with a question mark behind the number, e.g. _2.3?_. Deleting a step which is the target of a link causes a confirmation message to appear.
 
-Ctrl+click on a reference scrolls to the step it points to. Ctrl+Alt+Left goes back to where you came from, and Ctrl+Alt+Right forward again.
+Ctrl+click on a step link scrolls to the step it points to. Ctrl+Alt+Left goes back to where you came from, and Ctrl+Alt+Right forward again.
+
+### Hyperlinks
+A hyperlink is text which leads somewhere else: to a web page, a mail address or another Specman document. Hyperlinks are displayed in blue and underlined. For links to steps within a document, <<_step_links,step links>> are the better choice, as they follow the numbering.
+
+_Insert_ > _Hyperlink..._ or the hyperlink button of the formatting toolbar opens a dialog for the link text and the URL. Selecting text before opening the dialog makes the text the link text. To change a link later, put the caret into it and choose _Format_ > _Hyperlink Properties..._, which opens the same dialog.
+
+Ctrl+click follows a link. While Ctrl is pressed, the mouse cursor over a link turns into a hand, and a tooltip says what to do. A click without Ctrl just places the caret, so link texts can be edited like any other text.
+
+The following link types are supported:
+
+* Links of type `http`, `https`, and `mailto` are handed to the system, which opens them in the default browser or mail program.
+
+* `specman://` links point to another Specman document, or to a step in it. This is Specman's own URL scheme. How such links are created and followed is described in chapter <<speclinks,Links to other specifications>>.
+
+* Everything else, e.g. `file:` or `ftp:`, is refused with a message. Following a link in a document must not be able to start programs.
+
+The PDF export draws hyperlinks in blue and underlined as well. They are not clickable there.
 
 [#steprearranging]
 ## Moving, copying and deleting steps
@@ -182,19 +199,19 @@ Ctrl+click on a reference scrolls to the step it points to. Ctrl+Alt+Left goes b
 Once a diagram is populated with steps, they can be rearranged, copied and deleted. All these operations are available through a step's number label at its upper left corner. Right-clicking the step number brings up a context menu with a number of typical edit operations like Cut / Copy / Paste. Depending on the type of step, there may be more operations available, including tagging operations as described in chapter <<_meta_tags,Meta tags>>.
 
 ### Moving steps
-To move a step, press the mouse button on its step number, keep it pressed, move the mouse to the new place and release it. As when creating steps by drag & drop, a half-transparent gray insertion bar shows where the step will be placed. The step takes its entire content with it, nested steps included, and gets a new step number. It stays the same step, so references to it stay valid and the displayed step number is automatically updated.
+To move a step, press the mouse button on its step number, keep it pressed, move the mouse to the new place and release it. As when creating steps by drag & drop, a half-transparent gray insertion bar shows where the step will be placed. The step takes its entire content with it, nested steps included, and gets a new step number. It stays the same step, so links to it stay valid and the displayed step number is automatically updated.
 
 Some steps cannot be dragged: the only step of a sequence (because a sequence must not be empty), steps marked as deleted, and the placeholders which change mode leaves behind at the old position of a moved step. A step cannot be dropped into itself either.
 
 In change mode, a move is tracked as a move, see <<changetracking,Change Tracking>>.
 
 ### Deleting steps
-_Delete_ from the step number's context menu removes the step including everything inside. The last step of a sequence cannot be deleted. If the step is referenced from somewhere else, Specman asks for confirmation, and the references are marked as defective once the step is actually removed, see <<_step_references,Step references>>. In change mode, the step is marked as deleted instead of removed, see <<changetracking,Change Tracking>>. For catch steps, see above.
+_Delete_ from the step number's context menu removes the step including everything inside. The last step of a sequence cannot be deleted. If the step is the target of a link, Specman asks for confirmation, and the links are marked as defective once the step is actually removed, see <<_step_links,Step links>>. In change mode, the step is marked as deleted instead of removed, see <<changetracking,Change Tracking>>. For catch steps, see above.
 
 ### Copy, cut and paste
 _Copy_ puts the step including everything inside onto the clipboard. _Cut_ does the same and deletes the step afterwards, with the rules of _Delete_ above. _Paste_ inserts the clipboard content as a new step directly below the step whose menu was used, in the same sequence. For a structured step this means below the entire step, not inside it. The items are disabled for steps marked as deleted and for catch steps.
 
-Cutting is not the same as moving: the references to the cut step become defective, and in change mode it shows up as a deletion at the old and an addition at the new position, instead of one move. If the only reason for cutting is a different place within the same diagram, drag & drop is the better choice. It is also the safer one for steps containing break steps. If the catch sequence of such a break step is not part of the cut step itself, cutting removes the catch sequence with all its handling steps. Specman warns before doing so.
+Cutting is not the same as moving: the links to the cut step become defective, and in change mode it shows up as a deletion at the old and an addition at the new position, instead of one move. If the only reason for cutting is a different place within the same diagram, drag & drop is the better choice. It is also the safer one for steps containing break steps. If the catch sequence of such a break step is not part of the cut step itself, cutting removes the catch sequence with all its handling steps. Specman warns before doing so.
 
 Pasting works across diagrams, and also between two Specman windows. What happens to the change marks of the pasted step depends on where it comes from:
 
@@ -384,7 +401,7 @@ Loading replaces the entire diagram, including the undo history. Undo does not r
 The sanitizer checks a file and repairs what can be repaired automatically. It is a command-line operation of Specman: it runs without a window and without a running Specman, and usually only takes a second to check and repair a file. There are two reasons for the sanitizer to exist:
 
 * An AI agent is not a deterministic generator, so it may produce a file that does not conform to the grammar. The sanitizer checks the file syntax and important consistency rules, and gives the agent instant feedback to help it make corrections.
-* Some jobs in maintaining a specification file are complicated and error-prone for an AI agent, but trivial for Specman CLI. The most important one is the consistent renumbering of steps, together with the step references in the texts, whenever the structure of the diagram has changed. The sanitizer takes care of that, so the agent doesn't have to. Its output tells the agent which steps got which new numbers. So the agent can update its context for the next prompt without reading the entire specification again.
+* Some jobs in maintaining a specification file are complicated and error-prone for an AI agent, but trivial for Specman CLI. The most important one is the consistent renumbering of steps, together with the step links in the texts, whenever the structure of the diagram has changed. The sanitizer takes care of that, so the agent doesn't have to. Its output tells the agent which steps got which new numbers. So the agent can update its context for the next prompt without reading the entire specification again.
 
 Specman comes with a console launcher for such operations, called _Specman CLI_ here. The launcher depends on how Specman was installed:
 
@@ -395,8 +412,8 @@ Specman comes with a console launcher for such operations, called _Specman CLI_ 
 There are three possible results:
 
 * `OK`: the file is fine and untouched.
-* `SANITIZED` and a list of what has been done: the sanitizer changed the file in place. It renumbers the steps, adjusts step references in the texts accordingly, and regenerates the plain text renditions. The list names the old and the new number of every renumbered step, with its type and the beginning of its text, e.g. `1.2 -> 1.3 (simple) "The system checks whether ..."`. An agent may therefore insert a step with any temporary number such as 3.2.4.2b, and does not have to renumber anything. The list tells the agent which number the new step got.
-* `ERROR`, the line and column of the problem, and exit code 1: the file cannot be read or is inconsistent, e.g. because of a syntax error, duplicate step IDs, an invalid meta tag or a step reference to a step which doesn't exist. Specman prints this to the error stream, so an agent must read stderr as well.
+* `SANITIZED` and a list of what has been done: the sanitizer changed the file in place. It renumbers the steps, adjusts step links in the texts accordingly, and regenerates the plain text renditions. The list names the old and the new number of every renumbered step, with its type and the beginning of its text, e.g. `1.2 -> 1.3 (simple) "The system checks whether ..."`. An agent may therefore insert a step with any temporary number such as 3.2.4.2b, and does not have to renumber anything. The list tells the agent which number the new step got.
+* `ERROR`, the line and column of the problem, and exit code 1: the file cannot be read or is inconsistent, e.g. because of a syntax error, duplicate step IDs, an invalid meta tag or a step link to a step which doesn't exist. Specman prints this to the error stream, so an agent must read stderr as well.
 
 If the sanitizer changed the file, Specman loads it a second time, and the diagram may update twice.
 
