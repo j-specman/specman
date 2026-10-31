@@ -28,7 +28,7 @@ x Beim ersten Mal in einer Datei, erscheint ein Dialog mit dem Vorschlag, einen 
   x Ändern des Alias ist jederzeit möglich, dann ändert sich auch die URL
   x Hinweis, dass man die Aliasse jederzeit über Datei -> Alias ändern kann
   x Zuordnung von Alias zu Datei wird in den User Preferences abgelegt, wenn der User OK drückt
-  - Idee der Aliasse für Team-Kollaboration und Pfadunabhängigkeit der Links muss im Manual erklärt werden.
+  x Idee der Aliasse für Team-Kollaboration und Pfadunabhängigkeit der Links muss im Manual erklärt werden.
   x OK geht nur, wenn der Alias case-insensitiv eindeutig oder leer ist
   x Cancel sorgt dafür, dass nichts in der Zwischenablage landet und auch keine Zuordnung in den User Preferences abgelegt wird
   x Eine leere Eingabe wird ebenfalls in den User Preferences abgelegt, um zu verhindern, dass der Dialog bei jedem Öffnen der Datei wieder erscheint
@@ -78,7 +78,7 @@ x Nice to have: Nutzung der Links auch als Hyperlinks in Schritttexten, um von e
 x CLI-Operation --resolve-link für Agenten und Pipes (LinkResolver, ResolveLinkCLO, ResolveLinkTest)
   x Eine Ausgabezeile pro Link, TAB-getrennt: STATUS, Datei, Detail (vollständiger Link mit aktueller Schrittnummer bzw. Fehlererklärung)
   x OK / SANITIZED (Schrittnummer war falsch) / ERROR; Prüfung gegen die gespeicherte .nsd; Links als Argumente oder zeilenweise von stdin
-  - Im Manual dokumentieren (Kapitel zu Links bzw. "The sanitizer"), --separator erst bei konkretem Bedarf
+  x Im Manual dokumentieren (Kapitel zu Links bzw. "The sanitizer"), --separator erst bei konkretem Bedarf
 - Integration der Navigation ins Betriebssystem kommt später. Grundprinzip
   - Unter Windows: Eintragen des specman-Protokolls in der Windows Registry
   - Betriebssystem startet auf dieser Basis Specman, danach wie oben beschrieben
