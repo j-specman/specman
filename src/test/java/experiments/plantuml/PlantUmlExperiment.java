@@ -2,10 +2,7 @@ package experiments.plantuml;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.FileFormatOption;
-import net.sourceforge.plantuml.SourceStringReader;
-import specman.graphics.Styles;
+import specman.editarea.plantuml.PlantUmlRenderer;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -13,7 +10,6 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
@@ -22,11 +18,6 @@ import java.io.UncheckedIOException;
 public class PlantUmlExperiment extends JFrame {
   private static final int RENDER_DELAY_MS = 400;
   private static final double ZOOM_STEP = 1.1;
-  // Touching Styles registers Specman's shipped fonts with AWT, so PlantUML measures text with them and the
-  // SVG renderer finds them by name. labelFont is Roboto, the shipped sans-serif font.
-  private static final String PRELUDE = "\n!pragma layout elk"
-      + "\nskinparam defaultFontName \"" + Styles.labelFont.getFamily() + "\""
-      + "\nskinparam monospacedFontName \"Courier Prime\"";
   private static final String SAMPLE_SOURCE = """
       @startuml
       hide empty members
@@ -78,6 +69,7 @@ public class PlantUmlExperiment extends JFrame {
       @enduml
       """;
 
+  private final PlantUmlRenderer renderer = new PlantUmlRenderer();
   private final JTextArea sourceArea = new JTextArea(SAMPLE_SOURCE);
   private final JLabel diagramLabel = new JLabel();
   private final JLabel status = new JLabel(" ");
@@ -117,23 +109,10 @@ public class PlantUmlExperiment extends JFrame {
 
   private void render() {
     long start = System.nanoTime();
-    byte[] svg = renderSvg(sourceArea.getText());
+    byte[] svg = renderer.renderSvg(sourceArea.getText());
     diagramIcon = loadIcon(svg);
     applyZoom();
     status.setText("Rendered in " + (System.nanoTime() - start) / 1_000_000 + " ms, SVG " + svg.length + " bytes");
-  }
-
-  /** Syntax errors do not throw - PlantUML renders them as an error graphic. */
-  private byte[] renderSvg(String source) {
-    String withPragma = source.replaceFirst("@startuml[^\\n]*", "$0" + PRELUDE);
-    ByteArrayOutputStream svg = new ByteArrayOutputStream();
-    try {
-      new SourceStringReader(withPragma).outputImage(svg, new FileFormatOption(FileFormat.SVG));
-    }
-    catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-    return svg.toByteArray();
   }
 
   private FlatSVGIcon loadIcon(byte[] svg) {

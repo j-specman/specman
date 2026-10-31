@@ -11,9 +11,17 @@ import java.io.IOException;
 
 
 public class AddImageSpecmanOp extends AbstractSpecmanOp {
+  private static final String PLANTUML_HELLO_WORLD = "@startuml\nclass Hello\nclass World\nHello --> World\n@enduml\n";
 
   public AddImageSpecmanOp(SpecmanOpContext context) {
     super(context);
+  }
+
+  public void addPlantUml() {
+    TextEditArea lastFocused = getLastFocusedTextArea();
+    if (lastFocused != null) {
+      lastFocused.addPlantUmlImage(PLANTUML_HELLO_WORLD);
+    }
   }
 
   public void addViaFileChooser() {

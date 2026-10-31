@@ -454,6 +454,10 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         getParent().addImageUDBL(image, this);
     }
 
+    public void addPlantUmlImage(String plantUmlSource) {
+        getParent().addPlantUmlImageUDBL(plantUmlSource, this);
+    }
+
     public EditArea addTable(int columns, int rows) {
         return getParent().addTableUDBL(this, columns, rows);
     }
@@ -550,7 +554,7 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
     public boolean isTextArea() { return true; }
 
     @Override
-    public ImageEditArea asImageArea() {
+    public AbstractImageEditArea asImageArea() {
         return null;
     }
 

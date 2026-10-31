@@ -46,7 +46,7 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V002> extends Inte
   default boolean isTextArea() { return false; }
 
   default boolean isOrderedListItemArea() { return false; }
-  ImageEditArea asImageArea();
+  AbstractImageEditArea asImageArea();
 
   void setQuellStil(ChangeSet changeSet);
 

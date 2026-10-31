@@ -1,10 +1,10 @@
 package specman.editarea.focusmover;
 
-import specman.editarea.ImageEditArea;
+import specman.editarea.AbstractImageEditArea;
 
-public class CrossEditAreaFocusMoverFromImage extends AbstractCrossEditAreaFocusMover<ImageEditArea> {
+public class CrossEditAreaFocusMoverFromImage extends AbstractCrossEditAreaFocusMover<AbstractImageEditArea> {
 
-  public CrossEditAreaFocusMoverFromImage(ImageEditArea currentFocusArea) {
+  public CrossEditAreaFocusMoverFromImage(AbstractImageEditArea currentFocusArea) {
     super(currentFocusArea);
   }
 

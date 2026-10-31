@@ -623,7 +623,7 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
   @Override public Component asComponent() { return this; }
   @Override public String getPlainText() { return ""; }
   @Override public TextEditArea asTextArea() { return null; }
-  @Override public ImageEditArea asImageArea() { return null; }
+  @Override public AbstractImageEditArea asImageArea() { return null; }
   @Override public String getText() { return "table"; }
   @Override public void setEditDecorationIndentions(Indentions indentions) { /* Nothing to do */ }
   @Override public boolean isTableEditArea() { return true; }

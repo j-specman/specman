@@ -5,7 +5,7 @@ import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
-import specman.editarea.ImageEditArea;
+import specman.editarea.AbstractImageEditArea;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -15,9 +15,9 @@ import java.io.IOException;
 
 public class ShapeImage {
 
-  private ImageEditArea content;
+  private AbstractImageEditArea content;
 
-  public ShapeImage(ImageEditArea content) {
+  public ShapeImage(AbstractImageEditArea content) {
     this.content = content;
   }
 
@@ -26,7 +26,7 @@ public class ShapeImage {
       BufferedImage fullSizeImage = content.getFullSizeImage();
       float scaleFactor = content.getTotalScalePercent() * swing2pdfScaleFactor;
       ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-      ImageIO.write(fullSizeImage, ImageEditArea.PERSISTED_IMAGETYPE, bytes);
+      ImageIO.write(fullSizeImage, AbstractImageEditArea.PERSISTED_IMAGETYPE, bytes);
       ImageData data = ImageDataFactory.create(bytes.toByteArray());
       com.itextpdf.layout.element.Image img = new com.itextpdf.layout.element.Image(data);
       img.setAutoScale(true);

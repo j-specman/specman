@@ -2,7 +2,7 @@ package specman.visitor;
 
 import specman.editarea.AbstractListItemEditArea;
 import specman.editarea.EditContainer;
-import specman.editarea.ImageEditArea;
+import specman.editarea.AbstractImageEditArea;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;
@@ -50,7 +50,7 @@ public class DiagramPostInitializer {
     }
 
     @Override
-    public void visitImageArea(ImageEditArea imageArea) {
+    public void visitImageArea(AbstractImageEditArea imageArea) {
       imageArea.viewsNachinitialisieren();
     }
 

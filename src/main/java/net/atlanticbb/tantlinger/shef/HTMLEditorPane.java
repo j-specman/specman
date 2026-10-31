@@ -224,6 +224,10 @@ public class HTMLEditorPane extends JPanel
     actionList.add(act);
     insertMenu.add(act);
 
+    act = new PlantUmlAction();
+    actionList.add(act);
+    insertMenu.add(act);
+
     act = new TableAction();
     actionList.add(act);
     insertMenu.add(act);
@@ -345,6 +349,10 @@ public class HTMLEditorPane extends JPanel
     addToToolBar(formatToolBar, act);
 
     act = new ImageAction();
+    actionList.add(act);
+    addToToolBar(formatToolBar, act);
+
+    act = new PlantUmlAction();
     actionList.add(act);
     addToToolBar(formatToolBar, act);
 

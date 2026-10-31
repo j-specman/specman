@@ -2,7 +2,7 @@ package specman.visitor;
 
 import specman.editarea.AbstractListItemEditArea;
 import specman.editarea.EditContainer;
-import specman.editarea.ImageEditArea;
+import specman.editarea.AbstractImageEditArea;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;
@@ -48,7 +48,7 @@ public interface DiagramVisitor {
 
   default void visitTextArea(TextEditArea textArea) throws StopTraversalException {}
 
-  default void visitImageArea(ImageEditArea imageArea) throws StopTraversalException {}
+  default void visitImageArea(AbstractImageEditArea imageArea) throws StopTraversalException {}
 
   default void visitTable(TableEditArea table) throws IgnoreChildrenException, StopTraversalException {}
 

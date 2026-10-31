@@ -4,7 +4,6 @@ import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
-import org.jetbrains.annotations.NotNull;
 import specman.Aenderungsart;
 import specman.ChangeSet;
 import specman.EditorI;
@@ -14,6 +13,7 @@ import specman.ChangeInfo;
 import static specman.ChangeSet.changeset;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
+import specman.editarea.plantuml.PlantUmlImageEditArea;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.metatag.MetaTagPanel;
 import specman.metatag.TagMoveDirection;
@@ -470,11 +470,18 @@ public class EditContainer extends JPanel {
 
 
 	public void addImageUDBL(BufferedImage image, TextEditArea initiatingTextArea) {
+		addImageAreaUDBL(new ImageEditArea(image, TextInit.initialChangeInfo()), initiatingTextArea);
+	}
+
+	public void addPlantUmlImageUDBL(String plantUmlSource, TextEditArea initiatingTextArea) {
+		addImageAreaUDBL(new PlantUmlImageEditArea(plantUmlSource, TextInit.initialChangeInfo()), initiatingTextArea);
+	}
+
+	private void addImageAreaUDBL(AbstractImageEditArea imageEditArea, TextEditArea initiatingTextArea) {
 		EditorI editor = editor();
 		try (UndoRecording ur = editor.composeUndo()) {
 			int initiatingTextAreaIndex = indexOf(initiatingTextArea);
 			WrappedPosition initiatingCaretPosition = initiatingTextArea.getWrappedCaretPosition();
-			ImageEditArea imageEditArea = new ImageEditArea(image, TextInit.initialChangeInfo());
 			addEditArea(imageEditArea, initiatingTextAreaIndex+1);
 			TextEditArea cutOffTextArea = initiatingTextArea.split(initiatingCaretPosition);
 			if (cutOffTextArea != null) {
@@ -511,7 +518,7 @@ public class EditContainer extends JPanel {
 		addEditArea(splitListItemEditArea, initiatingIndex+1);
 	}
 
-	public TextEditArea addTextEditArea(ImageEditArea initiatingImageEditArea) {
+	public TextEditArea addTextEditArea(AbstractImageEditArea initiatingImageEditArea) {
 		int initiatingIndex = indexOf(initiatingImageEditArea);
 		TextEditArea newEditArea = new TextEditArea(new TextEditAreaModel_V002("", "", new ArrayList<>(), TextInit.initialChangeInfo()), getFont());
 		addEditArea(newEditArea, initiatingIndex+1);

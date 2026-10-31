@@ -43,12 +43,12 @@ public class ImageEditAreaGlassPane extends JPanel {
     return shape;
   }
 
-  /** The Markers are shown as small gray rectangles in each corner of a focussed {@link ImageEditArea},
+  /** The Markers are shown as small gray rectangles in each corner of a focussed {@link AbstractImageEditArea},
    * making the focussing look familiar to the user. However, the markers have no function yet like
    * resizing or rotating the image. This may be an interesting feature someday. */
   private class ImageFocusedMarker extends JLabel {
     public ImageFocusedMarker(int col, int row) {
-      setBackground(ImageEditArea.FOCUS_BORDER_COLOR);
+      setBackground(AbstractImageEditArea.FOCUS_BORDER_COLOR);
       setOpaque(true);
       ImageEditAreaGlassPane.this.add(this, CC.xy(col, row));
     }

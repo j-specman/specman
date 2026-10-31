@@ -3,7 +3,7 @@ package specman.visitor;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.editarea.AbstractListItemEditArea;
-import specman.editarea.ImageEditArea;
+import specman.editarea.AbstractImageEditArea;
 import specman.editarea.TextEditArea;
 
 /**
@@ -21,7 +21,7 @@ public class FirstChangeSetFinder implements DiagramVisitor {
   }
 
   @Override
-  public void visitImageArea(ImageEditArea imageArea) throws StopTraversalException {
+  public void visitImageArea(AbstractImageEditArea imageArea) throws StopTraversalException {
     found(imageArea.firstChangeSet());
   }
 

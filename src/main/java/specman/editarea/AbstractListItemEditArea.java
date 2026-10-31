@@ -146,7 +146,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   @Override
   public void setEditBackgroundUDBL(Color bg) {
     // The step's background is applied to its edit areas after loading. A list item which is
-    // a change itself must keep its own change color, like ImageEditArea does.
+    // a change itself must keep its own change color, like AbstractImageEditArea does.
     Color itemBackground = changeInfo.isChange() ? changeInfo.panelColor() : bg;
     content.setBackgroundUDBL(changeInfo.panelColor());
     setBackgroundUDBL(itemBackground);
@@ -234,7 +234,7 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
   @Override public Component asComponent() { return this; }
   @Override public String getPlainText() { return content.getPlainText(); }
   @Override public TextEditArea asTextArea() { return null; }
-  @Override public ImageEditArea asImageArea() { return null; }
+  @Override public AbstractImageEditArea asImageArea() { return null; }
   @Override public AbstractListItemEditArea asListItemArea() { return this; };
   @Override public boolean isListItemArea() { return true; }
   @Override public void setQuellStil(ChangeSet changeSet) { /* Not required for list items - source steps only contain an empty text area */ }

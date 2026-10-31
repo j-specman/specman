@@ -1,7 +1,7 @@
 package specman.editarea.focusmover;
 
 import specman.editarea.EditArea;
-import specman.editarea.ImageEditArea;
+import specman.editarea.AbstractImageEditArea;
 import specman.editarea.TextEditArea;
 import specman.visitor.DiagramVisitor;
 
@@ -36,7 +36,7 @@ class FocusCandidateCollector implements DiagramVisitor {
   }
 
   @Override
-  public void visitImageArea(ImageEditArea imageArea) {
+  public void visitImageArea(AbstractImageEditArea imageArea) {
     // Deleted images don't react to keys, so one could never leave them again
     addIfCandidate(imageArea, !imageArea.getChangeInfo().isDeleted());
   }

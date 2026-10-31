@@ -1,7 +1,7 @@
 package specman.editarea.focusmover;
 
 import specman.editarea.EditArea;
-import specman.editarea.ImageEditArea;
+import specman.editarea.AbstractImageEditArea;
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedBadLocationException;
 import specman.editarea.focusmover.EditAreaNeighbourFinder.Direction;
@@ -35,7 +35,7 @@ import static specman.editarea.document.WrappedDocument.VISIBLE_TEXT_START;
  * magic caret position, see {@link CrossEditAreaFocusMoverFromText#desiredLocalX()}. After entering the target text,
  * its magic caret position is set to that wanted point, even if the caret itself had to stop earlier,
  * see {@link #placeCaret(TextEditArea, int, boolean)}. Images have no caret, they remember the x position
- * themselves, see {@link ImageEditArea#setNavigationX(int)}.
+ * themselves, see {@link AbstractImageEditArea#setNavigationX(int)}.
  */
 abstract class AbstractCrossEditAreaFocusMover<EDITAREATYPE extends EditArea> {
   protected final EDITAREATYPE currentFocusArea;
@@ -68,7 +68,7 @@ abstract class AbstractCrossEditAreaFocusMover<EDITAREATYPE extends EditArea> {
       placeCaret(target.asTextArea(), localX, direction == Direction.DOWN);
     }
     else {
-      ImageEditArea image = target.asImageArea();
+      AbstractImageEditArea image = target.asImageArea();
       image.setNavigationX(localX);
       image.scrollRectToVisible(new Rectangle(image.getWidth(), image.getHeight()));
     }
