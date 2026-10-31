@@ -116,8 +116,8 @@ public class ResolveLinkTest {
     if (result.stdout.isEmpty()) {
       return List.of();
     }
-    assertTrue(result.stdout.endsWith("\n"), "every line ends with a line feed: " + result);
-    return List.of(result.stdout.substring(0, result.stdout.length() - 1).split("\n", -1));
+    assertTrue(result.stdout.endsWith(LINE_END), "every line ends with a line feed: " + result);
+    return List.of(result.stdout.substring(0, result.stdout.length() - LINE_END.length()).split(LINE_END, -1));
   }
 
   /** A link to a file without step is fine if the file exists. The result tells the file and repeats the link. */
