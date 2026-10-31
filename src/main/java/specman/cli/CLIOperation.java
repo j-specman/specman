@@ -1,7 +1,8 @@
 package specman.cli;
 
 public enum CLIOperation {
-    SANITIZE("--sanitize");
+    SANITIZE("--sanitize"),
+    RESOLVE_LINK("--resolve-link");
 
     private final String operationName;
 

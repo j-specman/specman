@@ -585,6 +585,7 @@ public class SpecmanFT extends Specman {
   }
 
   private void pressMouseOnFirstCharacter(TextEditArea text, int modifiers) {
+    waitForEventsProcessed();
     layoutComponents();
     try {
       Rectangle2D firstCharacter = text.modelToView2D(VISIBLE_TEXT_START);

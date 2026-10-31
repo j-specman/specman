@@ -1,14 +1,11 @@
 package specman.cli;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import specman.model.ModelEnvelope;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.MetaTagConfigModel_V002;
 import specman.model.v002.MetaTagModel_V002;
+import specman.model.v002.io.ModelFileReader_V002;
 import specman.model.v002.io.ModelParseException;
-import specman.model.v002.io.ModelParser_V002;
 import specman.model.v002.io.ModelRenumberer_V002;
 import specman.model.v002.io.ModelSerializer_V002;
 import specman.model.v002.io.ModelStepnumberRewriter_V002;
@@ -27,8 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static specman.ops.LoadDiagrammSpecmanOp.isTextFormat;
 
 /**
  * Headless sanitizer for model files written by AI agents.
@@ -54,7 +49,7 @@ public class SanitizeCLO extends AbstractCLO {
     this.filename = args[1];
   }
 
-  void run() {
+  int run() {
     File file = new File(filename);
     if (!file.exists()) {
       throw error("File not found: " + file.getAbsolutePath());
@@ -71,6 +66,7 @@ public class SanitizeCLO extends AbstractCLO {
       else {
         System.out.println("OK");
       }
+      return EXIT_SUCCESS;
     }
     catch (Exception e) {
       throw error(e.getMessage());
@@ -106,20 +102,7 @@ public class SanitizeCLO extends AbstractCLO {
   }
 
   private static SanitizeResult sanitize(File file) throws IOException, ModelParseException {
-    byte[] data = Files.readAllBytes(file.toPath());
-
-    DiagramModel_V002 model;
-    if (isTextFormat(data)) {
-      model = new ModelParser_V002().parse(new String(data, StandardCharsets.UTF_8));
-    }
-    else {
-      ObjectMapper mapper = buildMapper();
-      ModelEnvelope envelope = mapper.readValue(data, ModelEnvelope.class);
-      if (!(envelope.model instanceof DiagramModel_V002)) {
-        throw new RuntimeException("Unsupported model type — headless sanitize requires V2 format");
-      }
-      model = (DiagramModel_V002) envelope.model;
-    }
+    DiagramModel_V002 model = ModelFileReader_V002.read(file);
 
     List<String> idErrors = checkDuplicateIds(model);
     if (!idErrors.isEmpty()) {
@@ -205,12 +188,6 @@ public class SanitizeCLO extends AbstractCLO {
       }
     }
     return errors;
-  }
-
-  private static ObjectMapper buildMapper() {
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-    return mapper;
   }
 
 }

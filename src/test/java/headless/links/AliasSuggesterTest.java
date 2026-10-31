@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import specman.link.LinkAliases;
-import specman.link.suggestion.AliasSuggester;
+import specman.link.suggester.AliasSuggester;
 
 import java.io.File;
 import java.util.List;

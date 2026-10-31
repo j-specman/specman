@@ -5,7 +5,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import specman.link.LinkAliases;
-import specman.link.suggestion.FileSuggester;
+import specman.link.suggester.FileSuggester;
 
 import java.io.File;
 import java.io.IOException;

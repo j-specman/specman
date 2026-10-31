@@ -1,4 +1,4 @@
-package specman.link.suggestion;
+package specman.link.suggester;
 
 /** The kinds of characters an alias is made of. Letters are ASCII letters only, as the aliases are. */
 enum AliasCharacterType {

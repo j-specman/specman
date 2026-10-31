@@ -10,7 +10,6 @@ import specman.i18n.IFileNameExtensionFilter;
 import specman.i18n.Messages;
 import specman.link.AliasListDialog;
 import specman.link.AliasListPanel;
-import specman.link.SpecmanInstanceStarter;
 import specman.link.SpecmanLink;
 import specman.menubar.SpecmanMenuBar;
 import specman.draganddrop.DragMouseAdapter;

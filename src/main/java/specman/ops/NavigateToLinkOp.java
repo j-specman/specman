@@ -4,7 +4,7 @@ import specman.editarea.TextEditArea;
 import specman.link.LinkAliases;
 import specman.link.SpecmanLink;
 import specman.link.SpecmanLink.Reference;
-import specman.link.suggestion.FileSuggester;
+import specman.link.suggester.FileSuggester;
 import specman.view.AbstractSchrittView;
 import specman.visitor.StepByIdFinder;
 

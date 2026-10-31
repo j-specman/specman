@@ -6,7 +6,7 @@ import net.atlanticbb.tantlinger.ui.UIUtils;
 import specman.i18n.IButton;
 import specman.i18n.IHeaderPanel;
 import specman.i18n.ILabel;
-import specman.link.suggestion.AliasSuggester;
+import specman.link.suggester.AliasSuggester;
 import specman.view.AbstractSchrittView;
 
 import javax.swing.AbstractAction;

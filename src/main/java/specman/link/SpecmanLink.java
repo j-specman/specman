@@ -29,8 +29,18 @@ public final class SpecmanLink {
   /** The link to the passed step in the passed file, which is identified by the alias if there is one, otherwise
    * by its path. The step number is merely informative. */
   public static String of(File file, String alias, AbstractSchrittView step) {
-    String location = alias.isEmpty() ? pathOf(file) : SCHEME + alias;
-    return location + SEPARATOR + step.getId() + SEPARATOR + step.getNumber();
+    return of(file, alias, step.getId(), String.valueOf(step.getNumber()));
+  }
+
+  /** The link to the passed file, which is identified by the alias if there is one (an empty alias means none), otherwise
+   * by its path. The step ID and number may be null, the number even if the ID isn't. A link without ID names the file only. */
+  public static String of(File file, String alias, String stepId, String stepNumber) {
+    String link = alias.isEmpty() ? pathOf(file) : SCHEME + alias;
+    if (stepId == null) {
+      return link;
+    }
+    link += SEPARATOR + stepId;
+    return stepNumber == null ? link : link + SEPARATOR + stepNumber;
   }
 
   /** Reads the link text, which may carry surrounding whitespace and a slash at the end, as other tools tend to

@@ -1,4 +1,4 @@
-package specman.link.suggestion;
+package specman.link.suggester;
 
 import specman.link.LinkAliases;
 

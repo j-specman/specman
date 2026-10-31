@@ -1,4 +1,4 @@
-package specman.link.suggestion;
+package specman.link.suggester;
 
 import specman.link.LinkAliases;
 
@@ -9,7 +9,7 @@ import java.util.List;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
-/** The reverse of {@link AliasSuggester}:Suggests the file an alias nobody knows yet stands for, derived from the existing
+/** The reverse of {@link AliasSuggester}: Suggests the file an alias nobody knows yet stands for, derived from the existing
  * assignments of aliases to files.
  * <ul>
  * <li>An assignment is an example if the alias has the same length as the example's alias and the same type of character

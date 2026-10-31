@@ -1,4 +1,4 @@
-package specman.link.suggestion;
+package specman.link.suggester;
 
 import java.util.ArrayList;
 import java.util.List;
