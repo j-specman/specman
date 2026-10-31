@@ -17,6 +17,48 @@ Aus aktueller Anwendung
 - Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
 - PDF-Option "Export beim Speichern"
 
+PlantUML
+- Repräsentation im Modell
+  - Grafik-Image: image(scale=100%, type=png) { [base64:...] }
+  - Plantuml-Image: image(scale=100%, type=plantuml) { `<PlantUML-Sourcecode>` }
+  - Später auch SVG-Image: image(scale=100%, type=svg) { `<SVG-Sourcecode>` }
+  - Grammatik muss entsprechend erweitert werden
+    - Hinweis für KI-Agenten bzgl. ignorieren von Bildern plantuml ausnehmen. Diese Bilder sollen die Agents verstehen
+- Repräsentation im UI evtl. als spezialsierte ImageEditArea
+  - Gemeinsame Basisklasse AbstractImageEditArea für alle ImageEditAreas, die ein Bild darstellen
+  - ImageEditAras als Ableitung für Grafik-Images wie bisher
+  - PlantUMLImageEditArea für PlantUML-Images
+  - Später SvgImageEditArea für SVG-Images
+- Neuanlage durch neuen Button mit optionaler Auswahl einer bestehenden puml-Datei
+  - Ausgewählte Datei wird als initialer Content eingebettet
+  - Sonst eine leere Fläche (@startuml @enduml ohne Inhalt dazwischen)
+- Doppelklick öffnet PlantUML Sourcecode-Editor als Dialog
+  - Editor analog Inhalt von Meta-Tags
+  - Editor lehnt Backticks ab
+  - !include und !includeurl ist erlaubt, um puml-Dateien außerhalb des Spec-Dokuments einzubinden
+    - Neurendern nur durch explizites erneutes Laden
+  - Gerendertes Bild wird live aktualisiert, wenn der User im Editor länger als 1 Sekunde nichts tippt
+  - Rendering als SVG (Ergebnisse der Experimente haben zweistellige Millisekunden gezeigt, das ist OK)
+  - Vorgabe von Roboto als mitgelieferter Sans-Serif-Schriftart und CourierPrime für Festbreiten-Schriftart, die auch ins PDF eingebettet werden.
+  - User kann die Schrift im Quelltext überschreiben. Ist nicht verboten und auf eigene Gefahr.
+  - Bei Syntaxfehler, Anzeige des Parserfehlers als Text
+  - Pragma-Angabe durch User ist nicht erlaubt und führt zu Fehleranzeige (Groß-/Kleinschreibung und Einrückung beachten)
+  - Mehrere @startuml ebenfalls
+  - ELK-Pragma wird automatisch ergänzt als einzige verfügbare Render-Engine
+- Skalierung wie bei ImageEditArea
+  - individueller Prozentsatz der Schrittbreite über Breitenanpasser
+  - Anwendung des Zoomfaktors
+- Wenn man im Änderungsmodus ändert, wird Hintergrund der EditArea entsprechend eingefärbt
+  - Das eigentliche Bild zeigt keine Änderungen an
+- Undo / Redo
+- Annahme / Verwerfen der Änderungen
+- PDF-Export
+  - Rendering von Text im SVG prüfen
+- Copy / Cut / Paste /Drag&Drop von Schritten mit PlantUML-Images prüfen. Sollte ganz normal funktionieren
+- Erweiterung Manual
+- Suche berücksichtigt (zunächst) keine PlantUML-Quelltexte
+
+
 Specman URLs:
 x Custom URL Scheme, z.B. specman://uc730,2d34f85e,1.3
   x Bewusst nicht so URL-typisch wie specman://open?file=uc-730&step=2d34f85e&number=1.3, weil das schlechter lesbar ist

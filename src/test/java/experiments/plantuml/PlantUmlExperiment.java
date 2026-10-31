@@ -5,6 +5,7 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
+import specman.graphics.Styles;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -21,7 +22,11 @@ import java.io.UncheckedIOException;
 public class PlantUmlExperiment extends JFrame {
   private static final int RENDER_DELAY_MS = 400;
   private static final double ZOOM_STEP = 1.1;
-  private static final String ELK_PRAGMA = "\n!pragma layout elk";
+  // Touching Styles registers Specman's shipped fonts with AWT, so PlantUML measures text with them and the
+  // SVG renderer finds them by name. labelFont is Roboto, the shipped sans-serif font.
+  private static final String PRELUDE = "\n!pragma layout elk"
+      + "\nskinparam defaultFontName \"" + Styles.labelFont.getFamily() + "\""
+      + "\nskinparam monospacedFontName \"Courier Prime\"";
   private static final String SAMPLE_SOURCE = """
       @startuml
       hide empty members
@@ -120,7 +125,7 @@ public class PlantUmlExperiment extends JFrame {
 
   /** Syntax errors do not throw - PlantUML renders them as an error graphic. */
   private byte[] renderSvg(String source) {
-    String withPragma = source.replaceFirst("@startuml[^\\n]*", "$0" + ELK_PRAGMA);
+    String withPragma = source.replaceFirst("@startuml[^\\n]*", "$0" + PRELUDE);
     ByteArrayOutputStream svg = new ByteArrayOutputStream();
     try {
       new SourceStringReader(withPragma).outputImage(svg, new FileFormatOption(FileFormat.SVG));
