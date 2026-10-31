@@ -40,10 +40,6 @@ class NavigateToLinkTest extends AbstractLinkTest {
     return link.substring(0, link.lastIndexOf(SEPARATOR));
   }
 
-  private static String fileOnly(String link) {
-    return link.substring(0, link.indexOf(SEPARATOR));
-  }
-
   /** Scenario: The diagram is saved, the user copied the link of step 3 and works in step 1. Opening the link
    * from the clipboard puts the cursor into step 3. */
   @Test

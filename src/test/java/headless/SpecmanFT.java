@@ -33,9 +33,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.text.BadLocationException;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.geom.Rectangle2D;
 import java.awt.datatransfer.Clipboard;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
@@ -54,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static specman.DiagramToolBar.TRACK_CHANGES_BUTTON;
+import static specman.editarea.document.WrappedDocument.VISIBLE_TEXT_START;
 import static specman.i18n.Messages.i18n;
 import static specman.menubar.SpecmanMenuBar.changeSetItemName;
 
@@ -85,6 +88,8 @@ public class SpecmanFT extends Specman {
   private AliasListPanel openedAliasListPanel;
   private final List<String> aliasesAskedFor = new ArrayList<>();
   private final List<File> fileSuggestionsOffered = new ArrayList<>();
+  private final List<String> linksOpenedInNewInstance = new ArrayList<>();
+  private final List<String> addressesOpenedInBrowser = new ArrayList<>();
   private EditArea focusedArea;
   private static final Dimension LAYOUT_SIZE = new Dimension(800, 600);
   private static final int MAX_LAYOUT_PASSES = 50;
@@ -547,6 +552,51 @@ public class SpecmanFT extends Specman {
     aliasesAskedFor.add(alias);
     fileSuggestionsOffered.add(suggestedFile);
     return fileChoiceAnswer;
+  }
+
+  /** The links which would have started another Specman instance, in the order of following them. */
+  public List<String> linksOpenedInNewInstance() {
+    return Collections.unmodifiableList(linksOpenedInNewInstance);
+  }
+
+  /** The web and mail addresses which would have been handed to the system, in the order of following them. */
+  public List<String> addressesOpenedInBrowser() {
+    return Collections.unmodifiableList(addressesOpenedInBrowser);
+  }
+
+  @Override
+  public void openInNewInstance(String link) {
+    linksOpenedInNewInstance.add(link);
+  }
+
+  @Override
+  public void openInBrowser(String address) {
+    addressesOpenedInBrowser.add(address);
+  }
+
+  /** Simulates the user pressing the mouse button on the first visible character of the text while holding CTRL. */
+  public void ctrlClickOnFirstCharacter(TextEditArea text) {
+    pressMouseOnFirstCharacter(text, MouseEvent.CTRL_DOWN_MASK);
+  }
+
+  /** Simulates the user pressing the mouse button on the first visible character of the text. */
+  public void clickOnFirstCharacter(TextEditArea text) {
+    pressMouseOnFirstCharacter(text, 0);
+  }
+
+  private void pressMouseOnFirstCharacter(TextEditArea text, int modifiers) {
+    layoutComponents();
+    try {
+      Rectangle2D firstCharacter = text.modelToView2D(VISIBLE_TEXT_START);
+      int x = (int) firstCharacter.getX() + 2;
+      int y = (int) firstCharacter.getCenterY();
+      text.dispatchEvent(new MouseEvent(text, MouseEvent.MOUSE_PRESSED, System.currentTimeMillis(),
+        modifiers | MouseEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1));
+    }
+    catch (BadLocationException e) {
+      throw new IllegalStateException(e);
+    }
+    waitForEventsProcessed();
   }
 
   @Override public void openSettings() {}

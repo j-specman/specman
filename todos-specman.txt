@@ -74,7 +74,7 @@ x Nice to have: Dialog für eine on-the-fly Dateizuordnung schlägt Datei vor, w
 x Nice to have: Nutzung der Links auch als Hyperlinks in Schritttexten, um von einer Spezifikation auf eine andere zu verweisen.
   x STRG+Klick auf Hyperlink; Specman-Link auf andere Datei startet neue Instanz (Fenster kommt in den Vordergrund), auf die offene Datei navigiert im Fenster
   x Web- und Mail-Links (http, https, mailto) öffnen im Standardprogramm, andere Schemata werden abgelehnt
-  - Tests fehlen noch
+  x Tests (FollowHyperlinkTest, SpecmanInstanceStarterTest)
 - Integration der Navigation ins Betriebssystem kommt später. Grundprinzip
   - Unter Windows: Eintragen des specman-Protokolls in der Windows Registry
   - Betriebssystem startet auf dieser Basis Specman, danach wie oben beschrieben
