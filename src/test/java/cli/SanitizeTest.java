@@ -15,6 +15,8 @@ import static builder.BuilderFactory.simple;
 import static cli.SpecmanCLIFT.sanitize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static specman.cli.SpecmanCLI.EXIT_ERROR;
+import static specman.cli.SpecmanCLI.EXIT_SUCCESS;
 
 /** Tests of the {@code --sanitize} command line operation. */
 public class SanitizeTest {
@@ -147,7 +149,7 @@ public class SanitizeTest {
   }
 
   private void assertSANITIZED(CLIResult result, String... fragments) {
-    assertEquals(0, result.exitState, result.toString());
+    assertEquals(EXIT_SUCCESS, result.exitState, result.toString());
     assertContains(result.stdout, "SANITIZED");
     for (String fragment : fragments) {
       assertContains(result.stdout, fragment);
@@ -155,7 +157,7 @@ public class SanitizeTest {
   }
 
   private void assertERROR(CLIResult result, String... fragments) {
-    assertEquals(1, result.exitState, result.toString());
+    assertEquals(EXIT_ERROR, result.exitState, result.toString());
     assertContains(result.stderr, "ERROR");
     for (String fragment : fragments) {
       assertContains(result.stderr, fragment);
@@ -167,7 +169,7 @@ public class SanitizeTest {
   }
 
   private void assertOK(CLIResult result) {
-    assertEquals(0, result.exitState, result.toString());
+    assertEquals(EXIT_SUCCESS, result.exitState, result.toString());
     assertContains(result.stdout, "OK");
   }
 

@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static specman.cli.SpecmanCLI.EXIT_ERROR;
+import static specman.cli.SpecmanCLI.EXIT_SUCCESS;
+
 /**
  * Checks where Specman links lead to, see {@link LinkResolver}. The links are the arguments behind the operation name, or
  * the lines of stdin if there are none, which allows to feed it from other tools via pipes.
@@ -26,9 +29,10 @@ import java.util.List;
  * <p>
  * Exit code 0 = no line is an ERROR, 1 = at least one is.
  */
-class ResolveLinkCLO extends AbstractCLO {
-  private static final String SEPARATOR = "\t";
-  private static final String LINE_END = "\n";
+public class ResolveLinkCLO extends AbstractCLO {
+  /** Separates the status, file and detail in each line of the output. */
+  public static final String FIELD_SEPARATOR = "\t";
+  public static final String LINE_END = "\n";
 
   private final List<String> linksFromArguments;
 
@@ -42,7 +46,7 @@ class ResolveLinkCLO extends AbstractCLO {
     boolean anyError = false;
     for (String link : requestedLinks()) {
       LinkResolution resolution = resolver.resolve(link);
-      out.print(resolution.toLine(SEPARATOR) + LINE_END);
+      out.print(resolution.toLine(FIELD_SEPARATOR) + LINE_END);
       anyError |= resolution.isError();
     }
     out.flush();

@@ -2,12 +2,15 @@ package specman.cli;
 
 public class SpecmanCLI {
 
+  public static final int EXIT_SUCCESS = 0;
+  public static final int EXIT_ERROR = 1;
+
   public static void run(String[] args) {
     forceImmediateExit(execute(args));
   }
 
   /** Executes the CLI operation specified by the arguments and returns the exit state
-   * ({@link AbstractCLO#EXIT_SUCCESS} or {@link AbstractCLO#EXIT_ERROR}) instead of terminating the JVM. {@link #run(String[])}
+   * ({@link #EXIT_SUCCESS} or {@link #EXIT_ERROR}) instead of terminating the JVM. {@link #run(String[])}
    * is the production entry point, this method is the seam for headless tests. */
   public static int execute(String[] args) {
     try {
@@ -20,12 +23,12 @@ public class SpecmanCLI {
       if (operation == CLIOperation.RESOLVE_LINK) {
         return new ResolveLinkCLO(args).run();
       }
-      return AbstractCLO.EXIT_SUCCESS;
+      return EXIT_SUCCESS;
     }
     catch(CLIException clix) {
       System.err.println("ERROR");
       System.err.println(clix.getMessage());
-      return AbstractCLO.EXIT_ERROR;
+      return EXIT_ERROR;
     }
   }
 

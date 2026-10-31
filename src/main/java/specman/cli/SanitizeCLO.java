@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static specman.cli.SpecmanCLI.EXIT_SUCCESS;
+
 /**
  * Headless sanitizer for model files written by AI agents.
  * Corrects stale step numbers and steplink texts, and writes the
