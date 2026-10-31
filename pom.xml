@@ -191,6 +191,34 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- MIT-licensed light variant (no stdlib sprites/emojis); contains the PlantUML engine and the ELK proxy -->
+            <groupId>net.sourceforge.plantuml</groupId>
+            <artifactId>plantuml-mit-light</artifactId>
+            <version>1.2026.9</version>
+        </dependency>
+        <dependency>
+            <!-- ELK layout for PlantUML's "!pragma layout elk"; the PlantUML jar only contains the proxy -->
+            <groupId>org.eclipse.elk</groupId>
+            <artifactId>org.eclipse.elk.core</artifactId>
+            <version>0.12.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.elk</groupId>
+            <artifactId>org.eclipse.elk.graph</artifactId>
+            <version>0.12.1</version>
+        </dependency>
+        <dependency>
+            <!-- ELK is built against this Xtext version; its metadata providers need the xbase lib at runtime -->
+            <groupId>org.eclipse.xtext</groupId>
+            <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+            <version>2.36.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.elk</groupId>
+            <artifactId>org.eclipse.elk.alg.layered</artifactId>
+            <version>0.12.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>24.0.1</version>
