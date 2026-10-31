@@ -5,6 +5,7 @@ Release notes Specman 1.4.0
 - Beschriftungen internationalisieren
 - Sprache wählen
 - Hoch/Runter über Grenzen von Schritten wäre cool
+- Specman URLs
 
 Aus aktueller Anwendung
 - Hat man 5 Sekunden Autosave-Intervall eingestellt, dann wird es auffällig, dass ein abhängendes Leerzeichen wegbereinigt wird.
@@ -16,7 +17,7 @@ Aus aktueller Anwendung
 - Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
 - PDF-Option "Export beim Speichern"
 
-Globale Links:
+Specman URLs:
 x Custom URL Scheme, z.B. specman://uc730,2d34f85e,1.3
   x Bewusst nicht so URL-typisch wie specman://open?file=uc-730&step=2d34f85e&number=1.3, weil das schlechter lesbar ist
 x Über neuen Kontextmenüpunkt "Copy Link" an der Schrittnummer kann man die URL in die Zwischenablage kopieren
