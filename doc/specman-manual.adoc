@@ -405,13 +405,15 @@ There are three ways to follow a URL:
 
 * Ctrl+click on a hyperlink in a step text whose target is a Specman URL, see <<_hyperlinks,Hyperlinks>>.
 
-* Starting Specman with the URL as its only argument opens the file and scrolls to the step. This is the hook for registering the `specman://` protocol with the operating system, so a click on a URL in any other tool starts Specman. Specman doesn't register itself.
+* Starting Specman with the URL as its only argument opens the file and scrolls to the step. This is the hook for registering the `specman://` protocol with the operating system, so a click on a URL in any other tool starts Specman, see below.
 
 If the file of the URL is the one shown in the window, Specman scrolls to the addressed step, and Ctrl+Alt+Left takes you back to where you came from, as with step links. If the URL refers to a different file, it depends on the way you follow it: Ctrl+L loads the file into the window, after asking whether to save unsaved changes, while a hyperlink opens it in a new Specman window, because a window shows only one diagram.
 
 If the alias of a URL is unknown in your user settings, Specman asks which file it stands for, and remembers the answer. A file chooser opens, with a file preselected if the other existing aliases allow a suggestion.
 
 NOTE: Specman doesn't notice if a file is already open in another Specman window. A URL to it opens it a second time.
+
+If you installed Specman with the Windows installer, the `specman://` protocol is registered with the operating system. This makes it possible to follow a Specman URL, e.g. by pasting or typing it into the address field of Windows Explorer or a web browser. If you use the portable bundle, check your operating system's documentation on how to register the protocol yourself.
 
 ### Command line URL resolution
 Specman's command-line interface provides the operation `--resolve-link` for two reasons:
