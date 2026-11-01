@@ -14,6 +14,7 @@ import specman.undo.props.UDBL;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -225,12 +226,15 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
   @Override
   public void mouseClicked(MouseEvent e) {
     super.mouseClicked(e);
-    if (e.getClickCount() == 2 && !getChangeInfo().isDeleted()) {
+    if (SwingUtilities.isRightMouseButton(e)) {
+      PlantUmlContextMenu.open(this, e);
+    }
+    else if (e.getClickCount() == 2 && !getChangeInfo().isDeleted()) {
       editSource();
     }
   }
 
-  private void editSource() {
+  public void editSource() {
     PlantUmlSourceEditorPopup popup = new PlantUmlSourceEditorPopup(source, this::commitSource, this::editorClosed, this::show);
     if (awaitingFirstContent) {
       int emptyLineStart = source.indexOf('\n') + 1;

@@ -11,7 +11,9 @@ import specman.Specman;
 import specman.editarea.EditArea;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
+import specman.editarea.plantuml.PlantUmlContextMenu;
 import specman.editarea.plantuml.PlantUmlFileChoice;
+import specman.editarea.plantuml.PlantUmlImageEditArea;
 import specman.link.AliasListPanel;
 import specman.metatag.stepnumberlabel.StepnumberContextMenu;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
@@ -343,6 +345,29 @@ public class SpecmanFT extends Specman {
       }
     }
     throw new IllegalStateException("No context menu item of type " + itemType.getSimpleName());
+  }
+
+  /** Right-clicks the given PlantUML diagram and returns the item of its context menu with the given message key,
+   * without clicking it. Allows tests to check visibility and enablement. */
+  public JMenuItem contextMenuItem(PlantUmlImageEditArea diagram, String itemMessageKey) {
+    layoutComponents();
+    rightClick(diagram);
+    String itemText = i18n(itemMessageKey);
+    for (Component component : PlantUmlContextMenu.popupMenu().getComponents()) {
+      if (component instanceof JMenuItem item && itemText.equals(item.getText())) {
+        return item;
+      }
+    }
+    throw new IllegalStateException("No context menu item '" + itemText + "'");
+  }
+
+  /** Right-clicks the given PlantUML diagram and clicks the item of its context menu with the given message key,
+   * if the user could do so, i.e. if it is visible and enabled. */
+  public void clickContextMenuItem(PlantUmlImageEditArea diagram, String itemMessageKey) {
+    JMenuItem item = contextMenuItem(diagram, itemMessageKey);
+    assertTrue(item.isVisible() && item.isEnabled(), "context menu item '" + item.getText() + "' must be available");
+    item.doClick(0);
+    waitForEventsProcessed();
   }
 
   private Component[] openContextMenu(AbstractSchrittView step) {

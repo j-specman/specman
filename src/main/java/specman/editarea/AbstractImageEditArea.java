@@ -120,7 +120,7 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
         break;
       case KeyEvent.VK_BACK_SPACE:
       case KeyEvent.VK_DELETE:
-        removeAreaByKeypressUDBL();
+        deleteUDBL();
         e.consume();
         break;
       case KeyEvent.VK_ENTER:
@@ -163,7 +163,7 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
   private void keyCutPressed(KeyEvent e) {
     if (e.isControlDown()) {
       keyCopyPressed(e);
-      removeAreaByKeypressUDBL();
+      deleteUDBL();
     }
   }
 
@@ -181,7 +181,8 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
     }
   }
 
-  private void removeAreaByKeypressUDBL() {
+  /** Removes the area. In change mode, an area which existed before is marked as deleted instead. */
+  public void deleteUDBL() {
     EditorI editor = editor();
     try (UndoRecording ur = editor.pauseUndo()){
       // Change back to unselected border before starting to record undoable operations
