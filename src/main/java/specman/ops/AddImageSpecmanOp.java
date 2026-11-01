@@ -12,7 +12,7 @@ import java.io.IOException;
 
 
 public class AddImageSpecmanOp extends AbstractSpecmanOp {
-  private static final String EMPTY_PLANTUML = "@startuml\n\n@enduml";
+  public static final String EMPTY_PLANTUML = "@startuml\n\n@enduml";
 
   public AddImageSpecmanOp(SpecmanOpContext context) {
     super(context);
