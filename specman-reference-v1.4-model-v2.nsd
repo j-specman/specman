@@ -102,7 +102,7 @@ mainSequence {
     ifElse(13, 1e278bd4, `<div align="center">
       If-else step with a modified width ratio of its branches. This is 
       supported for if and case steps as well.
-    </div>`, plain=`If-else step with a modified width ratio of its branches. This is supported for if and case steps as well.`, ifRatio=9.26%) {
+    </div>`, plain=`If-else step with a modified width ratio of its branches. This is supported for if and case steps as well.`, ifRatio=7.87%) {
         if_branch(`Small width branch`, plain=`Small width branch`) {
             simple(13.1, a11bbefb, ``);
         }
@@ -292,46 +292,93 @@ Courier - Monospace`);
     </div>
     <pre>This<br>  text<br>    is<br>  pre  -  formatted<br></pre>`, plain=`Text might have a pre-formatted text section. Only preformatted text keeps all its whitespaces while multiple whitespaces in other text sections are eliminated when saving. Pre-formatted text is always displayed in a monospaced font.
 This   text     is   pre  -  formatted `);
-    simple(32, 24a10aa0, `Step with rounded border decoration.`, plain=`Step with rounded border decoration.`, deco=Full);
-    simple(33, e7290917, `Following step with border decoration. There is no gap line displayed in a 
+    simple(32, 2e55fdbf, `<div>
+      Hyperlinks
+    </div>
+    <div>
+      
+    </div>
+    <div>
+      The following link refers to Google's home page. The user can follow the 
+      link by clicking it while having Ctrl pressed, and the URL is opened in 
+      a browser.
+    </div>
+    <div>
+      <a href="https://www.google.com/">HTTP URL to web page of Google</a>&#160;
+    </div>
+    <div>
+      
+    </div>
+    <div>
+      The following links are all based on a file Alias &quot;ref&quot; which the 
+      reference model must be associated with to make the hyperlinks work. As 
+      soon as the association is registered, the links will navigate within 
+      the already opened file.
+    </div>
+    <div>
+      <a href="specman://ref,e81623e9,2">Specman URL to step 2 of the 
+      reference model</a>&#160;
+    </div>
+    <div>
+      <a href="specman://ref,e81623e9,666">Same Specman URL to step 2 with 
+      wrong step number</a>
+    </div>
+    <div>
+      <a href="specman://ref,e81623e9">Same Specman URL to step 2 without 
+      number</a>&#160;
+    </div>
+    <div>
+      <a href="specman://ref">Specman URL to reference model without step</a>&#160;&#160;
+    </div>`, plain=`Hyperlinks
+
+The following link refers to Google's home page. The user can follow the link by clicking it while having Ctrl pressed, and the URL is opened in a browser.
+HTTP URL to web page of Google 
+
+The following links are all based on a file Alias "ref" which the reference model must be associated with to make the hyperlinks work. As soon as the association is registered, the links will navigate within the already opened file.
+Specman URL to step 2 of the reference model 
+Same Specman URL to step 2 with wrong step number
+Same Specman URL to step 2 without number 
+Specman URL to reference model without step  `);
+    simple(33, 24a10aa0, `Step with rounded border decoration.`, plain=`Step with rounded border decoration.`, deco=Full);
+    simple(34, e7290917, `Following step with border decoration. There is no gap line displayed in a 
     sequence of steps with this decoration.`, plain=`Following step with border decoration. There is no gap line displayed in a sequence of steps with this decoration.`, deco=Co);
-    subsequence(34, fde99ef2, `<b>Subsequence with special catch sequence</b>`, plain=`Subsequence with special catch sequence`, deco=Co) {
-        simple(34.1, 15856508, `The catch area of the subsequence has a modified width ratio of its 
+    subsequence(35, fde99ef2, `<b>Subsequence with special catch sequence</b>`, plain=`Subsequence with special catch sequence`, deco=Co) {
+        simple(35.1, 15856508, `The catch area of the subsequence has a modified width ratio of its 
     branches, a modified righ bar width in the co-catch, and the catch area is 
     collapsed`, plain=`The catch area of the subsequence has a modified width ratio of its branches, a modified righ bar width in the co-catch, and the catch area is collapsed`);
-        break(34.2, 074ad64c, `<b>Sub X1</b>`, plain=`Sub X1`);
-        break(34.3, 77f1ab52, `<b>Sub X2</b>`, plain=`Sub X2`);
-        break(34.4, 4f9e39ae, `<b>Sub X3</b>`, plain=`Sub X3`);
+        break(35.2, 074ad64c, `<b>Sub X1</b>`, plain=`Sub X1`);
+        break(35.3, 77f1ab52, `<b>Sub X2</b>`, plain=`Sub X2`);
+        break(35.4, 4f9e39ae, `<b>Sub X3</b>`, plain=`Sub X3`);
         catchArea(collapsed=true, cols=[20%, 79%]) {
-            catch(34.2, `<b>Sub X1</b>`, plain=`Sub X1`, headingWidth=21) {
-                simple(34.2.1, fe4d5e16, `Small width`, plain=`Small width`);
+            catch(35.2, `<b>Sub X1</b>`, plain=`Sub X1`, headingWidth=21) {
+                simple(35.2.1, fe4d5e16, `Small width`, plain=`Small width`);
             }
-            catch(34.3, `<b>Sub X2</b>`, plain=`Sub X2`, headingWidth=78) {
-                coCatch(34.4, `<b>Sub X3</b>`, plain=`Sub X3`);
-                simple(34.3.1, 142ae6b6, `Big width, big right bar width`, plain=`Big width, big right bar width`);
+            catch(35.3, `<b>Sub X2</b>`, plain=`Sub X2`, headingWidth=78) {
+                coCatch(35.4, `<b>Sub X3</b>`, plain=`Sub X3`);
+                simple(35.3.1, 142ae6b6, `Big width, big right bar width`, plain=`Big width, big right bar width`);
             }
         }
     }
-    while(35, ee92204e, `Collapsed while loop. Each structured step allows to hide its sub sequences`, plain=`Collapsed while loop. Each structured step allows to hide its sub sequences`, barWidth=21, collapsed=true) {
-        simple(35.1, 6320fb89, `Neuer Schritt 1`, plain=`Neuer Schritt 1`);
+    while(36, ee92204e, `Collapsed while loop. Each structured step allows to hide its sub sequences`, plain=`Collapsed while loop. Each structured step allows to hide its sub sequences`, barWidth=21, collapsed=true) {
+        simple(36.1, 6320fb89, `Neuer Schritt 1`, plain=`Neuer Schritt 1`);
     }
-    doWhile(36, dfce79d0, `Loop with shaded background`, plain=`Loop with shaded background`, barWidth=21, shade=#dcdcdc) {
-        simple(36.1, 81ed3633, `Neuer Schritt 1`, plain=`Neuer Schritt 1`);
+    doWhile(37, dfce79d0, `Loop with shaded background`, plain=`Loop with shaded background`, barWidth=21, shade=#dcdcdc) {
+        simple(37.1, 81ed3633, `Neuer Schritt 1`, plain=`Neuer Schritt 1`);
     }
-    ifElse(37, 717e5669, `<div align="center">
+    ifElse(38, 717e5669, `<div align="center">
       New if step with shading, resulting in a mixed background color
     </div>`, plain=`New if step with shading, resulting in a mixed background color`, markups=[(0,62,Changed,yellow)], ifRatio=50.00%, change=(added, yellow), shade=#dcdcdc) {
         if_branch(`Branch headings shaded too`, plain=`Branch headings shaded too`, markups=[(0,25,Changed,yellow)], change=(added, yellow)) {
-            simple(37.1, afbac578, `Steps within the sequences not shaded`, plain=`Steps within the sequences not shaded`, markups=[(0,36,Changed,yellow)], change=(added, yellow));
+            simple(38.1, afbac578, `Steps within the sequences not shaded`, plain=`Steps within the sequences not shaded`, markups=[(0,36,Changed,yellow)], change=(added, yellow));
         }
         else_branch(`<div align="right">
       Branch heading shaded too
     </div>`, plain=`Branch heading shaded too`, markups=[(0,24,Changed,yellow)], change=(added, yellow)) {
-            simple(38.1, 27ce0689, ``, change=(added, yellow));
+            simple(39.1, 27ce0689, ``, change=(added, yellow));
         }
     }
-    source(39, cf97c413, `<strike><font color="#c0c0c0" size="1">.</font></strike>`, plain=`.`, markups=[(0,0,Changed,yellow)], yellow, sourceStep=1a9866f8);
-    simple(40, f9016c65, `Step with meta tags`, plain=`Step with meta tags`, tags=[(`user`, `Tag from a full-featured tag configuration, including
+    source(40, cf97c413, `<strike><font color="#c0c0c0" size="1">.</font></strike>`, plain=`.`, markups=[(0,0,Changed,yellow)], yellow, sourceStep=1a9866f8);
+    simple(41, f9016c65, `Step with meta tags`, plain=`Step with meta tags`, tags=[(`user`, `Tag from a full-featured tag configuration, including
 - SVG icon
 - Label text, differing from tag configuration identifier
 - Background color
@@ -345,15 +392,15 @@ Editing the freetext is initiated either by a single click on the tag or by sele
 The tag order can be changed by either pressing the left mouse button and dragging the tag or by selecting "Move right" or "Move left" from the tag's context menu`), (`no_freetext`), (`icon_only`, `A meta tag can be configured to have either an icon or a label or both.`), (`transparent_background`, `Background coloring supports transparency`), (`label_only`, `<html>
 This will not be treated as HTML as freetext of tags is only unformatted <b>plain text</b>.
 </html>`)]);
-    while(41, 3e4ceb15, `Sub-structured step with meta tag, demonstrating the position of the fold 
+    while(42, 3e4ceb15, `Sub-structured step with meta tag, demonstrating the position of the fold 
     button`, plain=`Sub-structured step with meta tag, demonstrating the position of the fold button`, barWidth=21, tags=[(`user`, `The fold button of a structured step is always located left from the step's last meta tag. This is especially reasonable as the fold button is *not* permanently displayed while the step is unfolded, but only when the user hovers over its location.
 Tags - just like the step number - will not change on folding the step.`)]) {
-        simple(41.1, c2f1666d, ``);
+        simple(42.1, c2f1666d, ``);
     }
-    simple(42, d3b571df, `Deleted step with tags`, plain=`Deleted step with tags`, change=(removed, yellow), tags=[(`user`, `Tags of deleted steps are displayed with black background, grey (disabled) icon and grey border. They can no longer be edited nor moved nor deleted. Any freetext is still displayed as tooltip. `), (`icon_only`), (`label_only`)]);
-    break(43, 220753bc, `<b>Tagged break</b>`, plain=`Tagged break`, tags=[(`user`, `Tags of break steps are not mirrored in the corresponding catch area's heading.`)]);
-    simple(44, c01bc240, `Tagged step with border decoration and shading.`, plain=`Tagged step with border decoration and shading.`, deco=Full, shade=#dcdcdc, tags=[(`user`)]);
-    simple(45, 1a9866f8, `Moved step with tags. The tags move to the target step together with 
+    simple(43, d3b571df, `Deleted step with tags`, plain=`Deleted step with tags`, change=(removed, yellow), tags=[(`user`, `Tags of deleted steps are displayed with black background, grey (disabled) icon and grey border. They can no longer be edited nor moved nor deleted. Any freetext is still displayed as tooltip. `), (`icon_only`), (`label_only`)]);
+    break(44, 220753bc, `<b>Tagged break</b>`, plain=`Tagged break`, tags=[(`user`, `Tags of break steps are not mirrored in the corresponding catch area's heading.`)]);
+    simple(45, c01bc240, `Tagged step with border decoration and shading.`, plain=`Tagged step with border decoration and shading.`, deco=Full, shade=#dcdcdc, tags=[(`user`)]);
+    simple(46, 1a9866f8, `Moved step with tags. The tags move to the target step together with 
     content. The source step does not keep them.`, plain=`Moved step with tags. The tags move to the target step together with content. The source step does not keep them.`, change=(target, yellow, sourceStep=cf97c413), tags=[(`user`)]);
     catchArea {
         catch(10, `<b>Exception 1 - should have single line text</b>`, plain=`Exception 1 - should have single line text`, headingWidth=21) {
@@ -368,8 +415,8 @@ Tags - just like the step number - will not change on folding the step.`)]) {
         catch(15, `<b>Exception 2</b>`, plain=`Exception 2`, headingWidth=21) {
             simple(15.1, e1b5c243, `Sequence for handling the second exception`, plain=`Sequence for handling the second exception`);
         }
-        catch(43, `<b>Tagged break</b>`, plain=`Tagged break`) {
-            simple(43.1, f7dc3b9f, `Neuer Schritt 1`, plain=`Neuer Schritt 1`, tags=[(`label_only`, `Catch area headings are not actually steps and therefore don't support the attachment of tags. The steps in the handling sequence of course do.`)]);
+        catch(44, `<b>Tagged break</b>`, plain=`Tagged break`) {
+            simple(44.1, f7dc3b9f, `Neuer Schritt 1`, plain=`Neuer Schritt 1`, tags=[(`label_only`, `Catch area headings are not actually steps and therefore don't support the attachment of tags. The steps in the handling sequence of course do.`)]);
         }
     }
 }
