@@ -16,6 +16,9 @@ public class ImageEditAreaGlassPane extends JPanel {
       "fill:8px,pref:grow,fill:8px",
       "fill:8px,fill:pref:grow,fill:3px,fill:pref:grow,fill:8px"));
     setBackground(FOCUS_AND_DELETED_GLASS_COLOR);
+    // A translucent component must not claim to be opaque: Swing would then repaint the glass alone, without the
+    // image below it, and leftovers of its shared paint buffer (menus, toolbars) would shine through the glass.
+    setOpaque(false);
 
     if (changeInfo.isDeleted()) {
       new ImageDeletedMarker();
@@ -32,6 +35,13 @@ public class ImageEditAreaGlassPane extends JPanel {
     removeAll();
     new ImageDeletedMarker();
     revalidate();
+  }
+
+  /** A non-opaque panel doesn't paint its background, so the glass fills itself. */
+  @Override
+  protected void paintComponent(Graphics g) {
+    g.setColor(getBackground());
+    g.fillRect(0, 0, getWidth(), getHeight());
   }
 
   /** The translucent glass with its markers, positioned relative to the glass pane's parent. */
