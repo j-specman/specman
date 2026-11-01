@@ -11,6 +11,8 @@ import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.TextInit;
 import static specman.ChangeSet.changeset;
+
+import specman.editarea.image.AbstractImageEditArea;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.TableEditAreaModel_V002;
 import specman.pdf.Shape;
@@ -18,7 +20,6 @@ import specman.undo.UndoableTableColumnAdded;
 import specman.undo.UndoableTableColumnRemoved;
 import specman.undo.UndoableTableRowAdded;
 import specman.undo.UndoableTableRowRemoved;
-import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
 import specman.view.AbstractSchrittView;
 import specman.visitor.DiagramVisitor;

@@ -1,4 +1,4 @@
-package specman.editarea.plantuml;
+package specman.editarea.image.plantuml;
 
 import specman.i18n.IButton;
 import specman.i18n.IFileNameExtensionFilter;

@@ -1,12 +1,9 @@
 package specman.undo.props;
 
-import specman.Aenderungsart;
 import specman.ChangeInfo;
-import specman.Specman;
 import specman.editarea.EditArea;
-import specman.editarea.plantuml.PlantUmlImageEditArea;
-import specman.editarea.plantuml.PlantUmlSourceBackup;
-import specman.editarea.EditArea;
+import specman.editarea.image.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.plantuml.PlantUmlSourceBackup;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.metatag.stepnumberlabel.StepnumberLabel.LabelStructure;
 import specman.undo.AbstractUndoableInteraction;

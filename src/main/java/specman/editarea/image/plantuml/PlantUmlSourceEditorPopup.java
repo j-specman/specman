@@ -1,4 +1,4 @@
-package specman.editarea.plantuml;
+package specman.editarea.image.plantuml;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import specman.graphics.Styles;

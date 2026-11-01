@@ -3,7 +3,7 @@ package specman.visitor;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.editarea.AbstractListItemEditArea;
-import specman.editarea.AbstractImageEditArea;
+import specman.editarea.image.AbstractImageEditArea;
 import specman.editarea.TextEditArea;
 
 /**

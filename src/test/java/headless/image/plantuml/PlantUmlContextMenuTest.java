@@ -1,10 +1,10 @@
-package headless.plantuml;
+package headless.image.plantuml;
 
 import org.junit.jupiter.api.Test;
 import specman.ChangeSet;
 import specman.editarea.EditContainer;
-import specman.editarea.plantuml.PlantUmlContextMenu;
-import specman.editarea.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.plantuml.PlantUmlContextMenu;
+import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 
 import javax.swing.JMenuItem;
 

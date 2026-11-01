@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import specman.editarea.EditArea;
 import specman.editarea.EditContainer;
-import specman.editarea.ImageEditArea;
+import specman.editarea.image.ImageEditArea;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.ops.buttons.CreateIfElseStepOpButton;

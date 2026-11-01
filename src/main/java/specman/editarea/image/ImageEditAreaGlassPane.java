@@ -1,4 +1,4 @@
-package specman.editarea;
+package specman.editarea.image;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;

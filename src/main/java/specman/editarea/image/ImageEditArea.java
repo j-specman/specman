@@ -1,4 +1,4 @@
-package specman.editarea;
+package specman.editarea.image;
 
 import specman.ChangeInfo;
 import specman.model.v002.ImageEditAreaModel_V002;
@@ -16,7 +16,7 @@ import java.io.IOException;
 public class ImageEditArea extends AbstractImageEditArea {
   private final BufferedImage fullSizeImage;
 
-  ImageEditArea(BufferedImage fullSizeImage, ChangeInfo changeInfo) {
+  public ImageEditArea(BufferedImage fullSizeImage, ChangeInfo changeInfo) {
     super(changeInfo, 1);
     this.fullSizeImage = fullSizeImage;
   }

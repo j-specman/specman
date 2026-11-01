@@ -1,10 +1,10 @@
-package headless.plantuml;
+package headless.image.plantuml;
 
 import headless.HeadlessExtension;
 import net.atlanticbb.tantlinger.ui.text.actions.PlantUmlAction;
 import org.junit.jupiter.api.extension.ExtendWith;
 import specman.editarea.EditContainer;
-import specman.editarea.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.view.EinfacherSchrittView;
 
 import static headless.HeadlessExtension.specman;

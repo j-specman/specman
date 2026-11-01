@@ -2,6 +2,7 @@ package specman.editarea;
 
 import specman.ChangeInfo;
 import specman.ChangeSet;
+import specman.editarea.image.AbstractImageEditArea;
 import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.pdf.Shape;
 import specman.visitor.DiagramVisitor;

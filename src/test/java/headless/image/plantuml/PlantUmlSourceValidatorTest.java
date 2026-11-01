@@ -1,7 +1,7 @@
-package headless.plantuml;
+package headless.image.plantuml;
 
 import org.junit.jupiter.api.Test;
-import specman.editarea.plantuml.PlantUmlSourceValidator;
+import specman.editarea.image.plantuml.PlantUmlSourceValidator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

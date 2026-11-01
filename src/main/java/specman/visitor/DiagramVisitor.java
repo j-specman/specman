@@ -2,7 +2,7 @@ package specman.visitor;
 
 import specman.editarea.AbstractListItemEditArea;
 import specman.editarea.EditContainer;
-import specman.editarea.AbstractImageEditArea;
+import specman.editarea.image.AbstractImageEditArea;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;

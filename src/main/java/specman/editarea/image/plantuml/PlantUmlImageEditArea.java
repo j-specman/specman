@@ -1,26 +1,20 @@
-package specman.editarea.plantuml;
+package specman.editarea.image.plantuml;
 
-import com.formdev.flatlaf.extras.FlatSVGIcon;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
 import specman.EditorI;
-import specman.editarea.AbstractImageEditArea;
+import specman.editarea.image.AbstractSvgImageEditArea;
 import specman.model.v002.PlantUmlImageEditAreaModel_V002;
 import specman.pdf.ShapeImage;
-import specman.pdf.ShapeSvgImage;
 import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
 
-import javax.swing.Icon;
-import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 
 import static specman.ChangeSet.changeset;
 import static specman.Specman.editor;
@@ -30,14 +24,13 @@ import static specman.util.ObjectUtils.nvl;
  * A double click opens a note-like editor for the source to the right of the diagram. The diagram is only updated
  * on F5 and when the editor is left, because most intermediate states while typing are not sensible diagrams.
  * The model persists the source only, the diagram is rendered from it when loading. */
-public class PlantUmlImageEditArea extends AbstractImageEditArea {
+public class PlantUmlImageEditArea extends AbstractSvgImageEditArea {
   private String source;
   /** The source from before a change set changed it, null as long as the source is unchanged. Rejecting the
    * change brings it back, and changing the source back to it takes the change mark away. */
   private PlantUmlSourceBackup backup;
   /** Differs from the source while the editor shows the preview the user asked for by F5. */
   private String displayedSource;
-  private FlatSVGIcon diagram;
   /** True from the insertion of a new diagram until the user confirmed some content. Leaving the editor
    * before that takes the diagram out again, as if it had never been inserted. */
   private boolean awaitingFirstContent;
@@ -67,7 +60,7 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
   }
 
   private void render(String sourceToRender) {
-    diagram = PlantUmlRenderer.toIcon(PlantUmlRenderer.renderSvg(sourceToRender));
+    showSvg(PlantUmlRenderer.renderSvg(sourceToRender));
   }
 
   public String getSource() { return source; }
@@ -164,10 +157,15 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
     super.aenderungsmarkierungenEntfernen();
   }
 
-  /** For a diagram that has just been inserted with empty content: lets the user enter the content right away. */
+  /** For a diagram that has just been inserted with empty content: lets the user enter the content right away.
+   * The relayout which the insertion requested may still be pending, and the editor is placed by the diagram's
+   * position on screen at the time it is shown. So the layout is completed and the diagram scrolled into view
+   * first, otherwise the editor can end up far from the diagram, e.g. for a diagram in the outro. */
   public void startFirstEdit() {
     awaitingFirstContent = true;
     if (isShowing()) {
+      SwingUtilities.getRoot(this).validate();
+      scrollRectToVisible(new Rectangle(getSize()));
       editSource();
     }
   }
@@ -243,34 +241,10 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
     popup.showRightOf(this);
   }
 
-  @Override
-  protected int intrinsicWidth() { return diagram.getIconWidth(); }
-
-  @Override
-  protected Icon createScaledIcon(float totalScalePercent) {
-    return diagram.derive(
-      Math.round(diagram.getIconWidth() * totalScalePercent),
-      Math.round(diagram.getIconHeight() * totalScalePercent));
-  }
-
   /** Rendered anew, as PDF export is rare and rendering is cheap, so there is no need to keep the SVG in memory. */
   @Override
   protected ShapeImage createShapeImage() {
-    return new ShapeSvgImage(this, PlantUmlRenderer.renderSvg(displayedSource), diagram.getIconWidth(), diagram.getIconHeight());
-  }
-
-  @Override
-  public BufferedImage getFullSizeImage() {
-    BufferedImage bitmap = new BufferedImage(diagram.getIconWidth(), diagram.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-    Graphics2D g = bitmap.createGraphics();
-    try {
-      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-      diagram.paintIcon(new JLabel(), g, 0, 0);
-    }
-    finally {
-      g.dispose();
-    }
-    return bitmap;
+    return vectorShapeImage(PlantUmlRenderer.renderSvg(displayedSource));
   }
 
   @Override

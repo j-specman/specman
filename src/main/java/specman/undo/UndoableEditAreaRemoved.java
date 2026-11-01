@@ -1,9 +1,7 @@
 package specman.undo;
 
 import specman.EditException;
-import specman.Specman;
 import specman.editarea.EditArea;
-import specman.editarea.ImageEditArea;
 import specman.editarea.TextEditArea;
 import specman.editarea.EditContainer;
 import static specman.Specman.editor;

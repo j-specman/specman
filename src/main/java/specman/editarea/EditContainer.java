@@ -13,7 +13,10 @@ import specman.ChangeInfo;
 import static specman.ChangeSet.changeset;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedPosition;
-import specman.editarea.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.AbstractImageEditArea;
+import specman.editarea.image.ImageEditArea;
+import specman.editarea.image.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.SvgImageEditArea;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.metatag.MetaTagPanel;
 import specman.metatag.TagMoveDirection;
@@ -23,6 +26,7 @@ import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
 import specman.model.v002.PlantUmlImageEditAreaModel_V002;
+import specman.model.v002.SvgImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.model.v002.TableEditAreaModel_V002;
 import specman.model.v002.TextEditAreaModel_V002;
@@ -156,6 +160,9 @@ public class EditContainer extends JPanel {
 			}
 			else if (editAreaModel instanceof PlantUmlImageEditAreaModel_V002) {
 				editArea = new PlantUmlImageEditArea((PlantUmlImageEditAreaModel_V002) editAreaModel);
+			}
+			else if (editAreaModel instanceof SvgImageEditAreaModel_V002) {
+				editArea = new SvgImageEditArea((SvgImageEditAreaModel_V002) editAreaModel);
 			}
 			else if (editAreaModel instanceof TableEditAreaModel_V002) {
 				editArea = new TableEditArea((TableEditAreaModel_V002) editAreaModel);
@@ -481,6 +488,10 @@ public class EditContainer extends JPanel {
 		PlantUmlImageEditArea diagram = new PlantUmlImageEditArea(plantUmlSource, TextInit.initialChangeInfo());
 		addImageAreaUDBL(diagram, initiatingTextArea);
 		return diagram;
+	}
+
+	public void addSvgImageUDBL(String svgSource, TextEditArea initiatingTextArea) {
+		addImageAreaUDBL(new SvgImageEditArea(svgSource, TextInit.initialChangeInfo()), initiatingTextArea);
 	}
 
 	private void addImageAreaUDBL(AbstractImageEditArea imageEditArea, TextEditArea initiatingTextArea) {

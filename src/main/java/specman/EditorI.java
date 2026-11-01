@@ -6,7 +6,7 @@ import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
-import specman.editarea.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigListener;

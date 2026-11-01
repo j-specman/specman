@@ -1,4 +1,4 @@
-package headless.plantuml;
+package headless.image.plantuml;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

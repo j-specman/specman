@@ -1,12 +1,10 @@
-package specman.editarea.plantuml;
+package specman.editarea.image.plantuml;
 
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
-import com.formdev.flatlaf.extras.FlatSVGIcon;
 import specman.graphics.Styles;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -20,15 +18,6 @@ public final class PlantUmlRenderer {
       + "\nskinparam monospacedFontName \"" + Styles.MONOSPACEFONT.getFamily() + "\"";
 
   private PlantUmlRenderer() {}
-
-  public static FlatSVGIcon toIcon(byte[] svg) {
-    try {
-      return new FlatSVGIcon(new ByteArrayInputStream(svg));
-    }
-    catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-  }
 
   /** Syntax errors do not throw - PlantUML renders them as an error graphic. */
   public static byte[] renderSvg(String plantUmlSource) {

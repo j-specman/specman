@@ -11,9 +11,9 @@ import specman.Specman;
 import specman.editarea.EditArea;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
-import specman.editarea.plantuml.PlantUmlContextMenu;
-import specman.editarea.plantuml.PlantUmlFileChoice;
-import specman.editarea.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.plantuml.PlantUmlContextMenu;
+import specman.editarea.image.plantuml.PlantUmlFileChoice;
+import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.link.AliasListPanel;
 import specman.metatag.stepnumberlabel.StepnumberContextMenu;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
@@ -88,6 +88,7 @@ public class SpecmanFT extends Specman {
   private final Clipboard clipboard = new Clipboard("specman-test");
   private int confirmDialogAnswer = JOptionPane.YES_OPTION;
   private File fileChoiceAnswer;
+  private File imageFileChoiceAnswer;
   private PlantUmlFileChoice plantUmlFileChoiceAnswer = PlantUmlFileChoice.emptyDiagram();
   private boolean plantUmlEmptyDiagramOffered;
   private AliasListPanel openedAliasListPanel;
@@ -599,6 +600,16 @@ public class SpecmanFT extends Specman {
   public PlantUmlFileChoice choosePlantUmlFile(boolean emptyDiagramOffered) {
     plantUmlEmptyDiagramOffered = emptyDiagramOffered;
     return plantUmlFileChoiceAnswer;
+  }
+
+  /** Defines the file the user picks when asked for an image file, null for cancelling the choice. */
+  public void answerImageFileChoiceWith(File file) {
+    imageFileChoiceAnswer = file;
+  }
+
+  @Override
+  public File chooseImageFile() {
+    return imageFileChoiceAnswer;
   }
 
   /** The links which would have started another Specman instance, in the order of following them. */

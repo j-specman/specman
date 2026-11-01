@@ -6,7 +6,7 @@ import specman.ScrollPause;
 import specman.SpaltenResizer;
 import specman.Specman;
 import specman.editarea.EditContainer;
-import specman.editarea.plantuml.PlantUmlFileChoice;
+import specman.editarea.image.plantuml.PlantUmlFileChoice;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.view.AbstractSchrittView;
@@ -42,6 +42,8 @@ public interface SpecmanOpContext extends EditorI {
    *                            only possible when creating a new diagram
    * @return the chosen file, or the choice to start empty (if offered), or the choice to cancel */
   PlantUmlFileChoice choosePlantUmlFile(boolean emptyDiagramOffered);
+  /** Asks the user for an image file, null if the user doesn't choose any. */
+  File chooseImageFile();
   /** Starts another Specman instance, which follows the link. */
   void openInNewInstance(String link);
   /** Hands the web or mail address to the system, which opens it with the user's browser or mail program. */

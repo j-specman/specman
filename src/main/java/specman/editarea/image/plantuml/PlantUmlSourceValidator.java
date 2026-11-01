@@ -1,4 +1,4 @@
-package specman.editarea.plantuml;
+package specman.editarea.image.plantuml;
 
 import net.sourceforge.plantuml.syntax.SyntaxChecker;
 import net.sourceforge.plantuml.syntax.SyntaxResult;

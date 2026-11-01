@@ -26,6 +26,7 @@ grammar SpecmanModel_V002;
 //                      write or update this field if capable.
 //   image            — type=png: inline base64 image data, agents must ignore these blocks.
 //                      type=plantuml: PlantUML source in backticks, agents can read and edit it.
+//                      type=svg: SVG source in backticks, agents can read it.
 //
 // EditContainer pattern (EditorContentModel_V002):
 //   Wherever the model contains an EditorContentModel, the format
@@ -294,9 +295,12 @@ tableCell
 // edit the source like any other text; Specman renders the diagram from it when loading.
 // backup=(changeset, `source`) is the content's own change tracking, like markups for text: the source from before
 // the named change set changed it. Specman maintains it for accepting and rejecting the change, agents leave it alone.
+// SvgImageEditAreaModel_V002 (type=svg, content = SVG source in backticks) — an imported vector graphic, which is
+// not edited in Specman. Backticks in the SVG are written as the character reference &#96;.
 imageBlock
     : 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' ID (',' changeParam)? ')' '{' BASE64_BLOCK '}'
     | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'plantuml' (',' changeParam)? ')' '{' BACKTICK_STRING (',' backupAttr)? '}'
+    | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'svg' (',' changeParam)? ')' '{' BACKTICK_STRING '}'
     ;
 
 backupAttr
@@ -433,6 +437,7 @@ KW_ROW             : 'row' ;
 KW_CELL            : 'cell' ;
 KW_IMAGE           : 'image' ;
 KW_PLANTUML        : 'plantuml' ;
+KW_SVG             : 'svg' ;
 KW_TEXT            : 'text' ;
 KW_ORDERED         : 'ordered' ;
 KW_FLAT            : 'flat' ;

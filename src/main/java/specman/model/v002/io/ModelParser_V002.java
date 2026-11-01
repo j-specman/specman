@@ -27,6 +27,7 @@ import specman.model.v002.IfStepModel_V002;
 import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
 import specman.model.v002.PlantUmlImageEditAreaModel_V002;
+import specman.model.v002.SvgImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.model.v002.Markup_V002;
 import specman.model.v002.MetaTagConfigModel_V002;
@@ -793,6 +794,9 @@ public class ModelParser_V002 {
     private AbstractImageEditAreaModel_V002 buildImage(SpecmanModel_V002Parser.ImageBlockContext ctx) {
         float scale = parseScalePercent(ctx.PERCENT().getText());
         ChangeInfo changeInfo = buildChangeInfo(ctx.changeParam());
+        if (ctx.KW_SVG() != null) {
+            return new SvgImageEditAreaModel_V002(stripBackticks(ctx.BACKTICK_STRING().getText()), scale, changeInfo);
+        }
         if (ctx.BACKTICK_STRING() != null) {
             String source = stripBackticks(ctx.BACKTICK_STRING().getText());
             SpecmanModel_V002Parser.BackupAttrContext backup = ctx.backupAttr();

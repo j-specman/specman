@@ -6,7 +6,7 @@ import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.layout.Document;
 import com.itextpdf.svg.converter.SvgConverter;
 import com.itextpdf.svg.processors.impl.SvgConverterProperties;
-import specman.editarea.AbstractImageEditArea;
+import specman.editarea.image.AbstractImageEditArea;
 
 import java.awt.Point;
 import java.io.ByteArrayInputStream;

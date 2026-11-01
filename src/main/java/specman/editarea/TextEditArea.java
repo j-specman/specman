@@ -4,6 +4,7 @@ import net.atlanticbb.tantlinger.ui.text.CompoundUndoManager;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
+import specman.editarea.image.AbstractImageEditArea;
 import specman.visitor.DiagramVisitor;
 import specman.visitor.StopTraversalException;
 
@@ -17,7 +18,7 @@ import specman.editarea.document.LeadingNewlineProtection;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedElement;
 import specman.editarea.document.WrappedPosition;
-import specman.editarea.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.metatag.stepnumberlabel.BreakCatchScrollMouseAdapter;
 import specman.model.v002.Markup_V002;
 import specman.model.v002.TableEditAreaModel_V002;
@@ -457,6 +458,10 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     public PlantUmlImageEditArea addPlantUmlImage(String plantUmlSource) {
         return getParent().addPlantUmlImageUDBL(plantUmlSource, this);
+    }
+
+    public void addSvgImage(String svgSource) {
+        getParent().addSvgImageUDBL(svgSource, this);
     }
 
     public EditArea addTable(int columns, int rows) {

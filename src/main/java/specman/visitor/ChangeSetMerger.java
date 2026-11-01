@@ -3,7 +3,7 @@ package specman.visitor;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeSet;
 import specman.editarea.AbstractListItemEditArea;
-import specman.editarea.AbstractImageEditArea;
+import specman.editarea.image.AbstractImageEditArea;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.view.AbstractSchrittView;

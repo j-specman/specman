@@ -1,7 +1,7 @@
 package specman.editarea.focusmover;
 
 import specman.editarea.EditArea;
-import specman.editarea.AbstractImageEditArea;
+import specman.editarea.image.AbstractImageEditArea;
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedBadLocationException;
 import specman.editarea.focusmover.EditAreaNeighbourFinder.Direction;

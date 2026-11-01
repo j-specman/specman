@@ -1,4 +1,4 @@
-package specman.editarea;
+package specman.editarea.image;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
@@ -8,6 +8,12 @@ import specman.ChangeSet;
 import specman.EditorI;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
+import specman.editarea.EditArea;
+import specman.editarea.EditContainer;
+import specman.editarea.ImageClipboardSelection;
+import specman.editarea.Indentions;
+import specman.editarea.InteractiveStepFragment;
+import specman.editarea.TextEditArea;
 import specman.editarea.focusmover.CrossEditAreaFocusMoverFromImage;
 import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.pdf.Shape;

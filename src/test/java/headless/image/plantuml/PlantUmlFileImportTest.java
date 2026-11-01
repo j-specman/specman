@@ -1,11 +1,11 @@
-package headless.plantuml;
+package headless.image.plantuml;
 
 import net.atlanticbb.tantlinger.ui.text.actions.PlantUmlAction;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import specman.editarea.EditContainer;
-import specman.editarea.plantuml.PlantUmlFileChoice;
-import specman.editarea.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.plantuml.PlantUmlFileChoice;
+import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

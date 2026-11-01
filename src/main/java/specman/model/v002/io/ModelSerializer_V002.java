@@ -22,6 +22,7 @@ import specman.model.v002.IfStepModel_V002;
 import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
 import specman.model.v002.PlantUmlImageEditAreaModel_V002;
+import specman.model.v002.SvgImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.model.v002.Markup_V002;
 import specman.model.v002.MetaTagConfigModel_V002;
@@ -390,6 +391,9 @@ public class ModelSerializer_V002 {
 
     // ---- Image ----
 
+    /** The XML way to write a backtick, which would end the source in the model file. */
+    private static final String BACKTICK_CHARACTER_REFERENCE = "&#96;";
+
     private void appendImage(AbstractImageEditAreaModel_V002 imageArea) {
         double scale = Math.round((double) imageArea.individualScalePercent * 10000.0) / 100.0;
         String scaleStr = String.format(java.util.Locale.US, "%.2f", scale).replaceAll("\\.?0+$", "");
@@ -422,6 +426,9 @@ public class ModelSerializer_V002 {
         if (imageArea instanceof PlantUmlImageEditAreaModel_V002) {
             return PlantUmlImageEditAreaModel_V002.IMAGE_TYPE;
         }
+        if (imageArea instanceof SvgImageEditAreaModel_V002) {
+            return SvgImageEditAreaModel_V002.IMAGE_TYPE;
+        }
         String type = ((ImageEditAreaModel_V002) imageArea).imageType;
         return type != null ? type : "png";
     }
@@ -429,6 +436,9 @@ public class ModelSerializer_V002 {
     private static String imageContentOf(AbstractImageEditAreaModel_V002 imageArea) {
         if (imageArea instanceof PlantUmlImageEditAreaModel_V002 plantUml) {
             return "`" + plantUml.source + "`";
+        }
+        if (imageArea instanceof SvgImageEditAreaModel_V002 svg) {
+            return "`" + svg.source.replace("`", BACKTICK_CHARACTER_REFERENCE) + "`";
         }
         byte[] imageData = ((ImageEditAreaModel_V002) imageArea).imageData;
         return "[base64:" + (imageData != null ? Base64.getEncoder().encodeToString(imageData) : "") + "]";

@@ -2,7 +2,7 @@ package experiments.plantuml;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import specman.editarea.plantuml.PlantUmlRenderer;
+import specman.editarea.image.plantuml.PlantUmlRenderer;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

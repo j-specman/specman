@@ -1,9 +1,9 @@
-package headless.plantuml;
+package headless.image.plantuml;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import specman.editarea.EditContainer;
-import specman.editarea.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.view.AbstractSchrittView;
 
 import java.io.File;

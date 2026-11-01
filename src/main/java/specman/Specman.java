@@ -24,14 +24,13 @@ import specman.metatag.generic.config.MetaTagConfigsDialog;
 import specman.settings.SettingsDialog;
 
 import specman.editarea.InteractiveStepFragment;
-import specman.graphics.IconReader;
 import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.editarea.EditContainer;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
-import specman.editarea.plantuml.PlantUmlFileChoice;
-import specman.editarea.plantuml.PlantUmlFileChooser;
-import specman.editarea.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.plantuml.PlantUmlFileChoice;
+import specman.editarea.image.plantuml.PlantUmlFileChooser;
+import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.undo.UndoableSchrittHinzugefuegt;
 import specman.undo.manager.SpecmanUndoManager;
 import specman.undo.manager.UndoRecording;
@@ -714,6 +713,16 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 			fileChooser.setSelectedFile(suggestedFile);
 		}
 		return fileChooser.showOpenDialog(scrollPane) == JFileChooser.APPROVE_OPTION ? fileChooser.getSelectedFile() : null;
+	}
+
+	@Override
+	public File chooseImageFile() {
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setCurrentDirectory(new File("."));
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fileChooser.addChoosableFileFilter(new IFileNameExtensionFilter("msg.filter.images", AddImageSpecmanOp.IMAGE_FILE_EXTENSIONS));
+		fileChooser.setAcceptAllFileFilterUsed(true);
+		return fileChooser.showOpenDialog(getArbeitsbereich()) == JFileChooser.APPROVE_OPTION ? fileChooser.getSelectedFile() : null;
 	}
 
 	@Override

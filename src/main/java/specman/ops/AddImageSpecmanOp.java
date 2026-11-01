@@ -1,22 +1,26 @@
 package specman.ops;
 
 import specman.editarea.TextEditArea;
-import specman.editarea.plantuml.PlantUmlFileChoice;
-import specman.editarea.plantuml.PlantUmlImageEditArea;
-import specman.editarea.plantuml.PlantUmlSourceValidator;
-import specman.i18n.IFileNameExtensionFilter;
+import specman.editarea.image.plantuml.PlantUmlFileChoice;
+import specman.editarea.image.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.plantuml.PlantUmlSourceValidator;
+import specman.editarea.image.AbstractSvgImageEditArea;
+import specman.editarea.image.SvgNotDisplayableException;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.image.BufferedImage;
+import javax.swing.SwingUtilities;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Locale;
+
+import static specman.i18n.Messages.i18n;
 
 
 public class AddImageSpecmanOp extends AbstractSpecmanOp {
   public static final String EMPTY_PLANTUML = "@startuml\n\n@enduml";
+  public static final String[] IMAGE_FILE_EXTENSIONS = {"jpg", "png", "gif", "bmp", "svg"};
 
   public AddImageSpecmanOp(SpecmanOpContext context) {
     super(context);
@@ -62,7 +66,7 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
   /** @return the source in the file, or null if the user got told why it can't be used */
   private String readValidPlantUmlSource(File file) {
     try {
-      String source = readPlantUmlSource(file);
+      String source = readTextFile(file);
       String problem = new PlantUmlSourceValidator().problemOf(source);
       if (problem != null) {
         fehler("msg.plantuml.file.invalid", file.getName(), problem);
@@ -78,8 +82,8 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
 
   private static final String BYTE_ORDER_MARK = String.valueOf((char) 0xFEFF);
 
-  /** The source with the line breaks Specman uses and without the byte order mark some editors put at the start. */
-  private static String readPlantUmlSource(File file) throws IOException {
+  /** The text with the line breaks Specman uses and without the byte order mark some editors put at the start. */
+  private static String readTextFile(File file) throws IOException {
     String content = Files.readString(file.toPath(), StandardCharsets.UTF_8);
     return content
       .replace(BYTE_ORDER_MARK, "")
@@ -87,28 +91,45 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
       .replace('\r', '\n');
   }
 
+  /** Asks the user for an image file and adds it after the text. Bitmaps are added as bitmaps, SVG files as
+   * vector graphics. */
   public void addViaFileChooser() {
     TextEditArea lastFocused = getLastFocusedTextArea();
     if (lastFocused == null) {
       return;
     }
-    try {
-      JFileChooser fileChooser = new JFileChooser();
-      fileChooser.setCurrentDirectory(new File("."));
-      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-      fileChooser.addChoosableFileFilter(new IFileNameExtensionFilter("msg.filter.images", "jpg", "png", "gif", "bmp"));
-      fileChooser.setAcceptAllFileFilterUsed(true);
-      if (fileChooser.showOpenDialog(getArbeitsbereich()) == JFileChooser.APPROVE_OPTION) {
-        File selectedFile = fileChooser.getSelectedFile();
-        if (selectedFile != null && selectedFile.exists()) {
-          BufferedImage image = ImageIO.read(selectedFile);
-          lastFocused.addImage(image);
+    File selectedFile = context.chooseImageFile();
+    if (selectedFile != null && selectedFile.exists()) {
+      try {
+        if (isSvgFile(selectedFile)) {
+          addSvg(lastFocused, selectedFile);
+        }
+        else {
+          lastFocused.addImage(ImageIO.read(selectedFile));
         }
       }
+      catch (IOException iox) {
+        displayException(iox);
+      }
     }
-    catch (IOException iox) {
-      displayException(iox);
+  }
+
+  private static boolean isSvgFile(File file) {
+    return file.getName().toLowerCase(Locale.ROOT).endsWith(".svg");
+  }
+
+  /** A file which can't be displayed is refused, so no graphic which fails to render ever gets into a spec. */
+  private void addSvg(TextEditArea lastFocused, File file) throws IOException {
+    String source = readTextFile(file);
+    try {
+      AbstractSvgImageEditArea.toIcon(source.getBytes(StandardCharsets.UTF_8));
     }
+    catch (SvgNotDisplayableException notDisplayable) {
+      String reason = notDisplayable.getMessage() != null ? notDisplayable.getMessage() : i18n("msg.svg.file.invalid.noreason");
+      fehler("msg.svg.file.invalid", file.getName(), reason);
+      return;
+    }
+    lastFocused.addSvgImage(source);
   }
 
 }
