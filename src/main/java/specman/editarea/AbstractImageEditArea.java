@@ -9,7 +9,7 @@ import specman.EditorI;
 import specman.SpaltenContainerI;
 import specman.SpaltenResizer;
 import specman.editarea.focusmover.CrossEditAreaFocusMoverFromImage;
-import specman.model.v002.ImageEditAreaModel_V002;
+import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.pdf.Shape;
 import specman.pdf.ShapeImage;
 import specman.undo.UndoableEditAreaAdded;
@@ -45,7 +45,7 @@ import static specman.view.AbstractSchrittView.LINIENBREITE;
 /** Everything an edit area showing a picture shares - focus, border, change tracking, undo, key handling and
  * scaling to the available width. Subclasses only say how big the picture naturally is and how to draw it
  * at a given scale, see {@link #intrinsicWidth()} and {@link #createScaledIcon(float)}. */
-public abstract class AbstractImageEditArea extends JPanel implements EditArea<ImageEditAreaModel_V002>,
+public abstract class AbstractImageEditArea extends JPanel implements EditArea<AbstractImageEditAreaModel_V002>,
   FocusListener, MouseListener, KeyListener, ComponentListener, SpaltenContainerI {
   public static final String PERSISTED_IMAGETYPE = "png";
 

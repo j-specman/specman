@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
     @Type(value = TextEditAreaModel_V002.class,     name = "text"),
     @Type(value = ListItemEditAreaModel_V002.class, name = "listItem"),
     @Type(value = ImageEditAreaModel_V002.class,    name = "image"),
+    @Type(value = PlantUmlImageEditAreaModel_V002.class, name = "plantuml"),
     @Type(value = TableEditAreaModel_V002.class,    name = "table"),
 })
 public abstract class AbstractEditAreaModel_V002 {

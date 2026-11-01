@@ -22,6 +22,7 @@ import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
+import specman.model.v002.PlantUmlImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.model.v002.TableEditAreaModel_V002;
 import specman.model.v002.TextEditAreaModel_V002;
@@ -152,6 +153,9 @@ public class EditContainer extends JPanel {
 			}
 			else if (editAreaModel instanceof ImageEditAreaModel_V002) {
 				editArea = new ImageEditArea((ImageEditAreaModel_V002) editAreaModel);
+			}
+			else if (editAreaModel instanceof PlantUmlImageEditAreaModel_V002) {
+				editArea = new PlantUmlImageEditArea((PlantUmlImageEditAreaModel_V002) editAreaModel);
 			}
 			else if (editAreaModel instanceof TableEditAreaModel_V002) {
 				editArea = new TableEditArea((TableEditAreaModel_V002) editAreaModel);

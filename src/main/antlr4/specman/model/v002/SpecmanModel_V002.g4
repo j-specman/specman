@@ -24,7 +24,8 @@ grammar SpecmanModel_V002;
 //                      Specman --sanitize. Agents must not write or update this field.
 //   markups=         — character-level markup spans; managed by Specman. Agents may
 //                      write or update this field if capable.
-//   image            — inline base64 image data. Agents must ignore image blocks.
+//   image            — type=png: inline base64 image data, agents must ignore these blocks.
+//                      type=plantuml: PlantUML source in backticks, agents can read and edit it.
 //
 // EditContainer pattern (EditorContentModel_V002):
 //   Wherever the model contains an EditorContentModel, the format
@@ -288,9 +289,12 @@ tableCell
     | 'cell' '(' editContainerHead (',' changeParam)? ')' '{' editContainerTail '}'
     ;
 
-// ImageEditAreaModel_V002 — agents must skip this block entirely.
+// ImageEditAreaModel_V002 (type=png, content [base64:...]) — agents must skip these blocks entirely.
+// PlantUmlImageEditAreaModel_V002 (type=plantuml, content = PlantUML source in backticks) — agents can read and
+// edit the source like any other text; Specman renders the diagram from it when loading.
 imageBlock
     : 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' ID (',' changeParam)? ')' '{' BASE64_BLOCK '}'
+    | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'plantuml' (',' changeParam)? ')' '{' BACKTICK_STRING '}'
     ;
 
 // --- HTML content with optional Specman-managed metadata ---
@@ -422,6 +426,7 @@ KW_TABLE           : 'table' ;
 KW_ROW             : 'row' ;
 KW_CELL            : 'cell' ;
 KW_IMAGE           : 'image' ;
+KW_PLANTUML        : 'plantuml' ;
 KW_TEXT            : 'text' ;
 KW_ORDERED         : 'ordered' ;
 KW_FLAT            : 'flat' ;

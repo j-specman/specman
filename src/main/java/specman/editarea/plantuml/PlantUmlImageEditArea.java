@@ -4,12 +4,11 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import specman.ChangeInfo;
 import specman.EditorI;
 import specman.editarea.AbstractImageEditArea;
-import specman.model.v002.ImageEditAreaModel_V002;
+import specman.model.v002.PlantUmlImageEditAreaModel_V002;
 import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
 import specman.util.NoteEditorPopup;
 
-import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import java.awt.Font;
@@ -17,16 +16,13 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 
 import static specman.Specman.editor;
 
 /** An edit area showing a PlantUML diagram, rendered as SVG so it stays sharp at any zoom level.
  * A double click opens a note-like editor for the source to the right of the diagram. The diagram is only updated
  * on F5 and when the editor is left, because most intermediate states while typing are not sensible diagrams.
- * Proof of concept: the model still persists only the rendered bitmap, not the PlantUML source. */
+ * The model persists the source only, the diagram is rendered from it when loading. */
 public class PlantUmlImageEditArea extends AbstractImageEditArea {
   private static final PlantUmlRenderer RENDERER = new PlantUmlRenderer();
   private static final Font SOURCE_FONT = new Font("Courier Prime", Font.PLAIN, 13);
@@ -45,7 +41,16 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
    * before that takes the diagram out again, as if it had never been inserted. */
   private boolean awaitingFirstContent;
   public PlantUmlImageEditArea(String source, ChangeInfo changeInfo) {
-    super(changeInfo, 1);
+    this(source, 1, changeInfo);
+  }
+
+  public PlantUmlImageEditArea(PlantUmlImageEditAreaModel_V002 model) {
+    this(model.source, model.individualScalePercent,
+      model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
+  }
+
+  private PlantUmlImageEditArea(String source, float individualScalePercent, ChangeInfo changeInfo) {
+    super(changeInfo, individualScalePercent);
     this.source = source;
     this.displayedSource = source;
     this.diagram = RENDERER.renderDiagram(source);
@@ -150,14 +155,7 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
   }
 
   @Override
-  public ImageEditAreaModel_V002 toModel(boolean formatierterText) {
-    try {
-      ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-      ImageIO.write(getFullSizeImage(), PERSISTED_IMAGETYPE, bytes);
-      return new ImageEditAreaModel_V002(bytes.toByteArray(), PERSISTED_IMAGETYPE, individualScalePercent, getChangeInfo());
-    }
-    catch (IOException iox) {
-      throw new UncheckedIOException(iox);
-    }
+  public PlantUmlImageEditAreaModel_V002 toModel(boolean formatierterText) {
+    return new PlantUmlImageEditAreaModel_V002(source, individualScalePercent, getChangeInfo());
   }
 }

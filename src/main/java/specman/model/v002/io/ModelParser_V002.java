@@ -24,7 +24,9 @@ import specman.model.v002.DoWhileStepModel_V002;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.IfElseStepModel_V002;
 import specman.model.v002.IfStepModel_V002;
+import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
+import specman.model.v002.PlantUmlImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.model.v002.Markup_V002;
 import specman.model.v002.MetaTagConfigModel_V002;
@@ -788,8 +790,12 @@ public class ModelParser_V002 {
     // Image
     // -----------------------------------------------------------------------
 
-    private ImageEditAreaModel_V002 buildImage(SpecmanModel_V002Parser.ImageBlockContext ctx) {
+    private AbstractImageEditAreaModel_V002 buildImage(SpecmanModel_V002Parser.ImageBlockContext ctx) {
         float scale = parseScalePercent(ctx.PERCENT().getText());
+        ChangeInfo changeInfo = buildChangeInfo(ctx.changeParam());
+        if (ctx.BACKTICK_STRING() != null) {
+            return new PlantUmlImageEditAreaModel_V002(stripBackticks(ctx.BACKTICK_STRING().getText()), scale, changeInfo);
+        }
         String type = ctx.ID().getText();
         String base64Block = ctx.BASE64_BLOCK().getText(); // "[base64:...]"
         String base64Data = base64Block
@@ -798,7 +804,7 @@ public class ModelParser_V002 {
         byte[] imageData = base64Data.isEmpty()
             ? new byte[0]
             : Base64.getDecoder().decode(base64Data);
-        return new ImageEditAreaModel_V002(imageData, type, scale, buildChangeInfo(ctx.changeParam()));
+        return new ImageEditAreaModel_V002(imageData, type, scale, changeInfo);
     }
 
     // -----------------------------------------------------------------------
