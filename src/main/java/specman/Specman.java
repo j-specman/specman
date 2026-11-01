@@ -31,6 +31,7 @@ import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.editarea.plantuml.PlantUmlFileChoice;
 import specman.editarea.plantuml.PlantUmlFileChooser;
+import specman.editarea.plantuml.PlantUmlImageEditArea;
 import specman.undo.UndoableSchrittHinzugefuegt;
 import specman.undo.manager.SpecmanUndoManager;
 import specman.undo.manager.UndoRecording;
@@ -380,6 +381,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	@Override
+	public void importPlantUmlSource(PlantUmlImageEditArea diagram) {
+		new AddImageSpecmanOp(this).importPlantUml(diagram);
+	}
+
+	@Override
 	public void undoLastEditAndForget() {
 		undoManager.undoAndForget();
 	}
@@ -711,9 +717,9 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	@Override
-	public PlantUmlFileChoice choosePlantUmlFile() {
+	public PlantUmlFileChoice choosePlantUmlFile(boolean emptyDiagramOffered) {
 		File directory = diagrammDatei != null ? diagrammDatei.getParentFile() : null;
-		return new PlantUmlFileChooser(directory).choose(scrollPane);
+		return new PlantUmlFileChooser(directory, emptyDiagramOffered).choose(scrollPane);
 	}
 
 	/** Called while Specman is being constructed. Overrides must not depend on their own fields. */

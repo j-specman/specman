@@ -35,6 +35,7 @@ class PlantUmlFileImportTest extends AbstractPlantUmlTest {
     assertTrue(hasDiagram(container), "diagram must be inserted");
     assertEquals(TWO_CLASSES, diagramIn(container).getSource());
     assertEquals(List.of(), specman.shownMessages());
+    assertTrue(specman.plantUmlEmptyDiagramWasOffered(), "starting empty must be offered for a new diagram");
 
     specman.undo();
 

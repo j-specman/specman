@@ -89,6 +89,7 @@ public class SpecmanFT extends Specman {
   private int confirmDialogAnswer = JOptionPane.YES_OPTION;
   private File fileChoiceAnswer;
   private PlantUmlFileChoice plantUmlFileChoiceAnswer = PlantUmlFileChoice.emptyDiagram();
+  private boolean plantUmlEmptyDiagramOffered;
   private AliasListPanel openedAliasListPanel;
   private final List<String> aliasesAskedFor = new ArrayList<>();
   private final List<File> fileSuggestionsOffered = new ArrayList<>();
@@ -583,14 +584,20 @@ public class SpecmanFT extends Specman {
     return fileChoiceAnswer;
   }
 
-  /** Defines what the user chooses when asked where a new PlantUML diagram takes its source from. Without
-   * an answer, the user starts with an empty diagram. */
+  /** Defines what the user chooses when asked for a file with PlantUML source, either for a new diagram or to
+   * import into an existing one. Without an answer, the user starts with an empty diagram. */
   public void answerPlantUmlFileChoiceWith(PlantUmlFileChoice choice) {
     plantUmlFileChoiceAnswer = choice;
   }
 
+  /** Whether the user was offered to start with an empty diagram when asked for a PlantUML file the last time. */
+  public boolean plantUmlEmptyDiagramWasOffered() {
+    return plantUmlEmptyDiagramOffered;
+  }
+
   @Override
-  public PlantUmlFileChoice choosePlantUmlFile() {
+  public PlantUmlFileChoice choosePlantUmlFile(boolean emptyDiagramOffered) {
+    plantUmlEmptyDiagramOffered = emptyDiagramOffered;
     return plantUmlFileChoiceAnswer;
   }
 

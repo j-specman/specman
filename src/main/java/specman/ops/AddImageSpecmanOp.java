@@ -29,12 +29,15 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
     if (lastFocused == null) {
       return;
     }
-    PlantUmlFileChoice choice = context.choosePlantUmlFile();
+    PlantUmlFileChoice choice = context.choosePlantUmlFile(true);
     if (choice.isEmptyDiagram()) {
       addEmptyPlantUml(lastFocused);
     }
     else if (!choice.isCancelled()) {
-      addPlantUmlFromFile(lastFocused, choice.file());
+      String source = readValidPlantUmlSource(choice.file());
+      if (source != null) {
+        lastFocused.addPlantUmlImage(source);
+      }
     }
   }
 
@@ -44,18 +47,32 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
     SwingUtilities.invokeLater(diagram::startFirstEdit);
   }
 
-  private void addPlantUmlFromFile(TextEditArea lastFocused, File file) {
+  /** Asks the user for a file and replaces the source of the diagram by its content, which is subject to the same
+   * rules as in {@link #addPlantUml()}. In change mode, the replacement is a change like any other source change. */
+  public void importPlantUml(PlantUmlImageEditArea diagram) {
+    PlantUmlFileChoice choice = context.choosePlantUmlFile(false);
+    if (!choice.isCancelled()) {
+      String source = readValidPlantUmlSource(choice.file());
+      if (source != null) {
+        diagram.changeSource(source);
+      }
+    }
+  }
+
+  /** @return the source in the file, or null if the user got told why it can't be used */
+  private String readValidPlantUmlSource(File file) {
     try {
       String source = readPlantUmlSource(file);
       String problem = new PlantUmlSourceValidator().problemOf(source);
       if (problem != null) {
         fehler("msg.plantuml.file.invalid", file.getName(), problem);
-        return;
+        return null;
       }
-      lastFocused.addPlantUmlImage(source);
+      return source;
     }
     catch (IOException iox) {
       displayException(iox);
+      return null;
     }
   }
 

@@ -6,6 +6,7 @@ import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
+import specman.editarea.plantuml.PlantUmlImageEditArea;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigListener;
@@ -54,6 +55,8 @@ public interface EditorI extends FocusListener {
 	double scale(double length);
 	void addImageViaFileChooser();
 	void addPlantUmlImage();
+	/** Asks the user for a file and replaces the source of the diagram by its content. */
+	void importPlantUmlSource(PlantUmlImageEditArea diagram);
 	void undoLastEditAndForget();
 	List<AbstractSchrittView> listAllSteps();
 	void addTable(int numColumns, int numRows);
