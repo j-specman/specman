@@ -68,9 +68,9 @@ x Copy / Cut / Paste /Drag&Drop von Schritten mit PlantUML-Images prüfen. Sollt
   - Warum F5 und nicht automatisch beim Tippen: Eine unfertige oder vertippte Beziehung mit einem noch nicht existierenden Klassennamen lässt PlantUML implizit eine neue Klasse anlegen. Das Diagramm würde beim Tippen ständig unruhig umgebaut.
   - Die Aussage "Agents überspringen Image-Blöcke" im Kapitel zur KI-Unterstützung (Zeile ~519) gilt nur noch für type=png, PlantUML-Blöcke sollen Agents lesen und bearbeiten
 x Suche berücksichtigt (zunächst) keine PlantUML-Quelltexte
+x Nice-to-have: Quick Win, SVG Image Area, UI und Modellrepäsentation analog PlantUML, Editor und leere Anlage ohne Datei braucht man aber nicht
 - Nice-to-have: Quelltexteditor mit Zeilennummern versehen.
 - Idee für später (nicht jetzt): Für Bilder nicht nur Einbettung vorsehen, sondern auch Referenzierung anbieten (gibt die Selfcontained-Eigenschaft der Spec auf). Pfade über den bestehenden Alias-Mechanismus der Specman URLs auflösen. Damit auch saubere Lösung für PlantUML-Includes, und das Manual kann eher vor !include/!import warnen.
-- Mice-to-have: Quick Win, SVG Image Area, UI und Modellrepäsentation analog PlantUML, Editor und leere Anlage ohne Datei braucht man aber nicht
 
 Specman URLs:
 x Custom URL Scheme, z.B. specman://uc730,2d34f85e,1.3
