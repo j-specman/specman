@@ -794,7 +794,13 @@ public class ModelParser_V002 {
         float scale = parseScalePercent(ctx.PERCENT().getText());
         ChangeInfo changeInfo = buildChangeInfo(ctx.changeParam());
         if (ctx.BACKTICK_STRING() != null) {
-            return new PlantUmlImageEditAreaModel_V002(stripBackticks(ctx.BACKTICK_STRING().getText()), scale, changeInfo);
+            String source = stripBackticks(ctx.BACKTICK_STRING().getText());
+            SpecmanModel_V002Parser.BackupAttrContext backup = ctx.backupAttr();
+            if (backup == null) {
+                return new PlantUmlImageEditAreaModel_V002(source, null, null, scale, changeInfo);
+            }
+            return new PlantUmlImageEditAreaModel_V002(source, stripBackticks(backup.BACKTICK_STRING().getText()),
+                backup.ID().getText(), scale, changeInfo);
         }
         String type = ctx.ID().getText();
         String base64Block = ctx.BASE64_BLOCK().getText(); // "[base64:...]"

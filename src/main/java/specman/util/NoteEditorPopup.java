@@ -117,12 +117,12 @@ public class NoteEditorPopup extends JPopupMenu {
   }
 
   /** Fixed width of the given number of characters; height is whatever the wrapped text needs, but
-   * never less than minRows and never more than maxRows lines - beyond that the scroll bar takes over. */
-  public NoteEditorPopup withSize(int columns, int minRows, int maxRows) {
+   * never less than minRows and never more than maxRows lines - beyond that the scroll bar takes over.
+   * For subclasses which don't want the defaults. */
+  protected void setTextSize(int columns, int minRows, int maxRows) {
     this.columns = columns;
     this.minRows = minRows;
     this.maxRows = maxRows;
-    return this;
   }
 
   public void select(int selectionStart, int selectionEnd) {

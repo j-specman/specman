@@ -292,9 +292,15 @@ tableCell
 // ImageEditAreaModel_V002 (type=png, content [base64:...]) — agents must skip these blocks entirely.
 // PlantUmlImageEditAreaModel_V002 (type=plantuml, content = PlantUML source in backticks) — agents can read and
 // edit the source like any other text; Specman renders the diagram from it when loading.
+// backup=(changeset, `source`) is the content's own change tracking, like markups for text: the source from before
+// the named change set changed it. Specman maintains it for accepting and rejecting the change, agents leave it alone.
 imageBlock
     : 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' ID (',' changeParam)? ')' '{' BASE64_BLOCK '}'
-    | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'plantuml' (',' changeParam)? ')' '{' BACKTICK_STRING '}'
+    | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'plantuml' (',' changeParam)? ')' '{' BACKTICK_STRING (',' backupAttr)? '}'
+    ;
+
+backupAttr
+    : 'backup' '=' '(' ID ',' BACKTICK_STRING ')'
     ;
 
 // --- HTML content with optional Specman-managed metadata ---
@@ -443,6 +449,7 @@ KW_TYPE            : 'type' ;
 KW_CHANGE          : 'change' ;
 KW_SOURCE          : 'source' ;
 KW_SOURCE_STEP     : 'sourceStep' ;
+KW_BACKUP          : 'backup' ;
 KW_DECO            : 'deco' ;
 KW_SHADE           : 'shade' ;
 KW_COLLAPSED       : 'collapsed' ;

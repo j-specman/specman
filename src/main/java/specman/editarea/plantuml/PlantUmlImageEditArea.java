@@ -1,42 +1,39 @@
 package specman.editarea.plantuml;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
+import specman.ChangeSet;
 import specman.EditorI;
 import specman.editarea.AbstractImageEditArea;
-import specman.graphics.Styles;
 import specman.model.v002.PlantUmlImageEditAreaModel_V002;
 import specman.pdf.ShapeImage;
 import specman.pdf.ShapeSvgImage;
 import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
-import specman.util.NoteEditorPopup;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
-import java.awt.Font;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
+import static specman.ChangeSet.changeset;
 import static specman.Specman.editor;
+import static specman.util.ObjectUtils.nvl;
 
 /** An edit area showing a PlantUML diagram, rendered as SVG so it stays sharp at any zoom level.
  * A double click opens a note-like editor for the source to the right of the diagram. The diagram is only updated
  * on F5 and when the editor is left, because most intermediate states while typing are not sensible diagrams.
  * The model persists the source only, the diagram is rendered from it when loading. */
 public class PlantUmlImageEditArea extends AbstractImageEditArea {
-  private static final Font SOURCE_FONT = Styles.metaTagFont.deriveFont(Font.PLAIN, 13);
-  private static final int SOURCE_COLUMNS = 30;
-  private static final int SOURCE_MIN_ROWS = 6;
-  private static final int SOURCE_MAX_ROWS = 20;
-  /** The editor overlaps the right edge of the area a little, so it does not sit exactly on the step's border line.
-   * Like the editor's font, the inset is given for 100% zoom. */
-  private static final int SOURCE_EDITOR_INSET = 20;
-
   private String source;
+  /** The source from before a change set changed it, null as long as the source is unchanged. Rejecting the
+   * change brings it back, and changing the source back to it takes the change mark away. */
+  private PlantUmlSourceBackup backup;
   /** Differs from the source while the editor shows the preview the user asked for by F5. */
   private String displayedSource;
   private FlatSVGIcon diagram;
@@ -44,19 +41,28 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
    * before that takes the diagram out again, as if it had never been inserted. */
   private boolean awaitingFirstContent;
   public PlantUmlImageEditArea(String source, ChangeInfo changeInfo) {
-    this(source, 1, changeInfo);
+    this(source, null, 1, changeInfo);
   }
 
   public PlantUmlImageEditArea(PlantUmlImageEditAreaModel_V002 model) {
-    this(model.source, model.individualScalePercent,
+    this(model.source, backupOf(model), model.individualScalePercent,
       model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
   }
 
-  private PlantUmlImageEditArea(String source, float individualScalePercent, ChangeInfo changeInfo) {
+  private PlantUmlImageEditArea(String source, PlantUmlSourceBackup backup, float individualScalePercent, ChangeInfo changeInfo) {
     super(changeInfo, individualScalePercent);
     this.source = source;
+    this.backup = backup;
     this.displayedSource = source;
     render(source);
+    setBackground(panelColor());
+  }
+
+  private static PlantUmlSourceBackup backupOf(PlantUmlImageEditAreaModel_V002 model) {
+    if (!model.hasBackup()) {
+      return null;
+    }
+    return new PlantUmlSourceBackup(model.backupSource, nvl(ChangeSet.fromName(model.backupChangeset), changeset()));
   }
 
   private void render(String sourceToRender) {
@@ -71,11 +77,90 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
     display(source);
   }
 
+  public PlantUmlSourceBackup getBackup() { return backup; }
+
+  /** Not undoable on its own, see {@link #changeSource(String)}. */
+  public void setBackup(PlantUmlSourceBackup backup) { this.backup = backup; }
+
+  @Override
+  protected Color panelColor() {
+    return backup != null ? backup.changeSet().panelColor() : super.panelColor();
+  }
+
+  /** In change mode, the first change of the source keeps the source from before as backup, which marks the diagram
+   * as changed. Changing the source back to the backup takes the mark away again. A change by another change set
+   * doesn't take over the backup of the first one. */
   public void changeSource(String newSource) {
+    if (newSource.equals(source)) {
+      return;
+    }
     EditorI editor = editor();
     try (UndoRecording ur = editor.composeUndo()) {
+      if (backup == null && editor.aenderungenVerfolgen() && getChangeInfo().isUntracked()) {
+        setBackupUDBL(new PlantUmlSourceBackup(source, changeset()));
+      }
       UDBL.setPlantUmlSourceUDBL(this, newSource);
+      if (backup != null && newSource.equals(backup.source())) {
+        setBackupUDBL(null);
+      }
     }
+  }
+
+  private void setBackupUDBL(PlantUmlSourceBackup newBackup) {
+    UDBL.setPlantUmlBackupUDBL(this, newBackup);
+    setEditBackgroundUDBL(null);
+  }
+
+  private boolean isChangedBy(ChangeSet changeSet) {
+    return backup != null && backup.changedBy(changeSet);
+  }
+
+  @Override
+  public int aenderungenUebernehmen() {
+    if (isChangedBy(changeset())) {
+      setBackupUDBL(null);
+      return 1;
+    }
+    return super.aenderungenUebernehmen();
+  }
+
+  @Override
+  public int aenderungenVerwerfen() {
+    if (isChangedBy(changeset())) {
+      restoreBackupUDBL();
+      return 1;
+    }
+    return super.aenderungenVerwerfen();
+  }
+
+  /** A deleted diagram shows the source from before the change, like the passages of a text which existed before. */
+  @Override
+  public void setGeloeschtMarkiertStilUDBL(ChangeSet triggerSet) {
+    if (backup != null) {
+      restoreBackupUDBL();
+    }
+    super.setGeloeschtMarkiertStilUDBL(triggerSet);
+  }
+
+  private void restoreBackupUDBL() {
+    UDBL.setPlantUmlSourceUDBL(this, backup.source());
+    setBackupUDBL(null);
+  }
+
+  @Override
+  public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
+    if (isChangedBy(source)) {
+      setBackupUDBL(backup.reassign(target));
+    }
+    super.mergeChangeSetUDBL(target, source, withMarkups);
+  }
+
+  @Override
+  public void aenderungsmarkierungenEntfernen() {
+    if (isChangedBy(changeset())) {
+      backup = null;
+    }
+    super.aenderungsmarkierungenEntfernen();
   }
 
   /** For a diagram that has just been inserted with empty content: lets the user enter the content right away. */
@@ -146,16 +231,12 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
   }
 
   private void editSource() {
-    EditorI editor = editor();
-    Font scaledFont = SOURCE_FONT.deriveFont((float) editor.scale(SOURCE_FONT.getSize2D()));
-    int scaledInset = (int) Math.round(editor.scale(SOURCE_EDITOR_INSET));
-    NoteEditorPopup popup = new PlantUmlSourceEditorPopup(scaledFont, source, this::commitSource, this::editorClosed, this::show)
-      .withSize(SOURCE_COLUMNS, SOURCE_MIN_ROWS, SOURCE_MAX_ROWS);
+    PlantUmlSourceEditorPopup popup = new PlantUmlSourceEditorPopup(source, this::commitSource, this::editorClosed, this::show);
     if (awaitingFirstContent) {
       int emptyLineStart = source.indexOf('\n') + 1;
       popup.select(emptyLineStart, emptyLineStart);
     }
-    popup.showRightOf(this, scaledInset);
+    popup.showRightOf(this);
   }
 
   @Override
@@ -190,6 +271,9 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
 
   @Override
   public PlantUmlImageEditAreaModel_V002 toModel(boolean formatierterText) {
-    return new PlantUmlImageEditAreaModel_V002(source, individualScalePercent, getChangeInfo());
+    return new PlantUmlImageEditAreaModel_V002(source,
+      backup != null ? backup.source() : null,
+      backup != null ? backup.changeSet().name : null,
+      individualScalePercent, getChangeInfo());
   }
 }

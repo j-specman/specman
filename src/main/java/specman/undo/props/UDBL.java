@@ -5,6 +5,7 @@ import specman.ChangeInfo;
 import specman.Specman;
 import specman.editarea.EditArea;
 import specman.editarea.plantuml.PlantUmlImageEditArea;
+import specman.editarea.plantuml.PlantUmlSourceBackup;
 import specman.editarea.EditArea;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.metatag.stepnumberlabel.StepnumberLabel.LabelStructure;
@@ -76,6 +77,14 @@ public class UDBL {
     if (!Objects.equals(undoSource, source)) {
       diagram.setSource(source);
       addEdit(new UndoableSetProperty<>(undoSource, diagram::setSource, diagram::getSource));
+    }
+  }
+
+  public static void setPlantUmlBackupUDBL(PlantUmlImageEditArea diagram, PlantUmlSourceBackup backup) {
+    PlantUmlSourceBackup undoBackup = diagram.getBackup();
+    if (!Objects.equals(undoBackup, backup)) {
+      diagram.setBackup(backup);
+      addEdit(new UndoableSetProperty<>(undoBackup, diagram::setBackup, diagram::getBackup));
     }
   }
 

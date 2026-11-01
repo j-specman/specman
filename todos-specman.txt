@@ -52,10 +52,12 @@ x Doppelklick öffnet PlantUML Sourcecode-Editor als Dialog
   x Mehrere @startuml ebenfalls
   x Leerer Inhalt ebenfalls - nur Kommentare und Leerzeilen gilt ebenfalls als leer
   x ELK-Pragma wird automatisch ergänzt als einzige verfügbare Render-Engine
-- Wenn man im Änderungsmodus ändert, wird Hintergrund der EditArea entsprechend eingefärbt
-  - Das eigentliche Bild zeigt keine Änderungen an
+x Wenn man im Änderungsmodus ändert, wird Hintergrund der EditArea entsprechend eingefärbt
+  x Das eigentliche Bild zeigt keine Änderungen an
+  x Der Quelltext trackt Änderungen als Inhaltsänderung (nicht als Area-Änderung): erste Änderung sichert backup=(changeset, `quelltext`) hinter dem aktuellen Quelltext im Block. Zurückändern auf das Backup nimmt die Markierung weg. Ändert ein zweites Änderungsset, bleibt die Änderung beim ersten.
 x Undo / Redo
-- Annahme / Verwerfen der Änderungen
+x Annahme / Verwerfen der Änderungen
+  x Löschen eines geänderten Diagramms: Quelltext aus dem Backup, als gelöscht markiert
 x PDF-Export
   x Rendering von Text im SVG prüfen: Diagramm wird als Vektorgrafik mit echtem Text und eingebetteten Roboto/CourierPrime-Schriften ins PDF gezeichnet
 x Copy / Cut / Paste /Drag&Drop von Schritten mit PlantUML-Images prüfen. Sollte ganz normal funktionieren

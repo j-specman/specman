@@ -91,7 +91,7 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
     this.image = new JLabel();
     add(image, CC.xy(1, 1));
     this.add(new SpaltenResizer(this, IRRELEVANT_COLUMNRESIZE_INDEX), CC.xy(2, 1));
-    setBackground(changeInfo.panelColor());
+    setBackground(panelColor());
     image.setBorder(changetype2border());
     addComponentListener(this);
     updateListenersByChangeInfo();
@@ -358,7 +358,13 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
 
   @Override
   public void setEditBackgroundUDBL(Color bg) {
-    setBackgroundUDBL(changeInfo.panelColor());
+    setBackgroundUDBL(panelColor());
+  }
+
+  /** The background of the area, which marks its changes. Subclasses with changes of their own content
+   * extend this. Note that it is also asked while the base class is being constructed. */
+  protected Color panelColor() {
+    return changeInfo.panelColor();
   }
 
   public void setBackgroundUDBL(Color bg) {

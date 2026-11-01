@@ -112,6 +112,7 @@ public class ModelSerializer_V002 {
         sb.append(COMMENT_INTRO + " markups=[...] fields: change-tracking annotations, maintained by Specman\n");
         sb.append(COMMENT_INTRO + " image(..., type=png) { [base64:...] } blocks: embedded binary image data (base64-encoded)\n");
         sb.append(COMMENT_INTRO + " image(..., type=plantuml) { `...` } blocks: PlantUML source of a diagram, Specman renders the picture from it\n");
+        sb.append(COMMENT_INTRO + " backup=(changeset, `...`) in a plantuml image: source from before that change set changed it, maintained by Specman, leave it alone\n");
 
         appendSettings(model);
 
@@ -398,7 +399,23 @@ public class ModelSerializer_V002 {
         if (anno != null) {
             sb.append(", ").append(anno);
         }
-        sb.append(") { ").append(imageContentOf(imageArea)).append(" }\n");
+        sb.append(")");
+        if (imageArea instanceof PlantUmlImageEditAreaModel_V002 plantUml && plantUml.hasBackup()) {
+            appendPlantUmlContentWithBackup(plantUml);
+        }
+        else {
+            sb.append(" { ").append(imageContentOf(imageArea)).append(" }\n");
+        }
+    }
+
+    /** The source is not indented, because everything between the backticks is the source. */
+    private void appendPlantUmlContentWithBackup(PlantUmlImageEditAreaModel_V002 plantUml) {
+        String changeset = plantUml.backupChangeset != null ? plantUml.backupChangeset : "yellow";
+        sb.append(" {\n");
+        sb.append(indent()).append("    `").append(plantUml.source).append("`,\n");
+        sb.append(indent()).append("    ").append(BACKUP).append("=(").append(changeset)
+          .append(", `").append(plantUml.backupSource).append("`)\n");
+        sb.append(indent()).append("}\n");
     }
 
     private static String imageTypeOf(AbstractImageEditAreaModel_V002 imageArea) {

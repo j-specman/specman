@@ -5,6 +5,7 @@ import specman.graphics.Styles;
 import specman.util.NoteEditorPopup;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.KeyStroke;
 import javax.swing.Timer;
@@ -14,6 +15,7 @@ import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.util.function.Consumer;
 
+import static specman.Specman.editor;
 import static specman.i18n.Messages.i18n;
 
 /** The editor for PlantUML source. Most intermediate states while typing are not sensible diagrams, so the diagram
@@ -21,6 +23,13 @@ import static specman.i18n.Messages.i18n;
  * names the problem, or the F5 key if there is none. */
 public class PlantUmlSourceEditorPopup extends NoteEditorPopup {
   private static final PlantUmlSourceValidator VALIDATOR = new PlantUmlSourceValidator();
+  private static final Font SOURCE_FONT = Styles.metaTagFont.deriveFont(Font.PLAIN, 13);
+  private static final int COLUMNS = 30;
+  private static final int MIN_ROWS = 6;
+  private static final int MAX_ROWS = 20;
+  /** The editor overlaps the right edge of the diagram a little, so it does not sit exactly on the step's border line.
+   * Like the font, the inset is given for 100% zoom. */
+  private static final int INSET_OVER_DIAGRAM = 20;
   private static final int PROBLEM_CHECK_DELAY_MS = 600;
   private static final Color HINT_COLOR = Color.GRAY;
   private static final Color SEPARATOR_COLOR = Color.GRAY;
@@ -30,9 +39,15 @@ public class PlantUmlSourceEditorPopup extends NoteEditorPopup {
   private final Consumer<String> onPreview;
 
   /** @param onPreview receives the source when the user presses F5 and the source has no problem */
-  public PlantUmlSourceEditorPopup(Font font, String source, Consumer<String> onCommit, Runnable onClosed,
+  public PlantUmlSourceEditorPopup(String source, Consumer<String> onCommit, Runnable onClosed,
                                    Consumer<String> onPreview) {
+    this(scaledSourceFont(), source, onCommit, onClosed, onPreview);
+  }
+
+  private PlantUmlSourceEditorPopup(Font font, String source, Consumer<String> onCommit, Runnable onClosed,
+                                    Consumer<String> onPreview) {
     super(font, source, onCommit, onClosed);
+    setTextSize(COLUMNS, MIN_ROWS, MAX_ROWS);
     this.onPreview = onPreview;
     statusLabel.setFont(font.deriveFont(Font.PLAIN));
     statusLabel.setBackground(NOTE_BACKGROUND);
@@ -43,6 +58,17 @@ public class PlantUmlSourceEditorPopup extends NoteEditorPopup {
     setBelowText(statusLabel);
     problemCheckTimer.setRepeats(false);
     bindKey(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), "preview", this::preview);
+  }
+
+  /** The font is given for 100% zoom and follows the editor's zoom. It is proportional, because a monospaced font is
+   * too wide for the narrow editor. */
+  private static Font scaledSourceFont() {
+    return SOURCE_FONT.deriveFont((float) editor().scale(SOURCE_FONT.getSize2D()));
+  }
+
+  /** Shows the editor at the right edge of the diagram, overlapping it a little, see {@link #INSET_OVER_DIAGRAM}. */
+  public void showRightOf(JComponent diagram) {
+    showRightOf(diagram, (int) Math.round(editor().scale(INSET_OVER_DIAGRAM)));
   }
 
   @Override
