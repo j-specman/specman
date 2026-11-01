@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This descriptor is required for bundling the ELK renderer for PlantUML in Specman's single flat JAR. It is the same
+  descriptor as Maven's predefined "jar-with-dependencies" descriptor, plus one addition: the containerDescriptorHandler
+  "metaInf-services" below. It is referenced from the maven-assembly-plugin configuration in pom.xml via
+  <descriptors>, instead of the <descriptorRef> for the predefined one.
+
+  Why the handler is needed:
+  The predefined descriptor unpacks all dependencies into one big jar. If several dependencies contain a file with
+  the same path, only one of them ends up in the result, and the others are silently dropped. That is harmless for
+  almost all files, but fatal for the service registration files under META-INF/services/. Java's ServiceLoader finds
+  implementations of an interface by reading the file META-INF/services/<fully qualified interface name>, and a
+  library which is extended by several jars needs the entries of all of them in one file.
+
+  ELK, the layout engine PlantUML uses for "!pragma layout elk", is exactly such a case. Its core jar and the jar of
+  each layout algorithm (e.g. org.eclipse.elk.alg.layered) register themselves in files of the same name. In a fat
+  jar without merging, only one of these files survives, so ELK would miss some of its algorithms or options at
+  runtime.
+
+  The handler concatenates same-named files below META-INF/services/ instead of dropping all but one.
+
+  This only shows in the assembled jar. In the IDE and in Maven tests, all dependencies are separate jars on the
+  classpath, and ServiceLoader reads the files of all of them. So the automated tests will not find a regression
+  here. After touching the dependencies or this file, insert a PlantUML diagram with the assembled jar by hand.
+-->
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.1"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.1 https://maven.apache.org/xsd/assembly-2.1.1.xsd">
+    <id>jar-with-dependencies</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <containerDescriptorHandlers>
+        <containerDescriptorHandler>
+            <handlerName>metaInf-services</handlerName>
+        </containerDescriptorHandler>
+    </containerDescriptorHandlers>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>true</useProjectArtifact>
+            <unpack>true</unpack>
+            <scope>runtime</scope>
+        </dependencySet>
+    </dependencySets>
+</assembly>

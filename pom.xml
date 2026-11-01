@@ -290,6 +290,9 @@
                                     </mainClass>
                                 </manifest>
                             </archive>
+                            <!-- Custom descriptor instead of the predefined "jar-with-dependencies" one,
+                                 required for a special issue with the ELK renderer of PlantUML. Details
+                                 are explained in src/assembly/jar-with-dependencies.xml. -->
                             <descriptors>
                                 <descriptor>src/assembly/jar-with-dependencies.xml</descriptor>
                             </descriptors>
