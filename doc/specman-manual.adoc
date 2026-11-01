@@ -163,9 +163,13 @@ Hovering over such a spot highlights it and changes the mouse cursor, and a clic
 In a cell, Tab moves to the next cell, and Tab in the very last cell appends a row. Column widths are changed by dragging the dividers between the columns. The divider at the right edge of the table changes the width of the entire table. Pressing Esc while dragging cancels the change.
 
 ### Images
-The image button of the formatting toolbar opens a file chooser for JPG, PNG, GIF and BMP files. Alternatively, an image can be pasted from the clipboard (see above). The image is embedded in the diagram file as a PNG, so the original file is no longer needed.
+The image button of the formatting toolbar opens a file chooser for JPG, PNG, GIF, BMP and SVG files. Alternatively, a bitmap can be pasted from the clipboard (see above). A bitmap is embedded in the diagram file as a PNG, so the original file is no longer needed.
+
+An SVG file is embedded as its source text instead, so it stays a vector graphic, sharp at any zoom factor and in the PDF export as well. SVG graphics cannot be edited in Specman. Specman displays only what its SVG renderer supports. A file which cannot be displayed is refused with a message naming the reason.
 
 Clicking an image selects it. Delete or Backspace removes it, and Ctrl+C or Ctrl+X copies or cuts it. To continue typing below the image, press Enter. Dragging the narrow bar at the right edge of the image changes its size. An image is never wider than the diagram, and its size follows the zoom factor.
+
+If you insert images to illustrate model structures like domain class diagrams, see chapter <<plantuml,Class diagrams with PlantUML>> for a better alternative.
 
 ### Step links
 Step links are links to other steps within the text, like "see step 2.3". They are inserted with the step link button of the formatting toolbar, or by _Insert_ > _Link to Stepnumber..._. The dialog lists all steps by number and the beginning of their text. A filter field narrows the list, and a click on an entry inserts the link at the caret.
@@ -440,6 +444,66 @@ The output has exactly one line per URL, in the same order. Each line consists o
 
 The exit code is 1 if at least one line is an `ERROR`, otherwise 0. Aliases are taken from the settings of the user who runs the command.
 
+[#plantuml]
+## Class diagrams with PlantUML
+Every description of a procedure stands on a vocabulary. Have a look at the specification example about deleting a customer in chapter <<changetracking,Change Tracking>>. When a step says that the customer can only be deleted if there are no open orders and no open payments, the reader must know what a customer is, what an order is and when it counts as open, and how orders and payments relate to each other. Where the vocabulary is vague, the procedures built on it are vague, however carefully the steps are written. So the vocabulary has to be defined, in line with the basic principles of Domain-Driven Design, and defining it is the job of domain class models: the classes of the domain, their attributes, and how they relate to each other.
+
+Larger projects use professional UML tools for this, but for smaller projects a lean approach fits better: no tool to license, no repository to run, a low entry barrier and a gentle learning curve. PlantUML is such an approach, and Specman supports the integration of PlantUML models into the content of steps, so the vocabulary is part of the specification itself, right where the steps use it.
+
+The alternative would be screenshots, added as images as described in section <<_images,Images>>. However, with <<aiassisted,AI assistance for specification work>> in mind, it is advantageous to integrate class diagrams in a way that AI agents can read them and understand their structure instantly. Bitmap images can be analyzed by an AI agent as well, but this takes more time and is less reliable than reading the source of a PlantUML diagram.
+
+PlantUML supports many more diagram types than class diagrams, e.g. sequence, state and activity diagrams. They all work the same way. Class diagrams are the ones this chapter uses as an example, because a specification needs them most.
+
+### Adding a PlantUML diagram
+The PlantUML button next to the image button of the formatting toolbar (or _Insert_ > _PlantUML diagram_) adds a PlantUML diagram at the caret, just like an image.
+
+A file chooser lets you pick an existing file with PlantUML source. The source is taken over into the diagram, so the original file is not needed afterwards (but see _Includes_ below). The _Empty diagram_ button of the dialog starts with an empty diagram and opens a PlantUML source editor right away. Pressing Esc before having entered any content removes the diagram again.
+
+### Editing the source
+A double click on the diagram, or selecting _Edit_ from its context menu, opens an editor for the source next to the diagram.
+
+image::plantuml-editor.png[PlantUML Diagram with Open Source Editor]
+
+The screenshot shows this source:
+
+----
+@startuml
+class Customer
+class Order {
+  status
+}
+class Payment {
+  status
+}
+Customer "1" --> "*" Order : places
+Order "1" --> "*" Payment : is paid by
+@enduml
+----
+
+The diagram does not follow while you type. It is updated by F5 in the editor and when the editor is left. This is deliberate: most intermediate states while typing result in unusable diagrams, even if the source conforms to the PlantUML syntax. For example, a half-typed relation to a class which does not exist yet makes PlantUML create that class implicitly, so the diagram would be rebuilt with every keystroke.
+
+The line below the text shows the F5 hint or, as long as the source has a problem, PlantUML's message with the line number. The editor can only be left with source which PlantUML accepts. A click elsewhere or Ctrl+Enter takes the source over, Esc discards your changes.
+
+Specman has four rules in addition to the PlantUML syntax:
+
+* The source contains exactly one diagram, i.e. one `@startuml`.
+* The source is not empty. Comments and blank lines do not count as content.
+* `!pragma` is refused, because the layout engine is fixed by Specman.
+* Backticks are refused, because they delimit the source in the diagram file.
+
+The context menu of the diagram has two more items: _Import..._ replaces the source by the content of a file, with the same rules as above, and _Delete_ removes the diagram. Selecting, deleting, copying and resizing work as described for images, see <<_images,Images>>.
+
+### Details
+* *Rendering:* PlantUML draws with its embedded ELK layout engine. PlantUML's default layout engine would be Graphviz, which has to be installed separately, but Specman does not require it. The texts are set in Roboto (sans-serif) and Courier Prime (monospaced), both shipped with Specman and embedded in the PDF export. You can set other fonts in the source, at your own risk.
+
+* *Vector graphic:* The diagram is rendered as SVG, so it is sharp at any zoom factor, and in the PDF export it is a vector graphic with real text.
+
+* *Includes:* `!include` is supported, e.g. to maintain a model in a file outside of Specman and use it in several places. The included file is not embedded. It is read whenever the diagram is rendered. Pressing F5 on a selected diagram (with the editor closed) renders it anew, which picks up changes in the file. Take care with the path. A relative path is resolved against the working directory of the Specman process, not against the location of the diagram file. An absolute path works anywhere, but only where the file exists at that very place. If the file cannot be found, its content is missing in the diagram. Embedded source keeps the specification self-contained, so prefer it where you can.
+
+* *Change mode:* A change of the source is a change like any other, see <<changetracking,Change Tracking>>. The background of the diagram shows the color of the changeset, the diagram itself shows no marks. The change can be accepted or rejected, and changing the source back to its original removes the mark.
+
+* *Search:* The text search does not look into the source of PlantUML diagrams.
+
 [#aiassisted]
 ## AI-assisted specification
 Specman and its file format were designed to involve AI agents in the work on specifications. A specification is not only read by people. It is the starting point of everything that follows, and agents can take part at every stage:
@@ -516,7 +580,7 @@ Tell the agent where the grammar and the reference model are, and that it has to
 * Step IDs are stable, step numbers are not: they change whenever steps are inserted or moved. An agent should therefore identify a step by its ID when editing the file, even though your prompts refer to step _numbers_.
 * The text of a step is HTML in backticks and must not contain backticks itself.
 * Plain text renditions (`plain=`) are generated and the agent doesn't have to spent time with deriving them from the HTML content.
-* Image blocks consist of Base64 data. The agent leaves them alone and skips them when reading the file, because they are large and of no use to it.
+* Bitmap blocks (`type=png`) consist of Base64 data. The agent leaves them alone and skips them when reading the file, because they are large and of no use to it. Blocks of type `plantuml` hold the source of a PlantUML diagram in backticks, which the agent reads and edits like the text of a step, see <<plantuml,Class diagrams with PlantUML>>. Blocks of type `svg` hold the source of an SVG graphic in backticks. The agent can read it, but it is rarely of use.
 
 The reference model contains an example of everything the format can express and is the best source for the agent to copy patterns from.
 
