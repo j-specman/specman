@@ -56,6 +56,19 @@ class PlantUmlSourceValidatorTest {
   }
 
   @Test
+  void testSeveralDiagramsAreRejected() {
+    assertEquals(PlantUmlSourceValidator.MULTIPLE_DIAGRAMS_MESSAGE_KEY,
+      validator.violationMessageKey("@startuml\nclass A\n@enduml\n@startuml\nclass B\n@enduml\n"));
+    assertEquals(PlantUmlSourceValidator.MULTIPLE_DIAGRAMS_MESSAGE_KEY,
+      validator.violationMessageKey("@startuml\nclass A\n@enduml\n  @STARTUML\nclass B\n@enduml\n"));
+  }
+
+  @Test
+  void testStartMarkerInsideCommentOrTextIsNoSecondDiagram() {
+    assertNull(validator.violationMessageKey("@startuml\n' @startuml\n/' @startuml\n'/\nclass A\nnote: @startuml\n@enduml\n"));
+  }
+
+  @Test
   void testSyntaxErrorIsReportedWithLine() {
     String problem = validator.syntaxProblem("@startuml\nclass A\nA --> \n@enduml\n");
 

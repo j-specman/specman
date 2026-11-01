@@ -1,8 +1,14 @@
 package headless.plantuml;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import specman.editarea.EditContainer;
 import specman.editarea.plantuml.PlantUmlImageEditArea;
+
+import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,6 +74,21 @@ class PlantUmlImageTest extends AbstractPlantUmlTest {
 
     specman.redo();
     assertEquals(THREE_CLASSES, diagram.getSource());
+  }
+
+  @Test
+  void testF5OnSelectedDiagramRendersTheDiagramAnewWithChangedIncludedFile(@TempDir Path directory) throws IOException {
+    Path included = directory.resolve("included.puml");
+    Files.writeString(included, "class Included\n");
+    PlantUmlImageEditArea diagram = insertDiagramByToolbarButton(containerOfNewStep());
+    diagram.commitSource("@startuml\n!include " + included.toString().replace('\\', '/') + "\nclass Own\n@enduml\n");
+    String sizeBefore = sizeOf(diagram);
+    Files.writeString(included, "class Included\nclass Second\nclass Third\n");
+    specman.focus(diagram);
+
+    specman.press(KeyEvent.VK_F5);
+
+    assertNotEquals(sizeBefore, sizeOf(diagram));
   }
 
   private static String sizeOf(PlantUmlImageEditArea diagram) {

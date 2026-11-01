@@ -37,18 +37,19 @@ x Repräsentation im Modell
   x Plantuml-Image: image(scale=100%, type=plantuml) { `<PlantUML-Sourcecode>` }
   x Grammatik muss entsprechend erweitert werden
     x Hinweis für KI-Agenten bzgl. ignorieren von Bildern plantuml ausnehmen. Diese Bilder sollen die Agents verstehen
-- Doppelklick öffnet PlantUML Sourcecode-Editor als Dialog
+x Doppelklick öffnet PlantUML Sourcecode-Editor als Dialog
   x Editor analog Inhalt von Meta-Tags
   x Editor lehnt Backticks ab
-  - !include und !includeurl ist erlaubt, um puml-Dateien außerhalb des Spec-Dokuments einzubinden
-    - Neurendern nur durch explizites erneutes Laden
+  x !include und !includeurl ist erlaubt, um puml-Dateien außerhalb des Spec-Dokuments einzubinden
+    x Neurendern durch explizites erneutes Laden
+    x F5 auf dem selektierten Diagramm (ohne geöffneten Editor) rendert es neu, auch wenn der Quelltext unverändert ist; F5 im Editor ebenfalls
   x Gerendertes Bild wird mit F5 aktualisiert und beim Verlassen des Editors (nicht live, weil viele Zwischenstände ungültig sind)
   x Rendering als SVG (Ergebnisse der Experimente haben zweistellige Millisekunden gezeigt, das ist OK)
   x Vorgabe von Roboto als mitgelieferter Sans-Serif-Schriftart und CourierPrime für Festbreiten-Schriftart, die auch ins PDF eingebettet werden.
   x User kann die Schrift im Quelltext überschreiben. Ist nicht verboten und auf eigene Gefahr.
   x Bei Syntaxfehler, Anzeige des Parserfehlers als Text
   x Pragma-Angabe durch User ist nicht erlaubt und führt zu Fehleranzeige (Groß-/Kleinschreibung und Einrückung beachten)
-  - Mehrere @startuml ebenfalls
+  x Mehrere @startuml ebenfalls
   x Leerer Inhalt ebenfalls - nur Kommentare und Leerzeilen gilt ebenfalls als leer
   x ELK-Pragma wird automatisch ergänzt als einzige verfügbare Render-Engine
 - Wenn man im Änderungsmodus ändert, wird Hintergrund der EditArea entsprechend eingefärbt
@@ -59,8 +60,11 @@ x PDF-Export
   x Rendering von Text im SVG prüfen: Diagramm wird als Vektorgrafik mit echtem Text und eingebetteten Roboto/CourierPrime-Schriften ins PDF gezeichnet
 x Copy / Cut / Paste /Drag&Drop von Schritten mit PlantUML-Images prüfen. Sollte ganz normal funktionieren
 - Erweiterung Manual
+  - Warum F5 und nicht automatisch beim Tippen: Eine unfertige oder vertippte Beziehung mit einem noch nicht existierenden Klassennamen lässt PlantUML implizit eine neue Klasse anlegen. Das Diagramm würde beim Tippen ständig unruhig umgebaut.
+  - Die Aussage "Agents überspringen Image-Blöcke" im Kapitel zur KI-Unterstützung (Zeile ~519) gilt nur noch für type=png, PlantUML-Blöcke sollen Agents lesen und bearbeiten
 x Suche berücksichtigt (zunächst) keine PlantUML-Quelltexte
 - Nice-to-have: Quelltexteditor mit Zeilennummern versehen.
+- Idee für später (nicht jetzt): Für Bilder nicht nur Einbettung vorsehen, sondern auch Referenzierung anbieten (gibt die Selfcontained-Eigenschaft der Spec auf). Pfade über den bestehenden Alias-Mechanismus der Specman URLs auflösen. Damit auch saubere Lösung für PlantUML-Includes, und das Manual kann eher vor !include/!import warnen.
 - Mice-to-have: Quick Win, SVG Image Area, UI und Modellrepäsentation analog PlantUML, Editor und leere Anlage ohne Datei braucht man aber nicht
 
 Specman URLs:

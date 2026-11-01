@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -27,7 +28,7 @@ import static specman.Specman.editor;
  * on F5 and when the editor is left, because most intermediate states while typing are not sensible diagrams.
  * The model persists the source only, the diagram is rendered from it when loading. */
 public class PlantUmlImageEditArea extends AbstractImageEditArea {
-  private static final Font SOURCE_FONT = Styles.MONOSPACEFONT.deriveFont(Font.PLAIN, 13);
+  private static final Font SOURCE_FONT = Styles.metaTagFont.deriveFont(Font.PLAIN, 13);
   private static final int SOURCE_COLUMNS = 30;
   private static final int SOURCE_MIN_ROWS = 6;
   private static final int SOURCE_MAX_ROWS = 20;
@@ -109,9 +110,30 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
 
   private void display(String sourceToShow) {
     if (!sourceToShow.equals(displayedSource)) {
-      displayedSource = sourceToShow;
-      render(sourceToShow);
-      imageChanged();
+      show(sourceToShow);
+    }
+  }
+
+  private void show(String sourceToShow) {
+    displayedSource = sourceToShow;
+    render(sourceToShow);
+    imageChanged();
+  }
+
+  /** Renders the diagram anew even if the source is unchanged, because the result can also depend on files
+   * included by the source. */
+  private void reload() {
+    show(source);
+  }
+
+  @Override
+  public void keyPressed(KeyEvent e) {
+    if (e.getKeyCode() == KeyEvent.VK_F5) {
+      reload();
+      e.consume();
+    }
+    else {
+      super.keyPressed(e);
     }
   }
 
@@ -127,7 +149,7 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
     EditorI editor = editor();
     Font scaledFont = SOURCE_FONT.deriveFont((float) editor.scale(SOURCE_FONT.getSize2D()));
     int scaledInset = (int) Math.round(editor.scale(SOURCE_EDITOR_INSET));
-    NoteEditorPopup popup = new PlantUmlSourceEditorPopup(scaledFont, source, this::commitSource, this::editorClosed, this::display)
+    NoteEditorPopup popup = new PlantUmlSourceEditorPopup(scaledFont, source, this::commitSource, this::editorClosed, this::show)
       .withSize(SOURCE_COLUMNS, SOURCE_MIN_ROWS, SOURCE_MAX_ROWS);
     if (awaitingFirstContent) {
       int emptyLineStart = source.indexOf('\n') + 1;

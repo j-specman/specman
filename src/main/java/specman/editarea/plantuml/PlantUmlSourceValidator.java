@@ -12,8 +12,10 @@ public class PlantUmlSourceValidator {
   public static final String BACKTICK_MESSAGE_KEY = "msg.plantuml.backtick";
   public static final String PRAGMA_MESSAGE_KEY = "msg.plantuml.pragma";
   public static final String EMPTY_MESSAGE_KEY = "msg.plantuml.empty";
+  public static final String MULTIPLE_DIAGRAMS_MESSAGE_KEY = "msg.plantuml.multiple";
 
   private static final Pattern PRAGMA = Pattern.compile("^\\s*!pragma\\b", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
+  private static final Pattern START_MARKER_LINE = Pattern.compile("^\\s*@startuml\\b", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
   private static final Pattern BLOCK_COMMENT = Pattern.compile("/'.*?'/", Pattern.DOTALL);
   private static final Pattern START_OR_END_MARKER = Pattern.compile("@(startuml|enduml)\\b.*", Pattern.CASE_INSENSITIVE);
 
@@ -24,7 +26,8 @@ public class PlantUmlSourceValidator {
   }
 
   /** Backticks delimit the source in the model file, and the layout engine is fixed by Specman. A diagram without
-   * content is rendered as a tiny empty picture, which the user could hardly find and click again. */
+   * content is rendered as a tiny empty picture, which the user could hardly find and click again. An area shows
+   * exactly one diagram. */
   public String violationMessageKey(String source) {
     if (source.indexOf('`') >= 0) {
       return BACKTICK_MESSAGE_KEY;
@@ -32,10 +35,17 @@ public class PlantUmlSourceValidator {
     if (PRAGMA.matcher(source).find()) {
       return PRAGMA_MESSAGE_KEY;
     }
+    if (startMarkerCount(source) > 1) {
+      return MULTIPLE_DIAGRAMS_MESSAGE_KEY;
+    }
     if (hasNoContent(source)) {
       return EMPTY_MESSAGE_KEY;
     }
     return null;
+  }
+
+  private long startMarkerCount(String source) {
+    return START_MARKER_LINE.matcher(BLOCK_COMMENT.matcher(source).replaceAll("")).results().count();
   }
 
   /** Nothing but the start and end markers, comments and blank lines. */
