@@ -29,7 +29,10 @@ x Skalierung wie bei ImageEditArea
 x Neuanlage durch neuen Button
   - mit optionaler Auswahl einer bestehenden puml-Datei
   - Ausgewählte Datei wird als initialer Content eingebettet
+  - Fehlermeldung, wenn der Dateiinhalt syntaktisch nicht korrekt ist
   - Sonst eine leere Fläche (@startuml @enduml ohne Inhalt dazwischen)
+     und es öffnet sich der Sourceeditor, damit der User den Inhalt einfügen kann
+  - Gibt der User nichts ein und drückt ESC, wird die Area wieder komplett entfernt.
 - Repräsentation im Modell
   - Grafik-Image: image(scale=100%, type=png) { [base64:...] }
   - Plantuml-Image: image(scale=100%, type=plantuml) { `<PlantUML-Sourcecode>` }
@@ -48,6 +51,7 @@ x Neuanlage durch neuen Button
   x Bei Syntaxfehler, Anzeige des Parserfehlers als Text
   x Pragma-Angabe durch User ist nicht erlaubt und führt zu Fehleranzeige (Groß-/Kleinschreibung und Einrückung beachten)
   - Mehrere @startuml ebenfalls
+  x Leerer Inhalt ebenfalls - nur Kommentare und Leerzeilen gilt ebenfalls als leer
   x ELK-Pragma wird automatisch ergänzt als einzige verfügbare Render-Engine
 - Wenn man im Änderungsmodus ändert, wird Hintergrund der EditArea entsprechend eingefärbt
   - Das eigentliche Bild zeigt keine Änderungen an
