@@ -17,6 +17,7 @@ import specman.editarea.document.LeadingNewlineProtection;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedElement;
 import specman.editarea.document.WrappedPosition;
+import specman.editarea.plantuml.PlantUmlImageEditArea;
 import specman.metatag.stepnumberlabel.BreakCatchScrollMouseAdapter;
 import specman.model.v002.Markup_V002;
 import specman.model.v002.TableEditAreaModel_V002;
@@ -454,8 +455,8 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
         getParent().addImageUDBL(image, this);
     }
 
-    public void addPlantUmlImage(String plantUmlSource) {
-        getParent().addPlantUmlImageUDBL(plantUmlSource, this);
+    public PlantUmlImageEditArea addPlantUmlImage(String plantUmlSource) {
+        return getParent().addPlantUmlImageUDBL(plantUmlSource, this);
     }
 
     public EditArea addTable(int columns, int rows) {

@@ -1,6 +1,7 @@
 package specman.ops;
 
 import specman.editarea.TextEditArea;
+import specman.editarea.plantuml.PlantUmlImageEditArea;
 import specman.i18n.IFileNameExtensionFilter;
 
 import javax.imageio.ImageIO;
@@ -11,7 +12,7 @@ import java.io.IOException;
 
 
 public class AddImageSpecmanOp extends AbstractSpecmanOp {
-  private static final String PLANTUML_HELLO_WORLD = "@startuml\nclass Hello\nclass World\nHello --> World\n@enduml\n";
+  private static final String EMPTY_PLANTUML = "@startuml\n\n@enduml";
 
   public AddImageSpecmanOp(SpecmanOpContext context) {
     super(context);
@@ -20,7 +21,9 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
   public void addPlantUml() {
     TextEditArea lastFocused = getLastFocusedTextArea();
     if (lastFocused != null) {
-      lastFocused.addPlantUmlImage(PLANTUML_HELLO_WORLD);
+      PlantUmlImageEditArea diagram = lastFocused.addPlantUmlImage(EMPTY_PLANTUML);
+      // The diagram has to be laid out before the editor can be shown next to it
+      SwingUtilities.invokeLater(diagram::startFirstEdit);
     }
   }
 

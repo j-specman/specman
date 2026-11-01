@@ -473,8 +473,10 @@ public class EditContainer extends JPanel {
 		addImageAreaUDBL(new ImageEditArea(image, TextInit.initialChangeInfo()), initiatingTextArea);
 	}
 
-	public void addPlantUmlImageUDBL(String plantUmlSource, TextEditArea initiatingTextArea) {
-		addImageAreaUDBL(new PlantUmlImageEditArea(plantUmlSource, TextInit.initialChangeInfo()), initiatingTextArea);
+	public PlantUmlImageEditArea addPlantUmlImageUDBL(String plantUmlSource, TextEditArea initiatingTextArea) {
+		PlantUmlImageEditArea diagram = new PlantUmlImageEditArea(plantUmlSource, TextInit.initialChangeInfo());
+		addImageAreaUDBL(diagram, initiatingTextArea);
+		return diagram;
 	}
 
 	private void addImageAreaUDBL(AbstractImageEditArea imageEditArea, TextEditArea initiatingTextArea) {

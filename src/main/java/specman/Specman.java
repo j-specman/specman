@@ -377,6 +377,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 		new AddImageSpecmanOp(this).addPlantUml();
 	}
 
+	@Override
+	public void undoLastEditAndForget() {
+		undoManager.undoAndForget();
+	}
+
 	public void addTable(int columns, int rows) {
 		if (lastFocusedTextArea != null) {
 			EditArea nextFocusArea = lastFocusedTextArea.addTable(columns, rows);

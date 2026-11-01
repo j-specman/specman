@@ -7,6 +7,7 @@ import specman.editarea.AbstractImageEditArea;
 import specman.model.v002.ImageEditAreaModel_V002;
 import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
+import specman.util.NoteEditorPopup;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
@@ -40,7 +41,9 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
   /** Differs from the source while the editor shows the preview the user asked for by F5. */
   private String displayedSource;
   private FlatSVGIcon diagram;
-
+  /** True from the insertion of a new diagram until the user confirmed some content. Leaving the editor
+   * before that takes the diagram out again, as if it had never been inserted. */
+  private boolean awaitingFirstContent;
   public PlantUmlImageEditArea(String source, ChangeInfo changeInfo) {
     super(changeInfo, 1);
     this.source = source;
@@ -60,6 +63,36 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
     EditorI editor = editor();
     try (UndoRecording ur = editor.composeUndo()) {
       UDBL.setPlantUmlSourceUDBL(this, newSource);
+    }
+  }
+
+  /** For a diagram that has just been inserted with empty content: lets the user enter the content right away. */
+  public void startFirstEdit() {
+    awaitingFirstContent = true;
+    if (isShowing()) {
+      editSource();
+    }
+  }
+
+  /** The first content of a new diagram belongs to its insertion, so a single undo takes the whole diagram out. */
+  public void commitSource(String newSource) {
+    if (awaitingFirstContent) {
+      awaitingFirstContent = false;
+      setSource(newSource);
+    }
+    else {
+      changeSource(newSource);
+    }
+  }
+
+  /** Called when the editor was closed, no matter if the source was committed or discarded. */
+  public void editorClosed() {
+    if (awaitingFirstContent) {
+      awaitingFirstContent = false;
+      editor().undoLastEditAndForget();
+    }
+    else {
+      display(source);
     }
   }
 
@@ -83,9 +116,13 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
     EditorI editor = editor();
     Font scaledFont = SOURCE_FONT.deriveFont((float) editor.scale(SOURCE_FONT.getSize2D()));
     int scaledInset = (int) Math.round(editor.scale(SOURCE_EDITOR_INSET));
-    new PlantUmlSourceEditorPopup(scaledFont, source, this::changeSource, () -> display(source), this::display)
-      .withSize(SOURCE_COLUMNS, SOURCE_MIN_ROWS, SOURCE_MAX_ROWS)
-      .showRightOf(this, scaledInset);
+    NoteEditorPopup popup = new PlantUmlSourceEditorPopup(scaledFont, source, this::commitSource, this::editorClosed, this::display)
+      .withSize(SOURCE_COLUMNS, SOURCE_MIN_ROWS, SOURCE_MAX_ROWS);
+    if (awaitingFirstContent) {
+      int emptyLineStart = source.indexOf('\n') + 1;
+      popup.select(emptyLineStart, emptyLineStart);
+    }
+    popup.showRightOf(this, scaledInset);
   }
 
   @Override

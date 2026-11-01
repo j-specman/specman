@@ -54,6 +54,7 @@ public interface EditorI extends FocusListener {
 	double scale(double length);
 	void addImageViaFileChooser();
 	void addPlantUmlImage();
+	void undoLastEditAndForget();
 	List<AbstractSchrittView> listAllSteps();
 	void addTable(int numColumns, int numRows);
 	void toggleListItem(boolean ordered);

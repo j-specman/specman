@@ -116,6 +116,15 @@ public class SpecmanUndoManager extends UndoManager {
         }
     }
 
+    /** Undoes the last edit and drops it, so that it can't be redone - for an operation the user cancelled
+     * right after it started, which should leave no trace in the history. */
+    public synchronized void undoAndForget() {
+        UndoableEdit edit = editToBeUndone();
+        undo();
+        trimEdits(edits.indexOf(edit), edits.size() - 1);
+        undoStackChanged();
+    }
+
     public void pushRecordingMode(UndoRecordingMode mode) {
         UndoRecordingMode currentMode = recordingMode.peek();
         if (currentMode == UndoRecordingMode.Paused && mode == Composing) {
