@@ -29,6 +29,8 @@ import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.editarea.EditContainer;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
+import specman.editarea.plantuml.PlantUmlFileChoice;
+import specman.editarea.plantuml.PlantUmlFileChooser;
 import specman.undo.UndoableSchrittHinzugefuegt;
 import specman.undo.manager.SpecmanUndoManager;
 import specman.undo.manager.UndoRecording;
@@ -706,6 +708,12 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 			fileChooser.setSelectedFile(suggestedFile);
 		}
 		return fileChooser.showOpenDialog(scrollPane) == JFileChooser.APPROVE_OPTION ? fileChooser.getSelectedFile() : null;
+	}
+
+	@Override
+	public PlantUmlFileChoice choosePlantUmlFile() {
+		File directory = diagrammDatei != null ? diagrammDatei.getParentFile() : null;
+		return new PlantUmlFileChooser(directory).choose(scrollPane);
 	}
 
 	/** Called while Specman is being constructed. Overrides must not depend on their own fields. */

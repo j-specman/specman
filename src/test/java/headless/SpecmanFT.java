@@ -11,6 +11,7 @@ import specman.Specman;
 import specman.editarea.EditArea;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
+import specman.editarea.plantuml.PlantUmlFileChoice;
 import specman.link.AliasListPanel;
 import specman.metatag.stepnumberlabel.StepnumberContextMenu;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
@@ -85,6 +86,7 @@ public class SpecmanFT extends Specman {
   private final Clipboard clipboard = new Clipboard("specman-test");
   private int confirmDialogAnswer = JOptionPane.YES_OPTION;
   private File fileChoiceAnswer;
+  private PlantUmlFileChoice plantUmlFileChoiceAnswer = PlantUmlFileChoice.emptyDiagram();
   private AliasListPanel openedAliasListPanel;
   private final List<String> aliasesAskedFor = new ArrayList<>();
   private final List<File> fileSuggestionsOffered = new ArrayList<>();
@@ -554,6 +556,17 @@ public class SpecmanFT extends Specman {
     aliasesAskedFor.add(alias);
     fileSuggestionsOffered.add(suggestedFile);
     return fileChoiceAnswer;
+  }
+
+  /** Defines what the user chooses when asked where a new PlantUML diagram takes its source from. Without
+   * an answer, the user starts with an empty diagram. */
+  public void answerPlantUmlFileChoiceWith(PlantUmlFileChoice choice) {
+    plantUmlFileChoiceAnswer = choice;
+  }
+
+  @Override
+  public PlantUmlFileChoice choosePlantUmlFile() {
+    return plantUmlFileChoiceAnswer;
   }
 
   /** The links which would have started another Specman instance, in the order of following them. */

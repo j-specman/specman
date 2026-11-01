@@ -6,6 +6,7 @@ import specman.ScrollPause;
 import specman.SpaltenResizer;
 import specman.Specman;
 import specman.editarea.EditContainer;
+import specman.editarea.plantuml.PlantUmlFileChoice;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.view.AbstractSchrittView;
@@ -36,6 +37,9 @@ public interface SpecmanOpContext extends EditorI {
   /** Asks the user which file the alias of a link stands for, null if the user doesn't choose any.
    * @param suggestedFile the file the user is offered as the probable answer, null if there is none */
   File chooseFileForAlias(String alias, File suggestedFile);
+  /** Asks the user where the source of a new PlantUML diagram comes from: a file, nowhere (empty diagram), or whether
+   * to create no diagram at all. */
+  PlantUmlFileChoice choosePlantUmlFile();
   /** Starts another Specman instance, which follows the link. */
   void openInNewInstance(String link);
   /** Hands the web or mail address to the system, which opens it with the user's browser or mail program. */

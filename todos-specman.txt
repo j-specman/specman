@@ -26,9 +26,9 @@ x Skalierung wie bei ImageEditArea
   x individueller Prozentsatz der Schrittbreite über Breitenanpasser
   x Anwendung des Zoomfaktors
 x Neuanlage durch neuen Button
-  - mit optionaler Auswahl einer bestehenden puml-Datei
-  - Ausgewählte Datei wird als initialer Content eingebettet
-  - Fehlermeldung, wenn der Dateiinhalt syntaktisch nicht korrekt ist
+  x mit optionaler Auswahl einer bestehenden puml-Datei (Dialog mit zusätzlicher Schaltfläche "Leeres Diagramm"; Abbrechen legt nichts an)
+  x Ausgewählte Datei wird als initialer Content eingebettet
+  x Fehlermeldung, wenn der Dateiinhalt syntaktisch nicht korrekt ist (und auch bei den anderen Editor-Regeln)
   x Sonst eine leere Fläche (@startuml @enduml ohne Inhalt dazwischen)
      und es öffnet sich der Sourceeditor, damit der User den Inhalt einfügen kann
   x Gibt der User nichts ein und drückt ESC, wird die Area wieder komplett entfernt.
