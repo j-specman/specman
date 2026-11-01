@@ -4,7 +4,10 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import specman.ChangeInfo;
 import specman.EditorI;
 import specman.editarea.AbstractImageEditArea;
+import specman.graphics.Styles;
 import specman.model.v002.PlantUmlImageEditAreaModel_V002;
+import specman.pdf.ShapeImage;
+import specman.pdf.ShapeSvgImage;
 import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
 import specman.util.NoteEditorPopup;
@@ -24,8 +27,7 @@ import static specman.Specman.editor;
  * on F5 and when the editor is left, because most intermediate states while typing are not sensible diagrams.
  * The model persists the source only, the diagram is rendered from it when loading. */
 public class PlantUmlImageEditArea extends AbstractImageEditArea {
-  private static final PlantUmlRenderer RENDERER = new PlantUmlRenderer();
-  private static final Font SOURCE_FONT = new Font("Courier Prime", Font.PLAIN, 13);
+  private static final Font SOURCE_FONT = Styles.MONOSPACEFONT.deriveFont(Font.PLAIN, 13);
   private static final int SOURCE_COLUMNS = 30;
   private static final int SOURCE_MIN_ROWS = 6;
   private static final int SOURCE_MAX_ROWS = 20;
@@ -53,7 +55,11 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
     super(changeInfo, individualScalePercent);
     this.source = source;
     this.displayedSource = source;
-    this.diagram = RENDERER.renderDiagram(source);
+    render(source);
+  }
+
+  private void render(String sourceToRender) {
+    diagram = PlantUmlRenderer.toIcon(PlantUmlRenderer.renderSvg(sourceToRender));
   }
 
   public String getSource() { return source; }
@@ -104,7 +110,7 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
   private void display(String sourceToShow) {
     if (!sourceToShow.equals(displayedSource)) {
       displayedSource = sourceToShow;
-      diagram = RENDERER.renderDiagram(sourceToShow);
+      render(sourceToShow);
       imageChanged();
     }
   }
@@ -138,6 +144,12 @@ public class PlantUmlImageEditArea extends AbstractImageEditArea {
     return diagram.derive(
       Math.round(diagram.getIconWidth() * totalScalePercent),
       Math.round(diagram.getIconHeight() * totalScalePercent));
+  }
+
+  /** Rendered anew, as PDF export is rare and rendering is cheap, so there is no need to keep the SVG in memory. */
+  @Override
+  protected ShapeImage createShapeImage() {
+    return new ShapeSvgImage(this, PlantUmlRenderer.renderSvg(displayedSource), diagram.getIconWidth(), diagram.getIconHeight());
   }
 
   @Override

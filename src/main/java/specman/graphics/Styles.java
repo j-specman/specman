@@ -18,6 +18,8 @@ public class Styles {
     public static MutableAttributeSet ganzerSchrittGeloeschtStil = new SimpleAttributeSet();
     public static MutableAttributeSet standardTextBackground = new SimpleAttributeSet();
 
+    private static final String MONOSPACE_FONTFILE = "fonts/courierprime/CourierPrime.ttf";
+
     public static final List<String> FONTFILES = List.of(
       "fonts/sitka/SitkaDisplay.ttf",
       "fonts/sitka/SitkaDisplay-Italic.ttf",
@@ -29,7 +31,7 @@ public class Styles {
       "fonts/roboto/Roboto-Bold.ttf",
       "fonts/roboto/Roboto-BoldItalic.ttf",
 
-      "fonts/courierprime/CourierPrime.ttf",
+      MONOSPACE_FONTFILE,
       "fonts/courierprime/CourierPrime-Italic.ttf",
       "fonts/courierprime/CourierPrime-Bold.ttf",
       "fonts/courierprime/CourierPrime-BoldItalic.ttf"
@@ -37,12 +39,19 @@ public class Styles {
 
     public static Font DEFAULTFONT;
 
+    /** Specman's shipped monospace font. Its AWT family name ("Courier Prime") differs from the name
+     * used in HTML and PDF ("CourierPrime"), so take it from the registered font instead of spelling it out. */
+    public static Font MONOSPACEFONT;
+
     static {
         try {
           for (String fontFile : FONTFILES) {
             Font registeredFont = registerFont(fontFile);
             if (DEFAULTFONT == null) {
               DEFAULTFONT = registeredFont;
+            }
+            if (fontFile.equals(MONOSPACE_FONTFILE)) {
+              MONOSPACEFONT = registeredFont;
             }
           }
         }

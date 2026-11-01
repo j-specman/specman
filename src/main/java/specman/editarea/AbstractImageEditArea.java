@@ -11,6 +11,7 @@ import specman.SpaltenResizer;
 import specman.editarea.focusmover.CrossEditAreaFocusMoverFromImage;
 import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.pdf.Shape;
+import specman.pdf.ShapeBitmapImage;
 import specman.pdf.ShapeImage;
 import specman.undo.UndoableEditAreaAdded;
 import specman.undo.manager.UndoRecording;
@@ -380,11 +381,16 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
   public Shape getShape() {
     Shape shape = new Shape(this)
       .add(new Shape(imageX(), imageY())
-        .withImage(new ShapeImage(this)));
+        .withImage(createShapeImage()));
     if (changeInfo.isDeleted() && focusGlass != null) {
       shape.add(focusGlass.getShape());
     }
     return shape;
+  }
+
+  /** How the picture gets into the PDF. Bitmap by default, subclasses with a vector representation override this. */
+  protected ShapeImage createShapeImage() {
+    return new ShapeBitmapImage(this);
   }
 
   /** The image sits inside the image label's border, left-aligned and vertically centered.

@@ -69,7 +69,6 @@ public class PlantUmlExperiment extends JFrame {
       @enduml
       """;
 
-  private final PlantUmlRenderer renderer = new PlantUmlRenderer();
   private final JTextArea sourceArea = new JTextArea(SAMPLE_SOURCE);
   private final JLabel diagramLabel = new JLabel();
   private final JLabel status = new JLabel(" ");
@@ -109,7 +108,7 @@ public class PlantUmlExperiment extends JFrame {
 
   private void render() {
     long start = System.nanoTime();
-    byte[] svg = renderer.renderSvg(sourceArea.getText());
+    byte[] svg = PlantUmlRenderer.renderSvg(sourceArea.getText());
     diagramIcon = loadIcon(svg);
     applyZoom();
     status.setText("Rendered in " + (System.nanoTime() - start) / 1_000_000 + " ms, SVG " + svg.length + " bytes");

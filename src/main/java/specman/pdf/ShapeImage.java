@@ -1,48 +1,12 @@
 package specman.pdf;
 
-import com.itextpdf.io.image.ImageData;
-import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Paragraph;
-import specman.editarea.AbstractImageEditArea;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.awt.Point;
 
-public class ShapeImage {
+/** The picture of an image edit area, drawn into the PDF. */
+public abstract class ShapeImage {
 
-  private AbstractImageEditArea content;
-
-  public ShapeImage(AbstractImageEditArea content) {
-    this.content = content;
-  }
-
-  public void drawToPDF(Point renderOffset, float swing2pdfScaleFactor, PdfCanvas pdfCanvas, Document document) {
-    try {
-      BufferedImage fullSizeImage = content.getFullSizeImage();
-      float scaleFactor = content.getTotalScalePercent() * swing2pdfScaleFactor;
-      ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-      ImageIO.write(fullSizeImage, AbstractImageEditArea.PERSISTED_IMAGETYPE, bytes);
-      ImageData data = ImageDataFactory.create(bytes.toByteArray());
-      com.itextpdf.layout.element.Image img = new com.itextpdf.layout.element.Image(data);
-      img.setAutoScale(true);
-
-      Paragraph p = new Paragraph()
-        .setFixedPosition(
-          renderOffset.x * swing2pdfScaleFactor,
-          (renderOffset.y - fullSizeImage.getHeight() * content.getTotalScalePercent()) * swing2pdfScaleFactor,
-          fullSizeImage.getWidth() * scaleFactor)
-        .setMargin(0);
-
-      p.add(img);
-      document.add(p);
-    }
-    catch(IOException iox) {
-      throw new RuntimeException(iox);
-    }
-  }
+  public abstract void drawToPDF(Point renderOffset, float swing2pdfScaleFactor, PdfCanvas pdfCanvas, Document document);
 }
