@@ -59,6 +59,7 @@ public class PlantUmlSourceValidator {
 
   /** @return PlantUML's description of the syntax error with its line number, or null if the source is fine */
   public String syntaxProblem(String source) {
+    PlantUmlRenderer.useModelFileDirectory();
     SyntaxResult result = SyntaxChecker.checkSyntax(source);
     if (!result.isError()) {
       return null;
