@@ -74,6 +74,11 @@ Root: HKA; Subkey: "Software\Classes\.nsd"; ValueName: "Content Type"; ValueType
 Root: HKA; Subkey: "Software\Classes\Specman.nsd"; ValueType: string; ValueData: "Specman Diagramm"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\Specman.nsd\DefaultIcon"; ValueType: string; ValueData: "{app}\{#AppExe},0"
 Root: HKA; Subkey: "Software\Classes\Specman.nsd\shell\open\command"; ValueType: string; ValueData: """{app}\{#AppExe}"" ""%1"""
+; URL protocol: clicking a specman:// link (browser, mail, wiki) starts Specman with the link as argument
+Root: HKA; Subkey: "Software\Classes\specman"; ValueType: string; ValueData: "URL:Specman"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\specman"; ValueName: "URL Protocol"; ValueType: string; ValueData: ""
+Root: HKA; Subkey: "Software\Classes\specman\DefaultIcon"; ValueType: string; ValueData: "{app}\{#AppExe},0"
+Root: HKA; Subkey: "Software\Classes\specman\shell\open\command"; ValueType: string; ValueData: """{app}\{#AppExe}"" ""%1"""
 ; PATH entry: user environment (HKCU) for a per-user install, machine environment (HKLM) for a system-wide one
 Root: HKA; Subkey: "{code:EnvSubkey}"; ValueName: "Path"; ValueType: expandsz; ValueData: "{olddata};{app}\bin"; Check: NeedsPath(ExpandConstant('{app}\bin'))
 
