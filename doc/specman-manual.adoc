@@ -505,6 +505,21 @@ The context menu of the diagram has two more items: _Import..._ replaces the sou
 
 * *Search:* The text search does not look into the source of PlantUML diagrams.
 
+### Professional class modeling
+Larger projects need a more sophisticated form of class modeling than a lean tool like PlantUML can offer. They typically use professional UML modeling tools such as link:https://www.visual-paradigm.com/[Visual Paradigm], link:https://sparxsystems.com/[Enterprise Architect] or MagicDraw. An important aspect of these tools is the distinction between the _model_ on the one hand and _diagrams_ on the other hand. A diagram is a restricted view on the model, drawn for a specific purpose.
+
+Take the diagram shown in section <<_editing_the_source,Editing the source>> above. It contains the customer with its orders because that is what the use case "Delete customer" needs. The model itself may well be much larger and also contain the relations to invoices, deliveries, returns, newsletters, contact history and so on. Other use cases need other excerpts and appropriately tailored diagrams. The business object "customer", however, which shows up in several diagrams, is defined only once in the model. The diagrams only refer to it instead of defining it anew. This is different with PlantUML, where every diagram defines its own classes.
+
+For the human readers of a specification, the _diagrams_ are what matters in the first place. They show at a glance the relations and details which are relevant for the particular use case. For a collaborating AI agent, the _model_ is what matters most. The agent's skill has to tell it where to find the model in a machine-readable form, see <<teachingtheagent,Teaching the agent: what belongs in a skill>>. This could be, for example, an export in link:https://www.omg.org/spec/XMI/[XMI], produced by the modeling tool. _**X**ML **M**etadata **I**nterchange_ is the OMG standard for exchanging UML models.
+
+The diagrams, on the other hand, do not have to be optimally machine-readable if the model already is. They can simply be integrated into the specification as screenshots as explained in the section about <<_images,Images>> above. This has the great advantage that they make full use of the layout capabilities of the UML tool. Ideally, sophisticated layout would not be necessary at all, because diagrams are kept simple by strict conventions, e.g. those of the link:https://c4model.com/[C4 model]. In practice, this is often impossible, because in larger projects you cannot always choose how complicated the relations to be considered are. That is exactly what the professional tools are for.
+
+The following diagram, taken from a real project, gives an idea without going into any details.
+
+image::uml-classdiagram.png[UML class diagram from a real project]
+
+Wouldn't it then be smart to specify the procedures in UML as well - e.g. as activity diagrams - if a professional tool is at hand anyway? In principle, this is possible, but it gives up the particular advantages Specman brings to this work, see the <<_introduction,Introduction>>. For example, none of the UML tools we know offers a change mode for iterative work. They offer versioning and model comparison, but they do not mark changes in the diagram itself the way Specman or MS Word do, see <<changetracking,Change Tracking>>. So a reasonable compromise is to model the class structures in a UML tool, as they change less often, and the procedures in Specman. The two tools complement each other. Up to now there has no "Classman" tool been invented yet as a counterpart to Specman ;-)
+
 [#aiassisted]
 ## AI-assisted specification
 Specman and its file format were designed to involve AI agents in the work on specifications. A specification is not only read by people. It is the starting point of everything that follows, and agents can take part at every stage:
