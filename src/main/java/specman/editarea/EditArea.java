@@ -38,6 +38,9 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V002> extends Inte
 
   Color getBackground();
 
+  /** Unlike {@link #getBackground()}, this doesn't fall back to the parent's background if the area has none of its own. */
+  default boolean isBackgroundSet() { return asComponent().isBackgroundSet(); }
+
   int aenderungenUebernehmen();
 
   int aenderungenVerwerfen();
