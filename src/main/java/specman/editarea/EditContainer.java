@@ -307,9 +307,15 @@ public class EditContainer extends JPanel {
 
 	@Override
 	public Color getBackground() {
-		// Null- und Size-Check ist notwendig, weil javax.swing.LookAndFeel bereits
-		// im Konstruktor einen Aufruf von getBackground vornimmt.
-		return editAreas != null && editAreas.size() > 0 ? editAreas.get(0).getBackground() : super.getBackground();
+		// Null and size check as javax.swing.LookAndFeel calls the method already in the constructor.
+		// isBackgroundSet() instead of a null check of getBackground(): If the first edit area has no background of its
+		// own, Component.getBackground() asks its parent, which is this container - endless recursion.
+		if (editAreas != null
+			&& editAreas.size() > 0
+			&& editAreas.get(0).isBackgroundSet()) {
+			return editAreas.get(0).getBackground();
+		}
+		return super.getBackground();
 	}
 
 	@Override
