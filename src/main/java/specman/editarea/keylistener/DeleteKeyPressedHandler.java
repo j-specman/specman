@@ -72,7 +72,13 @@ class DeleteKeyPressedHandler extends AbstractRemovalKeyPressedHandler {
     int deleteTo = (getSelectionStart() == getSelectionEnd())
       ? getSelectionEnd() + 1
       : getSelectionEnd();
+    int lengthBefore = getWrappedDocument().getLength();
     WrappedPosition maxDeleteMark = handleTextDeletion(getSelectionStart(), deleteTo);
+
+    // Characters added in change mode are removed for real, which moves the following text to the left.
+    // Only characters marked as deleted stay and the caret has to move behind them.
+    int removedLength = lengthBefore - getWrappedDocument().getLength();
+    maxDeleteMark = maxDeleteMark.dec(removedLength);
 
     // If the deleted text reaches up to the very end of the text area's content,
     // we can't move the caret beyond that position.
