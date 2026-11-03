@@ -6,6 +6,7 @@ Release notes Specman 1.4.0
 - Sprache wählen
 - Hoch/Runter über Grenzen von Schritten wäre cool
 - Specman URLs
+- PlantUML
 
 Aus aktueller Anwendung
 - Hat man 5 Sekunden Autosave-Intervall eingestellt, dann wird es auffällig, dass ein abhängendes Leerzeichen wegbereinigt wird.
@@ -311,7 +312,6 @@ x Komplettes Rewrite von DraggingLogic
 Auf längere Sicht - nicht notwendig für ersten Go-Live:
 - Schritt-Morphing: If/Else -> Case usw.
 - Zooming aus Undo-Liste entfernen
-- Code auf Englisch übersetzen
 - Sonst-Zweig in Cases Entfernen / Hinzufügen
 - Button-Enabling
 - Annehmen *einzelner* Änderungen
