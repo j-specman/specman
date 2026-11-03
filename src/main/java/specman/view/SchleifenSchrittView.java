@@ -168,6 +168,11 @@ public class SchleifenSchrittView extends AbstractSchrittView implements Spalten
 		}
 	}
 
+	@Override
+	public void alleKlappen(boolean zuklappen) {
+		klappen.setGeklapptProgrammatisch(zuklappen);
+	}
+
 public void skalieren(int prozentNeu, int prozentAktuell) {
 		super.skalieren(prozentNeu, prozentAktuell);
 		int neueBalkenbreite = groesseUmrechnen(balkenbreite, prozentNeu, prozentAktuell);

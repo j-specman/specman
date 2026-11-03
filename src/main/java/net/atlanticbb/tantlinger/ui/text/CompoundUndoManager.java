@@ -1,7 +1,9 @@
 package net.atlanticbb.tantlinger.ui.text;
 
+import specman.graphics.IconReader;
+import specman.graphics.SpecmanIcons;
+
 import net.atlanticbb.tantlinger.i18n.I18n;
-import net.atlanticbb.tantlinger.ui.UIUtils;
 
 import javax.swing.Action;
 import javax.swing.KeyStroke;
@@ -144,8 +146,8 @@ public class CompoundUndoManager implements UndoableEditListener {
 
     public RedoAction() {
       super(CompoundUndoManager.i18n.str("redo"));
-      this.putValue("SmallIcon", UIUtils.getIcon("resources/images/x16/", "redo.png"));
-      this.putValue("LARGE_ICON", UIUtils.getIcon("resources/images/x24/", "redo.png"));
+      this.putValue("SmallIcon", IconReader.readSvgIcon(SpecmanIcons.REDO, SpecmanIcons.SIZE_SMALL));
+      this.putValue("LARGE_ICON", IconReader.readSvgIcon(SpecmanIcons.REDO, SpecmanIcons.SIZE_TOOLBAR));
       this.putValue("MnemonicKey", (int) CompoundUndoManager.i18n.mnem("redo"));
       this.setEnabled(false);
       this.putValue("AcceleratorKey", KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK));
@@ -178,8 +180,8 @@ public class CompoundUndoManager implements UndoableEditListener {
 
     public UndoAction() {
       super(CompoundUndoManager.i18n.str("undo"));
-      this.putValue("SmallIcon", UIUtils.getIcon("resources/images/x16/", "undo.png"));
-      this.putValue("LARGE_ICON", UIUtils.getIcon("resources/images/x24/", "undo.png"));
+      this.putValue("SmallIcon", IconReader.readSvgIcon(SpecmanIcons.UNDO, SpecmanIcons.SIZE_SMALL));
+      this.putValue("LARGE_ICON", IconReader.readSvgIcon(SpecmanIcons.UNDO, SpecmanIcons.SIZE_TOOLBAR));
       this.putValue("MnemonicKey", (int) CompoundUndoManager.i18n.mnem("undo"));
       this.setEnabled(false);
       this.putValue("AcceleratorKey", KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK));

@@ -1,6 +1,7 @@
 package specman.editarea.image.plantuml;
 
 import specman.graphics.IconReader;
+import specman.graphics.SpecmanIcons;
 import specman.i18n.IMenuItem;
 
 import javax.swing.JMenuItem;
@@ -26,7 +27,7 @@ public class PlantUmlContextMenu {
     edit.addActionListener(e -> currentDiagram.editSource());
     JMenuItem importSource = new IMenuItem(IMPORT_ITEM);
     importSource.addActionListener(e -> editor().importPlantUmlSource(currentDiagram));
-    JMenuItem delete = new IMenuItem(DELETE_ITEM, IconReader.readImageIcon("loeschen"));
+    JMenuItem delete = new IMenuItem(DELETE_ITEM, IconReader.readSvgIcon(SpecmanIcons.DELETE, SpecmanIcons.SIZE_SMALL));
     delete.addActionListener(e -> currentDiagram.deleteUDBL());
     popup.add(edit);
     popup.add(importSource);

@@ -298,6 +298,10 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	 * are not foldable. Doesn't descend, see {@link specman.visitor.ReviewCollapser}. */
 	public void zusammenklappenFuerReview() {}
 
+	/** Folds or unfolds the step regardless of change marks. Does nothing by default, as most steps are not
+	 * foldable. Doesn't descend, see {@link specman.visitor.AllStepsFolder}. */
+	public void alleKlappen(boolean zuklappen) {}
+
 	public void setGeloeschtMarkiertStilUDBL() {
 		setAenderungsartUDBL(Geloescht);
 		editContainer.setGeloeschtMarkiertStilUDBL(number, changeInfo.changeSet());
