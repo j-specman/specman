@@ -12,7 +12,7 @@ Microsoft Word is an excellent word processor with change tracking (a crucial as
 Efficiency today also means AI assistance in every phase of software engineering. Specman is built for it: machine-readable text format with defined grammar, command line interface, and live collaboration between agent and user.
 
 ## Hello Specman
-Specman is a small Java 2D / Swing application packaged as an executable JAR file using Maven. To run Specman, you need a Java Runtime Environment (JRE) version 21 or higher installed. The main class is specman.Specman, and the delivery package includes launcher scripts for Windows (`specman.bat`) and Linux (`specman.sh`) that check the Java installation and locate the jar before starting the application. Opening the file link:anagramms.nsd[anagramms.nsd] in Specman displays the following diagram:
+Specman is a small Java 2D / Swing application packaged as an executable JAR file using Maven. To run Specman, you need a Java Runtime Environment (JRE) version 21 or higher installed. The main class is specman.Specman, and the delivery package includes launcher scripts for Windows (`specman.bat`) and Linux (`specman.sh`) that check the Java installation and locate the jar before starting the application. Windows users may alternatively use the Windows installer, which ships with its own Java runtime, so no JRE needs to be installed. Opening the file link:anagramms.nsd[anagramms.nsd] in Specman displays the following diagram:
 
 image::anagramms-screenshot.png[Two Word Anagrams Specman Diagram]
 
