@@ -27,7 +27,7 @@ public final class SpecmanIcons {
   public static final String REJECT_CHANGES = MATERIAL + "cancel.svg";
   public static final String MERGE_CHANGE_SETS = MATERIAL + "merge.svg";
   public static final String REVIEW = MATERIAL + "text_compare.svg";
-  public static final String BIRDS_VIEW = MATERIAL + "picture_in_picture.svg";
+  public static final String BIRDS_VIEW = MATERIAL + "visibility.svg";
   public static final String PDF = SPECMAN + "pdf.svg";
 
   // StepnumberContextMenu
@@ -43,12 +43,10 @@ public final class SpecmanIcons {
   // File menu
   public static final String FILE_NEW = MATERIAL + "note_add.svg";
   public static final String FILE_OPEN = MATERIAL + "folder_open.svg";
-  public static final String FILE_RECENT = MATERIAL + "history.svg";
   public static final String FILE_SAVE = MATERIAL + "save.svg";
   public static final String AUTO_LOAD = MATERIAL + "autorenew.svg";
   public static final String AUTO_SAVE = MATERIAL + "save_clock.svg";
   public static final String FILE_SAVE_AS = MATERIAL + "save_as.svg";
-  public static final String EXPORT_GRAPHVIZ = MATERIAL + "account_tree.svg";
   public static final String SETTINGS = MATERIAL + "settings.svg";
   public static final String EXIT = MATERIAL + "logout.svg";
 
@@ -82,15 +80,12 @@ public final class SpecmanIcons {
   public static final String UNDO = MATERIAL + "undo.svg";
   public static final String REDO = MATERIAL + "redo.svg";
   public static final String SELECT_ALL = MATERIAL + "select_all.svg";
-  public static final String FIND_REPLACE = MATERIAL + "find_replace.svg";
+  public static final String FIND_REPLACE = MATERIAL + "search.svg";
   public static final String LINE_BREAK = MATERIAL + "keyboard_return.svg";
   public static final String HORIZONTAL_RULE = MATERIAL + "horizontal_rule.svg";
   public static final String CLEAR_STYLES = MATERIAL + "format_clear.svg";
-  public static final String ELEMENT_PROPERTIES = MATERIAL + "tune.svg";
   public static final String FONT_DIALOG = MATERIAL + "font_download.svg";
   public static final String SPECIAL_CHARACTER = MATERIAL + "special_character.svg";
-  public static final String META_TAG = MATERIAL + "sell.svg";
-  public static final String META_TAGS = MATERIAL + "style.svg";
   public static final String PLANTUML = "images/plantuml.svg";
 
   // Own icons (see images/svg/specman/): PDF export above, step types below

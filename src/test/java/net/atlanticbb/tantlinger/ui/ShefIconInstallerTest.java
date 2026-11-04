@@ -1,6 +1,7 @@
 package net.atlanticbb.tantlinger.ui;
 
 import net.atlanticbb.tantlinger.ui.text.actions.CopyAction;
+import net.atlanticbb.tantlinger.ui.text.actions.HTMLElementPropertiesAction;
 import org.junit.jupiter.api.Test;
 import specman.graphics.SpecmanIcons;
 
@@ -12,6 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ShefIconInstallerTest {
 
@@ -24,6 +26,13 @@ class ShefIconInstallerTest {
     assertNotNull(after);
     assertEquals(SpecmanIcons.SIZE_SMALL, after.getIconWidth());
     assertNotSame(before, after);
+  }
+
+  @Test
+  void installRemovesTheBundledIconOfIconlessActions() {
+    Action properties = new HTMLElementPropertiesAction();
+    ShefIconInstaller.install(List.of(properties), List.of());
+    assertNull(properties.getValue(Action.SMALL_ICON));
   }
 
   @Test

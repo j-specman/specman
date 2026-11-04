@@ -68,7 +68,6 @@ public class StepnumberContextMenu implements MouseListener {
     down = createDownItem();
     toggleFlatNumbering = createSubnumberingItem();
     popup.add(metaTagSeparator);
-    metaTagMenu.setIcon(IconReader.readSvgIcon(SpecmanIcons.META_TAG, SpecmanIcons.SIZE_SMALL));
     popup.add(metaTagMenu);
   }
 
@@ -203,8 +202,7 @@ public class StepnumberContextMenu implements MouseListener {
     if (!configs.isEmpty()) {
       metaTagMenu.addSeparator();
     }
-    JMenuItem configure = new IMenuItem(CONFIGURE_TAGS_ITEM,
-      IconReader.readSvgIcon(SpecmanIcons.META_TAGS, SpecmanIcons.SIZE_SMALL));
+    JMenuItem configure = new IMenuItem(CONFIGURE_TAGS_ITEM);
     configure.addActionListener(e -> editor().openMetaTagConfigs());
     metaTagMenu.add(configure);
   }

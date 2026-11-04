@@ -69,9 +69,6 @@ public final class ShefActionIconMapper {
     if (action instanceof ClearStylesAction) {
       return SpecmanIcons.CLEAR_STYLES;
     }
-    if (action instanceof HTMLElementPropertiesAction) {
-      return SpecmanIcons.ELEMENT_PROPERTIES;
-    }
     if (action instanceof HTMLLinkAction) {
       return SpecmanIcons.LINK;
     }
@@ -88,6 +85,11 @@ public final class ShefActionIconMapper {
       return SpecmanIcons.SPECIAL_CHARACTER;
     }
     return null;
+  }
+
+  /** @return true for rarely used actions that deliberately show no icon, not even their bundled bitmap */
+  public static boolean isIconless(Action action) {
+    return action instanceof HTMLElementPropertiesAction;
   }
 
   private static String inlineIconPath(HTML.Tag tag) {

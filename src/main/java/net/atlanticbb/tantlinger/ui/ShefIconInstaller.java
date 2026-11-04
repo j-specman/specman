@@ -28,6 +28,10 @@ public final class ShefIconInstaller {
   private static void setActionIcons(Iterable<?> actions) {
     for (Object candidate : actions) {
       if (candidate instanceof Action action) {
+        if (ShefActionIconMapper.isIconless(action)) {
+          action.putValue(Action.SMALL_ICON, null);
+          continue;
+        }
         String iconPath = ShefActionIconMapper.pathFor(action);
         if (iconPath != null) {
           action.putValue(Action.SMALL_ICON, IconReader.readSvgIcon(iconPath, SpecmanIcons.SIZE_SMALL));

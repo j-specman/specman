@@ -58,11 +58,11 @@ public class SpecmanMenuBar extends JMenuBar {
     speichernUnter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
     speichernUnter.addActionListener(e -> context.diagrammSpeichern(true));
 
-    JMenuItem exportAsPDF = new IMenuItem(EXPORT_PDF_ITEM, icon(SpecmanIcons.PDF));
+    JMenuItem exportAsPDF = new IMenuItem(EXPORT_PDF_ITEM);
     exportAsPDF.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK));
     exportAsPDF.addActionListener(e -> context.exportAsPDF());
 
-    JMenuItem exportAsGraphviz = new IMenuItem(EXPORT_GRAPHVIZ_ITEM, icon(SpecmanIcons.EXPORT_GRAPHVIZ));
+    JMenuItem exportAsGraphviz = new IMenuItem(EXPORT_GRAPHVIZ_ITEM);
     exportAsGraphviz.addActionListener(e -> context.exportAsGraphviz());
 
     JMenuItem openLink = new IMenuItem(OPEN_LINK_ITEM);
@@ -73,7 +73,7 @@ public class SpecmanMenuBar extends JMenuBar {
     exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
     exit.addActionListener(e -> context.exit());
 
-    JMenuItem metaTags = new IMenuItem(META_TAGS_ITEM, icon(SpecmanIcons.META_TAGS));
+    JMenuItem metaTags = new IMenuItem(META_TAGS_ITEM);
     metaTags.addActionListener(e -> context.openMetaTagConfigs());
 
     JMenuItem aliases = new IMenuItem(ALIASES_ITEM);
@@ -85,7 +85,6 @@ public class SpecmanMenuBar extends JMenuBar {
     JMenu dateiMenu = new IMenu(FILE_MENU);
     dateiMenu.add(neu);
     dateiMenu.add(laden);
-    recentFiles.menu().setIcon(icon(SpecmanIcons.FILE_RECENT));
     dateiMenu.add(recentFiles.menu());
     dateiMenu.add(openLink);
     dateiMenu.add(speichern);
