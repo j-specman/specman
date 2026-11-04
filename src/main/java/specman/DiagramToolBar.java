@@ -104,15 +104,15 @@ public class DiagramToolBar extends RibbonToolBar {
     addGroup(step);
 
     ToolbarGroup changes = new ToolbarGroup("toolbar.group.changes");
+    changes.addControl(changeSetButton);
+    // like the combo boxes next to it, with a border, unlike the flat icon buttons
+    changeSetButton.putClientProperty("JButton.buttonType", null);
+    changes.nextRow();
     changes.addControl(aenderungenVerfolgen);
     addButton(changes, aenderungenUebernehmen, SpecmanIcons.ACCEPT_CHANGES, ACCEPT_CHANGES_BUTTON);
     addButton(changes, aenderungenVerwerfen, SpecmanIcons.REJECT_CHANGES, REJECT_CHANGES_BUTTON);
     addButton(changes, mergeChangeSets, SpecmanIcons.MERGE_CHANGE_SETS, MERGE_CHANGESETS_BUTTON);
     addButton(changes, review, SpecmanIcons.REVIEW, REVIEW_BUTTON);
-    changes.nextRow();
-    changes.addControl(changeSetButton);
-    // like the combo boxes next to it, with a border, unlike the flat icon buttons
-    changeSetButton.putClientProperty("JButton.buttonType", null);
     addGroup(changes);
 
     ToolbarGroup text = new ToolbarGroup("toolbar.group.text");
