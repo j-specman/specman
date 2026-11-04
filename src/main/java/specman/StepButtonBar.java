@@ -42,8 +42,6 @@ public class StepButtonBar extends JToolBar {
     toggleButton.setMargin(new Insets(0, 0, 0, 0));
     toggleButton.setAlignmentX(Component.LEFT_ALIGNMENT);
     toggleButton.addActionListener(e -> toggleShowText());
-    add(toggleButton);
-    addSeparator();
 
     addDragButton(new CreateSimpleStepOpButton(specman), SpecmanIcons.STEP_SIMPLE, "simple", specman);
     addDragButton(new CreateWhileStepOpButton(specman), SpecmanIcons.STEP_WHILE, "while", specman);
@@ -55,6 +53,10 @@ public class StepButtonBar extends JToolBar {
     addDragButton(new CreateBreakStepOpButton(specman), SpecmanIcons.STEP_BREAK, "break", specman);
     addDragButton(new CreateCatchSequenceADBLOpButton(specman), SpecmanIcons.STEP_CATCH, "catch", specman);
     addDragButton(new CreateCaseBranchADBLOpButton(specman), SpecmanIcons.STEP_CASE_BRANCH, "case.branch", specman);
+
+    add(Box.createVerticalGlue());
+    addSeparator();
+    add(toggleButton);
 
     applyShowText();
   }
