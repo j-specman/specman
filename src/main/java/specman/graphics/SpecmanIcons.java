@@ -86,7 +86,7 @@ public final class SpecmanIcons {
   public static final String CLEAR_STYLES = MATERIAL + "format_clear.svg";
   public static final String FONT_DIALOG = MATERIAL + "font_download.svg";
   public static final String SPECIAL_CHARACTER = MATERIAL + "special_character.svg";
-  public static final String PLANTUML = "images/plantuml.svg";
+  public static final String PLANTUML = MATERIAL + "account_tree.svg";
 
   // Own icons (see images/svg/specman/): PDF export above, step types below
   public static final String STEP_SIMPLE = SPECMAN + "step-simple.svg";
