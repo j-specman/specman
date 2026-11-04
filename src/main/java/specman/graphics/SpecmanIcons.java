@@ -28,7 +28,7 @@ public final class SpecmanIcons {
   public static final String MERGE_CHANGE_SETS = MATERIAL + "merge.svg";
   public static final String REVIEW = MATERIAL + "text_compare.svg";
   public static final String BIRDS_VIEW = MATERIAL + "picture_in_picture.svg";
-  public static final String PDF = MATERIAL + "picture_as_pdf.svg";
+  public static final String PDF = SPECMAN + "pdf.svg";
 
   // StepnumberContextMenu
   public static final String COPY = MATERIAL + "content_copy.svg";
@@ -93,7 +93,7 @@ public final class SpecmanIcons {
   public static final String META_TAGS = MATERIAL + "style.svg";
   public static final String PLANTUML = "images/plantuml.svg";
 
-  // Own step-type icons (see images/svg/specman/)
+  // Own icons (see images/svg/specman/): PDF export above, step types below
   public static final String STEP_SIMPLE = SPECMAN + "step-simple.svg";
   public static final String STEP_IF = SPECMAN + "step-if.svg";
   public static final String STEP_IFELSE = SPECMAN + "step-ifelse.svg";
