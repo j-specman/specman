@@ -17,7 +17,7 @@ import static specman.i18n.Messages.i18n;
 
 /**
  * Dropdown button for choosing the current change set: a dot in the color of the chosen change set, the label
- * "Change Set" and a dropdown arrow. A click opens a popup with one colored item per change set.
+ * "Change Set" and a dropdown arrow, on the change set's panel color. A click opens a popup with one colored item per change set.
  * Each item is styled to give the user an immediate preview of the change-tracking colors:
  * <ul>
  *   <li>The item background uses the change set's panel color (a light pastel).</li>
@@ -72,6 +72,7 @@ public class ChangeSetButton extends JButton {
 
   public void updateChangeSet(ChangeSet changeSet) {
     setIcon(new ChangeSetDotIcon(changeSet));
+    setBackground(changeSet.panelColor());
   }
 
   @Override
