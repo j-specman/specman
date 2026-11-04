@@ -8,7 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Toggle button for toolbars. Selected state: accent background with a white icon, so the active
+ * Toggle button for toolbars. Selected state: muted blue background with a light gray icon, so the active
  * toggle stays clearly visible. Use this for every toolbar toggle to keep the look consistent.
  */
 public class ToolbarToggleButton extends JToggleButton {
@@ -17,7 +17,8 @@ public class ToolbarToggleButton extends JToggleButton {
    * a good accent color on its own. The contrast was just tested manually and
    * this code is not based on any other color code like FlatLaf's color codes.
    */
-  private static final String SELECTED_BACKGROUND = "#2f6fd1";
+  private static final String SELECTED_BACKGROUND = "#5b7ea8";
+  private static final Color SELECTED_ICON_COLOR = new Color(0xEE, 0xEE, 0xEE);
 
   public ToolbarToggleButton(String iconPath, String tooltip) {
     putClientProperty("FlatLaf.style", "toolbar.selectedBackground: " + SELECTED_BACKGROUND);
@@ -25,7 +26,7 @@ public class ToolbarToggleButton extends JToggleButton {
     setToolTipText(tooltip);
     FlatSVGIcon icon = IconReader.readSvgIcon(iconPath, SpecmanIcons.SIZE_TOOLBAR);
     icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> Color.BLACK.equals(color)
-        ? (isSelected() ? Color.WHITE : UIManager.getColor("Label.foreground"))
+        ? (isSelected() ? SELECTED_ICON_COLOR : UIManager.getColor("Label.foreground"))
         : color));
     setIcon(icon);
   }
