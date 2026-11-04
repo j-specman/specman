@@ -55,11 +55,11 @@ As an alternative, most steps can be created by drag and drop: press the corresp
 
 The step creation toolbar provides the following buttons:
 
-### image:../src/main/resources/images/einfacher-schritt.png[Simple Step] Simple step
+### image:../src/main/resources/images/svg/specman/step-simple.svg[Simple Step,24] Simple step
 
 Creates a simple step in the diagram. The new step is immediately focused, i.e. pressing the button multiple times creates multiple steps one after the other.
 
-### image:../src/main/resources/images/subsequenz-schritt.png[Sub Sequence Step] Subsequence step
+### image:../src/main/resources/images/svg/specman/step-subsequence.svg[Sub Sequence Step,24] Subsequence step
 
 Creates a subsequence of steps with an initial simple step immediately added within. Subsequences are not part of original Nassi-Shneiderman diagrams. They bring structure into larger sequences like chapters in a book. These substructures may be directly used as a reasonable indicator for how to structure the code when implementing the specification.
 
@@ -67,31 +67,31 @@ The steps within the subsequence are numbered on a lower level, e.g. step 2.1, 2
 
 Subsequences can be folded up to hide their content when the details are currently not of interest. Moving the mouse just to the right of the subsequence's step number brings up a small button with a minus sign. Pressing this button folds up the subsequence. The button then shows a plus sign for unfolding the subsequence again.
 
-### image:../src/main/resources/images/while-schritt.png[While Step] While step
+### image:../src/main/resources/images/svg/specman/step-while.svg[While Step,24] While step
 
 Creates a loop step with an initial simple step in its repetition sequence immediately added. The repetition sequence must not be empty. So if the first step needs to be something other than a simple step, add a step of the required type and remove the initial first step afterward.
 
-### image:../src/main/resources/images/whilewhile-schritt.png[While While Step] While-while step
+### image:../src/main/resources/images/svg/specman/step-whilewhile.svg[While While Step,24] While-while step
 
 Creates a loop step with an additional horizontal empty bar at the bottom. This is functionally identical with the loop step, but sometimes the extra bar makes the lower boundary of the loop easier to recognize. E.g. if there are catch steps at the end of the loop's repetition sequence.
 
-### image:../src/main/resources/images/ifelse-schritt.png[If Else Step] If-else step
+### image:../src/main/resources/images/svg/specman/step-ifelse.svg[If Else Step,24] If-else step
 
 Creates an if-else step with an initial simple step in its if and else branches. The division ratio of the branches may be changed by clicking on the separating line between the branches and moving it right or left.
 
-### image:../src/main/resources/images/if-schritt.png[If Step] If step
+### image:../src/main/resources/images/svg/specman/step-if.svg[If Step,24] If step
 
 Creates an if step. Unlike the if-else step, the left branch is empty and its width cannot be modified.
 
-### image:../src/main/resources/images/case-schritt.png[Case Step] Case step
+### image:../src/main/resources/images/svg/specman/step-case.svg[Case Step,24] Case step
 
 Creates a case step with the default branch on the left and two other initial case branches on the right. Additional branches can be added by pressing the corresponding button from the steps creation toolbar (see below). Branch removal is achieved by placing the cursor in the branch's heading or condition edit area and pressing the delete button from the step & document properties toolbar. However, two case branches and the default branch are the minimum which a case step has to provide. Otherwise it's an if or if-else step.
 
-### image:../src/main/resources/images/zweig.png[New Branch] New branch
+### image:../src/main/resources/images/svg/specman/step-case-branch.svg[New Branch,24] New branch
 
 Creates a new branch in a previously created case step. The creation by button click requires placing the cursor into an existing branch's heading edit area first. The new branch is then added _left_ from the cursor-selected branch. Alternatively the new branch can be created by drag & drop which requires dragging into an existing branch's heading. A vertical insertion bar indicates where the new branch will be created when releasing the mouse button.
 
-### image:../src/main/resources/images/break-schritt.png[Break Step] Break step
+### image:../src/main/resources/images/svg/specman/step-break.svg[Break Step,24] Break step
 
 Creates a break step which can be understood as the occurrence of a business exception. It causes the following steps to be skipped down to the place where the exception gets caught. If it is not caught anywhere the exception causes the complete usecase to be aborted which is described in the diagram. However, this is usually not a good idea as it makes the reader wonder if this was designed by intention or if the design is not yet complete.
 
@@ -99,7 +99,7 @@ There are two flavours for using break steps: The compact form is the one being 
 
 image::breakcatch-break-flavours.png[Compact and Comprehensive Form of Break Steps]
 
-### image:../src/main/resources/images/catch-schritt.png[Catch Step] Catch step
+### image:../src/main/resources/images/svg/specman/step-catch.svg[Catch Step,24] Catch step
 
 Creates a catch step for a previously defined break step. Unlike all other steps, it is not just inserted at the drop position: the creation takes the following steps, no matter whether the button is pressed or dragged into the diagram.
 
@@ -236,7 +236,7 @@ A specification is not a one-shot design. Like the code, it is developed iterati
 ### Change mode
 Change tracking is switched on and off with the toggle button _Track changes_ in the diagram toolbar:
 
-image::../src/main/resources/images/aenderungen.png[Change Mode Button]
+image::../src/main/resources/images/svg/material/format_ink_highlighter.svg[Change Mode Button,24]
 
 While the button is pressed, Specman is in _change mode_: every edit is tracked and highlighted in the color of the current changeset (see below). Otherwise Specman is in _normal mode_ and edits are applied without any tracking. Whether change mode is on and which changeset is selected is saved with the diagram, so it is restored when you open the file again. A new diagram starts in normal mode.
 
@@ -274,8 +274,8 @@ image::changetracking-menu-toolbar.png[Changeset Menu and Toolbar Buttons]
 ### Accepting and rejecting changes
 The toolbar buttons _Accept changes_ and _Reject changes_ accept or reject all changes of the current changeset in the entire diagram, including intro and outro. Changes of other changesets are not touched. There is no way of accepting or rejecting changes selectively yet, e.g. for a single step.
 
-image::../src/main/resources/images/uebernehmen.png[Accept Changes Button]
-image::../src/main/resources/images/verwerfen.png[Reject Changes Button]
+image::../src/main/resources/images/svg/material/check_circle.svg[Accept Changes Button,24]
+image::../src/main/resources/images/svg/material/cancel.svg[Reject Changes Button,24]
 
 Accepting makes the changes part of the specification: added content loses its marking and deleted content is actually removed. A moved step stays at its new position and the placeholder at the step's original position disappears.
 
@@ -286,14 +286,14 @@ Both operations are a single undo step.
 ### Merging changesets
 The toolbar button _Merge change sets_ pulls the changes of another changeset into the current one:
 
-image::../src/main/resources/images/merge.png[Merge Changesets Button]
+image::../src/main/resources/images/svg/material/merge.svg[Merge Changesets Button,24]
 
 Pressing the button opens a list of all changesets except the current one. The changes of the one you choose are recolored into the current changeset, which makes it the target of the merge. This is typically the consolidation step at the end of a multi-loop coordination: the outcome gets merged into a single changeset, which is the basis for development and testing. Merging can be undone.
 
 ### Review
 Even with only a few changes, they can be hard to find in a large diagram. The toolbar button _Collapse for review_ folds up all structured steps which contain no changes, so that only the parts of the diagram remain open which are worth a reviewer's attention.
 
-image::../src/main/resources/images/review.png[Review Button]
+image::../src/main/resources/images/svg/material/text_compare.svg[Review Button,24]
 
 
 ## Meta tags
