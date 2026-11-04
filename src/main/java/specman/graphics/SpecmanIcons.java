@@ -52,7 +52,7 @@ public final class SpecmanIcons {
   public static final String SETTINGS = MATERIAL + "settings.svg";
   public static final String EXIT = MATERIAL + "logout.svg";
 
-  // Collapse/expand all steps (toolbar + View menu)
+  // Collapse/expand all steps (toolbar)
   public static final String COLLAPSE_ALL = MATERIAL + "unfold_less.svg";
   public static final String EXPAND_ALL = MATERIAL + "unfold_more.svg";
   // KlappButton of a single step

@@ -39,7 +39,6 @@ public class SpecmanMenuBar extends JMenuBar {
     add(shefEditorPane.getEditMenu());
     add(shefEditorPane.getFormatMenu());
     add(shefEditorPane.getInsertMenu());
-    add(createViewMenu(context));
   }
 
   private @NotNull JMenu createFileMenu(SpecmanOpContext context) {
@@ -99,19 +98,6 @@ public class SpecmanMenuBar extends JMenuBar {
     dateiMenu.add(settings);
     dateiMenu.add(exit);
     return dateiMenu;
-  }
-
-  private static JMenu createViewMenu(SpecmanOpContext context) {
-    JMenuItem collapseAll = new IMenuItem("menu.view.collapse.all", icon(SpecmanIcons.COLLAPSE_ALL));
-    collapseAll.addActionListener(e -> context.alleSchritteKlappen(true));
-
-    JMenuItem expandAll = new IMenuItem("menu.view.expand.all", icon(SpecmanIcons.EXPAND_ALL));
-    expandAll.addActionListener(e -> context.alleSchritteKlappen(false));
-
-    JMenu viewMenu = new IMenu("menu.view");
-    viewMenu.add(collapseAll);
-    viewMenu.add(expandAll);
-    return viewMenu;
   }
 
   private static Icon icon(String svgPath) {
