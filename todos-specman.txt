@@ -7,6 +7,7 @@ Release notes Specman 1.4.0
 - Hoch/Runter über Grenzen von Schritten wäre cool
 - Specman URLs
 - PlantUML
+- Button-Enabling
 
 Aus aktueller Anwendung
 - Hat man 5 Sekunden Autosave-Intervall eingestellt, dann wird es auffällig, dass ein abhängendes Leerzeichen wegbereinigt wird.
@@ -17,37 +18,6 @@ Aus aktueller Anwendung
 - beim Öffnen und einer vorhandenen .wrk, *drei* Optionen: 1) nicht laden, 2) laden, 3) ist in Arbeit - nicht laden aber auch nicht überschreiben und beim Schließen löschen
 - Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
 - PDF-Option "Export beim Speichern"
-
-Move & Morph
-Mit der Einführung der Specman URLs ist es wichtiger geworden, bestehende Schritte nach Möglichkeit nicht zu entfernen und neu zu erstellen,
-  wenn man nur eine Änderung haben will. Das Verschieben eines Schritts per Drag & Drop ist ein erster Anfang, um eine Änderung herbeizuführen
-  ohne dass sich die interne ID ändert. Eine URL auf diesen Schritt bleibt dadurch gültig, auch wenn sich die Nummer geändert hat.
-  Wir brauchen noch mehr solche ID-erhaltenen Hilfefunktionen
-x Cut & Paste von Schritten sollte beim Einfügen nur neue IDs vergeben, wenn die IDs der einzufügenden Schritte nicht eindeutig sind.
-  x Ein Cut & Paste innerhalb einer Instanz ist dann garantiert ID-erhaltend.
-  x Ist das vielleicht schon so? Wenn ja, müssen wir nur Tests ergänzen, die das nachweisen
-- Zweige in If/Else und Case sollten sich vertauschen lassen. Ähnlich wie bei Catch-Sequenzen in Catch-Bereichen
-  - allerdings haben die Zweige keine eigene ID und ein entsprechendes Schrittnummerlabel, wo sich entsprechende Kontextmenüpunkte anhängen ließen
-  - Wo hängen wir die Funktionalität also an, so dass der User sie auch intuitiv / explorativ findet?
-- Morphing Einfacher Schritt
-  - While / While-Wile: Schrittinhalt kommt in ersten Schritt der Wiederholsequenz.
-     Hat die erste TextEditArea mehr als einen Absatz, kommt der erste Absatz in den While-Schritt und nur der Rest in den ersten Schritt der Sequenz.
-  - If / If-Else / Catch: vorerst nicht unterstützt
-  - Sequenzschritt: Analog While
-  - Break: Nur Übernahme des ersten Absatzes des ersten TestEditArea
-  - Catch: geht grundsätzlich nicht - auch bei den anderen Schritttypen nicht
-- Morphing While / While-While
-  - Einfacher Schritt: EditAreas des Schritts selbst und aller enthaltenen Schritte werden im Zielschritt untereinander gehängt.
-  - Untereinander: keine inhaltliche Änderung
-  - If / If-Else / Case: Vorerst nicht unterstützt
-  - Break-Schritt: Vorerst nicht unterstützt
-- Morphing
-
-  - If -> If/Else: Schrittinhalt kommt in den If-Zweig, Else-Zweig wird mit einem leeren Schritt angelegt
-  - If/Else -> Case: Else-Zweig wird Sonst-Zwei, Ez-Zweig wird erster Case-Zweig, zweiter Case-Zweig wird mit einem leeren Schritt angelegt
-  - While -> While-Wile und umgekehrt: keine inhaltliche Änderung notwendig
-  - Einfacher Schritt -> While / While-While: Verteilung der Schrittinhalts analog Morping Einfacher Schritt -> Sequenzsschritt
-  - Sequenzschritt -> While / While-While und umgekehrt: keine inhaltliche Änderung notwendig
 
 PlantUML
 x Repräsentation im UI evtl. als spezialisierte ImageEditArea
@@ -344,8 +314,29 @@ Auf längere Sicht - nicht notwendig für ersten Go-Live:
 - Schritt-Morphing: If/Else -> Case usw.
 - Zooming aus Undo-Liste entfernen
 - Sonst-Zweig in Cases Entfernen / Hinzufügen
-- Button-Enabling
 - Annehmen *einzelner* Änderungen
+
+Move & Morph
+Mit der Einführung der Specman URLs ist es wichtiger geworden, bestehende Schritte nach Möglichkeit nicht zu entfernen und neu zu erstellen,
+  wenn man nur eine Änderung haben will. Das Verschieben eines Schritts per Drag & Drop ist ein erster Anfang, um eine Änderung herbeizuführen
+  ohne dass sich die interne ID ändert. Eine URL auf diesen Schritt bleibt dadurch gültig, auch wenn sich die Nummer geändert hat.
+  Wir brauchen noch mehr solche ID-erhaltenen Hilfefunktionen
+- Zweige in If/Else und Case sollten sich vertauschen lassen. Ähnlich wie bei Catch-Sequenzen in Catch-Bereichen
+  - allerdings haben die Zweige keine eigene ID und ein entsprechendes Schrittnummerlabel, wo sich entsprechende Kontextmenüpunkte anhängen ließen
+  - Wo hängen wir die Funktionalität also an, so dass der User sie auch intuitiv / explorativ findet?
+- Morphing Einfacher Schritt
+  - While / While-Wile: Schrittinhalt kommt in ersten Schritt der Wiederholsequenz.
+     Hat die erste TextEditArea mehr als einen Absatz, kommt der erste Absatz in den While-Schritt und nur der Rest in den ersten Schritt der Sequenz.
+  - If / If-Else / Catch: vorerst nicht unterstützt
+  - Sequenzschritt: Analog While
+  - Break: Nur Übernahme des ersten Absatzes des ersten TestEditArea
+  - Catch: geht grundsätzlich nicht - auch bei den anderen Schritttypen nicht
+- Morphing While / While-While
+  - Einfacher Schritt: EditAreas des Schritts selbst und aller enthaltenen Schritte werden im Zielschritt untereinander gehängt.
+  - Untereinander: keine inhaltliche Änderung
+  - If / If-Else / Case: Vorerst nicht unterstützt
+  - Break-Schritt: Vorerst nicht unterstützt
+- Morphing...
 
 Tipps und Tricks
 - Pixelgenauer Größenvergleich zwischen UI und PDF-Export geht mit 85,2% Zoomfaktor im Acrobat Reader

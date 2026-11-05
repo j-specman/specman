@@ -23,6 +23,9 @@ public class CutStepOp extends AbstractADBLSpecmanOp {
 
   @Override
   void execute() throws EditException {
+    if (step.getChangeInfo().isSourceStep()) {
+      return;
+    }
     if (userConfirmedCutDespiteExternalCatches()) {
       new CopyStepOp(step).run();
       deleteStepADBL(step, initiatingFragment);

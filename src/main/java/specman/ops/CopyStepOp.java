@@ -18,6 +18,9 @@ public class CopyStepOp {
   }
 
   public void run() {
+    if (step.getChangeInfo().isSourceStep()) {
+      return;
+    }
     // generiereModel(true) cleans up text formatting before serializing, which would
     // otherwise pollute the undo history with invisible side-effect edits from the copy action
     try (UndoRecording ur = editor().pauseUndo()) {

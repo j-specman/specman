@@ -712,10 +712,14 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
   public void moveCoCatchDownUDBL(StepnumberLabel initiatingLabel) {}
 
   public boolean allowsDeletion(StepnumberLabel initiatingLabel) {
-    return getParent().allowsStepDeletion() && !changeInfo.isDeleted();
+    return getParent().allowsStepDeletion() && !changeInfo.isDeleted() && !changeInfo.isSourceStep();
   }
 
   public boolean allowsClipboardOperations() { return !changeInfo.isDeleted(); }
+
+  /** A source step is just the placeholder a moved step leaves behind in change mode. It has no content of its
+   * own and only vanishes together with the move, so it can't be copied or cut. */
+  public boolean allowsCopyAndCut() { return allowsClipboardOperations() && !changeInfo.isSourceStep(); }
 
   /** Tags can only be assigned via the step's own step number, not e.g. via the one of a catch
    * heading, and not to a step marked as deleted. */

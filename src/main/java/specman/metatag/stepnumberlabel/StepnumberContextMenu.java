@@ -168,10 +168,10 @@ public class StepnumberContextMenu implements MouseListener {
     this.currentStep = currentStep;
     this.initiatingLabel = initiatingLabel;
     this.delete.setEnabled(currentStep.allowsDeletion(initiatingLabel));
-    boolean clipboardAllowed = currentStep.allowsClipboardOperations();
-    this.copy.setEnabled(clipboardAllowed);
-    this.cut.setEnabled(clipboardAllowed);
-    this.paste.setEnabled(clipboardAllowed);
+    boolean copyAndCutAllowed = currentStep.allowsCopyAndCut();
+    this.copy.setEnabled(copyAndCutAllowed);
+    this.cut.setEnabled(copyAndCutAllowed);
+    this.paste.setEnabled(currentStep.allowsClipboardOperations());
     this.copyLink.init(currentStep);
     this.toggleFlatNumbering.setVisible(currentStep.getFlatNumbering() != null);
     if (toggleFlatNumbering.isVisible()) {
