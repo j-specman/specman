@@ -246,6 +246,14 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
     setText(id.toString());
   }
 
+  public void setStandardStyleUDBL(StepNumber id) {
+    setStructureUDBL(LabelStructure.Standard);
+    setBorderForColorUDBL(SCHRITTNUMMER_FARBE.color);
+    setBackgroundUDBL(SCHRITTNUMMER_FARBE.color);
+    setForegroundUDBL(SCHRITTNUMMER_VORDERGRUNDFARBE);
+    setTextUDBL(id.toString());
+  }
+
   public void setTargetStyleUDBL(StepNumber quellschrittId, ChangeSet changeset) {
     setStructureUDBL(LabelStructure.Target);
     setBorderForColorUDBL(ChangeSet.DEFAULT.colors.panelColor);

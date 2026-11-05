@@ -716,7 +716,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
   public void moveCoCatchDownUDBL(StepnumberLabel initiatingLabel) {}
 
   public boolean allowsDeletion(StepnumberLabel initiatingLabel) {
-    return sequencesAllowDeletion() && !changeInfo.isDeleted() && !changeInfo.isSourceStep();
+    return sequencesAllowDeletion() && !changeInfo.isDeleted();
   }
 
   /** Outside change mode, deleting a step takes the source steps of all target steps in it along, see
@@ -738,14 +738,41 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
   /** The source steps of all target steps in this step's subtree, this step included, whose own place is outside
    * of the subtree. Source steps inside vanish together with the subtree anyway. */
   public List<QuellSchrittView> externalSourceSteps() {
-    StepCollector collector = new StepCollector();
-    traverse(collector);
-    List<AbstractSchrittView> subtree = collector.steps();
+    List<AbstractSchrittView> subtree = subtreeSteps();
     return subtree.stream()
       .map(AbstractSchrittView::getQuellschritt)
       .filter(Objects::nonNull)
       .filter(sourceStep -> !subtree.contains(sourceStep))
       .toList();
+  }
+
+  /** The target steps of all source steps in this step's subtree, this step included, whose own place is outside
+   * of the subtree. */
+  public List<AbstractSchrittView> externalTargetSteps() {
+    List<AbstractSchrittView> subtree = subtreeSteps();
+    return subtree.stream()
+      .filter(QuellSchrittView.class::isInstance)
+      .map(step -> ((QuellSchrittView) step).getZielschritt())
+      .filter(Objects::nonNull)
+      .filter(targetStep -> !subtree.contains(targetStep))
+      .toList();
+  }
+
+  private List<AbstractSchrittView> subtreeSteps() {
+    StepCollector collector = new StepCollector();
+    traverse(collector);
+    return collector.steps();
+  }
+
+  /** Cuts the tie of this target step to its source step, which is about to vanish. Unless the step is marked as
+   * deleted, it is an ordinary step afterwards, as if it had never been moved. */
+  public void detachFromSourceStepUDBL() {
+    setQuellschrittUDBL(null);
+    if (changeInfo.isTargetStep()) {
+      UDBL.setChangeInfo(this, ChangeInfo.untracked());
+      editContainer.setStandardStepnumberStyleUDBL(number);
+      applyEffectiveBackgroundUDBL();
+    }
   }
 
   public boolean allowsClipboardOperations() { return !changeInfo.isDeleted(); }

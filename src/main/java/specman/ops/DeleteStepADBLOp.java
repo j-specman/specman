@@ -25,11 +25,9 @@ public class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
 
   @Override
   void execute() throws EditException {
-    if (step.getChangeInfo().isSourceStep()) {
-      return;
-    }
     if (aenderungenVerfolgen()
         && !step.getChangeInfo().isAdded()
+        && !step.getChangeInfo().isSourceStep()
         && !(step instanceof CatchBereich)) {
       if (!step.getChangeInfo().isDeleted()) {
         if (isDeletionAllowed(step)) {
@@ -63,6 +61,7 @@ public class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
       }
       if (isDeletionAllowed(step)) {
         List<QuellSchrittView> sourceSteps = step.externalSourceSteps();
+        List<AbstractSchrittView> targetSteps = step.externalTargetSteps();
         step.markStepnumberLinksAsDefect();
         SchrittSequenzView sequenz = step.getParent();
         int schrittIndex = sequenz.schrittEntfernen(step, Discard);
@@ -70,6 +69,7 @@ public class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
         for (QuellSchrittView sourceStep : sourceSteps) {
           removeSourceStep(sourceStep);
         }
+        targetSteps.forEach(AbstractSchrittView::detachFromSourceStepUDBL);
         resyncStepnumberStyleADBL();
       }
     }

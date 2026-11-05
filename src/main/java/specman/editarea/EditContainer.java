@@ -238,6 +238,10 @@ public class EditContainer extends JPanel {
 		schrittNummer.setTargetStyleUDBL(quellschrittId, changeSet);
 	}
 
+	public void setStandardStepnumberStyleUDBL(StepNumber id) {
+		schrittNummer.setStandardStyleUDBL(id);
+	}
+
 	public void setQuellStil(StepNumber zielschrittID, ChangeSet changeSet) {
 		editAreas.forEach(ea -> ea.setQuellStil(changeSet));
 		setBackground(changeSet.panelColor());
