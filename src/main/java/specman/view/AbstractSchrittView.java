@@ -50,6 +50,7 @@ import specman.undo.props.UDBL;
 import specman.visitor.DiagramVisitor;
 import specman.visitor.FirstChangeSetFinder;
 import specman.visitor.LinkedBreakStepCollector;
+import specman.visitor.StepCollector;
 import specman.visitor.StopTraversalException;
 
 import javax.swing.JComponent;
@@ -60,7 +61,10 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -712,7 +716,36 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
   public void moveCoCatchDownUDBL(StepnumberLabel initiatingLabel) {}
 
   public boolean allowsDeletion(StepnumberLabel initiatingLabel) {
-    return getParent().allowsStepDeletion() && !changeInfo.isDeleted() && !changeInfo.isSourceStep();
+    return sequencesAllowDeletion() && !changeInfo.isDeleted() && !changeInfo.isSourceStep();
+  }
+
+  /** Outside change mode, deleting a step takes the source steps of all target steps in it along, see
+   * {@link #externalSourceSteps()}, so none of the affected sequences may become empty. In change mode the step is
+   * just marked as deleted. */
+  public boolean sequencesAllowDeletion() {
+    if (editor().aenderungenVerfolgen()) {
+      return parent.allowsStepDeletion();
+    }
+    Map<SchrittSequenzView, Integer> numDeletionsPerSequence = new HashMap<>();
+    numDeletionsPerSequence.merge(parent, 1, Integer::sum);
+    for (QuellSchrittView sourceStep : externalSourceSteps()) {
+      numDeletionsPerSequence.merge(sourceStep.getParent(), 1, Integer::sum);
+    }
+    return numDeletionsPerSequence.entrySet().stream()
+      .allMatch(entry -> entry.getKey().allowsStepsDeletion(entry.getValue()));
+  }
+
+  /** The source steps of all target steps in this step's subtree, this step included, whose own place is outside
+   * of the subtree. Source steps inside vanish together with the subtree anyway. */
+  public List<QuellSchrittView> externalSourceSteps() {
+    StepCollector collector = new StepCollector();
+    traverse(collector);
+    List<AbstractSchrittView> subtree = collector.steps();
+    return subtree.stream()
+      .map(AbstractSchrittView::getQuellschritt)
+      .filter(Objects::nonNull)
+      .filter(sourceStep -> !subtree.contains(sourceStep))
+      .toList();
   }
 
   public boolean allowsClipboardOperations() { return !changeInfo.isDeleted(); }

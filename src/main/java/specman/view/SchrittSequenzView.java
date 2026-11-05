@@ -629,11 +629,16 @@ public class SchrittSequenzView {
    * one step which is not marked for deletion. Otherwise, deletion of this last
    * step would leave the sequence empty, which is not allowed. */
   public boolean allowsStepDeletion() {
+    return allowsStepsDeletion(1);
+  }
+
+  /** Like {@link #allowsStepDeletion()}, but for deleting the given number of steps of this sequence at once. */
+  public boolean allowsStepsDeletion(int numStepsToDelete) {
     int numStepsMarkedForDeletion = (int)schritte
       .stream()
       .filter(s -> s.getChangeInfo().isDeleted())
       .count();
-    return schritte.size() - numStepsMarkedForDeletion > 1;
+    return schritte.size() - numStepsMarkedForDeletion > numStepsToDelete;
   }
 
   public AbstractSchrittView getLastStep() {

@@ -3,6 +3,10 @@ package headless.changemode;
 import headless.HeadlessExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 import specman.ChangeSet;
+import specman.EditException;
+import specman.draganddrop.DropTarget;
+import specman.draganddrop.MoveStepOperation;
+import specman.view.RelativeStepPosition;
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedElement;
@@ -70,6 +74,13 @@ abstract public class AbstractChangemodeTest {
     specman.toggleChangeMode();
     assertTrue(specman.aenderungenVerfolgen(), "change mode must be on");
     specman.selectChangeSet(changeSet);
+  }
+
+  /** Moves the step to the given position at the reference step like a drag and drop does. In change mode, this
+   * leaves a source step behind. */
+  protected static void moveStep(AbstractSchrittView step, AbstractSchrittView reference, RelativeStepPosition position)
+      throws EditException {
+    new MoveStepOperation(null, step, specman).execute(new DropTarget(reference.getParent(), reference, position), specman);
   }
 
   /** The text must be marked as changed by the given change set from its first to its last character. An empty

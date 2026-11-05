@@ -7,6 +7,7 @@ import specman.undo.UndoableZweigEntfernt;
 import specman.view.*;
 
 import javax.swing.*;
+import java.util.List;
 
 import static specman.view.StepRemovalPurpose.Discard;
 import static specman.i18n.Messages.i18n;
@@ -61,17 +62,29 @@ public class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
         return;
       }
       if (isDeletionAllowed(step)) {
+        List<QuellSchrittView> sourceSteps = step.externalSourceSteps();
         step.markStepnumberLinksAsDefect();
         SchrittSequenzView sequenz = step.getParent();
         int schrittIndex = sequenz.schrittEntfernen(step, Discard);
         addEdit(new UndoableSchrittEntfernt(step, sequenz, schrittIndex));
+        for (QuellSchrittView sourceStep : sourceSteps) {
+          removeSourceStep(sourceStep);
+        }
         resyncStepnumberStyleADBL();
       }
     }
   }
 
+  /** A target step doesn't make sense without its source step, which marks the place it was moved from. */
+  private void removeSourceStep(QuellSchrittView sourceStep) throws EditException {
+    sourceStep.markStepnumberLinksAsDefect();
+    SchrittSequenzView sequence = sourceStep.getParent();
+    int index = sequence.schrittEntfernen(sourceStep, Discard);
+    addEdit(new UndoableSchrittEntfernt(sourceStep, sequence, index));
+  }
+
   private boolean isDeletionAllowed(AbstractSchrittView step) throws EditException {
-    if (!step.getParent().allowsStepDeletion()) {
+    if (!step.sequencesAllowDeletion()) {
       throw new EditException("msg.delete.last.step");
     }
     if (step.hasStepnumberLinks()) {
