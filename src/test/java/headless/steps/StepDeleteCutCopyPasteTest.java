@@ -80,6 +80,32 @@ class StepDeleteCutCopyPasteTest {
     assertEquals(originalText, pasted.get(0).getFirstEditArea().asTextArea().getPlainText());
   }
 
+  /**
+   * Scenario: Step 1 is of the type under test, followed by a simple step 2. The user cuts step 1 and pastes it
+   * behind the remaining simple step. Cutting removes the step from the model, so pasting it back within the
+   * same instance keeps the IDs of the step and all its substeps. Links to these steps stay valid.
+   */
+  @ParameterizedTest
+  @MethodSource("testCutPasteKeepsStepIds_params")
+  void testCutPasteKeepsStepIds(
+      Class<? extends AbstractCreateStepOpButton> buttonType, Class<? extends AbstractSchrittView> stepType) {
+    specman.click(buttonType);
+    AbstractSchrittView original = specman.findStepByStepID("1", stepType);
+    specman.focus(original);
+    EinfacherSchrittView simpleStep = specman.clickNewSimpleStep();
+    List<AbstractSchrittView> stepsBeforeCut = List.copyOf(specman.listAllSteps());
+    List<String> originalIds = stepIds(stepsBeforeCut.subList(0, stepsBeforeCut.size() - 1));
+    String simpleStepId = simpleStep.getId();
+
+    specman.clickContextMenuItem(original, CUT_ITEM);
+    specman.clickContextMenuItem(simpleStep, PASTE_ITEM);
+
+    assertEquals(List.of(), specman.shownMessages());
+    List<AbstractSchrittView> steps = specman.listAllSteps();
+    assertEquals(simpleStepId, steps.get(0).getId());
+    assertEquals(originalIds, stepIds(steps.subList(1, steps.size())));
+  }
+
   /** Scenario: Two simple steps, the user deletes step 1 via the context menu. The remaining step moves up to number 1.
    * Undo restores the deleted step in its old place, redo deletes it again. */
   @Test
@@ -229,6 +255,14 @@ class StepDeleteCutCopyPasteTest {
         List.of("1", "1.1", "2.1", "3.1", "4", "5", "5.1", "6.1", "7.1")),
       Arguments.of(CreateSubsequenceStepOpButton.class, SubsequenzSchrittView.class, List.of("1", "1.1", "2", "3", "3.1")),
       Arguments.of(CreateBreakStepOpButton.class, BreakSchrittView.class, List.of("1", "2", "3")));
+  }
+
+  static Stream<Arguments> testCutPasteKeepsStepIds_params() {
+    return testCopyPasteBehindOtherStep_params().map(args -> Arguments.of(args.get()[0], args.get()[1]));
+  }
+
+  private static List<String> stepIds(List<AbstractSchrittView> steps) {
+    return steps.stream().map(AbstractSchrittView::getId).toList();
   }
 
   private static List<Class<?>> viewTypes(List<AbstractSchrittView> steps) {

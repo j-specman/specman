@@ -23,9 +23,9 @@ Mit der Einführung der Specman URLs ist es wichtiger geworden, bestehende Schri
   wenn man nur eine Änderung haben will. Das Verschieben eines Schritts per Drag & Drop ist ein erster Anfang, um eine Änderung herbeizuführen
   ohne dass sich die interne ID ändert. Eine URL auf diesen Schritt bleibt dadurch gültig, auch wenn sich die Nummer geändert hat.
   Wir brauchen noch mehr solche ID-erhaltenen Hilfefunktionen
-- Cut & Paste von Schritten sollte beim Einfügen nur neue IDs vergeben, wenn die IDs der einzufügenden Schritte nicht eindeutig sind.
-  - Ein Cut & Paste innerhalb einer Instanz ist dann garantiert ID-erhaltend.
-  - Ist das vielleicht schon so? Wenn ja, müssen wir nur Tests ergänzen, die das nachweisen
+x Cut & Paste von Schritten sollte beim Einfügen nur neue IDs vergeben, wenn die IDs der einzufügenden Schritte nicht eindeutig sind.
+  x Ein Cut & Paste innerhalb einer Instanz ist dann garantiert ID-erhaltend.
+  x Ist das vielleicht schon so? Wenn ja, müssen wir nur Tests ergänzen, die das nachweisen
 - Zweige in If/Else und Case sollten sich vertauschen lassen. Ähnlich wie bei Catch-Sequenzen in Catch-Bereichen
   - allerdings haben die Zweige keine eigene ID und ein entsprechendes Schrittnummerlabel, wo sich entsprechende Kontextmenüpunkte anhängen ließen
   - Wo hängen wir die Funktionalität also an, so dass der User sie auch intuitiv / explorativ findet?
