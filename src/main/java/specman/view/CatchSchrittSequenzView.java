@@ -219,13 +219,17 @@ public class CatchSchrittSequenzView extends ZweigSchrittSequenzView implements 
   }
 
   public void removeOrMarkAsDeletedUDBL() {
-    EditorI editor = editor();
-    if (changeInfo.isAdded() || !editor.aenderungenVerfolgen()) {
+    if (isRemovedByDeletion()) {
       removeUDBL();
     }
     else {
       alsGeloeschtMarkierenUDBL();
     }
+  }
+
+  /** Whether deleting the sequence removes it. Otherwise the deletion is just marked in change mode. */
+  public boolean isRemovedByDeletion() {
+    return changeInfo.isAdded() || !editor().aenderungenVerfolgen();
   }
 
   public void removeUDBL(CatchUeberschrift catchHeading) {

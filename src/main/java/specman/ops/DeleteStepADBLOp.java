@@ -5,9 +5,9 @@ import specman.editarea.InteractiveStepFragment;
 import specman.undo.UndoableSchrittEntfernt;
 import specman.undo.UndoableZweigEntfernt;
 import specman.view.*;
+import specman.visitor.VanishingSteps;
 
 import javax.swing.*;
-import java.util.List;
 
 import static specman.view.StepRemovalPurpose.Discard;
 import static specman.i18n.Messages.i18n;
@@ -41,8 +41,13 @@ public class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
         CaseSchrittView caseSchritt = (CaseSchrittView) step;
         ZweigSchrittSequenzView zweig = caseSchritt.headingToBranch(initiatingFragment);
         if (zweig != null) {
+          VanishingSteps vanishing = VanishingSteps.ofSequence(zweig);
+          ensureExternalSourceStepsRemovable(vanishing);
           int zweigIndex = caseSchritt.zweigEntfernen(zweig);
-          addEdit(new UndoableZweigEntfernt(zweig, caseSchritt, zweigIndex));
+          if (zweigIndex >= 0) {
+            addEdit(new UndoableZweigEntfernt(zweig, caseSchritt, zweigIndex));
+            resolveMoveTies(vanishing);
+          }
           return;
         }
       }
@@ -51,7 +56,7 @@ public class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
         CatchUeberschrift catchHeading = catchBereich.headingFromFragment(initiatingFragment);
         if (catchHeading != null) {
           if (catchHeading.isPrimaryHeading()) {
-            catchHeading.containingCatchSequence().removeOrMarkAsDeletedUDBL();
+            deleteCatchSequence(catchHeading.containingCatchSequence());
           }
           else {
             catchHeading.removeOrMarkAsDeletedUDBL();
@@ -60,27 +65,45 @@ public class DeleteStepADBLOp extends AbstractADBLSpecmanOp {
         return;
       }
       if (isDeletionAllowed(step)) {
-        List<QuellSchrittView> sourceSteps = step.externalSourceSteps();
-        List<AbstractSchrittView> targetSteps = step.externalTargetSteps();
+        VanishingSteps vanishing = VanishingSteps.ofStep(step);
         step.markStepnumberLinksAsDefect();
         SchrittSequenzView sequenz = step.getParent();
         int schrittIndex = sequenz.schrittEntfernen(step, Discard);
         addEdit(new UndoableSchrittEntfernt(step, sequenz, schrittIndex));
-        for (QuellSchrittView sourceStep : sourceSteps) {
-          removeSourceStep(sourceStep);
-        }
-        targetSteps.forEach(AbstractSchrittView::detachFromSourceStepUDBL);
+        resolveMoveTies(vanishing);
         resyncStepnumberStyleADBL();
       }
     }
   }
 
-  /** A target step doesn't make sense without its source step, which marks the place it was moved from. */
-  private void removeSourceStep(QuellSchrittView sourceStep) throws EditException {
-    sourceStep.markStepnumberLinksAsDefect();
-    SchrittSequenzView sequence = sourceStep.getParent();
-    int index = sequence.schrittEntfernen(sourceStep, Discard);
-    addEdit(new UndoableSchrittEntfernt(sourceStep, sequence, index));
+  private void deleteCatchSequence(CatchSchrittSequenzView catchSequence) throws EditException {
+    VanishingSteps vanishing = VanishingSteps.ofSequence(catchSequence);
+    boolean removed = catchSequence.isRemovedByDeletion();
+    if (removed) {
+      ensureExternalSourceStepsRemovable(vanishing);
+    }
+    catchSequence.removeOrMarkAsDeletedUDBL();
+    if (removed) {
+      resolveMoveTies(vanishing);
+    }
+  }
+
+  private void ensureExternalSourceStepsRemovable(VanishingSteps vanishing) throws EditException {
+    if (!vanishing.allowsRemovalOfExternalSourceSteps(null)) {
+      throw new EditException("msg.delete.last.step");
+    }
+  }
+
+  /** Source and target steps record a move together. When one side vanishes, the move is void: The source steps of
+   * vanishing target steps vanish as well, the target steps of vanishing source steps become ordinary steps. */
+  private void resolveMoveTies(VanishingSteps vanishing) throws EditException {
+    for (QuellSchrittView sourceStep : vanishing.externalSourceSteps()) {
+      sourceStep.markStepnumberLinksAsDefect();
+      SchrittSequenzView sequence = sourceStep.getParent();
+      int index = sequence.schrittEntfernen(sourceStep, Discard);
+      addEdit(new UndoableSchrittEntfernt(sourceStep, sequence, index));
+    }
+    vanishing.externalTargetSteps().forEach(AbstractSchrittView::detachFromSourceStepUDBL);
   }
 
   private boolean isDeletionAllowed(AbstractSchrittView step) throws EditException {

@@ -50,8 +50,8 @@ import specman.undo.props.UDBL;
 import specman.visitor.DiagramVisitor;
 import specman.visitor.FirstChangeSetFinder;
 import specman.visitor.LinkedBreakStepCollector;
-import specman.visitor.StepCollector;
 import specman.visitor.StopTraversalException;
+import specman.visitor.VanishingSteps;
 
 import javax.swing.JComponent;
 import java.awt.*;
@@ -61,10 +61,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -719,49 +716,14 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
     return sequencesAllowDeletion() && !changeInfo.isDeleted();
   }
 
-  /** Outside change mode, deleting a step takes the source steps of all target steps in it along, see
-   * {@link #externalSourceSteps()}, so none of the affected sequences may become empty. In change mode the step is
-   * just marked as deleted. */
+  /** Where deleting the step physically removes it, the source steps of target steps vanishing with it are removed
+   * as well, see {@link VanishingSteps}. None of the affected sequences may become empty. In change mode, steps
+   * from before are just marked as deleted. */
   public boolean sequencesAllowDeletion() {
-    if (editor().aenderungenVerfolgen()) {
+    if (editor().aenderungenVerfolgen() && !changeInfo.isAdded()) {
       return parent.allowsStepDeletion();
     }
-    Map<SchrittSequenzView, Integer> numDeletionsPerSequence = new HashMap<>();
-    numDeletionsPerSequence.merge(parent, 1, Integer::sum);
-    for (QuellSchrittView sourceStep : externalSourceSteps()) {
-      numDeletionsPerSequence.merge(sourceStep.getParent(), 1, Integer::sum);
-    }
-    return numDeletionsPerSequence.entrySet().stream()
-      .allMatch(entry -> entry.getKey().allowsStepsDeletion(entry.getValue()));
-  }
-
-  /** The source steps of all target steps in this step's subtree, this step included, whose own place is outside
-   * of the subtree. Source steps inside vanish together with the subtree anyway. */
-  public List<QuellSchrittView> externalSourceSteps() {
-    List<AbstractSchrittView> subtree = subtreeSteps();
-    return subtree.stream()
-      .map(AbstractSchrittView::getQuellschritt)
-      .filter(Objects::nonNull)
-      .filter(sourceStep -> !subtree.contains(sourceStep))
-      .toList();
-  }
-
-  /** The target steps of all source steps in this step's subtree, this step included, whose own place is outside
-   * of the subtree. */
-  public List<AbstractSchrittView> externalTargetSteps() {
-    List<AbstractSchrittView> subtree = subtreeSteps();
-    return subtree.stream()
-      .filter(QuellSchrittView.class::isInstance)
-      .map(step -> ((QuellSchrittView) step).getZielschritt())
-      .filter(Objects::nonNull)
-      .filter(targetStep -> !subtree.contains(targetStep))
-      .toList();
-  }
-
-  private List<AbstractSchrittView> subtreeSteps() {
-    StepCollector collector = new StepCollector();
-    traverse(collector);
-    return collector.steps();
+    return VanishingSteps.ofStep(this).allowsRemovalOfExternalSourceSteps(parent);
   }
 
   /** Cuts the tie of this target step to its source step, which is about to vanish. Unless the step is marked as

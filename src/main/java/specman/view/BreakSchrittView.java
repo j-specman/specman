@@ -186,6 +186,12 @@ public class BreakSchrittView extends AbstractSchrittView {
     return (CatchBereich) catchHeading.containingCatchSequence().getParent();
   }
 
+  /** The catch sequence which vanishes when this break step is removed, i.e. the one this is the primary break
+   * step of. A break step of a co-catch only takes its heading away. */
+  public CatchSchrittSequenzView vanishingCatchSequence() {
+    return catchHeading != null && catchHeading.isPrimaryHeading() ? catchHeading.containingCatchSequence() : null;
+  }
+
   public void scrollToCatch() {
     if (catchHeading != null) {
       // The user might not have focussed anything in the break step before he scrolled to
