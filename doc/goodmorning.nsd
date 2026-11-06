@@ -33,7 +33,7 @@ mainSequence {
     ifElse(2, ca44a1c4, `<div align="center">
       C<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">heck 
       day of week</font></span>
-    </div>`, plain=`Check day of week`, ifRatio=21.41%, shade=#ffffff) {
+    </div>`, plain=`Check day of week`, ifRatio=20.05%, shade=#ffffff) {
         if_branch(`S<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">aturday 
     or Sunday</font></span>`, plain=`Saturday or Sunday`) {
             simple(2.1, fa745b18, `T<span style="background-color: rgba(255, 255, 255, 0.0)"><font color="#000000">urn 
