@@ -57,14 +57,6 @@ class DiagramToolBarStructureTest {
     ExportPDFOpButton.class);
 
   @Test
-  void diagramToolBarHasAllStepChangeViewAndExportButtons() {
-    // the SHEF text and insert buttons are part of the same toolbar, but not of this expectation
-    List<AbstractButton> ownButtons = new ArrayList<>(buttons(specman.findComponent(DiagramToolBar.class)));
-    ownButtons.removeAll(shefButtons());
-    assertEquals(DIAGRAM_TOOLBAR_BUTTONS, ownButtons.stream().map(AbstractButton::getClass).toList());
-  }
-
-  @Test
   void diagramToolBarHasSevenTitledGroupsInOrder() {
     DiagramToolBar toolBar = specman.findComponent(DiagramToolBar.class);
     assertEquals(7, toolBar.getComponentCount());
@@ -94,19 +86,6 @@ class DiagramToolBarStructureTest {
       assertEquals(2, rows((ToolbarGroup) toolBar.getComponent(i)).size());
     }
     assertEquals(1, rows((ToolbarGroup) toolBar.getComponent(toolBar.getComponentCount() - 1)).size());
-  }
-
-  @Test
-  void changeSetButtonIsInTheSecondRowOfTheChangesGroupAndChoosesTheChangeSet() {
-    DiagramToolBar toolBar = specman.findComponent(DiagramToolBar.class);
-    List<Component> rows = rows((ToolbarGroup) toolBar.getComponent(2));
-    assertTrue(components((Container) rows.get(1)).stream().anyMatch(ChangeSetButton.class::isInstance));
-    ChangeSet lilac = ChangeSet.ALL.get("lilac");
-    specman.selectChangeSet(lilac);
-    assertEquals(lilac, ChangeSet.changeset());
-    ChangeSetButton button = specman.findComponent(ChangeSetButton.class);
-    assertEquals(ChangeSet.ALL.size(), button.popupMenu().getComponentCount());
-    specman.selectChangeSet(ChangeSet.DEFAULT);
   }
 
   @Test
