@@ -466,7 +466,7 @@ public class ModelSerializer_V002 {
         }
         String cs = info.changeset != null ? info.changeset : "yellow";
         String result = CHANGE + "=(" + changeType + ", " + cs;
-        if (sourceStepId != null && info.changetype == Aenderungsart.Zielschritt) {
+        if (sourceStepId != null && (info.changetype == Aenderungsart.Zielschritt || info.changetype == Aenderungsart.Geloescht)) {
             result += ", " + SOURCE_STEP + "=" + AbstractStepModel_V002.normalizeId(sourceStepId);
         }
         return result + ")";

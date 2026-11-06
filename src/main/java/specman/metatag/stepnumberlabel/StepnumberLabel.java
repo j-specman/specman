@@ -217,10 +217,10 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
    * a substring from index 0 to index 0 is an empty string. The end index
    * runs from 0 to */
   private IntRange findDelSubStringRange() {
+    if (fullTextDeleted()) {
+      return new IntRange(0, getText().length());
+    }
     if (structure == LabelStructure.Standard) {
-      if (fullTextDeleted()) {
-        return new IntRange(0, getText().length());
-      }
       return null;
     }
     int arrowStart = getText().indexOf(SPACER);
@@ -235,7 +235,7 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
   }
 
   private boolean fullTextDeleted() {
-    return structure == LabelStructure.Standard && getBackground() == DELETED_BACKGROUND_COLOR.color;
+    return structure != LabelStructure.Source && getBackground() == DELETED_BACKGROUND_COLOR.color;
   }
 
   public void setStandardStyle(StepNumber id) {
@@ -292,6 +292,16 @@ public class StepnumberLabel extends AbstractMetaTag implements InteractiveStepF
     setBackgroundUDBL(DELETED_BACKGROUND_COLOR.color);
     setForegroundUDBL(Schriftfarbe_Geloescht);
     setTextUDBL(id.toString(), null);
+  }
+
+  /** A deleted target keeps the connection to its source step, so the label still shows it, struck through
+   * together with the own number. */
+  public void setDeletedTargetStyleUDBL(StepNumber quellschrittId) {
+    setStructureUDBL(LabelStructure.Target);
+    setBorderForColorUDBL(DELETED_BACKGROUND_COLOR.color);
+    setBackgroundUDBL(DELETED_BACKGROUND_COLOR.color);
+    setForegroundUDBL(Schriftfarbe_Geloescht);
+    resyncSourceSuffixUDBL(quellschrittId);
   }
 
   public Shape getShape() {

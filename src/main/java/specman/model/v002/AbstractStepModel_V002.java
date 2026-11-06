@@ -103,7 +103,12 @@ public abstract class AbstractStepModel_V002 {
         return myNumber;
     }
 
+  /** A deleted target is marked as deleted and keeps the connection to its source step. */
   public boolean isTargetStep() {
-    return changeInfo != null && changeInfo.changetype == Aenderungsart.Zielschritt;
+    if (changeInfo == null) {
+      return false;
+    }
+    return changeInfo.changetype == Aenderungsart.Zielschritt
+      || (changeInfo.changetype == Aenderungsart.Geloescht && sourceStepId != null);
   }
 }

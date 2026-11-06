@@ -245,11 +245,20 @@ public class EditContainer extends JPanel {
 	}
 
 	public void setGeloeschtMarkiertStilUDBL(StepNumber id, ChangeSet changeSet) {
-		setBackgroundUDBL(changeSet.panelColor());
-		modifyableEditAreas().forEach(ea -> ea.setGeloeschtMarkiertStilUDBL(changeSet));
+		setEditAreasDeletedUDBL(changeSet);
 		if (schrittNummer != null) {
 			schrittNummer.setDeletedStyleUDBL(id);
 		}
+	}
+
+	public void setGeloeschtZielschrittStilUDBL(StepNumber quellschrittId, ChangeSet changeSet) {
+		setEditAreasDeletedUDBL(changeSet);
+		schrittNummer.setDeletedTargetStyleUDBL(quellschrittId);
+	}
+
+	private void setEditAreasDeletedUDBL(ChangeSet changeSet) {
+		setBackgroundUDBL(changeSet.panelColor());
+		modifyableEditAreas().forEach(ea -> ea.setGeloeschtMarkiertStilUDBL(changeSet));
 	}
 
 	public void setId(StepNumber id) {

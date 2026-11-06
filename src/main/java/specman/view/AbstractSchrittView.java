@@ -300,8 +300,18 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 
 	public void setGeloeschtMarkiertStilUDBL() {
 		setAenderungsartUDBL(Geloescht);
-		editContainer.setGeloeschtMarkiertStilUDBL(number, changeInfo.changeSet());
+		applyDeletedStyleUDBL();
 		applyEffectiveBackgroundUDBL();
+	}
+
+	/** A deleted target of a move keeps its connection to the source step. */
+	private void applyDeletedStyleUDBL() {
+		if (quellschritt != null) {
+			editContainer.setGeloeschtZielschrittStilUDBL(quellschritt.getNumber(), changeInfo.changeSet());
+		}
+		else {
+			editContainer.setGeloeschtMarkiertStilUDBL(number, changeInfo.changeSet());
+		}
 	}
 
 	public void setZielschrittStilUDBL() {
@@ -501,8 +511,8 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
     if (changeInfo.isSourceStep()) {
 			editContainer.resyncStepnumberAsSourceUDBL(((QuellSchrittView)this).getZielschrittID());
 		}
-		else if (changeInfo.isTargetStep()) {
-			editContainer.resyncStepnumberAsTargetUDBL(getQuellschritt().getNumber());
+		else if (quellschritt != null) {
+			editContainer.resyncStepnumberAsTargetUDBL(quellschritt.getNumber());
 		}
 		unterSequenzen().forEach(SchrittSequenzView::resyncStepnumberStyleADBL);
 	}
@@ -512,7 +522,7 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 	public void viewsNachinitialisieren() {
     switch (changeInfo.art()) {
       case Hinzugefuegt -> {} // panel color handled by applyEffectiveBackgroundUDBL below
-      case Geloescht -> editContainer.setGeloeschtMarkiertStilUDBL(number, changeInfo.changeSet());
+      case Geloescht -> applyDeletedStyleUDBL();
       case Quellschritt -> ((QuellSchrittView) this).setQuellStil();
       case Zielschritt -> setZielschrittStilUDBL();
     }
@@ -576,18 +586,29 @@ abstract public class AbstractSchrittView implements KlappbarerBereichI, Compone
 					getParent().schrittEntfernen(this, Reject);
 					break;
 				case Zielschritt:
-					getParent().schrittEntfernen(this, Move);
-					setNumber(getQuellschritt().newStepIDInSameSequence(After));
-					setParent(getQuellschritt().getParent());
-					getQuellschritt().getParent().insertStep(this, After, getQuellschritt());
-					getQuellschritt().getParent().schrittEntfernen(getQuellschritt(), Discard);
-					setQuellschrittUDBL(null);
+					returnToSourceStepUDBL();
+					break;
+				case Geloescht:
+					if (quellschritt != null) {
+						returnToSourceStepUDBL();
+					}
 					break;
 			}
 			aenderungsmarkierungenEntfernen();
 			setChangeInfo(changeInfo.untrack(currentSet));
 		}
 		return changesRejected;
+	}
+
+	/** Undoes the move: The step goes back to the place of its source step, which vanishes. */
+	private void returnToSourceStepUDBL() throws EditException {
+		QuellSchrittView source = getQuellschritt();
+		getParent().schrittEntfernen(this, Move);
+		setNumber(source.newStepIDInSameSequence(After));
+		setParent(source.getParent());
+		source.getParent().insertStep(this, After, source);
+		source.getParent().schrittEntfernen(source, Discard);
+		setQuellschrittUDBL(null);
 	}
 
 	protected int editAenderungenVerwerfen() {
