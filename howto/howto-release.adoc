@@ -140,7 +140,7 @@ Einen veröffentlichten Tag nicht nachträglich auf einen anderen Commit verschi
 [#website]
 == Website aktualisieren
 
-Nach der Veröffentlichung des GitHub-Releases wird die Website im Repository `j-specman/j-specman.github.io` aktualisiert. Dazu in den Klon dieses Repositorys wechseln, den Branch `main` auschecken und aktualisieren. Der Workflow `.github/workflows/pages.yml` baut daraus bei jedem Push auf `main` die Website samt Online-Manual (aus `doc/specman-manual.adoc` des Specman-Repositorys) und veröffentlicht sie über GitHub Pages.
+Nach der Veröffentlichung des GitHub-Releases wird die Website im Repository `j-specman/j-specman.github.io` aktualisiert. Dazu in den Klon dieses Repositorys wechseln, den Branch `main` auschecken und aktualisieren. Der Workflow `.github/workflows/pages.yml` baut daraus bei jedem Push auf `main` mit Maven (`mvn package`) die Website samt Online-Manual (aus `doc/specman-manual.adoc` des Specman-Repositorys) und Release-Historie und veröffentlicht sie über GitHub Pages. Dieselbe Maven-Konfiguration funktioniert auch lokal, siehe <<website-lokal-bauen,Website lokal bauen>>.
 
 === Release-Nummer prüfen
 
@@ -166,13 +166,47 @@ Wurde kein neuer Branch angelegt (zum Beispiel bei einem Patch-Release, das auf 
 
 Ab jetzt erscheinen Änderungen am Manual nur dann auf der Website, wenn sie auf den Release-Branch übernommen wurden.
 
+=== Release Notes übernehmen
+
+Die Website führt die Release-Historie (`releasenotes/index.html`). Ihre Quelle sind die Markdown-Dateien im Verzeichnis `releasenotes/` des Website-Repositorys.
+
+Im Specman-Klon, der gerade auf dem neuen Release steht, liegen unter `releasenotes/` die Release Notes des neuen Releases und aller Vorgänger, die in diesem Branch enthalten sind. Sie werden in den Klon des Website-Repositorys kopiert, ohne dort schon vorhandene Dateien zu überschreiben. Dazu im Verzeichnis des Website-Klons ausführen:
+
+[source,shell]
+----
+mvn antrun:run@collect-release-notes
+----
+
+Der Specman-Klon wird standardmäßig im Nachbarverzeichnis `../specman` erwartet. Liegt er woanders, wird der Pfad mit `-Dspecman.clone=<Pfad>` angegeben. Maven listet die kopierten Dateien auf. Gibt es keine neuen, wird nichts kopiert, das ist kein Fehler.
+
+Kopiert werden nur Dateien, die im Website-Repository noch fehlen. Die Historie dort ist maßgeblich: Eine nachträglich korrigierte Datei darf nicht durch eine veraltete Fassung aus einem Release-Branch überschrieben werden. Nachträgliche Korrekturen an alten Release Notes werden deshalb im Website-Repository gemacht.
+
+Anschließend zeigt `git status` im Website-Klon die neuen Dateien.
+
+Auf diese Weise sammelt die Website jede neue Release-Notes-Datei ein, ohne dass die Dateien zwischen den Branches des Specman-Repositorys hin und her kopiert werden müssen.
+
+[#website-lokal-bauen]
+=== Website lokal bauen
+
+Wer die Seiten vor dem Veröffentlichen lokal ansehen möchte, baut sie im Website-Klon mit:
+
+[source,shell]
+----
+mvn package
+----
+
+Der Build braucht nur Maven, ein JDK (21 oder höher) und laufendes Docker. Asciidoctor und Pandoc laufen in Docker-Containern und müssen nicht installiert sein. Beim ersten Mal lädt Docker die Images, das dauert einige Minuten.
+
+Das Ergebnis liegt in `_site/`: das Manual in `_site/manual/` (HTML und PDF) und die Release-Historie in `_site/releasenotes/`, jeweils mit `index.html` als Einstieg. Das Manual stammt aus dem Stand, der im Specman-Klon gerade ausgecheckt ist (standardmäßig `../specman`, sonst mit `-Dspecman.clone=<Pfad>` angeben). Der Workflow auf GitHub verwendet stattdessen den Branch aus `ref` in `pages.yml`.
+
 === Veröffentlichen und prüfen
 
-. Den Workflow `Build and deploy website` auslösen. Er baut die Website samt Online-Manual neu aus dem aktuellen Stand der Manual-Quelle. Das ist auch dann nötig, wenn an der Website selbst nichts zu ändern war, denn sonst zeigt das Online-Manual weiter den alten Stand.
-** *Es gab Änderungen* (Release-Nummer oder Manual-Quelle umgestellt): Änderungen committen und auf `main` pushen. Der Push löst den Workflow automatisch aus.
+. Den Workflow `Build and deploy website` auslösen. Er baut die Website samt Online-Manual und Release-Historie neu aus dem aktuellen Stand der Manual-Quelle. Das ist auch dann nötig, wenn an der Website selbst nichts zu ändern war, denn sonst zeigt das Online-Manual weiter den alten Stand.
+** *Es gab Änderungen* (neue Release Notes, Release-Nummer oder Manual-Quelle umgestellt): Änderungen committen und auf `main` pushen. Der Push löst den Workflow automatisch aus. Bei einem neuen Release ist das der Normalfall, denn die neue Release-Notes-Datei ist mindestens neu dazugekommen.
 ** *Es gab nichts zu ändern:* Nichts einchecken, sondern den Workflow manuell starten. Dazu auf GitHub das Repository `j-specman/j-specman.github.io` öffnen, **Actions** wählen, in der Liste links den Workflow **Build and deploy website** auswählen, **Run workflow** öffnen, den Branch `main` auswählen und **Run workflow** bestätigen.
 . Im Bereich **Actions** des Repositorys prüfen, dass der Lauf erfolgreich war.
 . Das Online-Manual öffnen und prüfen, dass es den Stand des neuen Releases zeigt, zum Beispiel am Titel mit der Versionsnummer.
+. Auf der Landing Page über die Kachel **Release history** die Release-Historie öffnen und prüfen, dass das neue Release oben in der Liste steht und seine Seite korrekt dargestellt wird.
 
 [#aeltere-releases]
 == Ältere GitHub-Releases nachträglich veröffentlichen
