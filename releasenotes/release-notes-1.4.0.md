@@ -1,4 +1,5 @@
-## Specman 1.4
+## Specman 1.4.0
+Released: 2026-11-07
 
 ### New
 - **PlantUML diagrams**: Embed PlantUML diagrams (class diagrams, sequence diagrams, etc.) directly in step texts. A new toolbar button creates a diagram, either from an existing `.puml` file or from scratch with a built-in source editor (double-click). Diagrams are rendered as vector graphics, are included in the PDF export, and take part in change tracking. The diagram source is plain text in the model file, so AI agents can read and edit it. Rendering needs no extra installation.
