@@ -24,6 +24,9 @@
         <itext.version>9.4.0</itext.version>
         <!-- Output of jpackage in the windows-installer profile; global because the pre-clean unlock below needs it without the profile -->
         <specman.inno.appImageDir>${project.build.directory}/jpackage-app-image</specman.inno.appImageDir>
+        <!-- The manual PDF is built with asciidoctor-pdf in Docker. Only the release profiles (windows-installer, release-bundle) switch this on, so that normal builds don't need Docker -->
+        <specman.manual.skip>true</specman.manual.skip>
+        <specman.manual.dockerImage>asciidoctor/docker-asciidoctor</specman.manual.dockerImage>
     </properties>
 
     <dependencies>
@@ -444,6 +447,46 @@
                 </executions>
             </plugin>
 
+            <!--
+                Renders doc/specman-manual.adoc to target/specman-manual.pdf using the asciidoctor Docker image,
+                so that release builders neither need a local Ruby/asciidoctor-pdf nor an IDE plugin. The whole
+                project directory is mounted, since the manual references images outside doc/ (src/main/resources/images).
+                Skipped unless a release profile is active. Standalone usage:
+                mvn -Dspecman.manual.skip=false exec:exec@manual-pdf
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.4</version>
+                <executions>
+                    <execution>
+                        <id>manual-pdf</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${specman.manual.skip}</skip>
+                            <executable>docker</executable>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>--rm</argument>
+                                <argument>-v</argument>
+                                <argument>${project.basedir}:/documents</argument>
+                                <argument>-w</argument>
+                                <argument>/documents/doc</argument>
+                                <argument>${specman.manual.dockerImage}</argument>
+                                <argument>asciidoctor-pdf</argument>
+                                <argument>-o</argument>
+                                <argument>/documents/target/specman-manual.pdf</argument>
+                                <argument>specman-manual.adoc</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
 
     </build>
@@ -465,6 +508,7 @@
                 <specman.installer.input>${project.build.directory}/jpackage-input</specman.installer.input>
                 <specman.inno.extraDir>${project.build.directory}/inno-extra</specman.inno.extraDir>
                 <specman.inno.iscc>ISCC.exe</specman.inno.iscc>
+                <specman.manual.skip>false</specman.manual.skip>
             </properties>
             <build>
                 <plugins>
@@ -502,6 +546,7 @@
                                         <copy todir="${specman.inno.extraDir}" flatten="true">
                                             <fileset file="${project.basedir}/src/main/antlr4/specman/model/v002/SpecmanModel_V002.g4"/>
                                             <fileset dir="${project.basedir}" includes="specman-reference-v${specman.release.version}-*.nsd"/>
+                                            <fileset file="${project.build.directory}/specman-manual.pdf"/>
                                         </copy>
                                     </target>
                                 </configuration>
@@ -586,10 +631,14 @@
             operations like sanitizing), the jar *with* dependencies (the plain jar is
             useless without them on the classpath), the grammar and the matching reference model - the
             latter two are first-class artifacts for AI-agent-assisted spec authoring, not just dev extras.
+            Also contains the manual as PDF, built via Docker (see the manual-pdf execution above, needs a running Docker).
             Usage: mvn -P release-bundle package
         -->
         <profile>
             <id>release-bundle</id>
+            <properties>
+                <specman.manual.skip>false</specman.manual.skip>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -622,6 +671,7 @@
                                             <fileset file="${project.basedir}/src/main/antlr4/specman/model/v002/SpecmanModel_V002.g4"/>
                                             <fileset dir="${project.basedir}" includes="specman-reference-v${specman.release.version}-*.nsd"/>
                                             <fileset file="${project.basedir}/src/main/resources/images/specman.png"/>
+                                            <fileset file="${project.build.directory}/specman-manual.pdf"/>
                                         </copy>
                                         <chmod file="${specman.releaseBundle.dir}/specman.sh" perm="755"/>
                                         <!-- Doc entry point for the zip: just a pointer to the manual on GitHub, not a copy of doc/ -->

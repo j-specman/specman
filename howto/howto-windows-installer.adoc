@@ -16,6 +16,8 @@ mvn -P windows-installer clean package "-Dspecman.inno.iscc=%LOCALAPPDATA%\Progr
 
 The resulting `specman-<version>-windows-setup.exe` is written directly to `target/`, next to the portable zip from `mvn -P release-bundle package` (if built).
 
+Both release profiles (`windows-installer` and `release-bundle`) also render the manual to `target/specman-manual.pdf` and ship it in the installation root. This runs `asciidoctor-pdf` from the `asciidoctor/docker-asciidoctor` Docker image (`manual-pdf` execution in `pom.xml`), so *Docker must be running* on the build machine; the image is pulled on first use. Normal builds without a release profile skip this step and don't need Docker.
+
 ### What the installer does
 * *Install mode.* At startup the installer asks whether to install "for all users" (recommended, preselected, needs admin rights) or "only for me" (no admin rights). System-wide installs go to `%ProgramFiles%\Specman` and register the `.nsd` association and the `PATH` entry machine-wide (HKLM); per-user installs go to `%LOCALAPPDATA%\Specman` and register both for the current user only (HKCU). Upgrades and uninstalls reuse the mode of the existing installation. For unattended installs: `/VERYSILENT /ALLUSERS` or `/VERYSILENT /CURRENTUSER` (`/DIR="<path>"` overrides the target directory).
 * *Shortcuts and tools.* A Start menu entry, an optional desktop shortcut (task in the wizard) and the `specman-cli` console launcher for the link:src/main/java/specman/cli/SpecmanCLI.java[command-line operations].

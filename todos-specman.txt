@@ -1,4 +1,5 @@
 Release notes Specman 1.4.0
+- Redesign of toolbars
 - Copy / Cut / Paste von Tabellen
 - Design for step number labels modified to avoid overlapping with step text
 - Meta Tags

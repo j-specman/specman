@@ -457,7 +457,7 @@ The alternative would be screenshots, added as images as described in section <<
 PlantUML supports many more diagram types than class diagrams, e.g. sequence, state and activity diagrams. They all work the same way. Class diagrams are the ones this chapter uses as an example, because a specification needs them most.
 
 ### Adding a PlantUML diagram
-The PlantUML button next to the image button of the formatting toolbar (or _Insert_ > _PlantUML diagram_) adds a PlantUML diagram at the caret, just like an image.
+The PlantUML button image:../src/main/resources/images/svg/material/account_tree.svg[PlantUML Button,20] next to the image button of the formatting toolbar (or _Insert_ > _PlantUML diagram_) adds a PlantUML diagram at the caret, just like an image.
 
 A file chooser lets you pick an existing file with PlantUML source. The source is taken over into the diagram, so the original file is not needed afterwards (but see _Includes_ below). The _Empty diagram_ button of the dialog starts with an empty diagram and opens a PlantUML source editor right away. Pressing Esc before having entered any content removes the diagram again.
 
