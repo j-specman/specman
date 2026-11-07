@@ -1,0 +1,146 @@
+= How-to: Release erstellen und auf GitHub veröffentlichen
+:toc:
+:sectnums:
+
+== Zweck und Geltungsbereich
+
+Dieses How-to beschreibt den gesamten Ablauf eines Specman-Releases:
+
+* das Bauen der Release-Artefakte (Windows-Installer und portables ZIP),
+* das Prüfen der Artefakte und
+* das manuelle Anlegen des GitHub-Releases im Repository `j-specman/specman`.
+
+Der Ablauf gilt für:
+
+* ein neues Release auf dem aktuellen Hauptbranch `master` und
+* die nachträgliche Veröffentlichung einer älteren Version (siehe <<aeltere-releases,Ältere GitHub-Releases nachträglich veröffentlichen>>).
+
+Der Release wird auf einem Windows-Rechner gebaut, weil der Installer Inno Setup benötigt.
+
+== Voraussetzungen für den Build
+
+* JDK 21 oder höher, auch von Maven verwendet (`jpackage` gehört zum JDK).
+* Maven.
+* *Docker*, laufend. Das Manual-PDF wird von `asciidoctor-pdf` aus dem Image `asciidoctor/docker-asciidoctor` erzeugt, das beim ersten Mal automatisch geladen wird. Dieser Build-Schritt läuft in beiden Release-Profilen, siehe Execution `manual-pdf` in der `pom.xml`.
+* Inno Setup 6 mit `ISCC.exe`. Installation und das Problem mit Virenscannern auf dem Build-Rechner sind in link:howto-windows-installer.adoc[How-to: Specman Windows Installer] beschrieben.
+* Schreibberechtigung für das Repository `j-specman/specman` und Zugriff auf dessen Releases-Bereich.
+
+== Version vorbereiten
+
+. Den vorgesehenen Release-Commit von `master` auschecken, aktuell, mit allen Änderungen, die ins Release sollen, committet.
+
+. `<version>` in der `pom.xml` auf die Release-Version setzen, zum Beispiel `1.4.0`. Die Version muss rein numerisch sein, `-SNAPSHOT` lehnt `jpackage` ab.
+
+. Prüfen, dass im Projekt-Root ein Referenzmodell `specman-reference-v<major.minor>-*.nsd` für die neue `major.minor` existiert (zum Beispiel `specman-reference-v1.4-model-v2.nsd` für 1.4.0). Ohne dieses Modell schlagen beide Release-Builds fehl. Es muss zur Grammatik `SpecmanModel_V002.g4` dieser Version passen.
+
+. Das Manual `doc/specman-manual.adoc` prüfen: Der Titel enthält die Version (`# Specman 1.4 Manual`), und die neuen Features des Releases sind dokumentiert. Außerdem die Screenshots prüfen, ob sie noch aktuell genug sind in Hinblick auf Gestaltung in Inhalt der Menüs. Sie müssen nicht top aktuell sein, sollten aber auch nicht irreführend alt sein.
+
+. Die Release Notes schreiben (Entwurf: `release-notes-<major.minor>.md`). Sie werden später in das GitHub-Release eingefügt. Sie enthalten die wichtigsten Änderungen, bekannte Einschränkungen, Upgrade-Hinweise und die Liste der enthaltenen Dateien. I.R. stehen im Kopfbereich von ´todos-specman.txt´ in Stichworten die wichtigsten Änderungen, die in den Release Notes ausgeführt werden. Man kann sich einen ersten Entwirf der Reease Notes KI-generieren lassen.
+
+== Testsuite ausführen
+
+Vor dem Bauen einmal die gesamte Testsuite ausführen, damit man es hinterher beim Release-Build nicht doppelt tun muss:
+
+[source,shell]
+----
+mvn clean test
+----
+
+Bei einem fehlgeschlagenen Test nicht weitermachen.
+
+== Artefakte bauen
+
+Beide Release-Builds überspringen die Tests (sie sind ja gerade gelaufen) und brauchen zwei getrennte Maven-Aufrufe. Die Reihenfolge ist wichtig: Der erste Aufruf räumt `target/` auf, der zweite darf das nicht tun, sonst würde er den Installer wieder löschen.
+
+[source,shell]
+----
+mvn -P windows-installer clean package -DskipTests "-Dspecman.inno.iscc=%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe"
+mvn -P release-bundle package -DskipTests
+----
+
+Die Property `specman.inno.iscc` kann entfallen, wenn `ISCC.exe` im `PATH` liegt. Details dazu siehe link:howto-windows-installer.adoc[How-to: Specman Windows Installer].
+
+Beide Aufrufe rendern das Manual (`target/specman-manual.pdf`) und erzeugen `readme.adoc` aus dem Manual neu. Hat sich `readme.adoc` geändert, wird die Datei committet.
+
+Die Ergebnisse liegen in `target/`:
+
+[cols="1,2"]
+|===
+|`specman-<version>-windows-setup.exe` |Windows-Installer
+|`specman-<version>-portable.zip` |Portables Bundle für Windows und Linux
+|`specman-installation/<major.minor>/` |Dieselben Dateien wie im ZIP, im Layout der Fileserver-Kopie
+|===
+
+== Artefakte prüfen
+
+. *ZIP-Inhalt:* Im Root des ZIP liegen `specman.bat`, `specman-cli.bat`, `specman.sh`, das Jar mit Abhängigkeiten, `SpecmanModel_V002.g4`, `specman-reference-v<major.minor>-*.nsd`, `specman-manual.pdf`, `specman-readme.html` und `specman.png`.
+. *Manual:* `specman-manual.pdf` öffnen und Titel, Version, Bilder und die Icons in den Überschriften prüfen.
+. *Portables Bundle:* In ein neues Verzeichnis entpacken, `specman.bat` starten und das Referenzmodell öffnen. Auf einer Kopie davon `specman-cli.bat --sanitize <Datei>` ausführen - dabei muss "OK" herauskommen.
+. *Installer:* Die Checkliste im Abschnitt "Testing the installer" aus link:howto-windows-installer.adoc[How-to: Specman Windows Installer] durchgehen, mindestens Installation für alle Benutzer, Dateizuordnung, Kommandozeile und Upgrade über die Vorversion. Im Installationsverzeichnis muss `specman-manual.pdf` neben Grammatik und Referenzmodell liegen.
+
+== Release-Commit pushen
+
+Versionsänderung, `readme.adoc` und Release Notes committen und nach `master` pushen. Dieser Commit ist der Release-Commit, auf den der Tag zeigen soll.
+
+== GitHub-Release vorbereiten
+
+Vor dem Öffnen des Release-Dialogs müssen folgende Informationen und Dateien vorliegen:
+
+. Schreibberechtigung für das Repository `j-specman/specman` und Zugriff auf dessen Releases-Bereich.
+. Die eindeutige Versionsnummer, zum Beispiel `1.3.2`.
+. Der passende Commit im Repository.
+** Für ein neues Release ist das der geprüfte Release-Commit auf `master`.
+** Für ein älteres Release muss der historische Release-Commit anhand der Git-Historie eindeutig bestimmt worden sein.
+. Der Tagname im Format `v<version>`, zum Beispiel `v1.3.2`.
+** Existiert der Tag bereits, muss er auf den passenden Commit zeigen.
+** Existiert er noch nicht, muss ein passender Target-Branch vorhanden sein, dessen aktueller Stand dem Release-Commit entspricht. GitHub legt den neuen Tag beim Erstellen des Releases auf diesem Target an.
+. Die geprüften Release-Artefakte aus `target/`. Dateiname und enthaltene Version müssen zum Release passen.
+. Fertige Release Notes mit den wichtigsten Änderungen, bekannten Einschränkungen, Upgrade-Hinweisen und einer Liste der enthaltenen Dateien.
+
+Vor dem Veröffentlichen muss außerdem feststehen, ob es sich um ein reguläres Release oder ausdrücklich um eine Vorabversion handelt.
+
+== GitHub-Release anlegen
+
+. Das Repository `j-specman/specman` auf GitHub öffnen.
+. **Releases** öffnen.
+. **Draft a new release** auswählen.
+. Unter **Choose a tag** den vorhandenen passenden Tag auswählen oder einen neuen Tagnamen im Format `v<version>` eingeben und **Create new tag** auswählen.
+. Wenn ein neuer Tag angelegt wird, als Ziel (**Target**) den Branch auswählen, dessen aktueller Stand dem zuvor bestimmten Release-Commit entspricht. GitHub bietet im Release-Dialog die Auswahl eines Branches an, nicht die freie Auswahl eines beliebigen Commits.
+. Als Titel des Releases `Specman <version>` eintragen, zum Beispiel `Specman 1.3.2`.
+. Die vorbereiteten Release Notes in das Beschreibungsfeld einfügen.
+. Die vorbereiteten Artefakte (Installer und ZIP) in den Bereich für Release Assets ziehen oder über die Dateiauswahl hochladen.
+. Falls GitHub automatisch Release Notes erzeugt, diese nur als Entwurf verwenden und fachlich prüfen. Sie ersetzen nicht die Informationen zu Artefakten, Einschränkungen und Upgrade-Hinweisen.
+. **This is a pre-release** nur aktivieren, wenn die Version ausdrücklich eine Vorabversion ist.
+. Solange noch geprüft wird, **Save draft** wählen. Erst nach der Kontrolle **Publish release** auswählen.
+
+== GitHub-Release prüfen und veröffentlichen
+
+Vor dem endgültigen Veröffentlichen prüfen:
+
+* Der Titel des Releases enthält die richtige Version.
+* Der Tagname entspricht exakt der Version und folgt dem Format `v<version>`.
+* Der Tag zeigt auf den vorgesehenen Commit. Bei einem neu angelegten Tag dazu den ausgewählten Target-Branch und anschließend die Commit-Ansicht des Tags prüfen.
+* Die Release Notes beschreiben das tatsächlich veröffentlichte Release.
+* Alle erwarteten Assets sind vorhanden und sinnvoll benannt.
+* Das Release ist nur dann als Pre-release markiert, wenn dies beabsichtigt ist.
+
+Nach **Publish release** die fertige Release-Seite öffnen und mindestens Folgendes kontrollieren:
+
+. Das Release ist über den richtigen Tag erreichbar.
+. Die Assets lassen sich herunterladen.
+. Die heruntergeladenen Dateien sind nicht leer und entsprechen den vorbereiteten Dateien.
+. Versionsnummer, Release Notes und Asset-Namen stimmen überein.
+
+Einen veröffentlichten Tag nicht nachträglich auf einen anderen Commit verschieben. Bei einem falschen Commit oder einem fehlerhaften Asset das Release nicht stillschweigend umdeuten. Stattdessen das Release nachvollziehbar korrigieren oder zurückziehen und erforderlichenfalls eine neue Version mit einem neuen Tag veröffentlichen.
+
+[#aeltere-releases]
+== Ältere GitHub-Releases nachträglich veröffentlichen
+
+Für ein älteres Release wird derselbe GitHub-Ablauf verwendet. Vor dem Anlegen des Releases ist jedoch zusätzlich zu prüfen:
+
+. Der historische Commit ist eindeutig identifiziert.
+. Der Tag `v<version>` existiert noch nicht oder zeigt bereits auf genau diesen Commit.
+. Die hochzuladenden Artefakte gehören nachweisbar zu diesem Commit und dieser Version.
+. Nicht mehr eindeutig zuordenbare oder nicht vertrauenswürdig rekonstruierte Dateien werden nicht hochgeladen.
+
+In den Release Notes muss kenntlich gemacht werden, dass das Release nachträglich angelegt wurde. Dabei sollten der historische Versionsstand und das Datum der nachträglichen Veröffentlichung genannt werden. Die automatische Erstellung von Source-Archiven durch GitHub ersetzt auch bei älteren Versionen keine verifizierten Release-Artefakte.
