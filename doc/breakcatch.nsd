@@ -9,8 +9,8 @@
 // backup=(changeset, `...`) in a plantuml image: source from before that change set changed it, maintained by Specman, leave it alone
 
 settings {
-    width=433
-    zoom=100
+    width=519
+    zoom=120
     changeModeEnabled=false
     changeSetName=yellow
 }
@@ -71,10 +71,10 @@ mainSequence {
         break(3.6, 290e5832, `<b>Open invoices</b>`, plain=`Open invoices`);
         simple(3.7, c0c4bcce, `. . .`, plain=`. . .`);
         catchArea {
-            catch(3.3, `<b>Customer not found</b>`, plain=`Customer not found`) {
+            catch(3.3, `<b>Customer not found</b>`, plain=`Customer not found`, headingWidth=21) {
                 simple(3.3.1, 169fc2b6, `The system displays a notification message and clears the user input`, plain=`The system displays a notification message and clears the user input`);
             }
-            catch(3.5, `<b>Open orders</b>`, plain=`Open orders`) {
+            catch(3.5, `<b>Open orders</b>`, plain=`Open orders`, headingWidth=21) {
                 coCatch(3.6, `<b>Open invoices</b>`, plain=`Open invoices`);
                 simple(3.5.1, 2fc76071, `The system displays an appropriate error message`, plain=`The system displays an appropriate error message`);
             }
