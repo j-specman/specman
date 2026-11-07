@@ -35,7 +35,7 @@ Der Release wird auf einem Windows-Rechner gebaut, weil der Installer Inno Setup
 
 . Das Manual `doc/specman-manual.adoc` prüfen: Der Titel enthält die Version (`# Specman 1.4 Manual`), und die neuen Features des Releases sind dokumentiert. Außerdem die Screenshots prüfen, ob sie noch aktuell genug sind in Hinblick auf Gestaltung in Inhalt der Menüs. Sie müssen nicht top aktuell sein, sollten aber auch nicht irreführend alt sein.
 
-. Die Release Notes schreiben in `releasenotes\release-notes-<major.minor.patch>.md`). Sie werden später in das GitHub-Release und die Release-Historie der Specman Web Site eingefügt. Sie enthalten die wichtigsten Änderungen, bekannte Einschränkungen, Upgrade-Hinweise und die Liste der enthaltenen Dateien. I.R. stehen im Kopfbereich von ´todos-specman.txt´ in Stichworten die wichtigsten Änderungen, die in den Release Notes ausgeführt werden. Man kann sich einen ersten Entwurf der Reease Notes KI-generieren lassen.
+. Die Release Notes schreiben in `releasenotes/release-notes-<major.minor.patch>.md`. Sie werden später in das GitHub-Release und die Release-Historie der Specman Web Site eingefügt. Sie enthalten die wichtigsten Änderungen, bekannte Einschränkungen, Upgrade-Hinweise und die Liste der enthaltenen Dateien. I.R. stehen im Kopfbereich von ´todos-specman.txt´ in Stichworten die wichtigsten Änderungen, die in den Release Notes ausgeführt werden. Man kann sich einen ersten Entwurf der Release Notes KI-generieren lassen.
 
 == Testsuite ausführen
 
