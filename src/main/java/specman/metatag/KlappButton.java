@@ -4,6 +4,7 @@ import specman.view.RoundedBorderDecorator;
 import specman.ChangeSet;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import specman.graphics.SpecmanIcons;
 import specman.graphics.SvgIcon;
 
 import javax.swing.*;
@@ -50,8 +51,8 @@ public class KlappButton extends AbstractMetaTag implements MouseMotionListener,
   private final Integer fillerrow;
   private final KlappbarerBereichI klappbarerBereich;
   private final Container parent;
-  private final SvgIcon collapseIcon = new SvgIcon("minus", ICON_GLYPH_SIZE);
-  private final SvgIcon expandIcon = new SvgIcon("plus", ICON_GLYPH_SIZE);
+  private final SvgIcon collapseIcon = new SvgIcon(SpecmanIcons.COLLAPSE_STEP, ICON_GLYPH_SIZE);
+  private final SvgIcon expandIcon = new SvgIcon(SpecmanIcons.EXPAND_STEP, ICON_GLYPH_SIZE);
   private Color currentColor;
   private boolean selected;
   // Safety net for mouseMoved/mouseExited-based hover detection (see mouseMoved's comment for why
@@ -99,20 +100,51 @@ public class KlappButton extends AbstractMetaTag implements MouseMotionListener,
 
   public void init(boolean zugeklappt) {
     if (zugeklappt && !isSelected()) {
-      mouseClicked(null);
+      setGeklappt(true);
       setVisible(isSelected());
     }
   }
 
-  /** Unfolds the area programmatically, e.g. to show a search hit. Unlike a click, there is no mouse
-   * over the button afterwards, so it must not stay visible for hovering.
+  /**
+   * Folds or unfolds the area, regardless of which direction the button was last switched.
+   * Does nothing if the area already is in the requested state.
+   */
+  public void setGeklappt(boolean geklappt) {
+    if (geklappt == isSelected()) {
+      return;
+    }
+    setSelected(geklappt);
+    if (geklappt) {
+      ChangeSet hiddenChangeSet = klappbarerBereich.firstChangeSet();
+      if (hiddenChangeSet != null) {
+        setColor(hiddenChangeSet.textColor());
+      }
+    } else {
+      resetToDefaultBackground();
+    }
+    refreshGeklappt();
+  }
+
+  /**
+   * Like {@link #setGeklappt(boolean)}, but for folding without the mouse over the button: a folded
+   * button stays visible, an unfolded one disappears again.
+   */
+  public void setGeklapptProgrammatisch(boolean geklappt) {
+    setGeklappt(geklappt);
+    if (isSelected()) {
+      setVisible(true);
+    } else {
+      setHoverVisible(false);
+    }
+  }
+
+  /** Unfolds the area programmatically, e.g. to show a search hit.
    * @return whether the area was folded before */
   public boolean unfold() {
     if (!isSelected()) {
       return false;
     }
-    mouseClicked(null);
-    setHoverVisible(false);
+    setGeklapptProgrammatisch(false);
     return true;
   }
 
@@ -217,16 +249,7 @@ public class KlappButton extends AbstractMetaTag implements MouseMotionListener,
   }
 
   @Override public void mouseClicked(MouseEvent e) {
-    setSelected(!isSelected());
-    if (isSelected()) {
-      ChangeSet hiddenChangeSet = klappbarerBereich.firstChangeSet();
-      if (hiddenChangeSet != null) {
-        setColor(hiddenChangeSet.textColor());
-      }
-    } else {
-      resetToDefaultBackground();
-    }
-    refreshGeklappt();
+    setGeklappt(!isSelected());
   }
 
   @Override public void mousePressed(MouseEvent e) {

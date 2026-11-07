@@ -2,7 +2,8 @@ package specman.link;
 
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
-import net.atlanticbb.tantlinger.ui.UIUtils;
+import specman.graphics.IconReader;
+import specman.graphics.SpecmanIcons;
 import specman.graphics.Styles;
 import specman.i18n.IButton;
 import specman.i18n.IHeaderPanel;
@@ -46,7 +47,7 @@ public class AliasPanel extends JPanel {
   public static final String OK_BUTTON = "link.alias.ok";
   public static final String CANCEL_BUTTON = "link.alias.cancel";
 
-  static final Icon ICON = UIUtils.getIcon("resources/images/x32/", "link3.png");
+  static final Icon ICON = IconReader.readSvgIcon(SpecmanIcons.LINK, SpecmanIcons.SIZE_DIALOG);
   private static final Color LINK_COLOR = new Color(0, 102, 204);
   private static final int ALIAS_FIELD_COLUMNS = 20;
   private static final int PREVIEW_FIELD_COLUMNS = 40;

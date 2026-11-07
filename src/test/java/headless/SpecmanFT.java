@@ -5,6 +5,7 @@ import net.atlanticbb.tantlinger.ui.text.actions.StepnumberLinkAction;
 import net.atlanticbb.tantlinger.ui.text.actions.StepnumberLinkPanel;
 import specman.CatchLinkPanel;
 import specman.ChangeSet;
+import specman.toolbar.ChangeSetButton;
 import specman.DiagramToolBar;
 import specman.EditException;
 import specman.Specman;
@@ -61,7 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static specman.DiagramToolBar.TRACK_CHANGES_BUTTON;
 import static specman.editarea.document.WrappedDocument.VISIBLE_TEXT_START;
 import static specman.i18n.Messages.i18n;
-import static specman.menubar.SpecmanMenuBar.changeSetItemName;
+import static specman.toolbar.ChangeSetButton.changeSetItemName;
 
 /**
  * Specman <b>F</b>or <b>T</b>ests: the real Specman, instantiated without its {@link specman.SpecmanFrame}.
@@ -234,13 +235,14 @@ public class SpecmanFT extends Specman {
     click(changeSetItemName(changeSet));
   }
 
-  /** Finds the component with the given name below the passed one, e.g. in a dialog panel. Menu items live in a
-   * menu's popup, which is not part of the menu's component children. */
+  /** Finds the component with the given name below the passed one, e.g. in a dialog panel. Menu items and the change set items
+   * live in a popup, which is not part of the component's children. */
   public static <T extends Component> T findByName(Component component, String name, Class<T> type) {
     if (type.isInstance(component) && name.equals(component.getName())) {
       return type.cast(component);
     }
     Component[] children = component instanceof JMenu menu ? menu.getMenuComponents()
+      : component instanceof ChangeSetButton changeSetButton ? changeSetButton.popupMenu().getComponents()
       : component instanceof Container container ? container.getComponents()
       : new Component[0];
     for (Component child : children) {
@@ -474,7 +476,7 @@ public class SpecmanFT extends Specman {
    */
   public void layoutComponents() {
     waitForEventsProcessed();
-    setSize(LAYOUT_SIZE);
+    onEdt(() -> setSize(LAYOUT_SIZE));
     int previousBoundsHash;
     int boundsHash = 0;
     int passes = 0;
@@ -483,7 +485,9 @@ public class SpecmanFT extends Specman {
         throw new IllegalStateException("Layout did not settle within " + MAX_LAYOUT_PASSES + " passes");
       }
       previousBoundsHash = boundsHash;
-      layoutTree(this);
+      // Swing layout belongs to the EDT. Laying out on the test thread while the EDT handles resize events
+      // (e.g. of the toolbar) can deadlock on the component tree lock and the layout manager.
+      onEdt(() -> layoutTree(this));
       waitForEventsProcessed();
       boundsHash = boundsHash(this);
     }
@@ -525,8 +529,14 @@ public class SpecmanFT extends Specman {
    * scheduled by those events themselves are not awaited. Sometimes this is required for
    * a deterministic application state before checking it. Must not be called on the EDT. */
   private static void waitForEventsProcessed() {
+    onEdt(() -> { });
+  }
+
+  /** Runs the code on the EDT and waits until it is done. Must not be called on the EDT. Swing components must only be
+   * touched on the EDT, e.g. creating a new diagram builds the UI while the EDT handles document events. */
+  public static void onEdt(Runnable runnable) {
     try {
-      SwingUtilities.invokeAndWait(() -> { });
+      SwingUtilities.invokeAndWait(runnable);
     }
     catch (InterruptedException x) {
       Thread.currentThread().interrupt();

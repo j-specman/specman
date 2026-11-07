@@ -4,7 +4,7 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicMenuItemUI;
 import java.awt.*;
 
-class ChangeSetMenuItemUI extends BasicMenuItemUI {
+public class ChangeSetMenuItemUI extends BasicMenuItemUI {
 
   @Override
   protected void paintBackground(Graphics g, JMenuItem item, Color bgColor) {

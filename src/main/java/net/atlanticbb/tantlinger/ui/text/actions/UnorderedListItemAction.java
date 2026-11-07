@@ -1,6 +1,8 @@
 package net.atlanticbb.tantlinger.ui.text.actions;
 
-import net.atlanticbb.tantlinger.ui.UIUtils;
+import specman.graphics.IconReader;
+import specman.graphics.SpecmanIcons;
+
 import static specman.Specman.editor;
 import static specman.i18n.Messages.i18n;
 
@@ -14,7 +16,7 @@ public class UnorderedListItemAction extends BasicEditAction {
 
   public UnorderedListItemAction() {
     super(i18n("action.list.item"));
-    this.putValue("SmallIcon", UIUtils.getIcon("resources/images/x16/", "listunordered.png"));
+    this.putValue("SmallIcon", IconReader.readSvgIcon(SpecmanIcons.LIST_UNORDERED, SpecmanIcons.SIZE_SMALL));
     this.putValue("ShortDescription", this.getValue("Name"));
   }
 

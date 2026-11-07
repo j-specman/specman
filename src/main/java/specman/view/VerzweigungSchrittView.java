@@ -204,6 +204,12 @@ abstract public class VerzweigungSchrittView extends AbstractSchrittView impleme
 		}
 	}
 
+	/** Covers If, If/Else and Case (CaseSchrittView inherits from here). */
+	@Override
+	public void alleKlappen(boolean zuklappen) {
+		klappen.setGeklapptProgrammatisch(zuklappen);
+	}
+
 	public void skalieren(int prozentNeu, int prozentAktuell) {
 		super.skalieren(prozentNeu, prozentAktuell);
 		klappen.scale(prozentNeu, prozentAktuell);

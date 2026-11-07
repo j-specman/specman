@@ -38,6 +38,12 @@ public class AutoLoadOp extends AbstractSpecmanOp {
     loadWorkingCopy_Debounced.restart();
   }
 
+  /** Schedules a check through the same debounce timer ({@value #DEBOUNCE_MS} ms), which loads the working copy if it is newer
+   *  than the last seen state, e.g. after auto load was switched on. The short delay does not matter there. */
+  public void checkNow() {
+    loadWorkingCopy_Debounced.restart();
+  }
+
   private void watchWorkingCopy() {
     File diagramFile = getDiagrammDatei();
     if (diagramFile == null) {

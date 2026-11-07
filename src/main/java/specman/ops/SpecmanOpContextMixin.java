@@ -23,6 +23,7 @@ public interface SpecmanOpContextMixin {
   default void markAsUnsavedWorkingCopy() { context().markAsUnsavedWorkingCopy(); }
   default void notifyWorkingCopyInitialized(long timestamp) { context().notifyWorkingCopyInitialized(timestamp); }
   default void zusammenklappenFuerReview() { context().zusammenklappenFuerReview(); }
+  default void alleSchritteKlappen(boolean zuklappen) { context().alleSchritteKlappen(zuklappen); }
   default void showMessage(String messageKey, Object... args) { context().showMessage(messageKey, args); }
   default void showToast(String briefMessage, String detailMessage) { context().showToast(briefMessage, detailMessage); }
   default EditContainer getIntro() { return context().getIntro(); }

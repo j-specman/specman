@@ -5,8 +5,10 @@ Specman is a WYSIWYG editor for actogramms, which are similar to Nassi-Shneiderm
 
 Microsoft Word is an excellent word processor with change tracking (a crucial aspect for iterative / agile development), but control structures like loops and branches are difficult to visualize. UML activity diagrams, on the other hand, are very good at visualizing control structures, but change tracking and diagram layout stability in iterative development are poor. Specman combines features of these tools in a way that has proven particularly useful for efficient, iterative software development.
 
+Efficiency today also means AI assistance in every phase of software engineering. Specman is built for it: machine-readable text format with defined grammar, command line interface, and live collaboration between agent and user.
+
 ## Hello Specman
-Specman is a small Java 2D / Swing application packaged as an executable JAR file using Maven. To run Specman, you need a Java Runtime Environment (JRE) version 21 or higher installed. The main class is specman.Specman, and the delivery package includes launcher scripts for Windows (`specman.bat`) and Linux (`specman.sh`) that check the Java installation and locate the jar before starting the application. Opening the file link:doc/anagramms.nsd[anagramms.nsd] in Specman displays the following diagram:
+Specman is a small Java 2D / Swing application packaged as an executable JAR file using Maven. To run Specman, you need a Java Runtime Environment (JRE) version 21 or higher installed. The main class is specman.Specman, and the delivery package includes launcher scripts for Windows (`specman.bat`) and Linux (`specman.sh`) that check the Java installation and locate the jar before starting the application. Windows users may alternatively use the Windows installer, which ships with its own Java runtime, so no JRE needs to be installed. Opening the file link:doc/anagramms.nsd[anagramms.nsd] in Specman displays the following diagram:
 
 image::doc/anagramms-screenshot.png[Two Word Anagrams Specman Diagram]
 

@@ -21,6 +21,10 @@ public class SettingAutoLoad extends AbstractBooleanSetting {
     return isSet(AUTOLOAD_PREF, false);
   }
 
+  public static void setEnabled(boolean enabled) {
+    Preferences.userNodeForPackage(Specman.class).put(AUTOLOAD_PREF, Boolean.toString(enabled));
+  }
+
   /** Up to version 1.3.1, auto load was polling and the preference held the interval in seconds. */
   static void migrateLegacyIntervalValue() {
     Preferences prefs = Preferences.userNodeForPackage(Specman.class);

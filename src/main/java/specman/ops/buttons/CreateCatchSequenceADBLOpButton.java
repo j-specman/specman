@@ -27,6 +27,10 @@ public class CreateCatchSequenceADBLOpButton extends AbstractADBLSpecmanOpButton
   @Override
   void execute() throws EditException {
     TextEditArea lastFocused = getLastFocusedTextArea();
+    // A keyboard shortcut can trigger this without the button being enabled.
+    if (lastFocused == null) {
+      return;
+    }
     AbstractSchrittView referenceStep = getHauptSequenz().findeSchritt(lastFocused);
     CatchUeberschrift referenceCatchHeading = lastFocused.containingCatchHeading();
     if (referenceStep != null) {
