@@ -27,7 +27,7 @@ Der Release wird auf einem Windows-Rechner gebaut, weil der Installer Inno Setup
 
 == Version vorbereiten
 
-. Den vorgesehenen Release-Branch auschecken, aktuell, mit allen Änderungen, die ins Release sollen, committet. Bei einem Major Release ist das der Branch `master`, bei einem Minor Release der Branch `release/<major>.<minor>.x`.
+. Den vorgesehenen Release-Branch auschecken, aktuell, mit allen Änderungen, die ins Release sollen, committet. Bei einem Major Release ist das der Branch `master`, bei einem Minor Release der Branch `<major>.<minor>.x`.
 
 . `<version>` in der `pom.xml` auf die Release-Version setzen, zum Beispiel `1.4.0`. Die Version muss rein numerisch sein, `-SNAPSHOT` lehnt `jpackage` ab.
 
