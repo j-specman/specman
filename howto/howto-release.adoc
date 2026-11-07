@@ -27,7 +27,7 @@ Der Release wird auf einem Windows-Rechner gebaut, weil der Installer Inno Setup
 
 == Version vorbereiten
 
-. Den vorgesehenen Release-Commit von `master` auschecken, aktuell, mit allen Änderungen, die ins Release sollen, committet.
+. Den vorgesehenen Release-Branch auschecken, aktuell, mit allen Änderungen, die ins Release sollen, committet. Bei einem Major Release ist das der Branch `master`, bei einem Minor Release der Branch `release/<major>.<minor>.x`.
 
 . `<version>` in der `pom.xml` auf die Release-Version setzen, zum Beispiel `1.4.0`. Die Version muss rein numerisch sein, `-SNAPSHOT` lehnt `jpackage` ab.
 
@@ -80,7 +80,9 @@ Die Ergebnisse liegen in `target/`:
 
 == Release-Commit pushen
 
-Versionsänderung, `readme.adoc` und Release Notes committen und nach `master` pushen. Dieser Commit ist der Release-Commit, auf den der Tag zeigen soll.
+Versionsänderung und `readme.adoc` committen und pushen. Dieser Commit ist der Release-Commit, auf den der Tag zeigen soll.
+
+Handelt es sich um einen Major-Release aus `master`, jetzt zunächst den Release-Branch `<major>.<minor>.x` anlegen und pushen.
 
 == GitHub-Release vorbereiten
 
