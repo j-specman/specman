@@ -8,7 +8,8 @@ Dieses How-to beschreibt den gesamten Ablauf eines Specman-Releases:
 
 * das Bauen der Release-Artefakte (Windows-Installer und portables ZIP),
 * das Prüfen der Artefakte und
-* das manuelle Anlegen des GitHub-Releases im Repository `j-specman/specman`.
+* das manuelle Anlegen des GitHub-Releases im Repository `j-specman/specman` und
+* das Aktualisieren der Website im Repository `j-specman/j-specman.github.io` (siehe <<website,Website aktualisieren>>).
 
 Der Ablauf gilt für:
 
@@ -134,6 +135,43 @@ Nach **Publish release** die fertige Release-Seite öffnen und mindestens Folgen
 . Versionsnummer, Release Notes und Asset-Namen stimmen überein.
 
 Einen veröffentlichten Tag nicht nachträglich auf einen anderen Commit verschieben. Bei einem falschen Commit oder einem fehlerhaften Asset das Release nicht stillschweigend umdeuten. Stattdessen das Release nachvollziehbar korrigieren oder zurückziehen und erforderlichenfalls eine neue Version mit einem neuen Tag veröffentlichen.
+
+[#website]
+== Website aktualisieren
+
+Nach der Veröffentlichung des GitHub-Releases wird die Website im Repository `j-specman/j-specman.github.io` aktualisiert. Dazu in den Klon dieses Repositorys wechseln, den Branch `main` auschecken und aktualisieren. Der Workflow `.github/workflows/pages.yml` baut daraus bei jedem Push auf `main` die Website samt Online-Manual (aus `doc/specman-manual.adoc` des Specman-Repositorys) und veröffentlicht sie über GitHub Pages.
+
+=== Release-Nummer prüfen
+
+Prüfen, ob in der Website eine Release-Nummer steht, die angepasst werden muss, insbesondere in `index.html`, in `manual-theme/` und in `README.md`. Der Titel des Manuals kommt aus dem Manual selbst und braucht keine Anpassung. Stand Nov. 2026 steht die Release-Nummer aber nirgends in den statischen Inhalten der Web Site.
+
+=== Manual-Quelle auf den Release-Branch umstellen
+
+Wurde bei der Veröffentlichung ein neuer Release-Branch `<major>.<minor>.x` angelegt, muss die Manual-Generierung jetzt auf diesen Branch umgestellt werden. Auf `master` beginnt mit der Veröffentlichung die Weiterentwicklung des nächsten Releases, sein Stand ist nicht mehr stabil, und das Online-Manual soll das veröffentlichte Release beschreiben.
+
+In `.github/workflows/pages.yml` im Schritt `Check out Specman (manual source)` den Wert `ref` ändern:
+
+[source,yaml]
+----
+      - name: Check out Specman (manual source)
+        uses: actions/checkout@v4
+        with:
+          repository: j-specman/specman
+          ref: 1.4.x
+          path: specman
+----
+
+Wurde kein neuer Branch angelegt (zum Beispiel bei einem Patch-Release, das auf einem bestehenden Release-Branch entsteht), bleibt `ref` unverändert.
+
+Ab jetzt erscheinen Änderungen am Manual nur dann auf der Website, wenn sie auf den Release-Branch übernommen wurden.
+
+=== Veröffentlichen und prüfen
+
+. Den Workflow `Build and deploy website` auslösen. Er baut die Website samt Online-Manual neu aus dem aktuellen Stand der Manual-Quelle. Das ist auch dann nötig, wenn an der Website selbst nichts zu ändern war, denn sonst zeigt das Online-Manual weiter den alten Stand.
+** *Es gab Änderungen* (Release-Nummer oder Manual-Quelle umgestellt): Änderungen committen und auf `main` pushen. Der Push löst den Workflow automatisch aus.
+** *Es gab nichts zu ändern:* Nichts einchecken, sondern den Workflow manuell starten. Dazu auf GitHub das Repository `j-specman/j-specman.github.io` öffnen, **Actions** wählen, in der Liste links den Workflow **Build and deploy website** auswählen, **Run workflow** öffnen, den Branch `main` auswählen und **Run workflow** bestätigen.
+. Im Bereich **Actions** des Repositorys prüfen, dass der Lauf erfolgreich war.
+. Das Online-Manual öffnen und prüfen, dass es den Stand des neuen Releases zeigt, zum Beispiel am Titel mit der Versionsnummer.
 
 [#aeltere-releases]
 == Ältere GitHub-Releases nachträglich veröffentlichen
