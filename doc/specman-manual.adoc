@@ -267,7 +267,7 @@ Sometimes more than one set of changes is in the air: several change requests be
 
 There are five changesets, which are predefined and cannot be changed or extended yet: yellow, lilac, blue, orange and pink. The colors were chosen to remain distinguishable for people with most kinds of color vision deficiency.
 
-The current changeset is the one which new changes are assigned to. It is chosen in the _Change Set_ menu of the menu bar, and it is recognizable at any time by the colored dot in the menu title and by the color of the toolbar buttons for change tracking. Accepting, rejecting and merging, as described below, always refer to the current changeset only.
+The current changeset is the one which new changes are assigned to. It is chosen in the _Change Set_ dropdown, and it is recognizable at any time by the colored dot and by the background color of the dropdown. Accepting, rejecting and merging, as described below, always refer to the current changeset only.
 
 image::changetracking-menu-toolbar.png[Changeset Menu and Toolbar Buttons]
 

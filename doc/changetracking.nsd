@@ -55,5 +55,6 @@ class Payment {
 }
 Customer "1" --> "*" Order : places
 Order "1" --> "*" Payment : is paid by
+@enduml
 @enduml` }
 }
