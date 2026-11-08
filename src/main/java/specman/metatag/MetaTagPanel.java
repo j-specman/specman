@@ -188,10 +188,10 @@ public class MetaTagPanel extends JPanel {
    * a step gets all meta-strip widgets kept in sync for free, instead of each KlappButton-owning
    * view (SchleifenSchrittView, SubsequenzSchrittView, VerzweigungSchrittView) having to
    * separately remember to reposition its klappen after every resize. */
-  private void repositionKlappButton(int rightNeighborX, int height) {
+  private void repositionKlappButton(int rightNeighborX, int height, int overdrawnTopRows) {
     for (Component child : getComponents()) {
       if (child instanceof KlappButton) {
-        ((KlappButton) child).updateLocation(rightNeighborX, height);
+        ((KlappButton) child).updateLocation(rightNeighborX, height, overdrawnTopRows);
       }
     }
   }
@@ -233,6 +233,6 @@ public class MetaTagPanel extends JPanel {
       tag.updateLocation(leftEdge, height, stepNumber.getOverdrawnTopRows());
       leftEdge = tag.getX();
     }
-    repositionKlappButton(leftEdge, height);
+    repositionKlappButton(leftEdge, height, stepNumber.getOverdrawnTopRows());
   }
 }
