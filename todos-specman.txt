@@ -1,13 +1,5 @@
-Release notes Specman 1.4.0
-- Redesign of toolbars
-- Copy / Cut / Paste von Tabellen
-- Design for step number labels modified to avoid overlapping with step text
-- Meta Tags
-- Beschriftungen internationalisieren
-- Sprache wählen
-- Hoch/Runter über Grenzen von Schritten wäre cool
-- Specman URLs
-- PlantUML
+Release notes Specman 1.x.x
+- Hier ein tragen, was sich gegenüber letztem Release geändert hat. Dient als Hilfe für Release Notes
 
 Aus aktueller Anwendung
 - Hat man 5 Sekunden Autosave-Intervall eingestellt, dann wird es auffällig, dass ein abhängendes Leerzeichen wegbereinigt wird.
@@ -43,135 +35,18 @@ x Cut & Paste von Schritten sollte beim Einfügen nur neue IDs vergeben, wenn di
   - If / If-Else / Case: Vorerst nicht unterstützt
   - Break-Schritt: Vorerst nicht unterstützt
 - Morphing
-
   - If -> If/Else: Schrittinhalt kommt in den If-Zweig, Else-Zweig wird mit einem leeren Schritt angelegt
   - If/Else -> Case: Else-Zweig wird Sonst-Zwei, Ez-Zweig wird erster Case-Zweig, zweiter Case-Zweig wird mit einem leeren Schritt angelegt
   - While -> While-Wile und umgekehrt: keine inhaltliche Änderung notwendig
   - Einfacher Schritt -> While / While-While: Verteilung der Schrittinhalts analog Morping Einfacher Schritt -> Sequenzsschritt
   - Sequenzschritt -> While / While-While und umgekehrt: keine inhaltliche Änderung notwendig
 
-PlantUML
-x Repräsentation im UI evtl. als spezialisierte ImageEditArea
-  x Gemeinsame Basisklasse AbstractImageEditArea für alle ImageEditAreas, die ein Bild darstellen
-  x ImageEditAras als Ableitung für Grafik-Images wie bisher
-  x PlantUMLImageEditArea für PlantUML-Images
-x Skalierung wie bei ImageEditArea
-  x individueller Prozentsatz der Schrittbreite über Breitenanpasser
-  x Anwendung des Zoomfaktors
-x Neuanlage durch neuen Button
-  x mit optionaler Auswahl einer bestehenden puml-Datei (Dialog mit zusätzlicher Schaltfläche "Leeres Diagramm"; Abbrechen legt nichts an)
-  x Ausgewählte Datei wird als initialer Content eingebettet
-  x Fehlermeldung, wenn der Dateiinhalt syntaktisch nicht korrekt ist (und auch bei den anderen Editor-Regeln)
-  x Sonst eine leere Fläche (@startuml @enduml ohne Inhalt dazwischen)
-     und es öffnet sich der Sourceeditor, damit der User den Inhalt einfügen kann
-  x Gibt der User nichts ein und drückt ESC, wird die Area wieder komplett entfernt.
-x Repräsentation im Modell
-  x Grafik-Image bisher: image(scale=100%, type=png) { [base64:...] }
-  x Plantuml-Image: image(scale=100%, type=plantuml) { `<PlantUML-Sourcecode>` }
-  x Grammatik muss entsprechend erweitert werden
-    x Hinweis für KI-Agenten bzgl. ignorieren von Bildern plantuml ausnehmen. Diese Bilder sollen die Agents verstehen
-x Doppelklick öffnet PlantUML Sourcecode-Editor als Dialog
-  x Editor analog Inhalt von Meta-Tags
-  x Editor lehnt Backticks ab
-  x !include und !includeurl ist erlaubt, um puml-Dateien außerhalb des Spec-Dokuments einzubinden
-    x Neurendern durch explizites erneutes Laden
-    x F5 auf dem selektierten Diagramm (ohne geöffneten Editor) rendert es neu, auch wenn der Quelltext unverändert ist; F5 im Editor ebenfalls
-  x Gerendertes Bild wird mit F5 aktualisiert und beim Verlassen des Editors (nicht live, weil viele Zwischenstände ungültig sind)
-  x Rendering als SVG (Ergebnisse der Experimente haben zweistellige Millisekunden gezeigt, das ist OK)
-  x Vorgabe von Roboto als mitgelieferter Sans-Serif-Schriftart und CourierPrime für Festbreiten-Schriftart, die auch ins PDF eingebettet werden.
-  x User kann die Schrift im Quelltext überschreiben. Ist nicht verboten und auf eigene Gefahr.
-  x Bei Syntaxfehler, Anzeige des Parserfehlers als Text
-  x Pragma-Angabe durch User ist nicht erlaubt und führt zu Fehleranzeige (Groß-/Kleinschreibung und Einrückung beachten)
-  x Mehrere @startuml ebenfalls
-  x Leerer Inhalt ebenfalls - nur Kommentare und Leerzeilen gilt ebenfalls als leer
-  x ELK-Pragma wird automatisch ergänzt als einzige verfügbare Render-Engine
-x Wenn man im Änderungsmodus ändert, wird Hintergrund der EditArea entsprechend eingefärbt
-  x Das eigentliche Bild zeigt keine Änderungen an
-  x Der Quelltext trackt Änderungen als Inhaltsänderung (nicht als Area-Änderung): erste Änderung sichert backup=(changeset, `quelltext`) hinter dem aktuellen Quelltext im Block. Zurückändern auf das Backup nimmt die Markierung weg. Ändert ein zweites Änderungsset, bleibt die Änderung beim ersten.
-x Undo / Redo
-x Annahme / Verwerfen der Änderungen
-  x Löschen eines geänderten Diagramms: Quelltext aus dem Backup, als gelöscht markiert
-x PDF-Export
-  x Rendering von Text im SVG prüfen: Diagramm wird als Vektorgrafik mit echtem Text und eingebetteten Roboto/CourierPrime-Schriften ins PDF gezeichnet
-x Copy / Cut / Paste /Drag&Drop von Schritten mit PlantUML-Images prüfen. Sollte ganz normal funktionieren
-- Kontextmenü am PlantUML-Diagramm (Rechtsklick)
-  x Edit (öffnet den Quelltexteditor) und Delete
-  x Import: Inhalt nachträglich aus Datei importieren und den bisherigen Inhalt ersetzen (im Änderungsmodus mit Backup wie beim Editieren)
-- Erweiterung Manual
-  - Warum F5 und nicht automatisch beim Tippen: Eine unfertige oder vertippte Beziehung mit einem noch nicht existierenden Klassennamen lässt PlantUML implizit eine neue Klasse anlegen. Das Diagramm würde beim Tippen ständig unruhig umgebaut.
-  - Die Aussage "Agents überspringen Image-Blöcke" im Kapitel zur KI-Unterstützung (Zeile ~519) gilt nur noch für type=png, PlantUML-Blöcke sollen Agents lesen und bearbeiten
-x Suche berücksichtigt (zunächst) keine PlantUML-Quelltexte
-x Nice-to-have: Quick Win, SVG Image Area, UI und Modellrepäsentation analog PlantUML, Editor und leere Anlage ohne Datei braucht man aber nicht
-- Nice-to-have: Quelltexteditor mit Zeilennummern versehen.
-- Idee für später (nicht jetzt): Für Bilder nicht nur Einbettung vorsehen, sondern auch Referenzierung anbieten (gibt die Selfcontained-Eigenschaft der Spec auf). Pfade über den bestehenden Alias-Mechanismus der Specman URLs auflösen. Damit auch saubere Lösung für PlantUML-Includes, und das Manual kann eher vor !include/!import warnen.
 
-Specman URLs:
-x Custom URL Scheme, z.B. specman://uc730,2d34f85e,1.3
-  x Bewusst nicht so URL-typisch wie specman://open?file=uc-730&step=2d34f85e&number=1.3, weil das schlechter lesbar ist
-x Über neuen Kontextmenüpunkt "Copy Link" an der Schrittnummer kann man die URL in die Zwischenablage kopieren
-x Ausgegraut, wenn das Modell noch nicht gespeichert wurde, weil man dann noch keinen Dateinamen hat
-x Beim ersten Mal in einer Datei, erscheint ein Dialog mit dem Vorschlag, einen Alias für Links auf diese Datei anzulegen
-  x Dialog bietet ein Textfeld für den Alias, nur ASCII-Buchstaben, Zahlen, Unterstriche, Gedankenstriche, maximal 20 Zeichen
-  x Darunter sieht man die URL, bei leerem Alias wird der Dateiname verwendet, also z.B. specman:///C:/project/UC-720%20Eins%20Zwei.nsd,2d34f85e,1.3
-  x Komma im Dateinamen muss als %2C kodiert werden, damit das Komma als Trennzeichen zur Schritt-ID und Schrittnummer eindeutig erkennbar ist.
-  x Ändern des Alias ist jederzeit möglich, dann ändert sich auch die URL
-  x Hinweis, dass man die Aliasse jederzeit über Datei -> Alias ändern kann
-  x Zuordnung von Alias zu Datei wird in den User Preferences abgelegt, wenn der User OK drückt
-  x Idee der Aliasse für Team-Kollaboration und Pfadunabhängigkeit der Links muss im Manual erklärt werden.
-  x OK geht nur, wenn der Alias case-insensitiv eindeutig oder leer ist
-  x Cancel sorgt dafür, dass nichts in der Zwischenablage landet und auch keine Zuordnung in den User Preferences abgelegt wird
-  x Eine leere Eingabe wird ebenfalls in den User Preferences abgelegt, um zu verhindern, dass der Dialog bei jedem Öffnen der Datei wieder erscheint
-x Aus der Zwischenablage kann man den Link anschließend in beliebige andere Tools einfügen
-x Schrittnummer in der URL ist nur informativ, kann entfallen
-x Schritt-ID kann in der URL entfallen, dann adressiert die URL nur die Datei und keinen Schritt darin
-x Über Datei -> Alias: Dialog mit allen Dateien, für die ein Alias definiert ist, jeweils Alias und Datei mit Pfad.
-  x Aliasse sind editierbar - Einschränkungen s.o.
-  x Nicht mehr existierende Dateien sind als verwaist markiert. Der User kann die Datei wieder neu auswählen
-  x Zeilen können auch gelöscht werden
-  x Über Abbrechen können die Änderungen verworfen werden
-  x Speichern geht nur, wenn die Aliasse case-insensitiv eindeutig sind (ausgenommen alle leeren Aliasse)
-x Bei "Speichern unter..." bleibt ein etwaiger bereits zugeordneter Alias mit der alten Datei assoziiert.
-  x Der User muss ggf. die Zuordnung zur neuen Datei über Datei -> Alias selbst nachtragen.
-x Einfache Navigation über einen Link
-  x Link aus irgendeinem Quelldokument in die Zwischenablage kopieren
-  x User startet Specman bzw. klickt ein laufendes Specman an und löst mit STRG+L das Navigieren zum Link in der Zwischenablage aus (STRG+L als Shortcut für einen Menüpunkt)
-  x URL parsen (bedenken: Copy aus Quelldokument könnte einen Slash hinten ergänzt haben)
-  x Wenn Datei nicht gefunden: Fehler
-  x Wenn Alias, Datei über die User Preferences auflösen
-  x Wenn der Alias unbekannt ist: Dialog für eine on-the-fly Dateizuordnung
-  x Datei öffnen, wenn nicht schon geöffnet, ggf. in der URL adressierten Schritt suchen und den Fokus darauf setzen
-    x Ist der Schritt unbekannt, Toast-Feedback, dass der Schritt nicht gefunden wurde
-    x Schritt wird über die ID adressiert, nicht über die Schrittnummer, weil die sich ja ändern kann
-    x Toast-Feedback, wenn die Schrittnummer in der URL nicht mehr mit der ID übereinstimmt
-    x Bei einem verschobenen Schritt trägt der Zielschritt die ID - das ist genau richtig.
-x Nice to have: Dialog für Alias-Vergabe schlägt initial einen Alias vor, wenn sich aus den bereits in den User Preferences abgelegten Aliasse ein Muster ablesen lässt, das auch auf die aktuelle Datei anwendbar ist
-  x Beispiel: es liegt bereits vor: Alias "uc730" für Datei "C:/project/BALI UC-730 Kundendaten pflegen.nsd"
-  x Dann sind alle Zeichen des Alias von links nach rechts im Präfix der Datei enthalten, und ergeben sich durch Auslassung bestimmter Zeichenfolgen.
-  x Quasi aus dem regulären Ausdruck: ".{16}(.{2}).{1}(.{3}).*" -> Alias = $1$2
-  x Eine aktuelle Datei "C:/project/BALI UC-135 Was Anderes.nsd" erfüllt diesen Ausdruck ebenfalls, und der Alias ergibt sich zu "uc135"
-  x Ausschlaggebend ist der Treffer mit dem längsten Alias, bei mehreren der erste (nur Zuordnungen aus demselben Verzeichnis)
-  x Vorschlag nur, wenn der abgeleitete Alias eindeutig ist
-  x Ganz genaues Verfahren inkl. genauer Umgang mit Groß/Kleinschreibung wird im Rahmen der Umsetzung geklärt
-  x Details könnten tricky sein, deswegen nicht Teil der ersten Ausbaustufe
-x Nice to have: Dialog für eine on-the-fly Dateizuordnung schlägt Datei vor, wenn sich aus den bereits in den User Preferences abgelegten Aliasse ein Muster ablesen lässt, das auch auf die aktuelle URL anwendbar ist
-  x Quasi in umgekehrter Richtung für den Vorschlag eines Alias oben bei Aliasvergabe.
-    x Aus einer bestehenden Zuordnung das Verzeichnis der Datei extrahieren
-    x Den regulären Ausdruck für die Ableitung des Alias ableiten
-    x Dann im Verzeichnis nach Dateien suchen, die den regulären Ausdruck erfüllen, der sich aus dem Alias des Links ergibt
-    x Ganz genaues Verfahren wird im Rahmen der Umsetzung geklärt
-  x Details könnten tricky sein, deswegen nicht Teil der ersten Ausbaustufe
-x Nice to have: Nutzung der Links auch als Hyperlinks in Schritttexten, um von einer Spezifikation auf eine andere zu verweisen.
-  x STRG+Klick auf Hyperlink; Specman-Link auf andere Datei startet neue Instanz (Fenster kommt in den Vordergrund), auf die offene Datei navigiert im Fenster
-  x Web- und Mail-Links (http, https, mailto) öffnen im Standardprogramm, andere Schemata werden abgelehnt
-  x Tests (FollowHyperlinkTest, SpecmanInstanceStarterTest)
-x CLI-Operation --resolve-link für Agenten und Pipes (LinkResolver, ResolveLinkCLO, ResolveLinkTest)
-  x Eine Ausgabezeile pro Link, TAB-getrennt: STATUS, Datei, Detail (vollständiger Link mit aktueller Schrittnummer bzw. Fehlererklärung)
-  x OK / SANITIZED (Schrittnummer war falsch) / ERROR; Prüfung gegen die gespeicherte .nsd; Links als Argumente oder zeilenweise von stdin
-  x Im Manual dokumentieren (Kapitel zu Links bzw. "The sanitizer"), --separator erst bei konkretem Bedarf
-- Integration der Navigation ins Betriebssystem kommt später. Grundprinzip
-  - Unter Windows: Eintragen des specman-Protokolls in der Windows Registry
-  - Betriebssystem startet auf dieser Basis Specman, danach wie oben beschrieben
-  - Besonderheit: Wenn schon eine andere Specman-Instanz läuft, das die Datei geöffnet hat, dann wird die Datei nicht nochmal geöffnet,
+Rest von Specman URLs
+- Integration der Navigation ins Betriebssystem
+  x Unter Windows: Eintragen des specman-Protokolls in der Windows Registry (erledigt)
+  - Betriebssystem startet auf dieser Basis Specman (erledigt), aber es fehlt eine Besonderheit:
+    - Wenn schon eine andere Specman-Instanz läuft, das die Datei geöffnet hat, dann wird die Datei nicht nochmal geöffnet,
     - Stattdessen Fokus auf das bereits geöffnete Fenster setzen und zum ggf. in der URL adressierten Schritt navigieren
     - Das ist anspruchsvoll, weil es Interprozess-Kommunikation erfordert.
 
@@ -182,79 +57,6 @@ Rechtschreibprüfung
 - Man kann unterschiedliche Kategorien von Fehlern (Grammatik, Rechtschreibung, Stil) ein- und ausschalten.
    Das ist interessant für Spezifikationen mit unterschiedlichen Stilen: Ganze Sätze vs. Kurzform
 
-Meta Tags (Release 1.4.0)
-x Meta Tag Panel für Aufnahme von Schrittlabel, Klappbutton und Meta Tags
-x Überarbeitung der Darstellung / Platzierung von Schrittlabel, Klappbutton
-x Generische Basisklasse für Meta Tags
-  x Icon, Label, Hintergrundfarbe, Rahmenfarbe
-  x Editierbarer Freitext, also Tooltip angezeigt
-  x Undo / Redo der Freitext-Edits
-x Anlegen / Editieren von Meta Tag Konfigurationen über die GUI
-  x Für das Icon: Auswahl einer SVG-Datei
-  x Beim Editieren bestehender Konfigurationen müssen die Meta Tags, die auf diese Konfiguration verweisen, im UI in der Darstellung aktualisiert werden
-  x Umbenennen einer Konfiguration, für die bereits Tags vergeben sind, ist nicht erlaubt
-  x Undo / Redo
-x Vergeben eines Tags an einem Schritt über die GUI
-  x Jeder Typ von Tag nur einmal pro Schritt
-  x Über Auswahl aus Untermenü des Kontextmenüs an der Schrittnummer
-  x Dadurch sichergestellt: Meta Tag Panels ohne Schrittnummer, erhalten nie konfigurierte Meta Tags, die ja die Schrittnummer bräuchten, um ihre Höhe und Position daraus abzuleiten
-  x Alle bereits vergebenen Tags sind ausgegraut
-  x Menüpunkte zeigen Icon und Label der Konfiguration
-  x Undo / Redo
-  x Vergeben von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
-  x Meta Tags werden im Meta Tag Panel immer links neben dem Schrittlabel bzw. dem letzten bereits vorliegenden Meta Tag eingehängt.
-  x Wenn ein Klappbutton vorliegt, verschiebt dieser sich dabei nach links, d.h. er steht immer ganz links
-    x Das ist so am besten, weil er nicht permanent sichtbar ist.
-  x Meta Tag Panel kann im Moment noch nicht mit variabler Anzahl der Tags umgehen
-  x Prototypisches UserMetaTag in dem Zuge entfernen
-x Entfernen eines Tags von einem Schritt über die GUI
-  x Denkbar über Kontextmenü des Tags mit den Punkten Edit (öffnet den Freitexteditor) und Delete
-  x Undo / Redo
-  x Entfernen von Meta Tags braucht den Änderungsmodus nicht zu berücksichtigen.
-x Löschen einer Meta Tag Konfiguration über die GUI
-  x Sicherheitsabfrage, wenn es Tags gibt, die sich darauf beziehen
-  x Bei Bestätigung, die entsprechenden Tags entfernen
-  x Undo / Redo (mit Toast-Feedback wie beim Anlegen / Editieren)
-x Aufnahme der Konfigurationen in die Modelldatei
-  x Das SVG des Icons wird in die Modelldatei eingebettet
-x Aufnahme der an den Schritten vergebenen Tags in die Modelldatei
-  x Es reicht eine Referenz auf die Bezeichner der Konfiguration + des ggf. zugehörigen Freitexts
-x Einlesen der Konfigs und der Tags an den Schritten aus der Modelldatei (Model Parser)
-x Wir erweitern die Grammatik, bleiben aber bei V002
-x Wichtig für Erweiterung: sie soll eine reiner Erweiterung gegenüber 1.3 sein, d.h. wenn man in 1.4 arbeiten aber keine Meta Tags konfiguriert (und nutzt) enthält die Modelldatei keine neuen (auch keine leeren!) Bestandteile, die ein Öffnen der Datei mit 1.3 verhindern würde.
-x Zielversion 1.4 mit Warnung bei Öffnen einer 1.3'er Datei, dass die Modelle kompatibel sind aber anschließend nicht mehr mit 1.3 bearbeitet werden sollten, um keine Meta-Informationen zu verlieren
-x Copy / Cut / Paste von Schritten mit Meta Tags
-  x Innerhalb derselben Instanz: Tags wandern mit
-  x Zwischen Instanzen: Tags wandern mit, wenn es eine passend bezeichnete Tag Konfiguration im Zielmodell gibt, sonst verschwinden sie still
-x Drag & Drop von Schritten: Meta Tags bleiben erhalten
-x Schritt als gelöscht markieren
-  x Tags bleiben, aber Darstellung mit schwarzem Hintergrund grauem Rand (wenn Rand definiet war) und grauem (disabled) Icon und grauem Label
-  x Entfernen, Editieren, Hinzufügen nicht mehr möglich
-  x Undo / Redo
-  x Darstellung / Editierbarkeit beim Verwerfen der Löschung wiederherstellen
-x Zusätzliche Prüfungen im Sanitizer:
-  x Tag an einem Schritt, zu dem es keine Konfiguration gibt
-  x Freitext an einem Tag, das laut Konfiguration keinen Freitext zulässt
-  x Mehrdeutige Konfigurationsbezeichner
-  x Dasselbe Tag mehrfach an einem Schritt
-  x Konfiguration ohne Label und ohne Icon
-x PDF-Export von Meta Tags
-  x Nice to have: Freitext als Kommentar in der PDF-Ausgabe?
-x Verschieben der Tags eines Schritts untereinander mit rechts/links im Kontextmenü analog Catch-Bereiche
-x Neues Refernzmodell specman-reference-v1.4-model-v2.nsd mit Meta Tag Konfigurationen und Tags an Schritten
-  x Nur Icon / nur Label / beides
-  x Mit / ohne Randfarbe
-  x Mit / ohne Freitext
-  x Ein Tag mit transparentem Hintergrund (nur Icon, steht frei am Rand)
-  x Ein Icon mit scharfer Ecke unten: Im Freitext erklären, dass ein solches Icon im SVG etwas Randabstand braucht, weil das Tag unten abgerundet ist. Gleiches später im Manual (Kapitel zu Tags).
-x Umgang mit Überlauf: Tags werden nach links hin abgeschnitten. Das ist OK.
-x Freitexte durchsuchen
-  x Auswahlbare Suchbereiche "Model" und "Tags" im Suchdialog
-  x Scrollen zum richtigen Schritt
-  x Freitext-Editor öffnen und Scrollen zum Suchtreffer im Text
-  x Compound Undo / Redo für Replace All ohne Tooltipanzeigen
-  x Tags gelöschter Schritte werden ignoriert -> kein Konflikt mit Editoranzeige und Replace
-
 Reste Multi-Catch
 - Obersten Co-Catch nach oben schieben macht diesen zum primären Catch
    - Reorg der Nummerierung wird notwendig
@@ -262,19 +64,6 @@ Reste Multi-Catch
   Das Klicken auf den Lösch-Button löst eine FocusLost und eine Synchronisation der Texte zwischen Catch und Break aus
   Diese Aktionen landen in der Undo-Historie vor dem eigentlichen Löschen des Co-Catchs.
   Man muss dann mehrfach klicken, um das eigentliche Undo auszulösen
-
-x Copy / Cut / Paste ganzer Schritte
-x Copy
-x Paste
-  x Referenzen auf nicht existierende Schritte als ungültig markieren
-  x Undo / Redo
-  x Für Schritte aus derselben Instanz
-  x Für Schritte aus einer anderen Instanz
-x Cut
-  x Warnmeldung bei drohendem Verlust von Catchs
-  x Undo / Redo
-x Icons für Kontextmenüpunkte
-x Copy / Cut / Paste von Tabellen
 
 Abschluss für Go-Live
 - Wenn man zu einem Breakschritt bzw. einem Catch-Bereich springt oder einer Schrittreferenz folgt, dann kann sich das Ziel
@@ -339,7 +128,6 @@ Bugs fixen
 - Abfangen des Löschens des letzten Zweigs im Case
 - NumberStepBackground in RoundedBorderDecorator schwarz färben wenn Schritt gelöscht ist
 - 'Cannot invoke "specman.SpaltenResizer.getShape()" because "this.breitenAnpasser" is null' in PDF-Export with no diagram
-x Komplettes Rewrite von DraggingLogic
 
 Auf längere Sicht - nicht notwendig für ersten Go-Live:
 - Schritt-Morphing: If/Else -> Case usw.
