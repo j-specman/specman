@@ -490,13 +490,16 @@ Specman has four rules in addition to the PlantUML syntax:
 
 * The source contains exactly one diagram, i.e. one `@startuml`.
 * The source is not empty. Comments and blank lines do not count as content.
-* `!pragma` is refused, because the layout engine is fixed by Specman.
+* `!pragma` is refused, because Specman chooses the layout engine itself, see _Layout engine_ below.
 * Backticks are refused, because they delimit the source in the diagram file.
 
 The context menu of the diagram has two more items: _Import..._ replaces the source by the content of a file, with the same rules as above, and _Delete_ removes the diagram. Selecting, deleting, copying and resizing work as described for images, see <<_images,Images>>.
 
 ### Details
-* *Rendering:* PlantUML draws with its embedded ELK layout engine. PlantUML's default layout engine would be Graphviz, which has to be installed separately, but Specman does not require it. The texts are set in Roboto (sans-serif) and Courier Prime (monospaced), both shipped with Specman and embedded in the PDF export. You can set other fonts in the source, at your own risk.
+* *Layout engine:* By default, Specman forces PlantUML to draw with the ELK layout engine embedded in it. ELK has the advantage that it does not require any additional installation, but it has some mentionable limitations like ignoring layout hints. PlantUML's default and most capable layout engine is Graphviz, which must be installed separately. When rendering the first PlantUML diagram, Specman looks for Graphviz' `dot` executable in the environment variable `GRAPHVIZ_DOT` and on the `PATH`. If it finds it, it uses Graphviz instead of ELK. +
+ You should explicitly decide whether it is important that diagrams render identically on all machines of the team, sharing the same specifications with embedded PlantUML diagrams. If so, make sure that all members use the same layout engine.
+
+* *Fonts:* The texts are set in Roboto (sans-serif) and Courier Prime (monospaced), both shipped with Specman and embedded in the PDF export. You can set other fonts in the source, at your own risk.
 
 * *Vector graphic:* The diagram is rendered as SVG, so it is sharp at any zoom factor, and in the PDF export it is a vector graphic with real text.
 

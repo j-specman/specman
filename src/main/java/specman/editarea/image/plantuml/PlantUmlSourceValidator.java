@@ -25,7 +25,7 @@ public class PlantUmlSourceValidator {
     return violationKey != null ? i18n(violationKey) : syntaxProblem(source);
   }
 
-  /** Backticks delimit the source in the model file, and the layout engine is fixed by Specman. A diagram without
+  /** Backticks delimit the source in the model file, and Specman chooses the layout engine. A diagram without
    * content is rendered as a tiny empty picture, which the user could hardly find and click again. An area shows
    * exactly one diagram. */
   public String violationMessageKey(String source) {
