@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.logging.Logger;
 
 import static specman.Specman.editor;
 
@@ -21,6 +22,7 @@ import static specman.Specman.editor;
  * its layout can be influenced from the source, e.g. by "left to right direction", which ELK in PlantUML
  * cannot. The minimal dot PlantUML carries along is deliberately never used. */
 public final class PlantUmlRenderer {
+  private static final Logger LOG = Logger.getLogger(PlantUmlRenderer.class.getName());
   private static final File INSTALLED_DOT = DotLocator.forThisMachine().locate();
   // Touching Styles registers Specman's shipped fonts with AWT, so PlantUML measures text with them and the
   // SVG renderer finds them by name. labelFont is Roboto, the shipped sans-serif font.
@@ -31,6 +33,11 @@ public final class PlantUmlRenderer {
   static {
     if (INSTALLED_DOT != null) {
       GraphvizRuntimeEnvironment.getInstance().setDotExecutable(INSTALLED_DOT.getAbsolutePath());
+      LOG.info("PlantUML layout engine: Graphviz, " + INSTALLED_DOT);
+    }
+    else {
+      LOG.info("PlantUML layout engine: ELK, no working dot found via " + DotLocator.ENVIRONMENT_VARIABLE
+        + " (" + System.getenv(DotLocator.ENVIRONMENT_VARIABLE) + ") or PATH (" + System.getenv("PATH") + ")");
     }
   }
 
