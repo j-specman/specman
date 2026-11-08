@@ -11,6 +11,15 @@ This document is a loose collection of information about the architecture of Spe
 * The rich text editing is based on a modified copy of the SHEF HTML editor (package `net.atlanticbb.tantlinger`). Specman-specific additions in there are kept to a minimum.
 * Jackson reads the legacy V1 model format. The model classes carry Jackson annotations for their polymorphic step types.
 
+### Additional tools for publishing releases
+Developing and testing need only the JDK and Maven. Building the release artifacts requires a few more tools, because the Maven release profiles call external programs.
+
+* *Docker* (it must be running) to render the manual to PDF with the `asciidoctor/docker-asciidoctor` image.
+
+* *jpackage* and *Inno Setup 6* (`ISCC.exe`) for the Windows installer. Details are in link:../../howto/howto-windows-installer.adoc[How-to: Specman Windows Installer].
+
+Normal builds without a release profile skip the steps which need these tools. The manual step is controlled by the property `specman.manual.skip`. Because the Windows installer can only be built on Windows, publishing releases requires a Windows machine.
+
 ## Package Overview
 All Specman code lives in `specman`. Notable sub-packages:
 
