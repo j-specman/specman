@@ -39,7 +39,7 @@ To get an idea of what real-world specifications look like in Specman, see the l
 ## Further information
 
 ### Manual
-The complete manual is available at link:doc/specman-manual.adoc[Specman Manual].
+The complete manual is available at link:doc/specman-manual.adoc[Specman Manual]. The online manual and the release history are available on the link:https://j-specman.github.io/[Specman website].
 
 ### Building
 For maintainers, building and publishing a release is described in link:howto/howto-release.adoc[How-to: Release erstellen und auf GitHub veröffentlichen].
