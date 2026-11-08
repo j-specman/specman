@@ -80,7 +80,7 @@ The base types for creating visitors live in the package `specman.visitor`, whic
 
 * The whole diagram including intro and outro is traversed with `EditorI.traverseDiagram(visitor)`. Parts of it are traversed with `traverse(visitor)` of a sequence, a step or an edit container, for example after pasting steps.
 
-There are two kinds of visitors:
+There are two kinds of visitors around in the package:
 
 * *Queries* find or collect nodes: `StepByIdFinder`, `StepByNumberFinder`, `StepByFragmentFinder`, `StepCollector`, `TextAreaCollector` and some more. Finders stop the traversal as soon as they have found what they are looking for. The result is read from the visitor afterwards:
 +
@@ -93,7 +93,7 @@ AbstractSchrittView step = stepFinder.step();
 
 * *Operations* do something with every node: `DiagramScaler` (zoom), `DiagramPostInitializer` (after loading a diagram or pasting steps), `ChangeSetMerger`, `ReviewCollapser` and `AllStepsFolder`. The work itself stays in the nodes, for example in `skalieren()` or `viewsNachinitialisieren()`. The visitor only calls it for each node reported to it. Descending is the traversal's job. If the order matters, an operation needs more than one traversal: scaling sets fonts and step number labels first and the layout afterwards, because the layout depends on the scaled contents.
 
-Conventions for visitors:
+### Conventions for visitors
 
 * New traversals of the diagram are written as visitors, not as another hand-written recursive descent. There are only a few exceptions to this rule, e.g. accepting or rejecting changes, because these operations also *modify* the tree during the traversal, which does not suit the Visitor pattern.
 
