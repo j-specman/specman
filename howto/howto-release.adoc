@@ -160,7 +160,7 @@ Einen veröffentlichten Tag nicht nachträglich auf einen anderen Commit verschi
 [#website]
 == Website aktualisieren
 
-Nach der Veröffentlichung des GitHub-Releases wird die Website im Repository `j-specman/j-specman.github.io` aktualisiert. Dazu in den Klon dieses Repositorys wechseln, den Branch `main` auschecken und aktualisieren. Der Workflow `.github/workflows/pages.yml` baut daraus bei jedem Push auf `main` mit Maven (`mvn package`) die Website samt Online-Manual (aus `doc/specman-manual.adoc` des Specman-Repositorys) und Release-Historie und veröffentlicht sie über GitHub Pages. Dieselbe Maven-Konfiguration funktioniert auch lokal, siehe <<website-lokal-bauen,Website lokal bauen>>.
+Nach der Veröffentlichung des GitHub-Releases wird die Website im Repository `j-specman/j-specman.github.io` aktualisiert. Dazu in den Klon dieses Repositorys wechseln, den Branch `main` auschecken und aktualisieren. Der Workflow `.github/workflows/deploy-specman-website.yaml` baut daraus bei jedem Push auf `main` mit Maven (`mvn package`) die Website samt Online-Manual (aus `doc/specman-manual.adoc` des Specman-Repositorys) und Release-Historie und veröffentlicht sie über GitHub Pages. Dieselbe Maven-Konfiguration funktioniert auch lokal, siehe <<website-lokal-bauen,Website lokal bauen>>.
 
 === Release-Nummer prüfen
 
@@ -170,7 +170,7 @@ Prüfen, ob in der Website eine Release-Nummer steht, die angepasst werden muss,
 
 Wurde bei der Veröffentlichung ein neuer Release-Branch `<major>.<minor>.x` angelegt, muss die Manual-Generierung jetzt auf diesen Branch umgestellt werden. Auf `master` beginnt mit der Veröffentlichung die Weiterentwicklung des nächsten Releases, sein Stand ist nicht mehr stabil, und das Online-Manual soll das veröffentlichte Release beschreiben.
 
-In `.github/workflows/pages.yml` im Schritt `Check out Specman (manual source)` den Wert `ref` ändern:
+In `.github/workflows/deploy-specman-website.yaml` im Schritt `Check out Specman (manual source)` den Wert `ref` ändern:
 
 [source,yaml]
 ----
@@ -217,13 +217,13 @@ mvn package
 
 Der Build braucht nur Maven, ein JDK (21 oder höher) und laufendes Docker. Asciidoctor und Pandoc laufen in Docker-Containern und müssen nicht installiert sein. Beim ersten Mal lädt Docker die Images, das dauert einige Minuten.
 
-Das Ergebnis liegt in `_site/`: das Manual in `_site/manual/` (HTML und PDF) und die Release-Historie in `_site/releasenotes/`, jeweils mit `index.html` als Einstieg. Das Manual stammt aus dem Stand, der im Specman-Klon gerade ausgecheckt ist (standardmäßig `../specman`, sonst mit `-Dspecman.clone=<Pfad>` angeben). Der Workflow auf GitHub verwendet stattdessen den Branch aus `ref` in `pages.yml`.
+Das Ergebnis liegt in `_site/`: das Manual in `_site/manual/` (HTML und PDF) und die Release-Historie in `_site/releasenotes/`, jeweils mit `index.html` als Einstieg. Das Manual stammt aus dem Stand, der im Specman-Klon gerade ausgecheckt ist (standardmäßig `../specman`, sonst mit `-Dspecman.clone=<Pfad>` angeben). Der Workflow auf GitHub verwendet stattdessen den Branch aus `ref` in `deploy-specman-website.yaml`.
 
 === Veröffentlichen und prüfen
 
-. Den Workflow `Build and deploy website` auslösen. Er baut die Website samt Online-Manual und Release-Historie neu aus dem aktuellen Stand der Manual-Quelle. Das ist auch dann nötig, wenn an der Website selbst nichts zu ändern war, denn sonst zeigt das Online-Manual weiter den alten Stand.
+. Den Workflow `Deploy Specman Website` auslösen. Er baut die Website samt Online-Manual und Release-Historie neu aus dem aktuellen Stand der Manual-Quelle. Das ist auch dann nötig, wenn an der Website selbst nichts zu ändern war, denn sonst zeigt das Online-Manual weiter den alten Stand.
 ** *Es gab Änderungen* (neue Release Notes, Release-Nummer oder Manual-Quelle umgestellt): Änderungen committen und auf `main` pushen. Der Push löst den Workflow automatisch aus. Bei einem neuen Release ist das der Normalfall, denn die neue Release-Notes-Datei ist mindestens neu dazugekommen.
-** *Es gab nichts zu ändern:* Nichts einchecken, sondern den Workflow manuell starten. Dazu auf GitHub das Repository `j-specman/j-specman.github.io` öffnen, **Actions** wählen, in der Liste links den Workflow **Build and deploy website** auswählen, **Run workflow** öffnen, den Branch `main` auswählen und **Run workflow** bestätigen.
+** *Es gab nichts zu ändern:* Nichts einchecken, sondern den Workflow manuell starten. Dazu auf GitHub das Repository `j-specman/j-specman.github.io` öffnen, **Actions** wählen, in der Liste links den Workflow **Deploy Specman Website** auswählen, **Run workflow** öffnen, den Branch `main` auswählen und **Run workflow** bestätigen.
 . Im Bereich **Actions** des Repositorys prüfen, dass der Lauf erfolgreich war.
 . Das Online-Manual öffnen und prüfen, dass es den Stand des neuen Releases zeigt, zum Beispiel am Titel mit der Versionsnummer.
 . Auf der Landing Page über die Kachel **Release history** die Release-Historie öffnen und prüfen, dass das neue Release oben in der Liste steht und seine Seite korrekt dargestellt wird.
