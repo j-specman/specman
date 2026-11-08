@@ -1,5 +1,5 @@
-Release notes Specman 1.x.x
-- Hier ein tragen, was sich gegenüber letztem Release geändert hat. Dient als Hilfe für Release Notes
+Release notes Specman 1.4.1
+- Slightly improved height calculation for icons of fold buttons
 
 Aus aktueller Anwendung
 - Hat man 5 Sekunden Autosave-Intervall eingestellt, dann wird es auffällig, dass ein abhängendes Leerzeichen wegbereinigt wird.
