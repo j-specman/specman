@@ -29,13 +29,22 @@ All Specman code lives in `specman`. Notable sub-packages:
 
 |`specman` |Application entry point (`Specman`, `SpecmanFrame`), shared types like `EditorI`, `ChangeSet`, `StepNumber`
 |`specman.view` |Views of the diagram steps and step sequences (`AbstractSchrittView` and subclasses)
+|`specman.visitor` |Visitors for traversing the diagram: finders, collectors and operations working on the whole diagram or parts of it, see <<Traversing the Diagram with Visitors>>
 |`specman.editarea` |Editable content within steps: text, images, tables, list items
 |`specman.editarea.document` |Wrapping of Swing text documents, see <<Text Documents and Wrapped Positions>>
+|`specman.editarea.image` |Image edit areas: bitmaps, SVG graphics and PlantUML diagrams (`plantuml`)
 |`specman.model` |Persistent model, versioned by package (`v001`, `v002`), converter and parsers
+|`specman.model.v002.io` |Reading, writing and sanitizing the text format of model version 2: parser, serializer, step renumbering
 |`specman.ops` |Operations and toolbar buttons extracted from the `Specman` class
 |`specman.undo` |Undo infrastructure and the concrete undoable edits
 |`specman.draganddrop` |Dragging of steps and tags
+|`specman.clipboard` |Copy, cut and paste of steps, tables and text, including the adjustment of change marks when pasting
 |`specman.metatag` |Meta tags and the step number label
+|`specman.link` |Specman URLs: links to steps, file aliases with their dialogs, suggestion of aliases and files (`suggester`) and resolution of links (`resolver`, used by `--resolve-link`)
+|`specman.search` |Support for find and replace across the whole model: search scopes, text matching, free texts of meta tags
+|`specman.settings` |User settings and the settings dialog, e.g. auto save, auto load and language
+|`specman.toolbar`, `specman.menubar` |Ribbon toolbar and menu bar, including recent files and the change set menu
+|`specman.graphics` |Colors, styles and icons
 |`specman.pdf` |PDF export
 |`specman.cli` |Command line operations (headless, e.g. `--sanitize`)
 |`specman.i18n` |Localization
@@ -57,6 +66,42 @@ The application's main class is `Specman`. Due to its central role, it tends to 
 * Orchestration logic belongs in operations, buttons and menu listeners, not into `Specman`. Tests trigger these classes the same way the user does, see <<Headless Tests>>.
 
 * Repeated structure among operation classes is captured by abstract base classes. An example is `AbstractCreateStepOpButton`, which implements the common "insert after the focused step or append to the main sequence" pattern for all step creation buttons.
+
+## Traversing the Diagram with Visitors
+The diagram and its representation in the UI form a tree: sequences contain steps and possibly a catch area, steps contain edit containers and sub sequences, and edit containers contain edit areas (text, images, tables, list items) which in turn may contain other edit containers. Many features have to walk through this tree, for example to find a step, to collect all text areas, to scale the diagram after a zoom change or to merge change sets. Most of them use the Visitor pattern for the traversal, so the knowledge of how the tree is built exists only once, and the traversal code is kept out of the size-critical central classes like `TextEditArea`, `EditContainer` and `AbstractSchrittView`.
+
+The base types for creating visitors live in the package `specman.visitor`, which also contains a number of implementations that might be reusable for future work. The following conventions apply:
+
+* Every node of the component tree implements `accept(DiagramVisitor)`. It reports itself to the visitor (`visitStep()`, `visitSequence()`, `visitTextArea()` etc.) and then passes the visitor on to its own children. A node is always reported before its children, in the order of the document. The Else branch of a case step comes first, because it is the leftmost column on screen.
+
+* `DiagramVisitor` has an empty default implementation for each `visit...` method. A concrete visitor overrides only the methods for the nodes it is interested in.
+
+* A visitor steers the traversal by exceptions. `IgnoreChildrenException` skips everything inside the node just reported, `StopTraversalException` ends the whole traversal. Both are checked exceptions, but overriding methods don't have to declare them, so other visitors don't have to care.
+
+* The whole diagram including intro and outro is traversed with `EditorI.traverseDiagram(visitor)`. Parts of it are traversed with `traverse(visitor)` of a sequence, a step or an edit container, for example after pasting steps.
+
+There are two kinds of visitors:
+
+* *Queries* find or collect nodes: `StepByIdFinder`, `StepByNumberFinder`, `StepByFragmentFinder`, `StepCollector`, `TextAreaCollector` and some more. Finders stop the traversal as soon as they have found what they are looking for. The result is read from the visitor afterwards:
++
+[source,java]
+----
+StepByIdFinder stepFinder = new StepByIdFinder(stepId);
+editor.traverseDiagram(stepFinder);
+AbstractSchrittView step = stepFinder.step();
+----
+
+* *Operations* do something with every node: `DiagramScaler` (zoom), `DiagramPostInitializer` (after loading a diagram or pasting steps), `ChangeSetMerger`, `ReviewCollapser` and `AllStepsFolder`. The work itself stays in the nodes, for example in `skalieren()` or `viewsNachinitialisieren()`. The visitor only calls it for each node reported to it. Descending is the traversal's job. If the order matters, an operation needs more than one traversal: scaling sets fonts and step number labels first and the layout afterwards, because the layout depends on the scaled contents.
+
+Conventions for visitors:
+
+* New traversals of the diagram are written as visitors, not as another hand-written recursive descent. There are only a few exceptions to this rule, e.g. accepting or rejecting changes, because these operations also *modify* the tree during the traversal, which does not suit the Visitor pattern.
+
+* A visitor skips subtrees it is not interested in by throwing `IgnoreChildrenException`. `StepByIdFinder`, for example, ignores all edit containers, because there are no steps inside edit areas.
+
+* Catch areas are part of the diagram. A traversal which leaves them out is usually a bug. Skipping them has to be deliberate, as in `UnlinkedBreakStepCollector`, which wants the break steps outside of catch sequences only.
+
+* Visitors are not tested on their own. Test the behavior of the features built on them instead, see <<Headless Tests>>.
 
 ## Undo
 All user-visible changes of the diagram must be undoable. The central `SpecmanUndoManager` extends the Swing `UndoManager` and adds:
@@ -203,25 +248,27 @@ With every extension of the modeling features, and thereby of the file format, t
 ## Coding Conventions
 * New code, comments and Javadoc are written in English. The project is migrating away from German incrementally. When renaming classes, methods or members in passing, make sure this has no effect on the persistent model representation in files.
 
+* Keep classes short. Even though there is no strict limit, a class should be understandable at a glance. Try to stay below 100 lines of pure code.
+
+* Keep lines short and try to apply the five-token rule: if a line consists of no more than five tokens, an average reader can take in the complete line at a single glance. Otherwise they must "parse" it mentally. Consider using static imports to keep the origin of a token out of the code line, since it is usually not of primary interest.
+
 * Local variables always have an explicit type, never `var`.
 
 * `if`, `else if` and `else` always use curly braces and line breaks. No single-line forms. Early return guards are unusual.
 
 * No duplication of non-trivial logic, not even "just for now". If the same logic is needed a second time, it is moved to a common parent class or utility first, even if that is a detour in the middle of other work. If multiple classes share the same structure, an abstract base class is introduced proactively.
 
-* Operations and menu listeners orchestrate, views and edit areas encapsulate their own state. Don't add functionality to `Specman` if it can live elsewhere.
+* Keep an eye on the size-critical central god classes like `Specman`, `TextEditArea`, `EditContainer` and `AbstractSchrittView`. They tend to grow constantly. Try to prevent this, following the orchestration concepts described in <<Specman Class and Operations>>.
 
-* Records are not used in the Specman project. Use classes instead.
+* Don't use inner classes that contain a noticeable amount of logic. They make it difficult for the reader to find the class and to understand it in isolation. Use a separate file instead.
 
-* Don't use inner classes that contain a noticeable amount of logic. It makes it difficult for the reader to find the class and to understand it in isolation. Use a separate file instead.
+* Records are unusual in the Specman project. Use classes instead. Records may be used for small class-internal data structures that have no noteworthy logic of their own.
+
+* Avoid class names ending with `Util` or `Helper`, which usually indicate an unclear responsibility. Use specific names instead that make the responsibility of a class visible. If a class tends to become a collection of unrelated functionality, split it up into multiple classes, each with a clear focus.
 
 * Apply the Boy Scout Rule (German: _Pfadfinderregel_): don't make bad code worse by adding more bad code. If a method is already too long or difficult to understand, don't add more lines to it. Refactor it first.
 
 * Keep clean code design principles in mind, especially the Single Level of Abstraction principle and the Integration Operation Segregation Principle (IOSP). Make sure that the reader of a class can understand its top-level methods by reading them in isolation, without having to understand the details of the lower-level methods.
-
-* Keep classes short. Even though there are no strict limits, a class should be understandable at a glance. Try to stay below 100 lines of pure code.
-
-* Keep lines short and try to apply the five-token rule: if a line consists of no more than five tokens, an average reader can take in the complete line at a single glance. Otherwise they must "parse" it mentally. Consider using static imports to keep the origin of a token out of the code line, since it is usually not of primary interest.
 
 ### Coding Conventions for Tests
 * Test classes end with `Test` and test methods start with `test`.
