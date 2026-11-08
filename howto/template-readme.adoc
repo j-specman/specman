@@ -12,3 +12,5 @@ The complete manual is available at link:doc/specman-manual.adoc[Specman Manual]
 For maintainers, building and publishing a release is described in link:howto/howto-release.adoc[How-to: Release erstellen und auf GitHub veröffentlichen].
 
 Project setup and creating of the Specman Windows installer is described in link:howto/howto-windows-installer.adoc[How-to: Specman Windows Installer].
+
+Maintainers should take the link:specifications/architecture/specman-architecture.adoc[Specman Architecture] documentation into account when changing the code.
