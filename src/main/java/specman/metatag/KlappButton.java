@@ -8,6 +8,7 @@ import specman.graphics.SpecmanIcons;
 import specman.graphics.SvgIcon;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -42,6 +43,9 @@ public class KlappButton extends AbstractMetaTag implements MouseMotionListener,
   // plus/minus glyph is known never to reach wide enough to collide with the rounded bottom
   // corners, so it can sit closer to the button's own left/right edges.
   private static final int ICON_SIDE_PADDING = 2;
+  // In pixels, deliberately not zoom-scaled: a single row is all the correction the half-row
+  // difference to the step number's digits needs, see reservingBorder().
+  private static final int ICON_LIFT = 1;
   // Poll interval for the hover-exit safety net (see hoverPoll below) - short enough that a quick
   // flick of the mouse off the button still hides it within a human-imperceptible delay.
   private static final int HOVER_POLL_MILLIS = 60;
@@ -54,6 +58,7 @@ public class KlappButton extends AbstractMetaTag implements MouseMotionListener,
   private final SvgIcon collapseIcon = new SvgIcon(SpecmanIcons.COLLAPSE_STEP, ICON_GLYPH_SIZE);
   private final SvgIcon expandIcon = new SvgIcon(SpecmanIcons.EXPAND_STEP, ICON_GLYPH_SIZE);
   private Color currentColor;
+  private int overdrawnTopRows;
   private boolean selected;
   // Safety net for mouseMoved/mouseExited-based hover detection (see mouseMoved's comment for why
   // those alone proved unreliable under fast mouse movement): while shown for hover (not because
@@ -157,14 +162,21 @@ public class KlappButton extends AbstractMetaTag implements MouseMotionListener,
     setColor(parent.getBackground());
   }
 
-  /** Same padding/lift trick as StepnumberLabel's own border (see HangingTab#scaledBorder) - this
-   * MatteBorder only ever reserves space, it's never meant to be seen itself (same color as the
-   * background), unlike HangingTab's own setBorderColor() line which is the one actually painted. */
+  /** The border only ever reserves space, it's never meant to be seen itself (same color as the
+   * background), unlike the line of setBorderColor() which is the one actually painted. */
   private void setColor(Color color) {
     currentColor = color;
     setOpaque(true);
     setBackground(color);
-    setBorder(scaledBorder(color, 0, ICON_SIDE_PADDING));
+    setBorder(reservingBorder(color));
+  }
+
+  /** The top inset keeps the icon out of the rows which the border of the step paints over, so Swing
+   * centers it in what remains visible. The step number and the tags are centered like this too,
+   * see {@link MetaLabelLayout}, but the digits' ink then lies half a row above that center. The
+   * plus/minus can't sit on half a row, so it is lifted by a whole one to be no lower than them. */
+  private Border reservingBorder(Color color) {
+    return insetBorder(color, overdrawnTopRows, ICON_LIFT, ICON_SIDE_PADDING);
   }
 
   public void refreshGeklappt() {
@@ -266,7 +278,7 @@ public class KlappButton extends AbstractMetaTag implements MouseMotionListener,
     collapseIcon.setSize(iconSize);
     expandIcon.setSize(iconSize);
     if (currentColor != null) {
-      setBorder(scaledBorder(currentColor, 0, ICON_SIDE_PADDING));
+      setBorder(reservingBorder(currentColor));
     }
   }
 
@@ -274,8 +286,16 @@ public class KlappButton extends AbstractMetaTag implements MouseMotionListener,
    * already-computed height (see EditContainer#updateBounds()) rather than independently
    * recomputing it, so the meta-strip widgets are guaranteed to end up the same height
    * instead of relying on separate formulas staying in sync by hand. Hangs the button left of
-   * its right neighbour, which is the leftmost tag or the step number. */
-  public void updateLocation(int rightNeighborX, int height) {
+   * its right neighbour, which is the leftmost tag or the step number.
+   * @param overdrawnTopRows the number of rows at the top of the button which are painted over by
+   *   the border of the step */
+  public void updateLocation(int rightNeighborX, int height, int overdrawnTopRows) {
+    if (this.overdrawnTopRows != overdrawnTopRows) {
+      this.overdrawnTopRows = overdrawnTopRows;
+      if (currentColor != null) {
+        setBorder(reservingBorder(currentColor));
+      }
+    }
     if (height > 0) {
       int gap = (int) editor().scale(MetaTagPanel.WIDGET_GAP);
       int width = getPreferredSize().width;

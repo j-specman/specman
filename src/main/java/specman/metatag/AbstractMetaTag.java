@@ -59,25 +59,16 @@ public abstract class AbstractMetaTag extends JLabel {
    * left/right for the rounded corners to live in, and exact insets in pixels at the top and bottom.
    * These are what position the text vertically, see {@link MetaLabelLayout}. */
   protected static Border insetBorder(Color color, int topInset, int bottomInset) {
-    int padding = (int) editor().scale(SIDE_PADDING);
-    return new MatteBorder(topInset, padding, bottomInset, padding, color);
+    return insetBorder(color, topInset, bottomInset, SIDE_PADDING);
   }
 
-  /** Border recipe with an explicit side padding - for widgets (like KlappButton's plus/minus) that
-   * are known not to collide with the rounded bottom corners even with much less padding than
-   * StepnumberLabel's digits need, and so can sit closer to their own edges. The bottom inset is
-   * CONTENT_LIFT, which nudges Swing's centered content upward (a larger bottom inset than top
-   * shifts the centering point up), reduced by heightGrowthCompensation. */
-  protected static Border scaledBorder(Color color, int heightGrowthCompensation, int sidePadding) {
-    return scaledBorder(color, heightGrowthCompensation, sidePadding, CONTENT_LIFT);
-  }
-
-  /** Same as {@link #scaledBorder(Color, int, int)}, but with an explicit lift instead of the
-   * default CONTENT_LIFT. */
-  protected static Border scaledBorder(Color color, int heightGrowthCompensation, int sidePadding, int lift) {
+  /** Same as {@link #insetBorder(Color, int, int)} with an explicit side padding - for widgets
+   * (like KlappButton's plus/minus) that are known not to collide with the rounded bottom corners
+   * even with much less padding than StepnumberLabel's digits need, and so can sit closer to
+   * their own edges. */
+  protected static Border insetBorder(Color color, int topInset, int bottomInset, int sidePadding) {
     int padding = (int) editor().scale(sidePadding);
-    int scaledLift = (int) editor().scale(lift) - heightGrowthCompensation;
-    return new MatteBorder(0, padding, scaledLift, padding, color);
+    return new MatteBorder(topInset, padding, bottomInset, padding, color);
   }
 
   @Override
