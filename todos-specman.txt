@@ -1,6 +1,7 @@
 Release notes Specman 1.4.1
 - Slightly improved height calculation for icons of fold buttons
-- Lookup for separately installed Graphviz layout engine for PlantUML.
+- Lookup for separately installed Graphviz layout engine for PlantUML
+- Bugfix in reloading if branch with catch area inside
 
 Aus aktueller Anwendung
 - Hat man 5 Sekunden Autosave-Intervall eingestellt, dann wird es auffällig, dass ein abhängendes Leerzeichen wegbereinigt wird.
