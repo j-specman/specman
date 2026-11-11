@@ -120,10 +120,13 @@ public class ZweigSchrittSequenzView extends SchrittSequenzView {
 		return ueberschrift.aenderungenVerwerfen();
 	}
 
-	/** Visits the heading of the branch. */
+	/** Visits the heading of the branch. A traversal while the branch is still being loaded may happen
+	 * before the heading exists. In this case, the heading is simply skipped. */
 	@Override
 	protected void acceptHeadings(DiagramVisitor visitor) throws StopTraversalException {
-		ueberschrift.accept(visitor);
+		if (ueberschrift != null) {
+			ueberschrift.accept(visitor);
+		}
 	}
 
   @Override
