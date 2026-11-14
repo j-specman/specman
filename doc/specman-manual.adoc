@@ -2,6 +2,9 @@
 :sectnums:
 
 # Specman 1.4 Manual
+:revdate: 2026-11-14
+
+_Last updated: {revdate}_
 
 ## Introduction
 // tag::readme[] - this region is copied into readme.adoc by the 'generate-readme' execution in pom.xml (mvn package, or standalone: mvn antrun:run@generate-readme)
