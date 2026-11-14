@@ -1,4 +1,5 @@
 ## Specman 1.4.1
+Released: 2026-11-14
 
 Bugfix and polish release on top of 1.4.0.
 
