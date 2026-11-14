@@ -1,4 +1,4 @@
-## Specman 1.4
+## Specman 1.4.0
 Released: 2026-11-07
 
 ### New
