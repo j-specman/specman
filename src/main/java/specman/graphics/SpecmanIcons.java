@@ -53,9 +53,9 @@ public final class SpecmanIcons {
   // Collapse/expand all steps (toolbar)
   public static final String COLLAPSE_ALL = MATERIAL + "unfold_less.svg";
   public static final String EXPAND_ALL = MATERIAL + "unfold_more.svg";
-  // KlappButton of a single step
-  public static final String COLLAPSE_STEP = MATERIAL + "remove.svg";
-  public static final String EXPAND_STEP = MATERIAL + "add.svg";
+  // KlappButton of a single step: the single chevrons of unfold_less/unfold_more, cropped to fit
+  public static final String COLLAPSE_STEP = SPECMAN + "step-collapse.svg";
+  public static final String EXPAND_STEP = SPECMAN + "step-expand.svg";
 
   // StepButtonBar text/icon-only toggle
   public static final String PANEL_HIDE_TEXT = MATERIAL + "left_panel_close.svg";
