@@ -1,10 +1,5 @@
-Release notes Specman 1.4.1
-- Slightly improved height calculation for icons of fold buttons
-- Lookup for separately installed Graphviz layout engine for PlantUML
-- Bugfix in reloading if branch with catch area inside
-- Tabellen: Klick in den unteren Rand legt einen Absatz hinter der Tabelle an bzw. setzt den Cursor in den folgenden Text
-- Tabellen Operation Cursors re-designed
-- Expand / Collapse icons unified
+Release notes Specman 1.4.2
+- ...
 
 Aus aktueller Anwendung
 - Hat man 5 Sekunden Autosave-Intervall eingestellt, dann wird es auffällig, dass ein abhängendes Leerzeichen wegbereinigt wird.
