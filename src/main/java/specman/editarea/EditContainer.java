@@ -541,11 +541,23 @@ public class EditContainer extends JPanel {
 		addEditArea(splitListItemEditArea, initiatingIndex+1);
 	}
 
-	public TextEditArea addTextEditArea(AbstractImageEditArea initiatingImageEditArea) {
-		int initiatingIndex = indexOf(initiatingImageEditArea);
-		TextEditArea newEditArea = new TextEditArea(new TextEditAreaModel_V002("", "", new ArrayList<>(), TextInit.initialChangeInfo()), getFont());
-		addEditArea(newEditArea, initiatingIndex+1);
-		return newEditArea;
+	/** Adds an empty text area directly behind the passed edit area and gives it the focus. */
+	public TextEditArea addTextEditAreaUDBL(EditArea initiatingEditArea) {
+		EditorI editor = editor();
+		try (UndoRecording ur = editor.composeUndo()) {
+			int initiatingIndex = indexOf(initiatingEditArea);
+			TextEditArea newEditArea = new TextEditArea(new TextEditAreaModel_V002("", "", new ArrayList<>(), TextInit.initialChangeInfo()), getFont());
+			addEditArea(newEditArea, initiatingIndex+1);
+			editor.addEdit(new UndoableEditAreaAdded(this, initiatingEditArea, newEditArea, null));
+			editor.diagrammAktualisieren(newEditArea);
+			return newEditArea;
+		}
+	}
+
+	/** The edit area directly behind the passed one, null if it is the last one. */
+	public EditArea getEditAreaAfter(EditArea editArea) {
+		int followerIndex = indexOf(editArea) + 1;
+		return followerIndex < editAreas.size() ? editAreas.get(followerIndex) : null;
 	}
 
 	public void appendTextEditArea(TextEditArea area) {

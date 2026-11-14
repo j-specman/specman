@@ -667,6 +667,17 @@ public class SpecmanFT extends Specman {
     waitForEventsProcessed();
   }
 
+  /** Simulates the user hovering over the margin below the table, in the middle of its width, and clicking there. */
+  public void clickBelow(TableEditArea table) {
+    layoutComponents();
+    int x = table.getWidth() / 2;
+    int y = table.getHeight() - 1;
+    long now = System.currentTimeMillis();
+    table.dispatchEvent(new MouseEvent(table, MouseEvent.MOUSE_MOVED, now, 0, x, y, 0, false));
+    table.dispatchEvent(new MouseEvent(table, MouseEvent.MOUSE_CLICKED, now, MouseEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1));
+    waitForEventsProcessed();
+  }
+
   @Override public void openSettings() {}
   @Override public void openAliases() { openedAliasListPanel = new AliasListPanel(); }
 

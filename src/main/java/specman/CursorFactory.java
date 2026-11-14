@@ -38,11 +38,11 @@ public class CursorFactory {
   }
 
   public enum HotspotPlacement {
-    Center, Bottom, Right, BottomRight;
+    Center, Top, Bottom, Right, BottomRight;
 
     public Point toPoint(int iconWidth, int iconHeight) {
       int x = this == Right || this == BottomRight ? iconWidth - 1 : iconWidth / 2;
-      int y = this == Bottom || this == BottomRight ? iconHeight - 1 : iconHeight / 2;
+      int y = this == Top ? 0 : this == Bottom || this == BottomRight ? iconHeight - 1 : iconHeight / 2;
       return new Point(x, y);
     }
   }

@@ -16,6 +16,7 @@ import static specman.Aenderungsart.Geloescht;
 import static specman.CursorFactory.HotspotPlacement.Bottom;
 import static specman.CursorFactory.HotspotPlacement.BottomRight;
 import static specman.CursorFactory.HotspotPlacement.Right;
+import static specman.CursorFactory.HotspotPlacement.Top;
 import static specman.CursorFactory.createCursor;
 import static specman.view.AbstractSchrittView.LINIENBREITE;
 import static specman.Specman.editor;
@@ -28,10 +29,12 @@ public class TableEditAreaSelectionTracker implements MouseListener, MouseMotion
   public static final Cursor ADD_ROW_CURSOR = createCursor("add-row-cursor", Right);
   public static final Cursor REMOVE_ROW_CURSOR = createCursor("remove-row-cursor", Right);
   public static final Cursor REMOVE_TABLE_CURSOR = createCursor("remove-table-cursor", BottomRight);
+  public static final Cursor ADD_PARAGRAPH_CURSOR = createCursor("add-paragraph-cursor", Top);
 
   public enum Operation {
     AddColumn(ADD_COLUMN_CURSOR),
     AddRow(ADD_ROW_CURSOR),
+    AddParagraphBelow(ADD_PARAGRAPH_CURSOR),
     RemoveColumn(REMOVE_COLUMN_CURSOR),
     RemoveRow(REMOVE_ROW_CURSOR),
     RemoveTable(REMOVE_TABLE_CURSOR);
@@ -67,11 +70,13 @@ public class TableEditAreaSelectionTracker implements MouseListener, MouseMotion
         switch(selectionOperation) {
           case RemoveTable -> editArea.removeTableOrMarkAsDeletedUDBL();
           case AddRow -> editArea.addRowUDBL(selectionIndex);
+          case AddParagraphBelow -> editArea.enterParagraphBelowUDBL();
           case RemoveRow -> editArea.removeRowOrMarkAsDeletedUDBL(selectionIndex);
           case AddColumn -> editArea.addColumnUDBL(selectionIndex);
           case RemoveColumn -> editArea.removeColumnOrMarkAsDeletedUDBL(selectionIndex);
         }
         resetSelection();
+        editArea.repaint();
       }
     }
   }
@@ -176,6 +181,13 @@ public class TableEditAreaSelectionTracker implements MouseListener, MouseMotion
     if (selectionUpdate == null) {
       selectionUpdate = xToTableColumnSelection(mousePos);
     }
+    if (selectionUpdate == null) {
+      selectionUpdate = belowTableSelection(mousePos);
+    }
+    if (selectionUpdate == null) {
+      // Otherwise a click beside the last zone would still execute its operation
+      selectionOperation = null;
+    }
     if (!Objects.equals(selectionHighlight, selectionUpdate)) {
       selectionHighlight = selectionUpdate;
       setEditAreaCursor(selectionHighlight != null ? selectionOperation.toCursor() : null);
@@ -188,6 +200,15 @@ public class TableEditAreaSelectionTracker implements MouseListener, MouseMotion
     if (mousePos.y < tablePanel.getY() && mousePos.x < tablePanel.getX()) {
       selectionOperation = Operation.RemoveTable;
       return tablePanel.getBounds();
+    }
+    return null;
+  }
+
+  private Rectangle belowTableSelection(Point mousePos) {
+    int tableBottom = tablePanel.getY() + tablePanel.getHeight();
+    if (mousePos.y >= tableBottom && mousePos.x >= tablePanel.getX() && mousePos.x < tablePanel.getX() + tablePanel.getWidth()) {
+      selectionOperation = Operation.AddParagraphBelow;
+      return new Rectangle(tablePanel.getX(), tableBottom, tablePanel.getWidth(), editArea.getHeight() - tableBottom);
     }
     return null;
   }
