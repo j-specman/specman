@@ -19,7 +19,6 @@ import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.pdf.Shape;
 import specman.pdf.ShapeBitmapImage;
 import specman.pdf.ShapeImage;
-import specman.undo.UndoableEditAreaAdded;
 import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
 import specman.visitor.DiagramVisitor;
@@ -179,12 +178,7 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
       // Change back to unselected border before starting to record undoable operations
       setImageBorderByChangetypeUDBL();
     }
-    try (UndoRecording ur = editor.composeUndo()){
-      EditContainer editContainer = getParent();
-      TextEditArea editArea = editContainer.addTextEditArea(AbstractImageEditArea.this);
-      editor.addEdit(new UndoableEditAreaAdded(editContainer, this, editArea, null));
-      editor.diagrammAktualisieren(editArea);
-    }
+    getParent().addTextEditAreaUDBL(this);
   }
 
   /** Removes the area. In change mode, an area which existed before is marked as deleted instead. */

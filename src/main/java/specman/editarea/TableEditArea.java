@@ -47,6 +47,7 @@ import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.view.AbstractSchrittView.FORMLAYOUT_GAP;
 import static specman.view.AbstractSchrittView.ZEILENLAYOUT_INHALT_SICHTBAR;
 import static specman.Specman.editor;
+import static specman.editarea.document.WrappedDocument.VISIBLE_TEXT_START;
 
 /** The edit area itself is a surrounding panel which contains the actual table panel
  * with a little space in between to all sides. This space is for interactions to remove
@@ -618,6 +619,20 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
       }
     }
     throw new IllegalArgumentException("Cell " + currentCell + " is not part of this table");
+  }
+
+  /** Gives the user a place to continue typing below the table: the caret goes to the start of the directly
+   * following text, unless there is none or it is deleted. Then an empty text is added behind the table. */
+  public void enterParagraphBelowUDBL() {
+    EditArea follower = getParent().getEditAreaAfter(this);
+    if (follower != null && follower.isTextArea() && !follower.getChangeInfo().isDeleted()) {
+      TextEditArea followingText = follower.asTextArea();
+      followingText.setCaretPosition(VISIBLE_TEXT_START);
+      editor().focus(followingText);
+    }
+    else {
+      getParent().addTextEditAreaUDBL(this);
+    }
   }
 
   @Override public void setQuellStil(ChangeSet changeSet) { /* Not required for tables - source steps only contain an empty text area */ }
