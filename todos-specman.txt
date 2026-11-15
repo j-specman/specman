@@ -1,5 +1,6 @@
 Release notes Specman 1.4.2
-- ...
+- line color glitch in PDF export fixed
+- removal of empty text area by BACKSPACE
 
 Aus aktueller Anwendung
 - Hat man 5 Sekunden Autosave-Intervall eingestellt, dann wird es auffällig, dass ein abhängendes Leerzeichen wegbereinigt wird.
