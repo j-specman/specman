@@ -583,9 +583,11 @@ public class EditContainer extends JPanel {
 		try (UndoRecording ur = editor.composeUndo()) {
 			TextEditArea leadingTextArea = null;
 			TextEditArea trailingTextArea = null;
+			EditArea precedingArea = null;
 			int editAreaIndex = removeEditAreaComponent(editarea);
 			if (editAreaIndex > 0) {
-				leadingTextArea = editAreas.get(editAreaIndex-1).asTextArea();
+				precedingArea = editAreas.get(editAreaIndex-1);
+				leadingTextArea = precedingArea.asTextArea();
 				if (editAreas.size() > editAreaIndex) {
 					trailingTextArea = editAreas.get(editAreaIndex).asTextArea();
 					if (leadingTextArea != null && trailingTextArea != null) {
@@ -595,7 +597,7 @@ public class EditContainer extends JPanel {
 					}
 				}
 			}
-			editor.addEdit(new UndoableEditAreaRemoved(this, leadingTextArea, editarea, trailingTextArea));
+			editor.addEdit(new UndoableEditAreaRemoved(this, precedingArea, editarea, trailingTextArea));
 		}
 		updateBounds();
 	}
@@ -777,6 +779,9 @@ public class EditContainer extends JPanel {
 	}
 
 	public EditArea tryDissolveEditAreaUDBL(TextEditArea initiatingTextEditArea) {
+		if (isRemovableEmptyText(initiatingTextEditArea)) {
+			return removeEmptyTextUDBL(initiatingTextEditArea);
+		}
 		// The text is the leading one in a list item
 		if (getParent() instanceof AbstractListItemEditArea) {
 			// Dissolve the list item by merging its content into the upper edit container
@@ -798,6 +803,26 @@ public class EditContainer extends JPanel {
 			}
 		}
     return null;
+	}
+
+	/** The first text of a container is mandatory, any later text without content only exists as a place to type. */
+	private boolean isRemovableEmptyText(TextEditArea text) {
+		return indexOf(text) > 0 && text.getPlainText().isEmpty();
+	}
+
+	/** Removes the empty text and moves the caret to the very end of the area above it, which is what the user
+	 * would expect from BACKSPACE: for a table this is its last cell. @return the area which got the focus. */
+	private EditArea removeEmptyTextUDBL(TextEditArea emptyText) {
+		EditArea precedingArea = editAreas.get(indexOf(emptyText) - 1);
+		EditArea focusTarget = precedingArea.getInnermostLastArea();
+		if (focusTarget.isTextArea()) {
+			TextEditArea targetText = focusTarget.asTextArea();
+			targetText.setCaretPosition(targetText.getWrappedDocument().end().unwrap());
+		}
+		editor().focus(focusTarget);
+		removeEditAreaUDBL(emptyText);
+		editor().diagrammAktualisieren(focusTarget);
+		return focusTarget;
 	}
 
 	private TextEditArea mergeTextIntoListItem(AbstractListItemEditArea target, TextEditArea initiatingTextEditArea) {

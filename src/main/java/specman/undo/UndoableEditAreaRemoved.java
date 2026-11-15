@@ -9,18 +9,19 @@ import static specman.Specman.editor;
 public class UndoableEditAreaRemoved extends AbstractUndoableInteraction {
   private final EditContainer editContainer;
   private final EditArea editArea;
-  private final TextEditArea leadingTextArea, trailingTextArea;
+  private final EditArea precedingArea;
+  private final TextEditArea trailingTextArea;
 
-  public UndoableEditAreaRemoved(EditContainer editContainer, TextEditArea leadingTextArea, EditArea editArea, TextEditArea trailingTextArea) {
+  public UndoableEditAreaRemoved(EditContainer editContainer, EditArea precedingArea, EditArea editArea, TextEditArea trailingTextArea) {
     this.editContainer = editContainer;
     this.editArea = editArea;
-    this.leadingTextArea = leadingTextArea;
+    this.precedingArea = precedingArea;
     this.trailingTextArea = trailingTextArea;
   }
 
   @Override
   protected void undoEdit() throws EditException {
-    editContainer.addEditAreaByUndoRedo(leadingTextArea, editArea, trailingTextArea);
+    editContainer.addEditAreaByUndoRedo(precedingArea, editArea, trailingTextArea);
     editor().diagrammAktualisieren(null);
   }
 

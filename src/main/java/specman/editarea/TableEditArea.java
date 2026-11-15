@@ -441,6 +441,17 @@ public class TableEditArea extends JPanel implements EditArea<TableEditAreaModel
     cells.get(0).get(0).requestFocus();
   }
 
+  /** The cell in the last column of the last row. */
+  public EditContainer getLastCell() {
+    List<EditContainer> lastRow = cells.get(cells.size() - 1);
+    return lastRow.get(lastRow.size() - 1);
+  }
+
+  @Override
+  public EditArea getInnermostLastArea() {
+    return getLastCell().getLastEditArea().getInnermostLastArea();
+  }
+
   public List<EditContainer> addRowUDBL(int rowIndex) {
     EditorI editor = editor();
     addEmptyRow(rowIndex);

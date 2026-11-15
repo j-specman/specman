@@ -78,6 +78,9 @@ public interface EditArea<MODEL extends AbstractEditAreaModel_V002> extends Inte
 
   default AbstractListItemEditArea asListItemArea() { return null; };
 
+  /** The area the caret would reach when moving to the very end of this area: this one, unless it contains other areas. */
+  default EditArea getInnermostLastArea() { return this; }
+
   /** Reports the edit area to the visitor. Containers (table, list item) then pass the visitor on to the areas inside them. */
   void accept(DiagramVisitor visitor) throws StopTraversalException;
 }
