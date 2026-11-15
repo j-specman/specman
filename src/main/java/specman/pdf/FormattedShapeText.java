@@ -262,7 +262,10 @@ public class FormattedShapeText extends AbstractShapeText {
     spans.add(new DecorationSpan(pdfX, pdfX + charWidth, decorY, thickness, color));
   }
 
+  /** Color and line width are restored afterwards: the canvas is shared, and shapes stroking
+   * later (e.g. rounded borders) rely on the stroke state they find. */
   private void drawDecorations(PdfCanvas canvas, List<DecorationSpan> spans) {
+    canvas.saveState();
     for (DecorationSpan span : spans) {
       canvas.setStrokeColor(new com.itextpdf.kernel.colors.DeviceRgb(
         span.color.getRed(), span.color.getGreen(), span.color.getBlue()));
@@ -271,6 +274,7 @@ public class FormattedShapeText extends AbstractShapeText {
       canvas.lineTo(span.xEnd, span.y);
       canvas.stroke();
     }
+    canvas.restoreState();
   }
 
   @Override
