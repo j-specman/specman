@@ -214,6 +214,8 @@ abstract public class AbstractListItemEditArea extends JPanel implements EditAre
 
   public EditArea getLastEditArea() { return content.getLastEditArea(); }
 
+  @Override public EditArea getInnermostLastArea() { return getLastEditArea().getInnermostLastArea(); }
+
   @Override public synchronized void addFocusListener(FocusListener l) { content.addEditAreasFocusListener(l); }
   @Override public synchronized void addComponentListener(ComponentListener l) { content.addEditComponentListener(l); }
   @Override public void requestFocus() { content.requestFocus(); }
