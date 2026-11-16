@@ -25,6 +25,11 @@ public class ClassBoxLayouter {
     }
 
     public BoxLayout layout(ClassModel_V001 model) {
+        return layout(model, CLASS_FILL);
+    }
+
+    /** Lays out the class with the given fill color for its box. */
+    public BoxLayout layout(ClassModel_V001 model, String fill) {
         String stereotype = model.stereotype == null ? null : "<<" + model.stereotype + ">>";
         String taggedValues = taggedValuesText(model);
         List<String> attributes = attributeTexts(model);
@@ -41,7 +46,7 @@ public class ClassBoxLayouter {
         y += PADDING_Y;
         y = addAttributes(elements, attributes, contentWidth, y);
         y += PADDING_Y;
-        elements.add(0, new SceneRectangle(0, 0, width, y, CLASS_FILL, STROKE));
+        elements.add(0, new SceneRectangle(0, 0, width, y, fill, STROKE));
         return new BoxLayout(width, y, elements);
     }
 
@@ -129,7 +134,8 @@ public class ClassBoxLayouter {
         }
         double lineY = y;
         for (String line : wrapper.wrap(text, contentWidth, contentWidth, bold)) {
-            elements.add(new SceneText(boxWidth / 2, lineY + measurer.ascent(), line, bold, TextAnchor.MIDDLE));
+            elements.add(new SceneText(boxWidth / 2, lineY + measurer.ascent(), line, bold, TextAnchor.MIDDLE,
+                measurer.width(line, bold)));
             lineY += measurer.lineHeight();
         }
         return lineY;
@@ -145,7 +151,8 @@ public class ClassBoxLayouter {
             boolean first = true;
             for (String line : wrapper.wrap(attribute, contentWidth, contentWidth - CONTINUATION_INDENT, false)) {
                 double x = first ? PADDING_X : PADDING_X + CONTINUATION_INDENT;
-                elements.add(new SceneText(x, lineY + measurer.ascent(), line, false, TextAnchor.START));
+                elements.add(new SceneText(x, lineY + measurer.ascent(), line, false, TextAnchor.START,
+                    measurer.width(line, false)));
                 lineY += measurer.lineHeight();
                 first = false;
             }

@@ -1,10 +1,8 @@
 package classman.render;
 
 import classman.model.v001.io.ClassDiagramParseException;
-import classman.model.v001.io.ClassDiagramParser_V001;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static classman.render.DiagramStyle.PADDING_X;
@@ -12,44 +10,15 @@ import static classman.render.DiagramStyle.PADDING_Y;
 import static classman.render.DiagramStyle.STACK_GAP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static classman.render.SceneTestHelper.all;
+import static classman.render.SceneTestHelper.layout;
+import static classman.render.SceneTestHelper.texts;
+import static classman.render.SceneTestHelper.textNamed;
 
 class ClassDiagramLayouterTest {
 
   private static final double LINE = 20;
   private static final double CHAR = 10;
-
-  private final ClassDiagramLayouter layouter = new ClassDiagramLayouter(new FixedTextMeasurer());
-
-  private Scene layout(String elements) throws ClassDiagramParseException {
-    return layouter.layout(new ClassDiagramParser_V001().parse("classdiagram {\n" + elements + "\n}"));
-  }
-
-  private static <T extends AbstractSceneElement> List<T> all(Scene scene, Class<T> type) {
-    List<T> result = new ArrayList<>();
-    for (AbstractSceneElement element : scene.elements) {
-      if (type.isInstance(element)) {
-        result.add(type.cast(element));
-      }
-    }
-    return result;
-  }
-
-  private static List<String> texts(Scene scene) {
-    List<String> result = new ArrayList<>();
-    for (SceneText text : all(scene, SceneText.class)) {
-      result.add(text.text);
-    }
-    return result;
-  }
-
-  private static SceneText textNamed(Scene scene, String text) {
-    for (SceneText candidate : all(scene, SceneText.class)) {
-      if (candidate.text.equals(text)) {
-        return candidate;
-      }
-    }
-    throw new AssertionError("No text " + text + " in " + texts(scene));
-  }
 
   // ---- classes ----
 

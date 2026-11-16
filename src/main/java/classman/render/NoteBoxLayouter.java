@@ -38,7 +38,8 @@ public class NoteBoxLayouter {
             new double[]{0, NOTE_FOLD, NOTE_FOLD}, null, STROKE));
         double lineY = PADDING_Y;
         for (String line : lines) {
-            elements.add(new SceneText(PADDING_X, lineY + measurer.ascent(), line, false, TextAnchor.START));
+            elements.add(new SceneText(PADDING_X, lineY + measurer.ascent(), line, false, TextAnchor.START,
+                measurer.width(line, false)));
             lineY += measurer.lineHeight();
         }
         return new BoxLayout(width, height, elements);

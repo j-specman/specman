@@ -1,6 +1,7 @@
 package classman.render;
 
 import classman.model.v001.AbstractDiagramElementModel_V001;
+import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.NoteModel_V001;
@@ -8,81 +9,121 @@ import classman.model.v001.PositionModel_V001;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static classman.render.DiagramStyle.STACK_GAP;
 
 /**
  * Turns a class diagram model into a scene. Classes and notes with a position stand there. The others are
  * stacked from top to bottom in source order, centered on one axis, so that relations between neighbors in the
- * stack are straight vertical lines.
+ * stack are straight vertical lines. The relations are drawn above the boxes.
  */
 public class ClassDiagramLayouter {
     private final ClassBoxLayouter classLayouter;
     private final NoteBoxLayouter noteLayouter;
+    private final NoteLinkLayouter noteLinkLayouter = new NoteLinkLayouter();
+    private final RelationLayouter relationLayouter;
 
     public ClassDiagramLayouter(TextMeasurer measurer) {
         this.classLayouter = new ClassBoxLayouter(measurer);
         this.noteLayouter = new NoteBoxLayouter(measurer);
+        this.relationLayouter = new RelationLayouter(measurer, classLayouter);
     }
 
+    /** @throws IllegalArgumentException if a relation refers to a class which isn't in the diagram */
     public Scene layout(ClassDiagramModel_V001 model) {
-        List<BoxLayout> boxes = new ArrayList<>();
-        List<PositionModel_V001> positions = new ArrayList<>();
-        for (AbstractDiagramElementModel_V001 element : model.elements) {
-            if (element instanceof ClassModel_V001 classModel) {
-                boxes.add(classLayouter.layout(classModel));
-                positions.add(classModel.position);
-            } else if (element instanceof NoteModel_V001 note) {
-                boxes.add(noteLayouter.layout(note));
-                positions.add(note.position);
-            }
-        }
-        return placeBoxes(boxes, positions);
-    }
+        Map<AbstractDiagramElementModel_V001, BoxLayout> boxes = layoutBoxes(model);
+        Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas = placeBoxes(boxes);
 
-    private Scene placeBoxes(List<BoxLayout> boxes, List<PositionModel_V001> positions) {
-        double axis = stackWidth(boxes, positions) / 2;
-        double stackY = 0;
         List<AbstractSceneElement> elements = new ArrayList<>();
         Rectangle2D.Double covered = null;
-        for (int i = 0; i < boxes.size(); i++) {
-            BoxLayout box = boxes.get(i);
-            double x;
-            double y;
-            if (positions.get(i) == null) {
-                x = axis - box.width / 2;
-                y = stackY;
-                stackY += box.height + STACK_GAP;
-            } else {
-                x = positions.get(i).x;
-                y = positions.get(i).y;
-            }
-            elements.addAll(box.placedAt(x, y));
-            covered = union(covered, new Rectangle2D.Double(x, y, box.width, box.height));
+        for (Map.Entry<AbstractDiagramElementModel_V001, BoxLayout> box : boxes.entrySet()) {
+            Rectangle2D.Double area = areas.get(box.getKey());
+            elements.addAll(box.getValue().placedAt(area.x, area.y));
+            covered = BoxGeometry.union(covered, area);
         }
+        Map<String, Rectangle2D.Double> classAreas = classAreas(areas);
+        for (AbstractRelationModel_V001 relation : model.relations()) {
+            RelationLayout relationLayout = relationLayouter.layout(relation, classAreas);
+            elements.addAll(relationLayout.elements);
+            covered = BoxGeometry.union(covered, relationLayout.bounds);
+        }
+        elements.addAll(noteLinks(boxes.keySet(), areas, classAreas));
         if (covered == null) {
             return new Scene(elements, 0, 0, 0, 0);
         }
         return new Scene(elements, covered.x, covered.y, covered.width, covered.height);
     }
 
-    private double stackWidth(List<BoxLayout> boxes, List<PositionModel_V001> positions) {
+    private Map<AbstractDiagramElementModel_V001, BoxLayout> layoutBoxes(ClassDiagramModel_V001 model) {
+        Map<AbstractDiagramElementModel_V001, BoxLayout> boxes = new LinkedHashMap<>();
+        for (AbstractDiagramElementModel_V001 element : model.elements) {
+            if (element instanceof ClassModel_V001 classModel) {
+                boxes.put(classModel, classLayouter.layout(classModel));
+            } else if (element instanceof NoteModel_V001 note) {
+                boxes.put(note, noteLayouter.layout(note));
+            }
+        }
+        return boxes;
+    }
+
+    /** Boxes with a position stand there, the others are stacked. */
+    private Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> placeBoxes(
+            Map<AbstractDiagramElementModel_V001, BoxLayout> boxes) {
+        double axis = stackWidth(boxes) / 2;
+        double stackY = 0;
+        Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas = new LinkedHashMap<>();
+        for (Map.Entry<AbstractDiagramElementModel_V001, BoxLayout> box : boxes.entrySet()) {
+            BoxLayout layout = box.getValue();
+            PositionModel_V001 position = positionOf(box.getKey());
+            if (position == null) {
+                areas.put(box.getKey(), new Rectangle2D.Double(axis - layout.width / 2, stackY, layout.width, layout.height));
+                stackY += layout.height + STACK_GAP;
+            } else {
+                areas.put(box.getKey(), new Rectangle2D.Double(position.x, position.y, layout.width, layout.height));
+            }
+        }
+        return areas;
+    }
+
+    private PositionModel_V001 positionOf(AbstractDiagramElementModel_V001 element) {
+        if (element instanceof ClassModel_V001 classModel) {
+            return classModel.position;
+        }
+        return ((NoteModel_V001) element).position;
+    }
+
+    private double stackWidth(Map<AbstractDiagramElementModel_V001, BoxLayout> boxes) {
         double widest = 0;
-        for (int i = 0; i < boxes.size(); i++) {
-            if (positions.get(i) == null) {
-                widest = Math.max(widest, boxes.get(i).width);
+        for (Map.Entry<AbstractDiagramElementModel_V001, BoxLayout> box : boxes.entrySet()) {
+            if (positionOf(box.getKey()) == null) {
+                widest = Math.max(widest, box.getValue().width);
             }
         }
         return widest;
     }
 
-    private Rectangle2D.Double union(Rectangle2D.Double covered, Rectangle2D.Double box) {
-        if (covered == null) {
-            return box;
+    /** The dashed lines from the notes to the classes they are attached to. */
+    private List<AbstractSceneElement> noteLinks(Iterable<AbstractDiagramElementModel_V001> elements,
+            Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas, Map<String, Rectangle2D.Double> classAreas) {
+        List<AbstractSceneElement> links = new ArrayList<>();
+        for (AbstractDiagramElementModel_V001 element : elements) {
+            if (element instanceof NoteModel_V001 note && note.attachedTo != null) {
+                links.add(noteLinkLayouter.layout(areas.get(note), note.attachedTo, classAreas));
+            }
         }
-        Rectangle2D.Double result = new Rectangle2D.Double();
-        Rectangle2D.union(covered, box, result);
-        return result;
+        return links;
+    }
+
+    private Map<String, Rectangle2D.Double> classAreas(Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas) {
+        Map<String, Rectangle2D.Double> classAreas = new LinkedHashMap<>();
+        for (Map.Entry<AbstractDiagramElementModel_V001, Rectangle2D.Double> area : areas.entrySet()) {
+            if (area.getKey() instanceof ClassModel_V001 classModel) {
+                classAreas.put(classModel.name, area.getValue());
+            }
+        }
+        return classAreas;
     }
 }
