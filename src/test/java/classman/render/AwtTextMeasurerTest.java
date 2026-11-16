@@ -37,4 +37,11 @@ class AwtTextMeasurerTest {
   void measuresAreStable() {
     assertEquals(measurer.width("Versionsnummer", false), measurer.width("Versionsnummer", false));
   }
+
+  /** The shipped font is found on the class path, and the SVG names it by the family which the renderers look up. */
+  @Test
+  void shippedFontLoaded() {
+    assertEquals(DiagramStyle.FONT_FAMILY, DiagramFonts.plain(11).getFamily());
+    assertEquals(DiagramStyle.FONT_FAMILY, DiagramFonts.bold(11).getFamily());
+  }
 }

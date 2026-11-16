@@ -3,7 +3,7 @@ package classman.render;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static classman.render.DiagramStyle.FONT_FAMILY;
+import static classman.render.DiagramStyle.SVG_FONT_FAMILIES;
 import static classman.render.DiagramStyle.FONT_SIZE;
 import static classman.render.DiagramStyle.STROKE;
 import static classman.render.DiagramStyle.SVG_MARGIN;
@@ -72,7 +72,7 @@ public class SceneSvgWriter {
 
     private String text(SceneText text) {
         return "<text x=\"" + number(text.x) + "\" y=\"" + number(text.y)
-            + "\" text-anchor=\"" + anchor(text.anchor) + "\" font-family=\"" + FONT_FAMILY
+            + "\" text-anchor=\"" + anchor(text.anchor) + "\" font-family=\"" + SVG_FONT_FAMILIES
             + "\" font-size=\"" + FONT_SIZE + "\"" + (text.bold ? " font-weight=\"bold\"" : "") + ">"
             + escaped(text.text) + "</text>";
     }

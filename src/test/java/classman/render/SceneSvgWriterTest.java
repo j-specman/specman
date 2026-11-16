@@ -52,7 +52,7 @@ class SceneSvgWriterTest {
     String svg = writer.write(sceneOf(new SceneText(5, 6, "a<b & \"c\"", true, TextAnchor.MIDDLE, 50)));
     assertTrue(svg.contains("text-anchor=\"middle\""), svg);
     assertTrue(svg.contains("font-weight=\"bold\""), svg);
-    assertTrue(svg.contains("font-family=\"" + DiagramStyle.FONT_FAMILY + "\""), svg);
+    assertTrue(svg.contains("font-family=\"" + DiagramStyle.SVG_FONT_FAMILIES + "\""), svg);
     assertTrue(svg.contains(">a&lt;b &amp; &quot;c&quot;</text>"), svg);
   }
 
