@@ -11,6 +11,8 @@ public final class DiagramStyle {
     public static final double MIN_BOX_WIDTH = 40;
     /** The size of the folded corner of a note. */
     public static final double NOTE_FOLD = 10;
+    /** The space between the text of a note and its right border: the fold plus the usual padding, so the text keeps clear of the fold. */
+    public static final double NOTE_RIGHT_PADDING = 16;
     /** A note without width wraps its text when it would be wider than this. */
     public static final double NOTE_MAX_AUTO_WIDTH = 240;
 
@@ -22,10 +24,12 @@ public final class DiagramStyle {
     public static final double TRIANGLE_LENGTH = 14;
     public static final double TRIANGLE_HALF_WIDTH = 7;
     /** The distances of the texts of a relation from its line. */
-    public static final double MULTIPLICITY_SIDE_GAP = 6;
+    public static final double MULTIPLICITY_SIDE_GAP = 8;
     public static final double MULTIPLICITY_ALONG_GAP = 4;
     public static final double MULTIPLICITY_BORDER_GAP = 2;
     public static final double LABEL_GAP = 6;
+    /** The space between the text of an attribute and the end of a note line which is attached to it. */
+    public static final double ATTRIBUTE_ATTACH_GAP = 2;
     /** The distance between the line of a relation and its association class. */
     public static final double ASSOC_CLASS_GAP = 30;
     /** How far the loop of a relation from a class to itself reaches out of the class. */

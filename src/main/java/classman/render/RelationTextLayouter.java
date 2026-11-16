@@ -39,7 +39,8 @@ public class RelationTextLayouter {
 
     /**
      * Beside a vertical line the text stands right of the line, at the border. Beside a horizontal line it stands
-     * above the line, next to the border.
+     * above the line, next to the border. A slanted line is not crossed by the text: the text keeps its gap to the
+     * line at the place where the line is closest to it.
      * @param border where the line touches the box
      * @param inside the next point on the line, away from the box
      */
@@ -52,13 +53,26 @@ public class RelationTextLayouter {
         double dy = inside.y - border.y;
         if (Math.abs(dx) > Math.abs(dy)) {
             double x = dx > 0 ? border.x + MULTIPLICITY_ALONG_GAP : border.x - MULTIPLICITY_ALONG_GAP;
-            texts.add(new SceneText(x, border.y - MULTIPLICITY_SIDE_GAP, multiplicity, false,
+            double farEnd = dx > 0 ? x + width : x - width;
+            double lineTop = Math.min(border.y, Math.min(yOnLine(border, dx, dy, x), yOnLine(border, dx, dy, farEnd)));
+            texts.add(new SceneText(x, lineTop - MULTIPLICITY_SIDE_GAP, multiplicity, false,
                 dx > 0 ? TextAnchor.START : TextAnchor.END, width));
         } else {
             double baseline = dy > 0 ? border.y + measurer.ascent() : border.y - MULTIPLICITY_BORDER_GAP;
-            texts.add(new SceneText(border.x + MULTIPLICITY_SIDE_GAP, baseline, multiplicity, false,
+            double top = baseline - measurer.ascent();
+            double lineRight = Math.max(border.x,
+                Math.max(xOnLine(border, dx, dy, top), xOnLine(border, dx, dy, top + measurer.lineHeight())));
+            texts.add(new SceneText(lineRight + MULTIPLICITY_SIDE_GAP, baseline, multiplicity, false,
                 TextAnchor.START, width));
         }
+    }
+
+    private static double yOnLine(Point2D.Double border, double dx, double dy, double x) {
+        return border.y + (x - border.x) * dy / dx;
+    }
+
+    private static double xOnLine(Point2D.Double border, double dx, double dy, double y) {
+        return border.x + (y - border.y) * dx / dy;
     }
 
     // ---- label ----

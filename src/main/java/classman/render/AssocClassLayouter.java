@@ -26,7 +26,7 @@ public class AssocClassLayouter {
         int longest = PathGeometry.longestSegment(relationPath);
         Point2D.Double from = relationPath.get(longest);
         Point2D.Double to = relationPath.get(longest + 1);
-        Point2D.Double middle = PathGeometry.middle(from, to);
+        Point2D.Double middle = PathGeometry.attachPoint(relationPath);
 
         Rectangle2D.Double area;
         Point2D.Double connectorEnd;

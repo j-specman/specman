@@ -154,7 +154,9 @@ public class ClassDiagramParser_V001 {
         List<WordOrStringContext> nameAndType = attribute.wordOrString();
         String name = text(nameAndType.get(0));
         String type = attribute.COLON() == null ? null : text(nameAndType.get(1));
-        return new AttributeModel_V001(visibility, name, type, infos(attribute.infos()));
+        AttributeModel_V001 model = new AttributeModel_V001(visibility, name, type, infos(attribute.infos()));
+        model.id = id(attribute.ELEMENT_ID());
+        return model;
     }
 
     private List<String> infos(InfosContext infos) {
@@ -241,16 +243,25 @@ public class ClassDiagramParser_V001 {
 
     private NoteModel_V001 buildNote(NoteContext ctx) {
         NoteModel_V001 model = new NoteModel_V001(lineBreaks(unquote(ctx.BACKTICK_STRING().getText())));
-        model.id = id(ctx.ELEMENT_ID());
+        model.id = id(ctx.noteId);
         model.position = position(ctx.position());
         model.width = width(ctx.widthSpec());
-        model.attachedTo = ctx.name() == null ? null : text(ctx.name());
+        model.attachedToId = id(ctx.target);
+        if (ctx.noteRoute() != null) {
+            for (WaypointContext waypoint : ctx.noteRoute().waypoint()) {
+                model.attachWaypoints.add(position(waypoint.NUMBER(0), waypoint.NUMBER(1)));
+            }
+        }
         return model;
     }
 
     // ---- small parts ----
 
     private String id(TerminalNode elementId) {
+        return elementId == null ? null : id(elementId.getSymbol());
+    }
+
+    private String id(Token elementId) {
         return elementId == null ? null : elementId.getText().substring(1, elementId.getText().length() - 1);
     }
 

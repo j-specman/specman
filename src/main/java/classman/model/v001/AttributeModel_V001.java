@@ -5,6 +5,8 @@ import java.util.List;
 
 /** Model of one line in the attribute compartment of a class, or of the marker for hidden attributes. */
 public class AttributeModel_V001 {
+    /** Null if the source gives none. Notes need it to attach to the attribute. */
+    public String id;
     /** Null if the source gives none. */
     public final Visibility_V001 visibility;
     /** Null for the marker of hidden attributes. */

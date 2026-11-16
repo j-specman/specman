@@ -1,5 +1,7 @@
 package classman.render;
 
+import java.awt.geom.Rectangle2D;
+
 /** A line through several points. */
 public class ScenePolyline extends AbstractSceneElement {
     public final double[] xs;
@@ -10,6 +12,21 @@ public class ScenePolyline extends AbstractSceneElement {
         this.xs = xs.clone();
         this.ys = ys.clone();
         this.dashed = dashed;
+    }
+
+    /** The smallest rectangle around all points. */
+    public Rectangle2D.Double bounds() {
+        double minX = xs[0];
+        double maxX = xs[0];
+        double minY = ys[0];
+        double maxY = ys[0];
+        for (int i = 1; i < xs.length; i++) {
+            minX = Math.min(minX, xs[i]);
+            maxX = Math.max(maxX, xs[i]);
+            minY = Math.min(minY, ys[i]);
+            maxY = Math.max(maxY, ys[i]);
+        }
+        return new Rectangle2D.Double(minX, minY, maxX - minX, maxY - minY);
     }
 
     @Override

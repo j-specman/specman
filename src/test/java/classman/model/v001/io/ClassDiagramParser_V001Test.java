@@ -196,16 +196,35 @@ class ClassDiagramParser_V001Test {
     assertEquals("since", r.assocClass.attributes.get(0).name);
   }
 
-  /** A note with id, position, width, text with a line break and the class it is attached to. */
+  /** A note with id, position, width, text with a line break and the ID of the element it is attached to. */
   @Test
   void noteParts() throws ClassDiagramParseException {
-    NoteModel_V001 note = parse("note (aabbccdd) at(1, 2) width=90 `one\\ntwo` attached A").notes().get(0);
+    NoteModel_V001 note = parse("note (aabbccdd) at(1, 2) width=90 `one\\ntwo` attach(11223344)").notes().get(0);
     assertEquals("aabbccdd", note.id);
     assertEquals(1, note.position.x);
     assertEquals(90, note.width);
     assertEquals("one\ntwo", note.text);
-    assertEquals("A", note.attachedTo);
-    assertNull(parse("note `free`").notes().get(0).attachedTo);
+    assertEquals("11223344", note.attachedToId);
+    assertNull(parse("note `free`").notes().get(0).attachedToId);
+  }
+
+  /** The dashed line of a note can lead over waypoints. */
+  @Test
+  void noteRoute() throws ClassDiagramParseException {
+    NoteModel_V001 note = parse("note `n` attach(11223344) route (10, 20) (30, -40)").notes().get(0);
+    assertEquals(2, note.attachWaypoints.size());
+    assertEquals(10, note.attachWaypoints.get(0).x);
+    assertEquals(-40, note.attachWaypoints.get(1).y);
+    assertTrue(parse("note `n` attach(11223344)").notes().get(0).attachWaypoints.isEmpty());
+  }
+
+  /** An attribute can have an ID after its name, so that notes can be attached to it. */
+  @Test
+  void attributeId() throws ClassDiagramParseException {
+    ClassModel_V001 classModel = parse("class A {\n  -name (0a1b2c3d) : String [x]\n  other\n}").classes().get(0);
+    assertEquals("0a1b2c3d", classModel.attributes.get(0).id);
+    assertEquals("String", classModel.attributes.get(0).type);
+    assertNull(classModel.attributes.get(1).id);
   }
 
   /** Classes, relations and notes stay in the order of the source. */

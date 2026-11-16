@@ -8,7 +8,7 @@ classdiagram {
         #`List<String>` : `J/N`
         ...
     }
-    class Über { Name }
+    class Über { Name (12ab34cd) }
     class Leer { }
     class Hello
     class Tagged {A=1, B=2} {
@@ -22,5 +22,6 @@ classdiagram {
     association Hello -- Leer
     extends Über -> Hello
     implements `Hilfe Eintrag` -> Leer `implements something`
-    note `just a note`
+    note `just a note` attach(12ab34cd)
+    note at(0, 0) `routed` attach(12ab34cd) route (10, 20) (30, 40)
 }

@@ -150,21 +150,24 @@ class ClassDiagramLayouterTest {
   /** A note with a given width wraps its text, and its outline has a folded corner. */
   @Test
   void noteGivenWidth() throws ClassDiagramParseException {
-    Scene scene = layout("note at(0, 0) width=100 `aa bb cc dd`");
+    Scene scene = layout("note at(0, 0) width=120 `aa bb cc dd`");
     assertEquals(List.of("aa bb cc", "dd"), texts(scene));
     ScenePolygon outline = all(scene, ScenePolygon.class).get(0);
     assertEquals(DiagramStyle.NOTE_FILL, outline.fill);
-    assertEquals(100, outline.xs[2]);
+    assertEquals(120, outline.xs[2]);
     assertEquals(DiagramStyle.NOTE_FOLD, outline.ys[2]);
     assertEquals(2 * PADDING_Y + 2 * LINE, outline.ys[3]);
   }
 
-  /** A note without width is as wide as its longest line. */
+  /** A note without width is as wide as its longest line, and its text keeps clear of the folded corner. */
   @Test
   void noteWidthFromLongestLine() throws ClassDiagramParseException {
     Scene scene = layout("note at(0, 0) `abc\\nabcdefgh`");
     assertEquals(List.of("abc", "abcdefgh"), texts(scene));
-    assertEquals(8 * CHAR + 2 * PADDING_X, all(scene, ScenePolygon.class).get(0).xs[2]);
+    double width = all(scene, ScenePolygon.class).get(0).xs[2];
+    assertEquals(8 * CHAR + PADDING_X + DiagramStyle.NOTE_RIGHT_PADDING, width);
+    SceneText longest = textNamed(scene, "abcdefgh");
+    assertTrue(longest.left() + longest.width <= width - DiagramStyle.NOTE_FOLD);
   }
 
   /** A note without width wraps its text when it would be wider than the maximum. */

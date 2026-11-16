@@ -32,22 +32,38 @@ class RelationTextTest {
   @Test
   void multiplicityBelowBorderRightOfLine() throws ClassDiagramParseException {
     Scene scene = layout(STACKED + "association A 1 -> * B");
-    assertText(textNamed(scene, "1"), 26, 71, TextAnchor.START);
+    assertText(textNamed(scene, "1"), 28, 71, TextAnchor.START);
   }
 
   /** At a line coming up to a box, the multiplicity stands right of the line, just above the border. */
   @Test
   void multiplicityAboveBorderRightOfLine() throws ClassDiagramParseException {
     Scene scene = layout(STACKED + "association A 1 -> * B");
-    assertText(textNamed(scene, "*"), 26, 94, TextAnchor.START);
+    assertText(textNamed(scene, "*"), 28, 94, TextAnchor.START);
   }
 
   /** At a horizontal line the multiplicities stand above it, next to the borders. */
   @Test
   void multiplicitiesAboveHorizontalLine() throws ClassDiagramParseException {
     Scene scene = layout(SIDE_BY_SIDE + "association A 0..1 -> 1..* B");
-    assertText(textNamed(scene, "0..1"), 44, 22, TextAnchor.START);
-    assertText(textNamed(scene, "1..*"), 296, 22, TextAnchor.END);
+    assertText(textNamed(scene, "0..1"), 44, 20, TextAnchor.START);
+    assertText(textNamed(scene, "1..*"), 296, 20, TextAnchor.END);
+  }
+
+  /** Beside a line which runs down to the right, the text stands right of the line's lowest point under it. */
+  @Test
+  void multiplicityClearsSlantedDownLine() throws ClassDiagramParseException {
+    Scene scene = layout("class A at(0, 0)\nclass B at(100, 200)\nassociation A 1 -> * B");
+    assertText(textNamed(scene, "1"), 52, 71, TextAnchor.START);
+  }
+
+  /** Above a line which rises to the right, the text stands above the line's highest point under it. */
+  @Test
+  void multiplicityClearsRisingLine() throws ClassDiagramParseException {
+    Scene scene = layout("class A at(0, 0)\nclass B at(300, -100)\nassociation A 0..1 -> * B");
+    SceneText text = textNamed(scene, "0..1");
+    assertEquals(44, text.x, 1e-9);
+    assertEquals(-1.33, text.y, 0.01);
   }
 
   /** A multiplicity which the source leaves out isn't drawn. */

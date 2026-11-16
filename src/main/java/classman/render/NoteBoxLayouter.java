@@ -9,6 +9,7 @@ import static classman.render.DiagramStyle.MIN_BOX_WIDTH;
 import static classman.render.DiagramStyle.NOTE_FILL;
 import static classman.render.DiagramStyle.NOTE_FOLD;
 import static classman.render.DiagramStyle.NOTE_MAX_AUTO_WIDTH;
+import static classman.render.DiagramStyle.NOTE_RIGHT_PADDING;
 import static classman.render.DiagramStyle.PADDING_X;
 import static classman.render.DiagramStyle.PADDING_Y;
 import static classman.render.DiagramStyle.STROKE;
@@ -16,6 +17,8 @@ import static classman.render.DiagramStyle.STROKE;
 /** Lays out one note: a box with a folded corner and left aligned, wrapped text. */
 public class NoteBoxLayouter {
     private final TextMeasurer measurer;
+    private static final double HORIZONTAL_PADDING = PADDING_X + NOTE_RIGHT_PADDING;
+
     private final TextWrapper wrapper;
 
     public NoteBoxLayouter(TextMeasurer measurer) {
@@ -25,7 +28,7 @@ public class NoteBoxLayouter {
 
     public BoxLayout layout(NoteModel_V001 model) {
         double contentWidth = contentWidth(model);
-        double width = contentWidth + 2 * PADDING_X;
+        double width = contentWidth + HORIZONTAL_PADDING;
         List<String> lines = wrapper.wrap(model.text, contentWidth, contentWidth, false);
         double height = 2 * PADDING_Y + lines.size() * measurer.lineHeight();
 
@@ -48,9 +51,9 @@ public class NoteBoxLayouter {
     private double contentWidth(NoteModel_V001 model) {
         double longestWord = wrapper.longestWord(model.text, false);
         if (model.width != null) {
-            return Math.max(model.width - 2 * PADDING_X, longestWord);
+            return Math.max(model.width - HORIZONTAL_PADDING, longestWord);
         }
-        double natural = Math.min(wrapper.widestLine(model.text, false), NOTE_MAX_AUTO_WIDTH - 2 * PADDING_X);
-        return Math.max(Math.max(natural, longestWord), MIN_BOX_WIDTH - 2 * PADDING_X);
+        double natural = Math.min(wrapper.widestLine(model.text, false), NOTE_MAX_AUTO_WIDTH - HORIZONTAL_PADDING);
+        return Math.max(Math.max(natural, longestWord), MIN_BOX_WIDTH - HORIZONTAL_PADDING);
     }
 }

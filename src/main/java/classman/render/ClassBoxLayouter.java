@@ -4,9 +4,13 @@ import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.TaggedValueModel_V001;
 
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import static classman.render.DiagramStyle.ATTRIBUTE_ATTACH_GAP;
 import static classman.render.DiagramStyle.CLASS_FILL;
 import static classman.render.DiagramStyle.CONTINUATION_INDENT;
 import static classman.render.DiagramStyle.MIN_BOX_WIDTH;
@@ -44,10 +48,11 @@ public class ClassBoxLayouter {
         y += PADDING_Y;
         elements.add(new SceneLine(0, y, width, y, false));
         y += PADDING_Y;
-        y = addAttributes(elements, attributes, contentWidth, y);
+        Map<String, Rectangle2D.Double> attributeAreas = new LinkedHashMap<>();
+        y = addAttributes(elements, model, attributes, width, y, attributeAreas);
         y += PADDING_Y;
         elements.add(0, new SceneRectangle(0, 0, width, y, fill, STROKE));
-        return new BoxLayout(width, y, elements);
+        return new BoxLayout(width, y, elements, attributeAreas);
     }
 
     private String taggedValuesText(ClassModel_V001 model) {
@@ -141,20 +146,33 @@ public class ClassBoxLayouter {
         return lineY;
     }
 
-    /** An empty class still gets one blank attribute line. Returns the y below the last line. */
-    private double addAttributes(List<AbstractSceneElement> elements, List<String> attributes, double contentWidth, double y) {
+    /**
+     * An empty class still gets one blank attribute line. The box around the text of each attribute with an ID is
+     * noted in attributeAreas. Returns the y below the last line.
+     */
+    private double addAttributes(List<AbstractSceneElement> elements, ClassModel_V001 model, List<String> attributes,
+                                 double boxWidth, double y, Map<String, Rectangle2D.Double> attributeAreas) {
         if (attributes.isEmpty()) {
             return y + measurer.lineHeight();
         }
+        double contentWidth = boxWidth - 2 * PADDING_X;
         double lineY = y;
-        for (String attribute : attributes) {
+        for (int i = 0; i < attributes.size(); i++) {
+            double top = lineY;
+            double textRight = PADDING_X;
             boolean first = true;
-            for (String line : wrapper.wrap(attribute, contentWidth, contentWidth - CONTINUATION_INDENT, false)) {
+            for (String line : wrapper.wrap(attributes.get(i), contentWidth, contentWidth - CONTINUATION_INDENT, false)) {
                 double x = first ? PADDING_X : PADDING_X + CONTINUATION_INDENT;
-                elements.add(new SceneText(x, lineY + measurer.ascent(), line, false, TextAnchor.START,
-                    measurer.width(line, false)));
+                double lineWidth = measurer.width(line, false);
+                elements.add(new SceneText(x, lineY + measurer.ascent(), line, false, TextAnchor.START, lineWidth));
+                textRight = Math.max(textRight, x + lineWidth);
                 lineY += measurer.lineHeight();
                 first = false;
+            }
+            String id = model.attributes.get(i).id;
+            if (id != null) {
+                attributeAreas.put(id, new Rectangle2D.Double(PADDING_X - ATTRIBUTE_ATTACH_GAP, top,
+                    textRight - PADDING_X + 2 * ATTRIBUTE_ATTACH_GAP, lineY - top));
             }
         }
         return lineY;

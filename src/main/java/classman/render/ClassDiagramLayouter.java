@@ -7,6 +7,7 @@ import classman.model.v001.ClassModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
 
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -32,10 +33,11 @@ public class ClassDiagramLayouter {
         this.relationLayouter = new RelationLayouter(measurer, classLayouter);
     }
 
-    /** @throws IllegalArgumentException if a relation refers to a class which isn't in the diagram */
+    /** @throws IllegalArgumentException if a relation refers to a class which isn't in the diagram, or a note to an unknown ID */
     public Scene layout(ClassDiagramModel_V001 model) {
         Map<AbstractDiagramElementModel_V001, BoxLayout> boxes = layoutBoxes(model);
         Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas = placeBoxes(boxes);
+        AttachTargetIndex attachTargets = new AttachTargetIndex();
 
         List<AbstractSceneElement> elements = new ArrayList<>();
         Rectangle2D.Double covered = null;
@@ -43,18 +45,32 @@ public class ClassDiagramLayouter {
             Rectangle2D.Double area = areas.get(box.getKey());
             elements.addAll(box.getValue().placedAt(area.x, area.y));
             covered = BoxGeometry.union(covered, area);
+            if (box.getKey() instanceof ClassModel_V001 classModel) {
+                addAttachTargets(attachTargets, classModel, area, box.getValue());
+            }
         }
         Map<String, Rectangle2D.Double> classAreas = classAreas(areas);
         for (AbstractRelationModel_V001 relation : model.relations()) {
             RelationLayout relationLayout = relationLayouter.layout(relation, classAreas);
             elements.addAll(relationLayout.elements);
             covered = BoxGeometry.union(covered, relationLayout.bounds);
+            attachTargets.add(relation.id, new RelationAttachTarget(relationLayout.attachPoint));
         }
-        elements.addAll(noteLinks(boxes.keySet(), areas, classAreas));
+        for (ScenePolyline link : noteLinks(boxes.keySet(), areas, attachTargets)) {
+            elements.add(link);
+            covered = BoxGeometry.union(covered, link.bounds());
+        }
         if (covered == null) {
             return new Scene(elements, 0, 0, 0, 0);
         }
         return new Scene(elements, covered.x, covered.y, covered.width, covered.height);
+    }
+
+    private void addAttachTargets(AttachTargetIndex attachTargets, ClassModel_V001 classModel,
+                                  Rectangle2D.Double classArea, BoxLayout box) {
+        attachTargets.add(classModel.id, new ClassAttachTarget(classArea));
+        box.attributeAreasAt(classArea.x, classArea.y).forEach((id, attributeArea) ->
+            attachTargets.add(id, new AttributeAttachTarget(attributeArea)));
     }
 
     private Map<AbstractDiagramElementModel_V001, BoxLayout> layoutBoxes(ClassDiagramModel_V001 model) {
@@ -105,16 +121,25 @@ public class ClassDiagramLayouter {
         return widest;
     }
 
-    /** The dashed lines from the notes to the classes they are attached to. */
-    private List<AbstractSceneElement> noteLinks(Iterable<AbstractDiagramElementModel_V001> elements,
-            Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas, Map<String, Rectangle2D.Double> classAreas) {
-        List<AbstractSceneElement> links = new ArrayList<>();
+    /** The dashed lines from the notes to the elements they are attached to. */
+    private List<ScenePolyline> noteLinks(Iterable<AbstractDiagramElementModel_V001> elements,
+            Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas, AttachTargetIndex attachTargets) {
+        List<ScenePolyline> links = new ArrayList<>();
         for (AbstractDiagramElementModel_V001 element : elements) {
-            if (element instanceof NoteModel_V001 note && note.attachedTo != null) {
-                links.add(noteLinkLayouter.layout(areas.get(note), note.attachedTo, classAreas));
+            if (element instanceof NoteModel_V001 note && note.attachedToId != null) {
+                links.add(noteLinkLayouter.layout(areas.get(note), attachTargets.find(note.attachedToId),
+                    waypoints(note)));
             }
         }
         return links;
+    }
+
+    private List<Point2D.Double> waypoints(NoteModel_V001 note) {
+        List<Point2D.Double> waypoints = new ArrayList<>();
+        for (PositionModel_V001 waypoint : note.attachWaypoints) {
+            waypoints.add(new Point2D.Double(waypoint.x, waypoint.y));
+        }
+        return waypoints;
     }
 
     private Map<String, Rectangle2D.Double> classAreas(Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas) {

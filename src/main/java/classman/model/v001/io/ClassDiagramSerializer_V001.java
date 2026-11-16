@@ -115,6 +115,7 @@ public class ClassDiagramSerializer_V001 {
             line.append(attribute.visibility.sign);
         }
         line.append(word(attribute.name));
+        appendId(line, attribute.id);
         if (attribute.type != null) {
             line.append(" : ").append(word(attribute.type));
         }
@@ -162,10 +163,14 @@ public class ClassDiagramSerializer_V001 {
 
     private void appendRoute(StringBuilder out, RouteModel_V001 route) {
         out.append(INDENT).append(INDENT).append("route ").append(anchor(route.start));
-        for (PositionModel_V001 waypoint : route.waypoints) {
+        appendWaypoints(out, route.waypoints);
+        out.append(' ').append(anchor(route.end)).append('\n');
+    }
+
+    private void appendWaypoints(StringBuilder out, List<PositionModel_V001> waypoints) {
+        for (PositionModel_V001 waypoint : waypoints) {
             out.append(" (").append(waypoint.x).append(", ").append(waypoint.y).append(')');
         }
-        out.append(' ').append(anchor(route.end)).append('\n');
     }
 
     private String anchor(AnchorModel_V001 anchor) {
@@ -180,8 +185,12 @@ public class ClassDiagramSerializer_V001 {
         appendPosition(out, note.position);
         appendWidth(out, note.width);
         out.append(' ').append(quoted(escapeLineBreaks(note.text)));
-        if (note.attachedTo != null) {
-            out.append(" attached ").append(name(note.attachedTo));
+        if (note.attachedToId != null) {
+            out.append(" attach(").append(note.attachedToId).append(')');
+            if (!note.attachWaypoints.isEmpty()) {
+                out.append(" route");
+                appendWaypoints(out, note.attachWaypoints);
+            }
         }
         out.append('\n');
     }

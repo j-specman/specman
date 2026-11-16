@@ -26,7 +26,7 @@ classdiagram `Hilfe-Versionierung` {
         -Sprache
         -Beschreibung : CLOB
     }
-    class Hilfekategorie at(190, 257) {
+    class Hilfekategorie (7c01a5e2) at(190, 257) {
         -Level : Zahl
         -`lfd Nummer` : Zahl
         -optional : J/N
@@ -46,7 +46,7 @@ classdiagram `Hilfe-Versionierung` {
         -Sprache
         -Beschreibung : CLOB
     }
-    class Handbuchseitenbezeichnung at(762, 619) {
+    class Handbuchseitenbezeichnung (b3e94d10) at(762, 619) {
         -Sprache
         -Bezeichnung : String
     }
@@ -87,6 +87,6 @@ classdiagram `Hilfe-Versionierung` {
         assocclass manualtextblockinmandate {
         }
 
-    note at(92, 380) width=165 `Aus Level und lfd. Nummer ergibt sich eine Baumstruktur aller Hilfekategorien. Kategorien und deren Zuordnungen zu Handbuchseiten und Hilfeeinträgen werden nicht vererbt sondern bei Neuanlage einer Version kopiert.` attached Hilfekategorie
-    note at(549, 670) `Mindestens\nEnglisch muss\nvorhanden sein` attached Handbuchseitenbezeichnung
+    note at(92, 380) width=165 `Aus Level und lfd. Nummer ergibt sich eine Baumstruktur aller Hilfekategorien. Kategorien und deren Zuordnungen zu Handbuchseiten und Hilfeeinträgen werden nicht vererbt sondern bei Neuanlage einer Version kopiert.` attach(7c01a5e2)
+    note at(549, 670) `Mindestens\nEnglisch muss\nvorhanden sein` attach(b3e94d10)
 }

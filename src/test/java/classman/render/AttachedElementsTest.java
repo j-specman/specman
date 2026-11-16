@@ -8,7 +8,6 @@ import java.util.List;
 import static classman.render.SceneTestHelper.all;
 import static classman.render.SceneTestHelper.layout;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -104,7 +103,7 @@ class AttachedElementsTest {
   /** A note attached to a class gets a dashed line from its border to the border of the class. */
   @Test
   void noteLinkDashed() throws ClassDiagramParseException {
-    Scene scene = layout("class A at(0, 0)\nnote at(0, 100) `n` attached A");
+    Scene scene = layout("class A (aa000001) at(0, 0)\nnote at(0, 100) `n` attach(aa000001)");
     ScenePolyline link = all(scene, ScenePolyline.class).get(0);
     assertTrue(link.dashed);
     assertEquals(20, link.xs[0], 1e-9);
@@ -113,18 +112,84 @@ class AttachedElementsTest {
     assertEquals(56, link.ys[1], 1e-9);
   }
 
+  /** A note attached to an attribute ends at the box around the attribute text on the side of the note, at half its height. */
+  @Test
+  void noteLinkToAttributeFromRight() throws ClassDiagramParseException {
+    ScenePolyline link = lastLine(layout(
+        "class A at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote at(200, 0) `n` attach(0a0a0a0a)"));
+    assertEquals(68, link.xs[1], 1e-9);
+    assertEquals(62, link.ys[1], 1e-9);
+  }
+
+  /** A note left of the attribute is linked to the left edge of its box, 2 pixels before the text. */
+  @Test
+  void noteLinkToAttributeFromLeft() throws ClassDiagramParseException {
+    ScenePolyline link = lastLine(layout(
+        "class A at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote at(-200, 0) `n` attach(0a0a0a0a)"));
+    assertEquals(4, link.xs[1], 1e-9);
+    assertEquals(62, link.ys[1], 1e-9);
+  }
+
+  /** A note attached to a relation is linked to the middle of the relation. */
+  @Test
+  void noteLinkToRelation() throws ClassDiagramParseException {
+    ScenePolyline link = lastLine(layout(STACKED + "association (11110000) A -- B\nnote at(100, 60) `n` attach(11110000)"));
+    assertEquals(20, link.xs[1], 1e-9);
+    assertEquals(76, link.ys[1], 1e-9);
+  }
+
+  /** With waypoints the line leads over them, starting at the note facing the first and ending at the class facing the last. */
+  @Test
+  void noteLinkOverWaypoints() throws ClassDiagramParseException {
+    ScenePolyline link = lastLine(layout(
+        "class A (aa000001) at(0, 0)\nnote at(0, -100) `n` attach(aa000001) route (60, -40) (60, 28)"));
+    assertEquals(4, link.xs.length);
+    assertEquals(32.17, link.xs[0], 0.01);
+    assertEquals(-72, link.ys[0], 1e-9);
+    assertEquals(60, link.xs[1], 1e-9);
+    assertEquals(-40, link.ys[1], 1e-9);
+    assertEquals(60, link.xs[2], 1e-9);
+    assertEquals(28, link.ys[2], 1e-9);
+    assertEquals(40, link.xs[3], 1e-9);
+    assertEquals(28, link.ys[3], 1e-9);
+  }
+
+  /** The line reaches an attribute from the side of the last waypoint, even if the note is on the other side. */
+  @Test
+  void attributeSideFromLastWaypoint() throws ClassDiagramParseException {
+    ScenePolyline link = lastLine(layout("class A at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\n"
+        + "note at(200, 0) `n` attach(0a0a0a0a) route (150, -20) (-30, 62)"));
+    assertEquals(4, link.xs[link.xs.length - 1], 1e-9);
+    assertEquals(62, link.ys[link.ys.length - 1], 1e-9);
+  }
+
+  /** The scene covers waypoints which lie outside of the boxes. */
+  @Test
+  void sceneCoversWaypoints() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aa000001) at(0, 0)\nnote at(100, 0) `n` attach(aa000001) route (500, 400) (100, 60)");
+    assertTrue(scene.x + scene.width >= 500);
+    assertTrue(scene.y + scene.height >= 400);
+  }
+
   /** A note which isn't attached has no line. */
   @Test
   void freeNoteWithoutLink() throws ClassDiagramParseException {
     assertTrue(all(layout("class A\nnote `n`"), ScenePolyline.class).isEmpty());
   }
 
-  /** A note attached to a class which isn't in the diagram can't be drawn. */
+  /** A note attached to an ID which no element of the diagram has can't be drawn. */
   @Test
-  void noteLinkToUnknownClassRejected() {
+  void noteLinkToUnknownIdRejected() {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> layout("class A\nnote `n` attached Missing"));
-    assertTrue(e.getMessage().contains("Missing"), e.getMessage());
-    assertFalse(e.getMessage().isEmpty());
+        () -> layout("class A (aa000001)\nnote `n` attach(deadbeef)"));
+    assertTrue(e.getMessage().contains("deadbeef"), e.getMessage());
+  }
+
+  /** An ID which two elements have can't be attached to. */
+  @Test
+  void duplicateIdRejected() {
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> layout("class A (aa000001)\nclass B (aa000001)\nnote `n` attach(aa000001)"));
+    assertTrue(e.getMessage().contains("aa000001"), e.getMessage());
   }
 }

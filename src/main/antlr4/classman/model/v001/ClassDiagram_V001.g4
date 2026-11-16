@@ -29,7 +29,13 @@ grammar ClassDiagram_V001;
 //   * Route anchors: Class.side@offset, side = top|right|bottom|left, offset in pixels from the start of the
 //     side (left end of top/bottom, upper end of left/right), clamped to the side's length. Waypoints are
 //     absolute pixel points.
-//   * Class names are unique within a diagram; relations and notes refer to classes by name.
+//   * Class names are unique within a diagram; relations refer to classes by name.
+//   * A note is attached to a class, an attribute or a relation by the ID of that element: attach(04de91aa).
+//     Whoever wants to attach a note must give the target an ID. The dashed line of a note on a class ends at the
+//     class border, on an attribute at the border of its class on the side of the note, on a relation at the
+//     middle of the longest part of the relation.
+//   * The dashed line of a note can lead over waypoints (absolute pixel points): attach(04de91aa) route (120, 40) (120, 90).
+//     The line starts at the note border facing the first waypoint and ends at the target facing the last one.
 //   * An assocclass nested in a relation belongs to that relation.
 //   * Labels and note texts: backtick strings; the two characters \n stand for a line break.
 //   * Attribute info items (inside [ ]) are shown exactly as written, the renderer doesn't interpret them.
@@ -81,10 +87,10 @@ classBody
     : LBRACE attribute* RBRACE
     ;
 
-// One attribute: [visibility] name [: type] [[info, info, ...]]. A name or type is one word or a backtick string.
+// One attribute: [visibility] name [(id)] [: type] [[info, info, ...]]. A name or type is one word or a backtick string.
 attribute
     : ELLIPSIS
-    | visibility? wordOrString (COLON wordOrString)? infos?
+    | visibility? wordOrString ELEMENT_ID? (COLON wordOrString)? infos?
     ;
 
 visibility
@@ -173,14 +179,19 @@ assocClass
 // ------------------------------------------------------------ notes
 
 note
-    : NOTE ELEMENT_ID? position? widthSpec? BACKTICK_STRING (ATTACHED name)?
+    : NOTE noteId=ELEMENT_ID? position? widthSpec? BACKTICK_STRING (ATTACH target=ELEMENT_ID noteRoute?)?
+    ;
+
+// Waypoints of the dashed line from a note to its target. Start and end of the line are computed.
+noteRoute
+    : ROUTE waypoint+
     ;
 
 // A plain word, including the keywords: they are only reserved where a class name is expected.
 word
     : NAME
     | CLASSDIAGRAM | CLASS | ASSOCCLASS | ASSOCIATION | AGGREGATION | COMPOSITION | EXTENDS | IMPLEMENTS
-    | NOTE | ROUTE | ATTACHED | AT | WIDTH | TOP | RIGHT | BOTTOM | LEFT
+    | NOTE | ROUTE | ATTACH | AT | WIDTH | TOP | RIGHT | BOTTOM | LEFT
     ;
 
 // ============================================================
@@ -197,7 +208,7 @@ EXTENDS      : 'extends' ;
 IMPLEMENTS   : 'implements' ;
 NOTE         : 'note' ;
 ROUTE        : 'route' ;
-ATTACHED     : 'attached' ;
+ATTACH       : 'attach' ;
 AT           : 'at' ;
 WIDTH        : 'width' ;
 TOP          : 'top' ;

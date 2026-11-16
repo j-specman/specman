@@ -36,7 +36,7 @@ public class RelationLayouter {
             elements.addAll(assocClass.elements);
             bounds = BoxGeometry.union(bounds, assocClass.bounds);
         }
-        return new RelationLayout(elements, bounds);
+        return new RelationLayout(elements, bounds, PathGeometry.attachPoint(path));
     }
 
     private ScenePolyline line(List<Point2D.Double> path, boolean dashed) {
