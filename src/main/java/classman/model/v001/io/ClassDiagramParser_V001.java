@@ -1,0 +1,289 @@
+package classman.model.v001.io;
+
+import classman.model.v001.AbstractDiagramElementModel_V001;
+import classman.model.v001.AbstractRelationModel_V001;
+import classman.model.v001.AnchorModel_V001;
+import classman.model.v001.AssociationRelationModel_V001;
+import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.ClassDiagramModel_V001;
+import classman.model.v001.ClassDiagram_V001Lexer;
+import classman.model.v001.ClassDiagram_V001Parser;
+import classman.model.v001.ClassDiagram_V001Parser.AnchorContext;
+import classman.model.v001.ClassDiagram_V001Parser.AssociationRelationContext;
+import classman.model.v001.ClassDiagram_V001Parser.AttributeContext;
+import classman.model.v001.ClassDiagram_V001Parser.ClassBodyContext;
+import classman.model.v001.ClassDiagram_V001Parser.ClassDiagramContext;
+import classman.model.v001.ClassDiagram_V001Parser.ClassHeadContext;
+import classman.model.v001.ClassDiagram_V001Parser.DiagramNameContext;
+import classman.model.v001.ClassDiagram_V001Parser.ElementContext;
+import classman.model.v001.ClassDiagram_V001Parser.ExtendsRelationContext;
+import classman.model.v001.ClassDiagram_V001Parser.ImplementsRelationContext;
+import classman.model.v001.ClassDiagram_V001Parser.InfoContext;
+import classman.model.v001.ClassDiagram_V001Parser.InfosContext;
+import classman.model.v001.ClassDiagram_V001Parser.MultiplicityContext;
+import classman.model.v001.ClassDiagram_V001Parser.NameContext;
+import classman.model.v001.ClassDiagram_V001Parser.NoteContext;
+import classman.model.v001.ClassDiagram_V001Parser.PositionContext;
+import classman.model.v001.ClassDiagram_V001Parser.RelationContext;
+import classman.model.v001.ClassDiagram_V001Parser.RouteContext;
+import classman.model.v001.ClassDiagram_V001Parser.TaggedValueContext;
+import classman.model.v001.ClassDiagram_V001Parser.WaypointContext;
+import classman.model.v001.ClassDiagram_V001Parser.WidthSpecContext;
+import classman.model.v001.ClassDiagram_V001Parser.WordOrStringContext;
+import classman.model.v001.ClassModel_V001;
+import classman.model.v001.ExtendsRelationModel_V001;
+import classman.model.v001.ImplementsRelationModel_V001;
+import classman.model.v001.NoteModel_V001;
+import classman.model.v001.PositionModel_V001;
+import classman.model.v001.RelationType_V001;
+import classman.model.v001.RouteModel_V001;
+import classman.model.v001.Side_V001;
+import classman.model.v001.TaggedValueModel_V001;
+import classman.model.v001.Visibility_V001;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.Interval;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+/** Reads the text of a class diagram, see ClassDiagram_V001.g4, into the model. */
+public class ClassDiagramParser_V001 {
+
+    /** @throws ClassDiagramParseException if the content has a syntax error, or two attributes in one line. */
+    public ClassDiagramModel_V001 parse(String content) throws ClassDiagramParseException {
+        ClassDiagramSyntaxErrorCollector errors = new ClassDiagramSyntaxErrorCollector();
+        ClassDiagram_V001Lexer lexer = new ClassDiagram_V001Lexer(CharStreams.fromString(content));
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(errors);
+        ClassDiagram_V001Parser parser = new ClassDiagram_V001Parser(new CommonTokenStream(lexer));
+        parser.removeErrorListeners();
+        parser.addErrorListener(errors);
+        ClassDiagramContext tree = parser.classDiagram();
+        if (errors.hasError()) {
+            throw new ClassDiagramParseException(errors.firstError());
+        }
+        return buildDiagram(tree);
+    }
+
+    private ClassDiagramModel_V001 buildDiagram(ClassDiagramContext tree) throws ClassDiagramParseException {
+        DiagramNameContext name = tree.diagramName();
+        ClassDiagramModel_V001 model = new ClassDiagramModel_V001(name == null ? null : text(name));
+        for (ElementContext element : tree.element()) {
+            model.elements.add(buildElement(element));
+        }
+        return model;
+    }
+
+    private AbstractDiagramElementModel_V001 buildElement(ElementContext element) throws ClassDiagramParseException {
+        if (element.classDecl() != null) {
+            return buildClass(element.classDecl().classHead(), element.classDecl().classBody());
+        }
+        if (element.relation() != null) {
+            return buildRelation(element.relation());
+        }
+        return buildNote(element.note());
+    }
+
+    // ---- classes ----
+
+    private ClassModel_V001 buildClass(ClassHeadContext head, ClassBodyContext body) throws ClassDiagramParseException {
+        ClassModel_V001 model = new ClassModel_V001(text(head.name()));
+        model.id = id(head.ELEMENT_ID());
+        model.position = position(head.position());
+        model.width = width(head.widthSpec());
+        model.stereotype = stereotype(head.STEREOTYPE());
+        if (head.taggedValues() != null) {
+            for (TaggedValueContext tag : head.taggedValues().taggedValue()) {
+                model.taggedValues.add(buildTaggedValue(tag));
+            }
+        }
+        if (body != null) {
+            checkOneAttributePerLine(body);
+            for (AttributeContext attribute : body.attribute()) {
+                model.attributes.add(buildAttribute(attribute));
+            }
+        }
+        return model;
+    }
+
+    private String stereotype(TerminalNode stereotype) {
+        if (stereotype == null) {
+            return null;
+        }
+        String text = stereotype.getText();
+        return text.substring(2, text.length() - 2).trim();
+    }
+
+    private TaggedValueModel_V001 buildTaggedValue(TaggedValueContext tag) {
+        String key = tag.word(0).getText();
+        if (tag.word().size() == 2) {
+            return new TaggedValueModel_V001(key, tag.word(1).getText());
+        }
+        if (tag.NUMBER() != null) {
+            return new TaggedValueModel_V001(key, tag.NUMBER().getText());
+        }
+        return new TaggedValueModel_V001(key, unquote(tag.BACKTICK_STRING().getText()));
+    }
+
+    // ---- attributes ----
+
+    /** Names and types with spaces must be in backticks, else one attribute would silently become several. */
+    private void checkOneAttributePerLine(ClassBodyContext body) throws ClassDiagramParseException {
+        List<AttributeContext> attributes = body.attribute();
+        for (int i = 1; i < attributes.size(); i++) {
+            Token previousEnd = attributes.get(i - 1).getStop();
+            Token start = attributes.get(i).getStart();
+            if (start.getLine() == previousEnd.getLine()) {
+                throw new ClassDiagramParseException("line " + start.getLine() + ":" + start.getCharPositionInLine()
+                    + " Two attributes start in one line. Attribute names and types with spaces need backticks,"
+                    + " for example `In Baum anzeigen`.");
+            }
+        }
+    }
+
+    private AttributeModel_V001 buildAttribute(AttributeContext attribute) {
+        if (attribute.ELLIPSIS() != null) {
+            return AttributeModel_V001.hiddenAttributesMarker();
+        }
+        Visibility_V001 visibility = attribute.visibility() == null ? null
+            : Visibility_V001.fromSign(attribute.visibility().getText().charAt(0));
+        List<WordOrStringContext> nameAndType = attribute.wordOrString();
+        String name = text(nameAndType.get(0));
+        String type = attribute.COLON() == null ? null : text(nameAndType.get(1));
+        return new AttributeModel_V001(visibility, name, type, infos(attribute.infos()));
+    }
+
+    private List<String> infos(InfosContext infos) {
+        List<String> result = new ArrayList<>();
+        if (infos != null) {
+            for (InfoContext info : infos.info()) {
+                result.add(infoText(info));
+            }
+        }
+        return result;
+    }
+
+    /** The info as written, except that a single backtick string loses its backticks. */
+    private String infoText(InfoContext info) {
+        if (info.getChildCount() == 1 && info.BACKTICK_STRING().size() == 1) {
+            return unquote(info.getText());
+        }
+        return info.getStart().getInputStream().getText(
+            Interval.of(info.getStart().getStartIndex(), info.getStop().getStopIndex()));
+    }
+
+    // ---- relations ----
+
+    private AbstractRelationModel_V001 buildRelation(RelationContext relation) throws ClassDiagramParseException {
+        if (relation.associationRelation() != null) {
+            return buildAssociation(relation.associationRelation());
+        }
+        if (relation.extendsRelation() != null) {
+            return buildExtends(relation.extendsRelation());
+        }
+        return buildImplements(relation.implementsRelation());
+    }
+
+    private AssociationRelationModel_V001 buildAssociation(AssociationRelationContext ctx) throws ClassDiagramParseException {
+        RelationType_V001 type = RelationType_V001.valueOf(ctx.type.getText().toUpperCase(Locale.ROOT));
+        AssociationRelationModel_V001 model = new AssociationRelationModel_V001(type, text(ctx.from), text(ctx.to));
+        model.fromMultiplicity = multiplicity(ctx.fromMultiplicity);
+        model.toMultiplicity = multiplicity(ctx.toMultiplicity);
+        model.directed = ctx.ARROW() != null;
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.label, ctx.route());
+        if (ctx.assocClass() != null) {
+            model.assocClass = buildClass(ctx.assocClass().classHead(), ctx.assocClass().classBody());
+        }
+        return model;
+    }
+
+    private ExtendsRelationModel_V001 buildExtends(ExtendsRelationContext ctx) {
+        ExtendsRelationModel_V001 model = new ExtendsRelationModel_V001(text(ctx.from), text(ctx.to));
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.label, ctx.route());
+        return model;
+    }
+
+    private ImplementsRelationModel_V001 buildImplements(ImplementsRelationContext ctx) {
+        ImplementsRelationModel_V001 model = new ImplementsRelationModel_V001(text(ctx.from), text(ctx.to));
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.label, ctx.route());
+        return model;
+    }
+
+    private void fillCommon(AbstractRelationModel_V001 model, TerminalNode id, Token label, RouteContext route) {
+        model.id = id(id);
+        model.label = label == null ? null : lineBreaks(unquote(label.getText()));
+        model.route = route == null ? null : buildRoute(route);
+    }
+
+    private String multiplicity(MultiplicityContext multiplicity) {
+        return multiplicity == null ? null : multiplicity.getText();
+    }
+
+    private RouteModel_V001 buildRoute(RouteContext route) {
+        List<AnchorContext> anchors = route.anchor();
+        List<PositionModel_V001> waypoints = new ArrayList<>();
+        for (WaypointContext waypoint : route.waypoint()) {
+            waypoints.add(position(waypoint.NUMBER(0), waypoint.NUMBER(1)));
+        }
+        return new RouteModel_V001(buildAnchor(anchors.get(0)), waypoints, buildAnchor(anchors.get(1)));
+    }
+
+    private AnchorModel_V001 buildAnchor(AnchorContext anchor) {
+        Side_V001 side = Side_V001.valueOf(anchor.side().getText().toUpperCase(Locale.ROOT));
+        return new AnchorModel_V001(text(anchor.name()), side, Integer.parseInt(anchor.NUMBER().getText()));
+    }
+
+    // ---- notes ----
+
+    private NoteModel_V001 buildNote(NoteContext ctx) {
+        NoteModel_V001 model = new NoteModel_V001(lineBreaks(unquote(ctx.BACKTICK_STRING().getText())));
+        model.id = id(ctx.ELEMENT_ID());
+        model.position = position(ctx.position());
+        model.width = width(ctx.widthSpec());
+        model.attachedTo = ctx.name() == null ? null : text(ctx.name());
+        return model;
+    }
+
+    // ---- small parts ----
+
+    private String id(TerminalNode elementId) {
+        return elementId == null ? null : elementId.getText().substring(1, elementId.getText().length() - 1);
+    }
+
+    private PositionModel_V001 position(PositionContext position) {
+        return position == null ? null : position(position.NUMBER(0), position.NUMBER(1));
+    }
+
+    private PositionModel_V001 position(TerminalNode x, TerminalNode y) {
+        return new PositionModel_V001(Integer.parseInt(x.getText()), Integer.parseInt(y.getText()));
+    }
+
+    private Integer width(WidthSpecContext width) {
+        return width == null ? null : Integer.valueOf(width.NUMBER().getText());
+    }
+
+    private String text(NameContext name) {
+        return name.NAME() != null ? name.NAME().getText() : unquote(name.BACKTICK_STRING().getText());
+    }
+
+    private String text(DiagramNameContext name) {
+        return name.NAME() != null ? name.NAME().getText() : unquote(name.BACKTICK_STRING().getText());
+    }
+
+    private String text(WordOrStringContext wordOrString) {
+        return wordOrString.word() != null ? wordOrString.word().getText()
+            : unquote(wordOrString.BACKTICK_STRING().getText());
+    }
+
+    private String unquote(String backtickString) {
+        return backtickString.substring(1, backtickString.length() - 1);
+    }
+
+    private String lineBreaks(String text) {
+        return text.replace("\\n", "\n");
+    }
+}

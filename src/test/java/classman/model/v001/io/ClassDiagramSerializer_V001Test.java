@@ -1,0 +1,85 @@
+package classman.model.v001.io;
+
+import classman.model.v001.ClassDiagramModel_V001;
+import classman.model.v001.ClassModel_V001;
+import classman.model.v001.NoteModel_V001;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class ClassDiagramSerializer_V001Test {
+
+  private final ClassDiagramParser_V001 parser = new ClassDiagramParser_V001();
+  private final ClassDiagramSerializer_V001 serializer = new ClassDiagramSerializer_V001();
+
+  private static String example(String name) throws IOException {
+    try (InputStream in = ClassDiagramSerializer_V001Test.class.getResourceAsStream("/classman/model/v001/" + name + ".classdiagram")) {
+      return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+    }
+  }
+
+  private String roundTrip(String source) throws ClassDiagramParseException {
+    return serializer.serialize(parser.parse(source));
+  }
+
+  /** Writing a model and reading the text again gives the same model, checked for all examples. */
+  @ParameterizedTest
+  @ValueSource(strings = {"hello", "benchmark", "edgecases"})
+  void roundTripKeepsModel(String exampleName) throws Exception {
+    ClassDiagramModel_V001 original = parser.parse(example(exampleName));
+    ClassDiagramModel_V001 again = parser.parse(serializer.serialize(original));
+    assertEquals(ClassDiagramDump.of(original), ClassDiagramDump.of(again));
+  }
+
+  /** The written text is the canonical form: reading and writing it again changes nothing. */
+  @ParameterizedTest
+  @ValueSource(strings = {"hello", "benchmark", "edgecases"})
+  void canonicalTextIsStable(String exampleName) throws Exception {
+    String written = roundTrip(example(exampleName));
+    assertEquals(written, roundTrip(written));
+  }
+
+  /** The first line is the JSON envelope comment with the version and the model type. */
+  @Test
+  void envelopeComment() throws ClassDiagramParseException {
+    String written = roundTrip("classdiagram { }");
+    assertTrue(written.startsWith(
+        "// {\"classmanVersion\":\"0.1\",\"modelType\":\"classman.model.v001.ClassDiagramModel_V001\"}\n"), written);
+  }
+
+  /** Names get backticks only if they have special characters or are keywords. */
+  @Test
+  void quotingOnlyWhenNeeded() throws ClassDiagramParseException {
+    ClassDiagramModel_V001 model = new ClassDiagramModel_V001("Hilfe Versionierung");
+    model.elements.add(new ClassModel_V001("Plain-Name"));
+    model.elements.add(new ClassModel_V001("Hilfe Eintrag"));
+    model.elements.add(new ClassModel_V001("left"));
+    String written = serializer.serialize(model);
+    assertTrue(written.contains("classdiagram `Hilfe Versionierung` {"), written);
+    assertTrue(written.contains("class Plain-Name\n"), written);
+    assertTrue(written.contains("class `Hilfe Eintrag`\n"), written);
+    assertTrue(written.contains("class `left`\n"), written);
+  }
+
+  /** A line break in a label or note text is written as the two characters backslash and n. */
+  @Test
+  void lineBreakEscaping() throws ClassDiagramParseException {
+    ClassDiagramModel_V001 model = new ClassDiagramModel_V001(null);
+    model.elements.add(new NoteModel_V001("one\ntwo"));
+    assertTrue(serializer.serialize(model).contains("note `one\\ntwo`"));
+  }
+
+  /** Attribute infos with spaces, commas or ranges survive writing and reading again. */
+  @Test
+  void infosRoundTrip() throws Exception {
+    String source = "classdiagram { class A { x [must be unique, `a, b`, 2..50] } }";
+    assertEquals(ClassDiagramDump.of(parser.parse(source)), ClassDiagramDump.of(parser.parse(roundTrip(source))));
+  }
+}

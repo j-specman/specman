@@ -41,15 +41,17 @@ class ClassDiagram_V001GrammarTest {
     return Trees.findAllRuleNodes(parse(source), rule).size();
   }
 
+  /** The minimal example without any at() parses: two classes and one relation. */
   @Test
-  void minimalDiagramWithoutPositionsParses() throws IOException {
+  void minimalDiagram() throws IOException {
     String source = example("hello");
     assertEquals(2, countIn(source, ClassDiagram_V001Parser.RULE_classDecl));
     assertEquals(1, countIn(source, ClassDiagram_V001Parser.RULE_relation));
   }
 
+  /** The benchmark diagram from the manual parses completely. */
   @Test
-  void benchmarkDiagramParsesCompletely() throws IOException {
+  void benchmarkDiagram() throws IOException {
     String source = example("benchmark");
     assertEquals(11, countIn(source, ClassDiagram_V001Parser.RULE_classDecl));
     assertEquals(17, countIn(source, ClassDiagram_V001Parser.RULE_relation));
@@ -57,25 +59,29 @@ class ClassDiagram_V001GrammarTest {
     assertEquals(2, countIn(source, ClassDiagram_V001Parser.RULE_note));
   }
 
+  /** Odd but valid constructs: quoted names, negative coordinates, comments, tagged values, all relation types. */
   @Test
-  void edgeCasesParse() throws IOException {
+  void edgeCaseSyntax() throws IOException {
     parse(example("edgecases"));
   }
 
+  /** A brace followed by "word =" opens tagged values, any other brace opens the class body. */
   @Test
-  void bracesAfterKeyAndEqualsAreTaggedValuesOtherBracesAreBody() {
+  void taggedValuesVersusBody() {
     String source = "classdiagram { class A {k=1} class B {x} class C {k=1} {x} }";
     assertEquals(2, countIn(source, ClassDiagram_V001Parser.RULE_taggedValues));
     assertEquals(2, countIn(source, ClassDiagram_V001Parser.RULE_classBody));
   }
 
+  /** An extends relation takes no multiplicities, so this is a syntax error. */
   @Test
-  void extendsHasNoMultiplicities() {
+  void extendsMultiplicityRejected() {
     assertThrows(IllegalStateException.class, () -> parse("classdiagram { extends A 1 -> * B }"));
   }
 
+  /** Keywords are fine as attribute names and types, but a class named like a keyword needs backticks. */
   @Test
-  void keywordsWorkAsAttributeNamesButNotAsUnquotedClassNames() {
+  void keywordsAsNames() {
     parse("classdiagram { class A { width : left } }");
     assertThrows(IllegalStateException.class, () -> parse("classdiagram { class left { } }"));
   }
