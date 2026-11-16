@@ -5,9 +5,9 @@ grammar ClassDiagram_V001;
 // First line of a file: JSON envelope comment, skipped like any comment, read separately:
 //   // {"classmanVersion":"0.1","modelType":"classman.model.v001.ClassDiagramModel_V001"}
 //
-// Names: unquoted if made of letters, digits, '_' and '-' or '/' between letters, else in backticks.
+// Names: unquoted if made of letters, digits, '_' and '-' or '/' between letters, else in double quotes.
 // This holds for class names, attribute names and attribute types alike: a name or type with spaces or
-// other special characters must be written in backticks, e.g.  -`In Baum anzeigen` : J/N
+// other special characters must be written in double quotes, e.g.  -"In Baum anzeigen" : J/N
 // Keywords can't be unquoted class names. As attribute names, types and info texts they work unquoted.
 //
 // Relation types and how they are drawn:
@@ -37,7 +37,9 @@ grammar ClassDiagram_V001;
 //   * The dashed line of a note can lead over waypoints (absolute pixel points): attach(04de91aa) route (120, 40) (120, 90).
 //     The line starts at the note border facing the first waypoint and ends at the target facing the last one.
 //   * An assocclass nested in a relation belongs to that relation.
-//   * Labels and note texts: backtick strings; the two characters \n stand for a line break.
+//   * Strings (names, labels, note texts) are in double quotes. Escapes: backslash-n is a line break, backslash-quote
+//     a quote, two backslashes one backslash, backslash-u0060 a backtick. The latter is the only way to write
+//     a backtick: a diagram source embedded in a Specman model file must not contain one.
 //   * Attribute info items (inside [ ]) are shown exactly as written, the renderer doesn't interpret them.
 //     The attribute ... says: the model has more attributes which this diagram doesn't show.
 // ============================================================
@@ -52,7 +54,7 @@ classDiagram
 
 diagramName
     : NAME
-    | BACKTICK_STRING
+    | QUOTED_STRING
     ;
 
 element
@@ -80,14 +82,14 @@ taggedValues
     ;
 
 taggedValue
-    : word EQUALS (word | NUMBER | BACKTICK_STRING)
+    : word EQUALS (word | NUMBER | QUOTED_STRING)
     ;
 
 classBody
     : LBRACE attribute* RBRACE
     ;
 
-// One attribute: [visibility] name [(id)] [: type] [[info, info, ...]]. A name or type is one word or a backtick string.
+// One attribute: [visibility] name [(id)] [: type] [[info, info, ...]]. A name or type is one word or a quoted string.
 attribute
     : ELLIPSIS
     | visibility? wordOrString ELEMENT_ID? (COLON wordOrString)? infos?
@@ -106,17 +108,17 @@ infos
 
 // Any run of tokens up to the next comma or closing bracket, e.g.  Pflicht   2..50   TN=versionkey
 info
-    : (word | NUMBER | DOTDOT | STAR | EQUALS | BACKTICK_STRING)+
+    : (word | NUMBER | DOTDOT | STAR | EQUALS | QUOTED_STRING)+
     ;
 
 wordOrString
     : word
-    | BACKTICK_STRING
+    | QUOTED_STRING
     ;
 
 name
     : NAME
-    | BACKTICK_STRING
+    | QUOTED_STRING
     ;
 
 position
@@ -137,15 +139,15 @@ relation
 
 associationRelation
     : type=(ASSOCIATION | AGGREGATION | COMPOSITION) ELEMENT_ID? from=name fromMultiplicity=multiplicity?
-      (ARROW | LINE) toMultiplicity=multiplicity? to=name label=BACKTICK_STRING? route? assocClass?
+      (ARROW | LINE) toMultiplicity=multiplicity? to=name label=QUOTED_STRING? route? assocClass?
     ;
 
 extendsRelation
-    : EXTENDS ELEMENT_ID? from=name ARROW to=name label=BACKTICK_STRING? route?
+    : EXTENDS ELEMENT_ID? from=name ARROW to=name label=QUOTED_STRING? route?
     ;
 
 implementsRelation
-    : IMPLEMENTS ELEMENT_ID? from=name ARROW to=name label=BACKTICK_STRING? route?
+    : IMPLEMENTS ELEMENT_ID? from=name ARROW to=name label=QUOTED_STRING? route?
     ;
 
 multiplicity
@@ -179,7 +181,7 @@ assocClass
 // ------------------------------------------------------------ notes
 
 note
-    : NOTE noteId=ELEMENT_ID? position? widthSpec? BACKTICK_STRING (ATTACH target=ELEMENT_ID noteRoute?)?
+    : NOTE noteId=ELEMENT_ID? position? widthSpec? QUOTED_STRING (ATTACH target=ELEMENT_ID noteRoute?)?
     ;
 
 // Waypoints of the dashed line from a note to its target. Start and end of the line are computed.
@@ -248,8 +250,9 @@ NUMBER       : '-'? [0-9]+ ;
 
 NAME         : [\p{L}_] [\p{L}\p{N}_]* (('-' | '/') [\p{L}\p{N}_]+)* ;
 
-// Names and types with spaces, relation labels, note texts. '\n' inside stands for a line break.
-BACKTICK_STRING : '`' ~'`'* '`' ;
+// Names and types with spaces, relation labels, note texts. A quote or backslash inside is escaped by a backslash.
+// A backtick can't be written as it is, see the escapes above.
+QUOTED_STRING : '"' ( ~["\\`] | '\\' . )* '"' ;
 
 WS           : [ \t\r\n]+ -> skip ;
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;

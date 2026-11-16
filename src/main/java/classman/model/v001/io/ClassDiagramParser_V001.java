@@ -126,12 +126,12 @@ public class ClassDiagramParser_V001 {
         if (tag.NUMBER() != null) {
             return new TaggedValueModel_V001(key, tag.NUMBER().getText());
         }
-        return new TaggedValueModel_V001(key, unquote(tag.BACKTICK_STRING().getText()));
+        return new TaggedValueModel_V001(key, unquote(tag.QUOTED_STRING().getText()));
     }
 
     // ---- attributes ----
 
-    /** Names and types with spaces must be in backticks, else one attribute would silently become several. */
+    /** Names and types with spaces must be in double quotes, else one attribute would silently become several. */
     private void checkOneAttributePerLine(ClassBodyContext body) throws ClassDiagramParseException {
         List<AttributeContext> attributes = body.attribute();
         for (int i = 1; i < attributes.size(); i++) {
@@ -139,8 +139,8 @@ public class ClassDiagramParser_V001 {
             Token start = attributes.get(i).getStart();
             if (start.getLine() == previousEnd.getLine()) {
                 throw new ClassDiagramParseException("line " + start.getLine() + ":" + start.getCharPositionInLine()
-                    + " Two attributes start in one line. Attribute names and types with spaces need backticks,"
-                    + " for example `In Baum anzeigen`.");
+                    + " Two attributes start in one line. Attribute names and types with spaces need double quotes,"
+                    + " for example \"In Baum anzeigen\".");
             }
         }
     }
@@ -169,9 +169,9 @@ public class ClassDiagramParser_V001 {
         return result;
     }
 
-    /** The info as written, except that a single backtick string loses its backticks. */
+    /** The info as written, except that a single quoted string loses its quotes. */
     private String infoText(InfoContext info) {
-        if (info.getChildCount() == 1 && info.BACKTICK_STRING().size() == 1) {
+        if (info.getChildCount() == 1 && info.QUOTED_STRING().size() == 1) {
             return unquote(info.getText());
         }
         return info.getStart().getInputStream().getText(
@@ -217,7 +217,7 @@ public class ClassDiagramParser_V001 {
 
     private void fillCommon(AbstractRelationModel_V001 model, TerminalNode id, Token label, RouteContext route) {
         model.id = id(id);
-        model.label = label == null ? null : lineBreaks(unquote(label.getText()));
+        model.label = label == null ? null : unquote(label.getText());
         model.route = route == null ? null : buildRoute(route);
     }
 
@@ -242,7 +242,7 @@ public class ClassDiagramParser_V001 {
     // ---- notes ----
 
     private NoteModel_V001 buildNote(NoteContext ctx) {
-        NoteModel_V001 model = new NoteModel_V001(lineBreaks(unquote(ctx.BACKTICK_STRING().getText())));
+        NoteModel_V001 model = new NoteModel_V001(unquote(ctx.QUOTED_STRING().getText()));
         model.id = id(ctx.noteId);
         model.position = position(ctx.position());
         model.width = width(ctx.widthSpec());
@@ -278,23 +278,46 @@ public class ClassDiagramParser_V001 {
     }
 
     private String text(NameContext name) {
-        return name.NAME() != null ? name.NAME().getText() : unquote(name.BACKTICK_STRING().getText());
+        return name.NAME() != null ? name.NAME().getText() : unquote(name.QUOTED_STRING().getText());
     }
 
     private String text(DiagramNameContext name) {
-        return name.NAME() != null ? name.NAME().getText() : unquote(name.BACKTICK_STRING().getText());
+        return name.NAME() != null ? name.NAME().getText() : unquote(name.QUOTED_STRING().getText());
     }
 
     private String text(WordOrStringContext wordOrString) {
         return wordOrString.word() != null ? wordOrString.word().getText()
-            : unquote(wordOrString.BACKTICK_STRING().getText());
+            : unquote(wordOrString.QUOTED_STRING().getText());
     }
 
-    private String unquote(String backtickString) {
-        return backtickString.substring(1, backtickString.length() - 1);
+    /** The text of a quoted string without the quotes, with its escapes resolved. */
+    private String unquote(String quotedString) {
+        String body = quotedString.substring(1, quotedString.length() - 1);
+        StringBuilder text = new StringBuilder();
+        for (int i = 0; i < body.length(); i++) {
+            char c = body.charAt(i);
+            if (c != '\\') {
+                text.append(c);
+                continue;
+            }
+            i++;
+            char escaped = body.charAt(i);
+            if (escaped == 'n') {
+                text.append('\n');
+            } else if (escaped == 'u' && isUnicodeEscape(body, i)) {
+                text.append((char) Integer.parseInt(body.substring(i + 1, i + 5), 16));
+                i += 4;
+            } else if (escaped == '"' || escaped == '\\') {
+                text.append(escaped);
+            } else {
+                text.append('\\').append(escaped);
+            }
+        }
+        return text.toString();
     }
 
-    private String lineBreaks(String text) {
-        return text.replace("\\n", "\n");
+    /** True if the u at the given index starts a unicode escape: four hex digits follow. */
+    private boolean isUnicodeEscape(String body, int indexOfU) {
+        return indexOfU + 4 < body.length() && body.substring(indexOfU + 1, indexOfU + 5).matches("[0-9a-fA-F]{4}");
     }
 }

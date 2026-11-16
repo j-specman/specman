@@ -1,4 +1,4 @@
-package specman.editarea.image.plantuml;
+package specman.editarea.image;
 
 import specman.i18n.IButton;
 import specman.i18n.IFileNameExtensionFilter;
@@ -17,31 +17,27 @@ import java.io.File;
 
 import static specman.i18n.Messages.i18n;
 
-/** Asks for a file PlantUML source is taken from, either as the initial source of a new diagram or to replace the
+/** Asks for a file the source of a diagram is taken from, either as the initial source of a new diagram or to replace the
  * source of an existing one. For a new diagram the file is optional, so the dialog also offers to create an empty
  * diagram, with a button next to the ones to open and to cancel. Cancelling creates no diagram at all. */
-public class PlantUmlFileChooser extends JFileChooser {
-  /** The extensions PlantUML files commonly have. "wsd" is a heritage of WebSequenceDiagrams, which PlantUML tools
-   * took over. "iuml" is missing on purpose: Include files have no @startuml and can't be a diagram of their own.
-   * The filter is only a preselection, the user can still choose any file. */
-  private static final String[] PLANTUML_EXTENSIONS = {"puml", "plantuml", "pu", "wsd", "txt"};
-
+public class SourceFileChooser extends JFileChooser {
   private final boolean emptyDiagramOffered;
-  private final JButton emptyDiagramButton = new IButton("dialog.plantuml.choose.empty");
+  private final JButton emptyDiagramButton;
   private boolean emptyDiagramChosen;
 
   /** @param directory where the dialog starts, null for the user's default directory
    * @param emptyDiagramOffered whether the user may also choose to start without a file, which only makes sense
    *                            when creating a diagram, not when importing into an existing one */
-  public PlantUmlFileChooser(File directory, boolean emptyDiagramOffered) {
+  public SourceFileChooser(SourceFileKind kind, File directory, boolean emptyDiagramOffered) {
     super(directory);
     this.emptyDiagramOffered = emptyDiagramOffered;
-    setDialogTitle(i18n(emptyDiagramOffered ? "dialog.plantuml.choose.title" : "dialog.plantuml.import.title"));
+    this.emptyDiagramButton = new IButton(kind.emptyButtonKey);
+    setDialogTitle(i18n(emptyDiagramOffered ? kind.chooseTitleKey : kind.importTitleKey));
     setFileSelectionMode(JFileChooser.FILES_ONLY);
-    IFileNameExtensionFilter plantUmlFilter = new IFileNameExtensionFilter("msg.filter.plantuml", PLANTUML_EXTENSIONS);
-    addChoosableFileFilter(plantUmlFilter);
-    setFileFilter(plantUmlFilter);
-    emptyDiagramButton.setToolTipText(i18n("dialog.plantuml.choose.empty.tooltip"));
+    IFileNameExtensionFilter filter = new IFileNameExtensionFilter(kind.filterMessageKey, kind.extensions);
+    addChoosableFileFilter(filter);
+    setFileFilter(filter);
+    emptyDiagramButton.setToolTipText(i18n(kind.emptyButtonTooltipKey));
     emptyDiagramButton.addActionListener(e -> {
       emptyDiagramChosen = true;
       cancelSelection();
@@ -99,14 +95,14 @@ public class PlantUmlFileChooser extends JFileChooser {
     return -1;
   }
 
-  public PlantUmlFileChoice choose(Component parent) {
+  public SourceFileChoice choose(Component parent) {
     int result = showOpenDialog(parent);
     if (emptyDiagramChosen) {
-      return PlantUmlFileChoice.emptyDiagram();
+      return SourceFileChoice.emptyDiagram();
     }
     if (result == JFileChooser.APPROVE_OPTION && getSelectedFile() != null) {
-      return PlantUmlFileChoice.file(getSelectedFile());
+      return SourceFileChoice.file(getSelectedFile());
     }
-    return PlantUmlFileChoice.cancelled();
+    return SourceFileChoice.cancelled();
   }
 }

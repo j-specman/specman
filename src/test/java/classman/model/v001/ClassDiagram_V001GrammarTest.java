@@ -32,7 +32,7 @@ class ClassDiagram_V001GrammarTest {
   }
 
   private static String example(String name) throws IOException {
-    try (InputStream in = ClassDiagram_V001GrammarTest.class.getResourceAsStream(name + ".classdiagram")) {
+    try (InputStream in = ClassDiagram_V001GrammarTest.class.getResourceAsStream(name + ".cld")) {
       return new String(in.readAllBytes(), StandardCharsets.UTF_8);
     }
   }
@@ -79,7 +79,7 @@ class ClassDiagram_V001GrammarTest {
     assertThrows(IllegalStateException.class, () -> parse("classdiagram { extends A 1 -> * B }"));
   }
 
-  /** Keywords are fine as attribute names and types, but a class named like a keyword needs backticks. */
+  /** Keywords are fine as attribute names and types, but a class named like a keyword needs double quotes. */
   @Test
   void keywordsAsNames() {
     parse("classdiagram { class A { width : left } }");

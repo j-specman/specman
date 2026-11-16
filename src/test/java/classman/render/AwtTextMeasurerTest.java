@@ -8,6 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /** The measures depend on the fonts of the machine, so these tests only check what holds for every font. */
 class AwtTextMeasurerTest {
 
+  static {
+    // The fonts touch AWT, which reads this property once. Without it, headless tests running later in the same JVM fail.
+    System.setProperty("java.awt.headless", "true");
+  }
+
   private final AwtTextMeasurer measurer = new AwtTextMeasurer();
 
   /** A longer text is wider, and the width adds up for a text which repeats. */

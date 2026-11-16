@@ -20,7 +20,7 @@ class ClassDiagramSerializer_V001Test {
   private final ClassDiagramSerializer_V001 serializer = new ClassDiagramSerializer_V001();
 
   private static String example(String name) throws IOException {
-    try (InputStream in = ClassDiagramSerializer_V001Test.class.getResourceAsStream("/classman/model/v001/" + name + ".classdiagram")) {
+    try (InputStream in = ClassDiagramSerializer_V001Test.class.getResourceAsStream("/classman/model/v001/" + name + ".cld")) {
       return new String(in.readAllBytes(), StandardCharsets.UTF_8);
     }
   }
@@ -54,7 +54,18 @@ class ClassDiagramSerializer_V001Test {
         "// {\"classmanVersion\":\"0.1\",\"modelType\":\"classman.model.v001.ClassDiagramModel_V001\"}\n"), written);
   }
 
-  /** Names get backticks only if they have special characters or are keywords. */
+  /** Quote, backslash, line break and backtick in a text survive writing and reading, and no backtick is written. */
+  @Test
+  void specialCharactersEscaped() throws ClassDiagramParseException {
+    String text = "say \"hi\" to C:\\temp`s\r\nnext line";
+    ClassDiagramModel_V001 model = new ClassDiagramModel_V001(null);
+    model.elements.add(new NoteModel_V001(text));
+    String written = serializer.serialize(model);
+    assertTrue(!written.contains("`"), written);
+    assertEquals(text.replace("\r\n", "\n"), parser.parse(written).notes().get(0).text);
+  }
+
+  /** Names get quotes only if they have special characters or are keywords. */
   @Test
   void quotingOnlyWhenNeeded() throws ClassDiagramParseException {
     ClassDiagramModel_V001 model = new ClassDiagramModel_V001("Hilfe Versionierung");
@@ -62,10 +73,10 @@ class ClassDiagramSerializer_V001Test {
     model.elements.add(new ClassModel_V001("Hilfe Eintrag"));
     model.elements.add(new ClassModel_V001("left"));
     String written = serializer.serialize(model);
-    assertTrue(written.contains("classdiagram `Hilfe Versionierung` {"), written);
+    assertTrue(written.contains("classdiagram \"Hilfe Versionierung\" {"), written);
     assertTrue(written.contains("class Plain-Name\n"), written);
-    assertTrue(written.contains("class `Hilfe Eintrag`\n"), written);
-    assertTrue(written.contains("class `left`\n"), written);
+    assertTrue(written.contains("class \"Hilfe Eintrag\"\n"), written);
+    assertTrue(written.contains("class \"left\"\n"), written);
   }
 
   /** A line break in a label or note text is written as the two characters backslash and n. */
@@ -73,13 +84,13 @@ class ClassDiagramSerializer_V001Test {
   void lineBreakEscaping() throws ClassDiagramParseException {
     ClassDiagramModel_V001 model = new ClassDiagramModel_V001(null);
     model.elements.add(new NoteModel_V001("one\ntwo"));
-    assertTrue(serializer.serialize(model).contains("note `one\\ntwo`"));
+    assertTrue(serializer.serialize(model).contains("note \"one\\ntwo\""));
   }
 
   /** Attribute infos with spaces, commas or ranges survive writing and reading again. */
   @Test
   void infosRoundTrip() throws Exception {
-    String source = "classdiagram { class A { x [must be unique, `a, b`, 2..50] } }";
+    String source = "classdiagram { class A { x [must be unique, \"a, b\", 2..50] } }";
     assertEquals(ClassDiagramDump.of(parser.parse(source)), ClassDiagramDump.of(parser.parse(roundTrip(source))));
   }
 }

@@ -14,6 +14,7 @@ import net.atlanticbb.tantlinger.ui.text.actions.HTMLLineBreakAction;
 import net.atlanticbb.tantlinger.ui.text.actions.HTMLLinkAction;
 import net.atlanticbb.tantlinger.ui.text.actions.PasteAction;
 import net.atlanticbb.tantlinger.ui.text.actions.PasteFormattedAction;
+import net.atlanticbb.tantlinger.ui.text.actions.ClassmanAction;
 import net.atlanticbb.tantlinger.ui.text.actions.PlantUmlAction;
 import net.atlanticbb.tantlinger.ui.text.actions.SelectAllAction;
 import net.atlanticbb.tantlinger.ui.text.actions.SpecialCharAction;
@@ -80,6 +81,9 @@ public final class ShefActionIconMapper {
     }
     if (action instanceof PlantUmlAction) {
       return SpecmanIcons.PLANTUML;
+    }
+    if (action instanceof ClassmanAction) {
+      return SpecmanIcons.CLASSMAN;
     }
     if (action instanceof SpecialCharAction) {
       return SpecmanIcons.SPECIAL_CHARACTER;

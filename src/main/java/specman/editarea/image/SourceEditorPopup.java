@@ -1,4 +1,4 @@
-package specman.editarea.image.plantuml;
+package specman.editarea.image;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import specman.graphics.Styles;
@@ -18,11 +18,10 @@ import java.util.function.Consumer;
 import static specman.Specman.editor;
 import static specman.i18n.Messages.i18n;
 
-/** The editor for PlantUML source. Most intermediate states while typing are not sensible diagrams, so the diagram
- * is only updated on F5, and the editor can only be left with source that PlantUML accepts. A line below the text
- * names the problem, or the F5 key if there is none. */
-public class PlantUmlSourceEditorPopup extends NoteEditorPopup {
-  private static final PlantUmlSourceValidator VALIDATOR = new PlantUmlSourceValidator();
+/** The editor for the source of a diagram. Most intermediate states while typing are not sensible diagrams, so the
+ * diagram is only updated on F5, and the editor can only be left with source that the diagram's validator accepts.
+ * A line below the text names the problem, or the F5 key if there is none. */
+public class SourceEditorPopup extends NoteEditorPopup {
   private static final Font SOURCE_FONT = Styles.metaTagFont.deriveFont(Font.PLAIN, 13);
   private static final int COLUMNS = 30;
   private static final int MIN_ROWS = 6;
@@ -36,19 +35,24 @@ public class PlantUmlSourceEditorPopup extends NoteEditorPopup {
 
   private final JLabel statusLabel = new JLabel();
   private final Timer problemCheckTimer = new Timer(PROBLEM_CHECK_DELAY_MS, e -> updateStatus());
+  private final SourceValidator validator;
+  private final String hintMessageKey;
   private final Consumer<String> onPreview;
 
-  /** @param onPreview receives the source when the user presses F5 and the source has no problem */
-  public PlantUmlSourceEditorPopup(String source, Consumer<String> onCommit, Runnable onClosed,
-                                   Consumer<String> onPreview) {
-    this(scaledSourceFont(), source, onCommit, onClosed, onPreview);
+  /** @param hintMessageKey the message shown below the text as long as the source has no problem
+   * @param onPreview receives the source when the user presses F5 and the source has no problem */
+  public SourceEditorPopup(String source, Consumer<String> onCommit, Runnable onClosed, Consumer<String> onPreview,
+                           SourceValidator validator, String hintMessageKey) {
+    this(scaledSourceFont(), source, onCommit, onClosed, onPreview, validator, hintMessageKey);
   }
 
-  private PlantUmlSourceEditorPopup(Font font, String source, Consumer<String> onCommit, Runnable onClosed,
-                                    Consumer<String> onPreview) {
+  private SourceEditorPopup(Font font, String source, Consumer<String> onCommit, Runnable onClosed,
+                            Consumer<String> onPreview, SourceValidator validator, String hintMessageKey) {
     super(font, source, onCommit, onClosed);
     setTextSize(COLUMNS, MIN_ROWS, MAX_ROWS);
     this.onPreview = onPreview;
+    this.validator = validator;
+    this.hintMessageKey = hintMessageKey;
     statusLabel.setFont(font.deriveFont(Font.PLAIN));
     statusLabel.setBackground(NOTE_BACKGROUND);
     statusLabel.setOpaque(true);
@@ -74,7 +78,7 @@ public class PlantUmlSourceEditorPopup extends NoteEditorPopup {
   @Override
   protected boolean canCommit() {
     problemCheckTimer.stop();
-    return VALIDATOR.problemOf(text()) == null;
+    return validator.problemOf(text()) == null;
   }
 
   @Override
@@ -88,7 +92,7 @@ public class PlantUmlSourceEditorPopup extends NoteEditorPopup {
   }
 
   private void preview() {
-    String problem = VALIDATOR.problemOf(text());
+    String problem = validator.problemOf(text());
     showStatus(problem);
     if (problem == null) {
       onPreview.accept(text());
@@ -96,12 +100,12 @@ public class PlantUmlSourceEditorPopup extends NoteEditorPopup {
   }
 
   private void updateStatus() {
-    showStatus(VALIDATOR.problemOf(text()));
+    showStatus(validator.problemOf(text()));
   }
 
   private void showStatus(String problem) {
     statusLabel.setForeground(problem != null ? Styles.PROBLEM_COLOR : HINT_COLOR);
-    statusLabel.setText(wrappedToTextWidth(problem != null ? problem : i18n("msg.plantuml.hint")));
+    statusLabel.setText(wrappedToTextWidth(problem != null ? problem : i18n(hintMessageKey)));
     pack();
   }
 

@@ -4,7 +4,7 @@ import net.atlanticbb.tantlinger.ui.text.actions.PlantUmlAction;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import specman.editarea.EditContainer;
-import specman.editarea.image.plantuml.PlantUmlFileChoice;
+import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 
 import java.io.IOException;
@@ -82,19 +82,19 @@ class PlantUmlFileImportTest extends AbstractPlantUmlTest {
   void testCancellingInsertsNothing() {
     EditContainer container = containerOfNewStep();
 
-    insertFrom(PlantUmlFileChoice.cancelled());
+    insertFrom(SourceFileChoice.cancelled());
 
     assertFalse(hasDiagram(container), "no diagram must be inserted");
     assertEquals(List.of(), specman.shownMessages());
   }
 
-  private static PlantUmlFileChoice fileWith(Path directory, String content) throws IOException {
+  private static SourceFileChoice fileWith(Path directory, String content) throws IOException {
     Path file = directory.resolve("diagram.puml");
     Files.writeString(file, content, StandardCharsets.UTF_8);
-    return PlantUmlFileChoice.file(file.toFile());
+    return SourceFileChoice.file(file.toFile());
   }
 
-  private static void insertFrom(PlantUmlFileChoice choice) {
+  private static void insertFrom(SourceFileChoice choice) {
     specman.answerPlantUmlFileChoiceWith(choice);
     specman.doEdit(PlantUmlAction.class);
     specman.layoutComponents();

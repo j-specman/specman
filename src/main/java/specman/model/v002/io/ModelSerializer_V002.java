@@ -21,6 +21,8 @@ import specman.model.v002.IfElseStepModel_V002;
 import specman.model.v002.IfStepModel_V002;
 import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
+import specman.model.v002.AbstractSourceImageEditAreaModel_V002;
+import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.model.v002.PlantUmlImageEditAreaModel_V002;
 import specman.model.v002.SvgImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
@@ -113,7 +115,8 @@ public class ModelSerializer_V002 {
         sb.append(COMMENT_INTRO + " markups=[...] fields: change-tracking annotations, maintained by Specman\n");
         sb.append(COMMENT_INTRO + " image(..., type=png) { [base64:...] } blocks: embedded binary image data (base64-encoded)\n");
         sb.append(COMMENT_INTRO + " image(..., type=plantuml) { `...` } blocks: PlantUML source of a diagram, Specman renders the picture from it\n");
-        sb.append(COMMENT_INTRO + " backup=(changeset, `...`) in a plantuml image: source from before that change set changed it, maintained by Specman, leave it alone\n");
+        sb.append(COMMENT_INTRO + " image(..., type=classman) { `...` } blocks: Classman class diagram source, Specman renders the picture from it\n");
+        sb.append(COMMENT_INTRO + " backup=(changeset, `...`) in a plantuml or classman image: source from before that change set changed it, maintained by Specman, leave it alone\n");
 
         appendSettings(model);
 
@@ -404,8 +407,8 @@ public class ModelSerializer_V002 {
             sb.append(", ").append(anno);
         }
         sb.append(")");
-        if (imageArea instanceof PlantUmlImageEditAreaModel_V002 plantUml && plantUml.hasBackup()) {
-            appendPlantUmlContentWithBackup(plantUml);
+        if (imageArea instanceof AbstractSourceImageEditAreaModel_V002 sourceArea && sourceArea.hasBackup()) {
+            appendSourceContentWithBackup(sourceArea);
         }
         else {
             sb.append(" { ").append(imageContentOf(imageArea)).append(" }\n");
@@ -413,12 +416,12 @@ public class ModelSerializer_V002 {
     }
 
     /** The source is not indented, because everything between the backticks is the source. */
-    private void appendPlantUmlContentWithBackup(PlantUmlImageEditAreaModel_V002 plantUml) {
-        String changeset = plantUml.backupChangeset != null ? plantUml.backupChangeset : "yellow";
+    private void appendSourceContentWithBackup(AbstractSourceImageEditAreaModel_V002 sourceArea) {
+        String changeset = sourceArea.backupChangeset != null ? sourceArea.backupChangeset : "yellow";
         sb.append(" {\n");
-        sb.append(indent()).append("    `").append(plantUml.source).append("`,\n");
+        sb.append(indent()).append("    `").append(sourceArea.source).append("`,\n");
         sb.append(indent()).append("    ").append(BACKUP).append("=(").append(changeset)
-          .append(", `").append(plantUml.backupSource).append("`)\n");
+          .append(", `").append(sourceArea.backupSource).append("`)\n");
         sb.append(indent()).append("}\n");
     }
 
@@ -428,6 +431,9 @@ public class ModelSerializer_V002 {
         }
         if (imageArea instanceof SvgImageEditAreaModel_V002) {
             return SvgImageEditAreaModel_V002.IMAGE_TYPE;
+        }
+        if (imageArea instanceof ClassmanImageEditAreaModel_V002) {
+            return ClassmanImageEditAreaModel_V002.IMAGE_TYPE;
         }
         String type = ((ImageEditAreaModel_V002) imageArea).imageType;
         return type != null ? type : "png";
@@ -439,6 +445,9 @@ public class ModelSerializer_V002 {
         }
         if (imageArea instanceof SvgImageEditAreaModel_V002 svg) {
             return "`" + svg.source.replace("`", BACKTICK_CHARACTER_REFERENCE) + "`";
+        }
+        if (imageArea instanceof ClassmanImageEditAreaModel_V002 classman) {
+            return "`" + classman.source + "`";
         }
         byte[] imageData = ((ImageEditAreaModel_V002) imageArea).imageData;
         return "[base64:" + (imageData != null ? Base64.getEncoder().encodeToString(imageData) : "") + "]";

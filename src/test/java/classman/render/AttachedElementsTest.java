@@ -103,7 +103,7 @@ class AttachedElementsTest {
   /** A note attached to a class gets a dashed line from its border to the border of the class. */
   @Test
   void noteLinkDashed() throws ClassDiagramParseException {
-    Scene scene = layout("class A (aa000001) at(0, 0)\nnote at(0, 100) `n` attach(aa000001)");
+    Scene scene = layout("class A (aa000001) at(0, 0)\nnote at(0, 100) \"n\" attach(aa000001)");
     ScenePolyline link = all(scene, ScenePolyline.class).get(0);
     assertTrue(link.dashed);
     assertEquals(20, link.xs[0], 1e-9);
@@ -116,7 +116,7 @@ class AttachedElementsTest {
   @Test
   void noteLinkToAttributeFromRight() throws ClassDiagramParseException {
     ScenePolyline link = lastLine(layout(
-        "class A at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote at(200, 0) `n` attach(0a0a0a0a)"));
+        "class A at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote at(200, 0) \"n\" attach(0a0a0a0a)"));
     assertEquals(68, link.xs[1], 1e-9);
     assertEquals(62, link.ys[1], 1e-9);
   }
@@ -125,7 +125,7 @@ class AttachedElementsTest {
   @Test
   void noteLinkToAttributeFromLeft() throws ClassDiagramParseException {
     ScenePolyline link = lastLine(layout(
-        "class A at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote at(-200, 0) `n` attach(0a0a0a0a)"));
+        "class A at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote at(-200, 0) \"n\" attach(0a0a0a0a)"));
     assertEquals(4, link.xs[1], 1e-9);
     assertEquals(62, link.ys[1], 1e-9);
   }
@@ -133,7 +133,7 @@ class AttachedElementsTest {
   /** A note attached to a relation is linked to the middle of the relation. */
   @Test
   void noteLinkToRelation() throws ClassDiagramParseException {
-    ScenePolyline link = lastLine(layout(STACKED + "association (11110000) A -- B\nnote at(100, 60) `n` attach(11110000)"));
+    ScenePolyline link = lastLine(layout(STACKED + "association (11110000) A -- B\nnote at(100, 60) \"n\" attach(11110000)"));
     assertEquals(20, link.xs[1], 1e-9);
     assertEquals(76, link.ys[1], 1e-9);
   }
@@ -142,7 +142,7 @@ class AttachedElementsTest {
   @Test
   void noteLinkOverWaypoints() throws ClassDiagramParseException {
     ScenePolyline link = lastLine(layout(
-        "class A (aa000001) at(0, 0)\nnote at(0, -100) `n` attach(aa000001) route (60, -40) (60, 28)"));
+        "class A (aa000001) at(0, 0)\nnote at(0, -100) \"n\" attach(aa000001) route (60, -40) (60, 28)"));
     assertEquals(4, link.xs.length);
     assertEquals(32.17, link.xs[0], 0.01);
     assertEquals(-72, link.ys[0], 1e-9);
@@ -158,7 +158,7 @@ class AttachedElementsTest {
   @Test
   void attributeSideFromLastWaypoint() throws ClassDiagramParseException {
     ScenePolyline link = lastLine(layout("class A at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\n"
-        + "note at(200, 0) `n` attach(0a0a0a0a) route (150, -20) (-30, 62)"));
+        + "note at(200, 0) \"n\" attach(0a0a0a0a) route (150, -20) (-30, 62)"));
     assertEquals(4, link.xs[link.xs.length - 1], 1e-9);
     assertEquals(62, link.ys[link.ys.length - 1], 1e-9);
   }
@@ -166,7 +166,7 @@ class AttachedElementsTest {
   /** The scene covers waypoints which lie outside of the boxes. */
   @Test
   void sceneCoversWaypoints() throws ClassDiagramParseException {
-    Scene scene = layout("class A (aa000001) at(0, 0)\nnote at(100, 0) `n` attach(aa000001) route (500, 400) (100, 60)");
+    Scene scene = layout("class A (aa000001) at(0, 0)\nnote at(100, 0) \"n\" attach(aa000001) route (500, 400) (100, 60)");
     assertTrue(scene.x + scene.width >= 500);
     assertTrue(scene.y + scene.height >= 400);
   }
@@ -174,14 +174,14 @@ class AttachedElementsTest {
   /** A note which isn't attached has no line. */
   @Test
   void freeNoteWithoutLink() throws ClassDiagramParseException {
-    assertTrue(all(layout("class A\nnote `n`"), ScenePolyline.class).isEmpty());
+    assertTrue(all(layout("class A\nnote \"n\""), ScenePolyline.class).isEmpty());
   }
 
   /** A note attached to an ID which no element of the diagram has can't be drawn. */
   @Test
   void noteLinkToUnknownIdRejected() {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> layout("class A (aa000001)\nnote `n` attach(deadbeef)"));
+        () -> layout("class A (aa000001)\nnote \"n\" attach(deadbeef)"));
     assertTrue(e.getMessage().contains("deadbeef"), e.getMessage());
   }
 
@@ -189,7 +189,7 @@ class AttachedElementsTest {
   @Test
   void duplicateIdRejected() {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> layout("class A (aa000001)\nclass B (aa000001)\nnote `n` attach(aa000001)"));
+        () -> layout("class A (aa000001)\nclass B (aa000001)\nnote \"n\" attach(aa000001)"));
     assertTrue(e.getMessage().contains("aa000001"), e.getMessage());
   }
 }

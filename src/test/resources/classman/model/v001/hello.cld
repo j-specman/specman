@@ -10,5 +10,5 @@ classdiagram {
         Beschreibung
     }
 
-    composition Hilfeversion 1 -> * HilfeversionMarkup `sprachabh. Beschreibung`
+    composition Hilfeversion 1 -> * HilfeversionMarkup "sprachabh. Beschreibung"
 }

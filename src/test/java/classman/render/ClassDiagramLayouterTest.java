@@ -89,7 +89,7 @@ class ClassDiagramLayouterTest {
   /** With a given width, attributes wrap at spaces and the following lines are indented. */
   @Test
   void attributeWrapping() throws ClassDiagramParseException {
-    Scene scene = layout("class A at(0, 0) width=60 { `xx yy zz` }");
+    Scene scene = layout("class A at(0, 0) width=60 { \"xx yy zz\" }");
     assertEquals(60, all(scene, SceneRectangle.class).get(0).width);
     assertEquals(List.of("A", "xx", "yy", "zz"), texts(scene));
     assertEquals(PADDING_X, textNamed(scene, "xx").x);
@@ -150,7 +150,7 @@ class ClassDiagramLayouterTest {
   /** A note with a given width wraps its text, and its outline has a folded corner. */
   @Test
   void noteGivenWidth() throws ClassDiagramParseException {
-    Scene scene = layout("note at(0, 0) width=120 `aa bb cc dd`");
+    Scene scene = layout("note at(0, 0) width=120 \"aa bb cc dd\"");
     assertEquals(List.of("aa bb cc", "dd"), texts(scene));
     ScenePolygon outline = all(scene, ScenePolygon.class).get(0);
     assertEquals(DiagramStyle.NOTE_FILL, outline.fill);
@@ -162,7 +162,7 @@ class ClassDiagramLayouterTest {
   /** A note without width is as wide as its longest line, and its text keeps clear of the folded corner. */
   @Test
   void noteWidthFromLongestLine() throws ClassDiagramParseException {
-    Scene scene = layout("note at(0, 0) `abc\\nabcdefgh`");
+    Scene scene = layout("note at(0, 0) \"abc\\nabcdefgh\"");
     assertEquals(List.of("abc", "abcdefgh"), texts(scene));
     double width = all(scene, ScenePolygon.class).get(0).xs[2];
     assertEquals(8 * CHAR + PADDING_X + DiagramStyle.NOTE_RIGHT_PADDING, width);
@@ -173,14 +173,14 @@ class ClassDiagramLayouterTest {
   /** A note without width wraps its text when it would be wider than the maximum. */
   @Test
   void noteWrapsAtMaxWidth() throws ClassDiagramParseException {
-    Scene scene = layout("note `aaaaa bbbbb ccccc ddddd eeeee fffff`");
+    Scene scene = layout("note \"aaaaa bbbbb ccccc ddddd eeeee fffff\"");
     assertEquals(List.of("aaaaa bbbbb ccccc", "ddddd eeeee fffff"), texts(scene));
   }
 
   /** Notes without at() are stacked together with the classes. */
   @Test
   void notesInStack() throws ClassDiagramParseException {
-    Scene scene = layout("class AAAAAAAA\nnote `n`");
+    Scene scene = layout("class AAAAAAAA\nnote \"n\"");
     SceneRectangle box = all(scene, SceneRectangle.class).get(0);
     ScenePolygon note = all(scene, ScenePolygon.class).get(0);
     assertEquals(box.y + box.height + STACK_GAP, note.ys[0]);

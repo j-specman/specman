@@ -1,14 +1,14 @@
-package specman.editarea.image.plantuml;
+package specman.editarea.image;
 
 import specman.ChangeSet;
 
-/** The PlantUML source from before a change set changed it. Like the markups of a text, it is the content's own
+/** The source of a diagram from before a change set changed it. Like the markups of a text, it is the content's own
  * change tracking: The area as a whole stays unchanged as far as its change info is concerned. */
-public class PlantUmlSourceBackup {
+public class SourceBackup {
   private final String source;
   private final ChangeSet changeSet;
 
-  public PlantUmlSourceBackup(String source, ChangeSet changeSet) {
+  public SourceBackup(String source, ChangeSet changeSet) {
     this.source = source;
     this.changeSet = changeSet;
   }
@@ -19,5 +19,5 @@ public class PlantUmlSourceBackup {
 
   public boolean changedBy(ChangeSet by) { return changeSet == by; }
 
-  public PlantUmlSourceBackup reassign(ChangeSet target) { return new PlantUmlSourceBackup(source, target); }
+  public SourceBackup reassign(ChangeSet target) { return new SourceBackup(source, target); }
 }

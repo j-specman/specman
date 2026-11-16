@@ -43,7 +43,7 @@ class ClassDiagramParser_V001Test {
   @Test
   void classHeaderParts() throws ClassDiagramParseException {
     ClassModel_V001 c = onlyClass("""
-        class `Hilfe Eintrag` (9a31c4e0) at(-20, 30) width=140 <<Entity>> {TABLENAME=helpversion, SCHEMA=`x y`} {
+        class \"Hilfe Eintrag\" (9a31c4e0) at(-20, 30) width=140 <<Entity>> {TABLENAME=helpversion, SCHEMA=\"x y\"} {
           -Name : String [Pflicht, 2..50, TN=key]
           ...
         }""");
@@ -78,10 +78,10 @@ class ClassDiagramParser_V001Test {
     assertTrue(c.attributes.isEmpty());
   }
 
-  /** Backticks around an attribute name or type are dropped, the text inside is kept. */
+  /** Quotes around an attribute name or type are dropped, the text inside is kept. */
   @Test
   void quotedAttributeNameAndType() throws ClassDiagramParseException {
-    ClassModel_V001 c = onlyClass("class A { `In Baum anzeigen` : `J/N ja` }");
+    ClassModel_V001 c = onlyClass("class A { \"In Baum anzeigen\" : \"J/N ja\" }");
     AttributeModel_V001 attribute = c.attributes.get(0);
     assertNull(attribute.visibility);
     assertEquals("In Baum anzeigen", attribute.name);
@@ -102,13 +102,13 @@ class ClassDiagramParser_V001Test {
     assertEquals(1, onlyClass("class A { x }").attributes.size());
   }
 
-  /** Two attributes in one line mean a forgotten backtick. The parser reports it with the line number. */
+  /** Two attributes in one line mean forgotten quotes. The parser reports it with the line number. */
   @Test
   void unquotedSpacesRejected() {
     ClassDiagramParseException e = assertThrows(ClassDiagramParseException.class,
         () -> parse("class A {\n  In Baum anzeigen : J/N\n}"));
     assertTrue(e.getMessage().startsWith("line 3"), e.getMessage());
-    assertTrue(e.getMessage().contains("backticks"), e.getMessage());
+    assertTrue(e.getMessage().contains("double quotes"), e.getMessage());
   }
 
   /** Attributes in separate lines are separate attributes. */
@@ -130,7 +130,7 @@ class ClassDiagramParser_V001Test {
   /** The diagram name is read, and it may be missing. */
   @Test
   void diagramName() throws ClassDiagramParseException {
-    assertEquals("Hilfe Versionierung", parser.parse("classdiagram `Hilfe Versionierung` { }").name);
+    assertEquals("Hilfe Versionierung", parser.parse("classdiagram \"Hilfe Versionierung\" { }").name);
     assertNull(parser.parse("classdiagram { }").name);
   }
 
@@ -138,7 +138,7 @@ class ClassDiagramParser_V001Test {
   @Test
   void associationParts() throws ClassDiagramParseException {
     AssociationRelationModel_V001 r = assertInstanceOf(AssociationRelationModel_V001.class,
-        parse("association (0123abcd) A 1 -> 0..* B `first\\nsecond`").relations().get(0));
+        parse("association (0123abcd) A 1 -> 0..* B \"first\\nsecond\"").relations().get(0));
     assertEquals(RelationType_V001.ASSOCIATION, r.type);
     assertEquals("0123abcd", r.id);
     assertEquals("A", r.from);
@@ -164,17 +164,17 @@ class ClassDiagramParser_V001Test {
   /** Extends and implements become their own model classes. */
   @Test
   void extendsAndImplements() throws ClassDiagramParseException {
-    List<AbstractRelationModel_V001> relations = parse("extends A -> B `is a`\nimplements A -> C").relations();
+    List<AbstractRelationModel_V001> relations = parse("extends A -> B \"is a\"\nimplements A -> C").relations();
     assertInstanceOf(ExtendsRelationModel_V001.class, relations.get(0));
     assertEquals("is a", relations.get(0).label);
     assertInstanceOf(ImplementsRelationModel_V001.class, relations.get(1));
     assertEquals("C", relations.get(1).to);
   }
 
-  /** A route has a start anchor, waypoints and an end anchor. Names in backticks work in anchors. */
+  /** A route has a start anchor, waypoints and an end anchor. Quoted names work in anchors. */
   @Test
   void routeAnchorsAndWaypoints() throws ClassDiagramParseException {
-    AbstractRelationModel_V001 r = parse("association A -> B\n  route A.top@5 (10, 20) (30, -40) `B C`.left@7").relations().get(0);
+    AbstractRelationModel_V001 r = parse("association A -> B\n  route A.top@5 (10, 20) (30, -40) \"B C\".left@7").relations().get(0);
     assertEquals("A", r.route.start.className);
     assertEquals(Side_V001.TOP, r.route.start.side);
     assertEquals(5, r.route.start.offset);
@@ -196,26 +196,45 @@ class ClassDiagramParser_V001Test {
     assertEquals("since", r.assocClass.attributes.get(0).name);
   }
 
+  /** Strings know escapes for a line break, a quote, a backslash and a backtick, which is a unicode escape. */
+  @Test
+  void stringEscapes() throws ClassDiagramParseException {
+    NoteModel_V001 note = parse("note \"a\\\"b\\\\c\\u0060d\\ne\"").notes().get(0);
+    assertEquals("a\"b\\c`d\ne", note.text);
+  }
+
+  /** A backslash which starts no known escape stays in the text. */
+  @Test
+  void unknownEscapeKept() throws ClassDiagramParseException {
+    assertEquals("C:\\temp", parse("note \"C:\\temp\"").notes().get(0).text);
+  }
+
+  /** A backtick in a string is refused, it has to be written as the escape, so that the source never has one. */
+  @Test
+  void backtickInStringRejected() {
+    assertThrows(ClassDiagramParseException.class, () -> parse("note \"a`b\""));
+  }
+
   /** A note with id, position, width, text with a line break and the ID of the element it is attached to. */
   @Test
   void noteParts() throws ClassDiagramParseException {
-    NoteModel_V001 note = parse("note (aabbccdd) at(1, 2) width=90 `one\\ntwo` attach(11223344)").notes().get(0);
+    NoteModel_V001 note = parse("note (aabbccdd) at(1, 2) width=90 \"one\\ntwo\" attach(11223344)").notes().get(0);
     assertEquals("aabbccdd", note.id);
     assertEquals(1, note.position.x);
     assertEquals(90, note.width);
     assertEquals("one\ntwo", note.text);
     assertEquals("11223344", note.attachedToId);
-    assertNull(parse("note `free`").notes().get(0).attachedToId);
+    assertNull(parse("note \"free\"").notes().get(0).attachedToId);
   }
 
   /** The dashed line of a note can lead over waypoints. */
   @Test
   void noteRoute() throws ClassDiagramParseException {
-    NoteModel_V001 note = parse("note `n` attach(11223344) route (10, 20) (30, -40)").notes().get(0);
+    NoteModel_V001 note = parse("note \"n\" attach(11223344) route (10, 20) (30, -40)").notes().get(0);
     assertEquals(2, note.attachWaypoints.size());
     assertEquals(10, note.attachWaypoints.get(0).x);
     assertEquals(-40, note.attachWaypoints.get(1).y);
-    assertTrue(parse("note `n` attach(11223344)").notes().get(0).attachWaypoints.isEmpty());
+    assertTrue(parse("note \"n\" attach(11223344)").notes().get(0).attachWaypoints.isEmpty());
   }
 
   /** An attribute can have an ID after its name, so that notes can be attached to it. */
@@ -231,7 +250,7 @@ class ClassDiagramParser_V001Test {
   @Test
   void elementSourceOrder() throws ClassDiagramParseException {
     List<AbstractDiagramElementModel_V001> elements =
-        parse("class A\nnote `n`\nclass B\nextends A -> B\nnote `m`").elements;
+        parse("class A\nnote \"n\"\nclass B\nextends A -> B\nnote \"m\"").elements;
     assertEquals(List.of(ClassModel_V001.class, NoteModel_V001.class, ClassModel_V001.class,
         ExtendsRelationModel_V001.class, NoteModel_V001.class),
         elements.stream().<Class<?>>map(Object::getClass).toList());

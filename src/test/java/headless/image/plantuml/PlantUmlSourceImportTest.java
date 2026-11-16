@@ -3,8 +3,8 @@ package headless.image.plantuml;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import specman.ChangeSet;
-import specman.editarea.image.plantuml.PlantUmlContextMenu;
-import specman.editarea.image.plantuml.PlantUmlFileChoice;
+import specman.editarea.image.SourceImageContextMenu;
+import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 
 import java.io.IOException;
@@ -58,7 +58,7 @@ class PlantUmlSourceImportTest extends AbstractPlantUmlTest {
   void testCancellingChangesNothing() {
     PlantUmlImageEditArea diagram = existingDiagram();
 
-    importFrom(diagram, PlantUmlFileChoice.cancelled());
+    importFrom(diagram, SourceFileChoice.cancelled());
 
     assertEquals(TWO_CLASSES, diagram.getSource());
     assertEquals(List.of(), specman.shownMessages());
@@ -92,14 +92,14 @@ class PlantUmlSourceImportTest extends AbstractPlantUmlTest {
     return diagram;
   }
 
-  private static PlantUmlFileChoice fileWith(Path directory, String content) throws IOException {
+  private static SourceFileChoice fileWith(Path directory, String content) throws IOException {
     Path file = directory.resolve("diagram.puml");
     Files.writeString(file, content, StandardCharsets.UTF_8);
-    return PlantUmlFileChoice.file(file.toFile());
+    return SourceFileChoice.file(file.toFile());
   }
 
-  private static void importFrom(PlantUmlImageEditArea diagram, PlantUmlFileChoice choice) {
+  private static void importFrom(PlantUmlImageEditArea diagram, SourceFileChoice choice) {
     specman.answerPlantUmlFileChoiceWith(choice);
-    specman.clickContextMenuItem(diagram, PlantUmlContextMenu.IMPORT_ITEM);
+    specman.clickContextMenuItem(diagram, SourceImageContextMenu.IMPORT_ITEM);
   }
 }

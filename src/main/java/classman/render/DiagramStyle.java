@@ -38,7 +38,7 @@ public final class DiagramStyle {
     /** The shipped font. A viewer without it falls back to the following families. */
     public static final String FONT_FAMILY = "Roboto";
     public static final String SVG_FONT_FAMILIES = FONT_FAMILY + ", Arial, sans-serif";
-    public static final int FONT_SIZE = 11;
+    public static final int FONT_SIZE = 12;
     /** The empty space around the scene in an SVG. */
     public static final double SVG_MARGIN = 10;
 

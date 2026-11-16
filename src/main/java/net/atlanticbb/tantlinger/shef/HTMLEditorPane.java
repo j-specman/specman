@@ -244,6 +244,10 @@ public class HTMLEditorPane extends JPanel
     actionList.add(act);
     insertMenu.add(act);
 
+    act = new ClassmanAction();
+    actionList.add(act);
+    insertMenu.add(act);
+
     act = new TableAction();
     actionList.add(act);
     insertMenu.add(act);
@@ -368,6 +372,10 @@ public class HTMLEditorPane extends JPanel
     textAreaButtons.add(addToToolBar(insertGroupComponents, act));
 
     act = new PlantUmlAction();
+    actionList.add(act);
+    textAreaButtons.add(addToToolBar(insertGroupComponents, act));
+
+    act = new ClassmanAction();
     actionList.add(act);
     textAreaButtons.add(addToToolBar(insertGroupComponents, act));
 

@@ -27,6 +27,7 @@ grammar SpecmanModel_V002;
 //   image            — type=png: inline base64 image data, agents must ignore these blocks.
 //                      type=plantuml: PlantUML source in backticks, agents can read and edit it.
 //                      type=svg: SVG source in backticks, agents can read it.
+//                      type=classman: Classman class diagram source in backticks, agents can read and edit it.
 //
 // EditContainer pattern (EditorContentModel_V002):
 //   Wherever the model contains an EditorContentModel, the format
@@ -292,15 +293,20 @@ tableCell
 
 // ImageEditAreaModel_V002 (type=png, content [base64:...]) — agents must skip these blocks entirely.
 // PlantUmlImageEditAreaModel_V002 (type=plantuml, content = PlantUML source in backticks) — agents can read and
-// edit the source like any other text; Specman renders the diagram from it when loading.
+// edit the source like any other text; Specman renders the diagram from it when loading (type=plantuml and type=classman).
 // backup=(changeset, `source`) is the content's own change tracking, like markups for text: the source from before
 // the named change set changed it. Specman maintains it for accepting and rejecting the change, agents leave it alone.
 // SvgImageEditAreaModel_V002 (type=svg, content = SVG source in backticks) — an imported vector graphic, which is
 // not edited in Specman. Backticks in the SVG are written as the character reference &#96;.
+// ClassmanImageEditAreaModel_V002 (type=classman, content = Classman class diagram source in backticks) — agents can
+// read and edit the source like any other text; Specman lays out and renders the diagram from it when loading. The
+// source never contains a backtick: strings in it are in double quotes, and a backtick inside a string is written
+// as the escape \u0060. The syntax of the source is the grammar ClassDiagram_V001.g4.
 imageBlock
     : 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' ID (',' changeParam)? ')' '{' BASE64_BLOCK '}'
     | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'plantuml' (',' changeParam)? ')' '{' BACKTICK_STRING (',' backupAttr)? '}'
     | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'svg' (',' changeParam)? ')' '{' BACKTICK_STRING '}'
+    | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'classman' (',' changeParam)? ')' '{' BACKTICK_STRING (',' backupAttr)? '}'
     ;
 
 backupAttr
@@ -438,6 +444,7 @@ KW_CELL            : 'cell' ;
 KW_IMAGE           : 'image' ;
 KW_PLANTUML        : 'plantuml' ;
 KW_SVG             : 'svg' ;
+KW_CLASSMAN        : 'classman' ;
 KW_TEXT            : 'text' ;
 KW_ORDERED         : 'ordered' ;
 KW_FLAT            : 'flat' ;

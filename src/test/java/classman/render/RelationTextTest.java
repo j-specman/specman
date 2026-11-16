@@ -78,14 +78,14 @@ class RelationTextTest {
   /** A label on a horizontal line is centered above the middle of the line. */
   @Test
   void labelAboveHorizontalLine() throws ClassDiagramParseException {
-    Scene scene = layout(SIDE_BY_SIDE + "association A -- B `owns`");
+    Scene scene = layout(SIDE_BY_SIDE + "association A -- B \"owns\"");
     assertText(textNamed(scene, "owns"), 170, 22, TextAnchor.MIDDLE);
   }
 
   /** A label with several lines grows upwards from the line, the last line closest to it. */
   @Test
   void multiLineLabelAboveLine() throws ClassDiagramParseException {
-    Scene scene = layout(SIDE_BY_SIDE + "association A -- B `first\\nsecond`");
+    Scene scene = layout(SIDE_BY_SIDE + "association A -- B \"first\\nsecond\"");
     assertText(textNamed(scene, "first"), 170, 2, TextAnchor.MIDDLE);
     assertText(textNamed(scene, "second"), 170, 22, TextAnchor.MIDDLE);
   }
@@ -93,7 +93,7 @@ class RelationTextTest {
   /** A label on a vertical line stands right of the line, centered on its middle. */
   @Test
   void labelRightOfVerticalLine() throws ClassDiagramParseException {
-    Scene scene = layout(STACKED + "association A -- B `two\\nlines`");
+    Scene scene = layout(STACKED + "association A -- B \"two\\nlines\"");
     assertText(textNamed(scene, "two"), 26, 71, TextAnchor.START);
     assertText(textNamed(scene, "lines"), 26, 91, TextAnchor.START);
   }
@@ -102,7 +102,7 @@ class RelationTextTest {
   @Test
   void labelOnLongestSegment() throws ClassDiagramParseException {
     Scene scene = layout("class A at(0, 0)\nclass B at(200, 100)\n"
-        + "association A -- B `on route`\n  route A.bottom@10 (10, 150) B.left@20");
+        + "association A -- B \"on route\"\n  route A.bottom@10 (10, 150) B.left@20");
     assertText(textNamed(scene, "on route"), 105, 129, TextAnchor.MIDDLE);
   }
 
@@ -110,7 +110,7 @@ class RelationTextTest {
   @Test
   void sceneCoversLongLabel() throws ClassDiagramParseException {
     String label = "x".repeat(50);
-    Scene scene = layout(SIDE_BY_SIDE + "association A -- B `" + label + "`");
+    Scene scene = layout(SIDE_BY_SIDE + "association A -- B \"" + label + "\"");
     assertEquals(170 - 250, scene.x, 1e-9);
     assertTrue(scene.x + scene.width >= 170 + 250);
   }
@@ -118,7 +118,7 @@ class RelationTextTest {
   /** The text knows its width, the layout needs it to place and measure. */
   @Test
   void textKnowsItsWidth() throws ClassDiagramParseException {
-    List<SceneText> texts = all(layout(SIDE_BY_SIDE + "association A -- B `owns`"), SceneText.class);
+    List<SceneText> texts = all(layout(SIDE_BY_SIDE + "association A -- B \"owns\""), SceneText.class);
     assertEquals(40, texts.stream().filter(text -> text.text.equals("owns")).findFirst().get().width, 1e-9);
   }
 }

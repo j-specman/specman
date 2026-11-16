@@ -2,8 +2,8 @@ package specman.undo.props;
 
 import specman.ChangeInfo;
 import specman.editarea.EditArea;
-import specman.editarea.image.plantuml.PlantUmlImageEditArea;
-import specman.editarea.image.plantuml.PlantUmlSourceBackup;
+import specman.editarea.image.AbstractSourceSvgImageEditArea;
+import specman.editarea.image.SourceBackup;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.metatag.stepnumberlabel.StepnumberLabel.LabelStructure;
 import specman.undo.AbstractUndoableInteraction;
@@ -69,7 +69,7 @@ public class UDBL {
     }
   }
 
-  public static void setPlantUmlSourceUDBL(PlantUmlImageEditArea diagram, String source) {
+  public static void setSourceUDBL(AbstractSourceSvgImageEditArea diagram, String source) {
     String undoSource = diagram.getSource();
     if (!Objects.equals(undoSource, source)) {
       diagram.setSource(source);
@@ -77,8 +77,8 @@ public class UDBL {
     }
   }
 
-  public static void setPlantUmlBackupUDBL(PlantUmlImageEditArea diagram, PlantUmlSourceBackup backup) {
-    PlantUmlSourceBackup undoBackup = diagram.getBackup();
+  public static void setSourceBackupUDBL(AbstractSourceSvgImageEditArea diagram, SourceBackup backup) {
+    SourceBackup undoBackup = diagram.getBackup();
     if (!Objects.equals(undoBackup, backup)) {
       diagram.setBackup(backup);
       addEdit(new UndoableSetProperty<>(undoBackup, diagram::setBackup, diagram::getBackup));

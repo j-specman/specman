@@ -144,7 +144,7 @@ public class ClassDiagramSerializer_V001 {
         }
         out.append(' ').append(name(relation.to));
         if (relation.label != null) {
-            out.append(' ').append(quoted(escapeLineBreaks(relation.label)));
+            out.append(' ').append(quoted(relation.label));
         }
         out.append('\n');
         if (relation.route != null) {
@@ -184,7 +184,7 @@ public class ClassDiagramSerializer_V001 {
         appendId(out, note.id);
         appendPosition(out, note.position);
         appendWidth(out, note.width);
-        out.append(' ').append(quoted(escapeLineBreaks(note.text)));
+        out.append(' ').append(quoted(note.text));
         if (note.attachedToId != null) {
             out.append(" attach(").append(note.attachedToId).append(')');
             if (!note.attachWaypoints.isEmpty()) {
@@ -225,16 +225,35 @@ public class ClassDiagramSerializer_V001 {
         return NAME.matcher(word).matches() ? word : quoted(word);
     }
 
-    /** Backticks can't be escaped, so a backtick in the text becomes an apostrophe. */
+    /**
+     * A string in double quotes with the escapes the grammar knows. A backtick is written as an escape too,
+     * because a diagram source in a Specman model file must not contain one.
+     */
     private String quoted(String text) {
-        return "`" + text.replace('`', '\'') + "`";
+        StringBuilder quoted = new StringBuilder("\"");
+        for (char c : text.replace("\r\n", "\n").toCharArray()) {
+            switch (c) {
+                case '"':
+                    quoted.append("\\\"");
+                    break;
+                case '\\':
+                    quoted.append("\\\\");
+                    break;
+                case '\n':
+                case '\r':
+                    quoted.append("\\n");
+                    break;
+                case '`':
+                    quoted.append("\\u0060");
+                    break;
+                default:
+                    quoted.append(c);
+            }
+        }
+        return quoted.append('"').toString();
     }
 
-    private String escapeLineBreaks(String text) {
-        return text.replace("\r\n", "\n").replace("\n", "\\n");
-    }
-
-    /** True if the info reads back as itself when written without backticks. */
+    /** True if the info reads back as itself when written without quotes. */
     private boolean isBareInfo(String info) {
         if (info.isBlank() || !info.equals(info.strip())) {
             return false;
@@ -256,7 +275,7 @@ public class ClassDiagramSerializer_V001 {
     private boolean isInfoToken(int type) {
         return type == ClassDiagram_V001Lexer.NAME || type == ClassDiagram_V001Lexer.NUMBER
             || type == ClassDiagram_V001Lexer.DOTDOT || type == ClassDiagram_V001Lexer.STAR
-            || type == ClassDiagram_V001Lexer.EQUALS || type == ClassDiagram_V001Lexer.BACKTICK_STRING
+            || type == ClassDiagram_V001Lexer.EQUALS || type == ClassDiagram_V001Lexer.QUOTED_STRING
             || keywordTypes.contains(type);
     }
 

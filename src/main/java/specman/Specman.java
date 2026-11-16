@@ -28,8 +28,10 @@ import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.editarea.EditContainer;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
-import specman.editarea.image.plantuml.PlantUmlFileChoice;
-import specman.editarea.image.plantuml.PlantUmlFileChooser;
+import specman.editarea.image.classman.ClassmanImageEditArea;
+import specman.editarea.image.SourceFileChoice;
+import specman.editarea.image.SourceFileKind;
+import specman.editarea.image.SourceFileChooser;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.undo.UndoableSchrittHinzugefuegt;
 import specman.undo.manager.SpecmanUndoManager;
@@ -395,8 +397,18 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	@Override
+	public void addClassmanImage() {
+		new AddImageSpecmanOp(this).addClassman();
+	}
+
+	@Override
 	public void importPlantUmlSource(PlantUmlImageEditArea diagram) {
 		new AddImageSpecmanOp(this).importPlantUml(diagram);
+	}
+
+	@Override
+	public void importClassmanSource(ClassmanImageEditArea diagram) {
+		new AddImageSpecmanOp(this).importClassman(diagram);
 	}
 
 	@Override
@@ -754,9 +766,9 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	@Override
-	public PlantUmlFileChoice choosePlantUmlFile(boolean emptyDiagramOffered) {
+	public SourceFileChoice chooseSourceFile(SourceFileKind kind, boolean emptyDiagramOffered) {
 		File directory = diagrammDatei != null ? diagrammDatei.getParentFile() : null;
-		return new PlantUmlFileChooser(directory, emptyDiagramOffered).choose(scrollPane);
+		return new SourceFileChooser(kind, directory, emptyDiagramOffered).choose(scrollPane);
 	}
 
 	/** Called while Specman is being constructed. Overrides must not depend on their own fields. */

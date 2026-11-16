@@ -26,6 +26,7 @@ import specman.model.v002.IfElseStepModel_V002;
 import specman.model.v002.IfStepModel_V002;
 import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
+import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.model.v002.PlantUmlImageEditAreaModel_V002;
 import specman.model.v002.SvgImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
@@ -800,11 +801,12 @@ public class ModelParser_V002 {
         if (ctx.BACKTICK_STRING() != null) {
             String source = stripBackticks(ctx.BACKTICK_STRING().getText());
             SpecmanModel_V002Parser.BackupAttrContext backup = ctx.backupAttr();
-            if (backup == null) {
-                return new PlantUmlImageEditAreaModel_V002(source, null, null, scale, changeInfo);
+            String backupSource = backup == null ? null : stripBackticks(backup.BACKTICK_STRING().getText());
+            String backupChangeset = backup == null ? null : backup.ID().getText();
+            if (ctx.KW_CLASSMAN() != null) {
+                return new ClassmanImageEditAreaModel_V002(source, backupSource, backupChangeset, scale, changeInfo);
             }
-            return new PlantUmlImageEditAreaModel_V002(source, stripBackticks(backup.BACKTICK_STRING().getText()),
-                backup.ID().getText(), scale, changeInfo);
+            return new PlantUmlImageEditAreaModel_V002(source, backupSource, backupChangeset, scale, changeInfo);
         }
         String type = ctx.ID().getText();
         String base64Block = ctx.BASE64_BLOCK().getText(); // "[base64:...]"
