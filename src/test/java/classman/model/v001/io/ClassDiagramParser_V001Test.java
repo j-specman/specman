@@ -43,7 +43,7 @@ class ClassDiagramParser_V001Test {
   @Test
   void classHeaderParts() throws ClassDiagramParseException {
     ClassModel_V001 c = onlyClass("""
-        class \"Hilfe Eintrag\" (9a31c4e0) at(-20, 30) width=140 <<Entity>> {TABLENAME=helpversion, SCHEMA=\"x y\"} {
+        class \"Hilfe Eintrag\" (9a31c4e0) at(-20, 30) width=140 <<Entity>> (e3a1d7c2) {TABLENAME=helpversion, SCHEMA=\"x y\"} {
           -Name : String [Pflicht, 2..50, TN=key]
           ...
         }""");
@@ -53,6 +53,7 @@ class ClassDiagramParser_V001Test {
     assertEquals(30, c.position.y);
     assertEquals(140, c.width);
     assertEquals("Entity", c.stereotype);
+    assertEquals("e3a1d7c2", c.stereotypeId);
     assertEquals(2, c.taggedValues.size());
     assertEquals("TABLENAME", c.taggedValues.get(0).key);
     assertEquals("helpversion", c.taggedValues.get(0).value);
@@ -74,6 +75,7 @@ class ClassDiagramParser_V001Test {
     assertNull(c.position);
     assertNull(c.width);
     assertNull(c.stereotype);
+    assertNull(c.stereotypeId);
     assertTrue(c.taggedValues.isEmpty());
     assertTrue(c.attributes.isEmpty());
   }

@@ -12,6 +12,8 @@ public class ClassModel_V001 extends AbstractDiagramElementModel_V001 {
     public Integer width;
     /** The text between the angle brackets without them, null if there is no stereotype. */
     public String stereotype;
+    /** Null if the stereotype has no ID, or there is no stereotype. */
+    public String stereotypeId;
     public final List<TaggedValueModel_V001> taggedValues = new ArrayList<>();
     public final List<AttributeModel_V001> attributes = new ArrayList<>();
 

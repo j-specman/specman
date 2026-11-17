@@ -92,10 +92,11 @@ public class ClassDiagramParser_V001 {
 
     private ClassModel_V001 buildClass(ClassHeadContext head, ClassBodyContext body) throws ClassDiagramParseException {
         ClassModel_V001 model = new ClassModel_V001(text(head.name()));
-        model.id = id(head.ELEMENT_ID());
+        model.id = id(head.classId);
         model.position = position(head.position());
         model.width = width(head.widthSpec());
         model.stereotype = stereotype(head.STEREOTYPE());
+        model.stereotypeId = id(head.stereotypeId);
         if (head.taggedValues() != null) {
             for (TaggedValueContext tag : head.taggedValues().taggedValue()) {
                 model.taggedValues.add(buildTaggedValue(tag));

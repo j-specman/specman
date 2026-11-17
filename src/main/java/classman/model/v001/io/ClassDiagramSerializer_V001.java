@@ -82,6 +82,7 @@ public class ClassDiagramSerializer_V001 {
         appendWidth(out, classModel.width);
         if (classModel.stereotype != null) {
             out.append(" <<").append(classModel.stereotype).append(">>");
+            appendId(out, classModel.stereotypeId);
         }
         appendTaggedValues(out, classModel.taggedValues);
         if (!classModel.attributes.isEmpty()) {

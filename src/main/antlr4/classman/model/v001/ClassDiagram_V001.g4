@@ -34,6 +34,9 @@ grammar ClassDiagram_V001;
 //     Whoever wants to attach a note must give the target an ID. The dashed line of a note on a class ends at the
 //     class border, on an attribute at the border of its class on the side of the note, on a relation at the
 //     middle of the longest part of the relation.
+//   * IDs of classes, attributes, relations and stereotypes (class Hilfeversion (04de91aa) <<Entity>> (7b2f90c1))
+//     are optional. Created in a class model, a diagram refers with them to the elements of the model: the
+//     stereotype is defined there once and assigned to the classes. A diagram which stands for itself needs none.
 //   * The dashed line of a note can lead over waypoints (absolute pixel points): attach(04de91aa) route (120, 40) (120, 90).
 //     The line starts at the note border facing the first waypoint and ends at the target facing the last one.
 //   * An assocclass nested in a relation belongs to that relation.
@@ -70,9 +73,9 @@ classDecl
     : CLASS classHead classBody?
     ;
 
-// Fixed order.
+// Fixed order. The ID after the name belongs to the class, the one after the stereotype to the stereotype.
 classHead
-    : name ELEMENT_ID? position? widthSpec? STEREOTYPE? taggedValues?
+    : name classId=ELEMENT_ID? position? widthSpec? (STEREOTYPE stereotypeId=ELEMENT_ID?)? taggedValues?
     ;
 
 // {TABLENAME=helpversion} or {A=1, B=2}. A '{' followed by word '=' starts tagged values,

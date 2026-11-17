@@ -3,7 +3,7 @@
 // positions and waypoints are chosen for the real box sizes so that nothing overlaps.
 classdiagram "Hilfe-Versionierung" {
 
-    class Hilfeversion (04de91aa) at(300, 20) <<Entity>> {TABLENAME=helpversion} {
+    class Hilfeversion (04de91aa) at(300, 20) <<Entity>> (e3a1d7c2) {TABLENAME=helpversion} {
         -Versionsnummer : String [Pflicht, 2..50, TN=versionkey]
         ...
     }
