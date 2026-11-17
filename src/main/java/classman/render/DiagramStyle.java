@@ -42,7 +42,7 @@ public final class DiagramStyle {
     /** The empty space around the scene in an SVG. */
     public static final double SVG_MARGIN = 10;
 
-    public static final String CLASS_FILL = "#fdd34d";
+    public static final String CLASS_FILL = "#f2e9c4";
     public static final String ASSOC_CLASS_FILL = "#e0e0e0";
     public static final String NOTE_FILL = "#6fcdf2";
     public static final String STROKE = "#000000";

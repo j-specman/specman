@@ -5,7 +5,7 @@ public class SceneRectangle extends AbstractSceneElement {
     public final double y;
     public final double width;
     public final double height;
-    /** A color like #fdd34d, or null for no fill. */
+    /** A color like #f2e9c4, or null for no fill. */
     public final String fill;
     /** A color like #000000, or null for no outline. */
     public final String stroke;
