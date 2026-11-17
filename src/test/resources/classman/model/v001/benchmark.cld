@@ -1,92 +1,106 @@
 // {"classmanVersion":"0.1","modelType":"classman.model.v001.ClassDiagramModel_V001"}
-// Syntax test only: the benchmark diagram expressed in the draft format. Positions are taken from the
-// hand-made grid image, most routes are left out (center-to-center), so this is not a finished rendering.
+// The benchmark diagram expressed in the draft format. Topology and routes follow the hand-made grid image,
+// positions and waypoints are chosen for the real box sizes so that nothing overlaps.
 classdiagram "Hilfe-Versionierung" {
 
-    class Hilfeversion (04de91aa) at(361, 45) <<Entity>> {TABLENAME=helpversion} {
+    class Hilfeversion (04de91aa) at(300, 20) <<Entity>> {TABLENAME=helpversion} {
         -Versionsnummer : String [Pflicht, 2..50, TN=versionkey]
         ...
     }
-    class Hilfeversion-Markup at(762, 44) {
+    class Hilfeversion-Markup at(780, 20) {
         -Sprache
         -Beschreibung : CLOB
     }
-    class Hilfeeintrag at(549, 134) {
+    class Hilfeeintrag at(540, 250) {
         -Positionsschlüssel : String [Pflicht]
         -"In Baum anzeigen" : J/N
         -"autom Mandantenauswahl" : J/N
         -"Weiterleitung zu Position" : String
         -Formel : String
     }
-    class Hilfetextblock at(763, 135) {
+    class Hilfetextblock at(900, 250) {
         -"autom Mandantenauswahl" : J/N
         -"lfd Nummer" : Zahl
     }
-    class Hilfe-Markup at(973, 257) {
+    class Hilfe-Markup at(1260, 400) {
         -Sprache
         -Beschreibung : CLOB
     }
-    class Hilfekategorie (7c01a5e2) at(190, 257) {
+    class Hilfekategorie (7c01a5e2) at(30, 250) {
         -Level : Zahl
         -"lfd Nummer" : Zahl
         -optional : J/N
         -schemaabhängig : J/N
         -Resourcenschlüssel : String
     }
-    class Mandant at(708, 284) {
+    class Mandant at(760, 478) {
     }
-    class Handbuchseite at(549, 508) {
+    class Handbuchseite at(680, 660) {
         -Seitenschlüssel : String [Pflicht]
         -"In Baum anzeigen" : J/N
     }
-    class Handbuchtextblock at(761, 506) {
+    class Handbuchtextblock at(1040, 667) {
         -"lfd Nummer" : Zahl
     }
-    class Handbuch-Markup at(973, 380) {
+    class Handbuch-Markup at(1260, 590) {
         -Sprache
         -Beschreibung : CLOB
     }
-    class Handbuchseitenbezeichnung (b3e94d10) at(762, 619) {
+    class Handbuchseitenbezeichnung (b3e94d10) at(1080, 851) {
         -Sprache
         -Bezeichnung : String
     }
 
     composition Hilfeversion 1 -> * Hilfeversion-Markup "sprachabh. Beschreibung"
-        route Hilfeversion.right@18 Hilfeversion-Markup.left@18
+        route Hilfeversion.right@29 Hilfeversion-Markup.left@29
     composition Hilfeversion 1 -> * Hilfekategorie "definiert für Handbuchseiten\nund Erfassungsleitfaden"
+        route Hilfeversion.left@30 (110, 50) Hilfekategorie.top@80
     composition Hilfeversion 1 -> * Hilfeeintrag "definiert für\nErfassungs-\nleitfaden"
-        route Hilfeversion.bottom@90 (451, 118) (620, 118) Hilfeeintrag.top@71
+        route Hilfeversion.bottom@200 (500, 270) Hilfeeintrag.left@20
     association Hilfeversion * -> * Hilfeeintrag "erbt aus\nVorgänger-\nversionen"
+        route Hilfeversion.bottom@300 Hilfeeintrag.top@60
     composition Hilfeversion 1 -> * Handbuchseite "definiert für\nBenutzer-\nhandbuch"
+        route Hilfeversion.bottom@20 (320, 705) Handbuchseite.left@45
     association Hilfeversion * -> * Handbuchseite "erbt aus\nVorgänger-\nversionen"
+        route Hilfeversion.bottom@110 (410, 680) Handbuchseite.left@20
 
     composition Hilfeeintrag 1 -> 1..* Hilfetextblock "definiert"
+        route Hilfeeintrag.right@29 Hilfetextblock.left@29
     composition Hilfetextblock 1 -> 1..* Hilfe-Markup "sprachabh. Inhalt"
+        route Hilfetextblock.right@29 (1323, 279) Hilfe-Markup.top@63
     composition Handbuchseite 1 -> 1..* Handbuchtextblock "definiert"
+        route Handbuchseite.right@29 Handbuchtextblock.left@22
     composition Handbuchtextblock 1 -> 1..* Handbuch-Markup "sprachabh. Inhalt"
+        route Handbuchtextblock.right@22 (1323, 689) Handbuch-Markup.bottom@63
     composition Handbuchseite 1 -> 1..* Handbuchseitenbezeichnung "sprachabh. Bezeichnung"
+        route Handbuchseite.bottom@140 (820, 880) Handbuchseitenbezeichnung.left@29
 
     association Hilfekategorie * -> * Hilfeeintrag "kategorisiert"
-        assocclass helpentrycategory at(330, 190) {
+        route Hilfekategorie.right@50 Hilfeeintrag.left@50
+        assocclass helpentrycategory at(200, 335) {
         }
     association Hilfekategorie * -> * Handbuchseite "kategorisiert"
+        route Hilfekategorie.bottom@150 (180, 780) (720, 780) Handbuchseite.bottom@40
         assocclass manualpagecategory {
             -"Seitenzahl in Kategorie" : Zahl
         }
     association Hilfeeintrag * -> * Mandant "sichtbar für"
-        route Hilfeeintrag.right@60 (745, 194) Mandant.top@37
-        assocclass helpentryinmandate at(790, 200) {
+        route Hilfeeintrag.bottom@100 (640, 500) Mandant.left@22
+        assocclass helpentryinmandate {
         }
     association Hilfetextblock * -> * Mandant "sichtbar für"
+        route Hilfetextblock.bottom@20 (920, 486) Mandant.right@8
         assocclass helptextblockinmandate {
         }
     association Handbuchseite * -> * Mandant "sichtbar für"
+        route Handbuchseite.top@110 Mandant.bottom@30
         assocclass manualpageinmandate {
         }
     association Handbuchtextblock * -> * Mandant "sichtbar für"
+        route Handbuchtextblock.top@60 (1100, 514) Mandant.right@36
         assocclass manualtextblockinmandate {
         }
 
-    note at(92, 380) width=165 "Aus Level und lfd. Nummer ergibt sich eine Baumstruktur aller Hilfekategorien. Kategorien und deren Zuordnungen zu Handbuchseiten und Hilfeeinträgen werden nicht vererbt sondern bei Neuanlage einer Version kopiert." attach(7c01a5e2)
-    note at(549, 670) "Mindestens\nEnglisch muss\nvorhanden sein" attach(b3e94d10)
+    note at(30, 400) width=140 "Aus Level und lfd. Nummer ergibt sich eine Baumstruktur aller Hilfekategorien. Kategorien und deren Zuordnungen zu Handbuchseiten und Hilfeeinträgen werden nicht vererbt sondern bei Neuanlage einer Version kopiert." attach(7c01a5e2)
+    note at(1080, 950) "Mindestens\nEnglisch muss\nvorhanden sein" attach(b3e94d10)
 }
