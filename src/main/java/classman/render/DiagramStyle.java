@@ -48,6 +48,11 @@ public final class DiagramStyle {
     public static final String STROKE = "#000000";
     public static final String WHITE = "#ffffff";
     public static final double STROKE_WIDTH = 1;
+    /** The pattern of a dashed line: this many pixels of line, then this many of gap. */
+    public static final int DASH_LENGTH = 5;
+    public static final int DASH_GAP = 4;
+    /** The miter limit of an SVG stroke by default, painters follow it so corners look the same. */
+    public static final float MITER_LIMIT = 4;
 
     // ---- change marks ----
 

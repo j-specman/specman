@@ -35,12 +35,16 @@ public final class ClassmanRenderer {
   /** @return the diagram as SVG, or a picture of the problem if the source can't be drawn, so that a file with a
    * source which was edited by hand can still be loaded */
   public static byte[] renderSvg(String source) {
-    SceneSvgWriter writer = new SceneSvgWriter();
+    return new SceneSvgWriter().write(renderScene(source)).getBytes(StandardCharsets.UTF_8);
+  }
+
+  /** @return the scene of the diagram, or of a picture of the problem if the source can't be drawn */
+  public static Scene renderScene(String source) {
     try {
-      return writer.write(sceneOf(modelOf(source))).getBytes(StandardCharsets.UTF_8);
+      return sceneOf(modelOf(source));
     }
     catch (ClassDiagramParseException | IllegalArgumentException problem) {
-      return writer.write(errorScene(problem.getMessage())).getBytes(StandardCharsets.UTF_8);
+      return errorScene(problem.getMessage());
     }
   }
 

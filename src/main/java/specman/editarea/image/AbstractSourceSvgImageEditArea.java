@@ -87,8 +87,13 @@ public abstract class AbstractSourceSvgImageEditArea extends AbstractSvgImageEdi
       SourceImageContextMenu.open(this, e);
     }
     else if (e.getClickCount() == 2 && !getChangeInfo().isDeleted()) {
-      editSource();
+      doubleClicked();
     }
+  }
+
+  /** The source editor opens by default. */
+  protected void doubleClicked() {
+    editSource();
   }
 
   public void editSource() {

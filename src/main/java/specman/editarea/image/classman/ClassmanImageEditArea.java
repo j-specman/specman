@@ -56,6 +56,13 @@ public class ClassmanImageEditArea extends AbstractSourceSvgImageEditArea {
     editor().importClassmanSource(this);
   }
 
+  /** Shows the diagram painted with Graphics2D, the first step towards the diagram editor. The source editor is
+   * still available in the context menu. */
+  @Override
+  protected void doubleClicked() {
+    new ClassmanDiagramDialog(this, ClassmanRenderer.renderScene(getSource())).setVisible(true);
+  }
+
   // ---- change mode ----
 
   @Override

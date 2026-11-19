@@ -3,26 +3,25 @@ package classman.render;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import static classman.render.DiagramStyle.DASH_GAP;
+import static classman.render.DiagramStyle.DASH_LENGTH;
 import static classman.render.DiagramStyle.SVG_FONT_FAMILIES;
 import static classman.render.DiagramStyle.FONT_SIZE;
 import static classman.render.DiagramStyle.STROKE_WIDTH;
-import static classman.render.DiagramStyle.SVG_MARGIN;
 
 /**
  * Writes a scene as SVG. It uses only rect, line, polyline, polygon and text, in the order of the scene.
  * The numbers are written with up to two decimals.
  */
 public class SceneSvgWriter {
-    private static final String DASHES = "5,4";
 
     public String write(Scene scene) {
-        double width = scene.width + 2 * SVG_MARGIN;
-        double height = scene.height + 2 * SVG_MARGIN;
+        SvgFrame frame = SvgFrame.of(scene);
         StringBuilder svg = new StringBuilder();
-        svg.append("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"").append(number(width))
-            .append("\" height=\"").append(number(height))
-            .append("\" viewBox=\"").append(number(scene.x - SVG_MARGIN)).append(' ').append(number(scene.y - SVG_MARGIN))
-            .append(' ').append(number(width)).append(' ').append(number(height)).append("\">\n");
+        svg.append("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"").append(number(frame.width))
+            .append("\" height=\"").append(number(frame.height))
+            .append("\" viewBox=\"").append(number(frame.x)).append(' ').append(number(frame.y))
+            .append(' ').append(number(frame.width)).append(' ').append(number(frame.height)).append("\">\n");
         for (AbstractSceneElement element : scene.elements) {
             svg.append("  ").append(elementSvg(element)).append('\n');
         }
@@ -71,9 +70,10 @@ public class SceneSvgWriter {
             + "\" stroke=\"" + color(polygon.stroke) + "\"" + strokeWidth(polygon.strokeWidth) + "/>";
     }
 
+    /** The text is anchored at its start, at the x where the layout puts its left end, whatever its anchor is. */
     private String text(SceneText text) {
-        return "<text x=\"" + number(text.x) + "\" y=\"" + number(text.y)
-            + "\" text-anchor=\"" + anchor(text.anchor) + "\" font-family=\"" + SVG_FONT_FAMILIES
+        return "<text x=\"" + number(text.left()) + "\" y=\"" + number(text.y)
+            + "\" font-family=\"" + SVG_FONT_FAMILIES
             + "\" font-size=\"" + FONT_SIZE + "\"" + (text.bold ? " font-weight=\"bold\"" : "")
             + (text.fill == null ? "" : " fill=\"" + text.fill + "\"") + ">"
             + escaped(text.text) + "</text>";
@@ -82,17 +82,6 @@ public class SceneSvgWriter {
     /** Only a stroke which isn't the usual one says its width. */
     private String strokeWidth(double width) {
         return width == STROKE_WIDTH ? "" : " stroke-width=\"" + number(width) + "\"";
-    }
-
-    private String anchor(TextAnchor anchor) {
-        switch (anchor) {
-            case MIDDLE:
-                return "middle";
-            case END:
-                return "end";
-            default:
-                return "start";
-        }
     }
 
     private String points(double[] xs, double[] ys) {
@@ -107,7 +96,7 @@ public class SceneSvgWriter {
     }
 
     private String dashes(boolean dashed) {
-        return dashed ? " stroke-dasharray=\"" + DASHES + "\"" : "";
+        return dashed ? " stroke-dasharray=\"" + DASH_LENGTH + "," + DASH_GAP + "\"" : "";
     }
 
     private String color(String color) {

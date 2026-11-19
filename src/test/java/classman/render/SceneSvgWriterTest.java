@@ -46,21 +46,22 @@ class SceneSvgWriterTest {
     assertTrue(svg.contains("x=\"1.5\" y=\"2.25\" width=\"3\" height=\"4.33\""), svg);
   }
 
-  /** A text has its anchor, its weight and the font of the diagram, and its characters are escaped. */
+  /** A text is written at the left end the layout gives it, with its weight and the font of the diagram, escaped. */
   @Test
-  void textWithAnchorAndEscaping() {
-    String svg = writer.write(sceneOf(new SceneText(5, 6, "a<b & \"c\"", true, TextAnchor.MIDDLE, 50)));
-    assertTrue(svg.contains("text-anchor=\"middle\""), svg);
+  void textAtLeftEndWithEscaping() {
+    String svg = writer.write(sceneOf(new SceneText(50, 6, "a<b & \"c\"", true, TextAnchor.MIDDLE, 40)));
+    assertTrue(svg.contains("<text x=\"30\" y=\"6\""), svg);
+    assertFalse(svg.contains("text-anchor"), svg);
     assertTrue(svg.contains("font-weight=\"bold\""), svg);
     assertTrue(svg.contains("font-family=\"" + DiagramStyle.SVG_FONT_FAMILIES + "\""), svg);
     assertTrue(svg.contains(">a&lt;b &amp; &quot;c&quot;</text>"), svg);
   }
 
-  /** A text which isn't bold doesn't say so, and a text at its start is anchored at the start. */
+  /** A text which isn't bold doesn't say so, and a text ending at x starts at x minus its width. */
   @Test
-  void plainTextAtStart() {
-    String svg = writer.write(sceneOf(new SceneText(5, 6, "x", false, TextAnchor.START, 10)));
-    assertTrue(svg.contains("text-anchor=\"start\""), svg);
+  void plainTextAtEnd() {
+    String svg = writer.write(sceneOf(new SceneText(25, 6, "x", false, TextAnchor.END, 10)));
+    assertTrue(svg.contains("<text x=\"15\" y=\"6\""), svg);
     assertFalse(svg.contains("font-weight"), svg);
   }
 
