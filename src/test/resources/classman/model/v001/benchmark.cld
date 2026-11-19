@@ -18,7 +18,7 @@ classdiagram "Hilfe-Versionierung" {
         -"Weiterleitung zu Position" : String
         -Formel : String
     }
-    class Hilfetextblock (c0de0003) at(900, 250) {
+    class Hilfetextblock (c0de0003) change(added, yellow) at(900, 250) {
         -"autom Mandantenauswahl" : J/N
         -"lfd Nummer" : Zahl
     }
@@ -66,7 +66,7 @@ classdiagram "Hilfe-Versionierung" {
 
     composition c0de0002 1 -> 1..* c0de0003 "definiert"
         route c0de0002.right@29 c0de0003.left@29
-    composition c0de0003 1 -> 1..* c0de0004 "sprachabh. Inhalt"
+    composition change(added, yellow) c0de0003 1 -> 1..* c0de0004 "sprachabh. Inhalt"
         route c0de0003.right@29 (1323, 279) c0de0004.top@63
     composition c0de0007 1 -> 1..* c0de0008 "definiert"
         route c0de0007.right@29 c0de0008.left@22

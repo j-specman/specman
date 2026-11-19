@@ -12,11 +12,11 @@ public class AttributeModel_V001 {
     /** Null if the source gives none. */
     public final Visibility_V001 visibility;
     /** Null for the marker of hidden attributes. */
-    public final String name;
+    public String name;
     /** Null if no change set changed the name. */
     public TextChangeModel_V001 nameChange;
     /** Null if the source gives none. */
-    public final String type;
+    public String type;
     /** Null if no change set changed the type. */
     public TextChangeModel_V001 typeChange;
     /** The items of the brackets, each as written and not interpreted. */
