@@ -13,6 +13,18 @@ Aus aktueller Anwendung
 - Beim Suchen wird die gefundene Stelle im Text nicht markiert. Könnte allerdings ein reines Linux-Problem sein.
 - PDF-Option "Export beim Speichern"
 
+Hinweise von Claude aus einer längeren Session, 19.11.2026
+Für die Weiterentwicklung von Specman hier noch Beobachtungen aus der Sitzung, an denen ich als Agent hängengeblieben bin. Sie kosten Sicherheit, nicht Qualität:
+- Der Sanitizer bricht bei einem toten Verweis komplett mit ERROR ab. Der alte Verweis 2.2.9? hat in der ganzen Sitzung jede Prüfung als Fehler markiert.
+   Dadurch konnte ich nicht unterscheiden, ob meine eigene Änderung heil war. Eine Abstufung in Fehler und Warnung, oder eine Option, bekannte tote Verweise auszuklammern, würde helfen.
+- Markup-Offsets muss der Agent von Hand rechnen, und der Sanitizer prüft sie nicht (das steht auch im Handbuch). Ich habe sie deshalb selbst gegen die Textlängen gegengeprüft.
+   Eine Prüfung "Markup-Ende liegt innerhalb von plain" im Sanitizer wäre billig und würde viele Fehler abfangen.
+- Ersetzter Text lässt sich nur als Changed markieren, gelöschter Text nicht. Beim Wechsel von "beide Fälle" zu "mehrere dieser Fälle" gehen die alten Wörter in der Änderungsansicht verloren.
+- Gemischte Zeilenenden (innerhalb mancher Textblöcke CRLF, sonst LF) haben meine Ersetzung einmal ins Leere laufen lassen. Einheitliche Zeilenenden beim Speichern würden das beseitigen.
+- Ungespeicherter Stand in Specman: Ein Agent kann nicht erkennen, dass im Fenster Änderungen stehen, die noch nicht in der .wrk sind. Auto-Save ist die Lösung,
+   aber wenn das aus ist, droht Datenverlust. Ein Hinweis in der Oberfläche oder eine Marker-Datei "ungespeicherte Änderungen" würde das sichtbar machen.
+
+
 Move & Morph
 Mit der Einführung der Specman URLs ist es wichtiger geworden, bestehende Schritte nach Möglichkeit nicht zu entfernen und neu zu erstellen,
   wenn man nur eine Änderung haben will. Das Verschieben eines Schritts per Drag & Drop ist ein erster Anfang, um eine Änderung herbeizuführen
