@@ -17,16 +17,16 @@ import static classman.render.DiagramStyle.LOOP_SIZE;
 public class RelationPathBuilder {
 
     /**
-     * @param classAreas where the classes are, by name
+     * @param classAreas where the classes are, by ID
      * @throws IllegalArgumentException if the relation refers to a class which isn't in the diagram
      */
     public List<Point2D.Double> pathOf(AbstractRelationModel_V001 relation, Map<String, Rectangle2D.Double> classAreas) {
-        Rectangle2D.Double from = areaOf(relation.from, classAreas);
-        Rectangle2D.Double to = areaOf(relation.to, classAreas);
+        Rectangle2D.Double from = areaOf(relation.fromId, classAreas);
+        Rectangle2D.Double to = areaOf(relation.toId, classAreas);
         if (relation.route != null) {
             return routedPath(relation.route, classAreas);
         }
-        if (relation.from.equals(relation.to)) {
+        if (relation.fromId.equals(relation.toId)) {
             return loopPath(from);
         }
         List<Point2D.Double> path = new ArrayList<>();
@@ -46,7 +46,7 @@ public class RelationPathBuilder {
     }
 
     private Point2D.Double anchorPoint(AnchorModel_V001 anchor, Map<String, Rectangle2D.Double> classAreas) {
-        return BoxGeometry.sidePoint(areaOf(anchor.className, classAreas), anchor.side, anchor.offset);
+        return BoxGeometry.sidePoint(areaOf(anchor.classId, classAreas), anchor.side, anchor.offset);
     }
 
     /** Up from the top side at three quarters of its width, over the corner, down to the right side at a quarter. */
@@ -62,10 +62,10 @@ public class RelationPathBuilder {
         return path;
     }
 
-    private Rectangle2D.Double areaOf(String className, Map<String, Rectangle2D.Double> classAreas) {
-        Rectangle2D.Double area = classAreas.get(className);
+    private Rectangle2D.Double areaOf(String classId, Map<String, Rectangle2D.Double> classAreas) {
+        Rectangle2D.Double area = classAreas.get(classId);
         if (area == null) {
-            throw new IllegalArgumentException("The diagram has no class " + className);
+            throw new IllegalArgumentException("The diagram has no class with the ID " + classId);
         }
         return area;
     }

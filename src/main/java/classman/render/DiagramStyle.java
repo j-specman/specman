@@ -44,9 +44,35 @@ public final class DiagramStyle {
 
     public static final String CLASS_FILL = "#f2e9c4";
     public static final String ASSOC_CLASS_FILL = "#e0e0e0";
-    public static final String NOTE_FILL = "#6fcdf2";
+    public static final String NOTE_FILL = "#c0e8f9";
     public static final String STROKE = "#000000";
     public static final String WHITE = "#ffffff";
+    public static final double STROKE_WIDTH = 1;
+
+    // ---- change marks ----
+
+    /** The width of the stroke which makes the frame of an added or removed class or note, half of it shows outside. */
+    public static final double FRAME_STROKE_WIDTH = 12;
+    /** The width of the line which is drawn under an added or removed relation. */
+    public static final double RELATION_HIGHLIGHT_WIDTH = 9;
+    /** How far the highlight of a changed text reaches out of the text to the left and right. */
+    public static final double HIGHLIGHT_MARGIN = 2;
+    /** The share of white in the pale variant of a change color. */
+    public static final double PALE_SHARE = 0.6;
+    /** The share of white which veils the fill of a removed class or note. */
+    public static final double VEIL_SHARE = 0.5;
+    public static final String VEILED_TEXT = "#9a9a9a";
+    public static final String VEILED_STROKE = "#a0a0a0";
+    /** The line of a removed relation: darker than the border of a removed box, because it lies on its colored band. */
+    public static final String VEILED_LINE = "#7a7a7a";
+    public static final String STRIKE_COLOR = "#444444";
+    public static final double STRIKE_WIDTH = 1.2;
+    /** Where the strike through line stands: this part of the ascent above the baseline. */
+    public static final double STRIKE_HEIGHT_PART = 0.35;
+    /** Half the size of the cross on a removed relation. */
+    public static final double CROSS_HALF_SIZE = 5;
+    /** The color of a change set which the host application doesn't know. */
+    public static final String UNKNOWN_CHANGE_COLOR = "#c8c8c8";
 
     private DiagramStyle() {
     }

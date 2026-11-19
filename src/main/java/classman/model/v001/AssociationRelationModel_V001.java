@@ -5,13 +5,16 @@ public class AssociationRelationModel_V001 extends AbstractRelationModel_V001 {
     /** Null if the source gives none. Written as in the source, for example 1..* */
     public String fromMultiplicity;
     public String toMultiplicity;
+    /** Null if no change set changed the multiplicity. A removed multiplicity can't be marked. */
+    public TextChangeModel_V001 fromMultiplicityChange;
+    public TextChangeModel_V001 toMultiplicityChange;
     /** True for an arrowhead at the target (written ->), false for no arrowhead (written --). */
     public boolean directed;
     /** Null if the relation has no association class. */
     public ClassModel_V001 assocClass;
 
-    public AssociationRelationModel_V001(RelationType_V001 type, String from, String to) {
-        super(type, from, to);
+    public AssociationRelationModel_V001(RelationType_V001 type, String fromId, String toId) {
+        super(type, fromId, toId);
         if (!type.isAssociationLike()) {
             throw new IllegalArgumentException("Not an association type: " + type);
         }

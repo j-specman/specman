@@ -11,19 +11,26 @@ public class SceneText extends AbstractSceneElement {
     public final TextAnchor anchor;
     /** The width of the text as the layout measured it. */
     public final double width;
+    /** A color like #9a9a9a, or null for the default text color, black. */
+    public final String fill;
 
     public SceneText(double x, double y, String text, boolean bold, TextAnchor anchor, double width) {
+        this(x, y, text, bold, anchor, width, null);
+    }
+
+    public SceneText(double x, double y, String text, boolean bold, TextAnchor anchor, double width, String fill) {
         this.x = x;
         this.y = y;
         this.text = text;
         this.bold = bold;
         this.anchor = anchor;
         this.width = width;
+        this.fill = fill;
     }
 
     @Override
     public SceneText translated(double dx, double dy) {
-        return new SceneText(x + dx, y + dy, text, bold, anchor, width);
+        return new SceneText(x + dx, y + dy, text, bold, anchor, width, fill);
     }
 
     /** The x of the left end of the text. */

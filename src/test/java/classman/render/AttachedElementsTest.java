@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class AttachedElementsTest {
 
-  private static final String STACKED = "class A\nclass B\n";
-  private static final String SIDE_BY_SIDE = "class A at(0, 0)\nclass B at(300, 0)\n";
+  private static final String STACKED = "class A (aaaaaaaa)\nclass B (bbbbbbbb)\n";
+  private static final String SIDE_BY_SIDE = "class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(300, 0)\n";
 
   private static SceneRectangle thirdBox(Scene scene) {
     return all(scene, SceneRectangle.class).get(2);
@@ -34,7 +34,7 @@ class AttachedElementsTest {
   /** Beside a vertical line the association class stands left of it, centered on the middle of the line. */
   @Test
   void assocClassLeftOfVerticalLine() throws ClassDiagramParseException {
-    Scene scene = layout(STACKED + "association A -- B\n  assocclass link");
+    Scene scene = layout(STACKED + "association aaaaaaaa -- bbbbbbbb\n  assocclass link");
     SceneRectangle box = thirdBox(scene);
     assertEquals(-62, box.x, 1e-9);
     assertEquals(48, box.y, 1e-9);
@@ -45,7 +45,7 @@ class AttachedElementsTest {
   /** Beside a horizontal line it stands below the line, as the label is above. */
   @Test
   void assocClassBelowHorizontalLine() throws ClassDiagramParseException {
-    Scene scene = layout(SIDE_BY_SIDE + "association A -- B\n  assocclass link");
+    Scene scene = layout(SIDE_BY_SIDE + "association aaaaaaaa -- bbbbbbbb\n  assocclass link");
     SceneRectangle box = thirdBox(scene);
     assertEquals(144, box.x, 1e-9);
     assertEquals(58, box.y, 1e-9);
@@ -54,7 +54,7 @@ class AttachedElementsTest {
   /** A dashed line connects the association class to the middle of the relation. */
   @Test
   void assocClassConnectorDashed() throws ClassDiagramParseException {
-    ScenePolyline connector = lastLine(layout(STACKED + "association A -- B\n  assocclass link"));
+    ScenePolyline connector = lastLine(layout(STACKED + "association aaaaaaaa -- bbbbbbbb\n  assocclass link"));
     assertTrue(connector.dashed);
     assertEquals(20, connector.xs[0], 1e-9);
     assertEquals(76, connector.ys[0], 1e-9);
@@ -65,7 +65,7 @@ class AttachedElementsTest {
   /** With at() the association class stands there, and the connector ends where it meets its border. */
   @Test
   void assocClassExplicitPosition() throws ClassDiagramParseException {
-    Scene scene = layout(SIDE_BY_SIDE + "association A -- B\n  assocclass link at(200, 200)");
+    Scene scene = layout(SIDE_BY_SIDE + "association aaaaaaaa -- bbbbbbbb\n  assocclass link at(200, 200)");
     SceneRectangle box = thirdBox(scene);
     assertEquals(200, box.x, 1e-9);
     assertEquals(200, box.y, 1e-9);
@@ -78,7 +78,7 @@ class AttachedElementsTest {
   /** The scene covers an association class which stands outside of the other boxes. */
   @Test
   void sceneCoversAssocClass() throws ClassDiagramParseException {
-    Scene scene = layout(SIDE_BY_SIDE + "association A -- B\n  assocclass link at(500, 400)");
+    Scene scene = layout(SIDE_BY_SIDE + "association aaaaaaaa -- bbbbbbbb\n  assocclass link at(500, 400)");
     assertTrue(scene.x + scene.width >= 552);
     assertTrue(scene.y + scene.height >= 456);
   }
@@ -86,14 +86,14 @@ class AttachedElementsTest {
   /** An association class is grey, to tell it from the classes of the diagram. */
   @Test
   void assocClassGrey() throws ClassDiagramParseException {
-    Scene scene = layout(STACKED + "association A -- B\n  assocclass link");
+    Scene scene = layout(STACKED + "association aaaaaaaa -- bbbbbbbb\n  assocclass link");
     assertEquals(DiagramStyle.ASSOC_CLASS_FILL, thirdBox(scene).fill);
   }
 
   /** Attributes of the association class are shown like those of any class. */
   @Test
   void assocClassWithAttributes() throws ClassDiagramParseException {
-    Scene scene = layout(STACKED + "association A -- B\n  assocclass link {\n    since\n    until\n  }");
+    Scene scene = layout(STACKED + "association aaaaaaaa -- bbbbbbbb\n  assocclass link {\n    since\n    until\n  }");
     assertTrue(SceneTestHelper.texts(scene).contains("since"));
     assertTrue(thirdBox(scene).height > 56);
   }
@@ -116,7 +116,7 @@ class AttachedElementsTest {
   @Test
   void noteLinkToAttributeFromRight() throws ClassDiagramParseException {
     ScenePolyline link = lastLine(layout(
-        "class A at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote at(200, 0) \"n\" attach(0a0a0a0a)"));
+        "class A (aaaaaaaa) at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote at(200, 0) \"n\" attach(0a0a0a0a)"));
     assertEquals(68, link.xs[1], 1e-9);
     assertEquals(62, link.ys[1], 1e-9);
   }
@@ -125,7 +125,7 @@ class AttachedElementsTest {
   @Test
   void noteLinkToAttributeFromLeft() throws ClassDiagramParseException {
     ScenePolyline link = lastLine(layout(
-        "class A at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote at(-200, 0) \"n\" attach(0a0a0a0a)"));
+        "class A (aaaaaaaa) at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote at(-200, 0) \"n\" attach(0a0a0a0a)"));
     assertEquals(4, link.xs[1], 1e-9);
     assertEquals(62, link.ys[1], 1e-9);
   }
@@ -133,7 +133,7 @@ class AttachedElementsTest {
   /** A note attached to a relation is linked to the middle of the relation. */
   @Test
   void noteLinkToRelation() throws ClassDiagramParseException {
-    ScenePolyline link = lastLine(layout(STACKED + "association (11110000) A -- B\nnote at(100, 60) \"n\" attach(11110000)"));
+    ScenePolyline link = lastLine(layout(STACKED + "association (11110000) aaaaaaaa -- bbbbbbbb\nnote at(100, 60) \"n\" attach(11110000)"));
     assertEquals(20, link.xs[1], 1e-9);
     assertEquals(76, link.ys[1], 1e-9);
   }
@@ -157,7 +157,7 @@ class AttachedElementsTest {
   /** The line reaches an attribute from the side of the last waypoint, even if the note is on the other side. */
   @Test
   void attributeSideFromLastWaypoint() throws ClassDiagramParseException {
-    ScenePolyline link = lastLine(layout("class A at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\n"
+    ScenePolyline link = lastLine(layout("class A (aaaaaaaa) at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\n"
         + "note at(200, 0) \"n\" attach(0a0a0a0a) route (150, -20) (-30, 62)"));
     assertEquals(4, link.xs[link.xs.length - 1], 1e-9);
     assertEquals(62, link.ys[link.ys.length - 1], 1e-9);
@@ -174,7 +174,7 @@ class AttachedElementsTest {
   /** A note which isn't attached has no line. */
   @Test
   void freeNoteWithoutLink() throws ClassDiagramParseException {
-    assertTrue(all(layout("class A\nnote \"n\""), ScenePolyline.class).isEmpty());
+    assertTrue(all(layout("class A (aaaaaaaa)\nnote \"n\""), ScenePolyline.class).isEmpty());
   }
 
   /** A note attached to an ID which no element of the diagram has can't be drawn. */

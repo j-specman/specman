@@ -23,16 +23,15 @@ public class RelationTextLayouter {
         this.measurer = measurer;
     }
 
-    public List<SceneText> texts(AbstractRelationModel_V001 relation, List<Point2D.Double> path) {
-        List<SceneText> texts = new ArrayList<>();
+    public RelationTexts texts(AbstractRelationModel_V001 relation, List<Point2D.Double> path) {
+        SceneText fromMultiplicity = null;
+        SceneText toMultiplicity = null;
         if (relation instanceof AssociationRelationModel_V001 association) {
-            addMultiplicity(texts, association.fromMultiplicity, path.get(0), path.get(1));
-            addMultiplicity(texts, association.toMultiplicity, path.get(path.size() - 1), path.get(path.size() - 2));
+            fromMultiplicity = multiplicity(association.fromMultiplicity, path.get(0), path.get(1));
+            toMultiplicity = multiplicity(association.toMultiplicity, path.get(path.size() - 1), path.get(path.size() - 2));
         }
-        if (relation.label != null) {
-            texts.addAll(label(relation.label, path));
-        }
-        return texts;
+        List<SceneText> labelLines = relation.label == null ? List.of() : label(relation.label, path);
+        return new RelationTexts(fromMultiplicity, toMultiplicity, labelLines);
     }
 
     // ---- multiplicities ----
@@ -44,9 +43,9 @@ public class RelationTextLayouter {
      * @param border where the line touches the box
      * @param inside the next point on the line, away from the box
      */
-    private void addMultiplicity(List<SceneText> texts, String multiplicity, Point2D.Double border, Point2D.Double inside) {
+    private SceneText multiplicity(String multiplicity, Point2D.Double border, Point2D.Double inside) {
         if (multiplicity == null) {
-            return;
+            return null;
         }
         double width = measurer.width(multiplicity, false);
         double dx = inside.x - border.x;
@@ -55,15 +54,15 @@ public class RelationTextLayouter {
             double x = dx > 0 ? border.x + MULTIPLICITY_ALONG_GAP : border.x - MULTIPLICITY_ALONG_GAP;
             double farEnd = dx > 0 ? x + width : x - width;
             double lineTop = Math.min(border.y, Math.min(yOnLine(border, dx, dy, x), yOnLine(border, dx, dy, farEnd)));
-            texts.add(new SceneText(x, lineTop - MULTIPLICITY_SIDE_GAP, multiplicity, false,
-                dx > 0 ? TextAnchor.START : TextAnchor.END, width));
+            return new SceneText(x, lineTop - MULTIPLICITY_SIDE_GAP, multiplicity, false,
+                dx > 0 ? TextAnchor.START : TextAnchor.END, width);
         } else {
             double baseline = dy > 0 ? border.y + measurer.ascent() : border.y - MULTIPLICITY_BORDER_GAP;
             double top = baseline - measurer.ascent();
             double lineRight = Math.max(border.x,
                 Math.max(xOnLine(border, dx, dy, top), xOnLine(border, dx, dy, top + measurer.lineHeight())));
-            texts.add(new SceneText(lineRight + MULTIPLICITY_SIDE_GAP, baseline, multiplicity, false,
-                TextAnchor.START, width));
+            return new SceneText(lineRight + MULTIPLICITY_SIDE_GAP, baseline, multiplicity, false,
+                TextAnchor.START, width);
         }
     }
 

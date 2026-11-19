@@ -33,6 +33,14 @@ public final class PathGeometry {
         return middle(path.get(longest), path.get(longest + 1));
     }
 
+    /** The point a quarter of the way along the longest part of the path, where the cross of a removed relation stands. */
+    public static Point2D.Double quarterPoint(List<Point2D.Double> path) {
+        int longest = longestSegment(path);
+        Point2D.Double from = path.get(longest);
+        Point2D.Double to = path.get(longest + 1);
+        return new Point2D.Double(from.x + (to.x - from.x) / 4, from.y + (to.y - from.y) / 4);
+    }
+
     /** True if the part from one point to the other runs more sideways than up or down. */
     public static boolean isHorizontal(Point2D.Double from, Point2D.Double to) {
         return Math.abs(to.x - from.x) > Math.abs(to.y - from.y);

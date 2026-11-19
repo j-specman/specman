@@ -86,6 +86,29 @@ class SceneSvgWriterTest {
     assertTrue(svg.contains("<polygon points=\"0,0 4,0 4,3\" fill=\"#ffffff\" stroke=\"#000000\"/>"), svg);
   }
 
+  /** A stroke which isn't the usual one says its width, and a veiled text its color. */
+  @Test
+  void strokeWidthAndTextFill() {
+    String svg = writer.write(sceneOf(new SceneRectangle(0, 0, 10, 10, null, "#ffff00", 12),
+        new ScenePolyline(new double[]{0, 10}, new double[]{0, 0}, false, "#ffff00", 9),
+        new SceneText(0, 0, "x", false, TextAnchor.START, 10, "#9a9a9a")));
+    assertTrue(svg.contains("stroke-width=\"12\""), svg);
+    assertTrue(svg.contains("stroke=\"#ffff00\" stroke-width=\"9\""), svg);
+    assertFalse(svg.contains("round"), svg);
+    assertFalse(svg.contains("rx="), svg);
+    assertTrue(svg.contains("fill=\"#9a9a9a\">x</text>"), svg);
+  }
+
+  /** Usual strokes and texts say nothing about width, corners or fill, so the SVG stays as it was. */
+  @Test
+  void usualPartsStaySlim() {
+    String svg = writer.write(sceneOf(new SceneRectangle(0, 0, 10, 10, "#ffffff", "#000000"),
+        new SceneText(0, 0, "x", false, TextAnchor.START, 10)));
+    assertFalse(svg.contains("stroke-width"), svg);
+    assertFalse(svg.contains("rx="), svg);
+    assertFalse(svg.contains("fill=\"#") && svg.indexOf("fill=\"#", svg.indexOf("<text")) > 0, svg);
+  }
+
   /** The parts come in the order of the scene, so later ones are drawn above earlier ones. */
   @Test
   void drawingOrder() {

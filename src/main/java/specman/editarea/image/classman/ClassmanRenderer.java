@@ -14,6 +14,9 @@ import classman.render.TextAnchor;
 import classman.render.TextMeasurer;
 import classman.render.TextWrapper;
 
+import specman.ChangeSet;
+
+import java.awt.Color;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +51,17 @@ public final class ClassmanRenderer {
 
   /** @throws IllegalArgumentException if the model refers to a class, attribute or relation which it doesn't have */
   static Scene sceneOf(ClassDiagramModel_V001 model) {
-    return new ClassDiagramLayouter(new AwtTextMeasurer()).layout(model);
+    return new ClassDiagramLayouter(new AwtTextMeasurer(), ClassmanRenderer::strongColorOf).layout(model);
+  }
+
+  /** @return the color of the change set as #rrggbb, or null if Specman has no change set of that name */
+  private static String strongColorOf(String changeSetName) {
+    ChangeSet changeSet = ChangeSet.fromName(changeSetName);
+    if (changeSet == null) {
+      return null;
+    }
+    Color color = changeSet.textColor();
+    return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
   }
 
   private static Scene errorScene(String problem) {

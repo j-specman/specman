@@ -4,4 +4,6 @@ package classman.model.v001;
 public abstract class AbstractDiagramElementModel_V001 {
     /** 8 lower-case hex characters like a Specman step ID, null if the source doesn't give one. */
     public String id;
+    /** Null if no change set added or removed the element. */
+    public ChangeModel_V001 change;
 }

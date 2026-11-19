@@ -5,7 +5,7 @@ import java.math.RoundingMode;
 
 import static classman.render.DiagramStyle.SVG_FONT_FAMILIES;
 import static classman.render.DiagramStyle.FONT_SIZE;
-import static classman.render.DiagramStyle.STROKE;
+import static classman.render.DiagramStyle.STROKE_WIDTH;
 import static classman.render.DiagramStyle.SVG_MARGIN;
 
 /**
@@ -51,30 +51,37 @@ public class SceneSvgWriter {
     private String rectangle(SceneRectangle rectangle) {
         return "<rect x=\"" + number(rectangle.x) + "\" y=\"" + number(rectangle.y)
             + "\" width=\"" + number(rectangle.width) + "\" height=\"" + number(rectangle.height)
-            + "\" fill=\"" + color(rectangle.fill) + "\" stroke=\"" + color(rectangle.stroke) + "\"/>";
+            + "\" fill=\"" + color(rectangle.fill) + "\" stroke=\"" + color(rectangle.stroke) + "\""
+            + strokeWidth(rectangle.strokeWidth) + "/>";
     }
 
     private String line(SceneLine line) {
         return "<line x1=\"" + number(line.x1) + "\" y1=\"" + number(line.y1)
             + "\" x2=\"" + number(line.x2) + "\" y2=\"" + number(line.y2)
-            + "\" stroke=\"" + STROKE + "\"" + dashes(line.dashed) + "/>";
+            + "\" stroke=\"" + line.stroke + "\"" + strokeWidth(line.strokeWidth) + dashes(line.dashed) + "/>";
     }
 
     private String polyline(ScenePolyline polyline) {
-        return "<polyline points=\"" + points(polyline.xs, polyline.ys) + "\" fill=\"none\" stroke=\"" + STROKE + "\""
-            + dashes(polyline.dashed) + "/>";
+        return "<polyline points=\"" + points(polyline.xs, polyline.ys) + "\" fill=\"none\" stroke=\"" + polyline.stroke + "\""
+            + strokeWidth(polyline.strokeWidth) + dashes(polyline.dashed) + "/>";
     }
 
     private String polygon(ScenePolygon polygon) {
         return "<polygon points=\"" + points(polygon.xs, polygon.ys) + "\" fill=\"" + color(polygon.fill)
-            + "\" stroke=\"" + color(polygon.stroke) + "\"/>";
+            + "\" stroke=\"" + color(polygon.stroke) + "\"" + strokeWidth(polygon.strokeWidth) + "/>";
     }
 
     private String text(SceneText text) {
         return "<text x=\"" + number(text.x) + "\" y=\"" + number(text.y)
             + "\" text-anchor=\"" + anchor(text.anchor) + "\" font-family=\"" + SVG_FONT_FAMILIES
-            + "\" font-size=\"" + FONT_SIZE + "\"" + (text.bold ? " font-weight=\"bold\"" : "") + ">"
+            + "\" font-size=\"" + FONT_SIZE + "\"" + (text.bold ? " font-weight=\"bold\"" : "")
+            + (text.fill == null ? "" : " fill=\"" + text.fill + "\"") + ">"
             + escaped(text.text) + "</text>";
+    }
+
+    /** Only a stroke which isn't the usual one says its width. */
+    private String strokeWidth(double width) {
+        return width == STROKE_WIDTH ? "" : " stroke-width=\"" + number(width) + "\"";
     }
 
     private String anchor(TextAnchor anchor) {

@@ -4,12 +4,14 @@ import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.ExtendsRelationModel_V001;
 import classman.model.v001.ImplementsRelationModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.RelationType_V001;
+import classman.model.v001.TextChangeModel_V001;
 import classman.model.v001.Side_V001;
 import classman.model.v001.Visibility_V001;
 import org.junit.jupiter.api.Test;
@@ -62,7 +64,7 @@ class ClassDiagramParser_V001Test {
     assertEquals(Visibility_V001.PRIVATE, name.visibility);
     assertEquals("Name", name.name);
     assertEquals("String", name.type);
-    assertEquals(List.of("Pflicht", "2..50", "TN=key"), name.infos);
+    assertEquals(List.of("Pflicht", "2..50", "TN=key"), infoTexts(name));
     assertTrue(c.attributes.get(1).hiddenAttributesMarker);
   }
 
@@ -140,11 +142,11 @@ class ClassDiagramParser_V001Test {
   @Test
   void associationParts() throws ClassDiagramParseException {
     AssociationRelationModel_V001 r = assertInstanceOf(AssociationRelationModel_V001.class,
-        parse("association (0123abcd) A 1 -> 0..* B \"first\\nsecond\"").relations().get(0));
+        parse("association (0123abcd) aaaaaaaa 1 -> 0..* bbbbbbbb \"first\\nsecond\"").relations().get(0));
     assertEquals(RelationType_V001.ASSOCIATION, r.type);
     assertEquals("0123abcd", r.id);
-    assertEquals("A", r.from);
-    assertEquals("B", r.to);
+    assertEquals("aaaaaaaa", r.fromId);
+    assertEquals("bbbbbbbb", r.toId);
     assertEquals("1", r.fromMultiplicity);
     assertEquals("0..*", r.toMultiplicity);
     assertTrue(r.directed);
@@ -153,10 +155,10 @@ class ClassDiagramParser_V001Test {
     assertNull(r.assocClass);
   }
 
-  /** Aggregation and composition are associations too. A -- instead of -> makes the relation undirected. */
+  /** Aggregation and composition are associations too. -- instead of -> makes the relation undirected. */
   @Test
   void aggregationCompositionUndirected() throws ClassDiagramParseException {
-    List<AbstractRelationModel_V001> relations = parse("aggregation A -- B\ncomposition A -> B").relations();
+    List<AbstractRelationModel_V001> relations = parse("aggregation aaaaaaaa -- bbbbbbbb\ncomposition aaaaaaaa -> bbbbbbbb").relations();
     assertEquals(RelationType_V001.AGGREGATION, relations.get(0).type);
     assertFalse(assertInstanceOf(AssociationRelationModel_V001.class, relations.get(0)).directed);
     assertEquals(RelationType_V001.COMPOSITION, relations.get(1).type);
@@ -166,33 +168,67 @@ class ClassDiagramParser_V001Test {
   /** Extends and implements become their own model classes. */
   @Test
   void extendsAndImplements() throws ClassDiagramParseException {
-    List<AbstractRelationModel_V001> relations = parse("extends A -> B \"is a\"\nimplements A -> C").relations();
+    List<AbstractRelationModel_V001> relations = parse("extends aaaaaaaa -> bbbbbbbb \"is a\"\nimplements aaaaaaaa -> cccccccc").relations();
     assertInstanceOf(ExtendsRelationModel_V001.class, relations.get(0));
     assertEquals("is a", relations.get(0).label);
     assertInstanceOf(ImplementsRelationModel_V001.class, relations.get(1));
-    assertEquals("C", relations.get(1).to);
+    assertEquals("cccccccc", relations.get(1).toId);
   }
 
-  /** A route has a start anchor, waypoints and an end anchor. Quoted names work in anchors. */
+  /** A route has a start anchor, waypoints and an end anchor. The anchors name the classes by ID. */
   @Test
   void routeAnchorsAndWaypoints() throws ClassDiagramParseException {
-    AbstractRelationModel_V001 r = parse("association A -> B\n  route A.top@5 (10, 20) (30, -40) \"B C\".left@7").relations().get(0);
-    assertEquals("A", r.route.start.className);
+    AbstractRelationModel_V001 r = parse("association aaaaaaaa -> bbbbbbbb\n  route aaaaaaaa.top@5 (10, 20) (30, -40) bbbbbbbb.left@7").relations().get(0);
+    assertEquals("aaaaaaaa", r.route.start.classId);
     assertEquals(Side_V001.TOP, r.route.start.side);
     assertEquals(5, r.route.start.offset);
     assertEquals(2, r.route.waypoints.size());
     assertEquals(30, r.route.waypoints.get(1).x);
     assertEquals(-40, r.route.waypoints.get(1).y);
-    assertEquals("B C", r.route.end.className);
+    assertEquals("bbbbbbbb", r.route.end.classId);
     assertEquals(Side_V001.LEFT, r.route.end.side);
     assertEquals(7, r.route.end.offset);
+  }
+
+  /** A word of 8 hex characters is an ID reference in a relation, but still a normal word as name, type or info. */
+  @Test
+  void hexWordAsName() throws ClassDiagramParseException {
+    ClassDiagramModel_V001 diagram = parse("""
+        class deadbeef (12345678) {KEY=12345678} {
+          deadbeef : deadbeef [deadbeef, 12345678]
+        }
+        class Other (aaaaaaaa)
+        extends 12345678 -> aaaaaaaa""");
+    ClassModel_V001 c = diagram.classes().get(0);
+    assertEquals("deadbeef", c.name);
+    assertEquals("12345678", c.id);
+    assertEquals("12345678", c.taggedValues.get(0).value);
+    assertEquals("deadbeef", c.attributes.get(0).name);
+    assertEquals("deadbeef", c.attributes.get(0).type);
+    assertEquals(List.of("deadbeef", "12345678"), infoTexts(c.attributes.get(0)));
+    assertEquals("12345678", diagram.relations().get(0).fromId);
+  }
+
+  /** Two classes with the same name are told apart by their IDs in a relation. */
+  @Test
+  void relationBetweenSameNamedClasses() throws ClassDiagramParseException {
+    AbstractRelationModel_V001 r = parse("class Same (aaaaaaaa)\nclass Same (bbbbbbbb)\nextends bbbbbbbb -> aaaaaaaa")
+        .relations().get(0);
+    assertEquals("bbbbbbbb", r.fromId);
+    assertEquals("aaaaaaaa", r.toId);
+  }
+
+  /** A class name in place of an ID is a syntax error. */
+  @Test
+  void classNameAsEndpointRejected() {
+    assertThrows(ClassDiagramParseException.class, () -> parse("class A (aaaaaaaa)\nclass B (bbbbbbbb)\nextends A -> B"));
   }
 
   /** An association class nested in a relation belongs to that relation. */
   @Test
   void nestedAssocClass() throws ClassDiagramParseException {
     AssociationRelationModel_V001 r = assertInstanceOf(AssociationRelationModel_V001.class,
-        parse("association A -> B\n  assocclass link at(5, 6) {\n    since\n  }").relations().get(0));
+        parse("association aaaaaaaa -> bbbbbbbb\n  assocclass link at(5, 6) {\n    since\n  }").relations().get(0));
     assertEquals("link", r.assocClass.name);
     assertEquals(5, r.assocClass.position.x);
     assertEquals("since", r.assocClass.attributes.get(0).name);
@@ -248,13 +284,167 @@ class ClassDiagramParser_V001Test {
     assertNull(classModel.attributes.get(1).id);
   }
 
+  /** A change mark follows the ID and gives the type and the change set. */
+  @Test
+  void changeMarks() throws ClassDiagramParseException {
+    ClassDiagramModel_V001 diagram = parse("class A (aaaaaaaa) change(added, yellow) at(1, 2) {\n"
+        + "  -x (a1a1a1a1) change(removed, blue) : String\n  -y\n}\n"
+        + "class B (bbbbbbbb)\n"
+        + "composition (cccccccc) change(removed, lilac) aaaaaaaa -> bbbbbbbb\n"
+        + "  assocclass C change(added, green) {}\n"
+        + "note (dddddddd) change(added, red) \"n\"");
+    ClassModel_V001 a = diagram.classes().get(0);
+    assertEquals(ChangeType_V001.ADDED, a.change.type);
+    assertEquals("yellow", a.change.changeSet);
+    assertEquals(1, a.position.x);
+    assertEquals(ChangeType_V001.REMOVED, a.attributes.get(0).change.type);
+    assertEquals("blue", a.attributes.get(0).change.changeSet);
+    assertEquals("String", a.attributes.get(0).type);
+    assertNull(a.attributes.get(1).change);
+    assertNull(diagram.classes().get(1).change);
+    AssociationRelationModel_V001 relation = (AssociationRelationModel_V001) diagram.relations().get(0);
+    assertEquals(ChangeType_V001.REMOVED, relation.change.type);
+    assertEquals("lilac", relation.change.changeSet);
+    assertEquals("green", relation.assocClass.change.changeSet);
+    assertEquals("red", diagram.notes().get(0).change.changeSet);
+  }
+
+  /** The word change is still fine as an attribute name, with or without a mark. */
+  @Test
+  void changeAsAttributeName() throws ClassDiagramParseException {
+    ClassModel_V001 classModel = onlyClass("class A {\n  -change\n  change change(added, yellow)\n  other\n}");
+    assertEquals("change", classModel.attributes.get(0).name);
+    assertNull(classModel.attributes.get(0).change);
+    assertEquals("change", classModel.attributes.get(1).name);
+    assertEquals("yellow", classModel.attributes.get(1).change.changeSet);
+    assertEquals("other", classModel.attributes.get(2).name);
+  }
+
+  /** Only added and removed exist as change types. */
+  @Test
+  void unknownChangeTypeRejected() {
+    ClassDiagramParseException e = assertThrows(ClassDiagramParseException.class,
+        () -> parse("class A (aaaaaaaa) change(moved, yellow)"));
+    assertTrue(e.getMessage().contains("moved"), e.getMessage());
+  }
+
   /** Classes, relations and notes stay in the order of the source. */
   @Test
   void elementSourceOrder() throws ClassDiagramParseException {
     List<AbstractDiagramElementModel_V001> elements =
-        parse("class A\nnote \"n\"\nclass B\nextends A -> B\nnote \"m\"").elements;
+        parse("class A (aaaaaaaa)\nnote \"n\"\nclass B (bbbbbbbb)\nextends aaaaaaaa -> bbbbbbbb\nnote \"m\"").elements;
     assertEquals(List.of(ClassModel_V001.class, NoteModel_V001.class, ClassModel_V001.class,
         ExtendsRelationModel_V001.class, NoteModel_V001.class),
         elements.stream().<Class<?>>map(Object::getClass).toList());
+  }
+
+  private static List<String> infoTexts(AttributeModel_V001 attribute) {
+    return attribute.infos.stream().map(info -> info.text).toList();
+  }
+
+  private static void assertTextChange(String changeSet, String backup, TextChangeModel_V001 change) {
+    assertEquals(changeSet, change.changeSet);
+    assertEquals(backup, change.backup);
+  }
+
+  /** Every kind of text takes a was mark right behind it. */
+  @Test
+  void textChangeKinds() throws ClassDiagramParseException {
+    ClassDiagramModel_V001 diagram = parser.parse("""
+        classdiagram "T" was(red, "Old") {
+          class Order was(yellow, Bestellung) (aaaaaaaa) <<Entity>> was(blue, Table) (e3a1d7c2) {TABLE was(green, T0)=orders was(lilac, o0)} {
+            -nr was(yellow, number) : String was(blue, Text) [Pflicht was(green, optional), 2..50]
+          }
+          class Line (bbbbbbbb)
+          association aaaaaaaa 1 was(yellow, "0..1") -> * was(blue, 1..*) bbbbbbbb "gehört zu" was(green, enthält)
+          note "Neu" was(red, "Alt")
+        }""");
+    assertTextChange("red", "Old", diagram.nameChange);
+    ClassModel_V001 order = diagram.classes().get(0);
+    assertTextChange("yellow", "Bestellung", order.nameChange);
+    assertEquals("aaaaaaaa", order.id);
+    assertTextChange("blue", "Table", order.stereotypeChange);
+    assertEquals("e3a1d7c2", order.stereotypeId);
+    assertTextChange("green", "T0", order.taggedValues.get(0).keyChange);
+    assertTextChange("lilac", "o0", order.taggedValues.get(0).valueChange);
+    AttributeModel_V001 number = order.attributes.get(0);
+    assertTextChange("yellow", "number", number.nameChange);
+    assertTextChange("blue", "Text", number.typeChange);
+    assertTextChange("green", "optional", number.infos.get(0).change);
+    assertEquals("Pflicht", number.infos.get(0).text);
+    assertNull(number.infos.get(1).change);
+    AssociationRelationModel_V001 relation = (AssociationRelationModel_V001) diagram.relations().get(0);
+    assertTextChange("yellow", "0..1", relation.fromMultiplicityChange);
+    assertTextChange("blue", "1..*", relation.toMultiplicityChange);
+    assertTextChange("green", "enthält", relation.labelChange);
+    assertTextChange("red", "Alt", diagram.notes().get(0).textChange);
+  }
+
+  /** Without backup there was no text before, an empty backup says the text was empty. */
+  @Test
+  void absentAndEmptyBackup() throws ClassDiagramParseException {
+    ClassDiagramModel_V001 diagram = parse("class A was(yellow) (aaaaaaaa)\nclass B was(yellow, \"\") (bbbbbbbb)");
+    assertTextChange("yellow", null, diagram.classes().get(0).nameChange);
+    assertTextChange("yellow", "", diagram.classes().get(1).nameChange);
+  }
+
+  /** A removed text stays as an empty string with the mark. */
+  @Test
+  void removedLabel() throws ClassDiagramParseException {
+    AbstractRelationModel_V001 relation = parse("association aaaaaaaa -- bbbbbbbb \"\" was(yellow, \"old\")")
+        .relations().get(0);
+    assertEquals("", relation.label);
+    assertTextChange("yellow", "old", relation.labelChange);
+  }
+
+  /** Texts without a mark have no change. */
+  @Test
+  void unmarkedTextsHaveNoChange() throws ClassDiagramParseException {
+    ClassDiagramModel_V001 diagram = parse("class A (aaaaaaaa) <<E>> {K=v} {\n  x : T [i]\n}\nnote \"n\"");
+    ClassModel_V001 classModel = diagram.classes().get(0);
+    assertNull(classModel.nameChange);
+    assertNull(classModel.stereotypeChange);
+    assertNull(classModel.taggedValues.get(0).keyChange);
+    assertNull(classModel.taggedValues.get(0).valueChange);
+    assertNull(classModel.attributes.get(0).nameChange);
+    assertNull(classModel.attributes.get(0).typeChange);
+    assertNull(classModel.attributes.get(0).infos.get(0).change);
+    assertNull(diagram.notes().get(0).textChange);
+    assertNull(diagram.nameChange);
+  }
+
+  /** The word was is still fine as an attribute name, type and info, with or without a mark. */
+  @Test
+  void wasAsWord() throws ClassDiagramParseException {
+    List<AttributeModel_V001> attributes = onlyClass(
+        "class A {\n  was\n  was was(yellow, x) : was [was, was was(blue), a was]\n  other\n}").attributes;
+    assertEquals("was", attributes.get(0).name);
+    assertNull(attributes.get(0).nameChange);
+    assertEquals("was", attributes.get(1).name);
+    assertTextChange("yellow", "x", attributes.get(1).nameChange);
+    assertEquals("was", attributes.get(1).type);
+    assertNull(attributes.get(1).typeChange);
+    assertEquals(List.of("was", "was", "a was"), infoTexts(attributes.get(1)));
+    assertNull(attributes.get(1).infos.get(0).change);
+    assertTextChange("blue", null, attributes.get(1).infos.get(1).change);
+    assertEquals("other", attributes.get(2).name);
+  }
+
+  /** Marks inside tagged values don't hide whether a brace starts tagged values or the body. */
+  @Test
+  void taggedValuesBesideBody() throws ClassDiagramParseException {
+    ClassModel_V001 withTags = onlyClass("class A {K was(yellow, J)=v was(blue, w), B=2} {\n  x\n}");
+    assertEquals(2, withTags.taggedValues.size());
+    assertEquals(1, withTags.attributes.size());
+    ClassModel_V001 bodyOnly = onlyClass("class A {\n  K was(yellow, J)\n  B\n}");
+    assertTrue(bodyOnly.taggedValues.isEmpty());
+    assertEquals(2, bodyOnly.attributes.size());
+    assertTextChange("yellow", "J", bodyOnly.attributes.get(0).nameChange);
+  }
+
+  /** A quoted backup keeps its line breaks. */
+  @Test
+  void multiLineBackup() throws ClassDiagramParseException {
+    assertTextChange("yellow", "one\ntwo", parse("note \"n\" was(yellow, \"one\\ntwo\")").notes().get(0).textChange);
   }
 }

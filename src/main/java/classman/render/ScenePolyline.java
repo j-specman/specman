@@ -7,11 +7,20 @@ public class ScenePolyline extends AbstractSceneElement {
     public final double[] xs;
     public final double[] ys;
     public final boolean dashed;
+    /** A color like #000000. */
+    public final String stroke;
+    public final double strokeWidth;
 
     public ScenePolyline(double[] xs, double[] ys, boolean dashed) {
+        this(xs, ys, dashed, DiagramStyle.STROKE, DiagramStyle.STROKE_WIDTH);
+    }
+
+    public ScenePolyline(double[] xs, double[] ys, boolean dashed, String stroke, double strokeWidth) {
         this.xs = xs.clone();
         this.ys = ys.clone();
         this.dashed = dashed;
+        this.stroke = stroke;
+        this.strokeWidth = strokeWidth;
     }
 
     /** The smallest rectangle around all points. */
@@ -37,6 +46,6 @@ public class ScenePolyline extends AbstractSceneElement {
             movedXs[i] = xs[i] + dx;
             movedYs[i] = ys[i] + dy;
         }
-        return new ScenePolyline(movedXs, movedYs, dashed);
+        return new ScenePolyline(movedXs, movedYs, dashed, stroke, strokeWidth);
     }
 }

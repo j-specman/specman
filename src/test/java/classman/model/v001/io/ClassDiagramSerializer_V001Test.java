@@ -31,7 +31,7 @@ class ClassDiagramSerializer_V001Test {
 
   /** Writing a model and reading the text again gives the same model, checked for all examples. */
   @ParameterizedTest
-  @ValueSource(strings = {"hello", "benchmark", "edgecases"})
+  @ValueSource(strings = {"hello", "benchmark", "edgecases", "changes", "textchanges", "change-colors"})
   void roundTripKeepsModel(String exampleName) throws Exception {
     ClassDiagramModel_V001 original = parser.parse(example(exampleName));
     ClassDiagramModel_V001 again = parser.parse(serializer.serialize(original));
@@ -40,7 +40,7 @@ class ClassDiagramSerializer_V001Test {
 
   /** The written text is the canonical form: reading and writing it again changes nothing. */
   @ParameterizedTest
-  @ValueSource(strings = {"hello", "benchmark", "edgecases"})
+  @ValueSource(strings = {"hello", "benchmark", "edgecases", "changes", "textchanges", "change-colors"})
   void canonicalTextIsStable(String exampleName) throws Exception {
     String written = roundTrip(example(exampleName));
     assertEquals(written, roundTrip(written));
@@ -63,6 +63,20 @@ class ClassDiagramSerializer_V001Test {
     String written = serializer.serialize(model);
     assertTrue(!written.contains("`"), written);
     assertEquals(text.replace("\r\n", "\n"), parser.parse(written).notes().get(0).text);
+  }
+
+  /** Relation endpoints and route anchors are written as bare IDs, the ID of the relation itself in parentheses. */
+  @Test
+  void bareIdsInRelations() throws ClassDiagramParseException {
+    String written = roundTrip("""
+        classdiagram {
+          class Same (aaaaaaaa)
+          class Same (bbbbbbbb)
+          composition (11223344) aaaaaaaa 1 -> * bbbbbbbb "owns"
+            route aaaaaaaa.right@5 (10, 20) bbbbbbbb.left@7
+        }""");
+    assertTrue(written.contains("    composition (11223344) aaaaaaaa 1 -> * bbbbbbbb \"owns\"\n"), written);
+    assertTrue(written.contains("route aaaaaaaa.right@5 (10, 20) bbbbbbbb.left@7\n"), written);
   }
 
   /** Names get quotes only if they have special characters or are keywords. */
@@ -92,5 +106,25 @@ class ClassDiagramSerializer_V001Test {
   void infosRoundTrip() throws Exception {
     String source = "classdiagram { class A { x [must be unique, \"a, b\", 2..50] } }";
     assertEquals(ClassDiagramDump.of(parser.parse(source)), ClassDiagramDump.of(parser.parse(roundTrip(source))));
+  }
+
+  /** A text mark is written right behind its text, the backup bare if it is a simple word or multiplicity. */
+  @Test
+  void textChangesWritten() throws ClassDiagramParseException {
+    String written = roundTrip("""
+        classdiagram {
+          class A was(yellow, "Alte Klasse") (aaaaaaaa)
+          class B (bbbbbbbb)
+          association aaaaaaaa 1 was(yellow, "0..1") -> bbbbbbbb "" was(blue, "old\\nlabel")
+        }""");
+    assertTrue(written.contains("class A was(yellow, \"Alte Klasse\") (aaaaaaaa)\n"), written);
+    assertTrue(written.contains("aaaaaaaa 1 was(yellow, 0..1) -> bbbbbbbb \"\" was(blue, \"old\\nlabel\")\n"), written);
+  }
+
+  /** A removed label (empty string with mark) is kept, a mark without backup stays without backup. */
+  @Test
+  void emptyTextWithMark() throws ClassDiagramParseException {
+    String written = roundTrip("classdiagram { class A (aaaaaaaa)\n association aaaaaaaa -- aaaaaaaa \"\" was(yellow)\n}");
+    assertTrue(written.contains("aaaaaaaa -- aaaaaaaa \"\" was(yellow)\n"), written);
   }
 }

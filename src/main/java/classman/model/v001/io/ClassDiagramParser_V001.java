@@ -5,12 +5,16 @@ import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.ChangeModel_V001;
+import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassDiagram_V001Lexer;
 import classman.model.v001.ClassDiagram_V001Parser;
 import classman.model.v001.ClassDiagram_V001Parser.AnchorContext;
 import classman.model.v001.ClassDiagram_V001Parser.AssociationRelationContext;
 import classman.model.v001.ClassDiagram_V001Parser.AttributeContext;
+import classman.model.v001.ClassDiagram_V001Parser.BackupTextContext;
+import classman.model.v001.ClassDiagram_V001Parser.ChangeMarkContext;
 import classman.model.v001.ClassDiagram_V001Parser.ClassBodyContext;
 import classman.model.v001.ClassDiagram_V001Parser.ClassDiagramContext;
 import classman.model.v001.ClassDiagram_V001Parser.ClassHeadContext;
@@ -19,6 +23,7 @@ import classman.model.v001.ClassDiagram_V001Parser.ElementContext;
 import classman.model.v001.ClassDiagram_V001Parser.ExtendsRelationContext;
 import classman.model.v001.ClassDiagram_V001Parser.ImplementsRelationContext;
 import classman.model.v001.ClassDiagram_V001Parser.InfoContext;
+import classman.model.v001.ClassDiagram_V001Parser.InfoTextContext;
 import classman.model.v001.ClassDiagram_V001Parser.InfosContext;
 import classman.model.v001.ClassDiagram_V001Parser.MultiplicityContext;
 import classman.model.v001.ClassDiagram_V001Parser.NameContext;
@@ -27,18 +32,21 @@ import classman.model.v001.ClassDiagram_V001Parser.PositionContext;
 import classman.model.v001.ClassDiagram_V001Parser.RelationContext;
 import classman.model.v001.ClassDiagram_V001Parser.RouteContext;
 import classman.model.v001.ClassDiagram_V001Parser.TaggedValueContext;
+import classman.model.v001.ClassDiagram_V001Parser.TextChangeContext;
 import classman.model.v001.ClassDiagram_V001Parser.WaypointContext;
 import classman.model.v001.ClassDiagram_V001Parser.WidthSpecContext;
 import classman.model.v001.ClassDiagram_V001Parser.WordOrStringContext;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.ExtendsRelationModel_V001;
 import classman.model.v001.ImplementsRelationModel_V001;
+import classman.model.v001.InfoModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.RouteModel_V001;
 import classman.model.v001.Side_V001;
 import classman.model.v001.TaggedValueModel_V001;
+import classman.model.v001.TextChangeModel_V001;
 import classman.model.v001.Visibility_V001;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -72,6 +80,7 @@ public class ClassDiagramParser_V001 {
     private ClassDiagramModel_V001 buildDiagram(ClassDiagramContext tree) throws ClassDiagramParseException {
         DiagramNameContext name = tree.diagramName();
         ClassDiagramModel_V001 model = new ClassDiagramModel_V001(name == null ? null : text(name));
+        model.nameChange = textChange(tree.nameChange);
         for (ElementContext element : tree.element()) {
             model.elements.add(buildElement(element));
         }
@@ -93,10 +102,13 @@ public class ClassDiagramParser_V001 {
     private ClassModel_V001 buildClass(ClassHeadContext head, ClassBodyContext body) throws ClassDiagramParseException {
         ClassModel_V001 model = new ClassModel_V001(text(head.name()));
         model.id = id(head.classId);
+        model.nameChange = textChange(head.nameChange);
+        model.change = change(head.changeMark());
         model.position = position(head.position());
         model.width = width(head.widthSpec());
         model.stereotype = stereotype(head.STEREOTYPE());
         model.stereotypeId = id(head.stereotypeId);
+        model.stereotypeChange = textChange(head.stereotypeChange);
         if (head.taggedValues() != null) {
             for (TaggedValueContext tag : head.taggedValues().taggedValue()) {
                 model.taggedValues.add(buildTaggedValue(tag));
@@ -120,14 +132,20 @@ public class ClassDiagramParser_V001 {
     }
 
     private TaggedValueModel_V001 buildTaggedValue(TaggedValueContext tag) {
-        String key = tag.word(0).getText();
+        TaggedValueModel_V001 model = new TaggedValueModel_V001(tag.word(0).getText(), taggedValueText(tag));
+        model.keyChange = textChange(tag.keyChange);
+        model.valueChange = textChange(tag.valueChange);
+        return model;
+    }
+
+    private String taggedValueText(TaggedValueContext tag) {
         if (tag.word().size() == 2) {
-            return new TaggedValueModel_V001(key, tag.word(1).getText());
+            return tag.word(1).getText();
         }
         if (tag.NUMBER() != null) {
-            return new TaggedValueModel_V001(key, tag.NUMBER().getText());
+            return tag.NUMBER().getText();
         }
-        return new TaggedValueModel_V001(key, unquote(tag.QUOTED_STRING().getText()));
+        return unquote(tag.QUOTED_STRING().getText());
     }
 
     // ---- attributes ----
@@ -146,7 +164,7 @@ public class ClassDiagramParser_V001 {
         }
     }
 
-    private AttributeModel_V001 buildAttribute(AttributeContext attribute) {
+    private AttributeModel_V001 buildAttribute(AttributeContext attribute) throws ClassDiagramParseException {
         if (attribute.ELLIPSIS() != null) {
             return AttributeModel_V001.hiddenAttributesMarker();
         }
@@ -157,21 +175,26 @@ public class ClassDiagramParser_V001 {
         String type = attribute.COLON() == null ? null : text(nameAndType.get(1));
         AttributeModel_V001 model = new AttributeModel_V001(visibility, name, type, infos(attribute.infos()));
         model.id = id(attribute.ELEMENT_ID());
+        model.nameChange = textChange(attribute.nameChange);
+        model.typeChange = textChange(attribute.typeChange);
+        model.change = change(attribute.changeMark());
         return model;
     }
 
-    private List<String> infos(InfosContext infos) {
-        List<String> result = new ArrayList<>();
+    private List<InfoModel_V001> infos(InfosContext infos) {
+        List<InfoModel_V001> result = new ArrayList<>();
         if (infos != null) {
             for (InfoContext info : infos.info()) {
-                result.add(infoText(info));
+                InfoModel_V001 model = new InfoModel_V001(infoText(info.infoText()));
+                model.change = textChange(info.textChange());
+                result.add(model);
             }
         }
         return result;
     }
 
     /** The info as written, except that a single quoted string loses its quotes. */
-    private String infoText(InfoContext info) {
+    private String infoText(InfoTextContext info) {
         if (info.getChildCount() == 1 && info.QUOTED_STRING().size() == 1) {
             return unquote(info.getText());
         }
@@ -193,32 +216,39 @@ public class ClassDiagramParser_V001 {
 
     private AssociationRelationModel_V001 buildAssociation(AssociationRelationContext ctx) throws ClassDiagramParseException {
         RelationType_V001 type = RelationType_V001.valueOf(ctx.type.getText().toUpperCase(Locale.ROOT));
-        AssociationRelationModel_V001 model = new AssociationRelationModel_V001(type, text(ctx.from), text(ctx.to));
+        AssociationRelationModel_V001 model = new AssociationRelationModel_V001(type, ctx.from.getText(), ctx.to.getText());
         model.fromMultiplicity = multiplicity(ctx.fromMultiplicity);
         model.toMultiplicity = multiplicity(ctx.toMultiplicity);
+        model.fromMultiplicityChange = textChange(ctx.fromMultiplicityChange);
+        model.toMultiplicityChange = textChange(ctx.toMultiplicityChange);
         model.directed = ctx.ARROW() != null;
-        fillCommon(model, ctx.ELEMENT_ID(), ctx.label, ctx.route());
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.route());
         if (ctx.assocClass() != null) {
             model.assocClass = buildClass(ctx.assocClass().classHead(), ctx.assocClass().classBody());
         }
         return model;
     }
 
-    private ExtendsRelationModel_V001 buildExtends(ExtendsRelationContext ctx) {
-        ExtendsRelationModel_V001 model = new ExtendsRelationModel_V001(text(ctx.from), text(ctx.to));
-        fillCommon(model, ctx.ELEMENT_ID(), ctx.label, ctx.route());
+    private ExtendsRelationModel_V001 buildExtends(ExtendsRelationContext ctx) throws ClassDiagramParseException {
+        ExtendsRelationModel_V001 model = new ExtendsRelationModel_V001(ctx.from.getText(), ctx.to.getText());
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.route());
         return model;
     }
 
-    private ImplementsRelationModel_V001 buildImplements(ImplementsRelationContext ctx) {
-        ImplementsRelationModel_V001 model = new ImplementsRelationModel_V001(text(ctx.from), text(ctx.to));
-        fillCommon(model, ctx.ELEMENT_ID(), ctx.label, ctx.route());
+    private ImplementsRelationModel_V001 buildImplements(ImplementsRelationContext ctx)
+            throws ClassDiagramParseException {
+        ImplementsRelationModel_V001 model = new ImplementsRelationModel_V001(ctx.from.getText(), ctx.to.getText());
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.route());
         return model;
     }
 
-    private void fillCommon(AbstractRelationModel_V001 model, TerminalNode id, Token label, RouteContext route) {
+    private void fillCommon(AbstractRelationModel_V001 model, TerminalNode id, ChangeMarkContext changeMark, Token label,
+                            TextChangeContext labelChange,
+                            RouteContext route) throws ClassDiagramParseException {
         model.id = id(id);
+        model.change = change(changeMark);
         model.label = label == null ? null : unquote(label.getText());
+        model.labelChange = textChange(labelChange);
         model.route = route == null ? null : buildRoute(route);
     }
 
@@ -237,14 +267,16 @@ public class ClassDiagramParser_V001 {
 
     private AnchorModel_V001 buildAnchor(AnchorContext anchor) {
         Side_V001 side = Side_V001.valueOf(anchor.side().getText().toUpperCase(Locale.ROOT));
-        return new AnchorModel_V001(text(anchor.name()), side, Integer.parseInt(anchor.NUMBER().getText()));
+        return new AnchorModel_V001(anchor.HEX_ID().getText(), side, Integer.parseInt(anchor.NUMBER().getText()));
     }
 
     // ---- notes ----
 
-    private NoteModel_V001 buildNote(NoteContext ctx) {
+    private NoteModel_V001 buildNote(NoteContext ctx) throws ClassDiagramParseException {
         NoteModel_V001 model = new NoteModel_V001(unquote(ctx.QUOTED_STRING().getText()));
         model.id = id(ctx.noteId);
+        model.change = change(ctx.changeMark());
+        model.textChange = textChange(ctx.textChange());
         model.position = position(ctx.position());
         model.width = width(ctx.widthSpec());
         model.attachedToId = id(ctx.target);
@@ -258,12 +290,38 @@ public class ClassDiagramParser_V001 {
 
     // ---- small parts ----
 
+    private ChangeModel_V001 change(ChangeMarkContext changeMark) throws ClassDiagramParseException {
+        if (changeMark == null) {
+            return null;
+        }
+        String typeWord = changeMark.changeType.getText();
+        ChangeType_V001 type = ChangeType_V001.fromKeyword(typeWord);
+        if (type == null) {
+            Token start = changeMark.changeType.getStart();
+            throw new ClassDiagramParseException("line " + start.getLine() + ":" + start.getCharPositionInLine()
+                + " Unknown change type " + typeWord + ", expected added or removed.");
+        }
+        return new ChangeModel_V001(type, text(changeMark.changeSet));
+    }
+
     private String id(TerminalNode elementId) {
         return elementId == null ? null : id(elementId.getSymbol());
     }
 
     private String id(Token elementId) {
         return elementId == null ? null : elementId.getText().substring(1, elementId.getText().length() - 1);
+    }
+
+    private TextChangeModel_V001 textChange(TextChangeContext textChange) {
+        if (textChange == null) {
+            return null;
+        }
+        String backup = textChange.backup == null ? null : backupText(textChange.backup);
+        return new TextChangeModel_V001(text(textChange.changeSet), backup);
+    }
+
+    private String backupText(BackupTextContext backup) {
+        return backup.wordOrString() != null ? text(backup.wordOrString()) : backup.getText();
     }
 
     private PositionModel_V001 position(PositionContext position) {
@@ -279,11 +337,11 @@ public class ClassDiagramParser_V001 {
     }
 
     private String text(NameContext name) {
-        return name.NAME() != null ? name.NAME().getText() : unquote(name.QUOTED_STRING().getText());
+        return name.QUOTED_STRING() != null ? unquote(name.QUOTED_STRING().getText()) : name.getText();
     }
 
     private String text(DiagramNameContext name) {
-        return name.NAME() != null ? name.NAME().getText() : unquote(name.QUOTED_STRING().getText());
+        return name.QUOTED_STRING() != null ? unquote(name.QUOTED_STRING().getText()) : name.getText();
     }
 
     private String text(WordOrStringContext wordOrString) {

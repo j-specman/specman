@@ -46,6 +46,6 @@ public class AssocClassLayouter {
         elements.add(new ScenePolyline(new double[]{middle.x, connectorEnd.x}, new double[]{middle.y, connectorEnd.y}, true));
         Rectangle2D.Double connectorArea = new Rectangle2D.Double(Math.min(middle.x, connectorEnd.x),
             Math.min(middle.y, connectorEnd.y), Math.abs(middle.x - connectorEnd.x), Math.abs(middle.y - connectorEnd.y));
-        return new RelationLayout(elements, BoxGeometry.union(area, connectorArea));
+        return new RelationLayout(elements, BoxGeometry.union(box.coveredAt(area.x, area.y), connectorArea));
     }
 }

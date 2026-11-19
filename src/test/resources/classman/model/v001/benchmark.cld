@@ -7,22 +7,22 @@ classdiagram "Hilfe-Versionierung" {
         -Versionsnummer : String [Pflicht, 2..50, TN=versionkey]
         ...
     }
-    class Hilfeversion-Markup at(780, 20) {
+    class Hilfeversion-Markup (c0de0001) at(780, 20) {
         -Sprache
         -Beschreibung : CLOB
     }
-    class Hilfeeintrag at(540, 250) {
+    class Hilfeeintrag (c0de0002) at(540, 250) {
         -Positionsschlüssel : String [Pflicht]
         -"In Baum anzeigen" : J/N
         -"autom Mandantenauswahl" : J/N
         -"Weiterleitung zu Position" : String
         -Formel : String
     }
-    class Hilfetextblock at(900, 250) {
+    class Hilfetextblock (c0de0003) at(900, 250) {
         -"autom Mandantenauswahl" : J/N
         -"lfd Nummer" : Zahl
     }
-    class Hilfe-Markup at(1260, 400) {
+    class Hilfe-Markup (c0de0004) at(1260, 400) {
         -Sprache
         -Beschreibung : CLOB
     }
@@ -33,16 +33,16 @@ classdiagram "Hilfe-Versionierung" {
         -schemaabhängig : J/N
         -Resourcenschlüssel : String
     }
-    class Mandant at(760, 478) {
+    class Mandant (c0de0006) at(760, 478) {
     }
-    class Handbuchseite at(680, 660) {
+    class Handbuchseite (c0de0007) at(680, 660) {
         -Seitenschlüssel : String [Pflicht]
         -"In Baum anzeigen" : J/N
     }
-    class Handbuchtextblock at(1040, 667) {
+    class Handbuchtextblock (c0de0008) at(1040, 667) {
         -"lfd Nummer" : Zahl
     }
-    class Handbuch-Markup at(1260, 590) {
+    class Handbuch-Markup (c0de0009) at(1260, 590) {
         -Sprache
         -Beschreibung : CLOB
     }
@@ -51,53 +51,53 @@ classdiagram "Hilfe-Versionierung" {
         -Bezeichnung : String
     }
 
-    composition Hilfeversion 1 -> * Hilfeversion-Markup "sprachabh. Beschreibung"
-        route Hilfeversion.right@29 Hilfeversion-Markup.left@29
-    composition Hilfeversion 1 -> * Hilfekategorie "definiert für Handbuchseiten\nund Erfassungsleitfaden"
-        route Hilfeversion.left@30 (110, 50) Hilfekategorie.top@80
-    composition Hilfeversion 1 -> * Hilfeeintrag "definiert für\nErfassungs-\nleitfaden"
-        route Hilfeversion.bottom@200 (500, 270) Hilfeeintrag.left@20
-    association Hilfeversion * -> * Hilfeeintrag "erbt aus\nVorgänger-\nversionen"
-        route Hilfeversion.bottom@300 Hilfeeintrag.top@60
-    composition Hilfeversion 1 -> * Handbuchseite "definiert für\nBenutzer-\nhandbuch"
-        route Hilfeversion.bottom@20 (320, 705) Handbuchseite.left@45
-    association Hilfeversion * -> * Handbuchseite "erbt aus\nVorgänger-\nversionen"
-        route Hilfeversion.bottom@110 (410, 680) Handbuchseite.left@20
+    composition 04de91aa 1 -> * c0de0001 "sprachabh. Beschreibung"
+        route 04de91aa.right@29 c0de0001.left@29
+    composition 04de91aa 1 -> * 7c01a5e2 "definiert für Handbuchseiten\nund Erfassungsleitfaden"
+        route 04de91aa.left@30 (110, 50) 7c01a5e2.top@80
+    composition 04de91aa 1 -> * c0de0002 "definiert für\nErfassungs-\nleitfaden"
+        route 04de91aa.bottom@200 (500, 270) c0de0002.left@20
+    association 04de91aa * -> * c0de0002 "erbt aus\nVorgänger-\nversionen"
+        route 04de91aa.bottom@300 c0de0002.top@60
+    composition 04de91aa 1 -> * c0de0007 "definiert für\nBenutzer-\nhandbuch"
+        route 04de91aa.bottom@20 (320, 705) c0de0007.left@45
+    association 04de91aa * -> * c0de0007 "erbt aus\nVorgänger-\nversionen"
+        route 04de91aa.bottom@110 (410, 680) c0de0007.left@20
 
-    composition Hilfeeintrag 1 -> 1..* Hilfetextblock "definiert"
-        route Hilfeeintrag.right@29 Hilfetextblock.left@29
-    composition Hilfetextblock 1 -> 1..* Hilfe-Markup "sprachabh. Inhalt"
-        route Hilfetextblock.right@29 (1323, 279) Hilfe-Markup.top@63
-    composition Handbuchseite 1 -> 1..* Handbuchtextblock "definiert"
-        route Handbuchseite.right@29 Handbuchtextblock.left@22
-    composition Handbuchtextblock 1 -> 1..* Handbuch-Markup "sprachabh. Inhalt"
-        route Handbuchtextblock.right@22 (1323, 689) Handbuch-Markup.bottom@63
-    composition Handbuchseite 1 -> 1..* Handbuchseitenbezeichnung "sprachabh. Bezeichnung"
-        route Handbuchseite.bottom@140 (820, 880) Handbuchseitenbezeichnung.left@29
+    composition c0de0002 1 -> 1..* c0de0003 "definiert"
+        route c0de0002.right@29 c0de0003.left@29
+    composition c0de0003 1 -> 1..* c0de0004 "sprachabh. Inhalt"
+        route c0de0003.right@29 (1323, 279) c0de0004.top@63
+    composition c0de0007 1 -> 1..* c0de0008 "definiert"
+        route c0de0007.right@29 c0de0008.left@22
+    composition c0de0008 1 -> 1..* c0de0009 "sprachabh. Inhalt"
+        route c0de0008.right@22 (1323, 689) c0de0009.bottom@63
+    composition c0de0007 1 -> 1..* b3e94d10 "sprachabh. Bezeichnung"
+        route c0de0007.bottom@140 (820, 880) b3e94d10.left@29
 
-    association Hilfekategorie * -> * Hilfeeintrag "kategorisiert"
-        route Hilfekategorie.right@50 Hilfeeintrag.left@50
+    association 7c01a5e2 * -> * c0de0002 "kategorisiert"
+        route 7c01a5e2.right@50 c0de0002.left@50
         assocclass helpentrycategory at(200, 335) {
         }
-    association Hilfekategorie * -> * Handbuchseite "kategorisiert"
-        route Hilfekategorie.bottom@150 (180, 780) (720, 780) Handbuchseite.bottom@40
+    association 7c01a5e2 * -> * c0de0007 "kategorisiert"
+        route 7c01a5e2.bottom@150 (180, 780) (720, 780) c0de0007.bottom@40
         assocclass manualpagecategory {
             -"Seitenzahl in Kategorie" : Zahl
         }
-    association Hilfeeintrag * -> * Mandant "sichtbar für"
-        route Hilfeeintrag.bottom@100 (640, 500) Mandant.left@22
+    association c0de0002 * -> * c0de0006 "sichtbar für"
+        route c0de0002.bottom@100 (640, 500) c0de0006.left@22
         assocclass helpentryinmandate {
         }
-    association Hilfetextblock * -> * Mandant "sichtbar für"
-        route Hilfetextblock.bottom@20 (920, 486) Mandant.right@8
+    association c0de0003 * -> * c0de0006 "sichtbar für"
+        route c0de0003.bottom@20 (920, 486) c0de0006.right@8
         assocclass helptextblockinmandate {
         }
-    association Handbuchseite * -> * Mandant "sichtbar für"
-        route Handbuchseite.top@110 Mandant.bottom@30
+    association c0de0007 * -> * c0de0006 "sichtbar für"
+        route c0de0007.top@110 c0de0006.bottom@30
         assocclass manualpageinmandate {
         }
-    association Handbuchtextblock * -> * Mandant "sichtbar für"
-        route Handbuchtextblock.top@60 (1100, 514) Mandant.right@36
+    association c0de0008 * -> * c0de0006 "sichtbar für"
+        route c0de0008.top@60 (1100, 514) c0de0006.right@36
         assocclass manualtextblockinmandate {
         }
 

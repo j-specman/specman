@@ -12,7 +12,7 @@ import static classman.render.DiagramStyle.ARROW_HALF_WIDTH;
 import static classman.render.DiagramStyle.ARROW_LENGTH;
 import static classman.render.DiagramStyle.DIAMOND_HALF_WIDTH;
 import static classman.render.DiagramStyle.DIAMOND_LENGTH;
-import static classman.render.DiagramStyle.STROKE;
+import static classman.render.DiagramStyle.STROKE_WIDTH;
 import static classman.render.DiagramStyle.TRIANGLE_HALF_WIDTH;
 import static classman.render.DiagramStyle.TRIANGLE_LENGTH;
 import static classman.render.DiagramStyle.WHITE;
@@ -20,21 +20,23 @@ import static classman.render.DiagramStyle.WHITE;
 /** Draws the marks at the ends of a relation: diamond, arrowhead or triangle. */
 public class RelationDecorator {
 
-    public List<AbstractSceneElement> decorations(AbstractRelationModel_V001 relation, List<Point2D.Double> path) {
+    /** @param lineColor the color of the marks: the usual stroke color, or the veiled one for a removed relation */
+    public List<AbstractSceneElement> decorations(AbstractRelationModel_V001 relation, List<Point2D.Double> path,
+                                                  String lineColor) {
         List<AbstractSceneElement> decorations = new ArrayList<>();
         Point2D.Double start = path.get(0);
         Point2D.Double end = path.get(path.size() - 1);
         double[] startDirection = directionAway(path, 0, 1);
         double[] endDirection = directionAway(path, path.size() - 1, -1);
         if (relation.type == RelationType_V001.AGGREGATION) {
-            decorations.add(diamond(start, startDirection, WHITE));
+            decorations.add(diamond(start, startDirection, WHITE, lineColor));
         } else if (relation.type == RelationType_V001.COMPOSITION) {
-            decorations.add(diamond(start, startDirection, STROKE));
+            decorations.add(diamond(start, startDirection, lineColor, lineColor));
         }
         if (relation.type == RelationType_V001.EXTENDS || relation.type == RelationType_V001.IMPLEMENTS) {
-            decorations.add(triangle(end, endDirection));
+            decorations.add(triangle(end, endDirection, lineColor));
         } else if (isDirected(relation)) {
-            decorations.add(arrow(end, endDirection));
+            decorations.add(arrow(end, endDirection, lineColor));
         }
         return decorations;
     }
@@ -60,32 +62,32 @@ public class RelationDecorator {
         return new double[]{0, 1};
     }
 
-    private ScenePolygon diamond(Point2D.Double tip, double[] direction, String fill) {
+    private ScenePolygon diamond(Point2D.Double tip, double[] direction, String fill, String stroke) {
         double[] middle = along(tip, direction, DIAMOND_LENGTH / 2);
         double[] far = along(tip, direction, DIAMOND_LENGTH);
         double sideX = -direction[1] * DIAMOND_HALF_WIDTH;
         double sideY = direction[0] * DIAMOND_HALF_WIDTH;
         return new ScenePolygon(
             new double[]{tip.x, middle[0] + sideX, far[0], middle[0] - sideX},
-            new double[]{tip.y, middle[1] + sideY, far[1], middle[1] - sideY}, fill, STROKE);
+            new double[]{tip.y, middle[1] + sideY, far[1], middle[1] - sideY}, fill, stroke);
     }
 
-    private ScenePolygon triangle(Point2D.Double tip, double[] direction) {
+    private ScenePolygon triangle(Point2D.Double tip, double[] direction, String stroke) {
         double[] base = along(tip, direction, TRIANGLE_LENGTH);
         double sideX = -direction[1] * TRIANGLE_HALF_WIDTH;
         double sideY = direction[0] * TRIANGLE_HALF_WIDTH;
         return new ScenePolygon(
             new double[]{tip.x, base[0] + sideX, base[0] - sideX},
-            new double[]{tip.y, base[1] + sideY, base[1] - sideY}, WHITE, STROKE);
+            new double[]{tip.y, base[1] + sideY, base[1] - sideY}, WHITE, stroke);
     }
 
-    private ScenePolyline arrow(Point2D.Double tip, double[] direction) {
+    private ScenePolyline arrow(Point2D.Double tip, double[] direction, String stroke) {
         double[] base = along(tip, direction, ARROW_LENGTH);
         double sideX = -direction[1] * ARROW_HALF_WIDTH;
         double sideY = direction[0] * ARROW_HALF_WIDTH;
         return new ScenePolyline(
             new double[]{base[0] - sideX, tip.x, base[0] + sideX},
-            new double[]{base[1] - sideY, tip.y, base[1] + sideY}, false);
+            new double[]{base[1] - sideY, tip.y, base[1] + sideY}, false, stroke, STROKE_WIDTH);
     }
 
     private double[] along(Point2D.Double start, double[] direction, double distance) {

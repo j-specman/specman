@@ -1,0 +1,144 @@
+// {"classmanVersion":"0.1","modelType":"classman.model.v001.ClassDiagramModel_V001"}
+// One small model with a typical mix of changes, once per change set, to compare the colors.
+classdiagram "Change colors" {
+
+    note at(0, -40) width=120 "yellow"
+
+    class Customer (1c000001) at(0, 0) {
+        -name : String
+        -email : String
+    }
+    class Order was(yellow, Bestellung) (1c000002) at(260, 0) {
+        -number : String
+        -date (1c000011) change(added, yellow) : Date
+        -note (1c000012) change(removed, yellow) : String
+        -status : String was(yellow, Integer)
+    }
+    class Invoice (1c000003) change(added, yellow) at(560, 0) {
+        -amount : Decimal
+    }
+    class Legacy (1c000004) change(removed, yellow) at(260, 220) {
+        -oldKey : String
+    }
+
+    association (1c000021) 1c000001 1 -> * 1c000002 "places" was(yellow, "orders")
+    composition (1c000022) change(added, yellow) 1c000002 1 -> 0..1 1c000003 "billed by"
+        route 1c000002.right@70 (500, 70) (500, 22) 1c000003.left@22
+    association (1c000023) change(removed, yellow) 1c000002 -- 1c000004 "uses"
+        route 1c000002.left@70 (210, 70) (210, 245) 1c000004.left@25
+
+    note (1c000031) change(added, yellow) at(580, 170) width=170 "Invoices are new" attach(1c000003)
+    note (1c000032) at(400, 235) width=190 "Orders are billed" was(yellow, "Orders are free") attach(1c000002)
+
+    note at(0, 360) width=120 "lilac"
+
+    class Customer (2c000001) at(0, 400) {
+        -name : String
+        -email : String
+    }
+    class Order was(lilac, Bestellung) (2c000002) at(260, 400) {
+        -number : String
+        -date (2c000011) change(added, lilac) : Date
+        -note (2c000012) change(removed, lilac) : String
+        -status : String was(lilac, Integer)
+    }
+    class Invoice (2c000003) change(added, lilac) at(560, 400) {
+        -amount : Decimal
+    }
+    class Legacy (2c000004) change(removed, lilac) at(260, 620) {
+        -oldKey : String
+    }
+
+    association (2c000021) 2c000001 1 -> * 2c000002 "places" was(lilac, "orders")
+    composition (2c000022) change(added, lilac) 2c000002 1 -> 0..1 2c000003 "billed by"
+        route 2c000002.right@70 (500, 470) (500, 422) 2c000003.left@22
+    association (2c000023) change(removed, lilac) 2c000002 -- 2c000004 "uses"
+        route 2c000002.left@70 (210, 470) (210, 645) 2c000004.left@25
+
+    note (2c000031) change(added, lilac) at(580, 570) width=170 "Invoices are new" attach(2c000003)
+    note (2c000032) at(400, 635) width=190 "Orders are billed" was(lilac, "Orders are free") attach(2c000002)
+
+    note at(0, 760) width=120 "blue"
+
+    class Customer (3c000001) at(0, 800) {
+        -name : String
+        -email : String
+    }
+    class Order was(blue, Bestellung) (3c000002) at(260, 800) {
+        -number : String
+        -date (3c000011) change(added, blue) : Date
+        -note (3c000012) change(removed, blue) : String
+        -status : String was(blue, Integer)
+    }
+    class Invoice (3c000003) change(added, blue) at(560, 800) {
+        -amount : Decimal
+    }
+    class Legacy (3c000004) change(removed, blue) at(260, 1020) {
+        -oldKey : String
+    }
+
+    association (3c000021) 3c000001 1 -> * 3c000002 "places" was(blue, "orders")
+    composition (3c000022) change(added, blue) 3c000002 1 -> 0..1 3c000003 "billed by"
+        route 3c000002.right@70 (500, 870) (500, 822) 3c000003.left@22
+    association (3c000023) change(removed, blue) 3c000002 -- 3c000004 "uses"
+        route 3c000002.left@70 (210, 870) (210, 1045) 3c000004.left@25
+
+    note (3c000031) change(added, blue) at(580, 970) width=170 "Invoices are new" attach(3c000003)
+    note (3c000032) at(400, 1035) width=190 "Orders are billed" was(blue, "Orders are free") attach(3c000002)
+
+    note at(0, 1160) width=120 "orange"
+
+    class Customer (4c000001) at(0, 1200) {
+        -name : String
+        -email : String
+    }
+    class Order was(orange, Bestellung) (4c000002) at(260, 1200) {
+        -number : String
+        -date (4c000011) change(added, orange) : Date
+        -note (4c000012) change(removed, orange) : String
+        -status : String was(orange, Integer)
+    }
+    class Invoice (4c000003) change(added, orange) at(560, 1200) {
+        -amount : Decimal
+    }
+    class Legacy (4c000004) change(removed, orange) at(260, 1420) {
+        -oldKey : String
+    }
+
+    association (4c000021) 4c000001 1 -> * 4c000002 "places" was(orange, "orders")
+    composition (4c000022) change(added, orange) 4c000002 1 -> 0..1 4c000003 "billed by"
+        route 4c000002.right@70 (500, 1270) (500, 1222) 4c000003.left@22
+    association (4c000023) change(removed, orange) 4c000002 -- 4c000004 "uses"
+        route 4c000002.left@70 (210, 1270) (210, 1445) 4c000004.left@25
+
+    note (4c000031) change(added, orange) at(580, 1370) width=170 "Invoices are new" attach(4c000003)
+    note (4c000032) at(400, 1435) width=190 "Orders are billed" was(orange, "Orders are free") attach(4c000002)
+
+    note at(0, 1560) width=120 "pink"
+
+    class Customer (5c000001) at(0, 1600) {
+        -name : String
+        -email : String
+    }
+    class Order was(pink, Bestellung) (5c000002) at(260, 1600) {
+        -number : String
+        -date (5c000011) change(added, pink) : Date
+        -note (5c000012) change(removed, pink) : String
+        -status : String was(pink, Integer)
+    }
+    class Invoice (5c000003) change(added, pink) at(560, 1600) {
+        -amount : Decimal
+    }
+    class Legacy (5c000004) change(removed, pink) at(260, 1820) {
+        -oldKey : String
+    }
+
+    association (5c000021) 5c000001 1 -> * 5c000002 "places" was(pink, "orders")
+    composition (5c000022) change(added, pink) 5c000002 1 -> 0..1 5c000003 "billed by"
+        route 5c000002.right@70 (500, 1670) (500, 1622) 5c000003.left@22
+    association (5c000023) change(removed, pink) 5c000002 -- 5c000004 "uses"
+        route 5c000002.left@70 (210, 1670) (210, 1845) 5c000004.left@25
+
+    note (5c000031) change(added, pink) at(580, 1770) width=170 "Invoices are new" attach(5c000003)
+    note (5c000032) at(400, 1835) width=190 "Orders are billed" was(pink, "Orders are free") attach(5c000002)
+}

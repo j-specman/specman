@@ -7,6 +7,8 @@ import java.util.List;
 public class NoteModel_V001 extends AbstractDiagramElementModel_V001 {
     /** Line breaks are real newline characters, not the two characters \n. */
     public String text;
+    /** Null if no change set changed the text. */
+    public TextChangeModel_V001 textChange;
     /** Null if the source gives no position, the layout places the note then. */
     public PositionModel_V001 position;
     /** Null if the content decides about the width. */

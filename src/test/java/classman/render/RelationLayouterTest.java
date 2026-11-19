@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class RelationLayouterTest {
 
-  private static final String STACKED = "class A\nclass B\n";
-  private static final String DIAGONAL = "class A at(0, 0)\nclass B at(200, 100)\n";
+  private static final String STACKED = "class A (aaaaaaaa)\nclass B (bbbbbbbb)\n";
+  private static final String DIAGONAL = "class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(200, 100)\n";
 
   private static ScenePolyline relationLine(Scene scene) {
     return all(scene, ScenePolyline.class).get(0);
@@ -35,7 +35,7 @@ class RelationLayouterTest {
   /** Between stacked classes the line is vertical, from the bottom border of A to the top border of B. */
   @Test
   void straightLineBetweenStackedClasses() throws ClassDiagramParseException {
-    ScenePolyline line = relationLine(layout(STACKED + "association A -- B"));
+    ScenePolyline line = relationLine(layout(STACKED + "association aaaaaaaa -- bbbbbbbb"));
     assertEquals(2, line.xs.length);
     assertPoint(line, 0, 20, 56);
     assertPoint(line, 1, 20, 96);
@@ -44,7 +44,7 @@ class RelationLayouterTest {
   /** A line from center to center is cut where it leaves the box of A and where it enters the box of B. */
   @Test
   void diagonalLineClippedAtBorders() throws ClassDiagramParseException {
-    ScenePolyline line = relationLine(layout(DIAGONAL + "association A -- B"));
+    ScenePolyline line = relationLine(layout(DIAGONAL + "association aaaaaaaa -- bbbbbbbb"));
     assertPoint(line, 0, 40, 38);
     assertPoint(line, 1, 200, 118);
   }
@@ -52,7 +52,7 @@ class RelationLayouterTest {
   /** A route starts at its anchor on a side of A, goes over the waypoints and ends at its anchor on B. */
   @Test
   void routeWithAnchorsAndWaypoints() throws ClassDiagramParseException {
-    ScenePolyline line = relationLine(layout(DIAGONAL + "association A -- B\n  route A.bottom@10 (10, 150) B.left@20"));
+    ScenePolyline line = relationLine(layout(DIAGONAL + "association aaaaaaaa -- bbbbbbbb\n  route aaaaaaaa.bottom@10 (10, 150) bbbbbbbb.left@20"));
     assertEquals(3, line.xs.length);
     assertPoint(line, 0, 10, 56);
     assertPoint(line, 1, 10, 150);
@@ -62,7 +62,7 @@ class RelationLayouterTest {
   /** An offset beyond the length of the side puts the anchor at the end of the side. */
   @Test
   void anchorOffsetClamped() throws ClassDiagramParseException {
-    ScenePolyline line = relationLine(layout(DIAGONAL + "association A -- B\n  route A.bottom@999 B.top@-5"));
+    ScenePolyline line = relationLine(layout(DIAGONAL + "association aaaaaaaa -- bbbbbbbb\n  route aaaaaaaa.bottom@999 bbbbbbbb.top@-5"));
     assertPoint(line, 0, 40, 56);
     assertPoint(line, 1, 200, 100);
   }
@@ -70,7 +70,7 @@ class RelationLayouterTest {
   /** A relation from a class to itself without route goes as a loop over the top right corner. */
   @Test
   void loopForRelationToSameClass() throws ClassDiagramParseException {
-    ScenePolyline line = relationLine(layout("class A at(0, 0)\nassociation A -- A"));
+    ScenePolyline line = relationLine(layout("class A (aaaaaaaa) at(0, 0)\nassociation aaaaaaaa -- aaaaaaaa"));
     assertEquals(5, line.xs.length);
     assertPoint(line, 0, 30, 0);
     assertPoint(line, 1, 30, -20);
@@ -79,18 +79,35 @@ class RelationLayouterTest {
     assertPoint(line, 4, 40, 14);
   }
 
-  /** A relation to a class which isn't in the diagram can't be drawn. */
+  /** A relation to an ID which no class has can't be drawn. */
   @Test
-  void unknownClassRejected() {
+  void unknownClassIdRejected() {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> layout("class A\nassociation A -- Missing"));
-    assertTrue(e.getMessage().contains("Missing"), e.getMessage());
+        () -> layout("class A (aaaaaaaa)\nassociation aaaaaaaa -- 99999999"));
+    assertTrue(e.getMessage().contains("99999999"), e.getMessage());
+  }
+
+  /** A class without ID can't take part in a relation, whatever its name. */
+  @Test
+  void classWithoutIdNotRelatable() {
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> layout("class A\nclass B (bbbbbbbb)\nassociation aaaaaaaa -- bbbbbbbb"));
+    assertTrue(e.getMessage().contains("aaaaaaaa"), e.getMessage());
+  }
+
+  /** Relations find their classes by ID, so two classes with the same name are told apart. */
+  @Test
+  void sameNamesDifferentIds() throws ClassDiagramParseException {
+    ScenePolyline line = relationLine(layout("class Same (aaaaaaaa) at(0, 0)\nclass Same (bbbbbbbb) at(200, 100)\n"
+        + "class Same (cccccccc) at(0, 300)\nassociation aaaaaaaa -- cccccccc"));
+    assertPoint(line, 0, 26, 56);
+    assertPoint(line, 1, 26, 300);
   }
 
   /** The scene also covers waypoints outside of all boxes. */
   @Test
   void sceneBoundsIncludeWaypoints() throws ClassDiagramParseException {
-    Scene scene = layout(DIAGONAL + "association A -- B\n  route A.bottom@10 (500, 600) B.left@20");
+    Scene scene = layout(DIAGONAL + "association aaaaaaaa -- bbbbbbbb\n  route aaaaaaaa.bottom@10 (500, 600) bbbbbbbb.left@20");
     assertTrue(scene.x + scene.width >= 500);
     assertTrue(scene.y + scene.height >= 600);
   }
@@ -100,7 +117,7 @@ class RelationLayouterTest {
   /** A composition has a filled diamond at the source. Its tip is at the border, it is 14 long and 8 wide. */
   @Test
   void compositionFilledDiamond() throws ClassDiagramParseException {
-    ScenePolygon diamond = all(layout(STACKED + "composition A -- B"), ScenePolygon.class).get(0);
+    ScenePolygon diamond = all(layout(STACKED + "composition aaaaaaaa -- bbbbbbbb"), ScenePolygon.class).get(0);
     assertEquals(DiagramStyle.STROKE, diamond.fill);
     assertEquals(4, diamond.xs.length);
     assertEquals(56, diamond.ys[0], 1e-9);
@@ -112,7 +129,7 @@ class RelationLayouterTest {
   /** An aggregation has a hollow diamond, white inside so that the line doesn't show through. */
   @Test
   void aggregationHollowDiamond() throws ClassDiagramParseException {
-    ScenePolygon diamond = all(layout(STACKED + "aggregation A -- B"), ScenePolygon.class).get(0);
+    ScenePolygon diamond = all(layout(STACKED + "aggregation aaaaaaaa -- bbbbbbbb"), ScenePolygon.class).get(0);
     assertEquals(DiagramStyle.WHITE, diamond.fill);
     assertEquals(DiagramStyle.STROKE, diamond.stroke);
   }
@@ -120,7 +137,7 @@ class RelationLayouterTest {
   /** A directed association has an open arrowhead with its tip at the border of the target. */
   @Test
   void directedAssociationArrowhead() throws ClassDiagramParseException {
-    Scene scene = layout(STACKED + "association A -> B");
+    Scene scene = layout(STACKED + "association aaaaaaaa -> bbbbbbbb");
     List<ScenePolyline> lines = all(scene, ScenePolyline.class);
     assertEquals(2, lines.size());
     ScenePolyline arrow = lines.get(1);
@@ -133,7 +150,7 @@ class RelationLayouterTest {
   /** Two dashes instead of an arrow mean no arrowhead at all. */
   @Test
   void undirectedAssociationWithoutArrowhead() throws ClassDiagramParseException {
-    Scene scene = layout(STACKED + "association A -- B");
+    Scene scene = layout(STACKED + "association aaaaaaaa -- bbbbbbbb");
     assertEquals(1, all(scene, ScenePolyline.class).size());
     assertTrue(all(scene, ScenePolygon.class).stream().noneMatch(polygon -> polygon.xs.length == 3));
   }
@@ -141,7 +158,7 @@ class RelationLayouterTest {
   /** Extends has a white triangle at the superclass, and a solid line. */
   @Test
   void extendsTriangle() throws ClassDiagramParseException {
-    Scene scene = layout(STACKED + "extends A -> B");
+    Scene scene = layout(STACKED + "extends aaaaaaaa -> bbbbbbbb");
     ScenePolygon triangle = all(scene, ScenePolygon.class).get(0);
     assertEquals(3, triangle.xs.length);
     assertEquals(DiagramStyle.WHITE, triangle.fill);
@@ -153,7 +170,7 @@ class RelationLayouterTest {
   /** Implements looks like extends, but the line is dashed. */
   @Test
   void implementsDashedLine() throws ClassDiagramParseException {
-    Scene scene = layout(STACKED + "implements A -> B");
+    Scene scene = layout(STACKED + "implements aaaaaaaa -> bbbbbbbb");
     assertTrue(relationLine(scene).dashed);
     assertEquals(3, all(scene, ScenePolygon.class).get(0).xs.length);
   }

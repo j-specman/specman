@@ -17,6 +17,9 @@ grammar ClassDiagram_V001;
 //   extends    hollow triangle at the target (the superclass), always ->, no multiplicities
 //   implements     dashed line, hollow triangle at the target (the interface), always ->, no multiplicities
 // Only association, aggregation and composition take multiplicities and an assocclass.
+// A relation refers to its two classes by their IDs, written bare (without parentheses, unlike the ID of the
+// element itself):  composition (11223344) 04de91aa 1 -> * b7c20f13 "label"
+// The classes need an ID for that. Class names are free text and need not be unique.
 //
 // Layout rules the renderer applies, not expressed in the grammar:
 //   * A class (or note) without at(x,y) is placed in the vertical stack: source order, top to bottom,
@@ -26,19 +29,29 @@ grammar ClassDiagram_V001;
 //   * A class with width=N is N pixels wide; text wraps at spaces. Without width the content decides.
 //     The height is always computed.
 //   * A relation without route is a straight line from center to center, clipped at the box borders.
-//   * Route anchors: Class.side@offset, side = top|right|bottom|left, offset in pixels from the start of the
+//   * Route anchors: classId.side@offset, side = top|right|bottom|left, offset in pixels from the start of the
 //     side (left end of top/bottom, upper end of left/right), clamped to the side's length. Waypoints are
 //     absolute pixel points.
-//   * Class names are unique within a diagram; relations refer to classes by name.
 //   * A note is attached to a class, an attribute or a relation by the ID of that element: attach(04de91aa).
 //     Whoever wants to attach a note must give the target an ID. The dashed line of a note on a class ends at the
 //     class border, on an attribute at the border of its class on the side of the note, on a relation at the
 //     middle of the longest part of the relation.
 //   * IDs of classes, attributes, relations and stereotypes (class Hilfeversion (04de91aa) <<Entity>> (7b2f90c1))
-//     are optional. Created in a class model, a diagram refers with them to the elements of the model: the
+//     are optional, except that a class needs one to take part in a relation. Created in a class model, a diagram refers with them to the elements of the model: the
 //     stereotype is defined there once and assigned to the classes. A diagram which stands for itself needs none.
 //   * The dashed line of a note can lead over waypoints (absolute pixel points): attach(04de91aa) route (120, 40) (120, 90).
 //     The line starts at the note border facing the first waypoint and ends at the target facing the last one.
+//   * A change mark change(added, yellow) or change(removed, blue) follows the ID of a class, attribute, relation,
+//     association class or note. Moving an element is never marked.
+//   * A text change mark was(yellow, "old text") follows the text it belongs to: the diagram name, class name,
+//     stereotype, key or value of a tagged value, attribute name or type, an info item, a multiplicity, a relation
+//     label, a note text. The first value names the change set, the optional second one is the text before the
+//     change (bare if it is a word or multiplicity, else a string). Without the second value there was no text
+//     before, an empty string says it was empty. The text itself always stands for the new state, the box is laid
+//     out for it. A removed text stays as an empty string with the mark: "" was(yellow, "old label"). A removed
+//     multiplicity can't be marked, there is no text left to carry the mark. Marks of the name come before the ID.
+//   * Text marks inside an element which is marked added or removed are accepted and ignored by the renderer:
+//     accepting or rejecting the element decides about everything in it.
 //   * An assocclass nested in a relation belongs to that relation.
 //   * Strings (names, labels, note texts) are in double quotes. Escapes: backslash-n is a line break, backslash-quote
 //     a quote, two backslashes one backslash, backslash-u0060 a backtick. The latter is the only way to write
@@ -52,11 +65,12 @@ grammar ClassDiagram_V001;
 // ============================================================
 
 classDiagram
-    : CLASSDIAGRAM diagramName? LBRACE element* RBRACE EOF
+    : CLASSDIAGRAM (diagramName nameChange=textChange?)? LBRACE element* RBRACE EOF
     ;
 
 diagramName
     : NAME
+    | HEX_ID
     | QUOTED_STRING
     ;
 
@@ -75,7 +89,8 @@ classDecl
 
 // Fixed order. The ID after the name belongs to the class, the one after the stereotype to the stereotype.
 classHead
-    : name classId=ELEMENT_ID? position? widthSpec? (STEREOTYPE stereotypeId=ELEMENT_ID?)? taggedValues?
+    : name nameChange=textChange? classId=ELEMENT_ID? changeMark? position? widthSpec?
+      (STEREOTYPE stereotypeChange=textChange? stereotypeId=ELEMENT_ID?)? taggedValues?
     ;
 
 // {TABLENAME=helpversion} or {A=1, B=2}. A '{' followed by word '=' starts tagged values,
@@ -85,7 +100,7 @@ taggedValues
     ;
 
 taggedValue
-    : word EQUALS (word | NUMBER | QUOTED_STRING)
+    : word keyChange=textChange? EQUALS (word | NUMBER | QUOTED_STRING) valueChange=textChange?
     ;
 
 classBody
@@ -95,7 +110,8 @@ classBody
 // One attribute: [visibility] name [(id)] [: type] [[info, info, ...]]. A name or type is one word or a quoted string.
 attribute
     : ELLIPSIS
-    | visibility? wordOrString ELEMENT_ID? (COLON wordOrString)? infos?
+    | visibility? wordOrString nameChange=textChange? ELEMENT_ID? changeMark?
+      (COLON wordOrString typeChange=textChange?)? infos?
     ;
 
 visibility
@@ -110,7 +126,12 @@ infos
     ;
 
 // Any run of tokens up to the next comma or closing bracket, e.g.  Pflicht   2..50   TN=versionkey
+// The word was ends the run if a parenthesis follows: that is the mark of the info.
 info
+    : infoText textChange?
+    ;
+
+infoText
     : (word | NUMBER | DOTDOT | STAR | EQUALS | QUOTED_STRING)+
     ;
 
@@ -121,6 +142,7 @@ wordOrString
 
 name
     : NAME
+    | HEX_ID
     | QUOTED_STRING
     ;
 
@@ -132,6 +154,24 @@ widthSpec
     : WIDTH EQUALS NUMBER
     ;
 
+// change(added, yellow): a change set added the element, or change(removed, blue): it removed the element, which
+// stays in the diagram until the change is accepted. The second word (or string) names the change set. The type is checked by
+// the parser and not by the grammar, so that added and removed stay usable as names. The mark follows the ID.
+changeMark
+    : CHANGE LPAREN changeType=word COMMA changeSet=wordOrString RPAREN
+    ;
+
+// was(yellow, Old): the text in front of the mark is the new one, Old the text before. The backup is optional,
+// see the header. Multiplicities may be written bare like 1..*, anything else which isn't a word needs a string.
+textChange
+    : WAS LPAREN changeSet=wordOrString (COMMA backup=backupText)? RPAREN
+    ;
+
+backupText
+    : wordOrString
+    | multiplicity
+    ;
+
 // ------------------------------------------------------------ relations
 
 relation
@@ -141,16 +181,17 @@ relation
     ;
 
 associationRelation
-    : type=(ASSOCIATION | AGGREGATION | COMPOSITION) ELEMENT_ID? from=name fromMultiplicity=multiplicity?
-      (ARROW | LINE) toMultiplicity=multiplicity? to=name label=QUOTED_STRING? route? assocClass?
+    : type=(ASSOCIATION | AGGREGATION | COMPOSITION) ELEMENT_ID? changeMark? from=HEX_ID (fromMultiplicity=multiplicity fromMultiplicityChange=textChange?)?
+      (ARROW | LINE) (toMultiplicity=multiplicity toMultiplicityChange=textChange?)? to=HEX_ID
+      (label=QUOTED_STRING labelChange=textChange?)? route? assocClass?
     ;
 
 extendsRelation
-    : EXTENDS ELEMENT_ID? from=name ARROW to=name label=QUOTED_STRING? route?
+    : EXTENDS ELEMENT_ID? changeMark? from=HEX_ID ARROW to=HEX_ID (label=QUOTED_STRING labelChange=textChange?)? route?
     ;
 
 implementsRelation
-    : IMPLEMENTS ELEMENT_ID? from=name ARROW to=name label=QUOTED_STRING? route?
+    : IMPLEMENTS ELEMENT_ID? changeMark? from=HEX_ID ARROW to=HEX_ID (label=QUOTED_STRING labelChange=textChange?)? route?
     ;
 
 multiplicity
@@ -163,7 +204,7 @@ route
     ;
 
 anchor
-    : name DOT side AT_SIGN NUMBER
+    : HEX_ID DOT side AT_SIGN NUMBER
     ;
 
 side
@@ -184,7 +225,7 @@ assocClass
 // ------------------------------------------------------------ notes
 
 note
-    : NOTE noteId=ELEMENT_ID? position? widthSpec? QUOTED_STRING (ATTACH target=ELEMENT_ID noteRoute?)?
+    : NOTE noteId=ELEMENT_ID? changeMark? position? widthSpec? QUOTED_STRING textChange? (ATTACH target=ELEMENT_ID noteRoute?)?
     ;
 
 // Waypoints of the dashed line from a note to its target. Start and end of the line are computed.
@@ -195,8 +236,9 @@ noteRoute
 // A plain word, including the keywords: they are only reserved where a class name is expected.
 word
     : NAME
+    | HEX_ID
     | CLASSDIAGRAM | CLASS | ASSOCCLASS | ASSOCIATION | AGGREGATION | COMPOSITION | EXTENDS | IMPLEMENTS
-    | NOTE | ROUTE | ATTACH | AT | WIDTH | TOP | RIGHT | BOTTOM | LEFT
+    | NOTE | ROUTE | ATTACH | CHANGE | WAS | AT | WIDTH | TOP | RIGHT | BOTTOM | LEFT
     ;
 
 // ============================================================
@@ -214,6 +256,8 @@ IMPLEMENTS   : 'implements' ;
 NOTE         : 'note' ;
 ROUTE        : 'route' ;
 ATTACH       : 'attach' ;
+WAS          : 'was' ;
+CHANGE       : 'change' ;
 AT           : 'at' ;
 WIDTH        : 'width' ;
 TOP          : 'top' ;
@@ -247,6 +291,11 @@ ELEMENT_ID   : '(' HEX HEX HEX HEX HEX HEX HEX HEX ')' ;
 
 // <<Entity>>
 STEREOTYPE   : '<<' ~[>\r\n]+ '>>' ;
+
+// Reference to the ID of an element, without parentheses. Defined before NUMBER and NAME so that it wins over
+// them when a word of exactly 8 hex characters is read. Where a name or word is expected the parser accepts it
+// as one (rules name, word, diagramName), so such a word still works as a class or attribute name.
+HEX_ID       : HEX HEX HEX HEX HEX HEX HEX HEX ;
 
 // Signed integer: coordinates, widths, offsets, and the numbers of multiplicities (1, 0..1, 1..*).
 NUMBER       : '-'? [0-9]+ ;

@@ -27,24 +27,31 @@ public class ClassDiagramLayouter {
     private final NoteLinkLayouter noteLinkLayouter = new NoteLinkLayouter();
     private final RelationLayouter relationLayouter;
 
+    /** Lays out diagrams whose change marks all get the color for unknown change sets. */
     public ClassDiagramLayouter(TextMeasurer measurer) {
-        this.classLayouter = new ClassBoxLayouter(measurer);
-        this.noteLayouter = new NoteBoxLayouter(measurer);
-        this.relationLayouter = new RelationLayouter(measurer, classLayouter);
+        this(measurer, ChangeColors.NONE);
     }
 
-    /** @throws IllegalArgumentException if a relation refers to a class which isn't in the diagram, or a note to an unknown ID */
+    public ClassDiagramLayouter(TextMeasurer measurer, ChangeColors changeColors) {
+        ChangePalette palette = new ChangePalette(changeColors);
+        this.classLayouter = new ClassBoxLayouter(measurer, palette);
+        this.noteLayouter = new NoteBoxLayouter(measurer, palette);
+        this.relationLayouter = new RelationLayouter(measurer, classLayouter, palette);
+    }
+
+    /** @throws IllegalArgumentException if a relation refers to a class ID which isn't in the diagram, or a note to an unknown ID */
     public Scene layout(ClassDiagramModel_V001 model) {
         Map<AbstractDiagramElementModel_V001, BoxLayout> boxes = layoutBoxes(model);
         Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas = placeBoxes(boxes);
         AttachTargetIndex attachTargets = new AttachTargetIndex();
 
         List<AbstractSceneElement> elements = new ArrayList<>();
+        List<AbstractSceneElement> underlays = new ArrayList<>();
         Rectangle2D.Double covered = null;
         for (Map.Entry<AbstractDiagramElementModel_V001, BoxLayout> box : boxes.entrySet()) {
             Rectangle2D.Double area = areas.get(box.getKey());
             elements.addAll(box.getValue().placedAt(area.x, area.y));
-            covered = BoxGeometry.union(covered, area);
+            covered = BoxGeometry.union(covered, box.getValue().coveredAt(area.x, area.y));
             if (box.getKey() instanceof ClassModel_V001 classModel) {
                 addAttachTargets(attachTargets, classModel, area, box.getValue());
             }
@@ -53,9 +60,11 @@ public class ClassDiagramLayouter {
         for (AbstractRelationModel_V001 relation : model.relations()) {
             RelationLayout relationLayout = relationLayouter.layout(relation, classAreas);
             elements.addAll(relationLayout.elements);
+            underlays.addAll(relationLayout.underlay);
             covered = BoxGeometry.union(covered, relationLayout.bounds);
             attachTargets.add(relation.id, new RelationAttachTarget(relationLayout.attachPoint));
         }
+        elements.addAll(0, underlays);
         for (ScenePolyline link : noteLinks(boxes.keySet(), areas, attachTargets)) {
             elements.add(link);
             covered = BoxGeometry.union(covered, link.bounds());
@@ -145,8 +154,8 @@ public class ClassDiagramLayouter {
     private Map<String, Rectangle2D.Double> classAreas(Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas) {
         Map<String, Rectangle2D.Double> classAreas = new LinkedHashMap<>();
         for (Map.Entry<AbstractDiagramElementModel_V001, Rectangle2D.Double> area : areas.entrySet()) {
-            if (area.getKey() instanceof ClassModel_V001 classModel) {
-                classAreas.put(classModel.name, area.getValue());
+            if (area.getKey() instanceof ClassModel_V001 classModel && classModel.id != null) {
+                classAreas.put(classModel.id, area.getValue());
             }
         }
         return classAreas;

@@ -30,11 +30,11 @@ class ClassmanImageTest {
 
   private static final String ORDERS = """
     classdiagram {
-        class Order <<Entity>> {
+        class Order (a0000001) <<Entity>> {
             -number : String
         }
-        class OrderLine
-        composition Order 1 -> * OrderLine "consists of"
+        class OrderLine (b0000002)
+        composition a0000001 1 -> * b0000002 "consists of"
     }
     """;
   private static final String MESSAGE_KEY_REFUSED = "msg.classman.file.invalid";
@@ -69,12 +69,12 @@ class ClassmanImageTest {
     assertEquals(List.of(MESSAGE_KEY_REFUSED), specman.shownMessages());
   }
 
-  /** Scenario: A source which refers to a class it doesn't have can't be laid out and is refused too. */
+  /** Scenario: A source which refers to a class ID it doesn't have can't be laid out and is refused too. */
   @Test
-  void testSourceWithUnknownClassIsRefused(@TempDir Path directory) throws IOException {
+  void testSourceWithUnknownClassIdIsRefused(@TempDir Path directory) throws IOException {
     EditContainer container = containerOfNewStep();
 
-    addImage(classdiagramFile(directory, "classdiagram { class A\nassociation A -> Missing }"));
+    addImage(classdiagramFile(directory, "classdiagram { class A (aaaaaaaa)\nassociation aaaaaaaa -> 99999999 }"));
 
     assertFalse(hasSecondArea(container), "no diagram must be added");
     assertEquals(List.of(MESSAGE_KEY_REFUSED), specman.shownMessages());
@@ -160,6 +160,32 @@ class ClassmanImageTest {
     String pdfText = text(pdf);
     assertTrue(pdfText.contains("consists of"), pdfText);
     assertTrue(pdfText.contains("OrderLine"), pdfText);
+  }
+
+  /** Scenario: A diagram with added, removed and changed elements is rendered with the colors of Specman's change
+   * sets, and its texts are still real PDF text. */
+  @Test
+  void testChangeMarksAreRenderedAndExported(@TempDir Path directory) throws IOException {
+    EditContainer container = containerOfNewStep();
+    addImage(classdiagramFile(directory, """
+      classdiagram {
+          class Order was(yellow, Bestellung) (a0000001) {
+              -number change(added, yellow) : String
+              -note change(removed, blue)
+          }
+          class Invoice (b0000002) change(added, lilac)
+          association change(removed, pink) a0000001 -> b0000002 "billed by"
+      }
+      """));
+    specman.layoutComponents();
+    File pdf = directory.resolve("classman-changes.pdf").toFile();
+
+    specman.exportPdf(pdf, "A4", true, false);
+
+    assertTrue(((ClassmanImageEditArea) container.getEditAreaAt(1)).getFullSizeImage().getWidth() > 0,
+      "The marked diagram must be rendered");
+    assertEquals(List.of(), specman.shownMessages());
+    assertTrue(text(pdf).contains("billed by"), text(pdf));
   }
 
   private static EditContainer containerOfNewStep() {

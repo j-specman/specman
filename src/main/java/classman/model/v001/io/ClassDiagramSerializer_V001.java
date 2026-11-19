@@ -5,13 +5,16 @@ import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassDiagram_V001Lexer;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.InfoModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RouteModel_V001;
 import classman.model.v001.TaggedValueModel_V001;
+import classman.model.v001.TextChangeModel_V001;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 
@@ -29,6 +32,7 @@ public class ClassDiagramSerializer_V001 {
         "// {\"classmanVersion\":\"0.1\",\"modelType\":\"classman.model.v001.ClassDiagramModel_V001\"}";
     private static final Pattern NAME = Pattern.compile("[\\p{L}_][\\p{L}\\p{N}_]*(?:[-/][\\p{L}\\p{N}_]+)*");
     private static final Pattern INTEGER = Pattern.compile("-?[0-9]+");
+    private static final Pattern MULTIPLICITY = Pattern.compile("-?[0-9]+(?:\\.\\.(?:-?[0-9]+|\\*))?|\\*");
 
     private final Set<Integer> keywordTypes = new HashSet<>();
     private final Set<String> keywords = new HashSet<>();
@@ -48,6 +52,7 @@ public class ClassDiagramSerializer_V001 {
         out.append("classdiagram");
         if (model.name != null) {
             out.append(' ').append(name(model.name));
+            appendTextChange(out, model.nameChange);
         }
         out.append(" {\n");
         boolean first = true;
@@ -77,11 +82,14 @@ public class ClassDiagramSerializer_V001 {
 
     private void appendClass(StringBuilder out, String indent, String keyword, ClassModel_V001 classModel) {
         out.append(indent).append(keyword).append(' ').append(name(classModel.name));
+        appendTextChange(out, classModel.nameChange);
         appendId(out, classModel.id);
+        appendChange(out, classModel.change);
         appendPosition(out, classModel.position);
         appendWidth(out, classModel.width);
         if (classModel.stereotype != null) {
             out.append(" <<").append(classModel.stereotype).append(">>");
+            appendTextChange(out, classModel.stereotypeChange);
             appendId(out, classModel.stereotypeId);
         }
         appendTaggedValues(out, classModel.taggedValues);
@@ -99,12 +107,21 @@ public class ClassDiagramSerializer_V001 {
         if (taggedValues.isEmpty()) {
             return;
         }
-        List<String> pairs = new ArrayList<>();
-        for (TaggedValueModel_V001 tag : taggedValues) {
-            String value = INTEGER.matcher(tag.value).matches() ? tag.value : word(tag.value);
-            pairs.add(word(tag.key) + "=" + value);
+        out.append(" {");
+        for (int i = 0; i < taggedValues.size(); i++) {
+            if (i > 0) {
+                out.append(", ");
+            }
+            appendTaggedValue(out, taggedValues.get(i));
         }
-        out.append(" {").append(String.join(", ", pairs)).append('}');
+        out.append('}');
+    }
+
+    private void appendTaggedValue(StringBuilder out, TaggedValueModel_V001 tag) {
+        out.append(word(tag.key));
+        appendTextChange(out, tag.keyChange);
+        out.append('=').append(INTEGER.matcher(tag.value).matches() ? tag.value : word(tag.value));
+        appendTextChange(out, tag.valueChange);
     }
 
     private String attribute(AttributeModel_V001 attribute) {
@@ -116,14 +133,19 @@ public class ClassDiagramSerializer_V001 {
             line.append(attribute.visibility.sign);
         }
         line.append(word(attribute.name));
+        appendTextChange(line, attribute.nameChange);
         appendId(line, attribute.id);
+        appendChange(line, attribute.change);
         if (attribute.type != null) {
             line.append(" : ").append(word(attribute.type));
+            appendTextChange(line, attribute.typeChange);
         }
         if (!attribute.infos.isEmpty()) {
             List<String> infos = new ArrayList<>();
-            for (String info : attribute.infos) {
-                infos.add(isBareInfo(info) ? info : quoted(info));
+            for (InfoModel_V001 info : attribute.infos) {
+                StringBuilder item = new StringBuilder(isBareInfo(info.text) ? info.text : quoted(info.text));
+                appendTextChange(item, info.change);
+                infos.add(item.toString());
             }
             line.append(" [").append(String.join(", ", infos)).append(']');
         }
@@ -135,17 +157,19 @@ public class ClassDiagramSerializer_V001 {
     private void appendRelation(StringBuilder out, AbstractRelationModel_V001 relation) {
         out.append(INDENT).append(relation.type.name().toLowerCase(Locale.ROOT));
         appendId(out, relation.id);
-        out.append(' ').append(name(relation.from));
+        appendChange(out, relation.change);
+        out.append(' ').append(relation.fromId);
         if (relation instanceof AssociationRelationModel_V001 association) {
-            appendMultiplicity(out, association.fromMultiplicity);
+            appendMultiplicity(out, association.fromMultiplicity, association.fromMultiplicityChange);
             out.append(association.directed ? " ->" : " --");
-            appendMultiplicity(out, association.toMultiplicity);
+            appendMultiplicity(out, association.toMultiplicity, association.toMultiplicityChange);
         } else {
             out.append(" ->");
         }
-        out.append(' ').append(name(relation.to));
-        if (relation.label != null) {
-            out.append(' ').append(quoted(relation.label));
+        out.append(' ').append(relation.toId);
+        if (relation.label != null || relation.labelChange != null) {
+            out.append(' ').append(quoted(relation.label == null ? "" : relation.label));
+            appendTextChange(out, relation.labelChange);
         }
         out.append('\n');
         if (relation.route != null) {
@@ -156,9 +180,10 @@ public class ClassDiagramSerializer_V001 {
         }
     }
 
-    private void appendMultiplicity(StringBuilder out, String multiplicity) {
+    private void appendMultiplicity(StringBuilder out, String multiplicity, TextChangeModel_V001 change) {
         if (multiplicity != null) {
             out.append(' ').append(multiplicity);
+            appendTextChange(out, change);
         }
     }
 
@@ -175,7 +200,7 @@ public class ClassDiagramSerializer_V001 {
     }
 
     private String anchor(AnchorModel_V001 anchor) {
-        return name(anchor.className) + "." + anchor.side.name().toLowerCase(Locale.ROOT) + "@" + anchor.offset;
+        return anchor.classId + "." + anchor.side.name().toLowerCase(Locale.ROOT) + "@" + anchor.offset;
     }
 
     // ---- notes ----
@@ -183,9 +208,11 @@ public class ClassDiagramSerializer_V001 {
     private void appendNote(StringBuilder out, NoteModel_V001 note) {
         out.append(INDENT).append("note");
         appendId(out, note.id);
+        appendChange(out, note.change);
         appendPosition(out, note.position);
         appendWidth(out, note.width);
         out.append(' ').append(quoted(note.text));
+        appendTextChange(out, note.textChange);
         if (note.attachedToId != null) {
             out.append(" attach(").append(note.attachedToId).append(')');
             if (!note.attachWaypoints.isEmpty()) {
@@ -201,6 +228,27 @@ public class ClassDiagramSerializer_V001 {
     private void appendId(StringBuilder out, String id) {
         if (id != null) {
             out.append(" (").append(id).append(')');
+        }
+    }
+
+    private void appendTextChange(StringBuilder out, TextChangeModel_V001 change) {
+        if (change != null) {
+            out.append(" was(").append(word(change.changeSet));
+            if (change.backup != null) {
+                out.append(", ").append(backupText(change.backup));
+            }
+            out.append(')');
+        }
+    }
+
+    /** Bare if it is a multiplicity or a simple word, else in quotes. */
+    private String backupText(String backup) {
+        return MULTIPLICITY.matcher(backup).matches() ? backup : word(backup);
+    }
+
+    private void appendChange(StringBuilder out, ChangeModel_V001 change) {
+        if (change != null) {
+            out.append(" change(").append(change.type.keyword()).append(", ").append(word(change.changeSet)).append(')');
         }
     }
 
@@ -274,7 +322,7 @@ public class ClassDiagramSerializer_V001 {
     }
 
     private boolean isInfoToken(int type) {
-        return type == ClassDiagram_V001Lexer.NAME || type == ClassDiagram_V001Lexer.NUMBER
+        return type == ClassDiagram_V001Lexer.NAME || type == ClassDiagram_V001Lexer.HEX_ID || type == ClassDiagram_V001Lexer.NUMBER
             || type == ClassDiagram_V001Lexer.DOTDOT || type == ClassDiagram_V001Lexer.STAR
             || type == ClassDiagram_V001Lexer.EQUALS || type == ClassDiagram_V001Lexer.QUOTED_STRING
             || keywordTypes.contains(type);

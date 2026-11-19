@@ -18,7 +18,7 @@ class ClassmanSourceValidatorTest {
 
   @Test
   void validSourceHasNoProblem() {
-    assertNull(validator.problemOf("classdiagram {\n  class A\n  class B\n  association A -> B\n}"));
+    assertNull(validator.problemOf("classdiagram {\n  class A (aaaaaaaa)\n  class B (bbbbbbbb)\n  association aaaaaaaa -> bbbbbbbb\n}"));
   }
 
   @Test
@@ -30,11 +30,11 @@ class ClassmanSourceValidatorTest {
   }
 
   @Test
-  void unknownClassIsReported() {
-    String problem = validator.problemOf("classdiagram {\n  class A\n  association A -> Missing\n}");
+  void unknownClassIdIsReported() {
+    String problem = validator.problemOf("classdiagram {\n  class A (aaaaaaaa)\n  association aaaaaaaa -> 99999999\n}");
 
     assertNotNull(problem);
-    assertTrue(problem.contains("Missing"), problem);
+    assertTrue(problem.contains("99999999"), problem);
   }
 
   @Test

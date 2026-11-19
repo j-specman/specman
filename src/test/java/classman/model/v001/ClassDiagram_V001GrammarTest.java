@@ -76,7 +76,7 @@ class ClassDiagram_V001GrammarTest {
   /** An extends relation takes no multiplicities, so this is a syntax error. */
   @Test
   void extendsMultiplicityRejected() {
-    assertThrows(IllegalStateException.class, () -> parse("classdiagram { extends A 1 -> * B }"));
+    assertThrows(IllegalStateException.class, () -> parse("classdiagram { extends aaaaaaaa 1 -> * bbbbbbbb }"));
   }
 
   /** Keywords are fine as attribute names and types, but a class named like a keyword needs double quotes. */

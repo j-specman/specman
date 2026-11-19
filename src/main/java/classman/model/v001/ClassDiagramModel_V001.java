@@ -7,6 +7,8 @@ import java.util.List;
 public class ClassDiagramModel_V001 {
     /** Null for a diagram without a name. */
     public String name;
+    /** Null if no change set changed the name. */
+    public TextChangeModel_V001 nameChange;
     public final List<AbstractDiagramElementModel_V001> elements = new ArrayList<>();
 
     public ClassDiagramModel_V001(String name) {

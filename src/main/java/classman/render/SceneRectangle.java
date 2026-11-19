@@ -9,18 +9,25 @@ public class SceneRectangle extends AbstractSceneElement {
     public final String fill;
     /** A color like #000000, or null for no outline. */
     public final String stroke;
+    public final double strokeWidth;
 
     public SceneRectangle(double x, double y, double width, double height, String fill, String stroke) {
+        this(x, y, width, height, fill, stroke, DiagramStyle.STROKE_WIDTH);
+    }
+
+    public SceneRectangle(double x, double y, double width, double height, String fill, String stroke,
+                          double strokeWidth) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.fill = fill;
         this.stroke = stroke;
+        this.strokeWidth = strokeWidth;
     }
 
     @Override
     public SceneRectangle translated(double dx, double dy) {
-        return new SceneRectangle(x + dx, y + dy, width, height, fill, stroke);
+        return new SceneRectangle(x + dx, y + dy, width, height, fill, stroke, strokeWidth);
     }
 }
