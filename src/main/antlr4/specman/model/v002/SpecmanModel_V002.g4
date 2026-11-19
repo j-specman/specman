@@ -294,19 +294,21 @@ tableCell
 // ImageEditAreaModel_V002 (type=png, content [base64:...]) — agents must skip these blocks entirely.
 // PlantUmlImageEditAreaModel_V002 (type=plantuml, content = PlantUML source in backticks) — agents can read and
 // edit the source like any other text; Specman renders the diagram from it when loading (type=plantuml and type=classman).
-// backup=(changeset, `source`) is the content's own change tracking, like markups for text: the source from before
+// backup=(changeset, `source`) in a plantuml image is the content's own change tracking, like markups for text: the source from before
 // the named change set changed it. Specman maintains it for accepting and rejecting the change, agents leave it alone.
 // SvgImageEditAreaModel_V002 (type=svg, content = SVG source in backticks) — an imported vector graphic, which is
 // not edited in Specman. Backticks in the SVG are written as the character reference &#96;.
 // ClassmanImageEditAreaModel_V002 (type=classman, content = Classman class diagram source in backticks) — agents can
 // read and edit the source like any other text; Specman lays out and renders the diagram from it when loading. The
 // source never contains a backtick: strings in it are in double quotes, and a backtick inside a string is written
-// as the escape \u0060. The syntax of the source is the grammar ClassDiagram_V001.g4.
+// as the escape \u0060. The syntax of the source is the grammar ClassDiagram_V001.g4. There is no backup= for a
+// classman image: the change marks, change(...) and was(...), are part of the source and tell what the change sets
+// changed. Specman resolves them when accepting or rejecting changes, and renames them when merging change sets.
 imageBlock
     : 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' ID (',' changeParam)? ')' '{' BASE64_BLOCK '}'
     | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'plantuml' (',' changeParam)? ')' '{' BACKTICK_STRING (',' backupAttr)? '}'
     | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'svg' (',' changeParam)? ')' '{' BACKTICK_STRING '}'
-    | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'classman' (',' changeParam)? ')' '{' BACKTICK_STRING (',' backupAttr)? '}'
+    | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'classman' (',' changeParam)? ')' '{' BACKTICK_STRING '}'
     ;
 
 backupAttr

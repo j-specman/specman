@@ -90,21 +90,18 @@ class ClassmanContextMenuTest extends AbstractClassmanTest {
     assertEquals(TWO_CLASSES, diagram.getSource());
   }
 
-  /** Scenario: In change mode, the import is a change like any other source change: The source from before is kept
-   * as backup, and rejecting brings it back. */
+  /** Scenario: In change mode, the import is an ordinary source change: Nothing is tracked about it, rejecting the
+   * changes leaves the imported source as it is. */
   @Test
-  void testImportInChangeModeKeepsTheSourceFromBefore(@TempDir Path directory) throws IOException {
+  void testImportInChangeModeIsNotTracked(@TempDir Path directory) throws IOException {
     ClassmanImageEditArea diagram = existingDiagram(containerOfNewStep());
     specman.toggleChangeMode();
     specman.selectChangeSet(ChangeSet.ALL.get("blue"));
 
     importFile(diagram, directory, THREE_CLASSES);
-
-    assertEquals(TWO_CLASSES, diagram.getBackup().source());
-
     specman.click(REJECT_CHANGES_BUTTON);
 
-    assertEquals(TWO_CLASSES, diagram.getSource());
+    assertEquals(THREE_CLASSES, diagram.getSource());
   }
 
   /** Scenario: A file with a source which can't be drawn is refused with a message, and the diagram stays as it is. */

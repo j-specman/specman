@@ -25,8 +25,13 @@ abstract class AbstractClassmanTest {
 
   /** A new step whose text is followed by a diagram with the source {@link #TWO_CLASSES}. */
   static ClassmanImageEditArea existingDiagram(EditContainer container) {
+    return diagramWithSource(container, TWO_CLASSES);
+  }
+
+  /** A new step whose text is followed by a diagram with the given source. */
+  static ClassmanImageEditArea diagramWithSource(EditContainer container, String source) {
     TextEditArea text = container.getEditAreaAt(0).asTextArea();
-    text.addClassmanImage(TWO_CLASSES);
+    text.addClassmanImage(source);
     specman.layoutComponents();
     return (ClassmanImageEditArea) container.getEditAreaAt(1);
   }

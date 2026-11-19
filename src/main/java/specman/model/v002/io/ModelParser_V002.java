@@ -800,12 +800,12 @@ public class ModelParser_V002 {
         }
         if (ctx.BACKTICK_STRING() != null) {
             String source = stripBackticks(ctx.BACKTICK_STRING().getText());
+            if (ctx.KW_CLASSMAN() != null) {
+                return new ClassmanImageEditAreaModel_V002(source, scale, changeInfo);
+            }
             SpecmanModel_V002Parser.BackupAttrContext backup = ctx.backupAttr();
             String backupSource = backup == null ? null : stripBackticks(backup.BACKTICK_STRING().getText());
             String backupChangeset = backup == null ? null : backup.ID().getText();
-            if (ctx.KW_CLASSMAN() != null) {
-                return new ClassmanImageEditAreaModel_V002(source, backupSource, backupChangeset, scale, changeInfo);
-            }
             return new PlantUmlImageEditAreaModel_V002(source, backupSource, backupChangeset, scale, changeInfo);
         }
         String type = ctx.ID().getText();

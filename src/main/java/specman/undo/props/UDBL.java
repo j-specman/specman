@@ -3,6 +3,7 @@ package specman.undo.props;
 import specman.ChangeInfo;
 import specman.editarea.EditArea;
 import specman.editarea.image.AbstractSourceSvgImageEditArea;
+import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.editarea.image.SourceBackup;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.metatag.stepnumberlabel.StepnumberLabel.LabelStructure;
@@ -77,7 +78,7 @@ public class UDBL {
     }
   }
 
-  public static void setSourceBackupUDBL(AbstractSourceSvgImageEditArea diagram, SourceBackup backup) {
+  public static void setSourceBackupUDBL(PlantUmlImageEditArea diagram, SourceBackup backup) {
     SourceBackup undoBackup = diagram.getBackup();
     if (!Objects.equals(undoBackup, backup)) {
       diagram.setBackup(backup);

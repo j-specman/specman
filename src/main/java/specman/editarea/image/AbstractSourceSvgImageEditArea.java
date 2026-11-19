@@ -1,55 +1,34 @@
 package specman.editarea.image;
 
-import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
-import specman.ChangeSet;
-import specman.EditorI;
 import specman.pdf.ShapeImage;
 import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
 
 import javax.swing.SwingUtilities;
-import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 
-import static specman.ChangeSet.changeset;
 import static specman.Specman.editor;
-import static specman.util.ObjectUtils.nvl;
 
 /** An SVG edit area which shows a diagram rendered from its source. A double click opens an editor for the source to
  * the right of the diagram, a right click its context menu. The diagram is only updated when the editor is left or the
  * user asks for a preview, because most intermediate states while typing are not sensible diagrams.
  * <p>
- * Changes of the source are tracked as a whole: The first change of the source in change mode keeps the source from
- * before as backup, which marks the diagram as changed and allows to reject the change. Changing the source back to
- * the backup takes the mark away again.
- * <p>
- * Subclasses say how the source is rendered and checked, see {@link #renderSvg(String)} and {@link #sourceValidator()}. */
+ * Subclasses say how the source is rendered and checked, see {@link #renderSvg(String)} and {@link #sourceValidator()}.
+ * Subclasses can track changes of the source as a whole, see {@link #applySourceChange(String)}, or give the source
+ * change marks of its own. */
 public abstract class AbstractSourceSvgImageEditArea extends AbstractSvgImageEditArea {
   private String source;
   /** Differs from the source while the editor shows the preview the user asked for. */
   private String displayedSource;
-  /** The source from before a change set changed it, null as long as the source is unchanged. Rejecting the
-   * change brings it back, and changing the source back to it takes the change mark away. */
-  private SourceBackup backup;
   /** True from the insertion of a new diagram until the user confirmed some content. Leaving the editor
    * before that takes the diagram out again, as if it had never been inserted. */
   private boolean awaitingFirstContent;
 
-  protected AbstractSourceSvgImageEditArea(String source, SourceBackup backup, float individualScalePercent,
-                                           ChangeInfo changeInfo) {
+  protected AbstractSourceSvgImageEditArea(String source, float individualScalePercent, ChangeInfo changeInfo) {
     super(changeInfo, individualScalePercent);
     this.source = source;
-    this.backup = backup;
-  }
-
-  /** @return the backup which the file holds for the given values, null if the file holds none */
-  protected static SourceBackup backupOf(String backupSource, String backupChangesetName) {
-    if (backupSource == null) {
-      return null;
-    }
-    return new SourceBackup(backupSource, nvl(ChangeSet.fromName(backupChangesetName), changeset()));
   }
 
   /** @return the diagram for the given source as SVG */
@@ -75,22 +54,6 @@ public abstract class AbstractSourceSvgImageEditArea extends AbstractSvgImageEdi
   public void setSource(String source) {
     this.source = source;
     display(source);
-  }
-
-  public SourceBackup getBackup() { return backup; }
-
-  /** Not undoable on its own, see {@link #changeSource(String)}. */
-  public void setBackup(SourceBackup backup) { this.backup = backup; }
-
-  /** @return the source from before the change for the model, null if the source is unchanged */
-  public String backupSourceForModel() { return backup != null ? backup.source() : null; }
-
-  /** @return the name of the change set which changed the source for the model, null if the source is unchanged */
-  public String backupChangesetForModel() { return backup != null ? backup.changeSet().name : null; }
-
-  @Override
-  protected Color panelColor() {
-    return backup != null ? backup.changeSet().panelColor() : super.panelColor();
   }
 
   // ---- display ----
@@ -180,81 +143,20 @@ public abstract class AbstractSourceSvgImageEditArea extends AbstractSvgImageEdi
     }
   }
 
-  /** In change mode, the first change of the source keeps the source from before as backup, which marks the diagram
-   * as changed. Changing the source back to the backup takes the mark away again. A change by another change set
-   * doesn't take over the backup of the first one. */
+  /** Replaces the source by an edit of the user, as a single undo step together with what {@link #applySourceChange}
+   * records. */
   public void changeSource(String newSource) {
     if (newSource.equals(source)) {
       return;
     }
-    EditorI editor = editor();
-    try (UndoRecording ur = editor.composeUndo()) {
-      if (backup == null && editor.aenderungenVerfolgen() && getChangeInfo().isUntracked()) {
-        setBackupUDBL(new SourceBackup(source, changeset()));
-      }
-      UDBL.setSourceUDBL(this, newSource);
-      if (backup != null && newSource.equals(backup.source())) {
-        setBackupUDBL(null);
-      }
+    try (UndoRecording ur = editor().composeUndo()) {
+      applySourceChange(newSource);
     }
   }
 
-  private void setBackupUDBL(SourceBackup newBackup) {
-    UDBL.setSourceBackupUDBL(this, newBackup);
-    setEditBackgroundUDBL(null);
-  }
-
-  // ---- change mode ----
-
-  private boolean isChangedBy(ChangeSet changeSet) {
-    return backup != null && backup.changedBy(changeSet);
-  }
-
-  @Override
-  public int aenderungenUebernehmen() {
-    if (isChangedBy(changeset())) {
-      setBackupUDBL(null);
-      return 1;
-    }
-    return super.aenderungenUebernehmen();
-  }
-
-  @Override
-  public int aenderungenVerwerfen() {
-    if (isChangedBy(changeset())) {
-      restoreBackupUDBL();
-      return 1;
-    }
-    return super.aenderungenVerwerfen();
-  }
-
-  /** A deleted diagram shows the source from before the change, like the passages of a text which existed before. */
-  @Override
-  public void setGeloeschtMarkiertStilUDBL(ChangeSet triggerSet) {
-    if (backup != null) {
-      restoreBackupUDBL();
-    }
-    super.setGeloeschtMarkiertStilUDBL(triggerSet);
-  }
-
-  private void restoreBackupUDBL() {
-    UDBL.setSourceUDBL(this, backup.source());
-    setBackupUDBL(null);
-  }
-
-  @Override
-  public void mergeChangeSetUDBL(@NotNull ChangeSet target, @NotNull ChangeSet source, boolean withMarkups) {
-    if (isChangedBy(source)) {
-      setBackupUDBL(backup.reassign(target));
-    }
-    super.mergeChangeSetUDBL(target, source, withMarkups);
-  }
-
-  @Override
-  public void aenderungsmarkierungenEntfernen() {
-    if (isChangedBy(changeset())) {
-      backup = null;
-    }
-    super.aenderungsmarkierungenEntfernen();
+  /** Called within the undo recording of {@link #changeSource(String)}. Subclasses record more undoable changes
+   * around the change of the source. */
+  protected void applySourceChange(String newSource) {
+    UDBL.setSourceUDBL(this, newSource);
   }
 }

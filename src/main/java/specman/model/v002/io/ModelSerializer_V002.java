@@ -21,9 +21,8 @@ import specman.model.v002.IfElseStepModel_V002;
 import specman.model.v002.IfStepModel_V002;
 import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
-import specman.model.v002.AbstractSourceImageEditAreaModel_V002;
-import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.model.v002.PlantUmlImageEditAreaModel_V002;
+import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.model.v002.SvgImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.model.v002.Markup_V002;
@@ -116,7 +115,7 @@ public class ModelSerializer_V002 {
         sb.append(COMMENT_INTRO + " image(..., type=png) { [base64:...] } blocks: embedded binary image data (base64-encoded)\n");
         sb.append(COMMENT_INTRO + " image(..., type=plantuml) { `...` } blocks: PlantUML source of a diagram, Specman renders the picture from it\n");
         sb.append(COMMENT_INTRO + " image(..., type=classman) { `...` } blocks: Classman class diagram source, Specman renders the picture from it\n");
-        sb.append(COMMENT_INTRO + " backup=(changeset, `...`) in a plantuml or classman image: source from before that change set changed it, maintained by Specman, leave it alone\n");
+        sb.append(COMMENT_INTRO + " backup=(changeset, `...`) in a plantuml image: source from before that change set changed it, maintained by Specman, leave it alone (a classman image carries its change marks in its source)\n");
 
         appendSettings(model);
 
@@ -407,7 +406,7 @@ public class ModelSerializer_V002 {
             sb.append(", ").append(anno);
         }
         sb.append(")");
-        if (imageArea instanceof AbstractSourceImageEditAreaModel_V002 sourceArea && sourceArea.hasBackup()) {
+        if (imageArea instanceof PlantUmlImageEditAreaModel_V002 sourceArea && sourceArea.hasBackup()) {
             appendSourceContentWithBackup(sourceArea);
         }
         else {
@@ -416,7 +415,7 @@ public class ModelSerializer_V002 {
     }
 
     /** The source is not indented, because everything between the backticks is the source. */
-    private void appendSourceContentWithBackup(AbstractSourceImageEditAreaModel_V002 sourceArea) {
+    private void appendSourceContentWithBackup(PlantUmlImageEditAreaModel_V002 sourceArea) {
         String changeset = sourceArea.backupChangeset != null ? sourceArea.backupChangeset : "yellow";
         sb.append(" {\n");
         sb.append(indent()).append("    `").append(sourceArea.source).append("`,\n");
