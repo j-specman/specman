@@ -6,7 +6,7 @@ import specman.editarea.image.classman.ClassmanSourceValidator;
 import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlSourceValidator;
-import specman.editarea.image.AbstractSvgImageEditArea;
+import specman.editarea.image.SvgPicture;
 import specman.editarea.image.SvgNotDisplayableException;
 
 import javax.imageio.ImageIO;
@@ -192,7 +192,7 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
   private void addSvg(TextEditArea lastFocused, File file) throws IOException {
     String source = readTextFile(file);
     try {
-      AbstractSvgImageEditArea.toIcon(source.getBytes(StandardCharsets.UTF_8));
+      new SvgPicture(source.getBytes(StandardCharsets.UTF_8));
     }
     catch (SvgNotDisplayableException notDisplayable) {
       String reason = notDisplayable.getMessage() != null ? notDisplayable.getMessage() : i18n("msg.svg.file.invalid.noreason");

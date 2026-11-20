@@ -3,7 +3,8 @@ package specman.editarea.image.classman;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
-import specman.editarea.image.AbstractSourceSvgImageEditArea;
+import specman.editarea.image.AbstractSourceImageEditArea;
+import specman.editarea.image.Picture;
 import specman.editarea.image.SourceFileKind;
 import specman.editarea.image.SourceValidator;
 import specman.model.v002.ClassmanImageEditAreaModel_V002;
@@ -12,11 +13,12 @@ import specman.undo.props.UDBL;
 import static specman.ChangeSet.changeset;
 import static specman.Specman.editor;
 
-/** An edit area showing a Classman class diagram, rendered as SVG so it stays sharp at any zoom level.
+/** An edit area showing a Classman class diagram, painted with Graphics2D so it stays sharp at any zoom level; the PDF
+ * gets it as SVG.
  * The model persists the source only, the diagram is laid out and rendered from it when loading. Changes are tracked
  * by the change marks in the source, see ClassDiagram_V001.g4: accepting, rejecting and merging change sets resolves
  * or renames them in the source. Nothing is tracked about the source as a whole. */
-public class ClassmanImageEditArea extends AbstractSourceSvgImageEditArea {
+public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
   public static final String FILE_EXTENSION = "cld";
   public static final SourceFileKind FILE_KIND = new SourceFileKind(new String[] {FILE_EXTENSION}, "msg.filter.classman",
     "dialog.classman.choose.title", "dialog.classman.import.title",
@@ -41,8 +43,8 @@ public class ClassmanImageEditArea extends AbstractSourceSvgImageEditArea {
   }
 
   @Override
-  protected byte[] renderSvg(String source) {
-    return ClassmanRenderer.renderSvg(source);
+  protected Picture pictureOf(String source) {
+    return new ScenePicture(ClassmanRenderer.renderScene(source));
   }
 
   @Override

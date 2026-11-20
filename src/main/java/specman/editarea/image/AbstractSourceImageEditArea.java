@@ -1,7 +1,6 @@
 package specman.editarea.image;
 
 import specman.ChangeInfo;
-import specman.pdf.ShapeImage;
 import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
 
@@ -11,14 +10,15 @@ import java.awt.event.MouseEvent;
 
 import static specman.Specman.editor;
 
-/** An SVG edit area which shows a diagram rendered from its source. A double click opens an editor for the source to
+/** An edit area which shows a vector diagram rendered from its source. A double click opens an editor for the source to
  * the right of the diagram, a right click its context menu. The diagram is only updated when the editor is left or the
  * user asks for a preview, because most intermediate states while typing are not sensible diagrams.
  * <p>
- * Subclasses say how the source is rendered and checked, see {@link #renderSvg(String)} and {@link #sourceValidator()}.
+ * Subclasses say how the source is rendered and checked, see {@link #pictureOf(String)}
+ * and {@link #sourceValidator()}.
  * Subclasses can track changes of the source as a whole, see {@link #applySourceChange(String)}, or give the source
  * change marks of its own. */
-public abstract class AbstractSourceSvgImageEditArea extends AbstractSvgImageEditArea {
+public abstract class AbstractSourceImageEditArea extends AbstractVectorImageEditArea {
   private String source;
   /** Differs from the source while the editor shows the preview the user asked for. */
   private String displayedSource;
@@ -26,13 +26,13 @@ public abstract class AbstractSourceSvgImageEditArea extends AbstractSvgImageEdi
    * before that takes the diagram out again, as if it had never been inserted. */
   private boolean awaitingFirstContent;
 
-  protected AbstractSourceSvgImageEditArea(String source, float individualScalePercent, ChangeInfo changeInfo) {
+  protected AbstractSourceImageEditArea(String source, float individualScalePercent, ChangeInfo changeInfo) {
     super(changeInfo, individualScalePercent);
     this.source = source;
   }
 
-  /** @return the diagram for the given source as SVG */
-  protected abstract byte[] renderSvg(String source);
+  /** @return the picture shown for the given source, which is also what the PDF export takes over */
+  protected abstract Picture pictureOf(String source);
 
   protected abstract SourceValidator sourceValidator();
 
@@ -45,7 +45,7 @@ public abstract class AbstractSourceSvgImageEditArea extends AbstractSvgImageEdi
   /** Subclasses call this once they are constructed, to show the diagram for the source. */
   protected void displayInitially() {
     displayedSource = source;
-    showSvg(renderSvg(source));
+    showPicture(pictureOf(source));
   }
 
   public String getSource() { return source; }
@@ -68,14 +68,8 @@ public abstract class AbstractSourceSvgImageEditArea extends AbstractSvgImageEdi
    * for its preview. */
   protected void show(String sourceToShow) {
     displayedSource = sourceToShow;
-    showSvg(renderSvg(sourceToShow));
+    showPicture(pictureOf(sourceToShow));
     imageChanged();
-  }
-
-  /** Rendered anew, as PDF export is rare and rendering is cheap, so there is no need to keep the SVG in memory. */
-  @Override
-  protected ShapeImage createShapeImage() {
-    return vectorShapeImage(renderSvg(displayedSource));
   }
 
   // ---- editing ----

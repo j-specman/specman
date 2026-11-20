@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import specman.editarea.EditContainer;
-import specman.editarea.image.AbstractSvgImageEditArea;
+import specman.editarea.image.SvgPicture;
 import specman.editarea.image.SvgImageEditArea;
 import specman.editarea.image.SvgNotDisplayableException;
 import specman.view.AbstractSchrittView;
@@ -63,7 +63,7 @@ class SvgImageTest {
       .replace("<svg ", "<svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" ");
 
     SvgNotDisplayableException refusal = assertThrows(SvgNotDisplayableException.class,
-      () -> AbstractSvgImageEditArea.toIcon(withImageFile.getBytes(StandardCharsets.UTF_8)));
+      () -> new SvgPicture(withImageFile.getBytes(StandardCharsets.UTF_8)));
 
     assertFalse(refusal.getMessage() == null || refusal.getMessage().isBlank(), "the loader's reason must be given");
   }

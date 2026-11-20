@@ -3,7 +3,9 @@ package specman.editarea.image.plantuml;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
-import specman.editarea.image.AbstractSourceSvgImageEditArea;
+import specman.editarea.image.AbstractSourceImageEditArea;
+import specman.editarea.image.Picture;
+import specman.editarea.image.SvgPicture;
 import specman.editarea.image.SourceBackup;
 import specman.editarea.image.SourceFileKind;
 import specman.editarea.image.SourceValidator;
@@ -24,7 +26,7 @@ import static specman.util.ObjectUtils.nvl;
  * Changes of the source are tracked as a whole: The first change of the source in change mode keeps the source from
  * before as backup, which marks the diagram as changed and allows to reject the change. Changing the source back to
  * the backup takes the mark away again. */
-public class PlantUmlImageEditArea extends AbstractSourceSvgImageEditArea {
+public class PlantUmlImageEditArea extends AbstractSourceImageEditArea {
   /** The extensions PlantUML files commonly have. "wsd" is a heritage of WebSequenceDiagrams, which PlantUML tools
    * took over. "iuml" is missing on purpose: Include files have no @startuml and can't be a diagram of their own. */
   public static final SourceFileKind FILE_KIND = new SourceFileKind(
@@ -63,8 +65,8 @@ public class PlantUmlImageEditArea extends AbstractSourceSvgImageEditArea {
   }
 
   @Override
-  protected byte[] renderSvg(String source) {
-    return PlantUmlRenderer.renderSvg(source);
+  protected Picture pictureOf(String source) {
+    return new SvgPicture(PlantUmlRenderer.renderSvg(source));
   }
 
   @Override

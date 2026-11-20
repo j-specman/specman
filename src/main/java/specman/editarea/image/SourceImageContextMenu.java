@@ -18,7 +18,7 @@ public class SourceImageContextMenu {
   private static final SourceImageContextMenu instance = new SourceImageContextMenu();
 
   private final JPopupMenu popup = new JPopupMenu();
-  private AbstractSourceSvgImageEditArea currentDiagram;
+  private AbstractSourceImageEditArea currentDiagram;
 
   private SourceImageContextMenu() {
     JMenuItem edit = new IMenuItem(EDIT_ITEM);
@@ -33,7 +33,7 @@ public class SourceImageContextMenu {
   }
 
   /** Opens the menu for the diagram at the position of the mouse event. */
-  static void open(AbstractSourceSvgImageEditArea diagram, MouseEvent e) {
+  static void open(AbstractSourceImageEditArea diagram, MouseEvent e) {
     instance.currentDiagram = diagram;
     // Not showing means headless in unit tests: The initialized menu stays operable via popupMenu()
     if (diagram.isShowing()) {

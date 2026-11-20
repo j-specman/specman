@@ -8,7 +8,6 @@ import classman.render.AwtTextMeasurer;
 import classman.render.ClassDiagramLayouter;
 import classman.render.Scene;
 import classman.render.SceneRectangle;
-import classman.render.SceneSvgWriter;
 import classman.render.SceneText;
 import classman.render.TextAnchor;
 import classman.render.TextMeasurer;
@@ -17,13 +16,12 @@ import classman.render.TextWrapper;
 import specman.ChangeSet;
 
 import java.awt.Color;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import static specman.i18n.Messages.i18n;
 
-/** Renders the source of a Classman class diagram to SVG with the shipped fonts. */
+/** Lays out the source of a Classman class diagram with the shipped fonts. */
 public final class ClassmanRenderer {
   private static final String ERROR_FILL = "#ffe0e0";
   private static final String ERROR_STROKE = "#c00000";
@@ -31,12 +29,6 @@ public final class ClassmanRenderer {
   private static final double ERROR_TEXT_WIDTH = 420;
 
   private ClassmanRenderer() {}
-
-  /** @return the diagram as SVG, or a picture of the problem if the source can't be drawn, so that a file with a
-   * source which was edited by hand can still be loaded */
-  public static byte[] renderSvg(String source) {
-    return new SceneSvgWriter().write(renderScene(source)).getBytes(StandardCharsets.UTF_8);
-  }
 
   /** @return the scene of the diagram, or of a picture of the problem if the source can't be drawn */
   public static Scene renderScene(String source) {

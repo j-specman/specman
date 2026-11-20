@@ -17,7 +17,7 @@ import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.SourceFileKind;
 import specman.editarea.image.classman.ClassmanImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
-import specman.editarea.image.AbstractSourceSvgImageEditArea;
+import specman.editarea.image.AbstractSourceImageEditArea;
 import specman.link.AliasListPanel;
 import specman.metatag.stepnumberlabel.StepnumberContextMenu;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
@@ -358,7 +358,7 @@ public class SpecmanFT extends Specman {
 
   /** Right-clicks the given diagram, which is shown from its source, and returns the item of its context menu with the given message key,
    * without clicking it. Allows tests to check visibility and enablement. */
-  public JMenuItem contextMenuItem(AbstractSourceSvgImageEditArea diagram, String itemMessageKey) {
+  public JMenuItem contextMenuItem(AbstractSourceImageEditArea diagram, String itemMessageKey) {
     layoutComponents();
     rightClick(diagram);
     String itemText = i18n(itemMessageKey);
@@ -372,7 +372,7 @@ public class SpecmanFT extends Specman {
 
   /** Right-clicks the given diagram, which is shown from its source, and clicks the item of its context menu with the given message key,
    * if the user could do so, i.e. if it is visible and enabled. */
-  public void clickContextMenuItem(AbstractSourceSvgImageEditArea diagram, String itemMessageKey) {
+  public void clickContextMenuItem(AbstractSourceImageEditArea diagram, String itemMessageKey) {
     JMenuItem item = contextMenuItem(diagram, itemMessageKey);
     assertTrue(item.isVisible() && item.isEnabled(), "context menu item '" + item.getText() + "' must be available");
     item.doClick(0);

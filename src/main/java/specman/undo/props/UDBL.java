@@ -2,7 +2,7 @@ package specman.undo.props;
 
 import specman.ChangeInfo;
 import specman.editarea.EditArea;
-import specman.editarea.image.AbstractSourceSvgImageEditArea;
+import specman.editarea.image.AbstractSourceImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.editarea.image.SourceBackup;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
@@ -70,7 +70,7 @@ public class UDBL {
     }
   }
 
-  public static void setSourceUDBL(AbstractSourceSvgImageEditArea diagram, String source) {
+  public static void setSourceUDBL(AbstractSourceImageEditArea diagram, String source) {
     String undoSource = diagram.getSource();
     if (!Objects.equals(undoSource, source)) {
       diagram.setSource(source);

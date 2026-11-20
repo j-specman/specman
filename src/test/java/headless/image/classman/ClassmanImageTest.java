@@ -10,6 +10,7 @@ import specman.editarea.image.classman.ClassmanImageEditArea;
 import specman.view.AbstractSchrittView;
 import specman.view.EinfacherSchrittView;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -56,6 +57,16 @@ class ClassmanImageTest {
     specman.undo();
 
     assertFalse(hasSecondArea(container), "a single undo must take the diagram out");
+  }
+
+  /** Scenario: The diagram is painted with Graphics2D, so its picture must show something. */
+  @Test
+  void testDiagramIsPainted(@TempDir Path directory) throws IOException {
+    EditContainer container = containerOfNewStep();
+    addImage(classdiagramFile(directory, ORDERS));
+    ClassmanImageEditArea diagram = (ClassmanImageEditArea) container.getEditAreaAt(1);
+
+    assertTrue(hasVisiblePixel(diagram.getFullSizeImage()), "the diagram must be painted");
   }
 
   /** Scenario: A source with a syntax error is refused with a message, nothing is added. */
@@ -192,6 +203,17 @@ class ClassmanImageTest {
     EinfacherSchrittView step = specman.clickNewSimpleStep();
     specman.focus(step);
     return step.getFirstEditArea().asTextArea().getParent();
+  }
+
+  private static boolean hasVisiblePixel(BufferedImage image) {
+    for (int y = 0; y < image.getHeight(); y++) {
+      for (int x = 0; x < image.getWidth(); x++) {
+        if ((image.getRGB(x, y) >>> 24) != 0) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   private static boolean hasSecondArea(EditContainer container) {
