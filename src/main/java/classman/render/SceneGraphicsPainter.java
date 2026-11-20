@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -14,6 +15,8 @@ import java.awt.geom.Rectangle2D;
 import static classman.render.DiagramStyle.DASH_GAP;
 import static classman.render.DiagramStyle.DASH_LENGTH;
 import static classman.render.DiagramStyle.FONT_SIZE;
+import static classman.render.DiagramStyle.MIN_VISIBLE_HIGHLIGHT;
+import static classman.render.DiagramStyle.MIN_VISIBLE_STROKE;
 import static classman.render.DiagramStyle.MITER_LIMIT;
 
 /**
@@ -48,19 +51,49 @@ public class SceneGraphicsPainter {
 
     private void paintElement(AbstractSceneElement element, Graphics2D g) {
         if (element instanceof SceneRectangle rectangle) {
-            fillAndStroke(g, new Rectangle2D.Double(rectangle.x, rectangle.y, rectangle.width, rectangle.height),
-                rectangle.fill, rectangle.stroke, rectangle.strokeWidth);
+            fillAndStroke(g, rectangleShape(g, rectangle), rectangle.fill, rectangle.stroke, strokeWidthOf(g, rectangle.strokeWidth, rectangle.keepsVisible));
         } else if (element instanceof SceneLine line) {
             stroke(g, new Line2D.Double(line.x1, line.y1, line.x2, line.y2), line.stroke, line.strokeWidth, line.dashed);
         } else if (element instanceof ScenePolyline polyline) {
-            stroke(g, path(polyline.xs, polyline.ys, false), polyline.stroke, polyline.strokeWidth, polyline.dashed);
+            stroke(g, path(polyline.xs, polyline.ys, false), polyline.stroke,
+                strokeWidthOf(g, polyline.strokeWidth, polyline.keepsVisible), polyline.dashed);
         } else if (element instanceof ScenePolygon polygon) {
-            fillAndStroke(g, path(polygon.xs, polygon.ys, true), polygon.fill, polygon.stroke, polygon.strokeWidth);
+            fillAndStroke(g, path(polygon.xs, polygon.ys, true), polygon.fill, polygon.stroke,
+                strokeWidthOf(g, polygon.strokeWidth, polygon.keepsVisible));
         } else if (element instanceof SceneText text) {
             paintText(g, text);
         } else {
             throw new IllegalArgumentException("Unknown scene element: " + element.getClass().getName());
         }
+    }
+
+    /**
+     * The marks of changes must stay recognizable when the diagram is painted small, so their strokes don't get thinner
+     * than {@link DiagramStyle#MIN_VISIBLE_STROKE} on the screen. Everything else scales with the diagram.
+     */
+    private double strokeWidthOf(Graphics2D g, double sceneWidth, boolean keepsVisible) {
+        if (!keepsVisible) {
+            return sceneWidth;
+        }
+        return Math.max(sceneWidth, MIN_VISIBLE_STROKE / deviceScale(g));
+    }
+
+    /** A filled rectangle which keeps itself visible grows around its center to the minimum size on the screen. */
+    private Rectangle2D.Double rectangleShape(Graphics2D g, SceneRectangle rectangle) {
+        if (!rectangle.keepsVisible || rectangle.fill == null) {
+            return new Rectangle2D.Double(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        }
+        double minimumSize = MIN_VISIBLE_HIGHLIGHT / deviceScale(g);
+        double width = Math.max(rectangle.width, minimumSize);
+        double height = Math.max(rectangle.height, minimumSize);
+        return new Rectangle2D.Double(rectangle.x - (width - rectangle.width) / 2,
+            rectangle.y - (height - rectangle.height) / 2, width, height);
+    }
+
+    /** How many pixels of the screen a unit of the scene covers. */
+    private double deviceScale(Graphics2D g) {
+        AffineTransform transform = g.getTransform();
+        return Math.hypot(transform.getScaleX(), transform.getShearY());
     }
 
     private void fillAndStroke(Graphics2D g, Shape shape, String fill, String stroke, double strokeWidth) {

@@ -9,17 +9,31 @@ public class ScenePolygon extends AbstractSceneElement {
     /** A color like #000000, or null for no outline. */
     public final String stroke;
     public final double strokeWidth;
+    /** See {@link #keepingVisible()}. */
+    public final boolean keepsVisible;
 
     public ScenePolygon(double[] xs, double[] ys, String fill, String stroke) {
         this(xs, ys, fill, stroke, DiagramStyle.STROKE_WIDTH);
     }
 
     public ScenePolygon(double[] xs, double[] ys, String fill, String stroke, double strokeWidth) {
+        this(xs, ys, fill, stroke, strokeWidth, false);
+    }
+
+    private ScenePolygon(double[] xs, double[] ys, String fill, String stroke, double strokeWidth,
+                         boolean keepsVisible) {
         this.xs = xs.clone();
         this.ys = ys.clone();
         this.fill = fill;
         this.stroke = stroke;
         this.strokeWidth = strokeWidth;
+        this.keepsVisible = keepsVisible;
+    }
+
+    /** @return the same polygon whose outline painters don't make thinner than {@link DiagramStyle#MIN_VISIBLE_STROKE}
+     * on the screen, however small the diagram is painted */
+    public ScenePolygon keepingVisible() {
+        return new ScenePolygon(xs, ys, fill, stroke, strokeWidth, true);
     }
 
     @Override
@@ -30,6 +44,6 @@ public class ScenePolygon extends AbstractSceneElement {
             movedXs[i] = xs[i] + dx;
             movedYs[i] = ys[i] + dy;
         }
-        return new ScenePolygon(movedXs, movedYs, fill, stroke, strokeWidth);
+        return new ScenePolygon(movedXs, movedYs, fill, stroke, strokeWidth, keepsVisible);
     }
 }

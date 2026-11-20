@@ -58,6 +58,12 @@ public final class DiagramStyle {
 
     /** The width of the stroke which makes the frame of an added or removed class or note, half of it shows outside. */
     public static final double FRAME_STROKE_WIDTH = 12;
+    /** The width which the strokes of the change marks keep at least on the screen, in device pixels, when the diagram
+     * is painted so small that their own width would vanish. For a frame only half of it shows outside the box. */
+    public static final double MIN_VISIBLE_STROKE = 6;
+    /** The size which the strong highlight of a changed text keeps at least on the screen, in device pixels, in height
+     * and width. It grows around its center, over the text and beyond it, so that a change stays noticeable. */
+    public static final double MIN_VISIBLE_HIGHLIGHT = 8;
     /** The width of the line which is drawn under an added or removed relation. */
     public static final double RELATION_HIGHLIGHT_WIDTH = 9;
     /** How far the highlight of a changed text reaches out of the text to the left and right. */

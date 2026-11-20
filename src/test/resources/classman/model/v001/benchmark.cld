@@ -36,7 +36,7 @@ classdiagram "Hilfe-Versionierung" {
     class Mandant (c0de0006) at(760, 478) {
     }
     class Handbuchseite (c0de0007) at(680, 660) {
-        -Seitenschlüssel : String [Pflicht]
+        -Seitenschlüssel was(yellow, Seitenkey) : String [Pflicht]
         -"In Baum anzeigen" : J/N
     }
     class Handbuchtextblock (c0de0008) at(1040, 667) {

@@ -96,6 +96,7 @@ class ChangeMarkTest {
     SceneRectangle highlight = rectanglesFilled(scene, YELLOW).get(0);
     assertEquals(line.left() + 10 - DiagramStyle.HIGHLIGHT_MARGIN, highlight.x);
     assertEquals(40 + 2 * DiagramStyle.HIGHLIGHT_MARGIN, highlight.width);
+    assertTrue(highlight.keepsVisible, "the highlight of a change must stay noticeable when the diagram is small");
     assertEquals(1, rectanglesFilled(scene, YELLOW).size());
   }
 

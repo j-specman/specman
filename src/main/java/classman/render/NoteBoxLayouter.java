@@ -55,7 +55,8 @@ public class NoteBoxLayouter {
         double[] outlineYs = {0, 0, NOTE_FOLD, height, height};
         List<AbstractSceneElement> elements = new ArrayList<>();
         if (change != null) {
-            elements.add(new ScenePolygon(outlineXs, outlineYs, null, palette.strong(change.changeSet), FRAME_STROKE_WIDTH));
+            elements.add(new ScenePolygon(outlineXs, outlineYs, null, palette.strong(change.changeSet), FRAME_STROKE_WIDTH)
+                .keepingVisible());
         }
         elements.add(new ScenePolygon(outlineXs, outlineYs, isRemoved ? ColorMix.blend(NOTE_FILL, WHITE, VEIL_SHARE) : NOTE_FILL,
             lineColor));

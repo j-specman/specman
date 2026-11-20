@@ -30,7 +30,7 @@ public class TextHighlighter {
                 int from = Math.max(mark.start, lineStart) - lineStart;
                 int to = Math.min(mark.end, lineEnd) - lineStart;
                 if (from < to) {
-                    highlights.add(partBackground(line, from, to, palette.strong(mark.changeSet)));
+                    highlights.add(partBackground(line, from, to, palette.strong(mark.changeSet)).keepingVisible());
                 }
             }
             lineStart = lineEnd + 1;
@@ -40,12 +40,17 @@ public class TextHighlighter {
 
     /** The backgrounds for the lines of a text which is changed as a whole, none if the change is null. */
     public List<SceneRectangle> wholeHighlights(TextChangeModel_V001 change, List<SceneText> lines) {
-        return change == null ? List.of() : backgrounds(lines, palette.strong(change.changeSet));
+        return change == null ? List.of() : keptVisible(backgrounds(lines, palette.strong(change.changeSet)));
     }
 
     /** The backgrounds for the lines of a text in the strong color of the change set. */
     public List<SceneRectangle> wholeHighlights(String changeSet, List<SceneText> lines) {
-        return backgrounds(lines, palette.strong(changeSet));
+        return keptVisible(backgrounds(lines, palette.strong(changeSet)));
+    }
+
+    /** The highlights in the strong color are the marks which painters keep recognizable when the diagram is small. */
+    private List<SceneRectangle> keptVisible(List<SceneRectangle> highlights) {
+        return highlights.stream().map(SceneRectangle::keepingVisible).toList();
     }
 
     /** A background in the given color behind each line which isn't empty. */

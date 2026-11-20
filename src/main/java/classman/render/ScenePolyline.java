@@ -10,17 +10,31 @@ public class ScenePolyline extends AbstractSceneElement {
     /** A color like #000000. */
     public final String stroke;
     public final double strokeWidth;
+    /** See {@link #keepingVisible()}. */
+    public final boolean keepsVisible;
 
     public ScenePolyline(double[] xs, double[] ys, boolean dashed) {
         this(xs, ys, dashed, DiagramStyle.STROKE, DiagramStyle.STROKE_WIDTH);
     }
 
     public ScenePolyline(double[] xs, double[] ys, boolean dashed, String stroke, double strokeWidth) {
+        this(xs, ys, dashed, stroke, strokeWidth, false);
+    }
+
+    private ScenePolyline(double[] xs, double[] ys, boolean dashed, String stroke, double strokeWidth,
+                          boolean keepsVisible) {
         this.xs = xs.clone();
         this.ys = ys.clone();
         this.dashed = dashed;
         this.stroke = stroke;
         this.strokeWidth = strokeWidth;
+        this.keepsVisible = keepsVisible;
+    }
+
+    /** @return the same line which painters don't make thinner than {@link DiagramStyle#MIN_VISIBLE_STROKE} on the
+     * screen, however small the diagram is painted */
+    public ScenePolyline keepingVisible() {
+        return new ScenePolyline(xs, ys, dashed, stroke, strokeWidth, true);
     }
 
     /** The smallest rectangle around all points. */
@@ -46,6 +60,6 @@ public class ScenePolyline extends AbstractSceneElement {
             movedXs[i] = xs[i] + dx;
             movedYs[i] = ys[i] + dy;
         }
-        return new ScenePolyline(movedXs, movedYs, dashed, stroke, strokeWidth);
+        return new ScenePolyline(movedXs, movedYs, dashed, stroke, strokeWidth, keepsVisible);
     }
 }

@@ -94,6 +94,6 @@ public class RelationMarkLayouter {
             xs[i] = path.get(i).x;
             ys[i] = path.get(i).y;
         }
-        return new ScenePolyline(xs, ys, false, color, RELATION_HIGHLIGHT_WIDTH);
+        return new ScenePolyline(xs, ys, false, color, RELATION_HIGHLIGHT_WIDTH).keepingVisible();
     }
 }

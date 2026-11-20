@@ -97,7 +97,8 @@ public class ClassBoxLayouter {
     }
 
     private SceneRectangle frame(double width, double height, ChangeModel_V001 change) {
-        return new SceneRectangle(0, 0, width, height, null, palette.strong(change.changeSet), FRAME_STROKE_WIDTH);
+        return new SceneRectangle(0, 0, width, height, null, palette.strong(change.changeSet), FRAME_STROKE_WIDTH)
+            .keepingVisible();
     }
 
     private String veiled(String fill) {
