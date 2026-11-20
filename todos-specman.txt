@@ -79,6 +79,18 @@ Reste Multi-Catch
   Diese Aktionen landen in der Undo-Historie vor dem eigentlichen Löschen des Co-Catchs.
   Man muss dann mehrfach klicken, um das eigentliche Undo auszulösen
 
+Classman-Diagrammeditor (In-Place-Editing)
+Konzept: specifications/classman/classman-editor-concept.adoc (Entwurf, offene Punkte stehen am Ende des Dokuments)
+- Konzept zu Ende ausarbeiten: offene Punkte klären (Umschalter Icons/Text geteilt?, Assoziationsklasse, Notiz-Anbindung, Auswahlmodell, Schwellenwert für Fenster)
+- Gerüst: Editiersitzung (Palettentausch, Beenden per Fertig/Esc/anderer Bereich), Classman-Palette mit Fertig-Button und Umschalter
+- Palettenbuttons mit Varianten (Pfeil + Auswahlmenü, letzte Wahl merken)
+- Anlegen: Boxen per Drag & Drop auf die Zeichenfläche, Relationen als Werkzeug (Button, dann von Box zu Box ziehen)
+- Bearbeiten: Auswählen, Verschieben (Routen mitführen), Umbenennen per Overlay-Textfeld, Löschen, Breite ziehen
+- Neue Schlüsselwörter interface und enum in Grammatik, Modell, Layouter und Änderungslogik
+- Änderungsmarkierungen beim Editieren automatisch schreiben (change/was)
+- Fenster-Variante für stark verkleinerte Diagramme (ClassmanDiagramDialog) mit derselben Palette
+- Idee: weißer Rand um die aufgeblasenen Highlights, weil Attribut-Highlights auf dem Eierschalenton wenig Kontrast haben
+
 Abschluss für Go-Live
 - Wenn man zu einem Breakschritt bzw. einem Catch-Bereich springt oder einer Schrittreferenz folgt, dann kann sich das Ziel
    der Navigation in einem zusammengeklappten Bereich befinden. Was machen wir dann? Aufklappen?

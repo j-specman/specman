@@ -1,0 +1,113 @@
+:toc:
+
+# Classman Diagram Editor: Concept
+
+*Status: draft of 2026-11-20, to be refined. Open points are collected at the end.*
+
+## Goal
+Class diagrams are drawn directly with Graphics2D inside the Aktogramm and can be edited there in place: creating, moving, renaming and deleting every kind of element, without leaving Specman and without editing the diagram source. The same editor is later the core of Classman itself, so it must not depend on Specman.
+
+The source text of the diagram (see `ClassDiagram_V001.g4`) stays the single persistent representation. The editor reads it, shows it as a scene, and writes a changed source after each completed operation.
+
+## Starting Point
+* `classman.render` builds an immutable `Scene` from the model with the pure layouters, `SceneGraphicsPainter` paints it with Graphics2D, `SceneSvgWriter` writes the same scene as SVG for the PDF.
+* In the Aktogramm the diagram is shown as a `Picture` (`ScenePicture` / `SceneIcon`), the edit area is `ClassmanImageEditArea`.
+* `ClassmanDiagramDialog` and `ClassmanCanvas` show the diagram in a separate window with zoom. They are the seed of the editor window.
+* The source editor popup stays available in the context menu as the expert path.
+
+## Entering and Leaving the Edit Mode
+A double click on a diagram starts the edit mode for this diagram. The context menu offers the same. While the mode is active, the Specman step palette on the left is replaced by the Classman palette, see <<Palette>>. The ribbon on top stays as it is.
+
+The swap is the visible signal that the user is doing something different from editing steps. It also makes sense functionally: Step buttons mean nothing inside a diagram.
+
+The edit mode ends by explicit events only:
+
+. the *Done* button of the palette,
+. the Esc key while no tool is armed and no text is being edited,
+. another edit area of the Aktogramm getting the focus, or a mouse click outside the diagram.
+
+It does *not* end when the diagram merely loses the keyboard focus. That happens without the user's intent: Clicks on palette buttons, the variant menu, the text field for renaming and dialogs all take the focus (the step palette doesn't avoid it either, Specman copes with `FocusHistory`).
+
+An *edit session* object receives these events and swaps the palette. It doesn't depend on AWT focus handling itself, so its rules can be tested headless. How the swap feels in the real GUI (no flicker, Esc arrives) is checked manually when the first skeleton exists.
+
+## Palette
+The palette is a vertical tool bar in the place of the step palette, built the same way: icon with text, or icons only, switchable by the user with the same kind of button at the bottom. The most important element comes first, at the top: the class.
+
+[cols="1,3"]
+|===
+|Position |Content
+
+|top |Element buttons, most important first
+|middle |Further commands, if needed later
+|bottom |*Done*, below it the switch between icons only and icons with text
+|===
+
+Whether the switch is the same user preference as for the step palette is an open point.
+
+### Buttons with Variants
+The number of element kinds will grow, so related kinds share one button. A button with variants shows the icon and the text of the variant it creates, and has a small arrow at its corner which opens a menu with the other variants. Choosing a variant makes it the current one of the button; using the button creates it. The last choice is remembered.
+
+Variants are grouped if they are used with the same gesture and differ in one property only:
+
+[cols="1,2,1"]
+|===
+|Button |Variants |Gesture
+
+|Class |class, interface, enum |drag onto canvas
+|Note |note, association class (open) |drag onto canvas
+|Association |association, aggregation, composition |tool
+|Inheritance |extends, implements |tool
+|===
+
+Interface and enum are keywords of their own, because their content will differ from a class: A class has attributes, an enum holds only its values, which are entered like attributes without a type, and an interface has no attributes. See <<Consequences for the Format>>.
+
+## Creating Elements
+Specman's step buttons are drag sources: The user drags a step onto the diagram. The Classman palette follows this for everything that is a single box:
+
+* *Boxes* (class, interface, enum, note) are dragged onto the canvas. The drop point becomes the `at(x, y)` of the new element, which matters in a free layout, unlike for steps. The new element gets an ID and, in change mode, its `change(added, ...)` mark.
+* *Relations* need two ends and are a *tool*: Click the button, the cursor changes, then drag from the first box to the second. The relation is created with a straight line, route points are the user's business afterwards. Afterwards the select tool is back (one-shot). Esc cancels an armed tool.
+* *Everything within a box* has no button: Attributes, enum values, stereotypes, tagged values, labels and multiplicities are created by editing in place, e.g. by typing into an empty line below the last attribute.
+
+## Editing Existing Elements
+These operations need no buttons, they are triggered by the mouse and keys:
+
+* *Select* by click. A selection is shown by handles. Multiple selection and a rubber band are open.
+* *Move* by dragging. The waypoints of the routes of the moved boxes move or are re-routed: this is the editor's job, since routes are absolute points.
+* *Rename* and edit texts by double click: a text field appears over the text, the change is committed with Return, the diagram is laid out again after the commit only, without live feedback.
+* *Delete* with the Delete key. In change mode the element gets a `change(removed, ...)` mark instead, and the veiled element stays visible.
+* *Width* of a box by dragging its side, which writes `width=`.
+
+## Undo and Change Mode
+Each completed operation is one undo step of Specman, which replaces the source (as the source editor popup does today). Nothing is recorded while a drag is in progress. In change mode, the editor writes the `change(...)` and `was(...)` marks: the user never writes them by hand, and accepting, rejecting and merging change sets continues to work on the marks in the source.
+
+## Hosts
+The editor consists of the canvas with its tools, the palette and the edit session. It lives in `classman.*` without imports of `specman.*`. There are three hosts:
+
+* *In place* in the Aktogramm: Specman swaps the palette into its left tool bar.
+* *In a window*: the same palette in the window's own tool bar, the Done button closes the window.
+* *Classman* later as an application of its own.
+
+The Specman side (`specman.editarea.image.classman`) is a thin adapter: It starts the session, swaps the palette, writes the changed source with undo, and converts mouse coordinates by the inverse of the scale of the diagram.
+
+### Small Diagrams
+A diagram which is shown strongly shrunk can't be edited in place sensibly. Below a threshold scale, a double click opens the window instead. The threshold is open.
+
+## Consequences for the Format
+* New keywords `interface` and `enum`. An interface has no body. An enum has values written like attributes without a type.
+* Elements created by the editor always get an ID, and a position `at(x, y)`.
+* The layouter and the change mark logic (`ChangeResolver`, renaming) have to handle the new kinds.
+
+## Tests
+* The edit session, tool state, variant selection and every operation on the model are plain logic and are tested headless with the same style as the Specman headless tests (real buttons and menus where Swing is involved).
+* Focus behaviour and the look of the swap can't be tested headless and are checked by hand.
+
+## Open Points
+. Is the switch between icons only and icons with text shared with the step palette, or has the Classman palette its own preference? A shared one is one decision for the user.
+. Is the association class a variant of the note button, or an element of its own?
+. How are notes attached to elements: as a relation-like tool, or by dragging a handle?
+. Selection model: multiple selection, rubber band, keyboard navigation.
+. Keyboard shortcuts for tools and variants.
+. Threshold scale below which the window opens instead of the in-place mode.
+. Does the variant of a button survive a restart, and does it differ per user or per diagram?
+. Sticky tools (stay armed until Esc), e.g. with a double click on the button. One-shot is the default.
+. Model-bound mode of Classman (only stereotypes and tags defined in the model can be chosen) is a separate topic and not part of this concept.
