@@ -70,6 +70,14 @@ public final class DiagramStyle {
     public static final double RELATION_HIGHLIGHT_WIDTH = 9;
     /** How far the highlight of a changed text reaches out of the text to the left and right. */
     public static final double HIGHLIGHT_MARGIN = 2;
+    /** Texts shorter than this are marked as a whole when they changed, a difference in a short text is no news. */
+    public static final int DIFF_MIN_TEXT_LENGTH = 12;
+    /** Marked passages of a changed text which are at most this many characters apart are marked as one. */
+    public static final int DIFF_MERGE_GAP = 3;
+    /** A changed text with more separate marked passages than this gets the closest ones joined into one. */
+    public static final int DIFF_MAX_RUNS = 8;
+    /** If the marked passages of a changed text cover more of it than this share, it is marked as a whole. */
+    public static final double DIFF_WHOLE_SHARE = 0.8;
     /** The share of white in the pale variant of a change color. */
     public static final double PALE_SHARE = 0.6;
     /** The share of white which veils the fill of a removed class or note. */

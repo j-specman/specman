@@ -71,10 +71,12 @@ public class RelationMarkLayouter {
     private List<SceneRectangle> textMarks(AbstractRelationModel_V001 relation, RelationTexts texts) {
         List<SceneRectangle> marks = new ArrayList<>();
         if (relation instanceof AssociationRelationModel_V001 association) {
-            marks.addAll(highlighter.wholeHighlights(association.fromMultiplicityChange, listOf(texts.fromMultiplicity)));
-            marks.addAll(highlighter.wholeHighlights(association.toMultiplicityChange, listOf(texts.toMultiplicity)));
+            marks.addAll(highlighter.changeHighlights(association.fromMultiplicityChange, association.fromMultiplicity,
+                listOf(texts.fromMultiplicity)));
+            marks.addAll(highlighter.changeHighlights(association.toMultiplicityChange, association.toMultiplicity,
+                listOf(texts.toMultiplicity)));
         }
-        marks.addAll(highlighter.wholeHighlights(relation.labelChange, texts.labelLines));
+        marks.addAll(highlighter.changeHighlights(relation.labelChange, relation.label, texts.labelLines));
         return marks;
     }
 

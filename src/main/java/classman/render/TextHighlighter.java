@@ -14,6 +14,7 @@ import static classman.render.DiagramStyle.STRIKE_WIDTH;
 public class TextHighlighter {
     private final TextMeasurer measurer;
     private final ChangePalette palette;
+    private final TextDiffMarks diffMarks = new TextDiffMarks();
 
     public TextHighlighter(TextMeasurer measurer, ChangePalette palette) {
         this.measurer = measurer;
@@ -22,18 +23,53 @@ public class TextHighlighter {
 
     /** The backgrounds for all marks of a text which is shown in the given lines, in the order of the lines. */
     public List<SceneRectangle> highlights(MarkedText marked, List<SceneText> lines) {
-        List<SceneRectangle> highlights = new ArrayList<>();
+        int[] lineStarts = new int[lines.size()];
         int lineStart = 0;
-        for (SceneText line : lines) {
+        for (int i = 0; i < lines.size(); i++) {
+            lineStarts[i] = lineStart;
+            lineStart += lines.get(i).text.length() + 1;
+        }
+        return highlights(marked.marks(), lineStarts, lines);
+    }
+
+    /**
+     * The backgrounds for a text which a change set changed, shown in the given lines. They cover what differs from
+     * the backup, or all of the text if the difference isn't worth showing in detail. None if the change is null.
+     */
+    public List<SceneRectangle> changeHighlights(TextChangeModel_V001 change, String text, List<SceneText> lines) {
+        if (change == null) {
+            return List.of();
+        }
+        List<TextMark> marks = diffMarks.of(change.backup, text == null ? "" : text, change.changeSet);
+        return highlights(marks, lineStartsIn(text == null ? "" : text, lines), lines);
+    }
+
+    /** Where each line starts in the text. The lines are the text without the blanks and line breaks at which it was
+     * broken, so each line is looked for after the end of the one before. */
+    private int[] lineStartsIn(String text, List<SceneText> lines) {
+        int[] lineStarts = new int[lines.size()];
+        int position = 0;
+        for (int i = 0; i < lines.size(); i++) {
+            int found = text.indexOf(lines.get(i).text, position);
+            lineStarts[i] = found >= 0 ? found : position;
+            position = lineStarts[i] + lines.get(i).text.length();
+        }
+        return lineStarts;
+    }
+
+    private List<SceneRectangle> highlights(List<TextMark> marks, int[] lineStarts, List<SceneText> lines) {
+        List<SceneRectangle> highlights = new ArrayList<>();
+        for (int i = 0; i < lines.size(); i++) {
+            SceneText line = lines.get(i);
+            int lineStart = lineStarts[i];
             int lineEnd = lineStart + line.text.length();
-            for (TextMark mark : marked.marks()) {
+            for (TextMark mark : marks) {
                 int from = Math.max(mark.start, lineStart) - lineStart;
                 int to = Math.min(mark.end, lineEnd) - lineStart;
                 if (from < to) {
                     highlights.add(partBackground(line, from, to, palette.strong(mark.changeSet)).keepingVisible());
                 }
             }
-            lineStart = lineEnd + 1;
         }
         return highlights;
     }

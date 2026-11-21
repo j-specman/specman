@@ -126,6 +126,33 @@ class ChangeMarkTest {
     assertEquals(1, rectanglesFilled(marked, YELLOW).size());
   }
 
+  /** Of a long changed note text only the new passage is highlighted, also where the note wraps its text. */
+  @Test
+  void changedNoteTextPartlyHighlighted() throws ClassDiagramParseException {
+    Scene scene = layout("note at(0, 0) \"Please remember to call the customer today and say hello\" "
+        + "was(yellow, \"remember to call the customer today and say hello\")");
+    List<SceneRectangle> highlights = rectanglesFilled(scene, YELLOW);
+    double highlightedWidth = 0;
+    for (SceneRectangle highlight : highlights) {
+      highlightedWidth += highlight.width - 2 * DiagramStyle.HIGHLIGHT_MARGIN;
+    }
+    assertEquals("Please ".length() * 10, highlightedWidth);
+  }
+
+  /** A changed note text of which little is left is highlighted as a whole. */
+  @Test
+  void mostlyChangedNoteTextWhollyHighlighted() throws ClassDiagramParseException {
+    String backup = "Alpha beta gamma delta epsilon zeta eta theta iota kappa lambda";
+    String current = "One two three four five six seven eight nine ten eleven twelve";
+    Scene scene = layout("note at(0, 0) \"" + current + "\" was(yellow, \"" + backup + "\")");
+    List<SceneText> lines = all(scene, SceneText.class);
+    List<SceneRectangle> highlights = rectanglesFilled(scene, YELLOW);
+    assertEquals(lines.size(), highlights.size());
+    for (int i = 0; i < lines.size(); i++) {
+      assertEquals(lines.get(i).width + 2 * DiagramStyle.HIGHLIGHT_MARGIN, highlights.get(i).width);
+    }
+  }
+
   /** The marks inside an added class are not drawn: its frame says it all. */
   @Test
   void marksInAddedClassIgnored() throws ClassDiagramParseException {

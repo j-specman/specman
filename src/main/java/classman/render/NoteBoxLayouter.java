@@ -72,7 +72,7 @@ public class NoteBoxLayouter {
             lineY += measurer.lineHeight();
         }
         if (change == null) {
-            elements.addAll(highlighter.wholeHighlights(model.textChange, placed));
+            elements.addAll(highlighter.changeHighlights(model.textChange, model.text, placed));
         }
         if (isRemoved) {
             elements.addAll(highlighter.wholeHighlights(change.changeSet, placed));

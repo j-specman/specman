@@ -116,7 +116,7 @@ public class ClassBoxLayouter {
                                 List<SceneText> stereotypeLines, List<SceneText> nameLines, MarkedText taggedValues,
                                 List<SceneText> taggedLines) {
         backgrounds.addAll(highlighter.wholeHighlights(model.stereotypeChange, stereotypeLines));
-        backgrounds.addAll(highlighter.wholeHighlights(model.nameChange, nameLines));
+        backgrounds.addAll(highlighter.changeHighlights(model.nameChange, model.name, nameLines));
         if (taggedValues != null) {
             backgrounds.addAll(highlighter.highlights(taggedValues, taggedLines));
         }
