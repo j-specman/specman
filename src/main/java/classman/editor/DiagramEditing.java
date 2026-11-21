@@ -10,7 +10,10 @@ import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
 import classman.model.v001.io.ClassDiagramSerializer_V001;
 import classman.render.Scene;
+import classman.render.SceneElementArea;
 
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +29,7 @@ public class DiagramEditing {
   private ClassDiagramModel_V001 model;
   private String source;
   private Scene scene;
+  private AbstractDiagramElementModel_V001 selected;
   private int undoableSteps;
   private int redoableSteps;
 
@@ -41,6 +45,7 @@ public class DiagramEditing {
     model = new ClassDiagramParser_V001().parse(newSource);
     scene = host.renderer().layout(model);
     source = newSource;
+    selected = null;
   }
 
   public String source() { return source; }
@@ -81,6 +86,22 @@ public class DiagramEditing {
     }
   }
 
+  /** Selects the box at the point of the diagram, or nothing if there is none. */
+  public void selectAt(Point2D point) {
+    SceneElementArea hit = scene.elementAreaAt(point);
+    selected = hit != null ? hit.element : null;
+  }
+
+  public void deselect() { selected = null; }
+
+  public boolean hasSelection() { return selected != null; }
+
+  /** @return where the selected box is drawn, null if nothing is selected */
+  public Rectangle2D selectedArea() {
+    SceneElementArea selectedArea = selected != null ? scene.elementAreaOf(selected) : null;
+    return selectedArea != null ? selectedArea.area : null;
+  }
+
   /** Adds a class with a made-up name and ID, its top left corner at the given point of the diagram. */
   public void addClass(int x, int y) {
     ClassModel_V001 box = new ClassModel_V001(newClassName());
@@ -88,6 +109,7 @@ public class DiagramEditing {
     box.position = new PositionModel_V001(x, y);
     markAsAdded(box);
     model.elements.add(box);
+    selected = box;
     publish();
   }
 

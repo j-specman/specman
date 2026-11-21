@@ -39,7 +39,7 @@ public class ClassDiagramEditorWindow extends JDialog {
     EditorTexts texts = new EditorTexts(host.locale());
     setTitle(texts.get("window.title"));
     editing = new DiagramEditing(source, host, texts);
-    canvas = new DiagramCanvas(editing.scene());
+    canvas = new DiagramCanvas(editing.scene(), this::pressedAt);
     scrollPane = new JScrollPane(canvas);
 
     EditorPalette palette = new EditorPalette(texts, this::classDropped);
@@ -48,7 +48,7 @@ public class ClassDiagramEditorWindow extends JDialog {
 
     pack();
     setSize(Math.max(MIN_WIDTH, getWidth()), Math.max(MIN_HEIGHT, getHeight()));
-    getRootPane().registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+    getRootPane().registerKeyboardAction(e -> escape(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
       JComponent.WHEN_IN_FOCUSED_WINDOW);
     bindKey(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK, editing::undo);
     bindKey(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK, editing::redo);
@@ -94,11 +94,32 @@ public class ClassDiagramEditorWindow extends JDialog {
     return new Rectangle(origin.x + visible.x, origin.y + visible.y, visible.width, visible.height);
   }
 
+  private void pressedAt(Point2D diagramPoint) {
+    editing.selectAt(diagramPoint);
+    showDiagram();
+  }
+
+  /** Esc takes the selection away first, and leaves the editor if there is none. */
+  private void escape() {
+    if (editing.hasSelection()) {
+      editing.deselect();
+      showDiagram();
+    }
+    else {
+      dispose();
+    }
+  }
+
+  private void showDiagram() {
+    canvas.setScene(editing.scene());
+    canvas.setSelection(editing.selectedArea());
+  }
+
   /** Runs the operation on Ctrl+key and shows the diagram as it is afterwards. */
   private void bindKey(int keyCode, int modifiers, Runnable operation) {
     getRootPane().registerKeyboardAction(e -> {
       operation.run();
-      canvas.setScene(editing.scene());
+      showDiagram();
     }, KeyStroke.getKeyStroke(keyCode, modifiers), JComponent.WHEN_IN_FOCUSED_WINDOW);
   }
 
@@ -113,6 +134,6 @@ public class ClassDiagramEditorWindow extends JDialog {
     SwingUtilities.convertPointFromScreen(inCanvas, canvas);
     Point2D inDiagram = canvas.toDiagram(inCanvas);
     editing.addClass((int) Math.round(inDiagram.getX()), (int) Math.round(inDiagram.getY()));
-    canvas.setScene(editing.scene());
+    showDiagram();
   }
 }

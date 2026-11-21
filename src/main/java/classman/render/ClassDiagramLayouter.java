@@ -69,10 +69,12 @@ public class ClassDiagramLayouter {
             elements.add(link);
             covered = BoxGeometry.union(covered, link.bounds());
         }
+        List<SceneElementArea> elementAreas = new ArrayList<>();
+        areas.forEach((element, area) -> elementAreas.add(new SceneElementArea(element, area)));
         if (covered == null) {
-            return new Scene(elements, 0, 0, 0, 0);
+            return new Scene(elements, elementAreas, 0, 0, 0, 0);
         }
-        return new Scene(elements, covered.x, covered.y, covered.width, covered.height);
+        return new Scene(elements, elementAreas, covered.x, covered.y, covered.width, covered.height);
     }
 
     private void addAttachTargets(AttachTargetIndex attachTargets, ClassModel_V001 classModel,

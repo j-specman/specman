@@ -7,11 +7,13 @@ import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
 import org.junit.jupiter.api.Test;
 
+import java.awt.geom.Point2D;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -111,6 +113,62 @@ class DiagramEditingTest {
     assertEquals(2, boxes.size());
     assertEquals("Book", boxes.get(0).name);
     assertEquals("04de91aa", boxes.get(0).id);
+  }
+
+  /** A press inside a box selects it, a press outside deselects. */
+  @Test
+  void selectingBox() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n  class Page (11111111) at(400, 20)\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    assertFalse(editing.hasSelection());
+
+    editing.selectAt(new Point2D.Double(15, 25));
+
+    assertTrue(editing.hasSelection());
+    assertTrue(editing.selectedArea().contains(15, 25));
+    assertFalse(editing.selectedArea().contains(405, 25));
+
+    editing.selectAt(new Point2D.Double(405, 25));
+
+    assertTrue(editing.selectedArea().contains(405, 25));
+
+    editing.selectAt(new Point2D.Double(250, 300));
+
+    assertFalse(editing.hasSelection());
+    assertNull(editing.selectedArea());
+  }
+
+  /** Where boxes overlap, the one drawn on top is selected. */
+  @Test
+  void selectingTopmostBox() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  class Below (04de91aa) at(10, 20)\n  class Above (11111111) at(12, 22)\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+
+    editing.selectAt(new Point2D.Double(15, 25));
+
+    assertEquals(12, editing.selectedArea().getX(), 0.001);
+  }
+
+  /** A class which has just been created is selected. */
+  @Test
+  void newClassSelected() throws ClassDiagramParseException {
+    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+
+    editing.addClass(100, 100);
+
+    assertEquals(100, editing.selectedArea().getX(), 0.001);
+    assertEquals(100, editing.selectedArea().getY(), 0.001);
+  }
+
+  /** Deselecting leaves nothing selected. */
+  @Test
+  void deselecting() throws ClassDiagramParseException {
+    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+    editing.addClass(100, 100);
+
+    editing.deselect();
+
+    assertFalse(editing.hasSelection());
   }
 
   /** A diagram which can't be read can't be edited. */
