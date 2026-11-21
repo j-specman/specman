@@ -10,10 +10,7 @@ import classman.model.v001.RelationType_V001;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ElementTextChangeTest {
   private final ElementTextChanger_V001 changer = new ElementTextChanger_V001();
@@ -230,27 +227,30 @@ class ElementTextChangeTest {
     assertNull(relation.fromMultiplicityChange);
   }
 
-  /** A multiplicity which was there before can't be removed while changes are tracked: nothing could carry the mark. */
+  /** A removed multiplicity stays as the empty text with the mark, like a label, and comes back with the old text. */
   @Test
-  void multiplicityRemovalNeedsMark() {
+  void multiplicityRemovedTracked() {
     AssociationRelationModel_V001 relation = association();
     relation.fromMultiplicity = "1";
 
-    assertFalse(changer.canSetMultiplicity(relation, RelationEnd_V001.FROM, "", "blue"));
-    assertThrows(IllegalArgumentException.class,
-      () -> changer.setMultiplicity(relation, RelationEnd_V001.FROM, "", "blue"));
+    changer.setMultiplicity(relation, RelationEnd_V001.FROM, "", "blue");
+    assertEquals("", relation.fromMultiplicity);
+    assertEquals("1", relation.fromMultiplicityChange.backup);
+
+    changer.setMultiplicity(relation, RelationEnd_V001.FROM, "1", "blue");
     assertEquals("1", relation.fromMultiplicity);
-    assertTrue(changer.canSetMultiplicity(relation, RelationEnd_V001.FROM, "*", "blue"));
-    assertTrue(changer.canSetMultiplicity(relation, RelationEnd_V001.TO, "", "blue"), "there is none to remove");
+    assertNull(relation.fromMultiplicityChange);
   }
 
-  /** A multiplicity which the change set has added itself can be removed again, and an added relation loses it. */
+  /** A multiplicity which the change set has added itself is gone completely when removed, and an added relation
+   * loses it without a mark. */
   @Test
-  void multiplicityRemovalWhereNoMarkIsNeeded() {
+  void multiplicityAddedThenRemoved() {
     AssociationRelationModel_V001 relation = association();
-    changer.setMultiplicity(relation, RelationEnd_V001.FROM, "1", "blue");
+    changer.setMultiplicity(relation, RelationEnd_V001.FROM, "1..<max capacity>", "blue");
+    assertEquals("1..<max capacity>", relation.fromMultiplicity);
+    assertNull(relation.fromMultiplicityChange.backup);
 
-    assertTrue(changer.canSetMultiplicity(relation, RelationEnd_V001.FROM, "", "blue"));
     changer.setMultiplicity(relation, RelationEnd_V001.FROM, "", "blue");
     assertNull(relation.fromMultiplicity);
     assertNull(relation.fromMultiplicityChange);
@@ -260,6 +260,7 @@ class ElementTextChangeTest {
     added.change = new ChangeModel_V001(ChangeType_V001.ADDED, "blue");
     changer.setMultiplicity(added, RelationEnd_V001.TO, "", "blue");
     assertNull(added.toMultiplicity);
+    assertNull(added.toMultiplicityChange);
   }
 
   private static AssociationRelationModel_V001 association() {

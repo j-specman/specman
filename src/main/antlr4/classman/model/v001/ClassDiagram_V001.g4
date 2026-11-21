@@ -17,6 +17,8 @@ grammar ClassDiagram_V001;
 //   extends    hollow triangle at the target (the superclass), always ->, no multiplicities
 //   implements     dashed line, hollow triangle at the target (the interface), always ->, no multiplicities
 // Only association, aggregation and composition take multiplicities and an assocclass.
+// A multiplicity is free text: written bare if it is a number, a range like 0..1 or 1..*, or *, else in double
+// quotes, for example "1..<maximum capacity>".
 // A relation refers to its two classes by their IDs, written bare (without parentheses, unlike the ID of the
 // element itself):  composition (11223344) 04de91aa 1 -> * b7c20f13 "label"
 // The classes need an ID for that. Class names are free text and need not be unique.
@@ -48,8 +50,8 @@ grammar ClassDiagram_V001;
 //     label, a note text. The first value names the change set, the optional second one is the text before the
 //     change (bare if it is a word or multiplicity, else a string). Without the second value there was no text
 //     before, an empty string says it was empty. The text itself always stands for the new state, the box is laid
-//     out for it. A removed text stays as an empty string with the mark: "" was(yellow, "old label"). A removed
-//     multiplicity can't be marked, there is no text left to carry the mark. Marks of the name come before the ID.
+//     out for it. A removed text stays as an empty string with the mark: "" was(yellow, "old label"). That holds
+//     for a multiplicity too. Marks of the name come before the ID.
 //   * Text marks inside an element which is marked added or removed are accepted and ignored by the renderer:
 //     accepting or rejecting the element decides about everything in it.
 //   * An assocclass nested in a relation belongs to that relation.
@@ -169,7 +171,7 @@ textChange
 
 backupText
     : wordOrString
-    | multiplicity
+    | bareMultiplicity
     ;
 
 // ------------------------------------------------------------ relations
@@ -195,6 +197,11 @@ implementsRelation
     ;
 
 multiplicity
+    : bareMultiplicity
+    | QUOTED_STRING
+    ;
+
+bareMultiplicity
     : NUMBER (DOTDOT (NUMBER | STAR))?
     | STAR
     ;

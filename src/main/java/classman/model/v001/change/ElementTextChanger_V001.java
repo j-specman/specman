@@ -17,9 +17,8 @@ import java.util.Objects;
  * the text from before this change. The marks inside an element which a change set has added or removed are ignored
  * in the display, so those are changed without a mark.
  * <p>
- * A label or multiplicity is optional: the empty text removes it. A removed label stays as the empty text with the
- * mark. A removed multiplicity can't be marked, so while changes are tracked it can only be removed if the change set
- * has added it itself, see {@link #canSetMultiplicity}.
+ * A label or multiplicity is optional: the empty text removes it. A removed one stays as the empty text with the
+ * mark.
  */
 public class ElementTextChanger_V001 {
 
@@ -58,30 +57,10 @@ public class ElementTextChanger_V001 {
         plain(multiplicityOf(association, end), newMultiplicity);
     }
 
-    /** Gives the end of the relation the multiplicity as a change of the change set.
-     * @throws IllegalArgumentException if {@link #canSetMultiplicity} says no */
+    /** Gives the end of the relation the multiplicity as a change of the change set. */
     public void setMultiplicity(AssociationRelationModel_V001 association, RelationEnd_V001 end,
                                 String newMultiplicity, String changeSet) {
-        if (!canSetMultiplicity(association, end, newMultiplicity, changeSet)) {
-            throw new IllegalArgumentException("A multiplicity which can't be marked as removed stays");
-        }
         tracked(multiplicityOf(association, end), newMultiplicity, changeSet, association.change == null);
-    }
-
-    /** @return false if the change set can't give the end that multiplicity: removing a multiplicity needs a mark,
-     * which there is no text left to carry, so it is only possible if the relation is added or removed anyway, if
-     * the change set has added the multiplicity itself, or if there is none to remove. */
-    public boolean canSetMultiplicity(AssociationRelationModel_V001 association, RelationEnd_V001 end,
-                                      String newMultiplicity, String changeSet) {
-        if (!newMultiplicity.isEmpty() || association.change != null) {
-            return true;
-        }
-        TextSlot_V001 slot = multiplicityOf(association, end);
-        TextChangeModel_V001 mark = slot.mark();
-        if (mark != null && mark.changeSet.equals(changeSet)) {
-            return isNone(mark.backup);
-        }
-        return isNone(slot.text());
     }
 
     private static TextSlot_V001 multiplicityOf(AssociationRelationModel_V001 association, RelationEnd_V001 end) {

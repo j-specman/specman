@@ -1,6 +1,5 @@
 package classman.editor;
 
-import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
@@ -495,36 +494,40 @@ class DiagramEditingTest {
     assertNull(relation.toMultiplicity);
   }
 
-  /** A multiplicity which isn't a number, a range or a star is not accepted. */
+  /** A multiplicity is free text, but only one line. */
   @Test
-  void invalidMultiplicity() throws ClassDiagramParseException {
+  void freeTextMultiplicity() throws ClassDiagramParseException {
     DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
     SceneTextArea from = textOfKind(editing, TextKind.FROM_MULTIPLICITY);
 
-    for (String valid : List.of("1", "*", "0..1", "1..*", "")) {
-      assertTrue(editing.accepts(from, valid), valid);
+    for (String text : List.of("1", "0..1", "1..<maximum capacity>", "many \"or\" few", "")) {
+      assertTrue(editing.accepts(from, text), text);
     }
-    for (String invalid : List.of("many", "1..", "a..b", "1 2")) {
-      assertFalse(editing.accepts(from, invalid), invalid);
-    }
-    assertThrows(IllegalArgumentException.class, () -> editing.setText(from, "many"));
+    assertFalse(editing.accepts(from, "two\nlines"));
+    assertThrows(IllegalArgumentException.class, () -> editing.setText(from, "two\nlines"));
     assertFalse(editing.canUndo());
+
+    editing.setText(from, "1..<maximum capacity>");
+
+    AssociationRelationModel_V001 relation = (AssociationRelationModel_V001) modelOf(editing.source()).relations().get(0);
+    assertEquals("1..<maximum capacity>", relation.fromMultiplicity);
   }
 
-  /** While changes are tracked a label gets the mark, and a multiplicity can be changed but not removed. */
+  /** While changes are tracked a label and a multiplicity get the mark, also when they are removed. */
   @Test
   void trackedRelationTexts() throws ClassDiagramParseException {
     host.trackedChangeSet = "yellow";
     DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
-    SceneTextArea from = textOfKind(editing, TextKind.FROM_MULTIPLICITY);
 
     editing.setText(textOfKind(editing, TextKind.RELATION_LABEL), "has");
-    editing.setText(from, "0..1");
+    editing.setText(textOfKind(editing, TextKind.FROM_MULTIPLICITY), "0..1");
+    editing.setText(textOfKind(editing, TextKind.TO_MULTIPLICITY), "");
 
-    AbstractRelationModel_V001 relation = modelOf(editing.source()).relations().get(0);
+    AssociationRelationModel_V001 relation = (AssociationRelationModel_V001) modelOf(editing.source()).relations().get(0);
     assertEquals("owns", relation.labelChange.backup);
-    assertEquals("1", ((AssociationRelationModel_V001) relation).fromMultiplicityChange.backup);
-    assertFalse(editing.accepts(textOfKind(editing, TextKind.FROM_MULTIPLICITY), ""));
+    assertEquals("1", relation.fromMultiplicityChange.backup);
+    assertEquals("", relation.toMultiplicity);
+    assertEquals("*", relation.toMultiplicityChange.backup);
   }
 
   /** A diagram which can't be read can't be edited. */

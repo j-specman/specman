@@ -181,8 +181,9 @@ public class ClassDiagramSerializer_V001 {
     }
 
     private void appendMultiplicity(StringBuilder out, String multiplicity, TextChangeModel_V001 change) {
-        if (multiplicity != null) {
-            out.append(' ').append(multiplicity);
+        if (multiplicity != null || change != null) {
+            String text = multiplicity == null ? "" : multiplicity;
+            out.append(' ').append(Multiplicity_V001.isBare(text) ? text : quoted(text));
             appendTextChange(out, change);
         }
     }
@@ -243,7 +244,7 @@ public class ClassDiagramSerializer_V001 {
 
     /** Bare if it is a multiplicity or a simple word, else in quotes. */
     private String backupText(String backup) {
-        return Multiplicity_V001.isValid(backup) ? backup : word(backup);
+        return Multiplicity_V001.isBare(backup) ? backup : word(backup);
     }
 
     private void appendChange(StringBuilder out, ChangeModel_V001 change) {

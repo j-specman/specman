@@ -32,6 +32,17 @@ class TextChangeResolutionTest {
     assertEquals(canonical(rejected), rejected(source, "yellow"));
   }
 
+  /** A removed multiplicity (empty string with mark) is gone when accepted and back when rejected. */
+  @Test
+  void removedMultiplicity() throws ClassDiagramParseException {
+    String source = "class A (aaaaaaaa)\nclass B (bbbbbbbb)\n"
+        + "association aaaaaaaa \"\" was(yellow, \"1..<max capacity>\") -> * bbbbbbbb";
+    assertEquals(canonical("class A (aaaaaaaa)\nclass B (bbbbbbbb)\nassociation aaaaaaaa -> * bbbbbbbb"),
+        accepted(source, "yellow"));
+    assertEquals(canonical("class A (aaaaaaaa)\nclass B (bbbbbbbb)\n"
+        + "association aaaaaaaa \"1..<max capacity>\" -> * bbbbbbbb"), rejected(source, "yellow"));
+  }
+
   /** The text of a note and an info item of an attribute. */
   @Test
   void noteTextAndInfoItem() throws ClassDiagramParseException {

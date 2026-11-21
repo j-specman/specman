@@ -7,7 +7,6 @@ import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
-import classman.model.v001.Multiplicity_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RelationEnd_V001;
@@ -162,23 +161,12 @@ public class DiagramEditing {
     return changeSet != null ? Color.decode(host.renderer().paleColorOf(changeSet)) : null;
   }
 
-  /** @return false if the text can't have that content: a multiplicity must be a number, a range like 0..1 or 1..*,
-   * or *, and while changes are tracked one which isn't new can't be removed, because the removal can't be marked. */
+  /** @return false if the text can't have that content: a multiplicity is free text, but only one line */
   public boolean accepts(SceneTextArea text, String newText) {
     return switch (text.kind) {
-      case FROM_MULTIPLICITY -> acceptsMultiplicity(text, RelationEnd_V001.FROM, newText);
-      case TO_MULTIPLICITY -> acceptsMultiplicity(text, RelationEnd_V001.TO, newText);
+      case FROM_MULTIPLICITY, TO_MULTIPLICITY -> !newText.contains("\n");
       default -> true;
     };
-  }
-
-  private boolean acceptsMultiplicity(SceneTextArea text, RelationEnd_V001 end, String newText) {
-    if (!newText.isEmpty() && !Multiplicity_V001.isValid(newText)) {
-      return false;
-    }
-    String changeSet = host.trackedChangeSet();
-    return changeSet == null
-      || textChanger.canSetMultiplicity((AssociationRelationModel_V001) text.element, end, newText, changeSet);
   }
 
   /** Gives the text a new content. While changes are tracked, the change set gets the mark for the change. The text it

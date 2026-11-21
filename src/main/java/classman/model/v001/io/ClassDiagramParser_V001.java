@@ -253,7 +253,10 @@ public class ClassDiagramParser_V001 {
     }
 
     private String multiplicity(MultiplicityContext multiplicity) {
-        return multiplicity == null ? null : multiplicity.getText();
+        if (multiplicity == null) {
+            return null;
+        }
+        return multiplicity.QUOTED_STRING() != null ? unquote(multiplicity.QUOTED_STRING().getText()) : multiplicity.getText();
     }
 
     private RouteModel_V001 buildRoute(RouteContext route) {

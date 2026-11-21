@@ -30,7 +30,8 @@ public class RelationTextLayouter {
             fromMultiplicity = multiplicity(association.fromMultiplicity, path.get(0), path.get(1));
             toMultiplicity = multiplicity(association.toMultiplicity, path.get(path.size() - 1), path.get(path.size() - 2));
         }
-        List<SceneText> labelLines = relation.label == null ? List.of() : label(relation.label, path);
+        List<SceneText> labelLines = relation.label == null || relation.label.isEmpty()
+            ? List.of() : label(relation.label, path);
         return new RelationTexts(fromMultiplicity, toMultiplicity, labelLines);
     }
 
@@ -44,7 +45,7 @@ public class RelationTextLayouter {
      * @param inside the next point on the line, away from the box
      */
     private SceneText multiplicity(String multiplicity, Point2D.Double border, Point2D.Double inside) {
-        if (multiplicity == null) {
+        if (multiplicity == null || multiplicity.isEmpty()) {
             return null;
         }
         double width = measurer.width(multiplicity, false);

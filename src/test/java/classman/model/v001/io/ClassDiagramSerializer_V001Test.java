@@ -121,6 +121,21 @@ class ClassDiagramSerializer_V001Test {
     assertTrue(written.contains("aaaaaaaa 1 was(yellow, 0..1) -> bbbbbbbb \"\" was(blue, \"old\\nlabel\")\n"), written);
   }
 
+  /** A multiplicity which is a number, a range or a star is written bare, any other text in quotes, a removed one as
+   * empty string with its mark. */
+  @Test
+  void multiplicitiesWritten() throws ClassDiagramParseException {
+    String written = roundTrip("""
+        classdiagram {
+          class A (aaaaaaaa)
+          class B (bbbbbbbb)
+          association aaaaaaaa "1..*" -> "" was(yellow, "1..<max capacity>") bbbbbbbb
+          association aaaaaaaa "1..<max capacity>" -> "a \\"quoted\\" one" bbbbbbbb
+        }""");
+    assertTrue(written.contains("aaaaaaaa 1..* -> \"\" was(yellow, \"1..<max capacity>\") bbbbbbbb\n"), written);
+    assertTrue(written.contains("aaaaaaaa \"1..<max capacity>\" -> \"a \\\"quoted\\\" one\" bbbbbbbb\n"), written);
+  }
+
   /** A removed label (empty string with mark) is kept, a mark without backup stays without backup. */
   @Test
   void emptyTextWithMark() throws ClassDiagramParseException {

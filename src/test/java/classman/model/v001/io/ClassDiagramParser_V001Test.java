@@ -155,6 +155,16 @@ class ClassDiagramParser_V001Test {
     assertNull(r.assocClass);
   }
 
+  /** A multiplicity is free text in quotes, an empty one with a mark is a removed multiplicity. */
+  @Test
+  void freeTextMultiplicity() throws ClassDiagramParseException {
+    AssociationRelationModel_V001 r = assertInstanceOf(AssociationRelationModel_V001.class,
+        parse("association aaaaaaaa \"1..<maximum capacity>\" -> \"\" was(yellow, 1) bbbbbbbb").relations().get(0));
+    assertEquals("1..<maximum capacity>", r.fromMultiplicity);
+    assertEquals("", r.toMultiplicity);
+    assertTextChange("yellow", "1", r.toMultiplicityChange);
+  }
+
   /** Aggregation and composition are associations too. -- instead of -> makes the relation undirected. */
   @Test
   void aggregationCompositionUndirected() throws ClassDiagramParseException {

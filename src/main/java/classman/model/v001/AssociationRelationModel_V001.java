@@ -2,10 +2,10 @@ package classman.model.v001;
 
 /** Model of an association, aggregation or composition. */
 public class AssociationRelationModel_V001 extends AbstractRelationModel_V001 {
-    /** Null if the source gives none. Written as in the source, for example 1..* */
+    /** Null if the source gives none. Free text, written as in the source, for example 1..* */
     public String fromMultiplicity;
     public String toMultiplicity;
-    /** Null if no change set changed the multiplicity. A removed multiplicity can't be marked. */
+    /** Null if no change set changed the multiplicity. A removed multiplicity is the empty string with the mark. */
     public TextChangeModel_V001 fromMultiplicityChange;
     public TextChangeModel_V001 toMultiplicityChange;
     /** True for an arrowhead at the target (written ->), false for no arrowhead (written --). */
