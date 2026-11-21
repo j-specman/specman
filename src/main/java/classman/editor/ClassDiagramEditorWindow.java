@@ -27,7 +27,6 @@ import java.awt.geom.Point2D;
 public class ClassDiagramEditorWindow extends JDialog {
   private static final int MIN_WIDTH = 500;
   private static final int MIN_HEIGHT = 350;
-  private static final double HIT_PIXELS = 4;
 
   private final DiagramEditing editing;
   private final DiagramCanvas canvas;
@@ -44,7 +43,7 @@ public class ClassDiagramEditorWindow extends JDialog {
     canvas = new DiagramCanvas(editing.scene());
     textEditor = new TextEditor(canvas, editing, this::showDiagram);
     canvas.setPointerListener(new PointerControl(editing, this::showDiagram, textEditor::start,
-      () -> canvas.toDiagramLength(HIT_PIXELS)));
+      canvas::toDiagramLength));
     scrollPane = new JScrollPane(canvas);
 
     EditorPalette palette = new EditorPalette(texts, this::classDropped);

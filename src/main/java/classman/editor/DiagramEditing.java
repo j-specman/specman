@@ -383,12 +383,19 @@ public class DiagramEditing {
       classArea(relation.toId));
   }
 
-  /** Shows the dragged box where the mouse is. Nothing is reported to the host until the drag ends. */
-  public void dragTo(Point2D at) {
+  /** Shows the dragged thing where the mouse is. A handle of a relation snaps to the line of its neighbors if it comes
+   * at most the tolerance close, so that the line is vertical or horizontal. Nothing is reported to the host until the
+   * drag ends. */
+  public void dragTo(Point2D at, double snapTolerance) {
     if (drag != null) {
-      drag.to(at);
+      drag.to(at, snapTolerance);
       scene = host.renderer().layout(model);
     }
+  }
+
+  /** Shows the dragged thing where the mouse is, without snapping. */
+  public void dragTo(Point2D at) {
+    dragTo(at, 0);
   }
 
   /** Leaves the dragged thing where it is. If it has moved, that is one operation. */

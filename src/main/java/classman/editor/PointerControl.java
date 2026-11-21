@@ -4,33 +4,37 @@ import classman.render.SceneTextArea;
 
 import java.awt.geom.Point2D;
 import java.util.function.Consumer;
-import java.util.function.DoubleSupplier;
+import java.util.function.DoubleUnaryOperator;
 
-/** What the mouse does in the editor: a press selects the box or relation below it, dragging moves the selected box,
- * and a double click on one of its texts lets the user change the text. */
+/** What the mouse does in the editor: a press selects the box or relation below it, dragging moves the selected box
+ * or a handle of the relation, and a double click on one of its texts lets the user change the text. Distances which
+ * the user judges on the screen are given in pixels and turned into units of the diagram, so they feel the same at
+ * every zoom. */
 class PointerControl implements PointerListener {
+  private static final double HIT_PIXELS = 4;
+  private static final double SNAP_PIXELS = 6;
+
   private final DiagramEditing editing;
   private final Runnable showDiagram;
   private final Consumer<SceneTextArea> editText;
-  private final DoubleSupplier hitTolerance;
+  private final DoubleUnaryOperator toDiagramLength;
 
   /** @param showDiagram shows the diagram and the selection as the editing has them now
    * @param editText lets the user change a text of the diagram
-   * @param hitTolerance how far, in units of the diagram, a press may be from the line of a relation or from one of
-   * its handles and still hit it */
+   * @param toDiagramLength turns a length in pixels of the screen into a length in units of the diagram */
   PointerControl(DiagramEditing editing, Runnable showDiagram, Consumer<SceneTextArea> editText,
-                 DoubleSupplier hitTolerance) {
+                 DoubleUnaryOperator toDiagramLength) {
     this.editing = editing;
     this.showDiagram = showDiagram;
     this.editText = editText;
-    this.hitTolerance = hitTolerance;
+    this.toDiagramLength = toDiagramLength;
   }
 
   /** A press selects what is below it. Dragging moves a handle of the selected relation if the press was on one,
    * otherwise the selected box. */
   @Override
   public void pressed(Point2D at) {
-    double tolerance = hitTolerance.getAsDouble();
+    double tolerance = toDiagramLength.applyAsDouble(HIT_PIXELS);
     editing.selectAt(at, tolerance);
     editing.startDrag(at, tolerance);
     showDiagram.run();
@@ -38,7 +42,7 @@ class PointerControl implements PointerListener {
 
   @Override
   public void dragged(Point2D at) {
-    editing.dragTo(at);
+    editing.dragTo(at, toDiagramLength.applyAsDouble(SNAP_PIXELS));
     showDiagram.run();
   }
 
@@ -52,7 +56,7 @@ class PointerControl implements PointerListener {
    * double click on a text of the box it selects, or on a text of a relation, lets the user change the text. */
   @Override
   public void doubleClicked(Point2D at) {
-    double tolerance = hitTolerance.getAsDouble();
+    double tolerance = toDiagramLength.applyAsDouble(HIT_PIXELS);
     if (editing.deleteWaypointAt(at, tolerance) || editing.insertWaypointAt(at, tolerance)) {
       showDiagram.run();
       return;

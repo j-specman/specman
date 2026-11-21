@@ -5,12 +5,14 @@ import classman.model.v001.RouteModel_V001;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.List;
 
 /** The dragging of one handle of a relation: a waypoint goes where the mouse takes it, an end slides along the border
  * of its class. The point follows the mouse by the distance between where the handle was grabbed and its center, so
- * it doesn't jump. A relation without a route gets one on the first move, which is taken away again if the drag is
- * cancelled. */
+ * it doesn't jump. It snaps to the line of its neighbors if it comes close, see {@link #snapped}, so that vertical and
+ * horizontal lines are easy to get. A relation without a route gets one on the first move, which is taken away again
+ * if the drag is cancelled. */
 class HandleDrag extends Drag {
   private final RouteEditing routeEditing;
   private final AbstractRelationModel_V001 relation;
@@ -40,15 +42,15 @@ class HandleDrag extends Drag {
   boolean hasMoved() { return moved; }
 
   @Override
-  void to(Point2D at) {
+  void to(Point2D at, double snapTolerance) {
     if (!moved) {
       routeBefore = routeEditing.copyOf(relation.route);
       routeEditing.ensureRoute(relation, path, fromArea, toArea);
       moved = true;
     }
     Point2D grabbed = path.get(handle);
-    Point2D target = new Point2D.Double(grabbed.getX() + at.getX() - pressedAt.getX(),
-      grabbed.getY() + at.getY() - pressedAt.getY());
+    Point2D target = snapped(new Point2D.Double(grabbed.getX() + at.getX() - pressedAt.getX(),
+      grabbed.getY() + at.getY() - pressedAt.getY()), snapTolerance);
     if (handle == 0) {
       routeEditing.moveStart(relation, fromArea, target);
     }
@@ -58,6 +60,45 @@ class HandleDrag extends Drag {
     else {
       routeEditing.moveWaypoint(relation, handle - 1, target);
     }
+  }
+
+  /** A coordinate which is within the tolerance of the same coordinate of a neighbor in the line becomes that one, so
+   * that the part of the line to that neighbor is vertical or horizontal. Each coordinate takes the closest neighbor
+   * within the tolerance, so a point can snap to one neighbor in x and to the other in y. */
+  private Point2D snapped(Point2D target, double tolerance) {
+    List<Double> neighborXs = new ArrayList<>();
+    List<Double> neighborYs = new ArrayList<>();
+    for (Point2D neighbor : neighbors()) {
+      neighborXs.add(neighbor.getX());
+      neighborYs.add(neighbor.getY());
+    }
+    return new Point2D.Double(snapped(target.getX(), neighborXs, tolerance),
+      snapped(target.getY(), neighborYs, tolerance));
+  }
+
+  private static double snapped(double value, List<Double> candidates, double tolerance) {
+    double snapped = value;
+    double closestDistance = tolerance;
+    for (double candidate : candidates) {
+      double distance = Math.abs(candidate - value);
+      if (distance <= closestDistance) {
+        snapped = candidate;
+        closestDistance = distance;
+      }
+    }
+    return snapped;
+  }
+
+  /** The points before and after the dragged one in the line. They stay where they were while it is dragged. */
+  private List<Point2D> neighbors() {
+    List<Point2D> neighbors = new ArrayList<>();
+    if (handle > 0) {
+      neighbors.add(path.get(handle - 1));
+    }
+    if (handle < path.size() - 1) {
+      neighbors.add(path.get(handle + 1));
+    }
+    return neighbors;
   }
 
   @Override

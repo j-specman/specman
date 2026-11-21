@@ -40,9 +40,9 @@ class BoxDrag extends Drag {
   @Override
   boolean hasMoved() { return positionsBefore != null; }
 
-  /** Puts the box where it is when the mouse is at the given point. */
+  /** Puts the box where it is when the mouse is at the given point. A box doesn't snap to anything. */
   @Override
-  void to(Point2D at) {
+  void to(Point2D at, double snapTolerance) {
     if (positionsBefore == null) {
       rememberPositions();
       freezePlacedBoxes();

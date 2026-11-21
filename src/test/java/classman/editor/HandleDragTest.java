@@ -27,6 +27,7 @@ class HandleDragTest {
     + "  route 11111111.bottom@10 (20, 150) (200, 150) 22222222.bottom@10\n}";
   private static final String STRAIGHT = CLASSES + "  association (33333333) 11111111 -- 22222222\n}";
   private static final double TOLERANCE = 4;
+  private static final double SNAP = 6;
 
   private final RecordingEditorHost host = new RecordingEditorHost();
 
@@ -58,6 +59,81 @@ class HandleDragTest {
 
     assertEquals(1, host.reportedSources.size());
     assertEquals(new Point2D.Double(60, 190), editing.selectedHandles().get(1));
+  }
+
+  /** A waypoint close to the vertical line through a neighbor snaps onto it. */
+  @Test
+  void snapsToVerticalLine() throws ClassDiagramParseException {
+    DiagramEditing editing = selectedAt(ROUTED, new Point2D.Double(100, 150));
+
+    editing.startDrag(new Point2D.Double(20, 150), TOLERANCE);
+    editing.dragTo(new Point2D.Double(23, 170), SNAP);
+    editing.endDrag();
+
+    assertWaypoint(editing, 0, 20, 170);
+  }
+
+  /** A waypoint close to the horizontal line through a neighbor snaps onto it. */
+  @Test
+  void snapsToHorizontalLine() throws ClassDiagramParseException {
+    DiagramEditing editing = selectedAt(ROUTED, new Point2D.Double(100, 150));
+
+    editing.startDrag(new Point2D.Double(20, 150), TOLERANCE);
+    editing.dragTo(new Point2D.Double(60, 153), SNAP);
+    editing.endDrag();
+
+    assertWaypoint(editing, 0, 60, 150);
+  }
+
+  /** Close to both lines, the waypoint snaps to the corner of a right angle. */
+  @Test
+  void snapsToCorner() throws ClassDiagramParseException {
+    DiagramEditing editing = selectedAt(ROUTED, new Point2D.Double(100, 150));
+
+    editing.startDrag(new Point2D.Double(20, 150), TOLERANCE);
+    editing.dragTo(new Point2D.Double(22, 152), SNAP);
+    editing.endDrag();
+
+    assertWaypoint(editing, 0, 20, 150);
+  }
+
+  /** Farther away than the tolerance, or without a tolerance, nothing snaps. */
+  @Test
+  void noSnapFarAway() throws ClassDiagramParseException {
+    DiagramEditing editing = selectedAt(ROUTED, new Point2D.Double(100, 150));
+
+    editing.startDrag(new Point2D.Double(20, 150), TOLERANCE);
+    editing.dragTo(new Point2D.Double(32, 170), SNAP);
+    assertEquals(new Point2D.Double(32, 170), editing.selectedHandles().get(1));
+    editing.dragTo(new Point2D.Double(23, 170));
+    assertEquals(new Point2D.Double(23, 170), editing.selectedHandles().get(1));
+  }
+
+  /** Between two neighbors which both are close, the closer one wins. */
+  @Test
+  void snapsToClosestNeighbor() throws ClassDiagramParseException {
+    String source = CLASSES + "  association (33333333) 11111111 -- 22222222\n"
+      + "  route 11111111.bottom@10 (30, 150) (24, 250) 22222222.bottom@10\n}";
+    DiagramEditing editing = selectedAt(source, new Point2D.Double(27, 200));
+
+    editing.startDrag(new Point2D.Double(30, 150), TOLERANCE);
+    editing.dragTo(new Point2D.Double(23, 150), SNAP);
+    editing.endDrag();
+
+    assertEquals(24, waypointOf(editing, 0).x);
+  }
+
+  /** The end of a line slides along the border and snaps to the line of its neighbor. */
+  @Test
+  void endSnapsToo() throws ClassDiagramParseException {
+    DiagramEditing editing = selectedAt(ROUTED, new Point2D.Double(100, 150));
+    Point2D start = editing.selectedHandles().get(0);
+
+    editing.startDrag(start, TOLERANCE);
+    editing.dragTo(new Point2D.Double(start.getX() + 4, start.getY()), SNAP);
+    editing.endDrag();
+
+    assertEquals(10, relationOf(editing.source()).route.start.offset);
   }
 
   /** A press on a handle without a move changes nothing. */
@@ -159,6 +235,16 @@ class HandleDragTest {
     editing.endDrag();
 
     assertNull(relationOf(editing.source()).change);
+  }
+
+  private static PositionModel_V001 waypointOf(DiagramEditing editing, int index) throws ClassDiagramParseException {
+    return relationOf(editing.source()).route.waypoints.get(index);
+  }
+
+  private static void assertWaypoint(DiagramEditing editing, int index, int x, int y)
+      throws ClassDiagramParseException {
+    assertEquals(x, waypointOf(editing, index).x);
+    assertEquals(y, waypointOf(editing, index).y);
   }
 
   private DiagramEditing selectedAt(String source, Point2D point) throws ClassDiagramParseException {
