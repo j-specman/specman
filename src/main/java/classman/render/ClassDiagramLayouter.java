@@ -57,8 +57,12 @@ public class ClassDiagramLayouter {
             }
         }
         List<SceneElementArea> elementAreas = new ArrayList<>();
-        areas.forEach((element, area) -> elementAreas.add(
-            new SceneElementArea(element, area, boxes.get(element).nameAreaAt(area.x, area.y))));
+        List<SceneTextArea> textAreas = new ArrayList<>();
+        areas.forEach((element, area) -> {
+            elementAreas.add(new SceneElementArea(element, area));
+            boxes.get(element).textAreasAt(area.x, area.y).forEach((kind, textArea) ->
+                textAreas.add(new SceneTextArea(element, kind, textArea)));
+        });
         Map<String, Rectangle2D.Double> classAreas = classAreas(areas);
         for (AbstractRelationModel_V001 relation : model.relations()) {
             RelationLayout relationLayout = relationLayouter.layout(relation, classAreas);
@@ -66,6 +70,7 @@ public class ClassDiagramLayouter {
             underlays.addAll(relationLayout.underlay);
             covered = BoxGeometry.union(covered, relationLayout.bounds);
             elementAreas.addAll(relationLayout.elementAreas);
+            textAreas.addAll(relationLayout.textAreas);
             attachTargets.add(relation.id, new RelationAttachTarget(relationLayout.attachPoint));
         }
         elements.addAll(0, underlays);
@@ -74,9 +79,9 @@ public class ClassDiagramLayouter {
             covered = BoxGeometry.union(covered, link.bounds());
         }
         if (covered == null) {
-            return new Scene(elements, elementAreas, 0, 0, 0, 0);
+            return new Scene(elements, elementAreas, textAreas, 0, 0, 0, 0);
         }
-        return new Scene(elements, elementAreas, covered.x, covered.y, covered.width, covered.height);
+        return new Scene(elements, elementAreas, textAreas, covered.x, covered.y, covered.width, covered.height);
     }
 
     private void addAttachTargets(AttachTargetIndex attachTargets, ClassModel_V001 classModel,

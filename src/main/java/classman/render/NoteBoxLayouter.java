@@ -4,6 +4,7 @@ import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.NoteModel_V001;
 
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,9 @@ public class NoteBoxLayouter {
         if (isRemoved) {
             elements.addAll(highlighter.strikes(placed));
         }
-        return new BoxLayout(width, height, elements, Map.of(), change == null ? 0 : FRAME_STROKE_WIDTH / 2, null);
+        Map<TextKind, Rectangle2D.Double> textAreas = Map.of(TextKind.NOTE_TEXT,
+            new Rectangle2D.Double(PADDING_X, PADDING_Y, contentWidth, height - 2 * PADDING_Y));
+        return new BoxLayout(width, height, elements, Map.of(), change == null ? 0 : FRAME_STROKE_WIDTH / 2, textAreas);
     }
 
     private double contentWidth(NoteModel_V001 model) {

@@ -7,14 +7,16 @@ import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
-import classman.model.v001.change.ClassRenamer_V001;
+import classman.model.v001.change.ElementTextChanger_V001;
 import classman.model.v001.change.ElementDeleter_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
 import classman.model.v001.io.ClassDiagramSerializer_V001;
 import classman.render.Scene;
 import classman.render.SceneElementArea;
+import classman.render.SceneTextArea;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
@@ -33,7 +35,7 @@ public class DiagramEditing {
   private final EditorTexts texts;
   private final ClassDiagramSerializer_V001 serializer = new ClassDiagramSerializer_V001();
   private final ElementDeleter_V001 deleter = new ElementDeleter_V001();
-  private final ClassRenamer_V001 renamer = new ClassRenamer_V001();
+  private final ElementTextChanger_V001 textChanger = new ElementTextChanger_V001();
   private final ElementIds ids = new ElementIds(new SecureRandom());
   private ClassDiagramModel_V001 model;
   private String source;
@@ -123,15 +125,23 @@ public class DiagramEditing {
     return color != null ? Color.decode(color) : null;
   }
 
-  /** @return the selected box if it is a class, null otherwise */
-  public ClassModel_V001 selectedClass() {
-    return selected instanceof ClassModel_V001 classModel ? classModel : null;
+  /** @return the text at the point if it belongs to the selected box, null otherwise */
+  public SceneTextArea selectedTextAt(Point2D point) {
+    SceneTextArea text = scene.textAreaAt(point);
+    return text != null && text.element == selected ? text : null;
   }
 
-  /** @return where the name of the selected class is, null if no class is selected */
-  public Rectangle2D selectedNameArea() {
-    SceneElementArea selectedArea = selected != null ? scene.elementAreaOf(selected) : null;
-    return selectedArea != null ? selectedArea.nameArea : null;
+  /** @return the area of the box which the text belongs to */
+  public Rectangle2D boxOf(SceneTextArea text) {
+    return scene.elementAreaOf(text.element).area;
+  }
+
+  /** @return the text which the area shows */
+  public String textOf(SceneTextArea text) {
+    return switch (text.kind) {
+      case CLASS_NAME -> ((ClassModel_V001) text.element).name;
+      case NOTE_TEXT -> ((NoteModel_V001) text.element).text;
+    };
   }
 
   /** @return the pale color of the change set which tracks changes, for the background of a text field, null if
@@ -141,18 +151,32 @@ public class DiagramEditing {
     return changeSet != null ? Color.decode(host.renderer().paleColorOf(changeSet)) : null;
   }
 
-  /** Gives the class a new name. While changes are tracked, the change set gets the mark for the change. The name it
+  /** Gives the text a new content. While changes are tracked, the change set gets the mark for the change. The text it
    * has already is no operation. */
-  public void rename(ClassModel_V001 box, String newName) {
-    if (box.name.equals(newName)) {
+  public void setText(SceneTextArea text, String newText) {
+    if (textOf(text).equals(newText)) {
       return;
     }
     String changeSet = host.trackedChangeSet();
-    if (changeSet != null) {
-      renamer.rename(box, newName, changeSet);
-    }
-    else {
-      renamer.rename(box, newName);
+    switch (text.kind) {
+      case CLASS_NAME -> {
+        ClassModel_V001 box = (ClassModel_V001) text.element;
+        if (changeSet != null) {
+          textChanger.setClassName(box, newText, changeSet);
+        }
+        else {
+          textChanger.setClassName(box, newText);
+        }
+      }
+      case NOTE_TEXT -> {
+        NoteModel_V001 note = (NoteModel_V001) text.element;
+        if (changeSet != null) {
+          textChanger.setNoteText(note, newText, changeSet);
+        }
+        else {
+          textChanger.setNoteText(note, newText);
+        }
+      }
     }
     publish();
   }

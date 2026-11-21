@@ -5,6 +5,8 @@ import classman.model.v001.ClassModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
+import classman.render.SceneTextArea;
+import classman.render.TextKind;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Color;
@@ -297,11 +299,11 @@ class DiagramEditingTest {
     editing.selectAt(new Point2D.Double(15, 25));
 
     Rectangle2D box = editing.selectedArea();
-    Rectangle2D name = editing.selectedNameArea();
+    Rectangle2D name = textOfKind(editing, TextKind.CLASS_NAME).area;
     assertTrue(box.contains(name));
     assertTrue(name.getHeight() > 0);
     assertTrue(name.getMaxY() < box.getCenterY() + box.getHeight() / 2 - 10);
-    assertEquals(editing.selectedClass().name, "Book");
+    assertEquals("Book", editing.textOf(textOfKind(editing, TextKind.CLASS_NAME)));
   }
 
   /** A note has no name area, and no class is selected. */
@@ -313,8 +315,8 @@ class DiagramEditingTest {
     editing.selectAt(new Point2D.Double(305, 25));
 
     assertTrue(editing.hasSelection());
-    assertNull(editing.selectedNameArea());
-    assertNull(editing.selectedClass());
+    assertEquals(1, editing.scene().textAreas.size());
+    assertEquals(TextKind.NOTE_TEXT, editing.scene().textAreas.get(0).kind);
   }
 
   /** The new name is reported, once. */
@@ -324,7 +326,7 @@ class DiagramEditingTest {
     DiagramEditing editing = new DiagramEditing(source, host, texts);
     editing.selectAt(new Point2D.Double(15, 25));
 
-    editing.rename(editing.selectedClass(), "Volume");
+    editing.setText(textOfKind(editing, TextKind.CLASS_NAME), "Volume");
 
     assertEquals("Volume", onlyClassOf(editing.source()).name);
     assertNull(onlyClassOf(editing.source()).nameChange);
@@ -339,7 +341,7 @@ class DiagramEditingTest {
     DiagramEditing editing = new DiagramEditing(source, host, texts);
     editing.selectAt(new Point2D.Double(15, 25));
 
-    editing.rename(editing.selectedClass(), "Volume");
+    editing.setText(textOfKind(editing, TextKind.CLASS_NAME), "Volume");
 
     ClassModel_V001 box = onlyClassOf(editing.source());
     assertEquals("Volume", box.name);
@@ -353,12 +355,12 @@ class DiagramEditingTest {
     String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
     DiagramEditing editing = new DiagramEditing(source, host, texts);
     editing.selectAt(new Point2D.Double(15, 25));
-    double oneLine = editing.selectedNameArea().getHeight();
+    double oneLine = textOfKind(editing, TextKind.CLASS_NAME).area.getHeight();
 
-    editing.rename(editing.selectedClass(), "Book\nVolume");
+    editing.setText(textOfKind(editing, TextKind.CLASS_NAME), "Book\nVolume");
 
     assertEquals("Book\nVolume", onlyClassOf(editing.source()).name);
-    assertTrue(editing.selectedNameArea().getHeight() > 1.5 * oneLine);
+    assertTrue(textOfKind(editing, TextKind.CLASS_NAME).area.getHeight() > 1.5 * oneLine);
   }
 
   /** While changes are tracked, a text field gets the pale color of the tracking change set, otherwise none. */
@@ -374,6 +376,49 @@ class DiagramEditingTest {
     assertEquals(Color.decode("#ffff99"), editing.trackedFieldColor());
   }
 
+  /** The text of a note can be changed in place, with line breaks. */
+  @Test
+  void changedNoteText() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  note (22222222) at(300, 20) \"Remember\"\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    editing.selectAt(new Point2D.Double(305, 25));
+
+    editing.setText(textOfKind(editing, TextKind.NOTE_TEXT), "First line\nSecond line");
+
+    assertEquals("First line\nSecond line", modelOf(editing.source()).notes().get(0).text);
+    assertNull(modelOf(editing.source()).notes().get(0).textChange);
+    assertEquals(1, host.reportedSources.size());
+  }
+
+  /** While changes are tracked, the old text of a note is the backup of the change set. */
+  @Test
+  void changedNoteTextTracked() throws ClassDiagramParseException {
+    host.trackedChangeSet = "yellow";
+    String source = "classdiagram {\n  note (22222222) at(300, 20) \"Remember\"\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    editing.selectAt(new Point2D.Double(305, 25));
+
+    editing.setText(textOfKind(editing, TextKind.NOTE_TEXT), "Forget");
+
+    assertEquals("Forget", modelOf(editing.source()).notes().get(0).text);
+    assertEquals("yellow", modelOf(editing.source()).notes().get(0).textChange.changeSet);
+    assertEquals("Remember", modelOf(editing.source()).notes().get(0).textChange.backup);
+  }
+
+  /** A note text is hit where it is drawn. */
+  @Test
+  void noteTextHit() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  note (22222222) at(300, 20) \"Remember\"\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    Rectangle2D text = textOfKind(editing, TextKind.NOTE_TEXT).area;
+    editing.selectAt(new Point2D.Double(text.getCenterX(), text.getCenterY()));
+
+    assertEquals(TextKind.NOTE_TEXT,
+      editing.selectedTextAt(new Point2D.Double(text.getCenterX(), text.getCenterY())).kind);
+    assertNull(editing.selectedTextAt(new Point2D.Double(text.getMinX() - 20, text.getMinY() - 20)));
+    assertTrue(editing.boxOf(textOfKind(editing, TextKind.NOTE_TEXT)).contains(text));
+  }
+
   /** The same name is no operation. */
   @Test
   void sameNameIsNoStep() throws ClassDiagramParseException {
@@ -381,7 +426,7 @@ class DiagramEditingTest {
     DiagramEditing editing = new DiagramEditing(source, host, texts);
     editing.selectAt(new Point2D.Double(15, 25));
 
-    editing.rename(editing.selectedClass(), "Book");
+    editing.setText(textOfKind(editing, TextKind.CLASS_NAME), "Book");
 
     assertFalse(editing.canUndo());
   }
@@ -397,6 +442,15 @@ class DiagramEditingTest {
   void danglingReference() {
     String source = "classdiagram {\n  extends 11111111 -> 22222222\n}";
     assertThrows(IllegalArgumentException.class, () -> new DiagramEditing(source, host, texts));
+  }
+
+  private static SceneTextArea textOfKind(DiagramEditing editing, TextKind kind) {
+    for (SceneTextArea text : editing.scene().textAreas) {
+      if (text.kind == kind) {
+        return text;
+      }
+    }
+    throw new AssertionError("no text of kind " + kind);
   }
 
   private static ClassDiagramModel_V001 modelOf(String source) throws ClassDiagramParseException {

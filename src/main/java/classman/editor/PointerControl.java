@@ -1,21 +1,23 @@
 package classman.editor;
 
+import classman.render.SceneTextArea;
+
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.util.function.Consumer;
 
 /** What the mouse does in the editor: a press selects the box below it, dragging moves the selected box, and a
- * double click on a class lets the user rename it. */
+ * double click on one of its texts lets the user change the text. */
 class PointerControl implements PointerListener {
   private final DiagramEditing editing;
   private final Runnable showDiagram;
-  private final Runnable editName;
+  private final Consumer<SceneTextArea> editText;
 
   /** @param showDiagram shows the diagram and the selection as the editing has them now
-   * @param editName lets the user edit the name of the selected class, if a class is selected */
-  PointerControl(DiagramEditing editing, Runnable showDiagram, Runnable editName) {
+   * @param editText lets the user change a text of the diagram */
+  PointerControl(DiagramEditing editing, Runnable showDiagram, Consumer<SceneTextArea> editText) {
     this.editing = editing;
     this.showDiagram = showDiagram;
-    this.editName = editName;
+    this.editText = editText;
   }
 
   @Override
@@ -37,14 +39,14 @@ class PointerControl implements PointerListener {
     showDiagram.run();
   }
 
-  /** Only a double click on the name opens the name editor, not one on the stereotype or the attributes. */
+  /** A double click on a text of the box it selects lets the user change the text. */
   @Override
   public void doubleClicked(Point2D at) {
     editing.selectAt(at);
     showDiagram.run();
-    Rectangle2D nameArea = editing.selectedNameArea();
-    if (nameArea != null && nameArea.contains(at)) {
-      editName.run();
+    SceneTextArea text = editing.selectedTextAt(at);
+    if (text != null) {
+      editText.accept(text);
     }
   }
 }

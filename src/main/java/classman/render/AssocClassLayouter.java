@@ -47,6 +47,13 @@ public class AssocClassLayouter {
         Rectangle2D.Double connectorArea = new Rectangle2D.Double(Math.min(middle.x, connectorEnd.x),
             Math.min(middle.y, connectorEnd.y), Math.abs(middle.x - connectorEnd.x), Math.abs(middle.y - connectorEnd.y));
         return new RelationLayout(elements, BoxGeometry.union(box.coveredAt(area.x, area.y), connectorArea),
-            List.of(new SceneElementArea(assocClass, area, box.nameAreaAt(area.x, area.y))));
+            List.of(new SceneElementArea(assocClass, area)), textAreas(assocClass, box, area));
+    }
+
+    private List<SceneTextArea> textAreas(ClassModel_V001 assocClass, BoxLayout box, Rectangle2D.Double area) {
+        List<SceneTextArea> textAreas = new ArrayList<>();
+        box.textAreasAt(area.x, area.y).forEach((kind, textArea) ->
+            textAreas.add(new SceneTextArea(assocClass, kind, textArea)));
+        return textAreas;
     }
 }

@@ -14,18 +14,22 @@ public class RelationLayout {
     public final Point2D.Double attachPoint;
     /** The boxes which belong to the relation: its association class, if it has one. */
     public final List<SceneElementArea> elementAreas;
+    /** The texts of the boxes which belong to the relation, which the user can change in place. */
+    public final List<SceneTextArea> textAreas;
 
     public RelationLayout(List<AbstractSceneElement> elements, Rectangle2D.Double bounds,
-                          List<SceneElementArea> elementAreas) {
-        this(List.of(), elements, bounds, null, elementAreas);
+                          List<SceneElementArea> elementAreas, List<SceneTextArea> textAreas) {
+        this(List.of(), elements, bounds, null, elementAreas, textAreas);
     }
 
     public RelationLayout(List<AbstractSceneElement> underlay, List<AbstractSceneElement> elements,
-                          Rectangle2D.Double bounds, Point2D.Double attachPoint, List<SceneElementArea> elementAreas) {
+                          Rectangle2D.Double bounds, Point2D.Double attachPoint, List<SceneElementArea> elementAreas,
+                          List<SceneTextArea> textAreas) {
         this.underlay = List.copyOf(underlay);
         this.elements = List.copyOf(elements);
         this.bounds = bounds;
         this.attachPoint = attachPoint;
         this.elementAreas = List.copyOf(elementAreas);
+        this.textAreas = List.copyOf(textAreas);
     }
 }

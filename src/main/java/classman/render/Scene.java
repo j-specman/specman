@@ -10,19 +10,22 @@ public class Scene {
     public final List<AbstractSceneElement> elements;
     /** Where the boxes of the diagram are, in the order they are drawn. */
     public final List<SceneElementArea> elementAreas;
+    /** Where the texts are which the user can change in place, in the order they are drawn. */
+    public final List<SceneTextArea> textAreas;
     public final double x;
     public final double y;
     public final double width;
     public final double height;
 
     public Scene(List<AbstractSceneElement> elements, double x, double y, double width, double height) {
-        this(elements, List.of(), x, y, width, height);
+        this(elements, List.of(), List.of(), x, y, width, height);
     }
 
     public Scene(List<AbstractSceneElement> elements, List<SceneElementArea> elementAreas,
-                 double x, double y, double width, double height) {
+                 List<SceneTextArea> textAreas, double x, double y, double width, double height) {
         this.elements = List.copyOf(elements);
         this.elementAreas = List.copyOf(elementAreas);
+        this.textAreas = List.copyOf(textAreas);
         this.x = x;
         this.y = y;
         this.width = width;
@@ -44,6 +47,16 @@ public class Scene {
         for (SceneElementArea elementArea : elementAreas) {
             if (elementArea.element == element) {
                 return elementArea;
+            }
+        }
+        return null;
+    }
+
+    /** @return the text at the point, the one drawn on top if they overlap, null if there is none */
+    public SceneTextArea textAreaAt(Point2D point) {
+        for (int i = textAreas.size() - 1; i >= 0; i--) {
+            if (textAreas.get(i).area.contains(point)) {
+                return textAreas.get(i);
             }
         }
         return null;

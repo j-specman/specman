@@ -31,7 +31,7 @@ public class ClassDiagramEditorWindow extends JDialog {
   private final DiagramEditing editing;
   private final DiagramCanvas canvas;
   private final JScrollPane scrollPane;
-  private final NameEditor nameEditor;
+  private final TextEditor textEditor;
 
   /** @throws ClassDiagramParseException if the source has a syntax error
    * @throws IllegalArgumentException if the diagram refers to an element which it doesn't have */
@@ -41,8 +41,8 @@ public class ClassDiagramEditorWindow extends JDialog {
     setTitle(texts.get("window.title"));
     editing = new DiagramEditing(source, host, texts);
     canvas = new DiagramCanvas(editing.scene());
-    nameEditor = new NameEditor(canvas, editing, this::showDiagram);
-    canvas.setPointerListener(new PointerControl(editing, this::showDiagram, nameEditor::start));
+    textEditor = new TextEditor(canvas, editing, this::showDiagram);
+    canvas.setPointerListener(new PointerControl(editing, this::showDiagram, textEditor::start));
     scrollPane = new JScrollPane(canvas);
 
     EditorPalette palette = new EditorPalette(texts, this::classDropped);
@@ -122,7 +122,7 @@ public class ClassDiagramEditorWindow extends JDialog {
    * to the text field. */
   private void bindKey(int keyCode, int modifiers, Runnable operation) {
     getRootPane().registerKeyboardAction(e -> {
-      if (!nameEditor.isEditing()) {
+      if (!textEditor.isEditing()) {
         operation.run();
         showDiagram();
       }

@@ -98,8 +98,9 @@ public class ClassBoxLayouter {
         all.addAll(backgrounds);
         all.addAll(elements);
         all.addAll(overlays);
-        Rectangle2D.Double nameArea = new Rectangle2D.Double(PADDING_X, nameTop, contentWidth, nameBottom - nameTop);
-        return new BoxLayout(width, y, all, attributeAreas, change == null ? 0 : FRAME_STROKE_WIDTH / 2, nameArea);
+        Map<TextKind, Rectangle2D.Double> textAreas = Map.of(TextKind.CLASS_NAME,
+            new Rectangle2D.Double(PADDING_X, nameTop, contentWidth, nameBottom - nameTop));
+        return new BoxLayout(width, y, all, attributeAreas, change == null ? 0 : FRAME_STROKE_WIDTH / 2, textAreas);
     }
 
     private SceneRectangle frame(double width, double height, ChangeModel_V001 change) {

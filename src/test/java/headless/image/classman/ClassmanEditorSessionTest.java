@@ -139,7 +139,7 @@ class ClassmanEditorSessionTest extends AbstractClassmanTest {
     Rectangle2D hello = editing.scene().elementAreas.get(0).area;
     editing.selectAt(new Point2D.Double(hello.getCenterX(), hello.getY() + 3));
 
-    editing.rename(editing.selectedClass(), "Greeting");
+    editing.setText(editing.scene().textAreas.get(0), "Greeting");
 
     assertTrue(diagram.getSource().contains("Greeting"), diagram.getSource());
     specman.undo();

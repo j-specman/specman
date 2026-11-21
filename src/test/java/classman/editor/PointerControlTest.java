@@ -1,6 +1,7 @@
 package classman.editor;
 
 import classman.model.v001.io.ClassDiagramParseException;
+import classman.render.TextKind;
 import org.junit.jupiter.api.Test;
 
 import java.awt.geom.Point2D;
@@ -26,7 +27,7 @@ class PointerControlTest {
 
   private void open() throws ClassDiagramParseException {
     editing = new DiagramEditing(SOURCE, host, new EditorTexts(host.locale()));
-    control = new PointerControl(editing, () -> { }, nameEdits::incrementAndGet);
+    control = new PointerControl(editing, () -> { }, text -> nameEdits.incrementAndGet());
   }
 
   /** A double click on the name of a class starts the name editor. */
@@ -34,7 +35,7 @@ class PointerControlTest {
   void doubleClickOnName() throws ClassDiagramParseException {
     open();
     editing.selectAt(new Point2D.Double(15, 25));
-    Rectangle2D name = editing.selectedNameArea();
+    Rectangle2D name = editing.scene().textAreas.get(0).area;
 
     control.doubleClicked(new Point2D.Double(name.getCenterX(), name.getCenterY()));
 
@@ -47,7 +48,7 @@ class PointerControlTest {
     open();
     editing.selectAt(new Point2D.Double(15, 25));
     Rectangle2D box = editing.selectedArea();
-    Rectangle2D name = editing.selectedNameArea();
+    Rectangle2D name = editing.scene().textAreas.get(0).area;
     assertTrue(name.getMinY() > box.getMinY() + 4, "the stereotype is above the name");
     assertTrue(name.getMaxY() < box.getMaxY() - 4, "the tagged values and attributes are below the name");
 
@@ -59,14 +60,21 @@ class PointerControlTest {
     assertTrue(editing.hasSelection());
   }
 
-  /** A note has no name to edit. */
+  /** A double click on the text of a note starts the editor for it, one on the margin of the note does not. */
   @Test
   void doubleClickOnNote() throws ClassDiagramParseException {
     open();
+    editing.selectAt(new Point2D.Double(401, 21));
+    Rectangle2D noteBox = editing.selectedArea();
 
-    control.doubleClicked(new Point2D.Double(405, 25));
-
+    control.doubleClicked(new Point2D.Double(noteBox.getMinX() + 1, noteBox.getMinY() + 1));
     assertEquals(0, nameEdits.get());
+
+    Rectangle2D text = editing.scene().textAreas.stream()
+      .filter(area -> area.kind == TextKind.NOTE_TEXT).findFirst().orElseThrow().area;
+    control.doubleClicked(new Point2D.Double(text.getCenterX(), text.getCenterY()));
+
+    assertEquals(1, nameEdits.get());
     assertTrue(editing.hasSelection());
   }
 }
