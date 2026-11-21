@@ -27,6 +27,7 @@ import java.awt.geom.Point2D;
 public class ClassDiagramEditorWindow extends JDialog {
   private static final int MIN_WIDTH = 500;
   private static final int MIN_HEIGHT = 350;
+  private static final double HIT_PIXELS = 4;
 
   private final DiagramEditing editing;
   private final DiagramCanvas canvas;
@@ -42,7 +43,8 @@ public class ClassDiagramEditorWindow extends JDialog {
     editing = new DiagramEditing(source, host, texts);
     canvas = new DiagramCanvas(editing.scene());
     textEditor = new TextEditor(canvas, editing, this::showDiagram);
-    canvas.setPointerListener(new PointerControl(editing, this::showDiagram, textEditor::start));
+    canvas.setPointerListener(new PointerControl(editing, this::showDiagram, textEditor::start,
+      () -> canvas.toDiagramLength(HIT_PIXELS)));
     scrollPane = new JScrollPane(canvas);
 
     EditorPalette palette = new EditorPalette(texts, this::classDropped);
@@ -115,7 +117,7 @@ public class ClassDiagramEditorWindow extends JDialog {
 
   private void showDiagram() {
     canvas.setScene(editing.scene());
-    canvas.setSelection(editing.selectedArea(), editing.specialSelectionColor());
+    canvas.setSelection(editing.selectedArea(), editing.selectedHandles(), editing.specialSelectionColor());
   }
 
   /** Runs the operation on the key and shows the diagram as it is afterwards. While a name is typed, the keys belong

@@ -3,6 +3,7 @@ package classman.editor;
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
+import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
@@ -16,8 +17,11 @@ import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
 import classman.model.v001.io.ClassDiagramSerializer_V001;
 import classman.render.Scene;
+import classman.render.DiagramStyle;
+import classman.render.SceneRelationLine;
 import classman.render.SceneElementArea;
 import classman.render.SceneTextArea;
+import classman.render.TextKind;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
@@ -32,6 +36,7 @@ import java.util.Set;
  * and reports it to the host. The host keeps the history: undo and redo are forwarded to it, but only for the sources
  * which this editing reported itself, so they never reach back to what happened before the editor was opened. */
 public class DiagramEditing {
+  private static final double DEFAULT_LINE_TOLERANCE = 4;
   private final EditorHost host;
   private final EditorTexts texts;
   private final ClassDiagramSerializer_V001 serializer = new ClassDiagramSerializer_V001();
@@ -39,6 +44,7 @@ public class DiagramEditing {
   private final ElementTextChanger_V001 textChanger = new ElementTextChanger_V001();
   private final ElementIds ids = new ElementIds(new SecureRandom());
   private ClassDiagramModel_V001 model;
+  private AttributeEditing attributeEditing;
   private String source;
   private Scene scene;
   private AbstractDiagramElementModel_V001 selected;
@@ -56,6 +62,7 @@ public class DiagramEditing {
 
   private void load(String newSource) throws ClassDiagramParseException {
     model = new ClassDiagramParser_V001().parse(newSource);
+    attributeEditing = new AttributeEditing(model);
     scene = host.renderer().layout(model);
     source = newSource;
     selected = null;
@@ -64,8 +71,11 @@ public class DiagramEditing {
 
   public String source() { return source; }
 
-  /** @return the picture of the diagram as it is now */
-  public Scene scene() { return scene; }
+  /** @return the picture of the diagram as it is now, with the line of the selected relation drawn thicker */
+  public Scene scene() {
+    SceneRelationLine selectedLine = selected != null ? scene.relationLineOf(selected) : null;
+    return selectedLine != null ? scene.withStrokeWidth(selectedLine, DiagramStyle.SELECTED_LINE_WIDTH) : scene;
+  }
 
   public boolean canUndo() { return undoableSteps > 0; }
 
@@ -100,10 +110,57 @@ public class DiagramEditing {
     }
   }
 
-  /** Selects the box at the point of the diagram, or nothing if there is none. */
-  public void selectAt(Point2D point) {
+  /** Selects the box at the point of the diagram, or else the relation whose line is at most the tolerance away, or
+   * nothing if there is none. A box wins over a line, so that a click near the border of a box selects the box. The
+   * handles of a selected relation are above everything: a point on one of them keeps the relation selected. */
+  public void selectAt(Point2D point, double tolerance) {
+    if (handleIndexAt(point, tolerance) >= 0) {
+      return;
+    }
     SceneElementArea hit = scene.elementAreaAt(point);
-    selected = hit != null ? hit.element : null;
+    if (hit != null) {
+      selected = hit.element;
+      return;
+    }
+    SceneRelationLine line = scene.relationLineAt(point, tolerance);
+    selected = line != null ? line.relation : null;
+  }
+
+  /** Selects the box at the point of the diagram, or else the relation whose line is {@value #DEFAULT_LINE_TOLERANCE}
+   * units away at most, or nothing if there is none. */
+  public void selectAt(Point2D point) {
+    selectAt(point, DEFAULT_LINE_TOLERANCE);
+  }
+
+  /** @return the index in {@link #selectedHandles()} of the handle which is at most the tolerance away from the
+   * point, the closest one if there are several, -1 if there is none */
+  private int handleIndexAt(Point2D point, double tolerance) {
+    List<Point2D> handles = selectedHandles();
+    int closest = -1;
+    double closestDistance = tolerance;
+    for (int i = 0; i < handles.size(); i++) {
+      double distance = handles.get(i).distance(point);
+      if (distance <= closestDistance) {
+        closest = i;
+        closestDistance = distance;
+      }
+    }
+    return closest;
+  }
+
+  /** Deletes the waypoint of the selected relation at the point, if there is one: the handles at the ends of a
+   * relation are no waypoints and a relation without a route has none. Moving a route is never marked as a change,
+   * so this is the same with and without change tracking. One operation.
+   * @return true if a waypoint was deleted */
+  public boolean deleteWaypointAt(Point2D point, double tolerance) {
+    int handle = handleIndexAt(point, tolerance);
+    boolean isWaypoint = handle > 0 && handle < selectedHandles().size() - 1;
+    if (!isWaypoint || !(selected instanceof AbstractRelationModel_V001 relation) || relation.route == null) {
+      return false;
+    }
+    relation.route.waypoints.remove(handle - 1);
+    publish();
+    return true;
   }
 
   public void deselect() { selected = null; }
@@ -114,6 +171,13 @@ public class DiagramEditing {
   public Rectangle2D selectedArea() {
     SceneElementArea selectedArea = selected != null ? scene.elementAreaOf(selected) : null;
     return selectedArea != null ? selectedArea.area : null;
+  }
+
+  /** @return the points of the selected relation where its line starts, bends and ends, empty if no relation is
+   * selected */
+  public List<Point2D> selectedHandles() {
+    SceneRelationLine selectedLine = selected != null ? scene.relationLineOf(selected) : null;
+    return selectedLine != null ? selectedLine.points() : List.of();
   }
 
   /** @return the color for the frame around the selected box if the usual one can't be told from the change set which
@@ -147,6 +211,7 @@ public class DiagramEditing {
       case RELATION_LABEL -> orEmpty(((AbstractRelationModel_V001) text.element).label);
       case FROM_MULTIPLICITY -> orEmpty(((AssociationRelationModel_V001) text.element).fromMultiplicity);
       case TO_MULTIPLICITY -> orEmpty(((AssociationRelationModel_V001) text.element).toMultiplicity);
+      case ATTRIBUTE_LINE -> attributeEditing.textOf(text);
     };
   }
 
@@ -161,25 +226,40 @@ public class DiagramEditing {
     return changeSet != null ? Color.decode(host.renderer().paleColorOf(changeSet)) : null;
   }
 
-  /** @return false if the text can't have that content: a multiplicity is free text, but only one line */
+  /** @return false if the text can't have that content: a multiplicity is free text, but only one line, and an
+   * attribute line needs a name. */
   public boolean accepts(SceneTextArea text, String newText) {
     return switch (text.kind) {
       case FROM_MULTIPLICITY, TO_MULTIPLICITY -> !newText.contains("\n");
+      case ATTRIBUTE_LINE -> attributeEditing.accepts(text, newText, host.trackedChangeSet());
       default -> true;
     };
   }
 
   /** Gives the text a new content. While changes are tracked, the change set gets the mark for the change. The text it
-   * has already is no operation. An empty text removes a label or multiplicity.
+   * has already is no operation, and a blank line for a new attribute which stays empty goes away. An empty text
+   * removes a label or multiplicity, or deletes an attribute.
    * @throws IllegalArgumentException if {@link #accepts} says no */
   public void setText(SceneTextArea text, String newText) {
     if (textOf(text).equals(newText)) {
+      if (text.kind == TextKind.ATTRIBUTE_LINE) {
+        discardNewAttribute();
+      }
       return;
     }
     if (!accepts(text, newText)) {
       throw new IllegalArgumentException("The text can't have the content: " + newText);
     }
     String changeSet = host.trackedChangeSet();
+    if (text.kind == TextKind.ATTRIBUTE_LINE) {
+      if (attributeEditing.setText(text, newText, changeSet)) {
+        publish();
+      }
+      else {
+        scene = host.renderer().layout(model);
+      }
+      return;
+    }
     switch (text.kind) {
       case CLASS_NAME -> {
         ClassModel_V001 box = (ClassModel_V001) text.element;
@@ -221,6 +301,28 @@ public class DiagramEditing {
     }
     else {
       textChanger.setMultiplicity(association, end, newText);
+    }
+  }
+
+  /** @return true if the text is the last attribute line of its class, or the blank line of a class without
+   * attributes: a new attribute can be typed right after it */
+  public boolean isLastAttributeLine(SceneTextArea text) {
+    return text.kind == TextKind.ATTRIBUTE_LINE && attributeEditing.isLastLine(text);
+  }
+
+  /** Puts a blank line at the end of the class, for a new attribute to be typed into. It is part of the picture, but
+   * not of the diagram, until it is given a text with {@link #setText}.
+   * @return the area of the blank line */
+  public SceneTextArea newAttributeAtEnd(ClassModel_V001 box) {
+    AttributeModel_V001 placeholder = attributeEditing.beginAtEnd(box);
+    scene = host.renderer().layout(model);
+    return scene.textAreas.stream().filter(text -> text.attribute == placeholder).findFirst().orElseThrow();
+  }
+
+  /** Takes away the blank line for a new attribute, if it is still there. */
+  public void discardNewAttribute() {
+    if (attributeEditing.discardPending()) {
+      scene = host.renderer().layout(model);
     }
   }
 
@@ -336,6 +438,7 @@ public class DiagramEditing {
   }
 
   private void publish() {
+    attributeEditing.discardPending();
     String newSource = serializer.serialize(model);
     scene = host.renderer().layout(model);
     if (!newSource.equals(source)) {

@@ -6,7 +6,9 @@ public enum TextKind {
     NOTE_TEXT(false, false, true, false, 120, 0),
     RELATION_LABEL(false, false, false, true, 80, DiagramStyle.TEXT_HIT_PADDING),
     FROM_MULTIPLICITY(false, false, false, true, 40, DiagramStyle.TEXT_HIT_PADDING),
-    TO_MULTIPLICITY(false, false, false, true, 40, DiagramStyle.TEXT_HIT_PADDING);
+    TO_MULTIPLICITY(false, false, false, true, 40, DiagramStyle.TEXT_HIT_PADDING),
+    /** A whole line of an attribute, like +name : type [info]. The empty text deletes the attribute. */
+    ATTRIBUTE_LINE(false, false, true, true, 120, 0);
 
     public final boolean bold;
     public final boolean centered;

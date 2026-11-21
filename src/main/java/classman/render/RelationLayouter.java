@@ -35,8 +35,10 @@ public class RelationLayouter {
         String lineColor = markLayouter.lineColor(relation);
         List<AbstractSceneElement> underlay = markLayouter.underlay(relation, path, texts);
         List<AbstractSceneElement> elements = new ArrayList<>();
-        elements.add(line(path, relation.type == RelationType_V001.IMPLEMENTS, lineColor));
-        elements.addAll(decorator.decorations(relation, path, lineColor));
+        ScenePolyline line = line(path, relation.type == RelationType_V001.IMPLEMENTS, lineColor);
+        elements.add(line);
+        List<AbstractSceneElement> decorations = decorator.decorations(relation, path, lineColor);
+        elements.addAll(decorations);
         elements.addAll(texts.all());
         elements.addAll(markLayouter.overlay(relation, texts, PathGeometry.quarterPoint(path)));
         Rectangle2D.Double bounds = boundsOf(path, underlay, elements);
@@ -49,7 +51,7 @@ public class RelationLayouter {
             elementAreas.addAll(assocClass.elementAreas);
             textAreas.addAll(assocClass.textAreas);
         }
-        return new RelationLayout(underlay, elements, bounds, attachPoint, elementAreas, textAreas);
+        return new RelationLayout(underlay, elements, bounds, line, decorations, attachPoint, elementAreas, textAreas);
     }
 
     private ScenePolyline line(List<Point2D.Double> path, boolean dashed, String color) {

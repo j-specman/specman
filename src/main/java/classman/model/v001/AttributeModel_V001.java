@@ -10,7 +10,9 @@ public class AttributeModel_V001 {
     /** Null if no change set added or removed the attribute. */
     public ChangeModel_V001 change;
     /** Null if the source gives none. */
-    public final Visibility_V001 visibility;
+    public Visibility_V001 visibility;
+    /** Null if no change set changed the visibility sign. A sign which was removed can't be marked. */
+    public TextChangeModel_V001 visibilityChange;
     /** Null for the marker of hidden attributes. */
     public String name;
     /** Null if no change set changed the name. */

@@ -131,6 +131,10 @@ public class ClassDiagramSerializer_V001 {
         StringBuilder line = new StringBuilder();
         if (attribute.visibility != null) {
             line.append(attribute.visibility.sign);
+            if (attribute.visibilityChange != null) {
+                appendTextChange(line, attribute.visibilityChange);
+                line.append(' ');
+            }
         }
         line.append(word(attribute.name));
         appendTextChange(line, attribute.nameChange);
@@ -144,7 +148,12 @@ public class ClassDiagramSerializer_V001 {
             List<String> infos = new ArrayList<>();
             for (InfoModel_V001 info : attribute.infos) {
                 StringBuilder item = new StringBuilder(isBareInfo(info.text) ? info.text : quoted(info.text));
-                appendTextChange(item, info.change);
+                if (info.change != null) {
+                    appendChange(item, info.change);
+                }
+                else {
+                    appendTextChange(item, info.textChange);
+                }
                 infos.add(item.toString());
             }
             line.append(" [").append(String.join(", ", infos)).append(']');

@@ -4,7 +4,6 @@ import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassModel_V001;
-import classman.model.v001.InfoModel_V001;
 import classman.model.v001.TaggedValueModel_V001;
 
 import java.awt.geom.Rectangle2D;
@@ -39,6 +38,7 @@ public class ClassBoxLayouter {
     private final TextWrapper wrapper;
     private final ChangePalette palette;
     private final TextHighlighter highlighter;
+    private final AttributeTextBuilder attributeTextBuilder = new AttributeTextBuilder();
 
     public ClassBoxLayouter(TextMeasurer measurer, ChangePalette palette) {
         this.measurer = measurer;
@@ -81,7 +81,9 @@ public class ClassBoxLayouter {
         elements.add(new SceneLine(0, y, width, y, false, lineColor, STROKE_WIDTH));
         y += PADDING_Y;
         Map<String, Rectangle2D.Double> attributeAreas = new LinkedHashMap<>();
-        y = addAttributes(elements, backgrounds, overlays, model, attributes, width, y, attributeAreas, textColor);
+        Map<AttributeModel_V001, Rectangle2D.Double> lineAreas = new LinkedHashMap<>();
+        y = addAttributes(elements, backgrounds, overlays, model, attributes, width, y, attributeAreas, lineAreas,
+            textColor);
         y += PADDING_Y;
 
         if (change == null) {
@@ -100,7 +102,8 @@ public class ClassBoxLayouter {
         all.addAll(overlays);
         Map<TextKind, Rectangle2D.Double> textAreas = Map.of(TextKind.CLASS_NAME,
             new Rectangle2D.Double(PADDING_X, nameTop, contentWidth, nameBottom - nameTop));
-        return new BoxLayout(width, y, all, attributeAreas, change == null ? 0 : FRAME_STROKE_WIDTH / 2, textAreas);
+        return new BoxLayout(width, y, all, attributeAreas, change == null ? 0 : FRAME_STROKE_WIDTH / 2, textAreas,
+            new AttributeLineAreas(lineAreas));
     }
 
     private SceneRectangle frame(double width, double height, ChangeModel_V001 change) {
@@ -149,30 +152,7 @@ public class ClassBoxLayouter {
     }
 
     private MarkedText attributeText(AttributeModel_V001 attribute) {
-        MarkedText text = new MarkedText();
-        if (attribute.hiddenAttributesMarker) {
-            return text.append("...");
-        }
-        if (attribute.visibility != null) {
-            text.append(String.valueOf(attribute.visibility.sign));
-        }
-        text.append(attribute.name, attribute.nameChange);
-        if (attribute.type != null) {
-            text.append(" : ").append(attribute.type, attribute.typeChange);
-        }
-        if (!attribute.infos.isEmpty()) {
-            text.append(" [");
-            boolean first = true;
-            for (InfoModel_V001 info : attribute.infos) {
-                if (!first) {
-                    text.append(", ");
-                }
-                first = false;
-                text.append(info.text, info.change);
-            }
-            text.append("]");
-        }
-        return text;
+        return attributeTextBuilder.build(attribute);
     }
 
     // ---- width ----
@@ -239,17 +219,19 @@ public class ClassBoxLayouter {
 
     /**
      * An empty class still gets one blank attribute line. The box around the text of each attribute with an ID is
-     * noted in attributeAreas. The attributes are marked unless the class as a whole is added or removed.
+     * noted in attributeAreas, the whole line of each attribute which can be changed in lineAreas, the blank line of
+     * an empty class under the key null. The attributes are marked unless the class as a whole is added or removed.
      * Returns the y below the last line.
      */
     private double addAttributes(List<AbstractSceneElement> elements, List<AbstractSceneElement> backgrounds,
                                  List<AbstractSceneElement> overlays, ClassModel_V001 model, List<MarkedText> attributes,
                                  double boxWidth, double y, Map<String, Rectangle2D.Double> attributeAreas,
-                                 String textColor) {
+                                 Map<AttributeModel_V001, Rectangle2D.Double> lineAreas, String textColor) {
+        double contentWidth = boxWidth - 2 * PADDING_X;
         if (attributes.isEmpty()) {
+            lineAreas.put(null, new Rectangle2D.Double(PADDING_X, y, contentWidth, measurer.lineHeight()));
             return y + measurer.lineHeight();
         }
-        double contentWidth = boxWidth - 2 * PADDING_X;
         double lineY = y;
         for (int i = 0; i < attributes.size(); i++) {
             double top = lineY;
@@ -275,6 +257,9 @@ public class ClassBoxLayouter {
                 attributeAreas.put(attribute.id, new Rectangle2D.Double(PADDING_X - ATTRIBUTE_ATTACH_GAP, top,
                     textRight - PADDING_X + 2 * ATTRIBUTE_ATTACH_GAP, lineY - top));
             }
+            if (!attribute.hiddenAttributesMarker) {
+                lineAreas.put(attribute, new Rectangle2D.Double(PADDING_X, top, contentWidth, lineY - top));
+            }
         }
         return lineY;
     }
@@ -285,6 +270,7 @@ public class ClassBoxLayouter {
                                double top, double bottom) {
         if (attribute.change == null) {
             backgrounds.addAll(highlighter.highlights(text, lines));
+            overlays.addAll(highlighter.strikes(text, lines));
             return;
         }
         String changeSet = attribute.change.changeSet;

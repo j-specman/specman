@@ -32,7 +32,7 @@ class PointerControlTest {
 
   private void open(String source) throws ClassDiagramParseException {
     editing = new DiagramEditing(source, host, new EditorTexts(host.locale()));
-    control = new PointerControl(editing, () -> { }, text -> nameEdits.incrementAndGet());
+    control = new PointerControl(editing, () -> { }, text -> nameEdits.incrementAndGet(), () -> 4);
   }
 
   /** A double click on the label of a relation starts the editor for it, although no box is selected. */

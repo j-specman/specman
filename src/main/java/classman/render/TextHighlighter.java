@@ -111,6 +111,27 @@ public class TextHighlighter {
         return strikes;
     }
 
+    /** The lines through the parts of a text which are struck through, in the order of the lines. */
+    public List<SceneLine> strikes(MarkedText marked, List<SceneText> lines) {
+        List<SceneLine> strikes = new ArrayList<>();
+        int lineStart = 0;
+        for (SceneText line : lines) {
+            int lineEnd = lineStart + line.text.length();
+            for (TextMark mark : marked.struck()) {
+                int from = Math.max(mark.start, lineStart) - lineStart;
+                int to = Math.min(mark.end, lineEnd) - lineStart;
+                if (from < to) {
+                    double y = line.y - measurer.ascent() * STRIKE_HEIGHT_PART;
+                    double left = line.left() + measurer.width(line.text.substring(0, from), line.bold);
+                    double right = line.left() + measurer.width(line.text.substring(0, to), line.bold);
+                    strikes.add(new SceneLine(left - 1, y, right + 1, y, false, STRIKE_COLOR, STRIKE_WIDTH));
+                }
+            }
+            lineStart = lineEnd + 1;
+        }
+        return strikes;
+    }
+
     private SceneRectangle partBackground(SceneText line, int from, int to, String color) {
         double left = line.left() + measurer.width(line.text.substring(0, from), line.bold);
         double right = line.left() + measurer.width(line.text.substring(0, to), line.bold);

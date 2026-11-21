@@ -21,13 +21,13 @@ class ChangeSetRenamingTest {
   void marksOfOneChangeSet() throws ClassDiagramParseException {
     String source = """
         class A (aaaaaaaa) change(added, yellow) {
-          -x (a1a1a1a1) change(removed, yellow) : String was(yellow, Integer)
+          -x (a1a1a1a1) change(removed, yellow) : String was(yellow, Integer) [a change(added, yellow), b was(yellow, c)]
         }
         note "n" was(yellow, "old")
         """;
     String expected = """
         class A (aaaaaaaa) change(added, pink) {
-          -x (a1a1a1a1) change(removed, pink) : String was(pink, Integer)
+          -x (a1a1a1a1) change(removed, pink) : String was(pink, Integer) [a change(added, pink), b was(pink, c)]
         }
         note "n" was(pink, "old")
         """;

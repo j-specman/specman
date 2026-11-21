@@ -50,6 +50,8 @@ public final class DiagramStyle {
     public static final String STROKE = "#000000";
     public static final String WHITE = "#ffffff";
     public static final double STROKE_WIDTH = 1;
+    /** The width of the line of a selected relation. */
+    public static final double SELECTED_LINE_WIDTH = 2.5;
     /** The pattern of a dashed line: this many pixels of line, then this many of gap. */
     public static final int DASH_LENGTH = 5;
     public static final int DASH_GAP = 4;

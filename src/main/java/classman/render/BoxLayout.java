@@ -1,5 +1,7 @@
 package classman.render;
 
+import classman.model.v001.ClassModel_V001;
+
 import java.awt.geom.Rectangle2D;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +16,7 @@ public class BoxLayout {
     private final List<AbstractSceneElement> elements;
     private final Map<String, Rectangle2D.Double> attributeAreas;
     private final Map<TextKind, Rectangle2D.Double> textAreas;
+    private final AttributeLineAreas attributeLines;
 
     public BoxLayout(double width, double height, List<AbstractSceneElement> elements) {
         this(width, height, elements, Map.of(), 0, Map.of());
@@ -27,12 +30,27 @@ public class BoxLayout {
     public BoxLayout(double width, double height, List<AbstractSceneElement> elements,
                      Map<String, Rectangle2D.Double> attributeAreas, double outset,
                      Map<TextKind, Rectangle2D.Double> textAreas) {
+        this(width, height, elements, attributeAreas, outset, textAreas, AttributeLineAreas.NONE);
+    }
+
+    /**
+     * @param attributeLines where the lines of the attributes are, which the user can change
+     */
+    public BoxLayout(double width, double height, List<AbstractSceneElement> elements,
+                     Map<String, Rectangle2D.Double> attributeAreas, double outset,
+                     Map<TextKind, Rectangle2D.Double> textAreas, AttributeLineAreas attributeLines) {
         this.width = width;
         this.height = height;
         this.outset = outset;
         this.elements = List.copyOf(elements);
         this.attributeAreas = Map.copyOf(attributeAreas);
         this.textAreas = Map.copyOf(textAreas);
+        this.attributeLines = attributeLines;
+    }
+
+    /** The areas of the attribute lines of the class, moved so that the top left corner of the box is at the given point. */
+    public List<SceneTextArea> attributeTextAreasAt(ClassModel_V001 owner, double x, double y) {
+        return attributeLines.textAreasAt(owner, x, y);
     }
 
     /** The parts of the box, moved so that its top left corner is at the given point. */

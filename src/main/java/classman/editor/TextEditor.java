@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.ClassModel_V001;
 import classman.render.DiagramFonts;
 import classman.render.DiagramStyle;
 import classman.render.SceneTextArea;
@@ -78,7 +79,11 @@ class TextEditor {
       showAsAccepted();
       SwingUtilities.invokeLater(this::resizeToText);
     }));
-    component.addFocusListener(new FocusLostAdapter(() -> commit(false)));
+    component.addFocusListener(new FocusLostAdapter(() -> {
+      if (field == component) {
+        commit(false);
+      }
+    }));
     component.registerKeyboardAction(e -> commit(true), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
       JComponent.WHEN_FOCUSED);
     component.registerKeyboardAction(e -> component.replaceSelection("\n"),
@@ -158,9 +163,10 @@ class TextEditor {
 
   /** An empty text is no text: a mandatory text keeps its old content, an optional one is removed. Tabs which were
    * typed or pasted become spaces. A content which the text can't have keeps the field open with a red border if the
-   * user wanted to finish, and is dropped if the field lost the focus.
-   * @param keepOpenIfRejected true if the user pressed Return */
-  private void commit(boolean keepOpenIfRejected) {
+   * user pressed Return, and is dropped if the field lost the focus. Return in the last line of the attributes of a
+   * class goes on with a blank line below it for the next attribute, an empty line, Esc or leaving the field ends that.
+   * @param returnPressed true if the user pressed Return */
+  private void commit(boolean returnPressed) {
     if (field == null) {
       return;
     }
@@ -168,20 +174,30 @@ class TextEditor {
     SceneTextArea text = edited;
     boolean unchanged = content.isEmpty() && !text.kind.optional;
     boolean accepted = unchanged || editing.accepts(text, content);
-    if (!accepted && keepOpenIfRejected) {
+    if (!accepted && returnPressed) {
       rejected = true;
       field.setBorder(border(REJECTED_BORDER_COLOR));
       return;
     }
+    boolean goOn = returnPressed && accepted && !content.isEmpty() && editing.isLastAttributeLine(text);
     close();
     if (accepted && !unchanged) {
       editing.setText(text, content);
+    }
+    editing.discardNewAttribute();
+    if (goOn) {
+      SceneTextArea next = editing.newAttributeAtEnd((ClassModel_V001) text.element);
+      showDiagram.run();
+      start(next);
+      return;
     }
     showDiagram.run();
   }
 
   private void cancel() {
     close();
+    editing.discardNewAttribute();
+    showDiagram.run();
   }
 
   private void close() {

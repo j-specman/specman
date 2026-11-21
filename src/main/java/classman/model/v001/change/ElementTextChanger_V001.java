@@ -5,9 +5,6 @@ import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.RelationEnd_V001;
-import classman.model.v001.TextChangeModel_V001;
-
-import java.util.Objects;
 
 /**
  * Gives a class a new name, a note a new text, a relation a new label or multiplicity. While changes are tracked, the
@@ -70,37 +67,10 @@ public class ElementTextChanger_V001 {
     }
 
     private static void plain(TextSlot_V001 slot, String newText) {
-        slot.setText(slot.isOptional() && newText.isEmpty() ? null : newText);
+        TextTracking_V001.plain(slot, newText);
     }
 
     private static void tracked(TextSlot_V001 slot, String newText, String changeSet, boolean markable) {
-        if (!markable) {
-            plain(slot, newText);
-            return;
-        }
-        TextChangeModel_V001 mark = slot.mark();
-        if (mark != null && mark.changeSet.equals(changeSet)) {
-            if (isSame(mark.backup, newText)) {
-                slot.setMark(null);
-                slot.setText(isNone(mark.backup) && slot.isOptional() ? null : mark.backup);
-            }
-            else {
-                slot.setText(newText);
-            }
-            return;
-        }
-        String before = slot.text();
-        if (!isSame(before, newText)) {
-            slot.setMark(new TextChangeModel_V001(changeSet, before));
-            slot.setText(newText);
-        }
-    }
-
-    private static boolean isSame(String text, String other) {
-        return Objects.equals(isNone(text) ? null : text, isNone(other) ? null : other);
-    }
-
-    private static boolean isNone(String text) {
-        return text == null || text.isEmpty();
+        TextTracking_V001.tracked(slot, newText, changeSet, markable);
     }
 }

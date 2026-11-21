@@ -2,6 +2,7 @@ package classman.model.v001.change;
 
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
+import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.NoteModel_V001;
@@ -18,6 +19,9 @@ class ElementRemover_V001 {
         model.elements.removeIf(element -> elementVanishes(element));
         for (ClassModel_V001 classModel : ClassBoxes_V001.of(model)) {
             classModel.attributes.removeIf(attribute -> vanishing.vanishes(attribute.change));
+            for (AttributeModel_V001 attribute : classModel.attributes) {
+                attribute.infos.removeIf(info -> vanishing.vanishes(info.change));
+            }
         }
         for (AbstractRelationModel_V001 relation : model.relations()) {
             removeVanishingAssocClass(relation);

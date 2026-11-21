@@ -1,8 +1,8 @@
 :toc:
 
-# Classman Diagram Editor: Concept
+# Classman Diagram Editor: Concept and Functional Description
 
-*Status: draft of 2026-11-21, to be refined. It replaces the draft of 2026-11-20, which planned to edit the diagram in place in the Aktogramm. Open points are collected at the end.*
+*Status: updated 2026-11-21. Describes what is built, what was decided and why, and what is open. It is kept up to date with every step of the editor, because it is the source for the Specman system use cases which will be derived from it later: the behavior is hard to read back from the code. Where something is planned and not built, it says so.*
 
 ## Goal
 Class diagrams are shown in the Aktogramm, painted with Graphics2D, and are edited in a window of their own: creating, moving, renaming and deleting every kind of element, without editing the diagram source by hand. The editor is later the core of Classman itself. It must not depend on Specman, and the interface between the two stays narrow.
@@ -21,35 +21,65 @@ The first idea was to edit in place, in the Aktogramm, with a palette that repla
 |Part |Responsibility
 
 |`classman.render` |Display. Builds an immutable `Scene` from the model with the pure layouters, `SceneGraphicsPainter` paints it with Graphics2D, `SceneSvgWriter` writes it as SVG. No dependencies on Specman.
-|`classman.editor` |The editor: the window, the canvas with its tools, the palette. No dependencies on Specman. It works on the source text and reports its changes through the interface below.
+|`classman.model` |The model of a diagram, its parser and serializer, and the logic which changes the model: accepting, rejecting and renaming change marks, deleting, changing texts and attributes.
+|`classman.editor` |The editor: the window, the canvas with its tools, the palette, the text field. No dependencies on Specman. It works on the source text and reports its changes through the interface below.
 |`specman.editarea.image.classman` |The thin adapter in Specman. The edit area shows the diagram as a `Picture` (`ScenePicture`), opens the editor window on a double click, and takes over the changes of the source as undoable edits.
 |===
 
 The rule `classman.*` never imports `specman.*` is checked by a test, so that it holds. Where the editor needs something which only the host knows, the host provides it through the interface.
 
 ### Display
-The Aktogramm shows the diagram with the same painter as the editor window, so both show the same picture. The painter keeps the marks of changes recognizable when the diagram is shown small: strokes of frames and bands get no thinner, and highlights of changed texts no smaller than a minimum number of pixels on the screen (`DiagramStyle.MIN_VISIBLE_STROKE` and `MIN_VISIBLE_HIGHLIGHT`).
+The Aktogramm shows the diagram with the same painter as the editor window, so both show the same picture. The painter keeps the marks of changes recognizable when the diagram is shown small, see <<Display of Changes>>.
 
-SVG is only needed for the PDF export. There the scale between the Swing picture and the PDF is known, so the SVG can be asked for the marks at that scale (`Picture.svg(scale)`, with the same rule as the painter, shared by both). This is a separate step.
+SVG is only needed for the PDF export. There the scale between the Swing picture and the PDF is known, so the SVG can be asked for the marks at that scale (`Picture.svg(scale)`, with the same rule as the painter, shared by both). This is a separate step, not built yet.
 
 ### Interface between the Editor and Specman
-The interface is small on purpose. Three things pass it:
+The interface is small on purpose. Four things pass it:
 
 * *Initiation:* Specman opens the editor for a diagram with its source and waits until the window is closed.
 * *Synchronization:* After each completed operation, the editor reports the new source, `sourceChanged(source)`. Specman puts it into the edit area, which shows the diagram anew right away. The window is modal, so nothing else changes the source while the editor is open: Specman never has to push a source into a running editor. This is the reason for the window being modal.
-* *Context:* what the editor needs to know from the host and can't know by itself: whether changes are tracked and by which change set, so that it writes the `change(...)` and `was(...)` marks; the colors of the change sets; the language.
+* *History:* The editor asks the host for the current source, and to undo and redo, see <<Undo and Redo>>.
+* *Context:* what the editor needs to know from the host and can't know by itself: whether changes are tracked and by which change set, so that it writes the `change(...)` and `was(...)` marks; the colors of the change sets (strong, pale, and for blue a special selection color); the language.
 
 The texts of the editor come from a resource bundle of Classman, the host passes the language. Specman's own classes (`Messages`, `SpecmanIcons`) are not used by the editor.
 
-*Undo and redo* are not part of the first version. The window being modal leaves two simple options for later. Either the whole editing session is one step in Specman's undo stack (the source from before and after), and the editor has an undo of its own inside the window, which a standalone Classman needs anyway. Or each reported source is one step in Specman's undo stack, and the window forwards Ctrl+Z to the host. This is not decided yet.
+## What is Built
+[cols="2,1,3"]
+|===
+|Operation |Status |Remarks
+
+|Open the editor by double click on the diagram |built |Falls back to the source editor if the source can't be parsed or laid out.
+|Create a class by dragging it from the palette |built |The only palette button so far.
+|Select a box |built |Classes, notes, association classes. Not yet: attributes, note links.
+|Select a relation |built |By a press on its line; the line is drawn thicker. Can be deleted, see <<Selecting>>.
+|Move a box |built |Routes and waypoints do not move with it.
+|Delete a box (Delete key) |built |Classes, notes, association classes.
+|Edit class names, note texts |built |
+|Edit relation labels and multiplicities |built |Only where the relation already has the text.
+|Edit, add and delete attributes |built |By lines, see <<Attributes>>.
+|Undo and redo |built |Forwarded to Specman's history.
+|Stereotype, tagged values, diagram name |open |
+|Create other element kinds (interface, enum, note, association class) |open |
+|Create relations, move waypoints of routes |open |Deleting a waypoint (double click on its handle) is built, see <<Selecting>>.
+|Create a text which an element doesn't have yet (relation label, multiplicity) |open |A relation can be selected now; the gesture for the missing texts is open.
+|Reorder attributes, attribute selection |open |
+|Width of a box by dragging its side |open |
+|===
 
 ## Editor Window
-There is one window, and it is modal: While it is open, the rest of Specman can't be operated. So there is never more than one editor, and nothing else changes the diagram while it is edited. The canvas scrolls and zooms on its own, with the mouse wheel and Ctrl+mouse wheel. The window needs no Done button, closing it is leaving the editor.
+There is one window, and it is modal: While it is open, the rest of Specman can't be operated. So there is never more than one editor, and nothing else changes the diagram while it is edited. The window needs no Done button, closing it is leaving the editor.
+
+* *Opening:* A double click on a Classman diagram in the Aktogramm opens the window. If the source can't be parsed, or refers to an element which the diagram doesn't have, the source editor opens instead, where the user can repair the text. The source editor stays available in the context menu of the diagram.
+* *Size:* The window is as large as the whole diagram, the palette and the window decorations need, but at least 500 x 350 pixels. There is no fixed upper limit, because the user wants to see the whole diagram where the screen allows it (an earlier limit of 1200 x 800 pixels was dropped for this). A diagram larger than the screen is cut to the usable part of the screen (without task bar), and scrolls. Where it is cut in one direction, the window gets the width of the scroll bar of the other direction in addition, so that no second scroll bar becomes necessary. The size is worked out once, when the window opens, for the diagram at 100 % zoom. Zooming, adding or moving boxes afterwards doesn't change the size of the window; the user can resize it as usual.
+* *Position:* The window is centered on the visible part of the diagram in the Aktogramm. It is then pushed completely into the usable part of the screen of the owner window. Being seen completely wins over being near. The window doesn't remember its position or size.
+* *Scrolling and zooming:* with the mouse wheel and Ctrl + mouse wheel. The zoom goes from 25 % to 400 %, in steps of 10 %. If the diagram is smaller than the window, the canvas fills the window, so there is room to drop things where the diagram has none yet.
+* *Esc:* does the first of these which applies: puts a box back which is being dragged; takes the selection away; closes the window. While a text is typed, Esc belongs to the text field.
+* *Keys:* Delete deletes the selected box, Ctrl+Z undoes, Ctrl+Y and Ctrl+Shift+Z redo. While a text is typed, these keys belong to the text field.
 
 ### Palette
 The palette is a vertical tool bar at the left edge of the window, built like the step palette of Specman: buttons with an icon and a text, or with an icon only, which the user switches with the button at the bottom. The editor has its own preference for that. The most important element comes first, at the top: the class.
 
-#### Buttons with Variants
+#### Buttons with Variants (planned)
 The number of element kinds will grow, so related kinds share one button. A button with variants shows the icon and the text of the variant it creates, and has a small arrow at its corner which opens a menu with the other variants. Choosing a variant makes it the current one of the button; using the button creates it. The last choice is remembered.
 
 Variants are grouped if they are used with the same gesture and differ in one property only:
@@ -67,42 +97,241 @@ Variants are grouped if they are used with the same gesture and differ in one pr
 Interface and enum are keywords of their own, because their content differs from a class: A class has attributes, an enum holds only its values, which are entered like attributes without a type, and an interface has no attributes. See <<Consequences for the Format>>.
 
 ### Creating Elements
-Specman's step buttons are drag sources: The user drags a step onto the diagram. The palette follows this for everything that is a single box:
+Specman's step buttons are drag sources: The user drags a step onto the diagram. The palette follows this for everything that is a single box.
 
-* *Boxes* (class, interface, enum, note) are dragged onto the canvas. The drop point becomes the `at(x, y)` of the new element, which matters in a free layout. The new element gets an ID and, if changes are tracked, its `change(added, ...)` mark.
+*Built, the class:*
+
+* The user presses the class button and drags. A ghost of the class follows the mouse. The class is created where the mouse is released, if that is inside the canvas of the window. Released anywhere else, nothing happens.
+* The drop point becomes the top left corner of the new class: `at(x, y)` in diagram coordinates, rounded to whole pixels, whatever the zoom is.
+* The class gets a made-up name, `NewClass`, and `NewClass2`, `NewClass3` and so on if the name is taken. Class names need not be unique, this only keeps the new classes apart for the user.
+* It gets an ID: 8 hexadecimal characters, different from all IDs in the diagram.
+* If changes are tracked, it gets `change(added, <change set>)`.
+* The new class is selected. One operation, one undo step.
+
+*Planned:*
+
+* Boxes (interface, enum, note) are dragged onto the canvas in the same way.
 * *Relations* need two ends and are a *tool*: Click the button, the cursor changes, then drag from the first box to the second. The relation is created with a straight line, route points are the user's business afterwards. Afterwards the select tool is back (one-shot). Esc cancels an armed tool.
-* *Everything within a box* has no button: Attributes, enum values, stereotypes, tagged values, labels and multiplicities are created by editing in place, e.g. by typing into an empty line below the last attribute.
+* *Everything within a box* has no button: Attributes, enum values, stereotypes, tagged values, labels and multiplicities are created by editing in place, see <<Attributes>>.
 
-### Editing Existing Elements
-These operations need no buttons, they are triggered by the mouse and keys:
+## Selecting
+* A mouse press on a box selects it. Boxes are classes, notes and association classes. Where boxes overlap, the one drawn on top is selected. A press on empty canvas, or on anything which isn't a box or a relation, takes the selection away.
+* *Relations:* A press on the line of a relation selects it, if it is at most 4 pixels of the screen away from the line, whatever the zoom is, so that the line can be hit when the diagram is shown small. Where a box and a line are both hit, the box wins: a press next to the border of a box, where lines start, selects the box.
+* A selected relation is shown by its line and the marks at its ends (arrowhead, triangle, diamond), which are drawn 2.5 units wide instead of 1, with round corners so that the sharp tips of the marks reach only about 1.25 units into the box they point at. It has no frame. Each part keeps its place in the order of drawing, so the marks stay above the line. A relation can be deleted with the Delete key, see <<Deleting>>. It can't be moved or dragged: it has no position.
+* A selected relation also shows its points: small circles (9 pixels of the screen wide, white, outlined in the color of the selection, the same size at every zoom) where its line starts, at each waypoint, and where it ends. They are only shown so far; moving the points is the next step. A relation without a route has the two ends, a loop its five points.
+* A press on a handle of the selected relation (4 pixels of the screen around its center, like the line) keeps the relation selected, also where a box lies below the handle: the handles are above everything.
+* *Deleting a waypoint:* A double click on a waypoint of the selected relation deletes it, and the relation stays selected. The handles at the ends are no waypoints and stay, and a relation without a route has no waypoints (a loop only has its automatic points). Moving a route is never marked as a change, so this is the same with and without change tracking. One operation, one undo step.
+* Attributes and the lines from notes to their targets can't be selected yet.
+* A selected box has a frame: 2 pixels wide, 4 pixels away from the box, always the same size on the screen whatever the zoom is, and translucent. Its color is the focus color of the look and feel (blue). Boxes which a change set with blue marks has marked get a black frame instead, because blue marks hide a blue frame.
+* A class which has just been created is selected. After undo or redo nothing is selected, because the diagram is read anew.
+* A box can be moved, deleted and have its texts edited only while it is selected, see below. The texts of relations are the exception.
 
-* *Select* by click. A selection is shown by handles. Multiple selection and a rubber band are open.
-* *Move* by dragging. The waypoints of the routes of the moved boxes move or are re-routed: this is the editor's job, since routes are absolute points.
-* *Rename* and edit texts by double click: a text field appears over the text, the change is committed with Return, the diagram is laid out again after the commit only, without live feedback.
-* *Delete* with the Delete key. If changes are tracked, the element gets a `change(removed, ...)` mark instead, and the veiled element stays visible.
-* *Width* of a box by dragging its side, which writes `width=`.
+## Moving
+* A press on a box selects it, and a drag moves it. The drag starts after the mouse has moved 3 pixels, so that a click is never a move.
+* While dragging, the diagram is laid out anew with the box at the mouse. Nothing is reported to the host until the mouse is released. The release is one operation and one undo step.
+* Esc during the drag puts the box back and ends the drag.
+* *Freezing:* Boxes without a position (`at(x, y)`) are stacked automatically. As soon as one box is moved, all boxes without a position get the position where they stand now, so that the others don't jump when the stack loses a member. Only the dragged box moves.
+* An association class belongs to its relation and stands automatically next to its line. Dragging it gives it its own position. The association classes of other relations stay automatic.
+* The canvas keeps its origin during the drag, otherwise it would follow the box and the mouse could never get ahead of it. Dragging to the edge of the window scrolls.
+* *Known limits:* A box which is dragged left of or above the top left of the diagram is cut off until the mouse is released. The waypoints of routes, and of the dashed lines of notes, are absolute points and don't move with the box. Moving them needs an operation of its own, which is open; until then the user repairs routes by hand. There is no move cursor and no grid snapping.
 
-### Change Marks
+## Deleting
+* The Delete key deletes the selected box or relation and what hangs on it, and afterwards nothing is selected, also if it only got marked as removed. There is no confirmation. Backspace does not delete.
+* *What hangs on a box:* A class takes its relations along, with their association classes, and the notes attached to the class or to those relations. A relation takes its association class and the notes attached to it. An association class and a note take only themselves. An attribute takes the notes attached to it.
+* *Without change tracking* everything which goes is removed.
+* *With change tracking* the rule is the one of deleting a step in Specman: What a change set has added is removed at once, whichever change set it was. Whatever else goes is marked `change(removed, <change set>)` and stays visible, veiled. What is marked removed already stays as it is.
+* The deletion is one operation and one undo step.
+* Attributes are deleted by emptying their line, see <<Attributes>>.
+
+## Editing Texts
+All texts are edited in place, with a text field which lies over the text.
+
+### Starting
+* A double click on a text starts it. The first press of the double click selects the box under it, if there is one.
+* The texts of the selected box can be changed: the name of a class (only its name row, not the stereotype or the tagged values), the text of a note, the lines of the attributes. The texts of a relation, its label and its multiplicities, can be changed without selecting anything. A text on a box which isn't selected can't be edited.
+* Short texts have a larger area where a double click counts: the multiplicities and labels of relations reach 3 diagram units around the text.
+* Only one text is edited at a time.
+
+### The Field
+* The field lies exactly where the text is, in its font, scaled with the zoom, aligned like the text (the class name is centered, the others start where the text starts). It has a blue border and is white. While changes are tracked, it has the pale color of the change set, as a reminder that the change will be marked.
+* *Size:* A class name, a label and a multiplicity grow with the text as it is typed, at least 120, 80 and 40 pixels wide. The text of a note and the line of an attribute are wrapped at the width of their box: the field has the width of the box and grows downwards. The height always fits the text.
+* The diagram is laid out anew after the commit only, not while typing.
+
+### Ending
+* *Return* commits. A line break in a text is made with Shift+Return or Ctrl+Return; where a text must not have one (multiplicities, attribute lines), a line break makes the text invalid.
+* *Esc* leaves the text as it was.
+* *Leaving the field* (a click elsewhere, another window) commits, as Return does. The element which is changed is the one which was edited, also if the click selected another box.
+* *Same text:* A text which is the same as before is no operation and no undo step.
+* *Empty text:* A text which must exist (class name, note text) keeps its old content if the field is committed empty. A text which may be missing (label, multiplicity, attribute line) is removed by the empty text.
+* *Whitespace:* Blanks at the ends are removed, tabs become blanks.
+* *Invalid text:* A text which the element can't have, see below, is not committed. After Return the field stays open and gets a red border, which goes away with the next keystroke. After leaving the field the text is dropped.
+* Every commit which changes something is one operation and one undo step.
+
+### The Texts of the Element Kinds
+[cols="1,3"]
+|===
+|Text |Rules
+
+|Class name |Bold, centered. May have several lines. Mandatory.
+|Note text |Plain, left aligned, wrapped at the width of the note. May have several lines. Mandatory.
+|Relation label |Plain. May have several lines. Optional: empty removes it. Stands at the middle of the longest part of the line.
+|Multiplicity |One at each end of an association, aggregation and composition. Free text, one line, optional. Anything is allowed, for example `1..<maximum capacity>`. In the source it is written without quotes if it is a number, a range like `0..1` or `1..*`, or `*`, otherwise in double quotes.
+|Attribute line |See <<Attributes>>.
+|===
+
+A relation which has no label or multiplicity yet has no area to double click, so none can be added so far. This is open, see <<Open Points>>.
+
+## Attributes
+An attribute is edited as a whole line, in the form in which the diagram shows it: `+name : type [info, info]`. The user types it as text, the editor splits it into its parts when the line is committed. Reason: it is one gesture for everything, including adding a type or an info which the attribute doesn't have yet, and it is how UML tools are used. The alternative, a field for each part, needs many small click areas in one short line, and has none for parts which are missing.
+
+### The Line
+* *Visibility:* an optional first sign: `+` public, `-` private, `#` protected, `~` package. Blanks after it are allowed.
+* *Name:* what stands before the first colon. It may contain blanks and needs no quotes. It is mandatory.
+* *Type:* what stands after the first colon, up to the infos. Optional; a colon with nothing after it is no type. A diagram shows the colon only if there is a type: with no type, or with a type which a change set has removed, there is no colon either.
+* *Infos:* items between ` [` and the closing `]`, separated by commas. Optional. An item which contains a comma, a quote, a closing bracket or a backslash is shown and typed in double quotes: `["a, b", "say \"hi\""]`. Empty items are dropped.
+* *Not possible:* a name or type which contains a colon, or a name or type which contains ` [`: they would be taken for the next part.
+* *Invalid lines:* no name; brackets which aren't closed; a line break; the line `...` (the marker for attributes which the diagram doesn't show; it can't be edited and can't be typed).
+* The field shows the attribute as the diagram does, so a line which is committed unchanged is no operation.
+
+### Changing an Attribute
+* Double click on a line of the selected class; the field covers all rows of the line if it wraps.
+* The parts which differ are changed, the others stay. Without change tracking nothing is marked.
+* *Infos:* The infos which are the same in the old and the new line stay, in their order. In the gaps between them, the old infos are changed into the new ones one by one, whatever is left over is removed, or added after the last info before it. This makes a changed info one change and not a removal and an addition.
+* *Change tracking:* The name and the type get `was(<change set>, <old text>)` where they differ. An info is a list entry, like an attribute in a class, so it takes element marks: an info which is added is marked `change(added, ...)`, one which is removed is marked `change(removed, ...)` and keeps its text. An info whose text is changed gets a text mark with its old text. An info which a change set has added is simply gone if it is removed, whichever change set it was. An info which the change set has removed and which is typed again is not removed any more: it is found by its text and stays where it was, also if it was typed at another place of the line. Another text typed in its place is a new info, and the removed one stays struck through next to it. A removed type stays as the empty text with its mark and is not shown, see <<Removed Parts of a Line>>. Setting a part back to its old text takes the mark away.
+* *Visibility sign:* has a mark like the other parts: `+ was(yellow, "-") name`. A sign which was there can't be removed while changes are tracked, because with no sign left there is nothing to carry the mark; the line is invalid then (red border). A sign which the change set added itself can be removed again, and in an added or removed attribute or class all this doesn't matter, since marks inside them are not shown. It is assumed that a diagram works either with visibility signs or without them, and doesn't switch in the middle of a change set; so the restriction is expected to be rarely met. Whether it is a nuisance in practice has to be watched, see <<Open Points>>.
+* In a class which a change set has added or removed, and in an attribute of that kind, attributes are changed without marks.
+
+### Deleting an Attribute
+The empty text deletes the attribute: the user selects all, deletes, presses Return. Without change tracking the attribute and the notes attached to it are removed. With it, the rule of <<Deleting>> applies: an attribute which a change set has added is removed at once, otherwise it is marked `change(removed, <change set>)`, and so are the notes attached to it.
+
+### Adding Attributes
+* A class without attributes shows one blank line. Double clicking it starts a new attribute.
+* *Return in the last line of a class* commits it and opens a blank line below for the next attribute, until a line is committed empty. *Esc*, or leaving the field, ends the sequence; a blank line which stays empty is not an attribute. Return in any other line only commits.
+* While the blank line is typed, the box of the class is one line taller. The blank line is part of the picture but not of the diagram: it is not reported to the host, and it goes away again if it is dropped.
+* The new attribute is marked `change(added, <change set>)` while changes are tracked, in an added or removed class it carries no mark.
+* A new attribute gets no ID. IDs are needed only for attaching notes.
+* Every committed line is one operation and one undo step.
+
+### Not Built
+Moving an attribute within its class (by dragging, or with Alt+Up and Alt+Down), editing the `...` marker, selecting an attribute, the indent of the following rows of a wrapped line in the field.
+
+## Change Tracking in the Editor
 If the host says that changes are tracked, the editor writes the marks: the user never writes them by hand. Accepting, rejecting and merging change sets is done by the host on the source, see `ChangeResolver_V001`, outside of the editor.
 
+### Why a Change Mode
+Software is developed in increments, sprint by sprint, and so are its specifications and models. A class diagram is not drawn once, it grows and changes with every sprint, and the people who work with it need to see *what is new in this sprint* against what existed before, and to decide about it: take it over, or throw it away. A diagram which only shows the current state can't say that. A history of file versions can, but only as a difference between two files, without the unit which matters in the work: the sprint, or a task, which is accepted or rejected as a whole.
+
+Specman has this for Aktogramme: changes are collected in change sets, shown in the color of the change set, and accepted or rejected as a whole. Classman gives class diagrams the same. This is a core feature of the editor and not an extra, and it shapes the rules:
+
+* *The change set is the unit.* The user doesn't change a diagram and a history afterwards: they work inside a change set, and everything they do is part of it. Accepting or rejecting a change set decides about all of its changes in all diagrams at once.
+* *The diagram shows the new state and marks the difference.* The people who read the diagram work with the new state, so that is what is shown. The marks say where something is new, changed or gone, in the color of the change set. The old text is not shown in the diagram, so that hand-made layouts keep their shape.
+* *The old state is kept, in the source.* A rejected change must be able to bring back exactly what was there. The marks therefore carry the old text, and removed things stay in the source until the change is accepted.
+* *The difference stays readable in the source.* The marks are plain text, in a fixed form, next to what they mark. People and programs, such as agents which are asked to review or write changes, can read and write them without a tool.
+* *The same rules for everything.* A class, an attribute, an entry in a list, a relation, a text: each can be added, removed, or (for texts) changed, and each is marked in the same way, so that the user doesn't have to learn a rule per element kind.
+* *Marking is the editor's job.* The user edits as usual. If the host says that changes are tracked, the editor writes the marks; the user never writes one by hand.
+* *Not everything is a change.* Moving a box changes the picture, not the model. Moves are never marked.
+
+### The Concept of Change Marks
+A diagram is changed by change sets, as the steps of an Aktogramm are, and the marks in the source say which change set did what. The marks have a fixed form so that the people and the programs who read the source can rely on it:
+
+* *Two kinds of marks.* An *element mark*, `change(added|removed, <change set>)`, says that a whole class, attribute, info of an attribute, relation, association class or note was added or removed. A *text mark*, `was(<change set>, <old text>)`, says that a text of an element was changed. The element is the same, the text is new.
+* *The text mark stands behind the text it belongs to.* The current text stays readable and searchable in the source, which matters for agents, and the style is the one of the element marks. The old text is the backup in the mark.
+* *The text shows the new state only.* The old text is not shown in the diagram, as Specman does it with its struck-through text, because the boxes of a diagram are laid out by hand and must not grow or shrink by a change. The diagram shows *that and where* something changed, the old text is in the source.
+* *The change set is the unit.* A change set is accepted or rejected as a whole, for the whole diagram. The marks of other change sets stay as they are.
+* *Accepting and rejecting* (done by the host, outside of the editor):
+** An element which was *added*: accepting keeps it and drops the mark, rejecting removes it.
+** An element which was *removed*: accepting removes it, rejecting keeps it and drops the mark.
+** A text which was *changed*: accepting keeps the new text and drops the mark, rejecting brings back the old text. A text which didn't exist before is gone after rejecting, a removed optional text is gone after accepting.
+** What hangs on an element goes with it, whatever its own marks say: a class takes its relations, association classes and the notes attached to it or to them; an attribute or a relation takes the notes attached to it.
+* *Renaming a change set* (merging two into one) renames its marks. This is also done by the host.
+* *Moves are never marked.* A box which is moved is moved, and that is all.
+* *The host decides whether changes are tracked.* Without tracking, the editor writes no marks and changes the diagram directly.
+
+How the editor writes the marks for each operation is described with the operation. The rules for texts are collected below.
+
+### Marks of Elements
+`change(added, <change set>)` and `change(removed, <change set>)` follow the ID of a class, attribute, relation, association class or note, and the text of an info of an attribute (`[a, b change(removed, yellow)]`). Moving an element is never marked. Rules for deleting: <<Deleting>>.
+
+### Marks of Texts
+`was(<change set>, <old text>)` follows the text which a change set has changed, which always stands for the new state. Every text of the diagram can carry one: the diagram name, class name, stereotype, key and value of a tagged value, the visibility sign, name and type of an attribute, an info, a multiplicity, a relation label, a note text.
+
+* The old text is the text from before the change set started, however often it is changed. Setting the text back to it takes the mark away.
+* A text which didn't exist before has a mark without old text. An empty old text says it was empty.
+* An optional text which is removed stays as the empty text with the mark: `"" was(yellow, "old label")`. This holds for labels, multiplicities and types. It is not shown, there is nothing left to show. The exceptions are the visibility sign, which can't be removed, and the infos of an attribute, which are list entries and get element marks. A source which writes a removed info as `"" was(...)` is still read, and shown like a removed type.
+* If another change set has changed the text before, the change set which changes it now takes the change over: its old text is the text from before this change.
+* The marks of texts inside an element which a change set has added or removed are ignored in the display. So these texts are changed without a mark.
+* If a text which a change set has added is removed again, it is gone without a trace.
+
+## Display of Changes
+These rules decide how a diagram with marks looks, also in the Aktogramm and in the PDF.
+
+* *Colors:* every change set has a strong color and a pale one (60 % white). The host maps the name of a change set to the colors.
+* *Added or removed class or note:* a frame in the strong color around the box, 12 units wide, of which 6 show outside the border. Removed ones are also veiled (half white), their texts grey, their name has the strong color behind it and a line through it. The marks of the texts inside are not shown.
+* *Added or removed attribute:* the row has the pale color, its text the strong color behind it; removed attributes have a line through the text.
+* *Added or removed info of an attribute:* the same for the info only: its text has the strong color behind it, and a removed info keeps its text and has a line through it. The line keeps its length: a removed info was there before, so nothing grows.
+* *Added or removed relation:* a band of 9 units in the strong color below the line. A removed relation has a grey line, a cross at a quarter of its longest part and a label which has the strong color behind it and a line through it.
+* *Changed text:* a background in the strong color behind the part of the text which changed, see below. The old text is not shown, so the box doesn't change its size, which matters in hand-made layouts.
+* *Not marked:* moves, and the visibility sign of an attribute of an added or removed element.
+
+### Which Part of a Changed Text is Marked
+For a long text, marking all of it is too much if only one character changed. The part is found by comparing the old text with the new one (diff):
+
+* New text is marked.
+* Where text is gone, the nearest characters before and after the gap which aren't blank are marked, with the blanks between them. At the start of the text only the first character after the gap is marked, at the end only the last one before it.
+* Text which is replaced by other text is shown by the new text alone.
+* Marks which are at most 3 characters apart become one.
+* If there are more than 8 separate marks, the two which are closest together become one, until 8 are left.
+* The whole text is marked if there is no old text, if it is shorter than 12 characters, or if the marks would cover more than 80 % of it.
+
+The numbers are tuning knobs in `DiagramStyle` (`DIFF_MIN_TEXT_LENGTH`, `DIFF_MERGE_GAP`, `DIFF_MAX_RUNS`, `DIFF_WHOLE_SHARE`). Marks for new text and for gaps look the same, the reader sees that something changed here, not what.
+
+### Removed Parts of a Line
+A type which a change set has removed is the empty text with a mark. It is not shown, and neither is its colon. The place where it was is marked by the same rule as a gap in a changed text: the last character before it, the end of the name. The same rule applies to an info which a source writes as the empty text with a mark.
+
+An info which is removed with the element mark, which is what the editor writes, keeps its text and is shown struck through, see <<Display of Changes>>. This was first done differently, with the empty text and the neighbors of the gap marked, until the user pointed out that an info is a list entry, as an attribute is, and the list should show what was removed from it. A removed label, multiplicity or stereotype has no line it could be struck through in and is not marked at all so far, see <<Open Points>>.
+
+### Marks in Small Diagrams
+When the diagram is shown small, marks must not disappear. Strokes of frames and bands keep a width of at least 6 pixels on the screen, strong highlights of texts a height and width of at least 8 pixels, whatever the zoom is (`DiagramStyle.MIN_VISIBLE_STROKE` and `MIN_VISIBLE_HIGHLIGHT`). A highlight which is made larger this way may reach over its neighbors.
+
+## Undo and Redo
+* The history is Specman's. After each operation the editor reports the whole new source, and Specman makes one undo step of it. Reason: this is simple, and a growing grammar needs no change of the undo.
+* The editor counts the steps it has reported itself. Ctrl+Z undoes only those, so never reaches back to what happened before the window was opened; Ctrl+Y and Ctrl+Shift+Z redo them. After undo or redo the editor reads the source anew: nothing is selected.
+* A new operation clears the steps which could be redone.
+* Operations which change nothing, like committing a text unchanged, are no steps.
+* A move is reported when the mouse is released, one step for the whole drag.
+* The keys belong to the text field while a text is typed.
+
 ## Consequences for the Format
-* New keywords `interface` and `enum`. An interface has no body. An enum has values written like attributes without a type.
-* Elements created by the editor always get an ID, and a position `at(x, y)`.
-* The layouter and the change mark logic (`ChangeResolver`, renaming) have to handle the new kinds.
+The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the editor needed, and what was decided on the way:
+
+* Relations and the anchors of their routes refer to classes by their IDs, class names are free text. A class needs an ID to take part in a relation.
+* Multiplicities are free text, written without quotes only if they are a number, a range or `*`.
+* All strings are in double quotes, which is why a source can be embedded into Specman's model without escaping. Backticks are not allowed.
+* The visibility sign of an attribute can carry a text change mark.
+* The infos of an attribute are list entries: they take the element marks `change(added|removed, ...)`, and keep their text as a removed info. Their text mark `was(...)` is for changing the text.
+* Elements created by the editor get an ID (classes) and a position `at(x, y)`. Attributes get an ID only if a note is attached.
+* Planned: new keywords `interface` and `enum`. An interface has no body. An enum has values written like attributes without a type. The layouter and the change mark logic have to handle the new kinds.
 
 ## Tests
-* Tool state, variant selection and every operation on the model are plain logic and are tested without a window.
+* Tool state and every operation on the model are plain logic and are tested without a window; the field and its keys are tested headless on the event dispatch thread.
 * The look of the window and the feel of the mouse operations are checked by hand.
 * The dependency rule between `classman.*` and `specman.*` is tested.
 
 ## Open Points
 . Is the association class a variant of the note button, or an element of its own?
 . How are notes attached to elements: as a relation-like tool, or by dragging a handle?
+. How can texts of a selected relation which it doesn't have yet (label, multiplicity) be added, and how are the waypoints of its route moved? (A relation can be selected and deleted already.)
+. Moving a box should move its waypoints or re-route them. Left to the user for now.
+. Stereotype (empty text removes it; how is one created on a class without), tagged values and the diagram name as editable texts.
+. Reordering attributes, selecting attributes.
+. A removed label or multiplicity is not shown and not marked at all, there is nothing to mark next to. Where could the place be shown, for example by the line of the relation? The same for a removed stereotype.
+. Is the restriction on removing a visibility sign under change tracking a nuisance in practice? Alternatives: let the sign stay, or give the removal a mark of its own in the format.
+. A long changed text is marked by a diff now. Is the rule good for texts with many changes, and for the mark of a deletion? See the knobs under <<Which Part of a Changed Text is Marked>>.
 . Selection model: multiple selection, rubber band, keyboard navigation.
 . Keyboard shortcuts for tools and variants.
 . Does the variant of a button survive a restart?
 . Sticky tools (stay armed until Esc), e.g. with a double click on the button. One-shot is the default.
-. Undo and redo, see <<Interface between the Editor and Specman>>.
-. Where does the window open, and does it remember its position and size?
+. Does the window remember its position and size?
 . The marks in the PDF: which rule at which scale, see <<Display>>.
-. Model-bound mode of Classman (only stereotypes and tags defined in the model can be chosen) is a separate topic and not part of this concept.
+. A white halo around the enlarged highlight of an attribute text, which sits on the colored class fill and contrasts less than frames on white.
+. Model-bound mode of Classman (only stereotypes and tags defined in the model can be chosen) is a separate topic and not part of this concept. The infos of an attribute are meant to follow the same path as stereotypes and tagged values: in the free mode of Specman they are free texts, in Classman they are chosen from a set of tags which the model defines for attributes, and refer to the definition by an ID. The format leaves room for it: an info is a list entry of its own, and an optional ID can be added behind its text, like the ID of a stereotype, without changing the rest.

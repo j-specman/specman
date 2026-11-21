@@ -21,4 +21,17 @@ public enum Visibility_V001 {
         }
         throw new IllegalArgumentException("No visibility sign: " + sign);
     }
+
+    /** @return the visibility with the sign, none for no text or a text which isn't a sign */
+    public static Visibility_V001 ofSign(String text) {
+        if (text == null || text.length() != 1) {
+            return null;
+        }
+        for (Visibility_V001 visibility : values()) {
+            if (visibility.sign == text.charAt(0)) {
+                return visibility;
+            }
+        }
+        return null;
+    }
 }

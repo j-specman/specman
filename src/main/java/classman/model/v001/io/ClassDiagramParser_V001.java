@@ -175,18 +175,20 @@ public class ClassDiagramParser_V001 {
         String type = attribute.COLON() == null ? null : text(nameAndType.get(1));
         AttributeModel_V001 model = new AttributeModel_V001(visibility, name, type, infos(attribute.infos()));
         model.id = id(attribute.ELEMENT_ID());
+        model.visibilityChange = textChange(attribute.visibilityChange);
         model.nameChange = textChange(attribute.nameChange);
         model.typeChange = textChange(attribute.typeChange);
         model.change = change(attribute.changeMark());
         return model;
     }
 
-    private List<InfoModel_V001> infos(InfosContext infos) {
+    private List<InfoModel_V001> infos(InfosContext infos) throws ClassDiagramParseException {
         List<InfoModel_V001> result = new ArrayList<>();
         if (infos != null) {
             for (InfoContext info : infos.info()) {
                 InfoModel_V001 model = new InfoModel_V001(infoText(info.infoText()));
-                model.change = textChange(info.textChange());
+                model.change = change(info.changeMark());
+                model.textChange = textChange(info.textChange());
                 result.add(model);
             }
         }

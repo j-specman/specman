@@ -5,6 +5,7 @@ import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.InfoModel_V001;
 
 import java.util.function.UnaryOperator;
 
@@ -23,6 +24,9 @@ final class ElementMarks_V001 {
             classModel.change = replacement.apply(classModel.change);
             for (AttributeModel_V001 attribute : classModel.attributes) {
                 attribute.change = replacement.apply(attribute.change);
+                for (InfoModel_V001 info : attribute.infos) {
+                    info.change = replacement.apply(info.change);
+                }
             }
         }
     }

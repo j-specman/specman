@@ -380,14 +380,47 @@ class ClassDiagramParser_V001Test {
     AttributeModel_V001 number = order.attributes.get(0);
     assertTextChange("yellow", "number", number.nameChange);
     assertTextChange("blue", "Text", number.typeChange);
-    assertTextChange("green", "optional", number.infos.get(0).change);
+    assertTextChange("green", "optional", number.infos.get(0).textChange);
     assertEquals("Pflicht", number.infos.get(0).text);
-    assertNull(number.infos.get(1).change);
+    assertNull(number.infos.get(1).textChange);
     AssociationRelationModel_V001 relation = (AssociationRelationModel_V001) diagram.relations().get(0);
     assertTextChange("yellow", "0..1", relation.fromMultiplicityChange);
     assertTextChange("blue", "1..*", relation.toMultiplicityChange);
     assertTextChange("green", "enthält", relation.labelChange);
     assertTextChange("red", "Alt", diagram.notes().get(0).textChange);
+  }
+
+  /** The visibility sign of an attribute takes a was mark right behind it, the sign before is the backup. */
+  @Test
+  void visibilityChange() throws ClassDiagramParseException {
+    ClassModel_V001 box = parse("""
+        class A (aaaaaaaa) {
+          + was(yellow, "-") x
+          - was(yellow) y
+          z
+        }""").classes().get(0);
+    AttributeModel_V001 changed = box.attributes.get(0);
+    assertEquals(Visibility_V001.PUBLIC, changed.visibility);
+    assertTextChange("yellow", "-", changed.visibilityChange);
+    assertEquals("x", changed.name);
+    assertTextChange("yellow", null, box.attributes.get(1).visibilityChange);
+    assertNull(box.attributes.get(2).visibility);
+    assertNull(box.attributes.get(2).visibilityChange);
+  }
+
+  /** An info is a list entry and takes element marks: added or removed. Its text mark is a different thing. */
+  @Test
+  void infoElementMarks() throws ClassDiagramParseException {
+    AttributeModel_V001 attribute = onlyClass("class A {\n  x [a, b change(removed, yellow), c change(added, blue), "
+      + "d was(red, e)]\n}").attributes.get(0);
+    assertEquals(List.of("a", "b", "c", "d"), infoTexts(attribute));
+    assertNull(attribute.infos.get(0).change);
+    assertEquals(ChangeType_V001.REMOVED, attribute.infos.get(1).change.type);
+    assertEquals("yellow", attribute.infos.get(1).change.changeSet);
+    assertEquals(ChangeType_V001.ADDED, attribute.infos.get(2).change.type);
+    assertNull(attribute.infos.get(2).textChange);
+    assertNull(attribute.infos.get(3).change);
+    assertTextChange("red", "e", attribute.infos.get(3).textChange);
   }
 
   /** Without backup there was no text before, an empty backup says the text was empty. */
@@ -418,7 +451,7 @@ class ClassDiagramParser_V001Test {
     assertNull(classModel.taggedValues.get(0).valueChange);
     assertNull(classModel.attributes.get(0).nameChange);
     assertNull(classModel.attributes.get(0).typeChange);
-    assertNull(classModel.attributes.get(0).infos.get(0).change);
+    assertNull(classModel.attributes.get(0).infos.get(0).textChange);
     assertNull(diagram.notes().get(0).textChange);
     assertNull(diagram.nameChange);
   }
@@ -435,8 +468,8 @@ class ClassDiagramParser_V001Test {
     assertEquals("was", attributes.get(1).type);
     assertNull(attributes.get(1).typeChange);
     assertEquals(List.of("was", "was", "a was"), infoTexts(attributes.get(1)));
-    assertNull(attributes.get(1).infos.get(0).change);
-    assertTextChange("blue", null, attributes.get(1).infos.get(1).change);
+    assertNull(attributes.get(1).infos.get(0).textChange);
+    assertTextChange("blue", null, attributes.get(1).infos.get(1).textChange);
     assertEquals("other", attributes.get(2).name);
   }
 

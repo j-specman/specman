@@ -58,10 +58,14 @@ public class ClassDiagramLayouter {
         }
         List<SceneElementArea> elementAreas = new ArrayList<>();
         List<SceneTextArea> textAreas = new ArrayList<>();
+        List<SceneRelationLine> relationLines = new ArrayList<>();
         areas.forEach((element, area) -> {
             elementAreas.add(new SceneElementArea(element, area));
             boxes.get(element).textAreasAt(area.x, area.y).forEach((kind, textArea) ->
                 textAreas.add(new SceneTextArea(element, kind, textArea)));
+            if (element instanceof ClassModel_V001 classModel) {
+                textAreas.addAll(boxes.get(element).attributeTextAreasAt(classModel, area.x, area.y));
+            }
         });
         Map<String, Rectangle2D.Double> classAreas = classAreas(areas);
         for (AbstractRelationModel_V001 relation : model.relations()) {
@@ -71,6 +75,7 @@ public class ClassDiagramLayouter {
             covered = BoxGeometry.union(covered, relationLayout.bounds);
             elementAreas.addAll(relationLayout.elementAreas);
             textAreas.addAll(relationLayout.textAreas);
+            relationLines.add(new SceneRelationLine(relation, relationLayout.line, relationLayout.decorations));
             attachTargets.add(relation.id, new RelationAttachTarget(relationLayout.attachPoint));
         }
         elements.addAll(0, underlays);
@@ -79,9 +84,10 @@ public class ClassDiagramLayouter {
             covered = BoxGeometry.union(covered, link.bounds());
         }
         if (covered == null) {
-            return new Scene(elements, elementAreas, textAreas, 0, 0, 0, 0);
+            return new Scene(elements, elementAreas, textAreas, relationLines, 0, 0, 0, 0);
         }
-        return new Scene(elements, elementAreas, textAreas, covered.x, covered.y, covered.width, covered.height);
+        return new Scene(elements, elementAreas, textAreas, relationLines, covered.x, covered.y, covered.width,
+            covered.height);
     }
 
     private void addAttachTargets(AttachTargetIndex attachTargets, ClassModel_V001 classModel,

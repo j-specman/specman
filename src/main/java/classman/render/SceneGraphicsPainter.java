@@ -51,15 +51,15 @@ public class SceneGraphicsPainter {
 
     private void paintElement(AbstractSceneElement element, Graphics2D g) {
         if (element instanceof SceneRectangle rectangle) {
-            fillAndStroke(g, rectangleShape(g, rectangle), rectangle.fill, rectangle.stroke, strokeWidthOf(g, rectangle.strokeWidth, rectangle.keepsVisible));
+            fillAndStroke(g, rectangleShape(g, rectangle), rectangle.fill, rectangle.stroke, strokeWidthOf(g, rectangle.strokeWidth, rectangle.keepsVisible), false);
         } else if (element instanceof SceneLine line) {
-            stroke(g, new Line2D.Double(line.x1, line.y1, line.x2, line.y2), line.stroke, line.strokeWidth, line.dashed);
+            stroke(g, new Line2D.Double(line.x1, line.y1, line.x2, line.y2), line.stroke, line.strokeWidth, line.dashed, false);
         } else if (element instanceof ScenePolyline polyline) {
             stroke(g, path(polyline.xs, polyline.ys, false), polyline.stroke,
-                strokeWidthOf(g, polyline.strokeWidth, polyline.keepsVisible), polyline.dashed);
+                strokeWidthOf(g, polyline.strokeWidth, polyline.keepsVisible), polyline.dashed, polyline.roundCorners);
         } else if (element instanceof ScenePolygon polygon) {
             fillAndStroke(g, path(polygon.xs, polygon.ys, true), polygon.fill, polygon.stroke,
-                strokeWidthOf(g, polygon.strokeWidth, polygon.keepsVisible));
+                strokeWidthOf(g, polygon.strokeWidth, polygon.keepsVisible), polygon.roundCorners);
         } else if (element instanceof SceneText text) {
             paintText(g, text);
         } else {
@@ -96,26 +96,28 @@ public class SceneGraphicsPainter {
         return Math.hypot(transform.getScaleX(), transform.getShearY());
     }
 
-    private void fillAndStroke(Graphics2D g, Shape shape, String fill, String stroke, double strokeWidth) {
+    private void fillAndStroke(Graphics2D g, Shape shape, String fill, String stroke, double strokeWidth,
+                               boolean roundCorners) {
         if (fill != null) {
             g.setColor(Color.decode(fill));
             g.fill(shape);
         }
         if (stroke != null) {
-            stroke(g, shape, stroke, strokeWidth, false);
+            stroke(g, shape, stroke, strokeWidth, false, roundCorners);
         }
     }
 
-    private void stroke(Graphics2D g, Shape shape, String color, double width, boolean dashed) {
+    private void stroke(Graphics2D g, Shape shape, String color, double width, boolean dashed, boolean roundCorners) {
         g.setColor(Color.decode(color));
-        g.setStroke(strokeOf(width, dashed));
+        g.setStroke(strokeOf(width, dashed, roundCorners));
         g.draw(shape);
     }
 
-    /** Butt ends and mitered corners, like the default of an SVG stroke. */
-    private Stroke strokeOf(double width, boolean dashed) {
+    /** Butt ends and mitered corners, like the default of an SVG stroke, unless the corners are to be round. */
+    private Stroke strokeOf(double width, boolean dashed, boolean roundCorners) {
         float[] dashes = dashed ? new float[] {DASH_LENGTH, DASH_GAP} : null;
-        return new BasicStroke((float) width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, MITER_LIMIT, dashes, 0);
+        int join = roundCorners ? BasicStroke.JOIN_ROUND : BasicStroke.JOIN_MITER;
+        return new BasicStroke((float) width, BasicStroke.CAP_BUTT, join, MITER_LIMIT, dashes, 0);
     }
 
     private Path2D.Double path(double[] xs, double[] ys, boolean closed) {

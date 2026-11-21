@@ -54,6 +54,7 @@ public class AssocClassLayouter {
         List<SceneTextArea> textAreas = new ArrayList<>();
         box.textAreasAt(area.x, area.y).forEach((kind, textArea) ->
             textAreas.add(new SceneTextArea(assocClass, kind, textArea)));
+        textAreas.addAll(box.attributeTextAreasAt(assocClass, area.x, area.y));
         return textAreas;
     }
 }

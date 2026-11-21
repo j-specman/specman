@@ -8,6 +8,7 @@ import classman.model.v001.ClassModel_V001;
 import classman.model.v001.InfoModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.TaggedValueModel_V001;
+import classman.model.v001.Visibility_V001;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,14 +79,34 @@ final class TextSlots_V001 {
     }
 
     private static void addAttribute(List<TextSlot_V001> slots, AttributeModel_V001 attribute) {
-        slots.add(mandatory(() -> attribute.name, text -> attribute.name = text,
-            () -> attribute.nameChange, mark -> attribute.nameChange = mark));
-        slots.add(optional(() -> attribute.type, text -> attribute.type = text,
-            () -> attribute.typeChange, mark -> attribute.typeChange = mark));
+        slots.add(visibilityOf(attribute));
+        slots.add(nameOf(attribute));
+        slots.add(typeOf(attribute));
         for (InfoModel_V001 info : attribute.infos) {
-            slots.add(optional(() -> info.text, text -> info.text = text,
-                () -> info.change, mark -> info.change = mark));
+            slots.add(infoOf(info));
         }
+    }
+
+    /** The sign of the visibility is the text, none is no text. */
+    static TextSlot_V001 visibilityOf(AttributeModel_V001 attribute) {
+        return optional(() -> attribute.visibility == null ? null : String.valueOf(attribute.visibility.sign),
+            text -> attribute.visibility = Visibility_V001.ofSign(text),
+            () -> attribute.visibilityChange, mark -> attribute.visibilityChange = mark);
+    }
+
+    static TextSlot_V001 nameOf(AttributeModel_V001 attribute) {
+        return mandatory(() -> attribute.name, text -> attribute.name = text,
+            () -> attribute.nameChange, mark -> attribute.nameChange = mark);
+    }
+
+    static TextSlot_V001 typeOf(AttributeModel_V001 attribute) {
+        return optional(() -> attribute.type, text -> attribute.type = text,
+            () -> attribute.typeChange, mark -> attribute.typeChange = mark);
+    }
+
+    static TextSlot_V001 infoOf(InfoModel_V001 info) {
+        return optional(() -> info.text, text -> info.text = text,
+            () -> info.textChange, mark -> info.textChange = mark);
     }
 
     private static void addRelation(List<TextSlot_V001> slots, AbstractRelationModel_V001 relation) {

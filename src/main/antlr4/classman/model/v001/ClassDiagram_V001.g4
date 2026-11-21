@@ -46,12 +46,14 @@ grammar ClassDiagram_V001;
 //   * A change mark change(added, yellow) or change(removed, blue) follows the ID of a class, attribute, relation,
 //     association class or note. Moving an element is never marked.
 //   * A text change mark was(yellow, "old text") follows the text it belongs to: the diagram name, class name,
-//     stereotype, key or value of a tagged value, attribute name or type, an info item, a multiplicity, a relation
-//     label, a note text. The first value names the change set, the optional second one is the text before the
+//     stereotype, key or value of a tagged value, attribute name or type, the visibility sign of an attribute, an info
+//     item, a multiplicity, a relation label, a note text. The first value names the change set, the optional second
+//     one is the text before the
 //     change (bare if it is a word or multiplicity, else a string). Without the second value there was no text
 //     before, an empty string says it was empty. The text itself always stands for the new state, the box is laid
 //     out for it. A removed text stays as an empty string with the mark: "" was(yellow, "old label"). That holds
-//     for a multiplicity too. Marks of the name come before the ID.
+//     for a multiplicity too, but not for a visibility sign, which has no text left to carry a mark: a sign which
+//     was there can't be removed under change tracking. Marks of the name come before the ID.
 //   * Text marks inside an element which is marked added or removed are accepted and ignored by the renderer:
 //     accepting or rejecting the element decides about everything in it.
 //   * An assocclass nested in a relation belongs to that relation.
@@ -112,7 +114,7 @@ classBody
 // One attribute: [visibility] name [(id)] [: type] [[info, info, ...]]. A name or type is one word or a quoted string.
 attribute
     : ELLIPSIS
-    | visibility? wordOrString nameChange=textChange? ELEMENT_ID? changeMark?
+    | (visibility visibilityChange=textChange?)? wordOrString nameChange=textChange? ELEMENT_ID? changeMark?
       (COLON wordOrString typeChange=textChange?)? infos?
     ;
 
@@ -128,9 +130,11 @@ infos
     ;
 
 // Any run of tokens up to the next comma or closing bracket, e.g.  Pflicht   2..50   TN=versionkey
-// The word was ends the run if a parenthesis follows: that is the mark of the info.
+// The words was and change end the run if a parenthesis follows: that is the mark of the info. An info is a list
+// entry, so it can be added or removed as a whole, change(removed, yellow), and keeps its text then; or its text can
+// be changed, was(yellow, "old").
 info
-    : infoText textChange?
+    : infoText (changeMark | textChange)?
     ;
 
 infoText

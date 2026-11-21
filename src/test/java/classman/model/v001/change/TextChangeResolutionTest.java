@@ -10,6 +10,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TextChangeResolutionTest {
 
+  /** An info is a list entry: added and removed ones are decided as a whole, those of other change sets stay. */
+  @Test
+  void infoElementMarks() throws ClassDiagramParseException {
+    String source = "class A (aaaaaaaa) {\n x [a, b change(removed, yellow), c change(added, yellow), "
+      + "d change(removed, pink)]\n}";
+    assertEquals(canonical("class A (aaaaaaaa) {\n x [a, c, d change(removed, pink)]\n}"), accepted(source, "yellow"));
+    assertEquals(canonical("class A (aaaaaaaa) {\n x [a, b, d change(removed, pink)]\n}"), rejected(source, "yellow"));
+  }
+
+  /** Accepting keeps the new visibility sign, rejecting brings back the old one or none. */
+  @Test
+  void visibilityChange() throws ClassDiagramParseException {
+    String source = "class A (aaaaaaaa) {\n + was(yellow, \"-\") x\n - was(yellow) y\n}";
+    assertEquals(canonical("class A (aaaaaaaa) {\n +x\n -y\n}"), accepted(source, "yellow"));
+    assertEquals(canonical("class A (aaaaaaaa) {\n -x\n y\n}"), rejected(source, "yellow"));
+  }
+
   /** Accepting keeps the new text, rejecting brings back the backup. */
   @Test
   void classNameChange() throws ClassDiagramParseException {

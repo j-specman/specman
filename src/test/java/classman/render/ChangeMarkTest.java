@@ -117,6 +117,81 @@ class ChangeMarkTest {
     assertEquals(1, rectanglesFilled(scene, YELLOW).size());
   }
 
+  /** The visibility sign of an attribute has its own mark, which is highlighted like the name. */
+  @Test
+  void changedVisibilityHighlight() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0) {\n  + was(yellow, \"-\") x\n}");
+    SceneText line = SceneTestHelper.textNamed(scene, "+x");
+    SceneRectangle highlight = rectanglesFilled(scene, YELLOW).get(0);
+    assertEquals(line.left() - DiagramStyle.HIGHLIGHT_MARGIN, highlight.x);
+    assertEquals(10 + 2 * DiagramStyle.HIGHLIGHT_MARGIN, highlight.width);
+    assertEquals(1, rectanglesFilled(scene, YELLOW).size());
+  }
+
+  /** An info which a change set has removed keeps its text, has the strong color behind it and a line through it,
+   * only through the info. */
+  @Test
+  void removedInfoStruck() throws ClassDiagramParseException {
+    double margin = DiagramStyle.HIGHLIGHT_MARGIN;
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0) {\n  x [a, b change(removed, yellow), c]\n}");
+    SceneText line = SceneTestHelper.textNamed(scene, "x [a, b, c]");
+    List<SceneRectangle> highlights = rectanglesFilled(scene, YELLOW);
+    assertEquals(1, highlights.size());
+    assertEquals(line.left() + 60 - margin, highlights.get(0).x);
+    assertEquals(10 + 2 * margin, highlights.get(0).width);
+    List<SceneLine> strikes = strikes(scene);
+    assertEquals(1, strikes.size());
+    assertEquals(line.left() + 60 - 1, strikes.get(0).x1);
+    assertEquals(line.left() + 70 + 1, strikes.get(0).x2);
+  }
+
+  /** An info which a change set has added has the strong color behind it, and no line through it. */
+  @Test
+  void addedInfoHighlighted() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0) {\n  x [a, b change(added, yellow)]\n}");
+    SceneText line = SceneTestHelper.textNamed(scene, "x [a, b]");
+    List<SceneRectangle> highlights = rectanglesFilled(scene, YELLOW);
+    assertEquals(1, highlights.size());
+    assertEquals(line.left() + 60 - DiagramStyle.HIGHLIGHT_MARGIN, highlights.get(0).x);
+    assertTrue(strikes(scene).isEmpty());
+  }
+
+  /** A source which marks a removed info as the empty text with a mark of its old text (as the format allows): the
+   * info is not shown, and the characters next to the gap are marked: on both sides in the middle, at the start only
+   * the one after the gap, at the end only the one before it. */
+  @Test
+  void removedInfoMarksNeighbors() throws ClassDiagramParseException {
+    double margin = DiagramStyle.HIGHLIGHT_MARGIN;
+    Scene middle = layout("class A (aaaaaaaa) at(0, 0) {\n  x [a, \"\" was(yellow, b), c]\n}");
+    SceneText line = SceneTestHelper.textNamed(middle, "x [a, c]");
+    assertEquals(List.of(line.left() + 30 - margin, line.left() + 60 - margin),
+      rectanglesFilled(middle, YELLOW).stream().map(highlight -> highlight.x).toList());
+
+    Scene start = layout("class A (aaaaaaaa) at(0, 0) {\n  x [\"\" was(yellow, b), a, c]\n}");
+    assertEquals(List.of(line.left() + 30 - margin), rectanglesFilled(start, YELLOW).stream().map(h -> h.x).toList());
+
+    Scene end = layout("class A (aaaaaaaa) at(0, 0) {\n  x [a, c, \"\" was(yellow, b)]\n}");
+    assertEquals(List.of(line.left() + 60 - margin), rectanglesFilled(end, YELLOW).stream().map(h -> h.x).toList());
+  }
+
+  /** If all infos are removed the brackets go, and the last character before them is marked. */
+  @Test
+  void allInfosRemoved() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0) {\n  x [\"\" was(yellow, b)]\n}");
+    SceneText line = SceneTestHelper.textNamed(scene, "x");
+    assertEquals(List.of(line.left() - DiagramStyle.HIGHLIGHT_MARGIN),
+      rectanglesFilled(scene, YELLOW).stream().map(highlight -> highlight.x).toList());
+  }
+
+  /** A type which a change set has removed is not shown, and neither is its colon. The name is marked at its end. */
+  @Test
+  void removedTypeHasNoColon() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0) {\n  name : \"\" was(yellow, String)\n}");
+    SceneText line = SceneTestHelper.textNamed(scene, "name");
+    assertEquals(List.of(line.left() + 30 - DiagramStyle.HIGHLIGHT_MARGIN),
+      rectanglesFilled(scene, YELLOW).stream().map(highlight -> highlight.x).toList());
+  }
+
   /** A text change in the class name marks all of the name, the box keeps its size. */
   @Test
   void changedNameKeepsBoxSize() throws ClassDiagramParseException {

@@ -136,6 +136,31 @@ class ClassDiagramSerializer_V001Test {
     assertTrue(written.contains("aaaaaaaa \"1..<max capacity>\" -> \"a \\\"quoted\\\" one\" bbbbbbbb\n"), written);
   }
 
+  /** The mark of a visibility sign stands behind the sign, and the name follows after a blank. */
+  @Test
+  void visibilityChangeWritten() throws ClassDiagramParseException {
+    String written = roundTrip("""
+        classdiagram {
+          class A (aaaaaaaa) {
+            + was(yellow, "-") x
+            - was(yellow) y
+            z
+          }
+        }""");
+    assertTrue(written.contains("+ was(yellow, \"-\") x\n"), written);
+    assertTrue(written.contains("- was(yellow) y\n"), written);
+    assertTrue(written.contains("\n        z\n"), written);
+  }
+
+  /** The element mark of an info stands behind its text, and the item is written as before otherwise. */
+  @Test
+  void infoElementMarksWritten() throws ClassDiagramParseException {
+    String written = roundTrip("classdiagram {\n class A (aaaaaaaa) {\n  x [a, \"b, b\" change(removed, yellow), "
+      + "c change(added, blue), d was(red, e)]\n }\n}");
+    assertTrue(written.contains("x [a, \"b, b\" change(removed, yellow), c change(added, blue), d was(red, e)]\n"),
+      written);
+  }
+
   /** A removed label (empty string with mark) is kept, a mark without backup stays without backup. */
   @Test
   void emptyTextWithMark() throws ClassDiagramParseException {
