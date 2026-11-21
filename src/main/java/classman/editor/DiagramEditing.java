@@ -134,6 +134,13 @@ public class DiagramEditing {
     return selectedArea != null ? selectedArea.nameArea : null;
   }
 
+  /** @return the pale color of the change set which tracks changes, for the background of a text field, null if
+   * changes are not tracked */
+  public Color trackedFieldColor() {
+    String changeSet = host.trackedChangeSet();
+    return changeSet != null ? Color.decode(host.renderer().paleColorOf(changeSet)) : null;
+  }
+
   /** Gives the class a new name. While changes are tracked, the change set gets the mark for the change. The name it
    * has already is no operation. */
   public void rename(ClassModel_V001 box, String newName) {

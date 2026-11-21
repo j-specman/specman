@@ -36,4 +36,9 @@ public final class DiagramRenderer {
   public String selectionColorOf(String changeSet) {
     return changeColors.selectionColorOf(changeSet);
   }
+
+  /** @return the pale variant of the color of the change set as #rrggbb, for backgrounds */
+  public String paleColorOf(String changeSet) {
+    return new ChangePalette(changeColors).pale(changeSet);
+  }
 }

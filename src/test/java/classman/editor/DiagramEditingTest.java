@@ -361,6 +361,19 @@ class DiagramEditingTest {
     assertTrue(editing.selectedNameArea().getHeight() > 1.5 * oneLine);
   }
 
+  /** While changes are tracked, a text field gets the pale color of the tracking change set, otherwise none. */
+  @Test
+  void trackedFieldColor() throws ClassDiagramParseException {
+    host.changeColors.strongColors.put("yellow", "#ffff00");
+    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+
+    assertNull(editing.trackedFieldColor());
+
+    host.trackedChangeSet = "yellow";
+
+    assertEquals(Color.decode("#ffff99"), editing.trackedFieldColor());
+  }
+
   /** The same name is no operation. */
   @Test
   void sameNameIsNoStep() throws ClassDiagramParseException {
