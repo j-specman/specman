@@ -20,6 +20,9 @@ import java.awt.Point;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 
 /** The window in which a class diagram is edited. It is modal: While it is open the rest of the application can't
  * be operated, so nothing else changes the diagram. Esc and closing the window leave the editor, every operation has
@@ -116,7 +119,19 @@ public class ClassDiagramEditorWindow extends JDialog {
 
   private void showDiagram() {
     canvas.setScene(editing.scene());
-    canvas.setSelection(editing.selectedArea(), editing.selectedHandles(), editing.specialSelectionColor());
+    canvas.setSelection(framedAreas(), editing.selectedHandles(), editing.specialSelectionColor());
+  }
+
+  /** The selected box, and the class which the end of a relation is going to be hung onto. */
+  private List<Rectangle2D> framedAreas() {
+    List<Rectangle2D> areas = new ArrayList<>();
+    if (editing.selectedArea() != null) {
+      areas.add(editing.selectedArea());
+    }
+    if (editing.connectionTargetArea() != null) {
+      areas.add(editing.connectionTargetArea());
+    }
+    return areas;
   }
 
   /** Runs the operation on the key and shows the diagram as it is afterwards. While a name is typed, the keys belong

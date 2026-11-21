@@ -29,7 +29,9 @@ import java.awt.geom.Rectangle2D;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /** The operations of the diagram editor on the diagram, without any window. Each operation writes the new source
@@ -379,8 +381,30 @@ public class DiagramEditing {
   private HandleDrag handleDrag(int handle, Point2D at) {
     SceneRelationLine line = scene.relationLineOf(selected);
     AbstractRelationModel_V001 relation = line.relation;
+    boolean isEnd = handle == 0 || handle == line.points().size() - 1;
     return new HandleDrag(routeEditing, relation, line.points(), handle, at, classArea(relation.fromId),
-      classArea(relation.toId));
+      classArea(relation.toId), isEnd ? classesAnEndMayHangOnto(relation, handle == 0) : Map.of());
+  }
+
+  /** The classes by ID in the order of drawing which an end of the relation may be hung onto: all of them, but while
+   * changes are tracked only the class it hangs on, because hanging a relation onto another class is no change which
+   * the format can mark. The user deletes the relation and adds a new one then. */
+  private Map<String, Rectangle2D> classesAnEndMayHangOnto(AbstractRelationModel_V001 relation, boolean start) {
+    Map<String, Rectangle2D> classes = new LinkedHashMap<>();
+    String ownClassId = start ? relation.fromId : relation.toId;
+    for (ClassModel_V001 box : model.classes()) {
+      boolean allowed = host.trackedChangeSet() == null || ownClassId.equals(box.id);
+      if (box.id != null && allowed) {
+        classes.put(box.id, scene.elementAreaOf(box).area);
+      }
+    }
+    return classes;
+  }
+
+  /** @return where the class is which the end of a relation which is being dragged is going to be hung onto, null if
+   * it stays on its own class or nothing is dragged */
+  public Rectangle2D connectionTargetArea() {
+    return drag != null ? drag.connectionTarget() : null;
   }
 
   /** Shows the dragged thing where the mouse is. A handle of a relation snaps to the line of its neighbors if it comes

@@ -38,7 +38,7 @@ class DiagramCanvas extends JPanel implements Scrollable {
 
   private final SceneGraphicsPainter painter = new SceneGraphicsPainter();
   private Scene scene;
-  private Rectangle2D selection;
+  private List<Rectangle2D> frames = List.of();
   private List<Point2D> handles = List.of();
   private Color specialSelectionColor;
   private double zoom = 1;
@@ -91,11 +91,12 @@ class DiagramCanvas extends JPanel implements Scrollable {
     scrollRectToVisible(new Rectangle(canvasPoint.x, canvasPoint.y, 1, 1));
   }
 
-  /** @param area the area of the diagram which is selected, null if nothing is
+  /** @param frames the areas of the diagram which get a frame: the selected box, and the class which the end of a
+   * relation is going to be hung onto
    * @param handles the points of a selected relation which are marked with small circles, empty if there are none
-   * @param specialColor the color of the frame if the usual one can't be told from what is selected, null otherwise */
-  void setSelection(Rectangle2D area, List<Point2D> handles, Color specialColor) {
-    this.selection = area;
+   * @param specialColor the color of the frames if the usual one can't be told from what is selected, null otherwise */
+  void setSelection(List<Rectangle2D> frames, List<Point2D> handles, Color specialColor) {
+    this.frames = List.copyOf(frames);
     this.handles = List.copyOf(handles);
     this.specialSelectionColor = specialColor;
     repaint();
@@ -145,17 +146,16 @@ class DiagramCanvas extends JPanel implements Scrollable {
     }
   }
 
-  /** A translucent frame around the selected box, so what it covers shines through. It is as thick and as far from
-   * the box on the screen at every zoom. */
+  /** A translucent frame around each framed box, so what it covers shines through. It is as thick and as far from the
+   * box on the screen at every zoom. */
   private void paintSelection(Graphics2D g) {
-    if (selection == null) {
-      return;
-    }
     double gap = SELECTION_GAP / zoom;
     g.setColor(selectionColor());
     g.setStroke(new BasicStroke((float) (SELECTION_WIDTH / zoom)));
-    g.draw(new Rectangle2D.Double(selection.getX() - gap, selection.getY() - gap,
-      selection.getWidth() + 2 * gap, selection.getHeight() + 2 * gap));
+    for (Rectangle2D frame : frames) {
+      g.draw(new Rectangle2D.Double(frame.getX() - gap, frame.getY() - gap,
+        frame.getWidth() + 2 * gap, frame.getHeight() + 2 * gap));
+    }
   }
 
   /** Small white circles outlined in the color of the selection, as large on the screen at every zoom. */

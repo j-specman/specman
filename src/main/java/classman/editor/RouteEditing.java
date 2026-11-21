@@ -49,18 +49,20 @@ class RouteEditing {
     relation.route.waypoints.set(waypointIndex, positionOf(to));
   }
 
-  /** Moves the start of the route along the border of the source class to the point of the border which is closest
-   * to the given point. */
-  void moveStart(AbstractRelationModel_V001 relation, Rectangle2D fromArea, Point2D to) {
+  /** Hangs the start of the route onto the class, at the point of its border which is closest to the given point. It
+   * is the source class of the relation from then on. */
+  void attachStart(AbstractRelationModel_V001 relation, String classId, Rectangle2D classArea, Point2D to) {
     RouteModel_V001 route = relation.route;
-    relation.route = new RouteModel_V001(anchorAt(relation.fromId, fromArea, to), route.waypoints, route.end);
+    relation.fromId = classId;
+    relation.route = new RouteModel_V001(anchorAt(classId, classArea, to), route.waypoints, route.end);
   }
 
-  /** Moves the end of the route along the border of the target class to the point of the border which is closest to
-   * the given point. */
-  void moveEnd(AbstractRelationModel_V001 relation, Rectangle2D toArea, Point2D to) {
+  /** Hangs the end of the route onto the class, at the point of its border which is closest to the given point. It is
+   * the target class of the relation from then on. */
+  void attachEnd(AbstractRelationModel_V001 relation, String classId, Rectangle2D classArea, Point2D to) {
     RouteModel_V001 route = relation.route;
-    relation.route = new RouteModel_V001(route.start, route.waypoints, anchorAt(relation.toId, toArea, to));
+    relation.toId = classId;
+    relation.route = new RouteModel_V001(route.start, route.waypoints, anchorAt(classId, classArea, to));
   }
 
   /** @return a copy of the route which doesn't change when the route does, null if there is none */
