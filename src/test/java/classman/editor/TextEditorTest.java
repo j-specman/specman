@@ -20,6 +20,8 @@ class TextEditorTest {
 
   private static final String RELATED = "classdiagram {\n  class A (11111111) at(10, 20)\n"
     + "  class B (22222222) at(300, 20)\n  association (33333333) 11111111 1 -> * 22222222 \"owns\"\n}";
+  private static final String BARE = "classdiagram {\n  class A (11111111) at(10, 20)\n"
+    + "  class B (22222222) at(300, 20)\n  association (33333333) 11111111 -- 22222222\n}";
   private static final int TEXT_OFFSET_X = 5;
   private static final int TEXT_OFFSET_Y = 3;
   private static final String LONG_TEXT = "A text which is much longer than the field was at the start of the editing";
@@ -81,6 +83,41 @@ class TextEditorTest {
 
       assertTrue(field.getWidth() > width, kind + " is wider");
       assertEquals(height, field.getHeight(), kind + " stays as high");
+    }
+  }
+
+  /** The field for a text which doesn't exist yet starts as wide as its place, and covers it, and then grows. It is as
+   * high as the field for a text of the same kind which exists. */
+  @Test
+  void fieldCoversPlaceholder() throws Exception {
+    for (TextKind kind : new TextKind[] {TextKind.RELATION_LABEL, TextKind.FROM_MULTIPLICITY,
+        TextKind.TO_MULTIPLICITY}) {
+      open(kind);
+      int heightOfExistingText = field.getHeight();
+      SceneTextArea[] place = new SceneTextArea[1];
+      onEdt(() -> {
+        try {
+          editing = new DiagramEditing(BARE, host, new EditorTexts(host.locale()));
+        }
+        catch (Exception e) {
+          throw new IllegalStateException(e);
+        }
+        canvas = new DiagramCanvas(editing.scene());
+        place[0] = editing.scene().placeholderAreas.stream().filter(text -> text.kind == kind).findFirst().orElseThrow();
+        new TextEditor(canvas, editing, () -> { }).start(place[0]);
+        field = (JTextComponent) canvas.getComponent(0);
+      });
+      Rectangle dashed = canvas.toCanvas(place[0].area);
+      dashed.grow(canvas.placeholderMargin(), canvas.placeholderMargin());
+
+      assertEquals(dashed.width, field.getWidth(), kind + " is as wide as its place");
+      assertEquals(dashed.x, field.getX(), kind + " starts where its place starts");
+      assertEquals(heightOfExistingText, field.getHeight(), kind + " is as high as a field for an existing text");
+
+      onEdt(() -> field.setText(LONG_TEXT));
+      onEdt(() -> { });
+
+      assertTrue(field.getWidth() > dashed.width, kind + " grows with the text");
     }
   }
 }

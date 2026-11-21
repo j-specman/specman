@@ -20,7 +20,6 @@ import java.awt.event.InputEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.List;
 
 /** Paints the scene of the diagram with Graphics2D. Mouse wheel with Ctrl zooms. If the diagram is smaller than the
  * window, the canvas fills the window, so there is room to drop things where the diagram has none yet. */
@@ -33,14 +32,14 @@ class DiagramCanvas extends JPanel implements Scrollable {
   private static final int SELECTION_WIDTH = 2;
   private static final int SELECTION_ALPHA = 190;
   private static final double HANDLE_DIAMETER = 9;
+  private static final double PLACEHOLDER_DASH = 3;
+  private static final int PLACEHOLDER_GAP = 2;
   private static final Color HANDLE_FILL = Color.WHITE;
   private static final Color DEFAULT_SELECTION_COLOR = new Color(0x2D7FF9);
 
   private final SceneGraphicsPainter painter = new SceneGraphicsPainter();
   private Scene scene;
-  private List<Rectangle2D> frames = List.of();
-  private List<Point2D> handles = List.of();
-  private Color specialSelectionColor;
+  private SelectionMarks marks = SelectionMarks.none();
   private double zoom = 1;
 
   /** The point of the diagram at the top left of the canvas, and the size of the canvas in points of the diagram.
@@ -91,14 +90,8 @@ class DiagramCanvas extends JPanel implements Scrollable {
     scrollRectToVisible(new Rectangle(canvasPoint.x, canvasPoint.y, 1, 1));
   }
 
-  /** @param frames the areas of the diagram which get a frame: the selected box, and the class which the end of a
-   * relation is going to be hung onto
-   * @param handles the points of a selected relation which are marked with small circles, empty if there are none
-   * @param specialColor the color of the frames if the usual one can't be told from what is selected, null otherwise */
-  void setSelection(List<Rectangle2D> frames, List<Point2D> handles, Color specialColor) {
-    this.frames = List.copyOf(frames);
-    this.handles = List.copyOf(handles);
-    this.specialSelectionColor = specialColor;
+  void setSelection(SelectionMarks marks) {
+    this.marks = marks;
     repaint();
   }
 
@@ -139,6 +132,7 @@ class DiagramCanvas extends JPanel implements Scrollable {
       g.translate(-originX, -originY);
       painter.paint(scene, g);
       paintSelection(g);
+      paintPlaceholders(g);
       paintHandles(g);
     }
     finally {
@@ -152,16 +146,39 @@ class DiagramCanvas extends JPanel implements Scrollable {
     double gap = SELECTION_GAP / zoom;
     g.setColor(selectionColor());
     g.setStroke(new BasicStroke((float) (SELECTION_WIDTH / zoom)));
-    for (Rectangle2D frame : frames) {
+    for (Rectangle2D frame : marks.frames) {
       g.draw(new Rectangle2D.Double(frame.getX() - gap, frame.getY() - gap,
         frame.getWidth() + 2 * gap, frame.getHeight() + 2 * gap));
     }
   }
 
+  /** Dashed rectangles in the color of the selection where a selected relation could get a text, as thin and with as
+   * long dashes on the screen at every zoom. While changes are tracked they are filled with the pale color of the
+   * change set, like the field in which the text is typed. */
+  private void paintPlaceholders(Graphics2D g) {
+    float[] dashes = {(float) (PLACEHOLDER_DASH / zoom), (float) (PLACEHOLDER_DASH / zoom)};
+    double gap = PLACEHOLDER_GAP / zoom;
+    for (Rectangle2D placeholder : marks.placeholders) {
+      Rectangle2D.Double outline = new Rectangle2D.Double(placeholder.getX() - gap, placeholder.getY() - gap,
+        placeholder.getWidth() + 2 * gap, placeholder.getHeight() + 2 * gap);
+      if (marks.placeholderFill != null) {
+        g.setColor(marks.placeholderFill);
+        g.fill(outline);
+      }
+      g.setColor(selectionColor());
+      g.setStroke(new BasicStroke((float) (1 / zoom), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10, dashes, 0));
+      g.draw(outline);
+    }
+  }
+
+  /** @return how far, in pixels of the screen, the dashed rectangle of a place for a missing text reaches out of the
+   * area of the text */
+  int placeholderMargin() { return PLACEHOLDER_GAP; }
+
   /** Small white circles outlined in the color of the selection, as large on the screen at every zoom. */
   private void paintHandles(Graphics2D g) {
     double diameter = HANDLE_DIAMETER / zoom;
-    for (Point2D handle : handles) {
+    for (Point2D handle : marks.handles) {
       Ellipse2D circle = new Ellipse2D.Double(handle.getX() - diameter / 2, handle.getY() - diameter / 2,
         diameter, diameter);
       g.setColor(HANDLE_FILL);
@@ -173,8 +190,8 @@ class DiagramCanvas extends JPanel implements Scrollable {
   }
 
   private Color selectionColor() {
-    if (specialSelectionColor != null) {
-      return withAlpha(specialSelectionColor, SELECTION_ALPHA);
+    if (marks.specialColor != null) {
+      return withAlpha(marks.specialColor, SELECTION_ALPHA);
     }
     Color accent = UIManager.getColor("Component.focusColor");
     return withAlpha(accent != null ? accent : DEFAULT_SELECTION_COLOR, SELECTION_ALPHA);

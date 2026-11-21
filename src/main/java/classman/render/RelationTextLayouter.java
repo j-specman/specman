@@ -35,6 +35,28 @@ public class RelationTextLayouter {
         return new RelationTexts(fromMultiplicity, toMultiplicity, labelLines);
     }
 
+    /** @return where the texts would stand which the relation doesn't have yet, laid out with sample texts: a label
+     * for every relation, multiplicities for those which can have them */
+    public RelationTexts placeholders(AbstractRelationModel_V001 relation, List<Point2D.Double> path) {
+        SceneText fromMultiplicity = null;
+        SceneText toMultiplicity = null;
+        if (relation instanceof AssociationRelationModel_V001 association) {
+            if (isMissing(association.fromMultiplicity)) {
+                fromMultiplicity = multiplicity(DiagramStyle.MULTIPLICITY_PLACEHOLDER, path.get(0), path.get(1));
+            }
+            if (isMissing(association.toMultiplicity)) {
+                toMultiplicity = multiplicity(DiagramStyle.MULTIPLICITY_PLACEHOLDER, path.get(path.size() - 1),
+                    path.get(path.size() - 2));
+            }
+        }
+        List<SceneText> labelLines = isMissing(relation.label) ? label(DiagramStyle.LABEL_PLACEHOLDER, path) : List.of();
+        return new RelationTexts(fromMultiplicity, toMultiplicity, labelLines);
+    }
+
+    private static boolean isMissing(String text) {
+        return text == null || text.isEmpty();
+    }
+
     // ---- multiplicities ----
 
     /**
@@ -58,8 +80,9 @@ public class RelationTextLayouter {
             return new SceneText(x, lineTop - MULTIPLICITY_SIDE_GAP, multiplicity, false,
                 dx > 0 ? TextAnchor.START : TextAnchor.END, width);
         } else {
-            double baseline = dy > 0 ? border.y + measurer.ascent() : border.y - MULTIPLICITY_BORDER_GAP;
-            double top = baseline - measurer.ascent();
+            double top = dy > 0 ? border.y + MULTIPLICITY_BORDER_GAP
+                : border.y - MULTIPLICITY_BORDER_GAP - measurer.lineHeight();
+            double baseline = top + measurer.ascent();
             double lineRight = Math.max(border.x,
                 Math.max(xOnLine(border, dx, dy, top), xOnLine(border, dx, dy, top + measurer.lineHeight())));
             return new SceneText(lineRight + MULTIPLICITY_SIDE_GAP, baseline, multiplicity, false,

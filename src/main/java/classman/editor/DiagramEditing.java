@@ -115,9 +115,10 @@ public class DiagramEditing {
 
   /** Selects the box at the point of the diagram, or else the relation whose line is at most the tolerance away, or
    * nothing if there is none. A box wins over a line, so that a click near the border of a box selects the box. The
-   * handles of a selected relation are above everything: a point on one of them keeps the relation selected. */
+   * handles and the placeholders of a selected relation are above everything: a point on one of them keeps the
+   * relation selected. */
   public void selectAt(Point2D point, double tolerance) {
-    if (handleIndexAt(point, tolerance) >= 0) {
+    if (handleIndexAt(point, tolerance) >= 0 || selectedPlaceholderAt(point) != null) {
       return;
     }
     SceneElementArea hit = scene.elementAreaAt(point);
@@ -175,7 +176,8 @@ public class DiagramEditing {
   public boolean insertWaypointAt(Point2D point, double tolerance) {
     SceneRelationLine line = selected != null ? scene.relationLineOf(selected) : null;
     if (line == null || line.distanceTo(point) > tolerance || handleIndexAt(point, tolerance) >= 0
-        || scene.elementAreaAt(point) != null || scene.textAreaAt(point) != null) {
+        || scene.elementAreaAt(point) != null || scene.textAreaAt(point) != null
+        || selectedPlaceholderAt(point) != null) {
       return false;
     }
     AbstractRelationModel_V001 relation = line.relation;
@@ -212,6 +214,21 @@ public class DiagramEditing {
     return selectedLine != null ? selectedLine.points() : List.of();
   }
 
+  /** @return what the canvas shows to mark the selection: a frame around the selected box and around the class which
+   * the end of a relation is going to be hung onto, the handles and the places for missing texts of a selected
+   * relation, which are filled with the pale color of the change set while changes are tracked */
+  SelectionMarks selectionMarks() {
+    List<Rectangle2D> frames = new ArrayList<>();
+    if (selectedArea() != null) {
+      frames.add(selectedArea());
+    }
+    if (connectionTargetArea() != null) {
+      frames.add(connectionTargetArea());
+    }
+    return new SelectionMarks(frames, selectedHandles(), selectedPlaceholders(), trackedFieldColor(),
+      specialSelectionColor());
+  }
+
   /** @return the color for the frame around the selected box if the usual one can't be told from the change set which
    * marked the box, null otherwise */
   public Color specialSelectionColor() {
@@ -222,11 +239,32 @@ public class DiagramEditing {
     return color != null ? Color.decode(color) : null;
   }
 
-  /** @return the text at the point if the user can change it: it belongs to the selected box or to a relation */
+  /** @return the text at the point if the user can change it: it belongs to the selected box or to a relation. Where
+   * the selected relation has no text yet, its placeholder at the point counts: the user creates the text there. */
   public SceneTextArea editableTextAt(Point2D point) {
     SceneTextArea text = scene.textAreaAt(point);
     boolean editable = text != null && (text.element == selected || text.element instanceof AbstractRelationModel_V001);
-    return editable ? text : null;
+    if (editable) {
+      return text;
+    }
+    return text == null ? selectedPlaceholderAt(point) : null;
+  }
+
+  private SceneTextArea selectedPlaceholderAt(Point2D point) {
+    SceneTextArea placeholder = scene.placeholderAt(point);
+    return placeholder != null && placeholder.element == selected ? placeholder : null;
+  }
+
+  /** @return where the selected relation could get the texts which it doesn't have yet, empty if no relation is
+   * selected or it has all */
+  public List<Rectangle2D> selectedPlaceholders() {
+    List<Rectangle2D> areas = new ArrayList<>();
+    for (SceneTextArea placeholder : scene.placeholderAreas) {
+      if (placeholder.element == selected) {
+        areas.add(placeholder.area);
+      }
+    }
+    return areas;
   }
 
   /** @return the area of the box which the text belongs to, the area of the text itself if it belongs to a relation */

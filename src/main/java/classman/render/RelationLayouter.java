@@ -44,6 +44,7 @@ public class RelationLayouter {
         Rectangle2D.Double bounds = boundsOf(path, underlay, elements);
         List<SceneElementArea> elementAreas = new ArrayList<>();
         List<SceneTextArea> textAreas = new ArrayList<>(textAreaLayouter.of(relation, texts));
+        textAreas.addAll(textAreaLayouter.placeholdersOf(relation, textLayouter.placeholders(relation, path)));
         if (relation instanceof AssociationRelationModel_V001 association && association.assocClass != null) {
             RelationLayout assocClass = assocClassLayouter.layout(association.assocClass, path);
             elements.addAll(assocClass.elements);

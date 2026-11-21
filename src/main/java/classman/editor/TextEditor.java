@@ -19,6 +19,8 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -32,6 +34,7 @@ class TextEditor {
   private static final int FIELD_MARGIN = 3;
   private static final int TEXT_MARGIN = 4;
   private static final int BORDER_WIDTH = 1;
+  private static final int CARET_WIDTH = 2;
   private static final Color BORDER_COLOR = new Color(0x2D7FF9);
   private static final Color REJECTED_BORDER_COLOR = new Color(0xD32F2F);
 
@@ -152,13 +155,34 @@ class TextEditor {
     return field.getPreferredSize().height;
   }
 
+  /** The width a text field starts with: at least the width of a text which exists, and at least what its text needs.
+   * The field for a text which doesn't exist yet starts as wide as its place, which the user sees as a dashed
+   * rectangle around the area of the text, and covers it exactly sideways. It is as high as the field for a text which
+   * exists, the dashed rectangle is higher than that. */
   private Rectangle growingBounds() {
-    int width = Math.max(Math.max(textArea.width, edited.kind.minFieldWidth), field.getPreferredSize().width);
+    int margin = edited.placeholder ? canvas.placeholderMargin() : 0;
+    int minimumWidth = edited.placeholder
+      ? textArea.width + 2 * margin
+      : Math.max(textArea.width, edited.kind.minFieldWidth);
+    int width = Math.max(minimumWidth, widthOfText());
     int height = Math.max(textArea.height + 2 * FIELD_MARGIN, heightAtWidth(width));
     int x = edited.kind.centered
       ? textArea.x + (textArea.width - width) / 2
-      : textArea.x - TEXT_MARGIN - BORDER_WIDTH;
+      : textArea.x - (edited.placeholder ? margin : TEXT_MARGIN + BORDER_WIDTH);
     return new Rectangle(x, textArea.y - FIELD_MARGIN, width, height);
+  }
+
+  /** The width which the lines of the text and the borders of the field need. The preferred width of the field is no
+   * help: some looks and feels give an empty field a minimum width of their own, which would make a field for a short
+   * text wider than the text it replaces. */
+  private int widthOfText() {
+    FontMetrics metrics = field.getFontMetrics(field.getFont());
+    int widest = 0;
+    for (String line : field.getText().split("\n", -1)) {
+      widest = Math.max(widest, metrics.stringWidth(line));
+    }
+    Insets borders = field.getInsets();
+    return widest + borders.left + borders.right + CARET_WIDTH;
   }
 
   /** An empty text is no text: a mandatory text keeps its old content, an optional one is removed. Tabs which were

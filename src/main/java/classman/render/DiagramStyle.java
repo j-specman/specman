@@ -23,11 +23,16 @@ public final class DiagramStyle {
     public static final double ARROW_HALF_WIDTH = 5;
     public static final double TRIANGLE_LENGTH = 14;
     public static final double TRIANGLE_HALF_WIDTH = 7;
-    /** The distances of the texts of a relation from its line. */
+    /** The distances of the texts of a relation from its line, and of its multiplicities from the box which the line
+     * starts at, along the line and, where the line runs up or down, above or below the box. */
     public static final double MULTIPLICITY_SIDE_GAP = 8;
-    public static final double MULTIPLICITY_ALONG_GAP = 4;
-    public static final double MULTIPLICITY_BORDER_GAP = 2;
+    public static final double MULTIPLICITY_ALONG_GAP = 6;
+    public static final double MULTIPLICITY_BORDER_GAP = 5;
     public static final double LABEL_GAP = 6;
+    /** The texts whose size gives the editor the size of the places where a relation could get a label or a
+     * multiplicity. They are not shown. */
+    public static final String LABEL_PLACEHOLDER = "label";
+    public static final String MULTIPLICITY_PLACEHOLDER = "0..*";
     /** How far the double click area of a short text of a relation reaches around the text. */
     public static final double TEXT_HIT_PADDING = 3;
     /** The space between the text of an attribute and the end of a note line which is attached to it. */
