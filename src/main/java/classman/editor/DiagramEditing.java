@@ -7,8 +7,10 @@ import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.Multiplicity_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
+import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.change.ElementTextChanger_V001;
 import classman.model.v001.change.ElementDeleter_V001;
 import classman.model.v001.io.ClassDiagramParseException;
@@ -125,23 +127,32 @@ public class DiagramEditing {
     return color != null ? Color.decode(color) : null;
   }
 
-  /** @return the text at the point if it belongs to the selected box, null otherwise */
-  public SceneTextArea selectedTextAt(Point2D point) {
+  /** @return the text at the point if the user can change it: it belongs to the selected box or to a relation */
+  public SceneTextArea editableTextAt(Point2D point) {
     SceneTextArea text = scene.textAreaAt(point);
-    return text != null && text.element == selected ? text : null;
+    boolean editable = text != null && (text.element == selected || text.element instanceof AbstractRelationModel_V001);
+    return editable ? text : null;
   }
 
-  /** @return the area of the box which the text belongs to */
+  /** @return the area of the box which the text belongs to, the area of the text itself if it belongs to a relation */
   public Rectangle2D boxOf(SceneTextArea text) {
-    return scene.elementAreaOf(text.element).area;
+    SceneElementArea box = scene.elementAreaOf(text.element);
+    return box != null ? box.area : text.area;
   }
 
-  /** @return the text which the area shows */
+  /** @return the text which the area shows, empty if the relation doesn't have it */
   public String textOf(SceneTextArea text) {
     return switch (text.kind) {
       case CLASS_NAME -> ((ClassModel_V001) text.element).name;
       case NOTE_TEXT -> ((NoteModel_V001) text.element).text;
+      case RELATION_LABEL -> orEmpty(((AbstractRelationModel_V001) text.element).label);
+      case FROM_MULTIPLICITY -> orEmpty(((AssociationRelationModel_V001) text.element).fromMultiplicity);
+      case TO_MULTIPLICITY -> orEmpty(((AssociationRelationModel_V001) text.element).toMultiplicity);
     };
+  }
+
+  private static String orEmpty(String text) {
+    return text != null ? text : "";
   }
 
   /** @return the pale color of the change set which tracks changes, for the background of a text field, null if
@@ -151,11 +162,34 @@ public class DiagramEditing {
     return changeSet != null ? Color.decode(host.renderer().paleColorOf(changeSet)) : null;
   }
 
+  /** @return false if the text can't have that content: a multiplicity must be a number, a range like 0..1 or 1..*,
+   * or *, and while changes are tracked one which isn't new can't be removed, because the removal can't be marked. */
+  public boolean accepts(SceneTextArea text, String newText) {
+    return switch (text.kind) {
+      case FROM_MULTIPLICITY -> acceptsMultiplicity(text, RelationEnd_V001.FROM, newText);
+      case TO_MULTIPLICITY -> acceptsMultiplicity(text, RelationEnd_V001.TO, newText);
+      default -> true;
+    };
+  }
+
+  private boolean acceptsMultiplicity(SceneTextArea text, RelationEnd_V001 end, String newText) {
+    if (!newText.isEmpty() && !Multiplicity_V001.isValid(newText)) {
+      return false;
+    }
+    String changeSet = host.trackedChangeSet();
+    return changeSet == null
+      || textChanger.canSetMultiplicity((AssociationRelationModel_V001) text.element, end, newText, changeSet);
+  }
+
   /** Gives the text a new content. While changes are tracked, the change set gets the mark for the change. The text it
-   * has already is no operation. */
+   * has already is no operation. An empty text removes a label or multiplicity.
+   * @throws IllegalArgumentException if {@link #accepts} says no */
   public void setText(SceneTextArea text, String newText) {
     if (textOf(text).equals(newText)) {
       return;
+    }
+    if (!accepts(text, newText)) {
+      throw new IllegalArgumentException("The text can't have the content: " + newText);
     }
     String changeSet = host.trackedChangeSet();
     switch (text.kind) {
@@ -177,8 +211,29 @@ public class DiagramEditing {
           textChanger.setNoteText(note, newText);
         }
       }
+      case RELATION_LABEL -> {
+        AbstractRelationModel_V001 relation = (AbstractRelationModel_V001) text.element;
+        if (changeSet != null) {
+          textChanger.setLabel(relation, newText, changeSet);
+        }
+        else {
+          textChanger.setLabel(relation, newText);
+        }
+      }
+      case FROM_MULTIPLICITY -> setMultiplicity(text, RelationEnd_V001.FROM, newText, changeSet);
+      case TO_MULTIPLICITY -> setMultiplicity(text, RelationEnd_V001.TO, newText, changeSet);
     }
     publish();
+  }
+
+  private void setMultiplicity(SceneTextArea text, RelationEnd_V001 end, String newText, String changeSet) {
+    AssociationRelationModel_V001 association = (AssociationRelationModel_V001) text.element;
+    if (changeSet != null) {
+      textChanger.setMultiplicity(association, end, newText, changeSet);
+    }
+    else {
+      textChanger.setMultiplicity(association, end, newText);
+    }
   }
 
   /** Starts to drag the selected box, if there is one, from the point where the mouse was pressed. */

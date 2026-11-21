@@ -14,7 +14,7 @@ public class RelationLayout {
     public final Point2D.Double attachPoint;
     /** The boxes which belong to the relation: its association class, if it has one. */
     public final List<SceneElementArea> elementAreas;
-    /** The texts of the boxes which belong to the relation, which the user can change in place. */
+    /** The texts of the relation itself and of the boxes which belong to it, which the user can change in place. */
     public final List<SceneTextArea> textAreas;
 
     public RelationLayout(List<AbstractSceneElement> elements, Rectangle2D.Double bounds,

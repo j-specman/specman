@@ -16,12 +16,14 @@ public class RelationLayouter {
     private final RelationPathBuilder pathBuilder = new RelationPathBuilder();
     private final RelationDecorator decorator = new RelationDecorator();
     private final RelationTextLayouter textLayouter;
+    private final RelationTextAreas textAreaLayouter;
     private final RelationMarkLayouter markLayouter;
     private final AssocClassLayouter assocClassLayouter;
 
     public RelationLayouter(TextMeasurer measurer, ClassBoxLayouter classLayouter, ChangePalette palette) {
         this.measurer = measurer;
         this.textLayouter = new RelationTextLayouter(measurer);
+        this.textAreaLayouter = new RelationTextAreas(measurer);
         this.markLayouter = new RelationMarkLayouter(measurer, palette);
         this.assocClassLayouter = new AssocClassLayouter(classLayouter);
     }
@@ -39,7 +41,7 @@ public class RelationLayouter {
         elements.addAll(markLayouter.overlay(relation, texts, PathGeometry.quarterPoint(path)));
         Rectangle2D.Double bounds = boundsOf(path, underlay, elements);
         List<SceneElementArea> elementAreas = new ArrayList<>();
-        List<SceneTextArea> textAreas = new ArrayList<>();
+        List<SceneTextArea> textAreas = new ArrayList<>(textAreaLayouter.of(relation, texts));
         if (relation instanceof AssociationRelationModel_V001 association && association.assocClass != null) {
             RelationLayout assocClass = assocClassLayouter.layout(association.assocClass, path);
             elements.addAll(assocClass.elements);

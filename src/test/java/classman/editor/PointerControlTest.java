@@ -9,6 +9,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PointerControlTest {
@@ -26,8 +27,29 @@ class PointerControlTest {
   private PointerControl control;
 
   private void open() throws ClassDiagramParseException {
-    editing = new DiagramEditing(SOURCE, host, new EditorTexts(host.locale()));
+    open(SOURCE);
+  }
+
+  private void open(String source) throws ClassDiagramParseException {
+    editing = new DiagramEditing(source, host, new EditorTexts(host.locale()));
     control = new PointerControl(editing, () -> { }, text -> nameEdits.incrementAndGet());
+  }
+
+  /** A double click on the label of a relation starts the editor for it, although no box is selected. */
+  @Test
+  void doubleClickOnRelationLabel() throws ClassDiagramParseException {
+    open("classdiagram {\n  class A (11111111) at(10, 20)\n  class B (22222222) at(300, 20)\n"
+      + "  association (33333333) 11111111 1 -> * 22222222 \"owns\"\n}");
+    Rectangle2D label = editing.scene().textAreas.stream()
+      .filter(area -> area.kind == TextKind.RELATION_LABEL).findFirst().orElseThrow().area;
+
+    control.doubleClicked(new Point2D.Double(label.getMinX() - 20, label.getMinY() - 20));
+    assertEquals(0, nameEdits.get());
+
+    control.doubleClicked(new Point2D.Double(label.getCenterX(), label.getCenterY()));
+
+    assertEquals(1, nameEdits.get());
+    assertFalse(editing.hasSelection());
   }
 
   /** A double click on the name of a class starts the name editor. */

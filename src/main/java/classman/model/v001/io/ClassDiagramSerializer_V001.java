@@ -10,6 +10,7 @@ import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassDiagram_V001Lexer;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.InfoModel_V001;
+import classman.model.v001.Multiplicity_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RouteModel_V001;
@@ -32,7 +33,6 @@ public class ClassDiagramSerializer_V001 {
         "// {\"classmanVersion\":\"0.1\",\"modelType\":\"classman.model.v001.ClassDiagramModel_V001\"}";
     private static final Pattern NAME = Pattern.compile("[\\p{L}_][\\p{L}\\p{N}_]*(?:[-/][\\p{L}\\p{N}_]+)*");
     private static final Pattern INTEGER = Pattern.compile("-?[0-9]+");
-    private static final Pattern MULTIPLICITY = Pattern.compile("-?[0-9]+(?:\\.\\.(?:-?[0-9]+|\\*))?|\\*");
 
     private final Set<Integer> keywordTypes = new HashSet<>();
     private final Set<String> keywords = new HashSet<>();
@@ -243,7 +243,7 @@ public class ClassDiagramSerializer_V001 {
 
     /** Bare if it is a multiplicity or a simple word, else in quotes. */
     private String backupText(String backup) {
-        return MULTIPLICITY.matcher(backup).matches() ? backup : word(backup);
+        return Multiplicity_V001.isValid(backup) ? backup : word(backup);
     }
 
     private void appendChange(StringBuilder out, ChangeModel_V001 change) {

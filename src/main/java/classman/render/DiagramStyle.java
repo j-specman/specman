@@ -28,6 +28,8 @@ public final class DiagramStyle {
     public static final double MULTIPLICITY_ALONG_GAP = 4;
     public static final double MULTIPLICITY_BORDER_GAP = 2;
     public static final double LABEL_GAP = 6;
+    /** How far the double click area of a short text of a relation reaches around the text. */
+    public static final double TEXT_HIT_PADDING = 3;
     /** The space between the text of an attribute and the end of a note line which is attached to it. */
     public static final double ATTRIBUTE_ATTACH_GAP = 2;
     /** The distance between the line of a relation and its association class. */

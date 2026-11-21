@@ -39,12 +39,12 @@ class PointerControl implements PointerListener {
     showDiagram.run();
   }
 
-  /** A double click on a text of the box it selects lets the user change the text. */
+  /** A double click on a text of the box it selects, or on a text of a relation, lets the user change the text. */
   @Override
   public void doubleClicked(Point2D at) {
     editing.selectAt(at);
     showDiagram.run();
-    SceneTextArea text = editing.selectedTextAt(at);
+    SceneTextArea text = editing.editableTextAt(at);
     if (text != null) {
       editText.accept(text);
     }

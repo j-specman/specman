@@ -55,7 +55,7 @@ public class Scene {
     /** @return the text at the point, the one drawn on top if they overlap, null if there is none */
     public SceneTextArea textAreaAt(Point2D point) {
         for (int i = textAreas.size() - 1; i >= 0; i--) {
-            if (textAreas.get(i).area.contains(point)) {
+            if (textAreas.get(i).hitArea().contains(point)) {
                 return textAreas.get(i);
             }
         }

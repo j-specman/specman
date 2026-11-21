@@ -1,5 +1,7 @@
 package classman.editor;
 
+import classman.model.v001.AbstractRelationModel_V001;
+import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.ChangeType_V001;
@@ -414,8 +416,8 @@ class DiagramEditingTest {
     editing.selectAt(new Point2D.Double(text.getCenterX(), text.getCenterY()));
 
     assertEquals(TextKind.NOTE_TEXT,
-      editing.selectedTextAt(new Point2D.Double(text.getCenterX(), text.getCenterY())).kind);
-    assertNull(editing.selectedTextAt(new Point2D.Double(text.getMinX() - 20, text.getMinY() - 20)));
+      editing.editableTextAt(new Point2D.Double(text.getCenterX(), text.getCenterY())).kind);
+    assertNull(editing.editableTextAt(new Point2D.Double(text.getMinX() - 20, text.getMinY() - 20)));
     assertTrue(editing.boxOf(textOfKind(editing, TextKind.NOTE_TEXT)).contains(text));
   }
 
@@ -429,6 +431,100 @@ class DiagramEditingTest {
     editing.setText(textOfKind(editing, TextKind.CLASS_NAME), "Book");
 
     assertFalse(editing.canUndo());
+  }
+
+  private static final String RELATED = "classdiagram {\n  class A (11111111) at(10, 20)\n"
+    + "  class B (22222222) at(300, 20)\n  association (33333333) 11111111 1 -> * 22222222 \"owns\"\n}";
+
+  /** A relation has areas for its label and both multiplicities, which lie between its two classes. */
+  @Test
+  void relationTextAreas() throws ClassDiagramParseException {
+    DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
+
+    Rectangle2D label = textOfKind(editing, TextKind.RELATION_LABEL).area;
+    Rectangle2D from = textOfKind(editing, TextKind.FROM_MULTIPLICITY).area;
+    Rectangle2D to = textOfKind(editing, TextKind.TO_MULTIPLICITY).area;
+
+    assertEquals("owns", editing.textOf(textOfKind(editing, TextKind.RELATION_LABEL)));
+    assertEquals("1", editing.textOf(textOfKind(editing, TextKind.FROM_MULTIPLICITY)));
+    assertEquals("*", editing.textOf(textOfKind(editing, TextKind.TO_MULTIPLICITY)));
+    assertTrue(from.getCenterX() < label.getCenterX() && label.getCenterX() < to.getCenterX());
+    SceneTextArea fromText = textOfKind(editing, TextKind.FROM_MULTIPLICITY);
+    assertTrue(fromText.hitArea().getWidth() > from.getWidth(), "short texts get an area which is easy to hit");
+  }
+
+  /** The texts of a relation can be changed without selecting anything, the texts of a class only when it is selected. */
+  @Test
+  void relationTextEditableWithoutSelection() throws ClassDiagramParseException {
+    DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
+    Rectangle2D label = textOfKind(editing, TextKind.RELATION_LABEL).area;
+    Rectangle2D name = textOfKind(editing, TextKind.CLASS_NAME).area;
+    Point2D onLabel = new Point2D.Double(label.getCenterX(), label.getCenterY());
+    Point2D onName = new Point2D.Double(name.getCenterX(), name.getCenterY());
+
+    assertFalse(editing.hasSelection());
+    assertEquals(TextKind.RELATION_LABEL, editing.editableTextAt(onLabel).kind);
+    assertNull(editing.editableTextAt(onName));
+    assertEquals(label, editing.boxOf(textOfKind(editing, TextKind.RELATION_LABEL)));
+  }
+
+  /** A new label is reported once, an empty one removes it. */
+  @Test
+  void changedLabel() throws ClassDiagramParseException {
+    DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
+
+    editing.setText(textOfKind(editing, TextKind.RELATION_LABEL), "has");
+    assertEquals("has", modelOf(editing.source()).relations().get(0).label);
+    assertEquals(1, host.reportedSources.size());
+
+    editing.setText(textOfKind(editing, TextKind.RELATION_LABEL), "");
+    assertNull(modelOf(editing.source()).relations().get(0).label);
+    assertEquals(2, host.reportedSources.size());
+  }
+
+  /** A multiplicity at either end is changed, an empty text removes it. */
+  @Test
+  void changedMultiplicity() throws ClassDiagramParseException {
+    DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
+
+    editing.setText(textOfKind(editing, TextKind.FROM_MULTIPLICITY), "0..1");
+    editing.setText(textOfKind(editing, TextKind.TO_MULTIPLICITY), "");
+
+    AssociationRelationModel_V001 relation = (AssociationRelationModel_V001) modelOf(editing.source()).relations().get(0);
+    assertEquals("0..1", relation.fromMultiplicity);
+    assertNull(relation.toMultiplicity);
+  }
+
+  /** A multiplicity which isn't a number, a range or a star is not accepted. */
+  @Test
+  void invalidMultiplicity() throws ClassDiagramParseException {
+    DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
+    SceneTextArea from = textOfKind(editing, TextKind.FROM_MULTIPLICITY);
+
+    for (String valid : List.of("1", "*", "0..1", "1..*", "")) {
+      assertTrue(editing.accepts(from, valid), valid);
+    }
+    for (String invalid : List.of("many", "1..", "a..b", "1 2")) {
+      assertFalse(editing.accepts(from, invalid), invalid);
+    }
+    assertThrows(IllegalArgumentException.class, () -> editing.setText(from, "many"));
+    assertFalse(editing.canUndo());
+  }
+
+  /** While changes are tracked a label gets the mark, and a multiplicity can be changed but not removed. */
+  @Test
+  void trackedRelationTexts() throws ClassDiagramParseException {
+    host.trackedChangeSet = "yellow";
+    DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
+    SceneTextArea from = textOfKind(editing, TextKind.FROM_MULTIPLICITY);
+
+    editing.setText(textOfKind(editing, TextKind.RELATION_LABEL), "has");
+    editing.setText(from, "0..1");
+
+    AbstractRelationModel_V001 relation = modelOf(editing.source()).relations().get(0);
+    assertEquals("owns", relation.labelChange.backup);
+    assertEquals("1", ((AssociationRelationModel_V001) relation).fromMultiplicityChange.backup);
+    assertFalse(editing.accepts(textOfKind(editing, TextKind.FROM_MULTIPLICITY), ""));
   }
 
   /** A diagram which can't be read can't be edited. */

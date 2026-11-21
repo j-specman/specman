@@ -32,15 +32,38 @@ final class TextSlots_V001 {
             addRelation(slots, relation);
         }
         for (NoteModel_V001 note : model.notes()) {
-            slots.add(mandatory(() -> note.text, text -> note.text = text,
-                () -> note.textChange, mark -> note.textChange = mark));
+            slots.add(textOf(note));
         }
         return slots;
     }
 
+    static TextSlot_V001 nameOf(ClassModel_V001 classModel) {
+        return mandatory(() -> classModel.name, text -> classModel.name = text,
+            () -> classModel.nameChange, mark -> classModel.nameChange = mark);
+    }
+
+    static TextSlot_V001 textOf(NoteModel_V001 note) {
+        return mandatory(() -> note.text, text -> note.text = text,
+            () -> note.textChange, mark -> note.textChange = mark);
+    }
+
+    static TextSlot_V001 labelOf(AbstractRelationModel_V001 relation) {
+        return optional(() -> relation.label, text -> relation.label = text,
+            () -> relation.labelChange, mark -> relation.labelChange = mark);
+    }
+
+    static TextSlot_V001 fromMultiplicityOf(AssociationRelationModel_V001 association) {
+        return optional(() -> association.fromMultiplicity, text -> association.fromMultiplicity = text,
+            () -> association.fromMultiplicityChange, mark -> association.fromMultiplicityChange = mark);
+    }
+
+    static TextSlot_V001 toMultiplicityOf(AssociationRelationModel_V001 association) {
+        return optional(() -> association.toMultiplicity, text -> association.toMultiplicity = text,
+            () -> association.toMultiplicityChange, mark -> association.toMultiplicityChange = mark);
+    }
+
     private static void addClass(List<TextSlot_V001> slots, ClassModel_V001 classModel) {
-        slots.add(mandatory(() -> classModel.name, text -> classModel.name = text,
-            () -> classModel.nameChange, mark -> classModel.nameChange = mark));
+        slots.add(nameOf(classModel));
         slots.add(optional(() -> classModel.stereotype, text -> classModel.stereotype = text,
             () -> classModel.stereotypeChange, mark -> classModel.stereotypeChange = mark));
         for (TaggedValueModel_V001 tag : classModel.taggedValues) {
@@ -66,13 +89,10 @@ final class TextSlots_V001 {
     }
 
     private static void addRelation(List<TextSlot_V001> slots, AbstractRelationModel_V001 relation) {
-        slots.add(optional(() -> relation.label, text -> relation.label = text,
-            () -> relation.labelChange, mark -> relation.labelChange = mark));
+        slots.add(labelOf(relation));
         if (relation instanceof AssociationRelationModel_V001 association) {
-            slots.add(optional(() -> association.fromMultiplicity, text -> association.fromMultiplicity = text,
-                () -> association.fromMultiplicityChange, mark -> association.fromMultiplicityChange = mark));
-            slots.add(optional(() -> association.toMultiplicity, text -> association.toMultiplicity = text,
-                () -> association.toMultiplicityChange, mark -> association.toMultiplicityChange = mark));
+            slots.add(fromMultiplicityOf(association));
+            slots.add(toMultiplicityOf(association));
         }
     }
 }
