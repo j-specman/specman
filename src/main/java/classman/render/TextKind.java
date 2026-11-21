@@ -1,0 +1,30 @@
+package classman.render;
+
+/** The kinds of text which the editor lets the user change in place, and how each is drawn and typed. */
+public enum TextKind {
+    CLASS_NAME(true, true, false, false, 120, 0),
+    NOTE_TEXT(false, false, true, false, 120, 0),
+    RELATION_LABEL(false, false, false, true, 80, DiagramStyle.TEXT_HIT_PADDING),
+    FROM_MULTIPLICITY(false, false, false, true, 40, DiagramStyle.TEXT_HIT_PADDING),
+    TO_MULTIPLICITY(false, false, false, true, 40, DiagramStyle.TEXT_HIT_PADDING);
+
+    public final boolean bold;
+    public final boolean centered;
+    /** True if the text is wrapped at the width of its box, false if the box grows with the text. */
+    public final boolean wrapped;
+    /** True if the element can do without the text, so that the empty text removes it. */
+    public final boolean optional;
+    /** The width in pixels which the field for typing the text has at least. */
+    public final int minFieldWidth;
+    /** How far around the text a double click still counts as one on the text, in diagram units. */
+    public final double hitPadding;
+
+    TextKind(boolean bold, boolean centered, boolean wrapped, boolean optional, int minFieldWidth, double hitPadding) {
+        this.bold = bold;
+        this.centered = centered;
+        this.wrapped = wrapped;
+        this.optional = optional;
+        this.minFieldWidth = minFieldWidth;
+        this.hitPadding = hitPadding;
+    }
+}
