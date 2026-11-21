@@ -52,11 +52,38 @@ public class SceneRelationLine {
 
     /** @return the distance of the point to the closest part of the line */
     public double distanceTo(Point2D point) {
-        double closest = Double.MAX_VALUE;
+        return distanceToSegment(nearestSegment(point), point);
+    }
+
+    /** @return the index of the point where the part of the line starts which is closest to the given point */
+    public int nearestSegment(Point2D point) {
+        int nearest = 0;
+        double nearestDistance = Double.MAX_VALUE;
         for (int i = 0; i < line.xs.length - 1; i++) {
-            closest = Math.min(closest, Line2D.ptSegDist(line.xs[i], line.ys[i], line.xs[i + 1], line.ys[i + 1],
-                point.getX(), point.getY()));
+            double distance = distanceToSegment(i, point);
+            if (distance < nearestDistance) {
+                nearest = i;
+                nearestDistance = distance;
+            }
         }
-        return closest;
+        return nearest;
+    }
+
+    /** @return the point on the part of the line which starts at the given index which is closest to the point */
+    public Point2D nearestPointOnSegment(int segment, Point2D point) {
+        double fromX = line.xs[segment];
+        double fromY = line.ys[segment];
+        double dx = line.xs[segment + 1] - fromX;
+        double dy = line.ys[segment + 1] - fromY;
+        double lengthSquared = dx * dx + dy * dy;
+        double along = lengthSquared == 0 ? 0
+            : ((point.getX() - fromX) * dx + (point.getY() - fromY) * dy) / lengthSquared;
+        double clamped = Math.max(0, Math.min(1, along));
+        return new Point2D.Double(fromX + clamped * dx, fromY + clamped * dy);
+    }
+
+    private double distanceToSegment(int segment, Point2D point) {
+        return Line2D.ptSegDist(line.xs[segment], line.ys[segment], line.xs[segment + 1], line.ys[segment + 1],
+            point.getX(), point.getY());
     }
 }

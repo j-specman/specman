@@ -26,10 +26,13 @@ class PointerControl implements PointerListener {
     this.hitTolerance = hitTolerance;
   }
 
+  /** A press selects what is below it. Dragging moves a handle of the selected relation if the press was on one,
+   * otherwise the selected box. */
   @Override
   public void pressed(Point2D at) {
-    editing.selectAt(at, hitTolerance.getAsDouble());
-    editing.startDrag(at);
+    double tolerance = hitTolerance.getAsDouble();
+    editing.selectAt(at, tolerance);
+    editing.startDrag(at, tolerance);
     showDiagram.run();
   }
 
@@ -45,15 +48,16 @@ class PointerControl implements PointerListener {
     showDiagram.run();
   }
 
-  /** A double click on a waypoint of the selected relation deletes it. A double click on a text of the box it selects,
-   * or on a text of a relation, lets the user change the text. */
+  /** A double click on a waypoint of the selected relation deletes it, one on its line elsewhere adds a waypoint. A
+   * double click on a text of the box it selects, or on a text of a relation, lets the user change the text. */
   @Override
   public void doubleClicked(Point2D at) {
-    if (editing.deleteWaypointAt(at, hitTolerance.getAsDouble())) {
+    double tolerance = hitTolerance.getAsDouble();
+    if (editing.deleteWaypointAt(at, tolerance) || editing.insertWaypointAt(at, tolerance)) {
       showDiagram.run();
       return;
     }
-    editing.selectAt(at, hitTolerance.getAsDouble());
+    editing.selectAt(at, tolerance);
     showDiagram.run();
     SceneTextArea text = editing.editableTextAt(at);
     if (text != null) {

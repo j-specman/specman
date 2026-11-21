@@ -16,7 +16,7 @@ import java.util.Map;
 /** The dragging of one box over the diagram. It changes the positions in the model as the mouse moves and can put
  * them back. A box without a position stands where the layout puts it, depending on the other boxes without one:
  * so on the first move all of them get the position they have, and only the dragged box changes. */
-class BoxDrag {
+class BoxDrag extends Drag {
   private final AbstractDiagramElementModel_V001 box;
   private final Point2D pressedAt;
   private final Rectangle2D startArea;
@@ -37,9 +37,11 @@ class BoxDrag {
     this.associationClasses = associationClasses;
   }
 
+  @Override
   boolean hasMoved() { return positionsBefore != null; }
 
   /** Puts the box where it is when the mouse is at the given point. */
+  @Override
   void to(Point2D at) {
     if (positionsBefore == null) {
       rememberPositions();
@@ -51,6 +53,7 @@ class BoxDrag {
   }
 
   /** Puts everything back where it was before the first move. */
+  @Override
   void cancel() {
     if (positionsBefore != null) {
       positionsBefore.forEach(BoxDrag::setPosition);

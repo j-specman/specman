@@ -10,6 +10,7 @@ import java.awt.geom.Point2D;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -49,6 +50,18 @@ class WaypointDeletionTest {
     editing.deleteWaypointAt(new Point2D.Double(20, 150), TOLERANCE);
 
     assertEquals(3, editing.selectedHandles().size());
+  }
+
+  /** Without its last waypoint a relation has no route any more. */
+  @Test
+  void routeGoneWithLastWaypoint() throws ClassDiagramParseException {
+    editing.deleteWaypointAt(new Point2D.Double(20, 150), TOLERANCE);
+    assertNotNull(relationOf(editing.source()).route);
+
+    editing.deleteWaypointAt(new Point2D.Double(200, 150), TOLERANCE);
+
+    assertNull(relationOf(editing.source()).route);
+    assertEquals(2, editing.selectedHandles().size());
   }
 
   /** The handles at the ends are no waypoints. */

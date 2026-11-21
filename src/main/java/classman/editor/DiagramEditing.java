@@ -42,13 +42,14 @@ public class DiagramEditing {
   private final ClassDiagramSerializer_V001 serializer = new ClassDiagramSerializer_V001();
   private final ElementDeleter_V001 deleter = new ElementDeleter_V001();
   private final ElementTextChanger_V001 textChanger = new ElementTextChanger_V001();
+  private final RouteEditing routeEditing = new RouteEditing();
   private final ElementIds ids = new ElementIds(new SecureRandom());
   private ClassDiagramModel_V001 model;
   private AttributeEditing attributeEditing;
   private String source;
   private Scene scene;
   private AbstractDiagramElementModel_V001 selected;
-  private BoxDrag drag;
+  private Drag drag;
   private int undoableSteps;
   private int redoableSteps;
 
@@ -149,8 +150,9 @@ public class DiagramEditing {
   }
 
   /** Deletes the waypoint of the selected relation at the point, if there is one: the handles at the ends of a
-   * relation are no waypoints and a relation without a route has none. Moving a route is never marked as a change,
-   * so this is the same with and without change tracking. One operation.
+   * relation are no waypoints and a relation without a route has none. Without its last waypoint a relation has no
+   * route any more. Changing a route is never marked as a change, so this is the same with and without change
+   * tracking. One operation.
    * @return true if a waypoint was deleted */
   public boolean deleteWaypointAt(Point2D point, double tolerance) {
     int handle = handleIndexAt(point, tolerance);
@@ -158,9 +160,37 @@ public class DiagramEditing {
     if (!isWaypoint || !(selected instanceof AbstractRelationModel_V001 relation) || relation.route == null) {
       return false;
     }
-    relation.route.waypoints.remove(handle - 1);
+    routeEditing.deleteWaypoint(relation, handle - 1);
     publish();
     return true;
+  }
+
+  /** Puts a new waypoint on the line of the selected relation, at the point of the line which is closest to the given
+   * point, if that is at most the tolerance away. Nothing happens on a handle, on a box, and on a text of the relation,
+   * where a press means something else. A relation without a route gets one which runs along its line as it is now.
+   * Not marked as a change, one operation.
+   * @return true if a waypoint was added */
+  public boolean insertWaypointAt(Point2D point, double tolerance) {
+    SceneRelationLine line = selected != null ? scene.relationLineOf(selected) : null;
+    if (line == null || line.distanceTo(point) > tolerance || handleIndexAt(point, tolerance) >= 0
+        || scene.elementAreaAt(point) != null || scene.textAreaAt(point) != null) {
+      return false;
+    }
+    AbstractRelationModel_V001 relation = line.relation;
+    int segment = line.nearestSegment(point);
+    routeEditing.insertWaypoint(relation, line.points(), segment, line.nearestPointOnSegment(segment, point),
+      classArea(relation.fromId), classArea(relation.toId));
+    publish();
+    return true;
+  }
+
+  private Rectangle2D classArea(String classId) {
+    for (ClassModel_V001 box : model.classes()) {
+      if (classId.equals(box.id)) {
+        return scene.elementAreaOf(box).area;
+      }
+    }
+    throw new IllegalStateException("The diagram has no class with the ID " + classId);
   }
 
   public void deselect() { selected = null; }
@@ -326,11 +356,31 @@ public class DiagramEditing {
     }
   }
 
+  /** Starts to drag, from the point where the mouse was pressed: a handle of the selected relation if the point is at
+   * most the tolerance away from one, otherwise the selected box, if there is one. Nothing is dragged if the user only
+   * clicks. */
+  public void startDrag(Point2D at, double tolerance) {
+    int handle = handleIndexAt(at, tolerance);
+    if (handle >= 0) {
+      drag = handleDrag(handle, at);
+    }
+    else {
+      drag = selected != null && scene.elementAreaOf(selected) != null
+        ? new BoxDrag(selected, at, scene, placedBoxes(), associationClasses())
+        : null;
+    }
+  }
+
   /** Starts to drag the selected box, if there is one, from the point where the mouse was pressed. */
   public void startDrag(Point2D at) {
-    drag = selected != null && scene.elementAreaOf(selected) != null
-      ? new BoxDrag(selected, at, scene, placedBoxes(), associationClasses())
-      : null;
+    startDrag(at, DEFAULT_LINE_TOLERANCE);
+  }
+
+  private HandleDrag handleDrag(int handle, Point2D at) {
+    SceneRelationLine line = scene.relationLineOf(selected);
+    AbstractRelationModel_V001 relation = line.relation;
+    return new HandleDrag(routeEditing, relation, line.points(), handle, at, classArea(relation.fromId),
+      classArea(relation.toId));
   }
 
   /** Shows the dragged box where the mouse is. Nothing is reported to the host until the drag ends. */
@@ -341,19 +391,19 @@ public class DiagramEditing {
     }
   }
 
-  /** Leaves the box where it is. If it has moved, that is one operation. */
+  /** Leaves the dragged thing where it is. If it has moved, that is one operation. */
   public void endDrag() {
-    BoxDrag ended = drag;
+    Drag ended = drag;
     drag = null;
     if (ended != null && ended.hasMoved()) {
       publish();
     }
   }
 
-  /** Puts the box back where it was before the drag.
-   * @return false if there was no drag which had moved a box */
+  /** Puts the dragged thing back where it was before the drag.
+   * @return false if there was no drag which had moved something */
   public boolean cancelDrag() {
-    BoxDrag cancelled = drag;
+    Drag cancelled = drag;
     drag = null;
     if (cancelled == null || !cancelled.hasMoved()) {
       return false;

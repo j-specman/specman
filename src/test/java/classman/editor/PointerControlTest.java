@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,6 +34,57 @@ class PointerControlTest {
   private void open(String source) throws ClassDiagramParseException {
     editing = new DiagramEditing(source, host, new EditorTexts(host.locale()));
     control = new PointerControl(editing, () -> { }, text -> nameEdits.incrementAndGet(), () -> 4);
+  }
+
+  private static final String ROUTED = "classdiagram {\n  class A (11111111) at(10, 20)\n"
+    + "  class B (22222222) at(300, 20)\n  association (33333333) 11111111 -- 22222222\n"
+    + "  route 11111111.bottom@10 (20, 150) (200, 150) 22222222.bottom@10\n}";
+
+  /** A press on the selected line changes nothing, a double click on it adds a waypoint. */
+  @Test
+  void doubleClickAddsWaypoint() throws ClassDiagramParseException {
+    open(ROUTED);
+    control.pressed(new Point2D.Double(100, 150));
+    control.released(new Point2D.Double(100, 150));
+    control.pressed(new Point2D.Double(100, 150));
+    control.released(new Point2D.Double(100, 150));
+    assertEquals(4, editing.selectedHandles().size());
+    assertFalse(editing.canUndo());
+
+    control.doubleClicked(new Point2D.Double(100, 150));
+
+    assertEquals(5, editing.selectedHandles().size());
+    assertTrue(editing.canUndo());
+  }
+
+  /** A double click on a handle of a waypoint deletes it. */
+  @Test
+  void doubleClickDeletesWaypoint() throws ClassDiagramParseException {
+    open(ROUTED);
+    control.pressed(new Point2D.Double(100, 150));
+
+    control.doubleClicked(new Point2D.Double(200, 150));
+
+    assertEquals(3, editing.selectedHandles().size());
+  }
+
+  /** A double click on a text of a selected relation edits the text and adds no waypoint. */
+  @Test
+  void doubleClickOnLabelOfSelectedRelation() throws ClassDiagramParseException {
+    open("classdiagram {\n  class A (11111111) at(10, 20)\n  class B (22222222) at(300, 20)\n"
+      + "  association (33333333) 11111111 1 -> * 22222222 \"owns\"\n}");
+    Rectangle2D label = editing.scene().textAreas.stream()
+      .filter(area -> area.kind == TextKind.RELATION_LABEL).findFirst().orElseThrow().area;
+    Point2D onLabel = new Point2D.Double(label.getCenterX(), label.getCenterY());
+    List<Point2D> ends = editing.scene().relationLines.get(0).points();
+    editing.selectAt(new Point2D.Double((ends.get(0).getX() + ends.get(1).getX()) / 2,
+      (ends.get(0).getY() + ends.get(1).getY()) / 2), 4);
+    assertEquals(2, editing.selectedHandles().size());
+
+    control.doubleClicked(onLabel);
+
+    assertEquals(1, nameEdits.get());
+    assertFalse(editing.canUndo());
   }
 
   /** A double click on the label of a relation starts the editor for it, although no box is selected. */
