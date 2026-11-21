@@ -10,16 +10,31 @@ import static specman.Specman.editor;
 
 /** What the Classman diagram editor gets from Specman: it reports its source to the edit area, which records it as an
  * undoable edit, and writes change marks if Specman tracks changes. */
-class ClassmanEditorHost implements EditorHost {
+public class ClassmanEditorHost implements EditorHost {
   private final ClassmanImageEditArea area;
 
-  ClassmanEditorHost(ClassmanImageEditArea area) {
+  public ClassmanEditorHost(ClassmanImageEditArea area) {
     this.area = area;
   }
 
   @Override
   public void sourceChanged(String source) {
     area.changeSource(source);
+  }
+
+  @Override
+  public String source() {
+    return area.getSource();
+  }
+
+  @Override
+  public void undo() {
+    editor().getUndoManager().undo();
+  }
+
+  @Override
+  public void redo() {
+    editor().getUndoManager().redo();
   }
 
   @Override

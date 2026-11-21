@@ -16,30 +16,70 @@ import java.util.HashSet;
 import java.util.Set;
 
 /** The operations of the diagram editor on the diagram, without any window. Each operation writes the new source
- * and reports it to the host. */
+ * and reports it to the host. The host keeps the history: undo and redo are forwarded to it, but only for the sources
+ * which this editing reported itself, so they never reach back to what happened before the editor was opened. */
 public class DiagramEditing {
   private final EditorHost host;
   private final EditorTexts texts;
   private final ClassDiagramSerializer_V001 serializer = new ClassDiagramSerializer_V001();
   private final ElementIds ids = new ElementIds(new SecureRandom());
-  private final ClassDiagramModel_V001 model;
+  private ClassDiagramModel_V001 model;
   private String source;
   private Scene scene;
+  private int undoableSteps;
+  private int redoableSteps;
 
   /** @throws ClassDiagramParseException if the source has a syntax error
    * @throws IllegalArgumentException if the diagram refers to an element which it doesn't have */
   public DiagramEditing(String source, EditorHost host, EditorTexts texts) throws ClassDiagramParseException {
     this.host = host;
     this.texts = texts;
-    this.source = source;
-    this.model = new ClassDiagramParser_V001().parse(source);
-    this.scene = host.renderer().layout(model);
+    load(source);
+  }
+
+  private void load(String newSource) throws ClassDiagramParseException {
+    model = new ClassDiagramParser_V001().parse(newSource);
+    scene = host.renderer().layout(model);
+    source = newSource;
   }
 
   public String source() { return source; }
 
   /** @return the picture of the diagram as it is now */
   public Scene scene() { return scene; }
+
+  public boolean canUndo() { return undoableSteps > 0; }
+
+  public boolean canRedo() { return redoableSteps > 0; }
+
+  /** Takes back the last operation, if there is one of this editing. */
+  public void undo() {
+    if (canUndo()) {
+      host.undo();
+      undoableSteps--;
+      redoableSteps++;
+      reloadFromHost();
+    }
+  }
+
+  /** Does again the operation which was taken back last, if nothing was done since. */
+  public void redo() {
+    if (canRedo()) {
+      host.redo();
+      redoableSteps--;
+      undoableSteps++;
+      reloadFromHost();
+    }
+  }
+
+  private void reloadFromHost() {
+    try {
+      load(host.source());
+    }
+    catch (ClassDiagramParseException e) {
+      throw new IllegalStateException("The host holds a source which the editor wrote and can't read", e);
+    }
+  }
 
   /** Adds a class with a made-up name and ID, its top left corner at the given point of the diagram. */
   public void addClass(int x, int y) {
@@ -82,8 +122,13 @@ public class DiagramEditing {
   }
 
   private void publish() {
-    source = serializer.serialize(model);
+    String newSource = serializer.serialize(model);
     scene = host.renderer().layout(model);
+    if (!newSource.equals(source)) {
+      undoableSteps++;
+      redoableSteps = 0;
+    }
+    source = newSource;
     host.sourceChanged(source);
   }
 }

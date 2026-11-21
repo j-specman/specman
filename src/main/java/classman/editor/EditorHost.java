@@ -10,6 +10,17 @@ public interface EditorHost {
   /** Called after each completed operation, with the whole new source of the diagram. */
   void sourceChanged(String source);
 
+  /** @return the current source of the diagram: after {@link #undo()} or {@link #redo()}, the editor reads it from
+   * here. */
+  String source();
+
+  /** Takes back the last source reported by {@link #sourceChanged(String)}. The editor asks for this only as many
+   * times as it has reported sources. */
+  void undo();
+
+  /** Restores the source which {@link #undo()} took back, as long as nothing was reported since. */
+  void redo();
+
   /** @return the renderer which knows the colors of the host's change sets and the words of its language */
   DiagramRenderer renderer();
 

@@ -12,6 +12,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
 
@@ -50,7 +51,18 @@ public class ClassDiagramEditorWindow extends JDialog {
       Math.max(MIN_HEIGHT, Math.min(preferred.height + FRAME_HEIGHT_ALLOWANCE, MAX_HEIGHT)));
     getRootPane().registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
       JComponent.WHEN_IN_FOCUSED_WINDOW);
+    bindKey(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK, editing::undo);
+    bindKey(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK, editing::redo);
+    bindKey(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK, editing::redo);
     setLocationRelativeTo(owner);
+  }
+
+  /** Runs the operation on Ctrl+key and shows the diagram as it is afterwards. */
+  private void bindKey(int keyCode, int modifiers, Runnable operation) {
+    getRootPane().registerKeyboardAction(e -> {
+      operation.run();
+      canvas.setScene(editing.scene());
+    }, KeyStroke.getKeyStroke(keyCode, modifiers), JComponent.WHEN_IN_FOCUSED_WINDOW);
   }
 
   private void classDropped(Point screenPoint) {

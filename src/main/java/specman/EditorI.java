@@ -11,6 +11,7 @@ import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigListener;
+import specman.undo.manager.SpecmanUndoManager;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
 import specman.visitor.DiagramVisitor;
@@ -63,6 +64,7 @@ public interface EditorI extends FocusListener {
 	/** Asks the user for a file and replaces the source of the diagram by its content. */
 	void importClassmanSource(ClassmanImageEditArea diagram);
 	void undoLastEditAndForget();
+	SpecmanUndoManager getUndoManager();
 	List<AbstractSchrittView> listAllSteps();
 	void addTable(int numColumns, int numRows);
 	void toggleListItem(boolean ordered);
