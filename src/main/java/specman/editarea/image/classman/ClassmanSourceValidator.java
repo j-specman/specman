@@ -2,6 +2,7 @@ package specman.editarea.image.classman;
 
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.io.ClassDiagramParseException;
+import classman.model.v001.io.ClassDiagramParser_V001;
 import specman.editarea.image.SourceValidator;
 
 import static specman.i18n.Messages.i18n;
@@ -19,11 +20,11 @@ public class ClassmanSourceValidator implements SourceValidator {
       return i18n(BACKTICK_MESSAGE_KEY);
     }
     try {
-      ClassDiagramModel_V001 model = ClassmanRenderer.modelOf(source);
+      ClassDiagramModel_V001 model = new ClassDiagramParser_V001().parse(source);
       if (model.elements.isEmpty()) {
         return i18n(EMPTY_MESSAGE_KEY);
       }
-      ClassmanRenderer.sceneOf(model);
+      ClassmanRenderer.renderer().layout(model);
       return null;
     }
     catch (ClassDiagramParseException | IllegalArgumentException problem) {

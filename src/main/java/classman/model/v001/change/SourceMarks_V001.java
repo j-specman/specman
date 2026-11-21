@@ -1,8 +1,6 @@
-package specman.editarea.image.classman;
+package classman.model.v001.change;
 
 import classman.model.v001.ClassDiagramModel_V001;
-import classman.model.v001.change.ChangeResolver_V001;
-import classman.model.v001.change.ChangeSetRenamer_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
 import classman.model.v001.io.ClassDiagramSerializer_V001;
@@ -10,24 +8,24 @@ import classman.model.v001.io.ClassDiagramSerializer_V001;
 import java.util.function.Consumer;
 
 /** Accepts, rejects and renames the change marks, change(...) and was(...), in the source text of a Classman diagram. */
-class ClassmanSourceMarks {
+public class SourceMarks_V001 {
   private final ClassDiagramParser_V001 parser = new ClassDiagramParser_V001();
   private final ClassDiagramSerializer_V001 serializer = new ClassDiagramSerializer_V001();
   private final ChangeResolver_V001 resolver = new ChangeResolver_V001();
   private final ChangeSetRenamer_V001 renamer = new ChangeSetRenamer_V001();
 
   /** @return the source with the marks of the change set accepted, the given source itself if there is nothing to accept */
-  String accepted(String source, String changeSet) {
+  public String accepted(String source, String changeSet) {
     return changed(source, model -> resolver.accept(model, changeSet));
   }
 
   /** @return the source with the marks of the change set rejected, the given source itself if there is nothing to reject */
-  String rejected(String source, String changeSet) {
+  public String rejected(String source, String changeSet) {
     return changed(source, model -> resolver.reject(model, changeSet));
   }
 
   /** @return the source with the marks of one change set given to another, the given source itself if there are none */
-  String renamed(String source, String from, String to) {
+  public String renamed(String source, String from, String to) {
     return changed(source, model -> renamer.rename(model, from, to));
   }
 

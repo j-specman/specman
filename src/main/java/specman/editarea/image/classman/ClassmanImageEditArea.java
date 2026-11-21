@@ -1,5 +1,8 @@
 package specman.editarea.image.classman;
 
+import classman.editor.ClassDiagramEditorWindow;
+import classman.model.v001.change.SourceMarks_V001;
+import classman.model.v001.io.ClassDiagramParseException;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
 import specman.ChangeSet;
@@ -25,7 +28,7 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
     "dialog.classman.choose.empty", "dialog.classman.choose.empty.tooltip");
 
   private static final ClassmanSourceValidator VALIDATOR = new ClassmanSourceValidator();
-  private static final ClassmanSourceMarks MARKS = new ClassmanSourceMarks();
+  private static final SourceMarks_V001 MARKS = new SourceMarks_V001();
 
   public ClassmanImageEditArea(String source, ChangeInfo changeInfo) {
     this(source, 1, changeInfo);
@@ -58,11 +61,16 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
     editor().importClassmanSource(this);
   }
 
-  /** Shows the diagram painted with Graphics2D, the first step towards the diagram editor. The source editor is
-   * still available in the context menu. */
+  /** Opens the diagram editor, in a window of its own. A source which can't be drawn is for the source editor, which
+   * is also available in the context menu. */
   @Override
   protected void doubleClicked() {
-    new ClassmanDiagramDialog(this, ClassmanRenderer.renderScene(getSource())).setVisible(true);
+    try {
+      new ClassDiagramEditorWindow(this, getSource(), new ClassmanEditorHost(this)).setVisible(true);
+    }
+    catch (ClassDiagramParseException | IllegalArgumentException problem) {
+      editSource();
+    }
   }
 
   // ---- change mode ----
