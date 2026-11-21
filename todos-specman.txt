@@ -79,16 +79,21 @@ Reste Multi-Catch
   Diese Aktionen landen in der Undo-Historie vor dem eigentlichen Löschen des Co-Catchs.
   Man muss dann mehrfach klicken, um das eigentliche Undo auszulösen
 
-Classman-Diagrammeditor (In-Place-Editing)
-Konzept: specifications/classman/classman-editor-concept.adoc (Entwurf, offene Punkte stehen am Ende des Dokuments)
-- Konzept zu Ende ausarbeiten: offene Punkte klären (Umschalter Icons/Text geteilt?, Assoziationsklasse, Notiz-Anbindung, Auswahlmodell, Schwellenwert für Fenster)
-- Gerüst: Editiersitzung (Palettentausch, Beenden per Fertig/Esc/anderer Bereich), Classman-Palette mit Fertig-Button und Umschalter
+Classman-Diagrammeditor (eigenes Fenster)
+Konzept: specifications/classman/classman-editor-concept.adoc (Entwurf vom 21.11.2026, offene Punkte stehen am Ende des Dokuments)
+Das Bearbeiten direkt im Aktogramm wurde ausprobiert und verworfen (Archiv: git Branch classman-inplace-experiment).
+- Anzeige im Aktogramm bleibt Graphics2D (Picture), SVG nur fürs PDF
+- PDF: Mindestgröße der Änderungsmarkierungen beim Export (Picture.svg(maßstab), gleiche Regel wie der Painter, gemeinsame Klasse)
+- Test, dass classman.* nichts aus specman.* importiert
+- Editorfenster als Durchstich: Doppelklick öffnet das modale Editorfenster (classman.editor), Palette fest links, schmale Schnittstelle zu Specman
+  (Initiierung, sourceChanged, Kontext: Änderungsverfolgung, Farben, Sprache); Undo/Redo kommt später
+- Eigene Texte (Resource-Bundle) und eigene Einstellung für Icons/Text in der Palette des Editors
 - Palettenbuttons mit Varianten (Pfeil + Auswahlmenü, letzte Wahl merken)
 - Anlegen: Boxen per Drag & Drop auf die Zeichenfläche, Relationen als Werkzeug (Button, dann von Box zu Box ziehen)
 - Bearbeiten: Auswählen, Verschieben (Routen mitführen), Umbenennen per Overlay-Textfeld, Löschen, Breite ziehen
 - Neue Schlüsselwörter interface und enum in Grammatik, Modell, Layouter und Änderungslogik
 - Änderungsmarkierungen beim Editieren automatisch schreiben (change/was)
-- Fenster-Variante für stark verkleinerte Diagramme (ClassmanDiagramDialog) mit derselben Palette
+- Undo/Redo über Specmans Undo-Stack (Quelle als einzige Wahrheit, Fenster leitet Strg+Z weiter)
 - Idee: weißer Rand um die aufgeblasenen Highlights, weil Attribut-Highlights auf dem Eierschalenton wenig Kontrast haben
 
 Abschluss für Go-Live
