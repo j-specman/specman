@@ -7,6 +7,7 @@ import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
 import org.junit.jupiter.api.Test;
 
+import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.util.HashSet;
 import java.util.List;
@@ -169,6 +170,27 @@ class DiagramEditingTest {
     editing.deselect();
 
     assertFalse(editing.hasSelection());
+  }
+
+  /** A box which a change set with a special selection color marked gets that color for its selection frame. */
+  @Test
+  void specialSelectionColor() throws ClassDiagramParseException {
+    host.changeColors.selectionColors.put("blue", "#000000");
+    String source = "classdiagram {\n  class Book (04de91aa) change(added, blue) at(10, 20)\n"
+      + "  class Page (11111111) change(added, yellow) at(400, 20)\n  class Cover (22222222) at(10, 300)\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+
+    editing.selectAt(new Point2D.Double(15, 25));
+    assertEquals(Color.BLACK, editing.specialSelectionColor());
+
+    editing.selectAt(new Point2D.Double(405, 25));
+    assertNull(editing.specialSelectionColor());
+
+    editing.selectAt(new Point2D.Double(15, 305));
+    assertNull(editing.specialSelectionColor());
+
+    editing.deselect();
+    assertNull(editing.specialSelectionColor());
   }
 
   /** A diagram which can't be read can't be edited. */

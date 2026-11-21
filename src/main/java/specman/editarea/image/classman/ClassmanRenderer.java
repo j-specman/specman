@@ -2,9 +2,6 @@ package specman.editarea.image.classman;
 
 import classman.render.DiagramRenderer;
 import classman.render.Scene;
-import specman.ChangeSet;
-
-import java.awt.Color;
 
 import static specman.i18n.Messages.i18n;
 
@@ -18,16 +15,6 @@ public final class ClassmanRenderer {
   }
 
   static DiagramRenderer renderer() {
-    return new DiagramRenderer(ClassmanRenderer::strongColorOf, i18n("msg.classman.render.error"));
-  }
-
-  /** @return the color of the change set as #rrggbb, or null if Specman has no change set of that name */
-  private static String strongColorOf(String changeSetName) {
-    ChangeSet changeSet = ChangeSet.fromName(changeSetName);
-    if (changeSet == null) {
-      return null;
-    }
-    Color color = changeSet.textColor();
-    return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+    return new DiagramRenderer(new ClassmanChangeColors(), i18n("msg.classman.render.error"));
   }
 }

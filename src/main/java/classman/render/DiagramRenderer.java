@@ -30,4 +30,10 @@ public final class DiagramRenderer {
   public Scene layout(ClassDiagramModel_V001 model) {
     return new ClassDiagramLayouter(new AwtTextMeasurer(), changeColors).layout(model);
   }
+
+  /** @return the color of the frame around a selected element which the change set has marked, as #rrggbb, or null
+   * if the usual selection color can be told from the color of the change set */
+  public String selectionColorOf(String changeSet) {
+    return changeColors.selectionColorOf(changeSet);
+  }
 }

@@ -37,6 +37,7 @@ class DiagramCanvas extends JPanel implements Scrollable {
   private Scene scene;
   private SvgFrame frame;
   private Rectangle2D selection;
+  private Color specialSelectionColor;
   private double zoom = 1;
 
   /** @param pressedAt called with the point of the diagram where the left mouse button was pressed */
@@ -61,9 +62,11 @@ class DiagramCanvas extends JPanel implements Scrollable {
     repaint();
   }
 
-  /** @param area the area of the diagram which is selected, null if nothing is */
-  void setSelection(Rectangle2D area) {
+  /** @param area the area of the diagram which is selected, null if nothing is
+   * @param specialColor the color of the frame if the usual one can't be told from what is selected, null otherwise */
+  void setSelection(Rectangle2D area, Color specialColor) {
     this.selection = area;
+    this.specialSelectionColor = specialColor;
     repaint();
   }
 
@@ -111,10 +114,16 @@ class DiagramCanvas extends JPanel implements Scrollable {
       selection.getWidth() + 2 * gap, selection.getHeight() + 2 * gap));
   }
 
-  private static Color selectionColor() {
+  private Color selectionColor() {
+    if (specialSelectionColor != null) {
+      return withAlpha(specialSelectionColor, SELECTION_ALPHA);
+    }
     Color accent = UIManager.getColor("Component.focusColor");
-    Color strong = accent != null ? accent : DEFAULT_SELECTION_COLOR;
-    return new Color(strong.getRed(), strong.getGreen(), strong.getBlue(), SELECTION_ALPHA);
+    return withAlpha(accent != null ? accent : DEFAULT_SELECTION_COLOR, SELECTION_ALPHA);
+  }
+
+  private static Color withAlpha(Color color, int alpha) {
+    return new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
   }
 
   @Override

@@ -12,6 +12,7 @@ import classman.model.v001.io.ClassDiagramSerializer_V001;
 import classman.render.Scene;
 import classman.render.SceneElementArea;
 
+import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.security.SecureRandom;
@@ -100,6 +101,16 @@ public class DiagramEditing {
   public Rectangle2D selectedArea() {
     SceneElementArea selectedArea = selected != null ? scene.elementAreaOf(selected) : null;
     return selectedArea != null ? selectedArea.area : null;
+  }
+
+  /** @return the color for the frame around the selected box if the usual one can't be told from the change set which
+   * marked the box, null otherwise */
+  public Color specialSelectionColor() {
+    if (selected == null || selected.change == null) {
+      return null;
+    }
+    String color = host.renderer().selectionColorOf(selected.change.changeSet);
+    return color != null ? Color.decode(color) : null;
   }
 
   /** Adds a class with a made-up name and ID, its top left corner at the given point of the diagram. */

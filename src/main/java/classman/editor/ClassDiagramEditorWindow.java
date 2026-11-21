@@ -112,7 +112,7 @@ public class ClassDiagramEditorWindow extends JDialog {
 
   private void showDiagram() {
     canvas.setScene(editing.scene());
-    canvas.setSelection(editing.selectedArea());
+    canvas.setSelection(editing.selectedArea(), editing.specialSelectionColor());
   }
 
   /** Runs the operation on Ctrl+key and shows the diagram as it is afterwards. */

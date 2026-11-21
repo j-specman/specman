@@ -32,7 +32,7 @@ public class ChangeSet {
     ALL = new LinkedHashMap<>();
     register("yellow", Color.yellow);
     register("lilac",  new Color(200, 170, 240));
-    register("blue",   new Color(130, 210, 255));
+    register("blue",   new Color(130, 210, 255), Color.GRAY);
     register("orange", new Color(255, 220, 150));
     register("pink",   new Color(255, 170, 170));
     DEFAULT = ALL.get("yellow");
@@ -42,8 +42,9 @@ public class ChangeSet {
     ALL.put(name, new ChangeSet(name, new ChangeColorSet(color, STEPNUMBER_LINK_COLOR.color)));
   }
 
-  private static void register(String name, Color color, Color menuColor) {
-    ALL.put(name, new ChangeSet(name, new ChangeColorSet(color, STEPNUMBER_LINK_COLOR.color, menuColor)));
+  /** For a change set whose color the usual selection color of diagrams can't be told from. */
+  private static void register(String name, Color color, Color selectColor) {
+    ALL.put(name, new ChangeSet(name, new ChangeColorSet(color, STEPNUMBER_LINK_COLOR.color, selectColor)));
   }
 
   public final String name;
@@ -72,6 +73,9 @@ public class ChangeSet {
   }
 
   public Color menuColor() { return colors.menuColor; }
+
+  /** @return null if the usual selection color can be told from this change set's color */
+  public Color selectColor() { return colors.selectColor; }
 
   public Color panelColor() { return colors.panelColor; }
   public boolean isAnyBackground(String cssColor) { return colors.isAnyBackground(cssColor); }

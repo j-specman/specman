@@ -1,6 +1,5 @@
 package classman.editor;
 
-import classman.render.ChangeColors;
 import classman.render.DiagramRenderer;
 
 import java.util.ArrayList;
@@ -12,6 +11,7 @@ import java.util.Locale;
 class RecordingEditorHost implements EditorHost {
   final List<String> reportedSources = new ArrayList<>();
   String trackedChangeSet;
+  final FixedChangeColors changeColors = new FixedChangeColors();
 
   @Override
   public void sourceChanged(String source) {
@@ -35,7 +35,7 @@ class RecordingEditorHost implements EditorHost {
 
   @Override
   public DiagramRenderer renderer() {
-    return new DiagramRenderer(ChangeColors.NONE, "Can't be drawn");
+    return new DiagramRenderer(changeColors, "Can't be drawn");
   }
 
   @Override

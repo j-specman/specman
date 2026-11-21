@@ -7,4 +7,10 @@ public interface ChangeColors {
 
     /** @return the strong color of the change set as #rrggbb, or null if the change set is unknown */
     String strongColorOf(String changeSet);
+
+    /** @return the color of the frame around a selected element which the change set has marked, as #rrggbb, or null
+     * if the usual selection color can be told from the color of the change set */
+    default String selectionColorOf(String changeSet) {
+        return null;
+    }
 }
