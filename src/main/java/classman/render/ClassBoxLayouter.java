@@ -24,6 +24,7 @@ import static classman.render.DiagramStyle.STROKE;
 import static classman.render.DiagramStyle.STROKE_WIDTH;
 import static classman.render.DiagramStyle.VEIL_SHARE;
 import static classman.render.DiagramStyle.VEILED_STROKE;
+import static classman.render.DiagramStyle.VEILED_MARKED_TEXT;
 import static classman.render.DiagramStyle.VEILED_TEXT;
 import static classman.render.DiagramStyle.WHITE;
 
@@ -69,7 +70,8 @@ public class ClassBoxLayouter {
         List<SceneText> stereotypeLines = new ArrayList<>();
         y = addCenteredText(elements, stereotypeLines, stereotype, false, contentWidth, width, y, textColor);
         List<SceneText> nameLines = new ArrayList<>();
-        y = addCenteredText(elements, nameLines, model.name, true, contentWidth, width, y, textColor);
+        y = addCenteredText(elements, nameLines, model.name, true, contentWidth, width, y,
+            isRemoved ? VEILED_MARKED_TEXT : null);
         List<SceneText> taggedLines = new ArrayList<>();
         y = addCenteredText(elements, taggedLines, taggedValues == null ? null : taggedValues.text(), false,
             contentWidth, width, y, textColor);
@@ -83,6 +85,7 @@ public class ClassBoxLayouter {
         if (change == null) {
             addHeaderMarks(backgrounds, model, stereotypeLines, nameLines, taggedValues, taggedLines);
         } else if (isRemoved) {
+            backgrounds.addAll(highlighter.wholeHighlights(change.changeSet, nameLines));
             overlays.addAll(highlighter.strikes(nameLines));
         }
         List<AbstractSceneElement> all = new ArrayList<>();

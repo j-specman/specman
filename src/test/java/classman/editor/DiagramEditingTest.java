@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -191,6 +192,100 @@ class DiagramEditingTest {
 
     editing.deselect();
     assertNull(editing.specialSelectionColor());
+  }
+
+  /** A note can be selected like a class. */
+  @Test
+  void selectingNote() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n  note (22222222) at(300, 20) \"Remember\"\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+
+    editing.selectAt(new Point2D.Double(305, 25));
+
+    assertTrue(editing.hasSelection());
+    assertEquals(300, editing.selectedArea().getX(), 0.001);
+  }
+
+  /** An association class can be selected wherever it stands, also where the layout has placed it. */
+  @Test
+  void selectingAssociationClass() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  class A (aaaaaaaa) at(0, 0)\n  class B (bbbbbbbb) at(300, 0)\n"
+      + "  association aaaaaaaa -- bbbbbbbb\n  assocclass link\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    Rectangle2D placed = editing.scene().elementAreas.get(2).area;
+
+    editing.selectAt(new Point2D.Double(placed.getCenterX(), placed.getCenterY()));
+
+    assertEquals(placed, editing.selectedArea());
+  }
+
+  /** The user's own position of an association class counts. */
+  @Test
+  void selectingPositionedAssociationClass() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  class A (aaaaaaaa) at(0, 0)\n  class B (bbbbbbbb) at(300, 0)\n"
+      + "  association aaaaaaaa -- bbbbbbbb\n  assocclass link at(100, 200)\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+
+    editing.selectAt(new Point2D.Double(105, 205));
+
+    assertEquals(100, editing.selectedArea().getX(), 0.001);
+    assertEquals(200, editing.selectedArea().getY(), 0.001);
+  }
+
+  /** Deleting the selected class takes it out of the diagram, and nothing stays selected. */
+  @Test
+  void deletedClass() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n  class Page (11111111) at(400, 20)\n"
+      + "  association 04de91aa -> 11111111\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    editing.selectAt(new Point2D.Double(15, 25));
+
+    editing.deleteSelected();
+
+    assertEquals(1, modelOf(editing.source()).classes().size());
+    assertEquals("Page", modelOf(editing.source()).classes().get(0).name);
+    assertTrue(modelOf(editing.source()).relations().isEmpty());
+    assertFalse(editing.hasSelection());
+    assertEquals(1, host.reportedSources.size());
+  }
+
+  /** While changes are tracked, the class stays, marked as removed, but is no longer selected. */
+  @Test
+  void deletedClassTracked() throws ClassDiagramParseException {
+    host.trackedChangeSet = "yellow";
+    String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    editing.selectAt(new Point2D.Double(15, 25));
+
+    editing.deleteSelected();
+
+    ClassModel_V001 book = onlyClassOf(editing.source());
+    assertEquals(ChangeType_V001.REMOVED, book.change.type);
+    assertEquals("yellow", book.change.changeSet);
+    assertFalse(editing.hasSelection());
+  }
+
+  /** Delete with nothing selected does nothing. */
+  @Test
+  void nothingToDelete() throws ClassDiagramParseException {
+    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+
+    editing.deleteSelected();
+
+    assertTrue(host.reportedSources.isEmpty());
+  }
+
+  /** In change mode, a class which was added is gone at once. */
+  @Test
+  void addedClassGoneAtOnce() throws ClassDiagramParseException {
+    host.trackedChangeSet = "yellow";
+    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+    editing.addClass(10, 10);
+
+    editing.deleteSelected();
+
+    assertTrue(modelOf(editing.source()).classes().isEmpty());
+    assertFalse(editing.hasSelection());
   }
 
   /** A diagram which can't be read can't be edited. */

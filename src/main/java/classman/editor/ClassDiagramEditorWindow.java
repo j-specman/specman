@@ -39,7 +39,8 @@ public class ClassDiagramEditorWindow extends JDialog {
     EditorTexts texts = new EditorTexts(host.locale());
     setTitle(texts.get("window.title"));
     editing = new DiagramEditing(source, host, texts);
-    canvas = new DiagramCanvas(editing.scene(), this::pressedAt);
+    canvas = new DiagramCanvas(editing.scene());
+    canvas.setPointerListener(new PointerControl(editing, this::showDiagram));
     scrollPane = new JScrollPane(canvas);
 
     EditorPalette palette = new EditorPalette(texts, this::classDropped);
@@ -52,6 +53,7 @@ public class ClassDiagramEditorWindow extends JDialog {
       JComponent.WHEN_IN_FOCUSED_WINDOW);
     bindKey(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK, editing::undo);
     bindKey(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK, editing::redo);
+    bindKey(KeyEvent.VK_DELETE, 0, editing::deleteSelected);
     bindKey(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK, editing::redo);
     placeNear(owner);
   }
@@ -94,14 +96,13 @@ public class ClassDiagramEditorWindow extends JDialog {
     return new Rectangle(origin.x + visible.x, origin.y + visible.y, visible.width, visible.height);
   }
 
-  private void pressedAt(Point2D diagramPoint) {
-    editing.selectAt(diagramPoint);
-    showDiagram();
-  }
-
-  /** Esc takes the selection away first, and leaves the editor if there is none. */
+  /** Esc puts a box which is being dragged back first, then takes the selection away, and leaves the editor if
+   * there is none. */
   private void escape() {
-    if (editing.hasSelection()) {
+    if (editing.cancelDrag()) {
+      showDiagram();
+    }
+    else if (editing.hasSelection()) {
       editing.deselect();
       showDiagram();
     }
@@ -115,7 +116,7 @@ public class ClassDiagramEditorWindow extends JDialog {
     canvas.setSelection(editing.selectedArea(), editing.specialSelectionColor());
   }
 
-  /** Runs the operation on Ctrl+key and shows the diagram as it is afterwards. */
+  /** Runs the operation on the key and shows the diagram as it is afterwards. */
   private void bindKey(int keyCode, int modifiers, Runnable operation) {
     getRootPane().registerKeyboardAction(e -> {
       operation.run();

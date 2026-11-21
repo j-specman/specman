@@ -8,6 +8,8 @@ import specman.ChangeSet;
 import specman.editarea.image.classman.ClassmanEditorHost;
 import specman.editarea.image.classman.ClassmanImageEditArea;
 
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Locale;
 
 import static headless.HeadlessExtension.specman;
@@ -94,6 +96,39 @@ class ClassmanEditorSessionTest extends AbstractClassmanTest {
     editorOn(diagram).addClass(300, 20);
 
     assertTrue(diagram.getSource().contains("change(added, blue)"), diagram.getSource());
+  }
+
+  /** Scenario: A move is one step of Specman's history, even if it fixes the places of the stacked classes. */
+  @Test
+  void moveIsOneUndoStep() throws ClassDiagramParseException {
+    ClassmanImageEditArea diagram = existingDiagram(containerOfNewStep());
+    DiagramEditing editing = editorOn(diagram);
+    Rectangle2D hello = editing.scene().elementAreas.get(0).area;
+    Point2D grab = new Point2D.Double(hello.getCenterX(), hello.getCenterY());
+    editing.selectAt(grab);
+
+    editing.startDrag(grab);
+    editing.dragTo(new Point2D.Double(grab.getX() + 200, grab.getY()));
+    editing.endDrag();
+
+    assertTrue(diagram.getSource().contains("at("), diagram.getSource());
+    specman.undo();
+    assertEquals(TWO_CLASSES, diagram.getSource());
+  }
+
+  /** Scenario: Deleting a class is one step of Specman's history. */
+  @Test
+  void deletionIsOneUndoStep() throws ClassDiagramParseException {
+    ClassmanImageEditArea diagram = existingDiagram(containerOfNewStep());
+    DiagramEditing editing = editorOn(diagram);
+    Rectangle2D hello = editing.scene().elementAreas.get(0).area;
+    editing.selectAt(new Point2D.Double(hello.getCenterX(), hello.getCenterY()));
+
+    editing.deleteSelected();
+
+    assertFalse(diagram.getSource().contains("Hello"), diagram.getSource());
+    specman.undo();
+    assertEquals(TWO_CLASSES, diagram.getSource());
   }
 
   private static DiagramEditing editorOn(ClassmanImageEditArea diagram) throws ClassDiagramParseException {

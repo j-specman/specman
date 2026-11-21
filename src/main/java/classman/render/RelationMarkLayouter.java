@@ -15,7 +15,6 @@ import static classman.render.DiagramStyle.STRIKE_COLOR;
 import static classman.render.DiagramStyle.STRIKE_WIDTH;
 import static classman.render.DiagramStyle.STROKE;
 import static classman.render.DiagramStyle.VEILED_LINE;
-import static classman.render.DiagramStyle.WHITE;
 
 /**
  * Makes the change marks of a relation. An added or removed relation gets a thick line in the color of the change
@@ -47,11 +46,7 @@ public class RelationMarkLayouter {
             return underlay;
         }
         underlay.add(thickLine(path, palette.strong(change.changeSet)));
-        if (change.type == ChangeType_V001.ADDED) {
-            underlay.addAll(highlighter.wholeHighlights(change.changeSet, texts.labelLines));
-        } else {
-            underlay.addAll(highlighter.backgrounds(texts.labelLines, WHITE));
-        }
+        underlay.addAll(highlighter.wholeHighlights(change.changeSet, texts.labelLines));
         return underlay;
     }
 

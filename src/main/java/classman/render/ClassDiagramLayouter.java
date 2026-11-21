@@ -56,12 +56,15 @@ public class ClassDiagramLayouter {
                 addAttachTargets(attachTargets, classModel, area, box.getValue());
             }
         }
+        List<SceneElementArea> elementAreas = new ArrayList<>();
+        areas.forEach((element, area) -> elementAreas.add(new SceneElementArea(element, area)));
         Map<String, Rectangle2D.Double> classAreas = classAreas(areas);
         for (AbstractRelationModel_V001 relation : model.relations()) {
             RelationLayout relationLayout = relationLayouter.layout(relation, classAreas);
             elements.addAll(relationLayout.elements);
             underlays.addAll(relationLayout.underlay);
             covered = BoxGeometry.union(covered, relationLayout.bounds);
+            elementAreas.addAll(relationLayout.elementAreas);
             attachTargets.add(relation.id, new RelationAttachTarget(relationLayout.attachPoint));
         }
         elements.addAll(0, underlays);
@@ -69,8 +72,6 @@ public class ClassDiagramLayouter {
             elements.add(link);
             covered = BoxGeometry.union(covered, link.bounds());
         }
-        List<SceneElementArea> elementAreas = new ArrayList<>();
-        areas.forEach((element, area) -> elementAreas.add(new SceneElementArea(element, area)));
         if (covered == null) {
             return new Scene(elements, elementAreas, 0, 0, 0, 0);
         }

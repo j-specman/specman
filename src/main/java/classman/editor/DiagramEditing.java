@@ -1,11 +1,14 @@
 package classman.editor;
 
 import classman.model.v001.AbstractDiagramElementModel_V001;
+import classman.model.v001.AbstractRelationModel_V001;
+import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.PositionModel_V001;
+import classman.model.v001.change.ElementDeleter_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
 import classman.model.v001.io.ClassDiagramSerializer_V001;
@@ -16,7 +19,9 @@ import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /** The operations of the diagram editor on the diagram, without any window. Each operation writes the new source
@@ -26,11 +31,13 @@ public class DiagramEditing {
   private final EditorHost host;
   private final EditorTexts texts;
   private final ClassDiagramSerializer_V001 serializer = new ClassDiagramSerializer_V001();
+  private final ElementDeleter_V001 deleter = new ElementDeleter_V001();
   private final ElementIds ids = new ElementIds(new SecureRandom());
   private ClassDiagramModel_V001 model;
   private String source;
   private Scene scene;
   private AbstractDiagramElementModel_V001 selected;
+  private BoxDrag drag;
   private int undoableSteps;
   private int redoableSteps;
 
@@ -47,6 +54,7 @@ public class DiagramEditing {
     scene = host.renderer().layout(model);
     source = newSource;
     selected = null;
+    drag = null;
   }
 
   public String source() { return source; }
@@ -111,6 +119,76 @@ public class DiagramEditing {
     }
     String color = host.renderer().selectionColorOf(selected.change.changeSet);
     return color != null ? Color.decode(color) : null;
+  }
+
+  /** Starts to drag the selected box, if there is one, from the point where the mouse was pressed. */
+  public void startDrag(Point2D at) {
+    drag = selected != null && scene.elementAreaOf(selected) != null
+      ? new BoxDrag(selected, at, scene, placedBoxes(), associationClasses())
+      : null;
+  }
+
+  /** Shows the dragged box where the mouse is. Nothing is reported to the host until the drag ends. */
+  public void dragTo(Point2D at) {
+    if (drag != null) {
+      drag.to(at);
+      scene = host.renderer().layout(model);
+    }
+  }
+
+  /** Leaves the box where it is. If it has moved, that is one operation. */
+  public void endDrag() {
+    BoxDrag ended = drag;
+    drag = null;
+    if (ended != null && ended.hasMoved()) {
+      publish();
+    }
+  }
+
+  /** Puts the box back where it was before the drag.
+   * @return false if there was no drag which had moved a box */
+  public boolean cancelDrag() {
+    BoxDrag cancelled = drag;
+    drag = null;
+    if (cancelled == null || !cancelled.hasMoved()) {
+      return false;
+    }
+    cancelled.cancel();
+    scene = host.renderer().layout(model);
+    return true;
+  }
+
+  private List<AbstractDiagramElementModel_V001> placedBoxes() {
+    List<AbstractDiagramElementModel_V001> boxes = new ArrayList<>(model.classes());
+    boxes.addAll(model.notes());
+    return boxes;
+  }
+
+  private List<ClassModel_V001> associationClasses() {
+    List<ClassModel_V001> classes = new ArrayList<>();
+    for (AbstractRelationModel_V001 relation : model.relations()) {
+      if (relation instanceof AssociationRelationModel_V001 association && association.assocClass != null) {
+        classes.add(association.assocClass);
+      }
+    }
+    return classes;
+  }
+
+  /** Deletes the selected box and what hangs on it, and selects nothing afterwards. While changes are tracked, what
+   * the change set has added is removed and the rest is marked as removed, so that the deletion can be rejected. */
+  public void deleteSelected() {
+    if (selected == null) {
+      return;
+    }
+    String changeSet = host.trackedChangeSet();
+    if (changeSet != null) {
+      deleter.delete(model, selected, changeSet);
+    }
+    else {
+      deleter.delete(model, selected);
+    }
+    publish();
+    selected = null;
   }
 
   /** Adds a class with a made-up name and ID, its top left corner at the given point of the diagram. */

@@ -38,12 +38,14 @@ public class RelationLayouter {
         elements.addAll(texts.all());
         elements.addAll(markLayouter.overlay(relation, texts, PathGeometry.quarterPoint(path)));
         Rectangle2D.Double bounds = boundsOf(path, underlay, elements);
+        List<SceneElementArea> elementAreas = new ArrayList<>();
         if (relation instanceof AssociationRelationModel_V001 association && association.assocClass != null) {
             RelationLayout assocClass = assocClassLayouter.layout(association.assocClass, path);
             elements.addAll(assocClass.elements);
             bounds = BoxGeometry.union(bounds, assocClass.bounds);
+            elementAreas.addAll(assocClass.elementAreas);
         }
-        return new RelationLayout(underlay, elements, bounds, attachPoint);
+        return new RelationLayout(underlay, elements, bounds, attachPoint, elementAreas);
     }
 
     private ScenePolyline line(List<Point2D.Double> path, boolean dashed, String color) {

@@ -20,7 +20,7 @@ import static classman.render.DiagramStyle.STROKE;
 import static classman.render.DiagramStyle.STROKE_WIDTH;
 import static classman.render.DiagramStyle.VEIL_SHARE;
 import static classman.render.DiagramStyle.VEILED_STROKE;
-import static classman.render.DiagramStyle.VEILED_TEXT;
+import static classman.render.DiagramStyle.VEILED_MARKED_TEXT;
 import static classman.render.DiagramStyle.WHITE;
 
 /**
@@ -67,11 +67,14 @@ public class NoteBoxLayouter {
         double lineY = PADDING_Y;
         for (String line : lines) {
             placed.add(new SceneText(PADDING_X, lineY + measurer.ascent(), line, false, TextAnchor.START,
-                measurer.width(line, false), isRemoved ? VEILED_TEXT : null));
+                measurer.width(line, false), isRemoved ? VEILED_MARKED_TEXT : null));
             lineY += measurer.lineHeight();
         }
         if (change == null) {
             elements.addAll(highlighter.wholeHighlights(model.textChange, placed));
+        }
+        if (isRemoved) {
+            elements.addAll(highlighter.wholeHighlights(change.changeSet, placed));
         }
         elements.addAll(placed);
         if (isRemoved) {

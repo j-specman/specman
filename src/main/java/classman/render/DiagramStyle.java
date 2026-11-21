@@ -73,6 +73,9 @@ public final class DiagramStyle {
     /** The share of white which veils the fill of a removed class or note. */
     public static final double VEIL_SHARE = 0.5;
     public static final String VEILED_TEXT = "#9a9a9a";
+    /** The text of a removed class name or note, which has the strong color of the change set behind it: darker than
+     * the other veiled texts, which would hardly show on that color. */
+    public static final String VEILED_MARKED_TEXT = "#505050";
     public static final String VEILED_STROKE = "#a0a0a0";
     /** The line of a removed relation: darker than the border of a removed box, because it lies on its colored band. */
     public static final String VEILED_LINE = "#7a7a7a";

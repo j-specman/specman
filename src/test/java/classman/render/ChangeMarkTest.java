@@ -49,10 +49,27 @@ class ChangeMarkTest {
     Scene scene = layout("class Aa (aaaaaaaa) change(removed, yellow) at(0, 0)");
     assertNotEquals(DiagramStyle.CLASS_FILL, all(scene, SceneRectangle.class).get(1).fill);
     SceneText name = SceneTestHelper.textNamed(scene, "Aa");
-    assertEquals(DiagramStyle.VEILED_TEXT, name.fill);
+    assertEquals(DiagramStyle.VEILED_MARKED_TEXT, name.fill);
     SceneLine strike = strikes(scene).get(0);
     assertEquals(name.left() - 1, strike.x1);
     assertEquals(name.left() + name.width + 1, strike.x2);
+  }
+
+  /** The name of a removed class has the strong color of the change set behind it, like a removed text in Specman. */
+  @Test
+  void removedClassNameHighlighted() throws ClassDiagramParseException {
+    Scene scene = layout("class Aa (aaaaaaaa) change(removed, yellow) at(0, 0)");
+    SceneText name = SceneTestHelper.textNamed(scene, "Aa");
+    List<SceneRectangle> highlights = rectanglesFilled(scene, YELLOW);
+    assertEquals(1, highlights.size());
+    assertTrue(highlights.get(0).x <= name.left() && highlights.get(0).x + highlights.get(0).width >= name.left() + name.width);
+  }
+
+  /** The text of a removed note has the strong color behind it. */
+  @Test
+  void removedNoteTextHighlighted() throws ClassDiagramParseException {
+    Scene scene = layout("note change(removed, yellow) at(0, 0) \"gone\"");
+    assertEquals(1, rectanglesFilled(scene, YELLOW).size());
   }
 
   private static List<SceneLine> strikes(Scene scene) {
@@ -132,7 +149,7 @@ class ChangeMarkTest {
     assertEquals(1, rectanglesFilled(scene, YELLOW).size());
   }
 
-  /** A removed relation is veiled, has a cross on its line and a struck through label on white. */
+  /** A removed relation is veiled, has a cross on its line and a struck through label on the strong color of the change set. */
   @Test
   void removedRelationCross() throws ClassDiagramParseException {
     Scene scene = layout("""
@@ -143,7 +160,7 @@ class ChangeMarkTest {
     List<ScenePolyline> lines = all(scene, ScenePolyline.class);
     assertEquals(DiagramStyle.VEILED_LINE, lines.get(1).stroke);
     assertEquals(3, strikes(scene).size());
-    assertEquals(1, rectanglesFilled(scene, DiagramStyle.WHITE).stream().filter(r -> r.stroke == null).count());
+    assertEquals(1, rectanglesFilled(scene, YELLOW).size());
   }
 
   /** A changed multiplicity and a changed label are highlighted, the line is left alone. */

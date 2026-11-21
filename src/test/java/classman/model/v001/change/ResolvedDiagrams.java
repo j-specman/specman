@@ -1,5 +1,7 @@
 package classman.model.v001.change;
 
+import classman.model.v001.AbstractDiagramElementModel_V001;
+import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
@@ -34,6 +36,33 @@ final class ResolvedDiagrams {
     ClassDiagramModel_V001 model = parse(elements);
     RESOLVER.reject(model, changeSet);
     return SERIALIZER.serialize(model);
+  }
+
+  /** The diagram without the element with the ID and what hangs on it. */
+  static String deleted(String elements, String id) throws ClassDiagramParseException {
+    ClassDiagramModel_V001 model = parse(elements);
+    new ElementDeleter_V001().delete(model, elementWithId(model, id));
+    return SERIALIZER.serialize(model);
+  }
+
+  /** The diagram after the change set deleted the element with the ID. */
+  static String deleted(String elements, String id, String changeSet) throws ClassDiagramParseException {
+    ClassDiagramModel_V001 model = parse(elements);
+    new ElementDeleter_V001().delete(model, elementWithId(model, id), changeSet);
+    return SERIALIZER.serialize(model);
+  }
+
+  private static AbstractDiagramElementModel_V001 elementWithId(ClassDiagramModel_V001 model, String id) {
+    for (AbstractDiagramElementModel_V001 element : model.elements) {
+      if (id.equals(element.id)) {
+        return element;
+      }
+      if (element instanceof AssociationRelationModel_V001 association && association.assocClass != null
+          && id.equals(association.assocClass.id)) {
+        return association.assocClass;
+      }
+    }
+    throw new AssertionError("no element " + id);
   }
 
   static String renamed(String elements, String from, String to) throws ClassDiagramParseException {

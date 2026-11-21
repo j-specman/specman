@@ -12,16 +12,20 @@ public class RelationLayout {
     public final Rectangle2D.Double bounds;
     /** Null for the layout of an association class, which has nothing to attach to. */
     public final Point2D.Double attachPoint;
+    /** The boxes which belong to the relation: its association class, if it has one. */
+    public final List<SceneElementArea> elementAreas;
 
-    public RelationLayout(List<AbstractSceneElement> elements, Rectangle2D.Double bounds) {
-        this(List.of(), elements, bounds, null);
+    public RelationLayout(List<AbstractSceneElement> elements, Rectangle2D.Double bounds,
+                          List<SceneElementArea> elementAreas) {
+        this(List.of(), elements, bounds, null, elementAreas);
     }
 
     public RelationLayout(List<AbstractSceneElement> underlay, List<AbstractSceneElement> elements,
-                          Rectangle2D.Double bounds, Point2D.Double attachPoint) {
+                          Rectangle2D.Double bounds, Point2D.Double attachPoint, List<SceneElementArea> elementAreas) {
         this.underlay = List.copyOf(underlay);
         this.elements = List.copyOf(elements);
         this.bounds = bounds;
         this.attachPoint = attachPoint;
+        this.elementAreas = List.copyOf(elementAreas);
     }
 }

@@ -19,7 +19,6 @@ import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.function.Consumer;
 
 /** Paints the scene of the diagram with Graphics2D. Mouse wheel with Ctrl zooms. If the diagram is smaller than the
  * window, the canvas fills the window, so there is room to drop things where the diagram has none yet. */
@@ -35,16 +34,25 @@ class DiagramCanvas extends JPanel implements Scrollable {
 
   private final SceneGraphicsPainter painter = new SceneGraphicsPainter();
   private Scene scene;
-  private SvgFrame frame;
   private Rectangle2D selection;
   private Color specialSelectionColor;
   private double zoom = 1;
 
-  /** @param pressedAt called with the point of the diagram where the left mouse button was pressed */
-  DiagramCanvas(Scene scene, Consumer<Point2D> pressedAt) {
+  /** The point of the diagram at the top left of the canvas, and the size of the canvas in points of the diagram.
+   * They follow the scene, but not while a box is dragged: the scene starts at the top left box, and the canvas would
+   * move along with the box and the mouse would never get ahead of it. */
+  private double originX;
+  private double originY;
+  private double extentWidth;
+  private double extentHeight;
+  private final PointerAdapter pointer = new PointerAdapter(this::toDiagram, this::showPoint);
+
+  DiagramCanvas(Scene scene) {
     setBackground(Color.WHITE);
     setScene(scene);
-    addMouseListener(new PressAdapter(e -> pressedAt.accept(toDiagram(e.getPoint()))));
+    setAutoscrolls(true);
+    addMouseListener(pointer);
+    addMouseMotionListener(pointer);
     addMouseWheelListener(e -> {
       if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0) {
         zoomBy(e.getWheelRotation() < 0 ? ZOOM_STEP : 1 / ZOOM_STEP);
@@ -57,9 +65,23 @@ class DiagramCanvas extends JPanel implements Scrollable {
 
   void setScene(Scene scene) {
     this.scene = scene;
-    this.frame = SvgFrame.of(scene);
+    SvgFrame frame = SvgFrame.of(scene);
+    if (!pointer.isDragging()) {
+      originX = frame.x;
+      originY = frame.y;
+    }
+    extentWidth = Math.max(0, frame.x + frame.width - originX);
+    extentHeight = Math.max(0, frame.y + frame.height - originY);
     revalidate();
     repaint();
+  }
+
+  void setPointerListener(PointerListener listener) {
+    pointer.setListener(listener);
+  }
+
+  private void showPoint(Point canvasPoint) {
+    scrollRectToVisible(new Rectangle(canvasPoint.x, canvasPoint.y, 1, 1));
   }
 
   /** @param area the area of the diagram which is selected, null if nothing is
@@ -72,7 +94,7 @@ class DiagramCanvas extends JPanel implements Scrollable {
 
   /** @return the point of the diagram which the given point of the canvas shows */
   Point2D toDiagram(Point canvasPoint) {
-    return new Point2D.Double(canvasPoint.x / zoom + frame.x, canvasPoint.y / zoom + frame.y);
+    return new Point2D.Double(canvasPoint.x / zoom + originX, canvasPoint.y / zoom + originY);
   }
 
   private void zoomBy(double factor) {
@@ -83,7 +105,7 @@ class DiagramCanvas extends JPanel implements Scrollable {
 
   @Override
   public Dimension getPreferredSize() {
-    return new Dimension((int) Math.ceil(frame.width * zoom), (int) Math.ceil(frame.height * zoom));
+    return new Dimension((int) Math.ceil(extentWidth * zoom), (int) Math.ceil(extentHeight * zoom));
   }
 
   @Override
@@ -92,7 +114,7 @@ class DiagramCanvas extends JPanel implements Scrollable {
     Graphics2D g = (Graphics2D) graphics.create();
     try {
       g.scale(zoom, zoom);
-      g.translate(-frame.x, -frame.y);
+      g.translate(-originX, -originY);
       painter.paint(scene, g);
       paintSelection(g);
     }
