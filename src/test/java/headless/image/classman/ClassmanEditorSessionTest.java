@@ -131,6 +131,21 @@ class ClassmanEditorSessionTest extends AbstractClassmanTest {
     assertEquals(TWO_CLASSES, diagram.getSource());
   }
 
+  /** Scenario: Renaming a class is one step of Specman's history. */
+  @Test
+  void renamingIsOneUndoStep() throws ClassDiagramParseException {
+    ClassmanImageEditArea diagram = existingDiagram(containerOfNewStep());
+    DiagramEditing editing = editorOn(diagram);
+    Rectangle2D hello = editing.scene().elementAreas.get(0).area;
+    editing.selectAt(new Point2D.Double(hello.getCenterX(), hello.getY() + 3));
+
+    editing.rename(editing.selectedClass(), "Greeting");
+
+    assertTrue(diagram.getSource().contains("Greeting"), diagram.getSource());
+    specman.undo();
+    assertEquals(TWO_CLASSES, diagram.getSource());
+  }
+
   private static DiagramEditing editorOn(ClassmanImageEditArea diagram) throws ClassDiagramParseException {
     return new DiagramEditing(diagram.getSource(), new ClassmanEditorHost(diagram), new EditorTexts(Locale.ENGLISH));
   }

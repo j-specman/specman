@@ -69,9 +69,11 @@ public class ClassBoxLayouter {
         double y = PADDING_Y;
         List<SceneText> stereotypeLines = new ArrayList<>();
         y = addCenteredText(elements, stereotypeLines, stereotype, false, contentWidth, width, y, textColor);
+        double nameTop = y;
         List<SceneText> nameLines = new ArrayList<>();
         y = addCenteredText(elements, nameLines, model.name, true, contentWidth, width, y,
             isRemoved ? VEILED_MARKED_TEXT : null);
+        double nameBottom = y;
         List<SceneText> taggedLines = new ArrayList<>();
         y = addCenteredText(elements, taggedLines, taggedValues == null ? null : taggedValues.text(), false,
             contentWidth, width, y, textColor);
@@ -96,7 +98,8 @@ public class ClassBoxLayouter {
         all.addAll(backgrounds);
         all.addAll(elements);
         all.addAll(overlays);
-        return new BoxLayout(width, y, all, attributeAreas, change == null ? 0 : FRAME_STROKE_WIDTH / 2);
+        Rectangle2D.Double nameArea = new Rectangle2D.Double(PADDING_X, nameTop, contentWidth, nameBottom - nameTop);
+        return new BoxLayout(width, y, all, attributeAreas, change == null ? 0 : FRAME_STROKE_WIDTH / 2, nameArea);
     }
 
     private SceneRectangle frame(double width, double height, ChangeModel_V001 change) {

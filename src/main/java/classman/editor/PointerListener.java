@@ -10,4 +10,7 @@ interface PointerListener {
   void dragged(Point2D at);
 
   void released(Point2D at);
+
+  /** Called instead of {@link #pressed} for the second press of a double click. */
+  void doubleClicked(Point2D at);
 }

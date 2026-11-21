@@ -13,22 +13,25 @@ public class BoxLayout {
     public final double outset;
     private final List<AbstractSceneElement> elements;
     private final Map<String, Rectangle2D.Double> attributeAreas;
+    private final Rectangle2D.Double nameArea;
 
     public BoxLayout(double width, double height, List<AbstractSceneElement> elements) {
-        this(width, height, elements, Map.of(), 0);
+        this(width, height, elements, Map.of(), 0, null);
     }
 
     /**
      * @param attributeAreas the lines of the attributes which have an ID, relative to the top left corner of the box
      * @param outset how far the parts reach out of the box
+     * @param nameArea where the name is, relative to the top left corner of the box, null if the box has no name
      */
     public BoxLayout(double width, double height, List<AbstractSceneElement> elements,
-                     Map<String, Rectangle2D.Double> attributeAreas, double outset) {
+                     Map<String, Rectangle2D.Double> attributeAreas, double outset, Rectangle2D.Double nameArea) {
         this.width = width;
         this.height = height;
         this.outset = outset;
         this.elements = List.copyOf(elements);
         this.attributeAreas = Map.copyOf(attributeAreas);
+        this.nameArea = nameArea;
     }
 
     /** The parts of the box, moved so that its top left corner is at the given point. */
@@ -42,6 +45,11 @@ public class BoxLayout {
         attributeAreas.forEach((id, area) ->
             placed.put(id, new Rectangle2D.Double(area.x + x, area.y + y, area.width, area.height)));
         return placed;
+    }
+
+    /** The area of the name, moved so that the top left corner of the box is at the given point, null if there is no name. */
+    public Rectangle2D.Double nameAreaAt(double x, double y) {
+        return nameArea == null ? null : new Rectangle2D.Double(nameArea.x + x, nameArea.y + y, nameArea.width, nameArea.height);
     }
 
     /** The area of the box at the given point including the parts which reach out of it. */

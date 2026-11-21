@@ -57,7 +57,8 @@ public class ClassDiagramLayouter {
             }
         }
         List<SceneElementArea> elementAreas = new ArrayList<>();
-        areas.forEach((element, area) -> elementAreas.add(new SceneElementArea(element, area)));
+        areas.forEach((element, area) -> elementAreas.add(
+            new SceneElementArea(element, area, boxes.get(element).nameAreaAt(area.x, area.y))));
         Map<String, Rectangle2D.Double> classAreas = classAreas(areas);
         for (AbstractRelationModel_V001 relation : model.relations()) {
             RelationLayout relationLayout = relationLayouter.layout(relation, classAreas);

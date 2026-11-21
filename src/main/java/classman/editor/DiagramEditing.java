@@ -8,6 +8,7 @@ import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.PositionModel_V001;
+import classman.model.v001.change.ClassRenamer_V001;
 import classman.model.v001.change.ElementDeleter_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
@@ -32,6 +33,7 @@ public class DiagramEditing {
   private final EditorTexts texts;
   private final ClassDiagramSerializer_V001 serializer = new ClassDiagramSerializer_V001();
   private final ElementDeleter_V001 deleter = new ElementDeleter_V001();
+  private final ClassRenamer_V001 renamer = new ClassRenamer_V001();
   private final ElementIds ids = new ElementIds(new SecureRandom());
   private ClassDiagramModel_V001 model;
   private String source;
@@ -119,6 +121,33 @@ public class DiagramEditing {
     }
     String color = host.renderer().selectionColorOf(selected.change.changeSet);
     return color != null ? Color.decode(color) : null;
+  }
+
+  /** @return the selected box if it is a class, null otherwise */
+  public ClassModel_V001 selectedClass() {
+    return selected instanceof ClassModel_V001 classModel ? classModel : null;
+  }
+
+  /** @return where the name of the selected class is, null if no class is selected */
+  public Rectangle2D selectedNameArea() {
+    SceneElementArea selectedArea = selected != null ? scene.elementAreaOf(selected) : null;
+    return selectedArea != null ? selectedArea.nameArea : null;
+  }
+
+  /** Gives the class a new name. While changes are tracked, the change set gets the mark for the change. The name it
+   * has already is no operation. */
+  public void rename(ClassModel_V001 box, String newName) {
+    if (box.name.equals(newName)) {
+      return;
+    }
+    String changeSet = host.trackedChangeSet();
+    if (changeSet != null) {
+      renamer.rename(box, newName, changeSet);
+    }
+    else {
+      renamer.rename(box, newName);
+    }
+    publish();
   }
 
   /** Starts to drag the selected box, if there is one, from the point where the mouse was pressed. */

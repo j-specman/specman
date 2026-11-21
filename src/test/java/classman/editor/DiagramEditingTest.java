@@ -288,6 +288,91 @@ class DiagramEditingTest {
     assertFalse(editing.hasSelection());
   }
 
+  /** The name area of a class lies in the header of its box, across its width. */
+  @Test
+  void nameAreaInHeader() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  class Book (04de91aa) at(10, 20) { -title : String }\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+
+    editing.selectAt(new Point2D.Double(15, 25));
+
+    Rectangle2D box = editing.selectedArea();
+    Rectangle2D name = editing.selectedNameArea();
+    assertTrue(box.contains(name));
+    assertTrue(name.getHeight() > 0);
+    assertTrue(name.getMaxY() < box.getCenterY() + box.getHeight() / 2 - 10);
+    assertEquals(editing.selectedClass().name, "Book");
+  }
+
+  /** A note has no name area, and no class is selected. */
+  @Test
+  void noNameAreaForNote() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  note (22222222) at(300, 20) \"Remember\"\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+
+    editing.selectAt(new Point2D.Double(305, 25));
+
+    assertTrue(editing.hasSelection());
+    assertNull(editing.selectedNameArea());
+    assertNull(editing.selectedClass());
+  }
+
+  /** The new name is reported, once. */
+  @Test
+  void renamedClass() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    editing.selectAt(new Point2D.Double(15, 25));
+
+    editing.rename(editing.selectedClass(), "Volume");
+
+    assertEquals("Volume", onlyClassOf(editing.source()).name);
+    assertNull(onlyClassOf(editing.source()).nameChange);
+    assertEquals(1, host.reportedSources.size());
+  }
+
+  /** While changes are tracked, the old name is kept as backup of the change set. */
+  @Test
+  void renamedClassTracked() throws ClassDiagramParseException {
+    host.trackedChangeSet = "yellow";
+    String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    editing.selectAt(new Point2D.Double(15, 25));
+
+    editing.rename(editing.selectedClass(), "Volume");
+
+    ClassModel_V001 box = onlyClassOf(editing.source());
+    assertEquals("Volume", box.name);
+    assertEquals("yellow", box.nameChange.changeSet);
+    assertEquals("Book", box.nameChange.backup);
+  }
+
+  /** A line break in a name stays in the name, in the source and in the picture. */
+  @Test
+  void renamedWithLineBreak() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    editing.selectAt(new Point2D.Double(15, 25));
+    double oneLine = editing.selectedNameArea().getHeight();
+
+    editing.rename(editing.selectedClass(), "Book\nVolume");
+
+    assertEquals("Book\nVolume", onlyClassOf(editing.source()).name);
+    assertTrue(editing.selectedNameArea().getHeight() > 1.5 * oneLine);
+  }
+
+  /** The same name is no operation. */
+  @Test
+  void sameNameIsNoStep() throws ClassDiagramParseException {
+    String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
+    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    editing.selectAt(new Point2D.Double(15, 25));
+
+    editing.rename(editing.selectedClass(), "Book");
+
+    assertFalse(editing.canUndo());
+  }
+
   /** A diagram which can't be read can't be edited. */
   @Test
   void unreadableSource() {

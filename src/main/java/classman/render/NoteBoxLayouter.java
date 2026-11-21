@@ -80,7 +80,7 @@ public class NoteBoxLayouter {
         if (isRemoved) {
             elements.addAll(highlighter.strikes(placed));
         }
-        return new BoxLayout(width, height, elements, Map.of(), change == null ? 0 : FRAME_STROKE_WIDTH / 2);
+        return new BoxLayout(width, height, elements, Map.of(), change == null ? 0 : FRAME_STROKE_WIDTH / 2, null);
     }
 
     private double contentWidth(NoteModel_V001 model) {

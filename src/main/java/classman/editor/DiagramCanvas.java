@@ -49,6 +49,8 @@ class DiagramCanvas extends JPanel implements Scrollable {
 
   DiagramCanvas(Scene scene) {
     setBackground(Color.WHITE);
+    setLayout(null);
+    setFocusable(true);
     setScene(scene);
     setAutoscrolls(true);
     addMouseListener(pointer);
@@ -95,6 +97,15 @@ class DiagramCanvas extends JPanel implements Scrollable {
   /** @return the point of the diagram which the given point of the canvas shows */
   Point2D toDiagram(Point canvasPoint) {
     return new Point2D.Double(canvasPoint.x / zoom + originX, canvasPoint.y / zoom + originY);
+  }
+
+  double zoom() { return zoom; }
+
+  /** @return the area of the canvas which shows the given area of the diagram */
+  Rectangle toCanvas(Rectangle2D diagramArea) {
+    return new Rectangle((int) Math.round((diagramArea.getX() - originX) * zoom),
+      (int) Math.round((diagramArea.getY() - originY) * zoom),
+      (int) Math.round(diagramArea.getWidth() * zoom), (int) Math.round(diagramArea.getHeight() * zoom));
   }
 
   private void zoomBy(double factor) {

@@ -8,9 +8,17 @@ import java.awt.geom.Rectangle2D;
 public class SceneElementArea {
     public final AbstractDiagramElementModel_V001 element;
     public final Rectangle2D.Double area;
+    /** Where the name of a class is, across the width of its box. Null for a box which has no name. */
+    public final Rectangle2D.Double nameArea;
 
     public SceneElementArea(AbstractDiagramElementModel_V001 element, Rectangle2D.Double area) {
+        this(element, area, null);
+    }
+
+    public SceneElementArea(AbstractDiagramElementModel_V001 element, Rectangle2D.Double area,
+                            Rectangle2D.Double nameArea) {
         this.element = element;
         this.area = area;
+        this.nameArea = nameArea;
     }
 }

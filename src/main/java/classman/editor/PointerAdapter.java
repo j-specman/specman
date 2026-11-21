@@ -35,6 +35,11 @@ class PointerAdapter extends MouseAdapter {
   @Override
   public void mousePressed(MouseEvent e) {
     if (listener != null && SwingUtilities.isLeftMouseButton(e)) {
+      e.getComponent().requestFocusInWindow();
+      if (e.getClickCount() > 1) {
+        listener.doubleClicked(toDiagram.apply(e.getPoint()));
+        return;
+      }
       pressedAt = e.getPoint();
       dragging = false;
       listener.pressed(toDiagram.apply(pressedAt));
