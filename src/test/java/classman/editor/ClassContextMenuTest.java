@@ -40,7 +40,7 @@ class ClassContextMenuTest {
   private void open(String source) throws Exception {
     SwingUtilities.invokeAndWait(() -> {
       try {
-        editing = new DiagramEditing(source, host, texts);
+        editing = new DiagramEditing(source, host);
       }
       catch (Exception e) {
         throw new IllegalStateException(e);

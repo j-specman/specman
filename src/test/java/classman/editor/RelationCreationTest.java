@@ -30,7 +30,7 @@ class RelationCreationTest {
   private PointerControl control;
 
   private void open(String source) throws ClassDiagramParseException {
-    editing = new DiagramEditing(source, host, new EditorTexts(host.locale()));
+    editing = new DiagramEditing(source, host);
     control = new PointerControl(editing, () -> { }, text -> { }, at -> { }, pixels -> pixels);
   }
 

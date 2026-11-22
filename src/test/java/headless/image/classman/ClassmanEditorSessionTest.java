@@ -1,7 +1,6 @@
 package headless.image.classman;
 
 import classman.editor.DiagramEditing;
-import classman.editor.EditorTexts;
 import classman.model.v001.io.ClassDiagramParseException;
 import org.junit.jupiter.api.Test;
 import specman.ChangeSet;
@@ -10,7 +9,6 @@ import specman.editarea.image.classman.ClassmanImageEditArea;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.Locale;
 
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,7 +24,7 @@ class ClassmanEditorSessionTest extends AbstractClassmanTest {
   void undoAndRedoInTheEditor() throws ClassDiagramParseException {
     ClassmanImageEditArea diagram = existingDiagram(containerOfNewStep());
     DiagramEditing editing = editorOn(diagram);
-    editing.addClass(300, 20);
+    editing.setText(editing.newClass(300, 20), "NewClass");
     String withNewClass = diagram.getSource();
     assertTrue(withNewClass.contains("NewClass"));
 
@@ -48,8 +46,8 @@ class ClassmanEditorSessionTest extends AbstractClassmanTest {
   void undoAfterTheEditorClosed() throws ClassDiagramParseException {
     ClassmanImageEditArea diagram = existingDiagram(containerOfNewStep());
     DiagramEditing editing = editorOn(diagram);
-    editing.addClass(300, 20);
-    editing.addClass(500, 20);
+    editing.setText(editing.newClass(300, 20), "NewClass");
+    editing.setText(editing.newClass(500, 20), "NewClass");
 
     specman.undo();
 
@@ -64,7 +62,7 @@ class ClassmanEditorSessionTest extends AbstractClassmanTest {
     ClassmanImageEditArea diagram = existingDiagram(containerOfNewStep());
     diagram.changeSource(THREE_CLASSES);
     DiagramEditing editing = editorOn(diagram);
-    editing.addClass(300, 20);
+    editing.setText(editing.newClass(300, 20), "NewClass");
 
     editing.undo();
     editing.undo();
@@ -78,10 +76,10 @@ class ClassmanEditorSessionTest extends AbstractClassmanTest {
   void newOperationEndsRedo() throws ClassDiagramParseException {
     ClassmanImageEditArea diagram = existingDiagram(containerOfNewStep());
     DiagramEditing editing = editorOn(diagram);
-    editing.addClass(300, 20);
+    editing.setText(editing.newClass(300, 20), "NewClass");
     editing.undo();
 
-    editing.addClass(500, 20);
+    editing.setText(editing.newClass(500, 20), "NewClass");
 
     assertFalse(editing.canRedo());
   }
@@ -93,7 +91,8 @@ class ClassmanEditorSessionTest extends AbstractClassmanTest {
     specman.toggleChangeMode();
     specman.selectChangeSet(ChangeSet.ALL.get("blue"));
 
-    editorOn(diagram).addClass(300, 20);
+    DiagramEditing created = editorOn(diagram);
+    created.setText(created.newClass(300, 20), "NewClass");
 
     assertTrue(diagram.getSource().contains("change(added, blue)"), diagram.getSource());
   }
@@ -147,6 +146,6 @@ class ClassmanEditorSessionTest extends AbstractClassmanTest {
   }
 
   private static DiagramEditing editorOn(ClassmanImageEditArea diagram) throws ClassDiagramParseException {
-    return new DiagramEditing(diagram.getSource(), new ClassmanEditorHost(diagram), new EditorTexts(Locale.ENGLISH));
+    return new DiagramEditing(diagram.getSource(), new ClassmanEditorHost(diagram));
   }
 }

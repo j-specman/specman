@@ -30,10 +30,9 @@ class AttributeEditingTest {
   private static final String EMPTY_BOOK = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
 
   private final RecordingEditorHost host = new RecordingEditorHost();
-  private final EditorTexts texts = new EditorTexts(host.locale());
 
   private DiagramEditing open(String source) throws ClassDiagramParseException {
-    return new DiagramEditing(source, host, texts);
+    return new DiagramEditing(source, host);
   }
 
   private static List<SceneTextArea> lines(DiagramEditing editing) {

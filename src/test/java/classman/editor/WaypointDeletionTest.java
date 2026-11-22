@@ -28,7 +28,7 @@ class WaypointDeletionTest {
   private final DiagramEditing editing;
 
   WaypointDeletionTest() throws ClassDiagramParseException {
-    editing = new DiagramEditing(ROUTED, host, new EditorTexts(host.locale()));
+    editing = new DiagramEditing(ROUTED, host);
     editing.selectAt(new Point2D.Double(100, 150), TOLERANCE);
   }
 
@@ -104,7 +104,7 @@ class WaypointDeletionTest {
   @Test
   void relationWithoutRoute() throws ClassDiagramParseException {
     DiagramEditing loop = new DiagramEditing("classdiagram {\n  class A (11111111) at(10, 20)\n"
-      + "  association (33333333) 11111111 -- 11111111\n}", host, new EditorTexts(host.locale()));
+      + "  association (33333333) 11111111 -- 11111111\n}", host);
     loop.selectAt(loop.scene().relationLines.get(0).points().get(1), TOLERANCE);
 
     assertFalse(loop.deleteWaypointAt(loop.selectedHandles().get(1), TOLERANCE));

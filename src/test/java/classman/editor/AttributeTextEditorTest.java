@@ -36,7 +36,7 @@ class AttributeTextEditorTest {
   private void open(int lineIndex) throws Exception {
     SwingUtilities.invokeAndWait(() -> {
       try {
-        editing = new DiagramEditing(BOOK, host, new EditorTexts(host.locale()));
+        editing = new DiagramEditing(BOOK, host);
       }
       catch (Exception e) {
         throw new IllegalStateException(e);

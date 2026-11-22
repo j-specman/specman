@@ -24,12 +24,11 @@ class DiagramMovingTest {
   private static final String TWO_STACKED = "classdiagram {\n  class Book (04de91aa)\n  class Page (11111111)\n}";
 
   private final RecordingEditorHost host = new RecordingEditorHost();
-  private final EditorTexts texts = new EditorTexts(host.locale());
 
   /** The box follows the mouse and stays where it was dropped. */
   @Test
   void movedBox() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(TWO_PLACED, host, texts);
+    DiagramEditing editing = new DiagramEditing(TWO_PLACED, host);
     select(editing, 15, 25);
 
     editing.startDrag(new Point2D.Double(15, 25));
@@ -49,7 +48,7 @@ class DiagramMovingTest {
   /** Nothing is reported while the mouse is dragged, and only one source when it is released. */
   @Test
   void reportedOnRelease() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(TWO_PLACED, host, texts);
+    DiagramEditing editing = new DiagramEditing(TWO_PLACED, host);
     select(editing, 15, 25);
 
     editing.startDrag(new Point2D.Double(15, 25));
@@ -67,7 +66,7 @@ class DiagramMovingTest {
   /** A press without a drag moves nothing and is no operation. */
   @Test
   void clickIsNoMove() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(TWO_PLACED, host, texts);
+    DiagramEditing editing = new DiagramEditing(TWO_PLACED, host);
     select(editing, 15, 25);
 
     editing.startDrag(new Point2D.Double(15, 25));
@@ -80,7 +79,7 @@ class DiagramMovingTest {
   /** A press on nothing drags nothing. */
   @Test
   void nothingToDrag() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(TWO_PLACED, host, texts);
+    DiagramEditing editing = new DiagramEditing(TWO_PLACED, host);
     select(editing, 250, 300);
 
     editing.startDrag(new Point2D.Double(250, 300));
@@ -93,7 +92,7 @@ class DiagramMovingTest {
   /** Esc during a drag puts the box back, and the release afterwards reports nothing. */
   @Test
   void cancelledDrag() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(TWO_PLACED, host, texts);
+    DiagramEditing editing = new DiagramEditing(TWO_PLACED, host);
     select(editing, 15, 25);
     editing.startDrag(new Point2D.Double(15, 25));
     editing.dragTo(new Point2D.Double(115, 75));
@@ -110,7 +109,7 @@ class DiagramMovingTest {
   /** Moving one of the stacked boxes leaves the others where they are, as the layout had them. */
   @Test
   void stackedBoxesStay() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(TWO_STACKED, host, texts);
+    DiagramEditing editing = new DiagramEditing(TWO_STACKED, host);
     Rectangle2D pageBefore = areaOfClassAt(editing, 1);
     Rectangle2D bookBefore = areaOfClassAt(editing, 0);
     select(editing, bookBefore.getCenterX(), bookBefore.getCenterY());
@@ -130,7 +129,7 @@ class DiagramMovingTest {
   void movedAssociationClass() throws ClassDiagramParseException {
     String source = "classdiagram {\n  class A (aaaaaaaa) at(0, 0)\n  class B (bbbbbbbb) at(300, 0)\n"
       + "  association aaaaaaaa -- bbbbbbbb\n  assocclass link\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
     Rectangle2D link = editing.scene().elementAreas.get(2).area;
     Point2D grab = new Point2D.Double(link.getCenterX(), link.getCenterY());
     editing.selectAt(grab);

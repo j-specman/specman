@@ -41,7 +41,6 @@ import java.util.Set;
 public class DiagramEditing {
   private static final double DEFAULT_LINE_TOLERANCE = 4;
   private final EditorHost host;
-  private final EditorTexts texts;
   private final ClassDiagramSerializer_V001 serializer = new ClassDiagramSerializer_V001();
   private final ElementDeleter_V001 deleter = new ElementDeleter_V001();
   private final ElementTextChanger_V001 textChanger = new ElementTextChanger_V001();
@@ -50,6 +49,7 @@ public class DiagramEditing {
   private ClassDiagramModel_V001 model;
   private AttributeEditing attributeEditing;
   private PendingStereotype pendingStereotype;
+  private ClassModel_V001 pendingClass;
   private String source;
   private Scene scene;
   private AbstractDiagramElementModel_V001 selected;
@@ -61,9 +61,8 @@ public class DiagramEditing {
 
   /** @throws ClassDiagramParseException if the source has a syntax error
    * @throws IllegalArgumentException if the diagram refers to an element which it doesn't have */
-  public DiagramEditing(String source, EditorHost host, EditorTexts texts) throws ClassDiagramParseException {
+  public DiagramEditing(String source, EditorHost host) throws ClassDiagramParseException {
     this.host = host;
-    this.texts = texts;
     load(source);
   }
 
@@ -71,6 +70,7 @@ public class DiagramEditing {
     model = new ClassDiagramParser_V001().parse(newSource);
     attributeEditing = new AttributeEditing(model);
     pendingStereotype = new PendingStereotype();
+    pendingClass = null;
     scene = host.renderer().layout(model);
     source = newSource;
     selected = null;
@@ -353,6 +353,9 @@ public class DiagramEditing {
     switch (text.kind) {
       case CLASS_NAME -> {
         ClassModel_V001 box = (ClassModel_V001) text.element;
+        if (box == pendingClass) {
+          pendingClass = null;
+        }
         if (changeSet != null) {
           textChanger.setClassName(box, newText, changeSet);
         }
@@ -442,7 +445,8 @@ public class DiagramEditing {
       .findFirst().orElseThrow();
   }
 
-  /** Takes away the blank line or row for a new attribute or stereotype, if it is still there. */
+  /** Takes away the blank line or row for a new attribute or stereotype, or the class without a name, if it is still
+   * there. */
   public void discardNewPart() {
     if (discardPendingParts()) {
       scene = host.renderer().layout(model);
@@ -452,7 +456,8 @@ public class DiagramEditing {
   private boolean discardPendingParts() {
     boolean attributeGone = attributeEditing.discardPending();
     boolean stereotypeGone = pendingStereotype.discard();
-    return attributeGone || stereotypeGone;
+    boolean classGone = discardPendingClass();
+    return attributeGone || stereotypeGone || classGone;
   }
 
   /** Starts to drag, from the point where the mouse was pressed: a handle of the selected relation if the point is at
@@ -641,28 +646,35 @@ public class DiagramEditing {
     selected = null;
   }
 
-  /** Adds a class with a made-up name and ID, its top left corner at the given point of the diagram. */
-  public void addClass(int x, int y) {
-    ClassModel_V001 box = new ClassModel_V001(newClassName());
+  /** Puts a class without a name into the picture, its top left corner at the given point of the diagram, with a new
+   * ID, selected, for the name to be typed into. The class is not part of the diagram until its name is given with
+   * {@link #setText}: that is one operation. It goes away again with the empty name, or if it is dropped.
+   * @return the area of the name */
+  public SceneTextArea newClass(int x, int y) {
+    discardPendingParts();
+    ClassModel_V001 box = new ClassModel_V001("");
     box.id = ids.newIdNotIn(usedIds());
     box.position = new PositionModel_V001(x, y);
+    box.width = DiagramStyle.NEW_CLASS_WIDTH;
     markAsAdded(box);
     model.elements.add(box);
     selected = box;
-    publish();
+    pendingClass = box;
+    scene = host.renderer().layout(model);
+    return scene.textAreas.stream().filter(text -> text.element == box && text.kind == TextKind.CLASS_NAME)
+      .findFirst().orElseThrow();
   }
 
-  private String newClassName() {
-    Set<String> names = new HashSet<>();
-    for (ClassModel_V001 box : model.classes()) {
-      names.add(box.name);
+  private boolean discardPendingClass() {
+    if (pendingClass == null) {
+      return false;
     }
-    String base = texts.get("class.new.name");
-    String name = base;
-    for (int number = 2; names.contains(name); number++) {
-      name = base + number;
+    model.elements.remove(pendingClass);
+    if (selected == pendingClass) {
+      selected = null;
     }
-    return name;
+    pendingClass = null;
+    return true;
   }
 
   private Set<String> usedIds() {

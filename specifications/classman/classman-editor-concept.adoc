@@ -106,10 +106,10 @@ Specman's step buttons are drag sources: The user drags a step onto the diagram.
 
 * The user presses the class button and drags. A ghost of the class follows the mouse. The class is created where the mouse is released, if that is inside the canvas of the window. Released anywhere else, nothing happens.
 * The drop point becomes the top left corner of the new class: `at(x, y)` in diagram coordinates, rounded to whole pixels, whatever the zoom is.
-* The class gets a made-up name, `NewClass`, and `NewClass2`, `NewClass3` and so on if the name is taken. Class names need not be unique, this only keeps the new classes apart for the user.
+* The field for the name opens right after the drop, over the name row of the new class, empty. The class has no made-up name. Return with a name creates the class; Return with an empty name, Esc, or leaving the field takes the class away again. Until then the class is part of the picture (selected, with its box) but not of the diagram: nothing is reported to the host and there is no undo step. The class is created with `width=140` (`DiagramStyle.NEW_CLASS_WIDTH`), wide enough for the empty field (120 pixels at 100 % zoom) to lie completely inside the box. Fields have their minimum width in proportion to the zoom, like their font. Class names need not be unique.
 * It gets an ID: 8 hexadecimal characters, different from all IDs in the diagram.
 * If changes are tracked, it gets `change(added, <change set>)`.
-* The new class is selected. One operation, one undo step.
+* The new class is selected. Creating it with its name is one operation, one undo step. While changes are tracked, the name needs no mark of its own: a class which a change set has added is named plainly.
 
 *Built, the association (first relation, as a vertical slice):*
 

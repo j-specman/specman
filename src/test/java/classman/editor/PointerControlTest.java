@@ -32,7 +32,7 @@ class PointerControlTest {
   }
 
   private void open(String source) throws ClassDiagramParseException {
-    editing = new DiagramEditing(source, host, new EditorTexts(host.locale()));
+    editing = new DiagramEditing(source, host);
     control = new PointerControl(editing, () -> { }, text -> nameEdits.incrementAndGet(), at -> { }, pixels -> pixels);
   }
 

@@ -29,7 +29,7 @@ class StereotypeEditingTest {
   private DiagramEditing editing;
 
   private void open(String source) throws ClassDiagramParseException {
-    editing = new DiagramEditing(source, host, new EditorTexts(host.locale()));
+    editing = new DiagramEditing(source, host);
   }
 
   private Rectangle2D boxArea() {
@@ -137,7 +137,7 @@ class StereotypeEditingTest {
     selectClass();
     editing.newStereotype(editing.selectedClass());
 
-    editing.addClass(300, 60);
+    editing.setText(editing.newClass(300, 60), "NewClass");
 
     assertNull(classOf(editing.source()).stereotype);
     assertFalse(editing.source().contains("<<"));

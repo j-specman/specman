@@ -194,7 +194,7 @@ class HandleDragTest {
   /** The first drag of a handle of a relation without a route gives it one, which the line follows. */
   @Test
   void dragMakesRoute() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(STRAIGHT, host, new EditorTexts(host.locale()));
+    DiagramEditing editing = new DiagramEditing(STRAIGHT, host);
     List<Point2D> before = editing.scene().relationLines.get(0).points();
     editing.selectAt(new Point2D.Double((before.get(0).getX() + before.get(1).getX()) / 2,
       (before.get(0).getY() + before.get(1).getY()) / 2), TOLERANCE);
@@ -211,7 +211,7 @@ class HandleDragTest {
   /** Cancelling the first drag of a relation without a route takes the route away again. */
   @Test
   void cancelRemovesNewRoute() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(STRAIGHT, host, new EditorTexts(host.locale()));
+    DiagramEditing editing = new DiagramEditing(STRAIGHT, host);
     List<Point2D> before = editing.scene().relationLines.get(0).points();
     editing.selectAt(new Point2D.Double((before.get(0).getX() + before.get(1).getX()) / 2,
       (before.get(0).getY() + before.get(1).getY()) / 2), TOLERANCE);
@@ -248,7 +248,7 @@ class HandleDragTest {
   }
 
   private DiagramEditing selectedAt(String source, Point2D point) throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(source, host, new EditorTexts(host.locale()));
+    DiagramEditing editing = new DiagramEditing(source, host);
     editing.selectAt(point, TOLERANCE);
     return editing;
   }

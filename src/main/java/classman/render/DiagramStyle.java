@@ -9,6 +9,8 @@ public final class DiagramStyle {
     /** The space between two classes or notes which the layout stacks. */
     public static final double STACK_GAP = 40;
     public static final double MIN_BOX_WIDTH = 40;
+    /** The width which a class gets when the editor creates it, so that the field for its name fits into the box. */
+    public static final int NEW_CLASS_WIDTH = 140;
     /** The size of the folded corner of a note. */
     public static final double NOTE_FOLD = 10;
     /** The space between the text of a note and its right border: the fold plus the usual padding, so the text keeps clear of the fold. */

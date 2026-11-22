@@ -147,8 +147,13 @@ class TextEditor {
     }
   }
 
+  /** The width a field has at least: it grows and shrinks with the zoom, like the font in it. */
+  private int minFieldWidth() {
+    return (int) Math.round(edited.kind.minFieldWidth * canvas.zoom());
+  }
+
   private Rectangle wrappedBounds() {
-    int width = Math.max(boxArea.width, edited.kind.minFieldWidth);
+    int width = Math.max(boxArea.width, minFieldWidth());
     int height = Math.max(textArea.height + 2 * FIELD_MARGIN, heightAtWidth(width));
     return new Rectangle(boxArea.x, textArea.y - FIELD_MARGIN, width, height);
   }
@@ -168,7 +173,7 @@ class TextEditor {
     int margin = edited.placeholder ? canvas.placeholderMargin() : 0;
     int minimumWidth = edited.placeholder
       ? textArea.width + 2 * margin
-      : Math.max(textArea.width, edited.kind.minFieldWidth);
+      : Math.max(textArea.width, minFieldWidth());
     int width = Math.max(minimumWidth, widthOfText());
     int height = Math.max(textArea.height + 2 * FIELD_MARGIN, heightAtWidth(width));
     int x = edited.kind.centered
@@ -219,6 +224,15 @@ class TextEditor {
       return;
     }
     showDiagram.run();
+  }
+
+  /** Puts a class without a name at the point of the diagram and starts to type the name. A text which is being typed
+   * is finished first. */
+  void startNewClass(int x, int y) {
+    commit(false);
+    SceneTextArea name = editing.newClass(x, y);
+    showDiagram.run();
+    start(name);
   }
 
   /** Puts a blank line at the end of the class and starts to type a new attribute into it. */

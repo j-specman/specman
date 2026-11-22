@@ -35,7 +35,7 @@ class TextEditorTest {
   private void open(TextKind kind) throws InterruptedException, InvocationTargetException {
     SwingUtilities.invokeAndWait(() -> {
       try {
-        editing = new DiagramEditing(RELATED, host, new EditorTexts(host.locale()));
+        editing = new DiagramEditing(RELATED, host);
       }
       catch (Exception e) {
         throw new IllegalStateException(e);
@@ -97,7 +97,7 @@ class TextEditorTest {
       SceneTextArea[] place = new SceneTextArea[1];
       onEdt(() -> {
         try {
-          editing = new DiagramEditing(BARE, host, new EditorTexts(host.locale()));
+          editing = new DiagramEditing(BARE, host);
         }
         catch (Exception e) {
           throw new IllegalStateException(e);

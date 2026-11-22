@@ -31,7 +31,7 @@ class PlaceholderFieldUnderFlatLafTest {
         try {
           UIManager.setLookAndFeel(new FlatLightLaf());
           RecordingEditorHost host = new RecordingEditorHost();
-          DiagramEditing editing = new DiagramEditing(BARE, host, new EditorTexts(host.locale()));
+          DiagramEditing editing = new DiagramEditing(BARE, host);
           for (TextKind kind : new TextKind[] {TextKind.RELATION_LABEL, TextKind.FROM_MULTIPLICITY,
               TextKind.TO_MULTIPLICITY}) {
             DiagramCanvas canvas = new DiagramCanvas(editing.scene());

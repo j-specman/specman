@@ -34,7 +34,7 @@ class RelationTextPlaceholderTest {
   private PointerControl control;
 
   private void open(String source) throws ClassDiagramParseException {
-    editing = new DiagramEditing(source, host, new EditorTexts(host.locale()));
+    editing = new DiagramEditing(source, host);
     control = new PointerControl(editing, () -> { }, text -> textEdits.incrementAndGet(), at -> { }, pixels -> pixels);
   }
 

@@ -85,7 +85,7 @@ class WaypointInsertionTest {
   /** The first waypoint of a straight relation gives it a route which starts and ends where the line did. */
   @Test
   void routeAlongStraightLine() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(STRAIGHT, host, new EditorTexts(host.locale()));
+    DiagramEditing editing = new DiagramEditing(STRAIGHT, host);
     List<Point2D> before = pointsOf(editing);
     editing.selectAt(middleOf(before), TOLERANCE);
 
@@ -93,7 +93,7 @@ class WaypointInsertionTest {
 
     assertNotNull(relationOf(editing.source()).route);
     assertEquals(1, relationOf(editing.source()).route.waypoints.size());
-    List<Point2D> after = pointsOf(new DiagramEditing(editing.source(), host, new EditorTexts(host.locale())));
+    List<Point2D> after = pointsOf(new DiagramEditing(editing.source(), host));
     assertEquals(3, after.size());
     assertNear(before.get(0), after.get(0));
     assertNear(before.get(1), after.get(2));
@@ -103,7 +103,7 @@ class WaypointInsertionTest {
   @Test
   void routeAlongLoop() throws ClassDiagramParseException {
     String loop = "classdiagram {\n  class A (11111111) at(10, 20)\n  association (33333333) 11111111 -- 11111111\n}";
-    DiagramEditing editing = new DiagramEditing(loop, host, new EditorTexts(host.locale()));
+    DiagramEditing editing = new DiagramEditing(loop, host);
     List<Point2D> before = pointsOf(editing);
     editing.selectAt(before.get(1), TOLERANCE);
     Point2D onFirstPart = new Point2D.Double(before.get(0).getX(), (before.get(0).getY() + before.get(1).getY()) / 2);
@@ -111,7 +111,7 @@ class WaypointInsertionTest {
     assertTrue(editing.insertWaypointAt(onFirstPart, TOLERANCE));
 
     assertEquals(4, relationOf(editing.source()).route.waypoints.size());
-    List<Point2D> after = pointsOf(new DiagramEditing(editing.source(), host, new EditorTexts(host.locale())));
+    List<Point2D> after = pointsOf(new DiagramEditing(editing.source(), host));
     assertEquals(6, after.size());
     assertNear(before.get(0), after.get(0));
     assertNear(before.get(4), after.get(5));
@@ -131,7 +131,7 @@ class WaypointInsertionTest {
   }
 
   private DiagramEditing selectedAt(String source, Point2D point) throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(source, host, new EditorTexts(host.locale()));
+    DiagramEditing editing = new DiagramEditing(source, host);
     editing.selectAt(point, TOLERANCE);
     return editing;
   }

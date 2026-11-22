@@ -33,14 +33,13 @@ class DiagramEditingTest {
   private static final String EMPTY = "classdiagram {\n\n}";
 
   private final RecordingEditorHost host = new RecordingEditorHost();
-  private final EditorTexts texts = new EditorTexts(host.locale());
 
   /** The class lands where it was dropped and is reported with ID and name. */
   @Test
   void droppedClass() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+    DiagramEditing editing = new DiagramEditing(EMPTY, host);
 
-    editing.addClass(120, 80);
+    editing.setText(editing.newClass(120, 80), "NewClass");
 
     ClassModel_V001 box = onlyClassOf(editing.source());
     assertEquals("NewClass", box.name);
@@ -50,14 +49,14 @@ class DiagramEditingTest {
     assertEquals(List.of(editing.source()), host.reportedSources);
   }
 
-  /** Several new classes can be told apart. */
+  /** Several new classes get names and IDs of their own. */
   @Test
   void distinctClasses() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+    DiagramEditing editing = new DiagramEditing(EMPTY, host);
 
-    editing.addClass(0, 0);
-    editing.addClass(200, 0);
-    editing.addClass(400, 0);
+    editing.setText(editing.newClass(0, 0), "A");
+    editing.setText(editing.newClass(200, 0), "B");
+    editing.setText(editing.newClass(400, 0), "C");
 
     List<ClassModel_V001> boxes = modelOf(editing.source()).classes();
     Set<String> names = new HashSet<>();
@@ -74,10 +73,10 @@ class DiagramEditingTest {
   /** The picture follows the diagram after each operation. */
   @Test
   void sceneFollowsSource() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+    DiagramEditing editing = new DiagramEditing(EMPTY, host);
     double widthBefore = editing.scene().width;
 
-    editing.addClass(300, 300);
+    editing.setText(editing.newClass(300, 300), "NewClass");
 
     assertTrue(editing.scene().width > widthBefore);
   }
@@ -86,9 +85,9 @@ class DiagramEditingTest {
   @Test
   void trackedClass() throws ClassDiagramParseException {
     host.trackedChangeSet = "yellow";
-    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+    DiagramEditing editing = new DiagramEditing(EMPTY, host);
 
-    editing.addClass(0, 0);
+    editing.setText(editing.newClass(0, 0), "NewClass");
 
     ClassModel_V001 box = onlyClassOf(editing.source());
     assertNotNull(box.change);
@@ -99,9 +98,9 @@ class DiagramEditingTest {
   /** Without tracking, a new class carries no mark. */
   @Test
   void untrackedClass() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+    DiagramEditing editing = new DiagramEditing(EMPTY, host);
 
-    editing.addClass(0, 0);
+    editing.setText(editing.newClass(0, 0), "NewClass");
 
     assertNull(onlyClassOf(editing.source()).change);
   }
@@ -110,9 +109,9 @@ class DiagramEditingTest {
   @Test
   void existingElementsKept() throws ClassDiagramParseException {
     String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
 
-    editing.addClass(300, 20);
+    editing.setText(editing.newClass(300, 20), "NewClass");
 
     List<ClassModel_V001> boxes = modelOf(editing.source()).classes();
     assertEquals(2, boxes.size());
@@ -124,7 +123,7 @@ class DiagramEditingTest {
   @Test
   void selectingBox() throws ClassDiagramParseException {
     String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n  class Page (11111111) at(400, 20)\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
     assertFalse(editing.hasSelection());
 
     editing.selectAt(new Point2D.Double(15, 25));
@@ -147,7 +146,7 @@ class DiagramEditingTest {
   @Test
   void selectingTopmostBox() throws ClassDiagramParseException {
     String source = "classdiagram {\n  class Below (04de91aa) at(10, 20)\n  class Above (11111111) at(12, 22)\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
 
     editing.selectAt(new Point2D.Double(15, 25));
 
@@ -157,9 +156,9 @@ class DiagramEditingTest {
   /** A class which has just been created is selected. */
   @Test
   void newClassSelected() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+    DiagramEditing editing = new DiagramEditing(EMPTY, host);
 
-    editing.addClass(100, 100);
+    editing.setText(editing.newClass(100, 100), "NewClass");
 
     assertEquals(100, editing.selectedArea().getX(), 0.001);
     assertEquals(100, editing.selectedArea().getY(), 0.001);
@@ -168,8 +167,8 @@ class DiagramEditingTest {
   /** Deselecting leaves nothing selected. */
   @Test
   void deselecting() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
-    editing.addClass(100, 100);
+    DiagramEditing editing = new DiagramEditing(EMPTY, host);
+    editing.setText(editing.newClass(100, 100), "NewClass");
 
     editing.deselect();
 
@@ -182,7 +181,7 @@ class DiagramEditingTest {
     host.changeColors.selectionColors.put("blue", "#000000");
     String source = "classdiagram {\n  class Book (04de91aa) change(added, blue) at(10, 20)\n"
       + "  class Page (11111111) change(added, yellow) at(400, 20)\n  class Cover (22222222) at(10, 300)\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
 
     editing.selectAt(new Point2D.Double(15, 25));
     assertEquals(Color.BLACK, editing.specialSelectionColor());
@@ -201,7 +200,7 @@ class DiagramEditingTest {
   @Test
   void selectingNote() throws ClassDiagramParseException {
     String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n  note (22222222) at(300, 20) \"Remember\"\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
 
     editing.selectAt(new Point2D.Double(305, 25));
 
@@ -214,7 +213,7 @@ class DiagramEditingTest {
   void selectingAssociationClass() throws ClassDiagramParseException {
     String source = "classdiagram {\n  class A (aaaaaaaa) at(0, 0)\n  class B (bbbbbbbb) at(300, 0)\n"
       + "  association aaaaaaaa -- bbbbbbbb\n  assocclass link\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
     Rectangle2D placed = editing.scene().elementAreas.get(2).area;
 
     editing.selectAt(new Point2D.Double(placed.getCenterX(), placed.getCenterY()));
@@ -227,7 +226,7 @@ class DiagramEditingTest {
   void selectingPositionedAssociationClass() throws ClassDiagramParseException {
     String source = "classdiagram {\n  class A (aaaaaaaa) at(0, 0)\n  class B (bbbbbbbb) at(300, 0)\n"
       + "  association aaaaaaaa -- bbbbbbbb\n  assocclass link at(100, 200)\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
 
     editing.selectAt(new Point2D.Double(105, 205));
 
@@ -240,7 +239,7 @@ class DiagramEditingTest {
   void deletedClass() throws ClassDiagramParseException {
     String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n  class Page (11111111) at(400, 20)\n"
       + "  association 04de91aa -> 11111111\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
     editing.selectAt(new Point2D.Double(15, 25));
 
     editing.deleteSelected();
@@ -257,7 +256,7 @@ class DiagramEditingTest {
   void deletedClassTracked() throws ClassDiagramParseException {
     host.trackedChangeSet = "yellow";
     String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
     editing.selectAt(new Point2D.Double(15, 25));
 
     editing.deleteSelected();
@@ -271,7 +270,7 @@ class DiagramEditingTest {
   /** Delete with nothing selected does nothing. */
   @Test
   void nothingToDelete() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+    DiagramEditing editing = new DiagramEditing(EMPTY, host);
 
     editing.deleteSelected();
 
@@ -282,8 +281,8 @@ class DiagramEditingTest {
   @Test
   void addedClassGoneAtOnce() throws ClassDiagramParseException {
     host.trackedChangeSet = "yellow";
-    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
-    editing.addClass(10, 10);
+    DiagramEditing editing = new DiagramEditing(EMPTY, host);
+    editing.setText(editing.newClass(10, 10), "NewClass");
 
     editing.deleteSelected();
 
@@ -295,7 +294,7 @@ class DiagramEditingTest {
   @Test
   void nameAreaInHeader() throws ClassDiagramParseException {
     String source = "classdiagram {\n  class Book (04de91aa) at(10, 20) { -title : String }\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
 
     editing.selectAt(new Point2D.Double(15, 25));
 
@@ -311,7 +310,7 @@ class DiagramEditingTest {
   @Test
   void noNameAreaForNote() throws ClassDiagramParseException {
     String source = "classdiagram {\n  note (22222222) at(300, 20) \"Remember\"\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
 
     editing.selectAt(new Point2D.Double(305, 25));
 
@@ -324,7 +323,7 @@ class DiagramEditingTest {
   @Test
   void renamedClass() throws ClassDiagramParseException {
     String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
     editing.selectAt(new Point2D.Double(15, 25));
 
     editing.setText(textOfKind(editing, TextKind.CLASS_NAME), "Volume");
@@ -339,7 +338,7 @@ class DiagramEditingTest {
   void renamedClassTracked() throws ClassDiagramParseException {
     host.trackedChangeSet = "yellow";
     String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
     editing.selectAt(new Point2D.Double(15, 25));
 
     editing.setText(textOfKind(editing, TextKind.CLASS_NAME), "Volume");
@@ -354,7 +353,7 @@ class DiagramEditingTest {
   @Test
   void renamedWithLineBreak() throws ClassDiagramParseException {
     String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
     editing.selectAt(new Point2D.Double(15, 25));
     double oneLine = textOfKind(editing, TextKind.CLASS_NAME).area.getHeight();
 
@@ -368,7 +367,7 @@ class DiagramEditingTest {
   @Test
   void trackedFieldColor() throws ClassDiagramParseException {
     host.changeColors.strongColors.put("yellow", "#ffff00");
-    DiagramEditing editing = new DiagramEditing(EMPTY, host, texts);
+    DiagramEditing editing = new DiagramEditing(EMPTY, host);
 
     assertNull(editing.trackedFieldColor());
 
@@ -381,7 +380,7 @@ class DiagramEditingTest {
   @Test
   void changedNoteText() throws ClassDiagramParseException {
     String source = "classdiagram {\n  note (22222222) at(300, 20) \"Remember\"\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
     editing.selectAt(new Point2D.Double(305, 25));
 
     editing.setText(textOfKind(editing, TextKind.NOTE_TEXT), "First line\nSecond line");
@@ -396,7 +395,7 @@ class DiagramEditingTest {
   void changedNoteTextTracked() throws ClassDiagramParseException {
     host.trackedChangeSet = "yellow";
     String source = "classdiagram {\n  note (22222222) at(300, 20) \"Remember\"\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
     editing.selectAt(new Point2D.Double(305, 25));
 
     editing.setText(textOfKind(editing, TextKind.NOTE_TEXT), "Forget");
@@ -410,7 +409,7 @@ class DiagramEditingTest {
   @Test
   void noteTextHit() throws ClassDiagramParseException {
     String source = "classdiagram {\n  note (22222222) at(300, 20) \"Remember\"\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
     Rectangle2D text = textOfKind(editing, TextKind.NOTE_TEXT).area;
     editing.selectAt(new Point2D.Double(text.getCenterX(), text.getCenterY()));
 
@@ -424,7 +423,7 @@ class DiagramEditingTest {
   @Test
   void sameNameIsNoStep() throws ClassDiagramParseException {
     String source = "classdiagram {\n  class Book (04de91aa) at(10, 20)\n}";
-    DiagramEditing editing = new DiagramEditing(source, host, texts);
+    DiagramEditing editing = new DiagramEditing(source, host);
     editing.selectAt(new Point2D.Double(15, 25));
 
     editing.setText(textOfKind(editing, TextKind.CLASS_NAME), "Book");
@@ -438,7 +437,7 @@ class DiagramEditingTest {
   /** A relation has areas for its label and both multiplicities, which lie between its two classes. */
   @Test
   void relationTextAreas() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
+    DiagramEditing editing = new DiagramEditing(RELATED, host);
 
     Rectangle2D label = textOfKind(editing, TextKind.RELATION_LABEL).area;
     Rectangle2D from = textOfKind(editing, TextKind.FROM_MULTIPLICITY).area;
@@ -455,7 +454,7 @@ class DiagramEditingTest {
   /** The texts of a relation can be changed without selecting anything, the texts of a class only when it is selected. */
   @Test
   void relationTextEditableWithoutSelection() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
+    DiagramEditing editing = new DiagramEditing(RELATED, host);
     Rectangle2D label = textOfKind(editing, TextKind.RELATION_LABEL).area;
     Rectangle2D name = textOfKind(editing, TextKind.CLASS_NAME).area;
     Point2D onLabel = new Point2D.Double(label.getCenterX(), label.getCenterY());
@@ -470,7 +469,7 @@ class DiagramEditingTest {
   /** A new label is reported once, an empty one removes it. */
   @Test
   void changedLabel() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
+    DiagramEditing editing = new DiagramEditing(RELATED, host);
 
     editing.setText(textOfKind(editing, TextKind.RELATION_LABEL), "has");
     assertEquals("has", modelOf(editing.source()).relations().get(0).label);
@@ -484,7 +483,7 @@ class DiagramEditingTest {
   /** A multiplicity at either end is changed, an empty text removes it. */
   @Test
   void changedMultiplicity() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
+    DiagramEditing editing = new DiagramEditing(RELATED, host);
 
     editing.setText(textOfKind(editing, TextKind.FROM_MULTIPLICITY), "0..1");
     editing.setText(textOfKind(editing, TextKind.TO_MULTIPLICITY), "");
@@ -497,7 +496,7 @@ class DiagramEditingTest {
   /** A multiplicity is free text, but only one line. */
   @Test
   void freeTextMultiplicity() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
+    DiagramEditing editing = new DiagramEditing(RELATED, host);
     SceneTextArea from = textOfKind(editing, TextKind.FROM_MULTIPLICITY);
 
     for (String text : List.of("1", "0..1", "1..<maximum capacity>", "many \"or\" few", "")) {
@@ -517,7 +516,7 @@ class DiagramEditingTest {
   @Test
   void trackedRelationTexts() throws ClassDiagramParseException {
     host.trackedChangeSet = "yellow";
-    DiagramEditing editing = new DiagramEditing(RELATED, host, texts);
+    DiagramEditing editing = new DiagramEditing(RELATED, host);
 
     editing.setText(textOfKind(editing, TextKind.RELATION_LABEL), "has");
     editing.setText(textOfKind(editing, TextKind.FROM_MULTIPLICITY), "0..1");
@@ -533,14 +532,14 @@ class DiagramEditingTest {
   /** A diagram which can't be read can't be edited. */
   @Test
   void unreadableSource() {
-    assertThrows(ClassDiagramParseException.class, () -> new DiagramEditing("classdiagram {", host, texts));
+    assertThrows(ClassDiagramParseException.class, () -> new DiagramEditing("classdiagram {", host));
   }
 
   /** A diagram which refers to a class it doesn't have can't be edited. */
   @Test
   void danglingReference() {
     String source = "classdiagram {\n  extends 11111111 -> 22222222\n}";
-    assertThrows(IllegalArgumentException.class, () -> new DiagramEditing(source, host, texts));
+    assertThrows(IllegalArgumentException.class, () -> new DiagramEditing(source, host));
   }
 
   private static SceneTextArea textOfKind(DiagramEditing editing, TextKind kind) {

@@ -43,7 +43,7 @@ public class ClassDiagramEditorWindow extends JDialog {
     super(SwingUtilities.getWindowAncestor(owner), ModalityType.APPLICATION_MODAL);
     texts = new EditorTexts(host.locale());
     setTitle(texts.get("window.title"));
-    editing = new DiagramEditing(source, host, texts);
+    editing = new DiagramEditing(source, host);
     canvas = new DiagramCanvas(editing.scene());
     textEditor = new TextEditor(canvas, editing, this::showDiagram);
     canvas.setPointerListener(new PointerControl(editing, this::showDiagram, textEditor::start, this::showClassMenu,
@@ -162,7 +162,6 @@ public class ClassDiagramEditorWindow extends JDialog {
     Point inCanvas = new Point(screenPoint);
     SwingUtilities.convertPointFromScreen(inCanvas, canvas);
     Point2D inDiagram = canvas.toDiagram(inCanvas);
-    editing.addClass((int) Math.round(inDiagram.getX()), (int) Math.round(inDiagram.getY()));
-    showDiagram();
+    textEditor.startNewClass((int) Math.round(inDiagram.getX()), (int) Math.round(inDiagram.getY()));
   }
 }

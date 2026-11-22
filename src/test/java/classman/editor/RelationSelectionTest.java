@@ -29,7 +29,7 @@ class RelationSelectionTest {
   private final DiagramEditing editing;
 
   RelationSelectionTest() throws ClassDiagramParseException {
-    editing = new DiagramEditing(RELATED, host, new EditorTexts(host.locale()));
+    editing = new DiagramEditing(RELATED, host);
   }
 
   /** A press on the line of a relation selects it, and the line is drawn thicker. */
@@ -136,7 +136,7 @@ class RelationSelectionTest {
   void handlesAtWaypoints() throws ClassDiagramParseException {
     DiagramEditing routed = new DiagramEditing("classdiagram {\n  class A (11111111) at(10, 20)\n"
       + "  class B (22222222) at(300, 20)\n  association (33333333) 11111111 -- 22222222\n"
-      + "  route 11111111.bottom@10 (20, 150) (200, 150) 22222222.bottom@10\n}", host, new EditorTexts(host.locale()));
+      + "  route 11111111.bottom@10 (20, 150) (200, 150) 22222222.bottom@10\n}", host);
     ScenePolyline line = lineOf(routed);
 
     routed.selectAt(onLine(line, 1), TOLERANCE);

@@ -181,7 +181,7 @@ class RelationReconnectionTest {
   /** A relation without a route gets one, and the cancelled drag takes it away again. */
   @Test
   void relationWithoutRoute() throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(STRAIGHT, host, new EditorTexts(host.locale()));
+    DiagramEditing editing = new DiagramEditing(STRAIGHT, host);
     Point2D start = editing.scene().relationLines.get(0).points().get(0);
     Point2D end = editing.scene().relationLines.get(0).points().get(1);
     editing.selectAt(new Point2D.Double((start.getX() + end.getX()) / 2, (start.getY() + end.getY()) / 2), TOLERANCE);
@@ -202,7 +202,7 @@ class RelationReconnectionTest {
   }
 
   private DiagramEditing selectedAt(String source) throws ClassDiagramParseException {
-    DiagramEditing editing = new DiagramEditing(source, host, new EditorTexts(host.locale()));
+    DiagramEditing editing = new DiagramEditing(source, host);
     editing.selectAt(new Point2D.Double(100, 150), TOLERANCE);
     return editing;
   }
