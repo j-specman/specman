@@ -1,7 +1,6 @@
 package classman.render;
 
 import classman.model.v001.AbstractDiagramElementModel_V001;
-import classman.model.v001.NoteModel_V001;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -23,6 +22,8 @@ public class Scene {
     public final List<SceneRelationLine> relationLines;
     /** The dashed lines from the notes to what they are attached to, in the order they are drawn. */
     public final List<SceneAnchorLine> anchorLines;
+    /** The things notes can be attached to: classes, attributes which have an ID, relations. */
+    public final AttachTargetIndex attachTargets;
     public final double x;
     public final double y;
     public final double width;
@@ -36,12 +37,21 @@ public class Scene {
     public Scene(List<AbstractSceneElement> elements, List<SceneElementArea> elementAreas,
                  List<SceneTextArea> textAreas, List<SceneRelationLine> relationLines,
                  List<SceneAnchorLine> anchorLines, double x, double y, double width, double height) {
+        this(elements, elementAreas, textAreas, relationLines, anchorLines, new AttachTargetIndex(), x, y, width, height);
+    }
+
+    /** @param attachTargets the things notes can be attached to, found by their IDs */
+    public Scene(List<AbstractSceneElement> elements, List<SceneElementArea> elementAreas,
+                 List<SceneTextArea> textAreas, List<SceneRelationLine> relationLines,
+                 List<SceneAnchorLine> anchorLines, AttachTargetIndex attachTargets, double x, double y, double width,
+                 double height) {
         this.elements = List.copyOf(elements);
         this.elementAreas = List.copyOf(elementAreas);
         this.textAreas = textAreas.stream().filter(area -> !area.placeholder).toList();
         this.placeholderAreas = textAreas.stream().filter(area -> area.placeholder).toList();
         this.relationLines = List.copyOf(relationLines);
         this.anchorLines = List.copyOf(anchorLines);
+        this.attachTargets = attachTargets;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -99,11 +109,11 @@ public class Scene {
         return null;
     }
 
-    /** @return where the anchor of the note is drawn, null if the note has none in this scene */
-    public SceneAnchorLine anchorLineOf(NoteModel_V001 note) {
-        for (SceneAnchorLine anchorLine : anchorLines) {
-            if (anchorLine.note == note) {
-                return anchorLine;
+    /** @return where the anchor line is drawn, null if it is not an anchor line of this scene */
+    public SceneAnchorLine anchorLineOf(AbstractDiagramElementModel_V001 anchorLine) {
+        for (SceneAnchorLine candidate : anchorLines) {
+            if (candidate.anchorLine == anchorLine) {
+                return candidate;
             }
         }
         return null;
@@ -132,8 +142,8 @@ public class Scene {
         }
         List<SceneTextArea> allTextAreas = new ArrayList<>(textAreas);
         allTextAreas.addAll(placeholderAreas);
-        return new Scene(widerElements, elementAreas, allTextAreas, widerRelationLines, widerAnchorLines, x, y, width,
-            height);
+        return new Scene(widerElements, elementAreas, allTextAreas, widerRelationLines, widerAnchorLines, attachTargets,
+            x, y, width, height);
     }
 
     /** @return the placeholder at the point, null if there is none */

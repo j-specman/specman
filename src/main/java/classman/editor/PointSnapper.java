@@ -20,8 +20,14 @@ final class PointSnapper {
       neighborXs.add(neighbor.getX());
       neighborYs.add(neighbor.getY());
     }
-    return new Point2D.Double(snapped(target.getX(), neighborXs, tolerance),
-      snapped(target.getY(), neighborYs, tolerance));
+    return snapped(target, neighborXs, neighborYs, tolerance);
+  }
+
+  /** Like {@link #snapped(Point2D, List, double)}, for neighbors which have only a x or only a y worth snapping to.
+   * @param xs the x coordinates a x can snap to
+   * @param ys the y coordinates a y can snap to */
+  static Point2D snapped(Point2D target, List<Double> xs, List<Double> ys, double tolerance) {
+    return new Point2D.Double(snapped(target.getX(), xs, tolerance), snapped(target.getY(), ys, tolerance));
   }
 
   private static double snapped(double value, List<Double> candidates, double tolerance) {

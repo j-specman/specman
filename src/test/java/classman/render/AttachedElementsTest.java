@@ -103,7 +103,7 @@ class AttachedElementsTest {
   /** A note attached to a class gets a dashed line from its border to the border of the class. */
   @Test
   void noteLinkDashed() throws ClassDiagramParseException {
-    Scene scene = layout("class A (aa000001) at(0, 0)\nnote at(0, 100) \"n\" attach(aa000001)");
+    Scene scene = layout("class A (aa000001) at(0, 0)\nnote (bb000001) at(0, 100) \"n\"\nanchor bb000001 -- aa000001");
     ScenePolyline link = all(scene, ScenePolyline.class).get(0);
     assertTrue(link.dashed);
     assertEquals(20, link.xs[0], 1e-9);
@@ -116,7 +116,8 @@ class AttachedElementsTest {
   @Test
   void noteLinkToAttributeFromRight() throws ClassDiagramParseException {
     ScenePolyline link = lastLine(layout(
-        "class A (aaaaaaaa) at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote at(200, 0) \"n\" attach(0a0a0a0a)"));
+        "class A (aaaaaaaa) at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote (bb000001) at(200, 0) \"n\"\n"
+        + "anchor bb000001 -- 0a0a0a0a"));
     assertEquals(68, link.xs[1], 1e-9);
     assertEquals(62, link.ys[1], 1e-9);
   }
@@ -125,7 +126,8 @@ class AttachedElementsTest {
   @Test
   void noteLinkToAttributeFromLeft() throws ClassDiagramParseException {
     ScenePolyline link = lastLine(layout(
-        "class A (aaaaaaaa) at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote at(-200, 0) \"n\" attach(0a0a0a0a)"));
+        "class A (aaaaaaaa) at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\nnote (bb000001) at(-200, 0) \"n\"\n"
+        + "anchor bb000001 -- 0a0a0a0a"));
     assertEquals(4, link.xs[1], 1e-9);
     assertEquals(62, link.ys[1], 1e-9);
   }
@@ -133,16 +135,47 @@ class AttachedElementsTest {
   /** A note attached to a relation is linked to the middle of the relation. */
   @Test
   void noteLinkToRelation() throws ClassDiagramParseException {
-    ScenePolyline link = lastLine(layout(STACKED + "association (11110000) aaaaaaaa -- bbbbbbbb\nnote at(100, 60) \"n\" attach(11110000)"));
+    ScenePolyline link = lastLine(layout(STACKED + "association (11110000) aaaaaaaa -- bbbbbbbb\n"
+        + "note (bb000001) at(100, 60) \"n\"\nanchor bb000001 -- 11110000"));
     assertEquals(20, link.xs[1], 1e-9);
     assertEquals(76, link.ys[1], 1e-9);
+  }
+
+  /** An anchor on an attribute fixes the end at a point of the border of the box around its text, like on a class. */
+  @Test
+  void noteLinkToAttributeAnchored() throws ClassDiagramParseException {
+    String diagram = "class A (aaaaaaaa) at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\n"
+        + "note (bb000001) at(200, 0) \"n\"\nanchor bb000001 -- 0a0a0a0a route 0a0a0a0a.right@%d";
+    ScenePolyline top = lastLine(layout(String.format(diagram, 0)));
+    ScenePolyline lower = lastLine(layout(String.format(diagram, 10)));
+    assertEquals(68, top.xs[1], 1e-9);
+    assertEquals(68, lower.xs[1], 1e-9);
+    assertEquals(10, lower.ys[1] - top.ys[1], 1e-9);
+  }
+
+  /** The end of the line on a relation is a point of the relation line, in percent of its length. */
+  @Test
+  void noteLinkToRelationAtPercent() throws ClassDiagramParseException {
+    ScenePolyline link = lastLine(layout(STACKED + "association (11110000) aaaaaaaa -- bbbbbbbb\n"
+        + "note (bb000001) at(100, 60) \"n\"\nanchor bb000001 -- 11110000 route (150, 0) 11110000@25%"));
+    assertEquals(20, link.xs[2], 1e-9);
+    assertEquals(66, link.ys[2], 1e-9);
+  }
+
+  /** A point on a line which doesn't fit the target is ignored: the end is computed as without it. */
+  @Test
+  void percentOnBoxIsIgnored() throws ClassDiagramParseException {
+    ScenePolyline link = lastLine(layout("class A (aa000001) at(0, 0)\nnote (bb000001) at(0, 100) \"n\"\n"
+        + "anchor bb000001 -- aa000001 route aa000001@50%"));
+    assertEquals(20, link.xs[1], 1e-9);
+    assertEquals(56, link.ys[1], 1e-9);
   }
 
   /** An anchor fixes an end of the line at a point of the border: the start on the note, the end on the class. */
   @Test
   void noteLinkWithAnchors() throws ClassDiagramParseException {
-    ScenePolyline link = lastLine(layout(
-        "class A (aa000001) at(0, 0)\nnote (bb000001) at(0, 100) \"n\" attach(aa000001) route bb000001.top@10 aa000001.bottom@15"));
+    ScenePolyline link = lastLine(layout("class A (aa000001) at(0, 0)\nnote (bb000001) at(0, 100) \"n\"\n"
+        + "anchor bb000001 -- aa000001 route bb000001.top@10 aa000001.bottom@15"));
     assertEquals(2, link.xs.length);
     assertEquals(10, link.xs[0], 1e-9);
     assertEquals(100, link.ys[0], 1e-9);
@@ -153,8 +186,8 @@ class AttachedElementsTest {
   /** With waypoints the line leads over them, starting at the note facing the first and ending at the class facing the last. */
   @Test
   void noteLinkOverWaypoints() throws ClassDiagramParseException {
-    ScenePolyline link = lastLine(layout(
-        "class A (aa000001) at(0, 0)\nnote at(0, -100) \"n\" attach(aa000001) route (60, -40) (60, 28)"));
+    ScenePolyline link = lastLine(layout("class A (aa000001) at(0, 0)\nnote (bb000001) at(0, -100) \"n\"\n"
+        + "anchor bb000001 -- aa000001 route (60, -40) (60, 28)"));
     assertEquals(4, link.xs.length);
     assertEquals(32.17, link.xs[0], 0.01);
     assertEquals(-72, link.ys[0], 1e-9);
@@ -170,7 +203,7 @@ class AttachedElementsTest {
   @Test
   void attributeSideFromLastWaypoint() throws ClassDiagramParseException {
     ScenePolyline link = lastLine(layout("class A (aaaaaaaa) at(0, 0) {\n  first\n  second (0a0a0a0a)\n}\n"
-        + "note at(200, 0) \"n\" attach(0a0a0a0a) route (150, -20) (-30, 62)"));
+        + "note (bb000001) at(200, 0) \"n\"\nanchor bb000001 -- 0a0a0a0a route (150, -20) (-30, 62)"));
     assertEquals(4, link.xs[link.xs.length - 1], 1e-9);
     assertEquals(62, link.ys[link.ys.length - 1], 1e-9);
   }
@@ -178,7 +211,8 @@ class AttachedElementsTest {
   /** The scene covers waypoints which lie outside of the boxes. */
   @Test
   void sceneCoversWaypoints() throws ClassDiagramParseException {
-    Scene scene = layout("class A (aa000001) at(0, 0)\nnote at(100, 0) \"n\" attach(aa000001) route (500, 400) (100, 60)");
+    Scene scene = layout("class A (aa000001) at(0, 0)\nnote (bb000001) at(100, 0) \"n\"\n"
+        + "anchor bb000001 -- aa000001 route (500, 400) (100, 60)");
     assertTrue(scene.x + scene.width >= 500);
     assertTrue(scene.y + scene.height >= 400);
   }
@@ -189,11 +223,19 @@ class AttachedElementsTest {
     assertTrue(all(layout("class A (aaaaaaaa)\nnote \"n\""), ScenePolyline.class).isEmpty());
   }
 
-  /** A note attached to an ID which no element of the diagram has can't be drawn. */
+  /** An anchor line to an ID which no element of the diagram has can't be drawn. */
   @Test
   void noteLinkToUnknownIdRejected() {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> layout("class A (aa000001)\nnote \"n\" attach(deadbeef)"));
+        () -> layout("class A (aa000001)\nnote (bb000001) \"n\"\nanchor bb000001 -- deadbeef"));
+    assertTrue(e.getMessage().contains("deadbeef"), e.getMessage());
+  }
+
+  /** An anchor line from a note which the diagram doesn't have can't be drawn either. */
+  @Test
+  void noteLinkFromUnknownNoteRejected() {
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> layout("class A (aa000001)\nanchor deadbeef -- aa000001"));
     assertTrue(e.getMessage().contains("deadbeef"), e.getMessage());
   }
 
@@ -201,7 +243,7 @@ class AttachedElementsTest {
   @Test
   void duplicateIdRejected() {
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> layout("class A (aa000001)\nclass B (aa000001)\nnote \"n\" attach(aa000001)"));
+        () -> layout("class A (aa000001)\nclass B (aa000001)\nnote (bb000001) \"n\"\nanchor bb000001 -- aa000001"));
     assertTrue(e.getMessage().contains("aa000001"), e.getMessage());
   }
 }

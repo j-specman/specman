@@ -3,6 +3,7 @@ package classman.editor;
 import classman.model.v001.AbstractBoxModel_V001;
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
+import classman.model.v001.AnchorLineModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeModel_V001;
@@ -20,6 +21,7 @@ import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
 import classman.model.v001.io.ClassDiagramSerializer_V001;
 import classman.render.Scene;
+import classman.render.AttachTarget;
 import classman.render.DiagramStyle;
 import classman.render.SceneAnchorLine;
 import classman.render.SceneConnectionLine;
@@ -156,7 +158,7 @@ public class DiagramEditing {
     }
     SceneConnectionLine line = scene.connectionLineAt(point, tolerance);
     if (line instanceof SceneAnchorLine anchorLine) {
-      selected = new AnchorSelection(anchorLine.note);
+      selected = anchorLine.anchorLine;
     }
     else {
       selected = line != null ? ((SceneRelationLine) line).relation : null;
@@ -192,10 +194,10 @@ public class DiagramEditing {
    * @return true if a waypoint was deleted */
   public boolean deleteWaypointAt(Point2D point, double tolerance) {
     int handle = handleIndexAt(point, tolerance);
-    if (selected instanceof AnchorSelection anchor) {
-      boolean isAnchorWaypoint = handle > 0 && handle <= anchor.note.attachWaypoints.size();
+    if (selected instanceof AnchorLineModel_V001 anchorLine) {
+      boolean isAnchorWaypoint = handle > 0 && handle <= anchorLine.waypoints.size();
       if (isAnchorWaypoint) {
-        routeEditing.deleteWaypoint(anchor.note, handle - 1);
+        routeEditing.deleteWaypoint(anchorLine, handle - 1);
         publish();
       }
       return isAnchorWaypoint;
@@ -223,8 +225,8 @@ public class DiagramEditing {
     }
     int segment = line.nearestSegment(point);
     Point2D onLine = line.nearestPointOnSegment(segment, point);
-    if (selected instanceof AnchorSelection anchor) {
-      routeEditing.insertWaypoint(anchor.note, segment, onLine);
+    if (selected instanceof AnchorLineModel_V001 anchorLine) {
+      routeEditing.insertWaypoint(anchorLine, segment, onLine);
     }
     else {
       AbstractRelationModel_V001 relation = ((SceneRelationLine) line).relation;
@@ -266,29 +268,21 @@ public class DiagramEditing {
   }
 
   /** @return the points of the selected relation or anchor where its line starts, bends and ends, empty if none is
-   * selected. An anchor which is attached to something else than a class has no handle at its end. */
+   * selected */
   public List<Point2D> selectedHandles() {
     SceneConnectionLine selectedLine = selectedLine();
-    if (selectedLine == null) {
-      return List.of();
-    }
-    List<Point2D> points = selectedLine.points();
-    if (selected instanceof AnchorSelection anchor && !isAttachedToClass(anchor.note)) {
-      return points.subList(0, points.size() - 1);
-    }
-    return points;
+    return selectedLine != null ? selectedLine.points() : List.of();
   }
 
-  /** A note which is attached to an attribute or a relation has no end of its own to move: it ends where the layout
-   * puts it. */
-  private boolean isAttachedToClass(NoteModel_V001 note) {
-    return model.classes().stream().anyMatch(box -> note.attachedToId.equals(box.id));
+  /** An anchor line leads to a class if the ID it refers to is the ID of a class, else to an attribute or a relation. */
+  private boolean leadsToClass(AnchorLineModel_V001 anchorLine) {
+    return model.classes().stream().anyMatch(box -> anchorLine.targetId.equals(box.id));
   }
 
   /** @return where the line is drawn of the selected relation or anchor, null if none is selected */
   private SceneConnectionLine selectedLine() {
-    if (selected instanceof AnchorSelection anchor) {
-      return scene.anchorLineOf(anchor.note);
+    if (selected instanceof AnchorLineModel_V001 anchorLine) {
+      return scene.anchorLineOf(anchorLine);
     }
     return selected != null ? scene.relationLineOf(selected) : null;
   }
@@ -621,13 +615,11 @@ public class DiagramEditing {
   }
 
   private Drag handleDrag(int handle, Point2D at) {
-    if (selected instanceof AnchorSelection anchor) {
-      NoteModel_V001 note = anchor.note;
-      if (note.id == null) {
-        note.id = newId();
-      }
-      return new AnchorHandleDrag(routeEditing, note, scene.elementAreaOf(note).area, handle,
-        selectedLine().points(), at, classesAnAnchorMayHangOnto(note));
+    if (selected instanceof AnchorLineModel_V001 anchorLine) {
+      AttachTarget slideTarget = leadsToClass(anchorLine) ? null : scene.attachTargets.find(anchorLine.targetId);
+      return new AnchorHandleDrag(routeEditing, anchorLine, scene.elementAreaOf(model.noteWithId(anchorLine.noteId)).area,
+        handle, selectedLine().points(), at, classesAnAnchorMayHangOnto(anchorLine), slideTarget,
+        scene.attachTargets.find(anchorLine.targetId));
     }
     SceneRelationLine line = scene.relationLineOf(selected);
     AbstractRelationModel_V001 relation = line.relation;
@@ -651,12 +643,13 @@ public class DiagramEditing {
     return classes;
   }
 
-  /** The classes by ID in the order of drawing which the end of the anchor of the note may be hung onto: all of them,
-   * but while changes are tracked only the class it hangs on, unless the note was added by a change set. */
-  private Map<String, Rectangle2D> classesAnAnchorMayHangOnto(NoteModel_V001 note) {
+  /** The classes by ID in the order of drawing which the end of the anchor line may be hung onto: all of them, but
+   * while changes are tracked only the class it leads to, unless a change set has added the line. */
+  private Map<String, Rectangle2D> classesAnAnchorMayHangOnto(AnchorLineModel_V001 anchorLine) {
+    boolean mayChange = host.trackedChangeSet() == null || anchorLine.change != null;
     Map<String, Rectangle2D> classes = new LinkedHashMap<>();
     for (ClassModel_V001 box : model.classes()) {
-      boolean allowed = canChangeAnchor(note) || note.attachedToId.equals(box.id);
+      boolean allowed = mayChange || anchorLine.targetId.equals(box.id);
       if (box.id != null && allowed) {
         classes.put(box.id, scene.elementAreaOf(box).area);
       }
@@ -774,22 +767,13 @@ public class DiagramEditing {
     else if (armedTool == Tool.ANCHOR) {
       Map<NoteModel_V001, Rectangle2D> notes = new LinkedHashMap<>();
       for (NoteModel_V001 note : model.notes()) {
-        if (canChangeAnchor(note)) {
-          notes.put(note, scene.elementAreaOf(note).area);
-        }
+        notes.put(note, scene.elementAreaOf(note).area);
       }
       NoteModel_V001 from = ClassPicker.closest(notes, at, tolerance);
       if (from != null) {
         drawing = new ConnectionDrawing(from, notes.get(from), targets::closestForAnchor, at);
       }
     }
-  }
-
-  /** While changes are tracked, only a note which a change set has added gets a new anchor or loses its anchor: for
-   * another note this changes what it is attached to, which the format has no mark for, like hanging a relation onto
-   * another class. */
-  private boolean canChangeAnchor(NoteModel_V001 note) {
-    return host.trackedChangeSet() == null || note.change != null && note.change.type == ChangeType_V001.ADDED;
   }
 
   /** Creates what was drawn, if the mouse was released on a class, and leaves the tool. If it was released on none,
@@ -822,19 +806,40 @@ public class DiagramEditing {
     publish();
   }
 
-  /** Attaches the note to the class, attribute or relation which the mouse was released on, so the dashed line of the
-   * note leads to it. A class or attribute which has no ID gets one. The note is selected. Nothing happens, and no
-   * operation is made, if it is attached to that target already. */
+  /** Attaches the note to the class, attribute or relation which the mouse was released on, with an anchor line. A
+   * class or attribute which has no ID gets one, and so does the note. The note is selected. Nothing happens, and no
+   * operation is made, if it is attached to that target already.
+   * <p>
+   * A note which is attached already gets the new target in place of the old one, and the waypoints of the old line go.
+   * While changes are tracked this is so only if a change set has added the line. Otherwise the old line is marked as
+   * removed and a new one, marked as added, leads to the target, like a relation which is deleted and added again. A
+   * note which isn't attached gets a new line, marked as added while changes are tracked. */
   private void anchorNote(ConnectionDrawing finished) {
     NoteModel_V001 note = (NoteModel_V001) finished.from();
     String targetId = finished.target().ensureId(this::newId);
     armedTool = Tool.NONE;
     selected = note;
-    if (targetId.equals(note.attachedToId)) {
+    if (note.id == null) {
+      note.id = newId();
+    }
+    List<AnchorLineModel_V001> attached = model.liveAnchorLinesOf(note);
+    AnchorLineModel_V001 current = attached.isEmpty() ? null : attached.get(0);
+    if (current != null && targetId.equals(current.targetId)) {
       return;
     }
-    note.attachedToId = targetId;
-    routeEditing.clearRoute(note);
+    String changeSet = host.trackedChangeSet();
+    if (current != null && (changeSet == null || current.change != null)) {
+      current.targetId = targetId;
+      current.clearRoute();
+    }
+    else {
+      if (current != null) {
+        current.change = new ChangeModel_V001(ChangeType_V001.REMOVED, changeSet);
+      }
+      AnchorLineModel_V001 anchorLine = new AnchorLineModel_V001(note.id, targetId);
+      markAsAdded(anchorLine);
+      model.elements.add(anchorLine);
+    }
     publish();
   }
 
@@ -848,10 +853,6 @@ public class DiagramEditing {
     if (selected == null) {
       return;
     }
-    if (selected instanceof AnchorSelection anchor) {
-      deleteAnchor(anchor.note);
-      return;
-    }
     String changeSet = host.trackedChangeSet();
     if (changeSet != null) {
       deleter.delete(model, selected, changeSet);
@@ -861,19 +862,6 @@ public class DiagramEditing {
     }
     publish();
     selected = null;
-  }
-
-  /** Takes the anchor away from the note, so it hangs on nothing. While changes are tracked this is only done for a note
-   * which a change set has added: taking the anchor from another note is a change which the format has no mark for.
-   * Nothing is selected afterwards. */
-  private void deleteAnchor(NoteModel_V001 note) {
-    if (!canChangeAnchor(note)) {
-      return;
-    }
-    note.attachedToId = null;
-    routeEditing.clearRoute(note);
-    selected = null;
-    publish();
   }
 
   /** Puts a class without a name into the picture, its top left corner at the given point of the diagram, with a new

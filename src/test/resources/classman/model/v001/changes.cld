@@ -20,5 +20,6 @@ classdiagram "Changes" {
             -date
         }
     extends change(added, yellow) bbbbbbbb -> aaaaaaaa
-    note (eeeeeeee) change(added, yellow) "A new note" attach(aaaaaaaa)
+    note (eeeeeeee) change(added, yellow) "A new note"
+    anchor change(added, yellow) eeeeeeee -- aaaaaaaa
 }

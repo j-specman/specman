@@ -27,8 +27,8 @@ classdiagram "Change colors" {
     association (1c000023) change(removed, yellow) 1c000002 -- 1c000004 "uses"
         route 1c000002.left@70 (210, 70) (210, 245) 1c000004.left@25
 
-    note (1c000031) change(added, yellow) at(580, 170) width=170 "Invoices are new" attach(1c000003)
-    note (1c000032) at(400, 235) width=190 "Orders are billed" was(yellow, "Orders are free") attach(1c000002)
+    note (1c000031) change(added, yellow) at(580, 170) width=170 "Invoices are new"
+    note (1c000032) at(400, 235) width=190 "Orders are billed" was(yellow, "Orders are free")
 
     note at(0, 360) width=120 "lilac"
 
@@ -55,8 +55,8 @@ classdiagram "Change colors" {
     association (2c000023) change(removed, lilac) 2c000002 -- 2c000004 "uses"
         route 2c000002.left@70 (210, 470) (210, 645) 2c000004.left@25
 
-    note (2c000031) change(added, lilac) at(580, 570) width=170 "Invoices are new" attach(2c000003)
-    note (2c000032) at(400, 635) width=190 "Orders are billed" was(lilac, "Orders are free") attach(2c000002)
+    note (2c000031) change(added, lilac) at(580, 570) width=170 "Invoices are new"
+    note (2c000032) at(400, 635) width=190 "Orders are billed" was(lilac, "Orders are free")
 
     note at(0, 760) width=120 "blue"
 
@@ -83,8 +83,8 @@ classdiagram "Change colors" {
     association (3c000023) change(removed, blue) 3c000002 -- 3c000004 "uses"
         route 3c000002.left@70 (210, 870) (210, 1045) 3c000004.left@25
 
-    note (3c000031) change(added, blue) at(580, 970) width=170 "Invoices are new" attach(3c000003)
-    note (3c000032) at(400, 1035) width=190 "Orders are billed" was(blue, "Orders are free") attach(3c000002)
+    note (3c000031) change(added, blue) at(580, 970) width=170 "Invoices are new"
+    note (3c000032) at(400, 1035) width=190 "Orders are billed" was(blue, "Orders are free")
 
     note at(0, 1160) width=120 "orange"
 
@@ -111,8 +111,8 @@ classdiagram "Change colors" {
     association (4c000023) change(removed, orange) 4c000002 -- 4c000004 "uses"
         route 4c000002.left@70 (210, 1270) (210, 1445) 4c000004.left@25
 
-    note (4c000031) change(added, orange) at(580, 1370) width=170 "Invoices are new" attach(4c000003)
-    note (4c000032) at(400, 1435) width=190 "Orders are billed" was(orange, "Orders are free") attach(4c000002)
+    note (4c000031) change(added, orange) at(580, 1370) width=170 "Invoices are new"
+    note (4c000032) at(400, 1435) width=190 "Orders are billed" was(orange, "Orders are free")
 
     note at(0, 1560) width=120 "pink"
 
@@ -139,6 +139,16 @@ classdiagram "Change colors" {
     association (5c000023) change(removed, pink) 5c000002 -- 5c000004 "uses"
         route 5c000002.left@70 (210, 1670) (210, 1845) 5c000004.left@25
 
-    note (5c000031) change(added, pink) at(580, 1770) width=170 "Invoices are new" attach(5c000003)
-    note (5c000032) at(400, 1835) width=190 "Orders are billed" was(pink, "Orders are free") attach(5c000002)
+    note (5c000031) change(added, pink) at(580, 1770) width=170 "Invoices are new"
+    note (5c000032) at(400, 1835) width=190 "Orders are billed" was(pink, "Orders are free")
+    anchor change(added, yellow) 1c000031 -- 1c000003
+    anchor 1c000032 -- 1c000002
+    anchor change(added, lilac) 2c000031 -- 2c000003
+    anchor 2c000032 -- 2c000002
+    anchor change(added, blue) 3c000031 -- 3c000003
+    anchor 3c000032 -- 3c000002
+    anchor change(added, orange) 4c000031 -- 4c000003
+    anchor 4c000032 -- 4c000002
+    anchor change(added, pink) 5c000031 -- 5c000003
+    anchor 5c000032 -- 5c000002
 }

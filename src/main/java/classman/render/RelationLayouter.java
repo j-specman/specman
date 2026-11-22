@@ -31,7 +31,6 @@ public class RelationLayouter {
     public RelationLayout layout(AbstractRelationModel_V001 relation, Map<String, Rectangle2D.Double> classAreas) {
         List<Point2D.Double> path = pathBuilder.pathOf(relation, classAreas);
         RelationTexts texts = textLayouter.texts(relation, path);
-        Point2D.Double attachPoint = PathGeometry.attachPoint(path);
         String lineColor = markLayouter.lineColor(relation);
         List<AbstractSceneElement> underlay = markLayouter.underlay(relation, path, texts);
         List<AbstractSceneElement> elements = new ArrayList<>();
@@ -52,7 +51,7 @@ public class RelationLayouter {
             elementAreas.addAll(assocClass.elementAreas);
             textAreas.addAll(assocClass.textAreas);
         }
-        return new RelationLayout(underlay, elements, bounds, line, decorations, attachPoint, elementAreas, textAreas);
+        return new RelationLayout(underlay, elements, bounds, line, decorations, path, elementAreas, textAreas);
     }
 
     private ScenePolyline line(List<Point2D.Double> path, boolean dashed, String color) {

@@ -2,6 +2,7 @@ package classman.model.v001.io;
 
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
+import classman.model.v001.AnchorLineModel_V001;
 import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.AttributeModel_V001;
@@ -11,6 +12,7 @@ import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassDiagram_V001Lexer;
 import classman.model.v001.ClassDiagram_V001Parser;
 import classman.model.v001.ClassDiagram_V001Parser.AnchorContext;
+import classman.model.v001.ClassDiagram_V001Parser.AnchorLineContext;
 import classman.model.v001.ClassDiagram_V001Parser.AssociationRelationContext;
 import classman.model.v001.ClassDiagram_V001Parser.AttributeContext;
 import classman.model.v001.ClassDiagram_V001Parser.BackupTextContext;
@@ -25,8 +27,10 @@ import classman.model.v001.ClassDiagram_V001Parser.ImplementsRelationContext;
 import classman.model.v001.ClassDiagram_V001Parser.InfoContext;
 import classman.model.v001.ClassDiagram_V001Parser.InfoTextContext;
 import classman.model.v001.ClassDiagram_V001Parser.InfosContext;
+import classman.model.v001.ClassDiagram_V001Parser.LinePointContext;
 import classman.model.v001.ClassDiagram_V001Parser.MultiplicityContext;
 import classman.model.v001.ClassDiagram_V001Parser.NameContext;
+import classman.model.v001.ClassDiagram_V001Parser.NoteAnchorContext;
 import classman.model.v001.ClassDiagram_V001Parser.NoteContext;
 import classman.model.v001.ClassDiagram_V001Parser.PositionContext;
 import classman.model.v001.ClassDiagram_V001Parser.RelationContext;
@@ -94,6 +98,9 @@ public class ClassDiagramParser_V001 {
         }
         if (element.relation() != null) {
             return buildRelation(element.relation());
+        }
+        if (element.anchorLine() != null) {
+            return buildAnchorLine(element.anchorLine());
         }
         return buildNote(element.note());
     }
@@ -287,33 +294,46 @@ public class ClassDiagramParser_V001 {
         model.textChange = textChange(ctx.textChange());
         model.position = position(ctx.position());
         model.width = width(ctx.widthSpec());
-        model.attachedToId = id(ctx.target);
+        return model;
+    }
+
+    // ---- anchor lines ----
+
+    private AnchorLineModel_V001 buildAnchorLine(AnchorLineContext ctx) throws ClassDiagramParseException {
+        AnchorLineModel_V001 model = new AnchorLineModel_V001(ctx.noteRef.getText(), ctx.targetRef.getText());
+        model.id = id(ctx.ELEMENT_ID());
+        model.change = change(ctx.changeMark());
         if (ctx.noteRoute() != null) {
-            buildNoteRoute(model, ctx.noteRoute());
+            buildRoute(model, ctx.noteRoute());
         }
         return model;
     }
 
-    /** An anchor on the note is the start of the line, one on the target the end. */
-    private void buildNoteRoute(NoteModel_V001 model, NoteRouteContext route) throws ClassDiagramParseException {
+    /** An anchor on the note is the start of the line, one on the target the end. A point on a line is only an end. */
+    private void buildRoute(AnchorLineModel_V001 model, NoteRouteContext route) throws ClassDiagramParseException {
         for (WaypointContext waypoint : route.waypoint()) {
-            model.attachWaypoints.add(position(waypoint.NUMBER(0), waypoint.NUMBER(1)));
+            model.waypoints.add(position(waypoint.NUMBER(0), waypoint.NUMBER(1)));
         }
-        for (AnchorContext anchor : route.anchor()) {
-            AnchorModel_V001 built = buildAnchor(anchor);
-            if (built.classId.equals(model.id) && model.attachStart == null) {
-                model.attachStart = built;
+        for (NoteAnchorContext anchor : route.noteAnchor()) {
+            AnchorModel_V001 built = anchor.anchor() != null ? buildAnchor(anchor.anchor())
+                : buildLinePoint(anchor.linePoint());
+            if (!built.isOnLine() && built.classId.equals(model.noteId) && model.start == null) {
+                model.start = built;
             }
-            else if (built.classId.equals(model.attachedToId) && model.attachEnd == null) {
-                model.attachEnd = built;
+            else if (built.classId.equals(model.targetId) && model.end == null) {
+                model.end = built;
             }
             else {
                 Token start = anchor.getStart();
                 throw new ClassDiagramParseException("line " + start.getLine() + ":" + start.getCharPositionInLine()
-                    + " An anchor in the route of a note must name the note (for the start of the line) or the"
-                    + " element it is attached to (for the end), and each of them only once.");
+                    + " An anchor in the route of an anchor line must name the note (for the start of the line) or the"
+                    + " element it leads to (for the end), and each of them only once.");
             }
         }
+    }
+
+    private AnchorModel_V001 buildLinePoint(LinePointContext linePoint) {
+        return AnchorModel_V001.onLine(linePoint.HEX_ID().getText(), Integer.parseInt(linePoint.NUMBER().getText()));
     }
 
     // ---- small parts ----

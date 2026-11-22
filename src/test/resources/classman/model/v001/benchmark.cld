@@ -101,6 +101,8 @@ classdiagram "Hilfe-Versionierung" {
         assocclass manualtextblockinmandate {
         }
 
-    note at(30, 400) width=140 "Aus Level und lfd. Nummer ergibt sich eine Baumstruktur aller Hilfekategorien. Kategorien und deren Zuordnungen zu Handbuchseiten und Hilfeeinträgen werden nicht vererbt sondern bei Neuanlage einer Version kopiert." attach(7c01a5e2)
-    note at(1080, 950) "Mindestens\nEnglisch muss\nvorhanden sein" attach(b3e94d10)
+    note (ed9e0001) at(30, 400) width=140 "Aus Level und lfd. Nummer ergibt sich eine Baumstruktur aller Hilfekategorien. Kategorien und deren Zuordnungen zu Handbuchseiten und Hilfeeinträgen werden nicht vererbt sondern bei Neuanlage einer Version kopiert."
+    note (ed9e0002) at(1080, 950) "Mindestens\nEnglisch muss\nvorhanden sein"
+    anchor ed9e0001 -- 7c01a5e2
+    anchor ed9e0002 -- b3e94d10
 }

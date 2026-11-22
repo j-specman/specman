@@ -34,19 +34,23 @@ grammar ClassDiagram_V001;
 //   * Route anchors: classId.side@offset, side = top|right|bottom|left, offset in pixels from the start of the
 //     side (left end of top/bottom, upper end of left/right), clamped to the side's length. Waypoints are
 //     absolute pixel points.
-//   * A note is attached to a class, an attribute or a relation by the ID of that element: attach(04de91aa).
-//     Whoever wants to attach a note must give the target an ID. The dashed line of a note on a class ends at the
-//     class border, on an attribute at the border of its class on the side of the note, on a relation at the
-//     middle of the longest part of the relation.
+//   * A note is attached to a class, an attribute or a relation by an anchor line, an element of its own like a
+//     relation which names the note and the target by their IDs: anchor 11223344 -- 04de91aa. The note and the
+//     target need an ID. Like a relation it can have an ID and a change mark: anchor (5a5a5a5a) change(added, yellow)
+//     11223344 -- 04de91aa. The line on a class ends at the class border, on an attribute at the border of the box
+//     around its text on the side of the note, on a relation at the middle of the longest part of the relation.
 //   * IDs of classes, attributes, relations and stereotypes (class Hilfeversion (04de91aa) <<Entity>> (7b2f90c1))
 //     are optional, except that a class needs one to take part in a relation. Created in a class model, a diagram refers with them to the elements of the model: the
 //     stereotype is defined there once and assigned to the classes. A diagram which stands for itself needs none.
-//   * The dashed line of a note can lead over waypoints (absolute pixel points): attach(04de91aa) route (120, 40) (120, 90).
+//   * An anchor line can lead over waypoints (absolute pixel points): anchor 11223344 -- 04de91aa route (120, 40) (120, 90).
 //     The line starts at the note border facing the first waypoint and ends at the target facing the last one.
 //     Either end can be fixed at a point of the border like the ends of a route of a relation, with an anchor
-//     classId.side@offset: the start on the note itself (the note needs an ID), the end on the class it is attached to:
-//     note (11223344) "..." attach(04de91aa) route 11223344.right@10 (120, 40) 04de91aa.top@25.
-//     An end without anchor is computed as without waypoints. Anchors of the end are only used for a class.
+//     classId.side@offset: the start on the note itself, the end on the box it leads to:
+//     anchor 11223344 -- 04de91aa route 11223344.right@10 (120, 40) 04de91aa.top@25.
+//     The end on an attribute is a point of the border of the text of the attribute, an anchor like the one on a class.
+//     The end on a relation is a point of its line, in percent of the length of the line from its start:
+//     anchor 11223344 -- 04de91aa route (120, 40) 04de91aa@40%. An end without anchor is computed as without waypoints.
+//     An anchor which doesn't fit the target (a side anchor on a relation, a percent on a box) is ignored by the renderer.
 //   * A change mark change(added, yellow) or change(removed, blue) follows the ID of a class, attribute, relation,
 //     association class or note, and the text (and ID) of a stereotype or an info. Moving an element is never marked.
 //   * A text change mark was(yellow, "old text") follows the text it belongs to: the diagram name, class name,
@@ -87,6 +91,7 @@ element
     : classDecl
     | relation
     | note
+    | anchorLine
     ;
 
 // ------------------------------------------------------------ classes
@@ -245,15 +250,32 @@ assocClass
 // ------------------------------------------------------------ notes
 
 note
-    : NOTE noteId=ELEMENT_ID? changeMark? position? widthSpec? QUOTED_STRING textChange? (ATTACH target=ELEMENT_ID noteRoute?)?
+    : NOTE noteId=ELEMENT_ID? changeMark? position? widthSpec? QUOTED_STRING textChange?
+    ;
+
+// The dashed line from a note to what it is about (a class, an attribute or a relation), an element of the diagram
+// like a relation: it can carry an ID and a change mark. The note and the target are named by their IDs, the note
+// needs one. A note can have several.
+anchorLine
+    : ANCHOR ELEMENT_ID? changeMark? noteRef=HEX_ID LINE targetRef=HEX_ID noteRoute?
     ;
 
 // Waypoints of the dashed line from a note to its target, and optionally anchors which fix its start (on the note)
-// and its end (on the target class). An end without anchor is computed. A single anchor belongs to the start if it
-// names the note, to the end if it names the target, which the parser checks.
+// and its end (on the target). An end without anchor is computed. A single anchor belongs to the start if it
+// names the note, to the end if it names the target, which the parser checks. The end on a relation is a point of
+// its line, given in percent of its length, the start is never one.
 noteRoute
-    : ROUTE anchor waypoint* anchor?
-    | ROUTE waypoint+ anchor?
+    : ROUTE noteAnchor waypoint* noteAnchor?
+    | ROUTE waypoint+ noteAnchor?
+    ;
+
+noteAnchor
+    : anchor
+    | linePoint
+    ;
+
+linePoint
+    : HEX_ID AT_SIGN NUMBER PERCENT
     ;
 
 // A plain word, including the keywords: they are only reserved where a class name is expected.
@@ -261,7 +283,7 @@ word
     : NAME
     | HEX_ID
     | CLASSDIAGRAM | CLASS | ASSOCCLASS | ASSOCIATION | AGGREGATION | COMPOSITION | EXTENDS | IMPLEMENTS
-    | NOTE | ROUTE | ATTACH | CHANGE | WAS | AT | WIDTH | TOP | RIGHT | BOTTOM | LEFT
+    | NOTE | ROUTE | ANCHOR | CHANGE | WAS | AT | WIDTH | TOP | RIGHT | BOTTOM | LEFT
     ;
 
 // ============================================================
@@ -278,7 +300,7 @@ EXTENDS      : 'extends' ;
 IMPLEMENTS   : 'implements' ;
 NOTE         : 'note' ;
 ROUTE        : 'route' ;
-ATTACH       : 'attach' ;
+ANCHOR       : 'anchor' ;
 WAS          : 'was' ;
 CHANGE       : 'change' ;
 AT           : 'at' ;
@@ -295,6 +317,7 @@ DOTDOT       : '..' ;
 DOT          : '.' ;
 STAR         : '*' ;
 AT_SIGN      : '@' ;
+PERCENT      : '%' ;
 EQUALS       : '=' ;
 COMMA        : ',' ;
 COLON        : ':' ;

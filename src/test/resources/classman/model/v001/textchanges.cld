@@ -16,5 +16,6 @@ classdiagram "Texts" was(yellow, "Old title") {
         }
     association aaaaaaaa -- bbbbbbbb "neu" was(yellow)
     note "Neu" was(yellow, "Alt\nText")
-    note (eeeeeeee) "x" was(blue, "") attach(aaaaaaaa)
+    note (eeeeeeee) "x" was(blue, "")
+    anchor eeeeeeee -- aaaaaaaa
 }

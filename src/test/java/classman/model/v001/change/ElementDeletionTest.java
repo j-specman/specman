@@ -15,10 +15,13 @@ class ElementDeletionTest {
       association (11111111) aaaaaaaa -- bbbbbbbb
         assocclass L (eeeeeeee)
       association (22222222) bbbbbbbb -- cccccccc
-      note (a0000001) "on A" attach(aaaaaaaa)
-      note (a0000002) "on relation of A" attach(11111111)
-      note (a0000003) "on survivor" attach(22222222)
+      note (a0000001) "on A"
+      note (a0000002) "on relation of A"
+      note (a0000003) "on survivor"
       note (a0000004) "free"
+      anchor (f0000001) a0000001 -- aaaaaaaa
+      anchor (f0000002) a0000002 -- 11111111
+      anchor (f0000003) a0000003 -- 22222222
       """;
 
   /** Deleting a class takes its relations with their association classes and the notes attached to them along. */
@@ -28,8 +31,9 @@ class ElementDeletionTest {
         class B (bbbbbbbb)
         class C (cccccccc)
         association (22222222) bbbbbbbb -- cccccccc
-        note (a0000003) "on survivor" attach(22222222)
+        note (a0000003) "on survivor"
         note (a0000004) "free"
+        anchor (f0000003) a0000003 -- 22222222
         """;
     assertEquals(canonical(expected), deleted(SOURCE, "aaaaaaaa"));
   }
@@ -38,6 +42,21 @@ class ElementDeletionTest {
   @Test
   void deletedNote() throws ClassDiagramParseException {
     assertEquals(canonical(SOURCE.replace("note (a0000004) \"free\"\n", "")), deleted(SOURCE, "a0000004"));
+  }
+
+  /** Deleting a note takes its anchor lines along. */
+  @Test
+  void deletedNoteTakesItsAnchorLines() throws ClassDiagramParseException {
+    String expected = SOURCE.replace("note (a0000003) \"on survivor\"\n", "")
+        .replace("anchor (f0000003) a0000003 -- 22222222\n", "");
+    assertEquals(canonical(expected), deleted(SOURCE, "a0000003"));
+  }
+
+  /** Deleting an anchor line leaves its note and its target. */
+  @Test
+  void deletedAnchorLine() throws ClassDiagramParseException {
+    assertEquals(canonical(SOURCE.replace("anchor (f0000003) a0000003 -- 22222222\n", "")),
+        deleted(SOURCE, "f0000003"));
   }
 
   /** Deleting an association class leaves its relation. */
@@ -56,12 +75,30 @@ class ElementDeletionTest {
         association (11111111) change(removed, blue) aaaaaaaa -- bbbbbbbb
           assocclass L (eeeeeeee) change(removed, blue)
         association (22222222) bbbbbbbb -- cccccccc
-        note (a0000001) change(removed, blue) "on A" attach(aaaaaaaa)
-        note (a0000002) change(removed, blue) "on relation of A" attach(11111111)
-        note (a0000003) "on survivor" attach(22222222)
+        note (a0000001) change(removed, blue) "on A"
+        note (a0000002) change(removed, blue) "on relation of A"
+        note (a0000003) "on survivor"
         note (a0000004) "free"
+        anchor (f0000001) change(removed, blue) a0000001 -- aaaaaaaa
+        anchor (f0000002) change(removed, blue) a0000002 -- 11111111
+        anchor (f0000003) a0000003 -- 22222222
         """;
     assertEquals(canonical(expected), deleted(SOURCE, "aaaaaaaa", "blue"));
+  }
+
+  /** While changes are tracked, an anchor line is marked as removed, its note and its target stay as they are. */
+  @Test
+  void trackedAnchorLineMarkedRemoved() throws ClassDiagramParseException {
+    String expected = SOURCE.replace("anchor (f0000003) a0000003", "anchor (f0000003) change(removed, blue) a0000003");
+    assertEquals(canonical(expected), deleted(SOURCE, "f0000003", "blue"));
+  }
+
+  /** While changes are tracked, an anchor line which a change set has added is removed right away. */
+  @Test
+  void trackedAddedAnchorLineRemoved() throws ClassDiagramParseException {
+    String source = SOURCE.replace("anchor (f0000003) a0000003", "anchor (f0000003) change(added, yellow) a0000003");
+    assertEquals(canonical(SOURCE.replace("anchor (f0000003) a0000003 -- 22222222\n", "")),
+        deleted(source, "f0000003", "blue"));
   }
 
   /** While changes are tracked, what has been added, by whichever change set, is removed right away. */
@@ -72,8 +109,9 @@ class ElementDeletionTest {
         class B (bbbbbbbb)
         class C (cccccccc)
         association (22222222) bbbbbbbb -- cccccccc
-        note (a0000003) "on survivor" attach(22222222)
+        note (a0000003) "on survivor"
         note (a0000004) "free"
+        anchor (f0000003) a0000003 -- 22222222
         """;
     assertEquals(canonical(expected), deleted(source, "aaaaaaaa", "blue"));
   }

@@ -1,6 +1,8 @@
 package classman.editor;
 
-import classman.model.v001.NoteModel_V001;
+import classman.model.v001.AnchorLineModel_V001;
+import classman.model.v001.ChangeType_V001;
+import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
 import org.junit.jupiter.api.Test;
@@ -42,11 +44,15 @@ class AnchorToolTest {
     control.released(to);
   }
 
-  private NoteModel_V001 note() throws ClassDiagramParseException {
-    return new ClassDiagramParser_V001().parse(editing.source()).notes().get(0);
+  private ClassDiagramModel_V001 model() throws ClassDiagramParseException {
+    return new ClassDiagramParser_V001().parse(editing.source());
   }
 
-  /** A press on a note and a drag to a class attaches the note to it, in one step, and the tool is left. */
+  private AnchorLineModel_V001 anchorLine() throws ClassDiagramParseException {
+    return model().anchorLines().get(0);
+  }
+
+  /** A press on a note and a drag to a class draws an anchor line from the note to it, in one step, and the tool is left. */
   @Test
   void noteAnchoredToClass() throws ClassDiagramParseException {
     open(DIAGRAM);
@@ -54,7 +60,9 @@ class AnchorToolTest {
 
     draw(inBox(2), inBox(0));
 
-    assertEquals("11111111", note().attachedToId);
+    assertEquals("33333333", anchorLine().noteId);
+    assertEquals("11111111", anchorLine().targetId);
+    assertNull(anchorLine().change);
     assertFalse(editing.isToolArmed());
     assertEquals(1, host.reportedSources.size());
     assertTrue(editing.canUndo());
@@ -71,28 +79,30 @@ class AnchorToolTest {
     draw(inBox(2), new Point2D.Double(200, 500));
     draw(inBox(0), inBox(1));
 
-    assertNull(note().attachedToId);
+    assertTrue(model().anchorLines().isEmpty());
     assertTrue(host.reportedSources.isEmpty());
     assertTrue(editing.isAnchorToolArmed());
   }
 
-  /** A note is attached to another class by anchoring it again, and the dashed line loses its waypoints. */
+  /** A note is attached to another class by anchoring it again: the line leads there, without the waypoints of the old one. */
   @Test
   void anchorMovedToOtherClass() throws ClassDiagramParseException {
     open("classdiagram {\n  class A (11111111) at(10, 20)\n  class B (22222222) at(300, 20)\n"
-      + "  note (33333333) at(10, 200) \"remember\" attach(11111111) route (150, 150)\n}");
+      + "  note (33333333) at(10, 200) \"remember\"\n  anchor 33333333 -- 11111111 route (150, 150)\n}");
     editing.toggleAnchorTool();
 
     draw(inBox(2), inBox(1));
 
-    assertEquals("22222222", note().attachedToId);
-    assertTrue(note().attachWaypoints.isEmpty());
+    assertEquals(1, model().anchorLines().size());
+    assertEquals("22222222", anchorLine().targetId);
+    assertTrue(anchorLine().waypoints.isEmpty());
   }
 
   /** Anchoring a note to the class it hangs on is no operation. */
   @Test
   void sameClassIsNoOperation() throws ClassDiagramParseException {
-    open("classdiagram {\n  class A (11111111) at(10, 20)\n  note (33333333) at(10, 200) \"n\" attach(11111111)\n}");
+    open("classdiagram {\n  class A (11111111) at(10, 20)\n  note (33333333) at(10, 200) \"n\"\n"
+      + "  anchor 33333333 -- 11111111\n}");
     editing.toggleAnchorTool();
 
     draw(inBox(1), inBox(0));
@@ -101,32 +111,83 @@ class AnchorToolTest {
     assertFalse(editing.canUndo());
   }
 
-  /** A class without an ID gets one, because the note refers to it by ID. */
+  /** A class without an ID gets one, because the anchor line refers to it by ID, and so does a note without one. */
   @Test
-  void classWithoutIdGetsOne() throws ClassDiagramParseException {
-    open("classdiagram {\n  class A at(10, 20)\n  note (33333333) at(10, 200) \"n\"\n}");
+  void classAndNoteWithoutIdGetOne() throws ClassDiagramParseException {
+    open("classdiagram {\n  class A at(10, 20)\n  note at(10, 200) \"n\"\n}");
     editing.toggleAnchorTool();
 
     draw(inBox(1), inBox(0));
 
-    String classId = new ClassDiagramParser_V001().parse(editing.source()).classes().get(0).id;
-    assertNotNull(classId);
-    assertEquals(classId, note().attachedToId);
+    ClassDiagramModel_V001 model = model();
+    assertNotNull(model.classes().get(0).id);
+    assertNotNull(model.notes().get(0).id);
+    assertEquals(model.classes().get(0).id, anchorLine().targetId);
+    assertEquals(model.notes().get(0).id, anchorLine().noteId);
   }
 
-  /** While changes are tracked, a note which exists can't get an anchor, but one which a change set has added can. */
+  /** While changes are tracked, a note which exists can get an anchor line too: it is marked as added. */
   @Test
-  void trackedOnlyAddedNotes() throws ClassDiagramParseException {
+  void trackedExistingNoteGetsAddedLine() throws ClassDiagramParseException {
     host.trackedChangeSet = "yellow";
-    open("classdiagram {\n  class A (11111111) at(10, 20)\n  note (33333333) at(10, 200) \"old\"\n"
-      + "  note (44444444) change(added, yellow) at(10, 300) \"new\"\n}");
+    open("classdiagram {\n  class A (11111111) at(10, 20)\n  note (33333333) at(10, 200) \"old\"\n}");
     editing.toggleAnchorTool();
 
     draw(inBox(1), inBox(0));
-    assertTrue(host.reportedSources.isEmpty());
 
-    draw(inBox(2), inBox(0));
-    assertEquals("11111111", new ClassDiagramParser_V001().parse(editing.source()).notes().get(1).attachedToId);
+    assertEquals(ChangeType_V001.ADDED, anchorLine().change.type);
+    assertEquals("yellow", anchorLine().change.changeSet);
+    assertNull(model().notes().get(0).change);
+  }
+
+  /** While changes are tracked, a new target for a note with a line is a removed line and an added one, like a relation
+   * which is deleted and drawn again. */
+  @Test
+  void trackedNewTargetRemovesAndAdds() throws ClassDiagramParseException {
+    host.trackedChangeSet = "yellow";
+    open("classdiagram {\n  class A (11111111) at(10, 20)\n  class B (22222222) at(300, 20)\n"
+      + "  note (33333333) at(10, 200) \"old\"\n  anchor 33333333 -- 11111111\n}");
+    editing.toggleAnchorTool();
+
+    draw(inBox(2), inBox(1));
+
+    assertEquals(2, model().anchorLines().size());
+    AnchorLineModel_V001 old = model().anchorLines().get(0);
+    AnchorLineModel_V001 added = model().anchorLines().get(1);
+    assertEquals("11111111", old.targetId);
+    assertEquals(ChangeType_V001.REMOVED, old.change.type);
+    assertEquals("22222222", added.targetId);
+    assertEquals(ChangeType_V001.ADDED, added.change.type);
+    assertEquals(1, host.reportedSources.size());
+  }
+
+  /** A line which a change set has added is given a new target in place. */
+  @Test
+  void trackedAddedLineIsRetargeted() throws ClassDiagramParseException {
+    host.trackedChangeSet = "yellow";
+    open("classdiagram {\n  class A (11111111) at(10, 20)\n  class B (22222222) at(300, 20)\n"
+      + "  note (33333333) at(10, 200) \"old\"\n  anchor change(added, yellow) 33333333 -- 11111111\n}");
+    editing.toggleAnchorTool();
+
+    draw(inBox(2), inBox(1));
+
+    assertEquals(1, model().anchorLines().size());
+    assertEquals("22222222", anchorLine().targetId);
+    assertEquals(ChangeType_V001.ADDED, anchorLine().change.type);
+  }
+
+  /** A note whose line is removed is attached again by a new added line, also to the same class. */
+  @Test
+  void trackedRemovedLineDoesNotCount() throws ClassDiagramParseException {
+    host.trackedChangeSet = "yellow";
+    open("classdiagram {\n  class A (11111111) at(10, 20)\n  note (33333333) at(10, 200) \"old\"\n"
+      + "  anchor change(removed, yellow) 33333333 -- 11111111\n}");
+    editing.toggleAnchorTool();
+
+    draw(inBox(1), inBox(0));
+
+    assertEquals(2, model().anchorLines().size());
+    assertEquals(ChangeType_V001.ADDED, model().anchorLines().get(1).change.type);
   }
 
   /** The two tools exclude each other, and the cursor is a crosshair while one is armed. */

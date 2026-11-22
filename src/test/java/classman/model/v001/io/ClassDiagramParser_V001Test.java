@@ -2,6 +2,7 @@ package classman.model.v001.io;
 
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
+import classman.model.v001.AnchorLineModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeType_V001;
@@ -185,23 +186,38 @@ class ClassDiagramParser_V001Test {
     assertEquals("cccccccc", relations.get(1).toId);
   }
 
-  /** The route of a note can fix its ends: an anchor on the note is the start, one on the target the end. */
+  /** The route of an anchor line can fix its ends: an anchor on the note is the start, one on the target the end. */
   @Test
-  void noteRouteAnchors() throws ClassDiagramParseException {
-    NoteModel_V001 both = parse("class A (aaaaaaaa)\nnote (22222222) \"n\" attach(aaaaaaaa) route 22222222.right@3 (10, 20) aaaaaaaa.top@5")
-      .notes().get(0);
-    assertEquals(Side_V001.RIGHT, both.attachStart.side);
-    assertEquals(3, both.attachStart.offset);
-    assertEquals("aaaaaaaa", both.attachEnd.classId);
-    assertEquals(1, both.attachWaypoints.size());
+  void anchorLineRouteAnchors() throws ClassDiagramParseException {
+    AnchorLineModel_V001 both = parse("class A (aaaaaaaa)\nnote (22222222) \"n\"\n"
+      + "anchor 22222222 -- aaaaaaaa route 22222222.right@3 (10, 20) aaaaaaaa.top@5").anchorLines().get(0);
+    assertEquals(Side_V001.RIGHT, both.start.side);
+    assertEquals(3, both.start.offset);
+    assertEquals("aaaaaaaa", both.end.classId);
+    assertEquals(1, both.waypoints.size());
 
-    NoteModel_V001 endOnly = parse("class A (aaaaaaaa)\nnote (22222222) \"n\" attach(aaaaaaaa) route (10, 20) aaaaaaaa.left@4")
-      .notes().get(0);
-    assertNull(endOnly.attachStart);
-    assertEquals(Side_V001.LEFT, endOnly.attachEnd.side);
+    AnchorLineModel_V001 endOnly = parse("class A (aaaaaaaa)\nnote (22222222) \"n\"\n"
+      + "anchor 22222222 -- aaaaaaaa route (10, 20) aaaaaaaa.left@4").anchorLines().get(0);
+    assertNull(endOnly.start);
+    assertEquals(Side_V001.LEFT, endOnly.end.side);
 
     assertThrows(ClassDiagramParseException.class,
-      () -> parse("class A (aaaaaaaa)\nnote (22222222) \"n\" attach(aaaaaaaa) route 33333333.top@1"));
+      () -> parse("class A (aaaaaaaa)\nnote (22222222) \"n\"\nanchor 22222222 -- aaaaaaaa route 33333333.top@1"));
+  }
+
+  /** The end of an anchor line on a relation is a point of the relation line in percent, and written back so. */
+  @Test
+  void anchorLineLinePoint() throws ClassDiagramParseException {
+    String source = "association (11110000) aaaaaaaa -- bbbbbbbb\nnote (22222222) \"n\"\n"
+      + "anchor 22222222 -- 11110000 route (10, 20) 11110000@40%";
+    AnchorLineModel_V001 anchorLine = parse(source).anchorLines().get(0);
+    assertTrue(anchorLine.end.isOnLine());
+    assertEquals(40, anchorLine.end.offset);
+    assertEquals("11110000", anchorLine.end.classId);
+    assertTrue(new ClassDiagramSerializer_V001().serialize(parse(source)).contains("route (10, 20) 11110000@40%"));
+
+    assertThrows(ClassDiagramParseException.class,
+      () -> parse("class A (aaaaaaaa)\nnote (22222222) \"n\"\nanchor 22222222 -- aaaaaaaa route 22222222@40%"));
   }
 
   /** A route has a start anchor, waypoints and an end anchor. The anchors name the classes by ID. */
@@ -282,26 +298,33 @@ class ClassDiagramParser_V001Test {
     assertThrows(ClassDiagramParseException.class, () -> parse("note \"a`b\""));
   }
 
-  /** A note with id, position, width, text with a line break and the ID of the element it is attached to. */
+  /** A note with id, position, width and a text with a line break. */
   @Test
   void noteParts() throws ClassDiagramParseException {
-    NoteModel_V001 note = parse("note (aabbccdd) at(1, 2) width=90 \"one\\ntwo\" attach(11223344)").notes().get(0);
+    NoteModel_V001 note = parse("note (aabbccdd) at(1, 2) width=90 \"one\\ntwo\"").notes().get(0);
     assertEquals("aabbccdd", note.id);
     assertEquals(1, note.position.x);
     assertEquals(90, note.width);
     assertEquals("one\ntwo", note.text);
-    assertEquals("11223344", note.attachedToId);
-    assertNull(parse("note \"free\"").notes().get(0).attachedToId);
   }
 
-  /** The dashed line of a note can lead over waypoints. */
+  /** An anchor line names the note and its target by their IDs, can have an ID and a change mark, and leads over waypoints. */
   @Test
-  void noteRoute() throws ClassDiagramParseException {
-    NoteModel_V001 note = parse("note \"n\" attach(11223344) route (10, 20) (30, -40)").notes().get(0);
-    assertEquals(2, note.attachWaypoints.size());
-    assertEquals(10, note.attachWaypoints.get(0).x);
-    assertEquals(-40, note.attachWaypoints.get(1).y);
-    assertTrue(parse("note \"n\" attach(11223344)").notes().get(0).attachWaypoints.isEmpty());
+  void anchorLineParts() throws ClassDiagramParseException {
+    AnchorLineModel_V001 line = parse("anchor (5a5a5a5a) change(added, yellow) aabbccdd -- 11223344 route (10, 20) (30, -40)")
+      .anchorLines().get(0);
+    assertEquals("5a5a5a5a", line.id);
+    assertEquals(ChangeType_V001.ADDED, line.change.type);
+    assertEquals("yellow", line.change.changeSet);
+    assertEquals("aabbccdd", line.noteId);
+    assertEquals("11223344", line.targetId);
+    assertEquals(2, line.waypoints.size());
+    assertEquals(10, line.waypoints.get(0).x);
+    assertEquals(-40, line.waypoints.get(1).y);
+    AnchorLineModel_V001 plain = parse("anchor aabbccdd -- 11223344").anchorLines().get(0);
+    assertNull(plain.id);
+    assertNull(plain.change);
+    assertTrue(plain.waypoints.isEmpty());
   }
 
   /** An attribute can have an ID after its name, so that notes can be attached to it. */

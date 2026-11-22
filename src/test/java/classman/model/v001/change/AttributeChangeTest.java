@@ -188,8 +188,9 @@ class AttributeChangeTest {
         -title (a1a1a1a1) : String
         -pages
       }
-      note (a0000001) "on title" attach(a1a1a1a1)
+      note (a0000001) "on title"
       note (a0000002) "free"
+      anchor (f0000001) a0000001 -- a1a1a1a1
       """;
 
   /** Deleting an attribute without tracking takes the notes attached to it along. */
@@ -211,8 +212,9 @@ class AttributeChangeTest {
           -title (a1a1a1a1) change(removed, yellow) : String
           -pages
         }
-        note (a0000001) change(removed, yellow) "on title" attach(a1a1a1a1)
+        note (a0000001) change(removed, yellow) "on title"
         note (a0000002) "free"
+        anchor (f0000001) change(removed, yellow) a0000001 -- a1a1a1a1
         """;
     assertEquals(canonical(expected), serializer.serialize(model));
   }

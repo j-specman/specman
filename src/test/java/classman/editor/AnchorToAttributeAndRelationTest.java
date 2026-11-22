@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.AnchorLineModel_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.NoteModel_V001;
@@ -66,12 +67,17 @@ class AnchorToAttributeAndRelationTest {
     control.released(to);
   }
 
+  private String withAnchorLine(String anchorLine) {
+    return DIAGRAM.substring(0, DIAGRAM.length() - 1) + "  " + anchorLine + "\n}";
+  }
+
   private ClassModel_V001 classA() throws ClassDiagramParseException {
     return new ClassDiagramParser_V001().parse(editing.source()).classes().get(0);
   }
 
   private String attachedTo() throws ClassDiagramParseException {
-    return new ClassDiagramParser_V001().parse(editing.source()).notes().get(0).attachedToId;
+    List<AnchorLineModel_V001> lines = new ClassDiagramParser_V001().parse(editing.source()).anchorLines();
+    return lines.isEmpty() ? null : lines.get(0).targetId;
   }
 
   /** An attribute which has an ID is taken as it is. */
@@ -161,7 +167,7 @@ class AnchorToAttributeAndRelationTest {
   /** The note stays on its attribute: anchoring it to the same one again is no operation. */
   @Test
   void sameAttributeIsNoOperation() throws ClassDiagramParseException {
-    open(DIAGRAM.replace("\"remember\"", "\"remember\" attach(0a0a0a0a)"));
+    open(withAnchorLine("anchor 33333333 -- 0a0a0a0a"));
 
     draw(noteCenter(), center(lineOfAttribute("age")));
 
@@ -172,12 +178,12 @@ class AnchorToAttributeAndRelationTest {
   /** A note which is attached to an attribute is moved to a relation, and the waypoints of the old line go. */
   @Test
   void anchorMovedFromAttributeToRelation() throws ClassDiagramParseException {
-    open(DIAGRAM.replace("\"remember\"", "\"remember\" attach(0a0a0a0a) route (200, 250)"));
+    open(withAnchorLine("anchor 33333333 -- 0a0a0a0a route (200, 250)"));
 
     draw(noteCenter(), onRelation());
 
     assertEquals("44444444", attachedTo());
-    assertTrue(new ClassDiagramParser_V001().parse(editing.source()).notes().get(0).attachWaypoints.isEmpty());
+    assertTrue(new ClassDiagramParser_V001().parse(editing.source()).anchorLines().get(0).waypoints.isEmpty());
   }
 
   /** An attribute which a change set removed is no target any more: the point is on its class then. */

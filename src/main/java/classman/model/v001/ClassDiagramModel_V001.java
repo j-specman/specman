@@ -32,6 +32,31 @@ public class ClassDiagramModel_V001 {
         return elementsOfType(NoteModel_V001.class);
     }
 
+    public List<AnchorLineModel_V001> anchorLines() {
+        return elementsOfType(AnchorLineModel_V001.class);
+    }
+
+    /** The anchor lines which start at the note and which no change set removed. A note without an ID has none. */
+    public List<AnchorLineModel_V001> liveAnchorLinesOf(NoteModel_V001 note) {
+        List<AnchorLineModel_V001> lines = new ArrayList<>();
+        for (AnchorLineModel_V001 line : anchorLines()) {
+            if (note.id != null && note.id.equals(line.noteId) && !line.isRemoved()) {
+                lines.add(line);
+            }
+        }
+        return lines;
+    }
+
+    /** @return the note with the ID, null if the diagram has none */
+    public NoteModel_V001 noteWithId(String id) {
+        for (NoteModel_V001 note : notes()) {
+            if (note.id != null && note.id.equals(id)) {
+                return note;
+            }
+        }
+        return null;
+    }
+
     private <T extends AbstractDiagramElementModel_V001> List<T> elementsOfType(Class<T> type) {
         List<T> result = new ArrayList<>();
         for (AbstractDiagramElementModel_V001 element : elements) {

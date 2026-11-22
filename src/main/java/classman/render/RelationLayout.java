@@ -4,7 +4,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-/** A laid out relation: its parts, the area they cover, and the point where notes can be attached to it. */
+/** A laid out relation: its parts, the area they cover, and the path of its line, where notes can be attached to it. */
 public class RelationLayout {
     /** The change marks which go below the boxes of the diagram, like the thick line of an added relation. */
     public final List<AbstractSceneElement> underlay;
@@ -15,7 +15,7 @@ public class RelationLayout {
     /** The marks at the ends of the line: diamond, triangle or arrowhead. Empty for an association class. */
     public final List<AbstractSceneElement> decorations;
     /** Null for the layout of an association class, which has nothing to attach to. */
-    public final Point2D.Double attachPoint;
+    public final List<Point2D.Double> path;
     /** The boxes which belong to the relation: its association class, if it has one. */
     public final List<SceneElementArea> elementAreas;
     /** The texts of the relation itself and of the boxes which belong to it, which the user can change in place. */
@@ -28,14 +28,14 @@ public class RelationLayout {
 
     public RelationLayout(List<AbstractSceneElement> underlay, List<AbstractSceneElement> elements,
                           Rectangle2D.Double bounds, ScenePolyline line, List<AbstractSceneElement> decorations,
-                          Point2D.Double attachPoint, List<SceneElementArea> elementAreas,
+                          List<Point2D.Double> path, List<SceneElementArea> elementAreas,
                           List<SceneTextArea> textAreas) {
         this.underlay = List.copyOf(underlay);
         this.elements = List.copyOf(elements);
         this.bounds = bounds;
         this.line = line;
         this.decorations = List.copyOf(decorations);
-        this.attachPoint = attachPoint;
+        this.path = path;
         this.elementAreas = List.copyOf(elementAreas);
         this.textAreas = List.copyOf(textAreas);
     }

@@ -337,6 +337,52 @@ class ChangeMarkTest {
     assertEquals(-HALF_FRAME, scene.x);
   }
 
+  /** An added anchor line has a thick line in the strong color below its dashed line, like an added relation. */
+  @Test
+  void addedAnchorLineHighlight() throws ClassDiagramParseException {
+    Scene scene = layout("""
+        class A (aaaaaaaa) at(0, 0)
+        note (bbbbbbbb) at(0, 100) "hi"
+        anchor change(added, yellow) bbbbbbbb -- aaaaaaaa
+        """);
+    List<ScenePolyline> lines = all(scene, ScenePolyline.class);
+    ScenePolyline highlight = lines.get(0);
+    ScenePolyline dashed = lines.get(lines.size() - 1);
+    assertEquals(YELLOW, highlight.stroke);
+    assertEquals(DiagramStyle.RELATION_HIGHLIGHT_WIDTH, highlight.strokeWidth);
+    assertEquals(false, highlight.dashed);
+    assertEquals(true, dashed.dashed);
+    assertEquals(DiagramStyle.STROKE, dashed.stroke);
+    assertEquals(dashed.xs.length, highlight.xs.length);
+    assertEquals(0, strikes(scene).size());
+  }
+
+  /** A removed anchor line is veiled, has a cross on its line and the strong color below it, like a removed relation. */
+  @Test
+  void removedAnchorLineCross() throws ClassDiagramParseException {
+    Scene scene = layout("""
+        class A (aaaaaaaa) at(0, 0)
+        note (bbbbbbbb) at(0, 100) "hi"
+        anchor change(removed, yellow) bbbbbbbb -- aaaaaaaa
+        """);
+    List<ScenePolyline> lines = all(scene, ScenePolyline.class);
+    assertEquals(YELLOW, lines.get(0).stroke);
+    assertEquals(DiagramStyle.VEILED_LINE, lines.get(lines.size() - 1).stroke);
+    assertTrue(lines.get(lines.size() - 1).dashed);
+    assertEquals(2, strikes(scene).size());
+  }
+
+  /** An anchor line which no change set marked has no highlight, even if its note is marked: the note says it all. */
+  @Test
+  void plainAnchorLineWithoutHighlight() throws ClassDiagramParseException {
+    Scene scene = layout("""
+        class A (aaaaaaaa) at(0, 0)
+        note (bbbbbbbb) change(added, yellow) at(0, 100) "hi"
+        anchor bbbbbbbb -- aaaaaaaa
+        """);
+    assertEquals(1, all(scene, ScenePolyline.class).size());
+  }
+
   /** A diagram without marks has no frames, highlights or strikes. */
   @Test
   void unmarkedDiagramPlain() throws ClassDiagramParseException {

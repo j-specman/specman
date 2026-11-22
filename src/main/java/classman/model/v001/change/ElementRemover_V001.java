@@ -1,6 +1,7 @@
 package classman.model.v001.change;
 
 import classman.model.v001.AbstractRelationModel_V001;
+import classman.model.v001.AnchorLineModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
@@ -38,6 +39,9 @@ class ElementRemover_V001 {
         }
         if (element instanceof AbstractRelationModel_V001 relation) {
             return vanishing.relationVanishes(relation);
+        }
+        if (element instanceof AnchorLineModel_V001 anchorLine) {
+            return vanishing.anchorLineVanishes(anchorLine);
         }
         return vanishing.noteVanishes((NoteModel_V001) element);
     }

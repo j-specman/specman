@@ -26,6 +26,8 @@ classdiagram {
     extends 0b1c2d3e -> 4e110002
     association 12345678 -- 12345678
     implements 9a31c4e0 -> 1ee50001 "implements something"
-    note "just a note" attach(12ab34cd)
-    note at(0, 0) "routed" attach(12ab34cd) route (10, 20) (30, 40)
+    note (ed9e0003) "just a note"
+    note (ed9e0004) at(0, 0) "routed"
+    anchor ed9e0003 -- 12ab34cd
+    anchor ed9e0004 -- 12ab34cd route (10, 20) (30, 40)
 }

@@ -1,5 +1,6 @@
 package classman.render;
 
+import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.Side_V001;
 
 import java.awt.geom.Point2D;
@@ -19,7 +20,22 @@ public class ClassAttachTarget extends AttachTarget {
     }
 
     @Override
+    public Double alignmentX() {
+        return classArea.getCenterX();
+    }
+
+    @Override
+    public Double alignmentY() {
+        return classArea.getCenterY();
+    }
+
+    @Override
     public Point2D.Double anchorPoint(Side_V001 side, double offset) {
         return BoxGeometry.sidePoint(classArea, side, offset);
+    }
+
+    @Override
+    public AnchorModel_V001 anchorNear(String id, Point2D point) {
+        return BoxGeometry.nearestAnchor(id, classArea, point);
     }
 }
