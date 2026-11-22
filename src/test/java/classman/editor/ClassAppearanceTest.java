@@ -115,7 +115,7 @@ class ClassAppearanceTest {
 
     assertFalse(parsedClass().attributesHidden);
     assertTrue(host.reportedSources.isEmpty());
-    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(5);
+    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(6);
     assertTrue(shows.isSelected());
     assertFalse(shows.isEnabled());
   }
@@ -144,10 +144,10 @@ class ClassAppearanceTest {
   void colorEntry() throws ClassDiagramParseException {
     open(CLASS);
 
-    menuEntries(start -> null).get(3).doClick(0);
+    menuEntries(start -> null).get(4).doClick(0);
     assertNull(parsedClass().fill);
 
-    menuEntries(start -> new Color(0xCC, 0xE5, 0xFF)).get(3).doClick(0);
+    menuEntries(start -> new Color(0xCC, 0xE5, 0xFF)).get(4).doClick(0);
     assertEquals("#cce5ff", parsedClass().fill);
   }
 
@@ -155,10 +155,10 @@ class ClassAppearanceTest {
   @Test
   void standardColorEntry() throws ClassDiagramParseException {
     open(CLASS);
-    assertFalse(menuEntries(start -> null).get(4).isEnabled());
+    assertFalse(menuEntries(start -> null).get(5).isEnabled());
 
     editing.setFill(editing.selectedClass(), "#cce5ff");
-    JMenuItem standard = menuEntries(start -> null).get(4);
+    JMenuItem standard = menuEntries(start -> null).get(5);
     assertTrue(standard.isEnabled());
 
     standard.doClick(0);
@@ -169,13 +169,13 @@ class ClassAppearanceTest {
   @Test
   void showAttributesEntry() throws ClassDiagramParseException {
     open(CLASS);
-    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(5);
+    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(6);
     assertTrue(shows.isSelected());
 
     shows.doClick(0);
 
     assertTrue(parsedClass().attributesHidden);
-    assertFalse(((JCheckBoxMenuItem) menuEntries(start -> null).get(5)).isSelected());
+    assertFalse(((JCheckBoxMenuItem) menuEntries(start -> null).get(6)).isSelected());
     assertFalse(menuEntries(start -> null).get(2).isEnabled());
   }
 }

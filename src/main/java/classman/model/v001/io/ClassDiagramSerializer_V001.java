@@ -182,6 +182,9 @@ public class ClassDiagramSerializer_V001 {
             }
             line.append(" [").append(String.join(", ", infos)).append(']');
         }
+        if (attribute.hidden) {
+            line.append(" (hidden)");
+        }
         return line.toString();
     }
 

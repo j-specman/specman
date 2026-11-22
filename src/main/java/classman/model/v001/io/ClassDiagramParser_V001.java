@@ -222,6 +222,7 @@ public class ClassDiagramParser_V001 {
         model.nameChange = textChange(attribute.nameChange);
         model.typeChange = textChange(attribute.typeChange);
         model.change = change(attribute.changeMark());
+        model.hidden = attribute.HIDDEN_MARK() != null;
         return model;
     }
 

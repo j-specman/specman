@@ -31,6 +31,8 @@ grammar ClassDiagram_V001;
 //   * fill="#rrggbb" in the head gives the class box a background color of its own, the word hideattributes behind it
 //     hides the attribute compartment (the values of an enum); the attributes stay in the source.
 //     The height is always computed.
+//   * An attribute which ends with (hidden) is not shown: the attribute compartment ends with a line "..." instead,
+//     in the color of the first change set which marked one of the hidden attributes.
 //   * A relation without route is a straight line from center to center, clipped at the box borders.
 //   * Route anchors: classId.side@offset, side = top|right|bottom|left, offset in pixels from the start of the
 //     side (left end of top/bottom, upper end of left/right), clamped to the side's length. Waypoints are
@@ -133,11 +135,12 @@ classBody
     : LBRACE attribute* RBRACE
     ;
 
-// One attribute: [visibility] name [(id)] [: type] [[info, info, ...]]. A name or type is one word or a quoted string.
+// One attribute: [visibility] name [(id)] [: type] [[info, info, ...]] [(hidden)]. A name or type is one word or a
+// quoted string. The diagram doesn't show an attribute which ends with (hidden); it stays in the model.
 attribute
     : ELLIPSIS
     | (visibility visibilityChange=textChange?)? wordOrString nameChange=textChange? ELEMENT_ID? changeMark?
-      (COLON wordOrString typeChange=textChange?)? infos?
+      (COLON wordOrString typeChange=textChange?)? infos? HIDDEN_MARK?
     ;
 
 visibility
@@ -372,6 +375,9 @@ TILDE        : '~' ;
 
 // Element ID: 8 lower-case hex characters in parentheses, like Specman step IDs, e.g. (04de91aa).
 ELEMENT_ID   : '(' HEX HEX HEX HEX HEX HEX HEX HEX ')' ;
+
+// The mark of an attribute which the diagram doesn't show, at the end of its line.
+HIDDEN_MARK  : '(hidden)' ;
 
 // <<Entity>>
 STEREOTYPE   : '<<' ~[>\r\n]+ '>>' ;

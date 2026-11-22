@@ -69,12 +69,12 @@ class ClassDiagramLayouterTest {
     assertEquals(PADDING_Y + LINE + PADDING_Y, separator.y1);
   }
 
-  /** An attribute is shown as visibility sign, name, type and infos. The marker for hidden attributes is shown as three dots. */
+  /** An attribute is shown as visibility sign, name, type and infos. The marker for hidden attributes is shown as three dots with blanks between them. */
   @Test
   void attributeTextParts() throws ClassDiagramParseException {
     Scene scene = layout("class A {\n  -name : String [Pflicht, 2..50]\n  ...\n}");
     assertTrue(texts(scene).contains("-name : String [Pflicht, 2..50]"), texts(scene).toString());
-    assertTrue(texts(scene).contains("..."), texts(scene).toString());
+    assertTrue(texts(scene).contains(". . ."), texts(scene).toString());
   }
 
   /** The stereotype is above the name, the tagged values are below it. */

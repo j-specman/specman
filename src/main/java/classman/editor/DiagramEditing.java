@@ -616,6 +616,35 @@ public class DiagramEditing {
     return canAddPartsTo(box) && box.kind.hasAttributes() && !box.hasMarkedAttributes();
   }
 
+  /** @return true if the attribute can be hidden: the class shows it, no change set has removed the class, and it
+   * is not the line ". . ." */
+  public boolean canHideAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
+    return attribute != null && !attribute.hidden && !attribute.hiddenAttributesMarker && canAddAttributeTo(box)
+      && box.attributes.contains(attribute);
+  }
+
+  /** Hides the attribute, which stays in the diagram. Marks of change sets on it are not lost, the line ". . ." shows
+   * their color. Not marked as a change, like the width. One operation. */
+  public void hideAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
+    if (canHideAttribute(box, attribute)) {
+      attribute.hidden = true;
+      publish();
+    }
+  }
+
+  /** @return true if the hidden attribute of the class can be shown again: no change set has removed the class */
+  public boolean canShowAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
+    return attribute.hidden && canAddPartsTo(box) && box.attributes.contains(attribute);
+  }
+
+  /** Shows the hidden attribute again. Not marked as a change. One operation. */
+  public void showAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
+    if (canShowAttribute(box, attribute)) {
+      attribute.hidden = false;
+      publish();
+    }
+  }
+
   /** Hides or shows the attribute compartment of the class. The attributes stay in the diagram. Not marked as a
    * change, like the width. One operation. */
   public void setAttributesHidden(ClassModel_V001 box, boolean hidden) {

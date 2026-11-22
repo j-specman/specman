@@ -81,6 +81,16 @@ class AttachedElementsTest {
     assertEquals(62, link.ys[1], 1e-9);
   }
 
+  /** A note attached to a hidden attribute is linked to the box around the line "...", which stands for it. */
+  @Test
+  void noteLinkToHiddenAttributeEndsAtEllipsis() throws ClassDiagramParseException {
+    ScenePolyline link = lastLine(layout(
+        "class A (aaaaaaaa) at(0, 0) {\n  first\n  second (0a0a0a0a) (hidden)\n}\nnote (bb000001) at(200, 0) \"n\"\n"
+        + "anchor bb000001 -- 0a0a0a0a"));
+    assertEquals(58, link.xs[1], 1e-9);
+    assertEquals(62, link.ys[1], 1e-9);
+  }
+
   /** A note left of the attribute is linked to the left edge of its box, 2 pixels before the text. */
   @Test
   void noteLinkToAttributeFromLeft() throws ClassDiagramParseException {

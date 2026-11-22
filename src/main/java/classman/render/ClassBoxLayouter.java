@@ -58,7 +58,8 @@ public class ClassBoxLayouter {
         String stereotype = model.stereotype == null ? null : stereotypeText(model.stereotype);
         List<MarkedText> taggedValues = taggedValueTexts(model);
         boolean showsAttributes = model.showsAttributes();
-        List<MarkedText> attributes = showsAttributes ? attributeTexts(model) : List.of();
+        List<AttributeModel_V001> shownAttributes = showsAttributes ? shownAttributes(model) : List.of();
+        List<MarkedText> attributes = attributeTexts(shownAttributes);
         String fill = model.fill != null ? model.fill : CLASS_FILL;
         double contentWidth = contentWidth(model, derivedStereotype, stereotype, taggedValues, attributes);
         double width = contentWidth + 2 * PADDING_X;
@@ -94,8 +95,8 @@ public class ClassBoxLayouter {
         if (showsAttributes) {
             elements.add(new SceneLine(0, y, width, y, false, lineColor, STROKE_WIDTH));
             y += PADDING_Y;
-            y = addAttributes(elements, backgrounds, overlays, model, attributes, width, y, attributeAreas, lineAreas,
-                textColor);
+            y = addAttributes(elements, backgrounds, overlays, model, shownAttributes, attributes, width, y,
+                attributeAreas, lineAreas, textColor);
             y += PADDING_Y;
         }
 
@@ -191,16 +192,35 @@ public class ClassBoxLayouter {
         return texts;
     }
 
-    private List<MarkedText> attributeTexts(ClassModel_V001 model) {
-        List<MarkedText> texts = new ArrayList<>();
+    /** The attributes which are not hidden. If any is hidden, and the class has no line "..." of its own, a line "..."
+     * follows them, marked with the change set of the first mark of the hidden attributes. */
+    private List<AttributeModel_V001> shownAttributes(ClassModel_V001 model) {
+        List<AttributeModel_V001> shown = new ArrayList<>();
+        String hiddenMarkChangeSet = null;
+        boolean hasHidden = false;
+        boolean hasMarker = false;
         for (AttributeModel_V001 attribute : model.attributes) {
-            texts.add(attributeText(attribute));
+            if (attribute.hidden) {
+                hasHidden = true;
+                hiddenMarkChangeSet = hiddenMarkChangeSet == null ? attribute.firstChangeSet() : hiddenMarkChangeSet;
+            }
+            else {
+                shown.add(attribute);
+                hasMarker = hasMarker || attribute.hiddenAttributesMarker;
+            }
         }
-        return texts;
+        if (hasHidden && !hasMarker) {
+            shown.add(AttributeModel_V001.hiddenAttributesMarker(hiddenMarkChangeSet));
+        }
+        return shown;
     }
 
-    private MarkedText attributeText(AttributeModel_V001 attribute) {
-        return attributeTextBuilder.build(attribute);
+    private List<MarkedText> attributeTexts(List<AttributeModel_V001> attributes) {
+        List<MarkedText> texts = new ArrayList<>();
+        for (AttributeModel_V001 attribute : attributes) {
+            texts.add(attributeTextBuilder.build(attribute));
+        }
+        return texts;
     }
 
     // ---- width ----
@@ -274,13 +294,13 @@ public class ClassBoxLayouter {
 
     /**
      * An empty class still gets one blank attribute line. The box around the text of each attribute with an ID is
-     * noted in attributeAreas, the whole line of each attribute which can be changed in lineAreas, the blank line of
+     * noted in attributeAreas (the box of the line "..." also for the hidden attributes with an ID), the whole line of each attribute which can be changed in lineAreas, the blank line of
      * an empty class under the key null. The attributes are marked unless the class as a whole is added or removed.
      * Returns the y below the last line.
      */
     private double addAttributes(List<AbstractSceneElement> elements, List<AbstractSceneElement> backgrounds,
-                                 List<AbstractSceneElement> overlays, ClassModel_V001 model, List<MarkedText> attributes,
-                                 double boxWidth, double y, Map<String, Rectangle2D.Double> attributeAreas,
+                                 List<AbstractSceneElement> overlays, ClassModel_V001 model,
+                                 List<AttributeModel_V001> shownAttributes, List<MarkedText> attributes, double boxWidth, double y, Map<String, Rectangle2D.Double> attributeAreas,
                                  Map<AttributeModel_V001, Rectangle2D.Double> lineAreas, String textColor) {
         double contentWidth = boxWidth - 2 * PADDING_X;
         if (attributes.isEmpty()) {
@@ -298,19 +318,33 @@ public class ClassBoxLayouter {
             List<SceneText> lines = List.of(sceneText);
             double textRight = PADDING_X + lineWidth;
             lineY += measurer.lineHeight();
-            AttributeModel_V001 attribute = model.attributes.get(i);
+            AttributeModel_V001 attribute = shownAttributes.get(i);
             if (model.change == null) {
                 markAttribute(backgrounds, overlays, attribute, attributes.get(i), lines, boxWidth, top, lineY);
             }
+            Rectangle2D.Double textBox = new Rectangle2D.Double(PADDING_X - ATTRIBUTE_ATTACH_GAP, top,
+                textRight - PADDING_X + 2 * ATTRIBUTE_ATTACH_GAP, lineY - top);
             if (attribute.id != null) {
-                attributeAreas.put(attribute.id, new Rectangle2D.Double(PADDING_X - ATTRIBUTE_ATTACH_GAP, top,
-                    textRight - PADDING_X + 2 * ATTRIBUTE_ATTACH_GAP, lineY - top));
+                attributeAreas.put(attribute.id, textBox);
+            }
+            if (attribute.hiddenAttributesMarker) {
+                hiddenAttributesLeadToMarker(model, textBox, attributeAreas);
             }
             if (!attribute.hiddenAttributesMarker) {
                 lineAreas.put(attribute, new Rectangle2D.Double(PADDING_X, top, contentWidth, lineY - top));
             }
         }
         return lineY;
+    }
+
+    /** What is attached to a hidden attribute is attached to the box of the line "...". */
+    private void hiddenAttributesLeadToMarker(ClassModel_V001 model, Rectangle2D.Double markerBox,
+                                              Map<String, Rectangle2D.Double> attributeAreas) {
+        for (AttributeModel_V001 attribute : model.attributes) {
+            if (attribute.hidden && attribute.id != null) {
+                attributeAreas.put(attribute.id, markerBox);
+            }
+        }
     }
 
     /** An added or removed attribute gets a colored row, the other attributes the backgrounds of their changed texts. */

@@ -110,7 +110,7 @@ public class ClassDiagramLayouter {
             attachTargets.add(id, new AttributeAttachTarget(attributeArea)));
     }
 
-    /** What is attached to a hidden attribute is attached to the class instead. */
+    /** While the whole compartment is hidden, what is attached to an attribute is attached to the class instead. */
     private void hiddenAttributesLeadToClass(AttachTargetIndex attachTargets, ClassModel_V001 classModel,
                                              Rectangle2D.Double classArea) {
         for (AttributeModel_V001 attribute : classModel.attributes) {

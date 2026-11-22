@@ -13,10 +13,13 @@ import classman.model.v001.InfoModel_V001;
  */
 class AttributeTextBuilder {
 
+    /** The dots have blanks between them, so that the line takes more room. */
+    static final String TEXT_OF_MARKER = ". . .";
+
     MarkedText build(AttributeModel_V001 attribute) {
         MarkedText text = new MarkedText();
         if (attribute.hiddenAttributesMarker) {
-            return text.append("...");
+            return text.append(TEXT_OF_MARKER, attribute.nameChange);
         }
         if (attribute.visibility != null) {
             text.append(String.valueOf(attribute.visibility.sign), attribute.visibilityChange);
