@@ -12,8 +12,6 @@ public class AssociationRelationModel_V001 extends AbstractRelationModel_V001 {
     public boolean fromArrow;
     /** True for an arrowhead at the target. */
     public boolean toArrow;
-    /** Null if the relation has no association class. */
-    public ClassModel_V001 assocClass;
 
     public AssociationRelationModel_V001(RelationType_V001 type, String fromId, String toId) {
         super(type, fromId, toId);

@@ -1,7 +1,6 @@
 package classman.render;
 
 import classman.model.v001.AbstractRelationModel_V001;
-import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.RelationType_V001;
 
 import java.awt.geom.Point2D;
@@ -18,14 +17,12 @@ public class RelationLayouter {
     private final RelationTextLayouter textLayouter;
     private final RelationTextAreas textAreaLayouter;
     private final RelationMarkLayouter markLayouter;
-    private final AssocClassLayouter assocClassLayouter;
 
-    public RelationLayouter(TextMeasurer measurer, ClassBoxLayouter classLayouter, ChangePalette palette) {
+    public RelationLayouter(TextMeasurer measurer, ChangePalette palette) {
         this.measurer = measurer;
         this.textLayouter = new RelationTextLayouter(measurer);
         this.textAreaLayouter = new RelationTextAreas(measurer);
         this.markLayouter = new RelationMarkLayouter(measurer, palette);
-        this.assocClassLayouter = new AssocClassLayouter(classLayouter);
     }
 
     public RelationLayout layout(AbstractRelationModel_V001 relation, Map<String, Rectangle2D.Double> classAreas) {
@@ -42,17 +39,9 @@ public class RelationLayouter {
         elements.addAll(texts.all());
         elements.addAll(markLayouter.overlay(relation, texts, PathGeometry.quarterPoint(path)));
         Rectangle2D.Double bounds = boundsOf(path, underlay, elements);
-        List<SceneElementArea> elementAreas = new ArrayList<>();
         List<SceneTextArea> textAreas = new ArrayList<>(textAreaLayouter.of(relation, texts));
         textAreas.addAll(textAreaLayouter.placeholdersOf(relation, textLayouter.placeholders(relation, path)));
-        if (relation instanceof AssociationRelationModel_V001 association && association.assocClass != null) {
-            RelationLayout assocClass = assocClassLayouter.layout(association.assocClass, path);
-            elements.addAll(assocClass.elements);
-            bounds = BoxGeometry.union(bounds, assocClass.bounds);
-            elementAreas.addAll(assocClass.elementAreas);
-            textAreas.addAll(assocClass.textAreas);
-        }
-        return new RelationLayout(underlay, elements, bounds, line, decorations, path, elementAreas, textAreas);
+        return new RelationLayout(underlay, elements, bounds, line, decorations, path, textAreas);
     }
 
     private ScenePolyline line(List<Point2D.Double> path, boolean dashed, String color) {

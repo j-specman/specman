@@ -1,7 +1,7 @@
 package classman.editor;
 
 import classman.model.v001.AbstractRelationModel_V001;
-import classman.model.v001.AnchorLineModel_V001;
+import classman.model.v001.AttachLineModel_V001;
 import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RelationEnd_V001;
@@ -46,30 +46,30 @@ class RouteEditing {
     }
   }
 
-  /** Removes a waypoint of an anchor line. Without waypoints the anchor line is straight. */
-  void deleteWaypoint(AnchorLineModel_V001 anchorLine, int waypointIndex) {
-    anchorLine.waypoints.remove(waypointIndex);
+  /** Removes a waypoint of an anchor line or association class link. Without waypoints the anchor line is straight. */
+  void deleteWaypoint(AttachLineModel_V001 attachLine, int waypointIndex) {
+    attachLine.waypoints.remove(waypointIndex);
   }
 
   /** Puts a new waypoint into an anchor line, as the waypoint with the given index. */
-  void insertWaypoint(AnchorLineModel_V001 anchorLine, int waypointIndex, Point2D at) {
-    anchorLine.waypoints.add(waypointIndex, positionOf(at));
+  void insertWaypoint(AttachLineModel_V001 attachLine, int waypointIndex, Point2D at) {
+    attachLine.waypoints.add(waypointIndex, positionOf(at));
   }
 
-  void moveWaypoint(AnchorLineModel_V001 anchorLine, int waypointIndex, Point2D to) {
-    anchorLine.waypoints.set(waypointIndex, positionOf(to));
+  void moveWaypoint(AttachLineModel_V001 attachLine, int waypointIndex, Point2D to) {
+    attachLine.waypoints.set(waypointIndex, positionOf(to));
   }
 
-  /** Fixes the start of an anchor line at the point of the border of the note which is closest to the given point. */
-  void attachNoteStart(AnchorLineModel_V001 anchorLine, Rectangle2D noteArea, Point2D to) {
-    anchorLine.start = anchorAt(anchorLine.noteId, noteArea, to);
+  /** Fixes the start of an anchor line or association class link at the point of the border of its box which is closest to the given point. */
+  void attachLineStart(AttachLineModel_V001 attachLine, Rectangle2D boxArea, Point2D to) {
+    attachLine.start = anchorAt(attachLine.startId, boxArea, to);
   }
 
   /** Fixes the end of an anchor line at the point of the border of the class which is closest to the given point. The
    * anchor line leads to that class from then on. */
-  void attachNoteEnd(AnchorLineModel_V001 anchorLine, String classId, Rectangle2D classArea, Point2D to) {
-    anchorLine.targetId = classId;
-    anchorLine.end = anchorAt(classId, classArea, to);
+  void attachLineEnd(AttachLineModel_V001 attachLine, String classId, Rectangle2D classArea, Point2D to) {
+    attachLine.targetId = classId;
+    attachLine.end = anchorAt(classId, classArea, to);
   }
 
   /** @param waypointIndex the index in the waypoints of the route */
@@ -103,13 +103,13 @@ class RouteEditing {
     relation.route = isStraight ? null : new RouteModel_V001(start, route.waypoints, last);
   }
 
-  /** Lets the layout work out the end of an anchor line again, where it leaves the note or meets its target. */
-  void centerEnd(AnchorLineModel_V001 anchorLine, RelationEnd_V001 end) {
+  /** Lets the layout work out the end of an anchor line again, where it leaves its box or meets its target. */
+  void centerEnd(AttachLineModel_V001 attachLine, RelationEnd_V001 end) {
     if (end == RelationEnd_V001.FROM) {
-      anchorLine.start = null;
+      attachLine.start = null;
     }
     else {
-      anchorLine.end = null;
+      attachLine.end = null;
     }
   }
 

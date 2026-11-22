@@ -49,11 +49,6 @@ public class ClassBoxLayouter {
     }
 
     public BoxLayout layout(ClassModel_V001 model) {
-        return layout(model, CLASS_FILL);
-    }
-
-    /** Lays out the class with the given fill color for its box. */
-    public BoxLayout layout(ClassModel_V001 model, String fill) {
         ChangeModel_V001 change = model.change;
         boolean isRemoved = change != null && change.type == ChangeType_V001.REMOVED;
         String textColor = isRemoved ? VEILED_TEXT : null;
@@ -112,7 +107,7 @@ public class ClassBoxLayouter {
         if (change != null) {
             all.add(frame(width, y, change));
         }
-        all.add(new SceneRectangle(0, 0, width, y, isRemoved ? veiled(fill) : fill, lineColor));
+        all.add(new SceneRectangle(0, 0, width, y, isRemoved ? veiled(CLASS_FILL) : CLASS_FILL, lineColor));
         all.addAll(backgrounds);
         all.addAll(elements);
         all.addAll(overlays);

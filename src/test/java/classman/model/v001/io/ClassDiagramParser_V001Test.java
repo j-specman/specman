@@ -3,6 +3,7 @@ package classman.model.v001.io;
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AnchorLineModel_V001;
+import classman.model.v001.AssocClassLinkModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeType_V001;
@@ -155,7 +156,6 @@ class ClassDiagramParser_V001Test {
     assertFalse(r.fromArrow);
     assertEquals("first\nsecond", r.label);
     assertNull(r.route);
-    assertNull(r.assocClass);
   }
 
   /** A multiplicity is free text in quotes, an empty one with a mark is a removed multiplicity. */
@@ -271,14 +271,31 @@ class ClassDiagramParser_V001Test {
     assertThrows(ClassDiagramParseException.class, () -> parse("class A (aaaaaaaa)\nclass B (bbbbbbbb)\nextends A -> B"));
   }
 
-  /** An association class nested in a relation belongs to that relation. */
+  /** The association class link names the class and the relation, and takes ID, mark and route like an anchor line. */
   @Test
-  void nestedAssocClass() throws ClassDiagramParseException {
-    AssociationRelationModel_V001 r = assertInstanceOf(AssociationRelationModel_V001.class,
-        parse("association aaaaaaaa -> bbbbbbbb\n  assocclass link at(5, 6) {\n    since\n  }").relations().get(0));
-    assertEquals("link", r.assocClass.name);
-    assertEquals(5, r.assocClass.position.x);
-    assertEquals("since", r.assocClass.attributes.get(0).name);
+  void assocClassLink() throws ClassDiagramParseException {
+    AssocClassLinkModel_V001 link = parse("assocclass (5a5a5a5a) change(added, green) aabbccdd -- 11223344"
+      + " route aabbccdd.right@3 (10, 20) 11223344@40%").assocClassLinks().get(0);
+
+    assertEquals("5a5a5a5a", link.id);
+    assertEquals("green", link.change.changeSet);
+    assertEquals("aabbccdd", link.startId);
+    assertEquals("11223344", link.targetId);
+    assertEquals(10, link.waypoints.get(0).x);
+    assertEquals(3, link.start.offset);
+    assertEquals(40, link.end.offset);
+    assertTrue(link.end.isOnLine());
+  }
+
+  /** The link is no anchor line, and the old form nested in the relation is gone. */
+  @Test
+  void assocClassLinkIsNoAnchorLine() throws ClassDiagramParseException {
+    ClassDiagramModel_V001 diagram = parse("assocclass aabbccdd -- 11223344");
+
+    assertTrue(diagram.anchorLines().isEmpty());
+    assertEquals(1, diagram.attachLines().size());
+    assertThrows(ClassDiagramParseException.class,
+      () -> parse("association aaaaaaaa -- bbbbbbbb\n  assocclass link {\n  }"));
   }
 
   /** Strings know escapes for a line break, a quote, a backslash and a backtick, which is a unicode escape. */
@@ -318,7 +335,7 @@ class ClassDiagramParser_V001Test {
     assertEquals("5a5a5a5a", line.id);
     assertEquals(ChangeType_V001.ADDED, line.change.type);
     assertEquals("yellow", line.change.changeSet);
-    assertEquals("aabbccdd", line.noteId);
+    assertEquals("aabbccdd", line.startId);
     assertEquals("11223344", line.targetId);
     assertEquals(2, line.waypoints.size());
     assertEquals(10, line.waypoints.get(0).x);
@@ -345,7 +362,8 @@ class ClassDiagramParser_V001Test {
         + "  -x (a1a1a1a1) change(removed, blue) : String\n  -y\n}\n"
         + "class B (bbbbbbbb)\n"
         + "composition (cccccccc) change(removed, lilac) aaaaaaaa -> bbbbbbbb\n"
-        + "  assocclass C change(added, green) {}\n"
+        + "class C (cccccccc)\n"
+        + "assocclass (eeeeeeee) change(added, green) 99999999 -- cccccccc\n"
         + "note (dddddddd) change(added, red) \"n\"");
     ClassModel_V001 a = diagram.classes().get(0);
     assertEquals(ChangeType_V001.ADDED, a.change.type);
@@ -359,7 +377,7 @@ class ClassDiagramParser_V001Test {
     AssociationRelationModel_V001 relation = (AssociationRelationModel_V001) diagram.relations().get(0);
     assertEquals(ChangeType_V001.REMOVED, relation.change.type);
     assertEquals("lilac", relation.change.changeSet);
-    assertEquals("green", relation.assocClass.change.changeSet);
+    assertEquals("green", diagram.assocClassLinks().get(0).change.changeSet);
     assertEquals("red", diagram.notes().get(0).change.changeSet);
   }
 

@@ -2,6 +2,7 @@ package classman.model.v001.change;
 
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AnchorLineModel_V001;
+import classman.model.v001.AttachLineModel_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
@@ -18,7 +19,8 @@ import java.util.Set;
  * Knows which elements go away when the marks of a change set are accepted or rejected: the marked ones, and
  * everything which hangs on them. A class takes its relations along, a class, an attribute or a relation takes the
  * notes along which are attached to it, a note takes its anchor lines along, and so does the class, attribute or
- * relation an anchor line leads to. An anchor line which a change set removed doesn't attach its note any more, unless
+ * relation an anchor line leads to. An association class link goes with its class and with its relation, the class
+ * itself stays where only the relation goes. An anchor line which a change set removed doesn't attach its note any more, unless
  * it was removed together with the note, by the same change set: then it still counts, so that the note goes with the
  * target which the deletion of the note's lines was a consequence of.
  */
@@ -39,7 +41,7 @@ class VanishingElements_V001 {
         collectNotes(model);
     }
 
-    /** True if the mark of a class, attribute, association class, relation, note or anchor line makes it go away. */
+    /** True if the mark of a class, attribute, relation, note, anchor line or association class link makes it go away. */
     boolean vanishes(ChangeModel_V001 change) {
         return change != null && change.changeSet.equals(changeSet) && resolution.removesElementWith(change.type);
     }
@@ -52,12 +54,13 @@ class VanishingElements_V001 {
         return notes.contains(note);
     }
 
-    boolean anchorLineVanishes(AnchorLineModel_V001 anchorLine) {
-        return vanishes(anchorLine.change) || noteIds.contains(anchorLine.noteId) || leadsToVanishing(anchorLine);
+    boolean attachLineVanishes(AttachLineModel_V001 line) {
+        return vanishes(line.change) || noteIds.contains(line.startId) || classIds.contains(line.startId)
+            || leadsToVanishing(line);
     }
 
-    private boolean leadsToVanishing(AnchorLineModel_V001 anchorLine) {
-        String target = anchorLine.targetId;
+    private boolean leadsToVanishing(AttachLineModel_V001 line) {
+        String target = line.targetId;
         return classIds.contains(target) || attributeIds.contains(target) || relationIds.contains(target);
     }
 
@@ -104,7 +107,7 @@ class VanishingElements_V001 {
     /** True if the line starts at the note and no change set removed it, or the change set which removed it removed
      * the note too. */
     private boolean attaches(AnchorLineModel_V001 anchorLine, NoteModel_V001 note) {
-        if (note.id == null || !note.id.equals(anchorLine.noteId)) {
+        if (note.id == null || !note.id.equals(anchorLine.startId)) {
             return false;
         }
         return !anchorLine.isRemoved() || removedTogether(anchorLine, note);

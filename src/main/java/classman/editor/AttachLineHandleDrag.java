@@ -1,6 +1,6 @@
 package classman.editor;
 
-import classman.model.v001.AnchorLineModel_V001;
+import classman.model.v001.AttachLineModel_V001;
 import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.render.AttachTarget;
@@ -11,16 +11,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/** The dragging of one handle of an anchor line: a waypoint goes where the mouse takes it, the start slides along
- * the border of the note, the end slides along the border of the class the line leads to, or is hung onto another
+/** The dragging of one handle of an anchor line or association class link: a waypoint goes where the mouse takes it, the start slides along
+ * the border of its box, the end slides along the border of the class the line leads to, or is hung onto another
  * class while the mouse is on it. If the line leads to an attribute or a relation, the end slides along the border
  * of the attribute or the line of the relation and stays on it. The point follows the mouse by the distance between
  * where the handle was grabbed and its center, so it doesn't jump, and snaps to the line of its neighbors if it comes
  * close. Cancelling takes the waypoints, the ends and the target back. */
-class AnchorHandleDrag extends Drag {
+class AttachLineHandleDrag extends Drag {
   private final RouteEditing routeEditing;
-  private final AnchorLineModel_V001 anchorLine;
-  private final Rectangle2D noteArea;
+  private final AttachLineModel_V001 attachLine;
+  private final Rectangle2D boxArea;
   private final int handle;
   private final List<Point2D> path;
   private final Point2D pressedAt;
@@ -43,25 +43,25 @@ class AnchorHandleDrag extends Drag {
    * @param slideTarget the attribute or relation the line leads to, whose border or line the end slides along
    * without leaving it, null if the line leads to a class
    * @param ownTarget what the line leads to when the drag starts */
-  AnchorHandleDrag(RouteEditing routeEditing, AnchorLineModel_V001 anchorLine, Rectangle2D noteArea, int handle, List<Point2D> path,
+  AttachLineHandleDrag(RouteEditing routeEditing, AttachLineModel_V001 attachLine, Rectangle2D boxArea, int handle, List<Point2D> path,
                    Point2D pressedAt, Map<String, Rectangle2D> reachableClasses, AttachTarget slideTarget,
                    AttachTarget ownTarget) {
     this.routeEditing = routeEditing;
-    this.anchorLine = anchorLine;
-    this.noteArea = noteArea;
+    this.attachLine = attachLine;
+    this.boxArea = boxArea;
     this.handle = handle;
     this.path = path;
     this.pressedAt = pressedAt;
     this.reachableClasses = reachableClasses;
     this.slideTarget = slideTarget;
     this.ownTarget = ownTarget;
-    this.startIsComputed = anchorLine.start == null;
-    this.endIsComputed = anchorLine.end == null;
-    this.ownClassId = anchorLine.targetId;
+    this.startIsComputed = attachLine.start == null;
+    this.endIsComputed = attachLine.end == null;
+    this.ownClassId = attachLine.targetId;
     this.hungOntoClassId = ownClassId;
-    this.waypointsBefore = new ArrayList<>(anchorLine.waypoints);
-    this.startBefore = anchorLine.start;
-    this.endBefore = anchorLine.end;
+    this.waypointsBefore = new ArrayList<>(attachLine.waypoints);
+    this.startBefore = attachLine.start;
+    this.endBefore = attachLine.end;
   }
 
   @Override
@@ -79,17 +79,17 @@ class AnchorHandleDrag extends Drag {
     Point2D target = PointSnapper.snapped(new Point2D.Double(grabbed.getX() + at.getX() - pressedAt.getX(),
       grabbed.getY() + at.getY() - pressedAt.getY()), neighborXs, neighborYs, tolerance);
     if (handle == 0) {
-      routeEditing.attachNoteStart(anchorLine, noteArea, target);
+      routeEditing.attachLineStart(attachLine, boxArea, target);
     }
     else if (handle == path.size() - 1 && slideTarget != null) {
-      anchorLine.end = slideTarget.anchorNear(ownClassId, target);
+      attachLine.end = slideTarget.anchorNear(ownClassId, target);
     }
     else if (handle == path.size() - 1) {
       hungOntoClassId = classAt(at, tolerance);
-      routeEditing.attachNoteEnd(anchorLine, hungOntoClassId, reachableClasses.get(hungOntoClassId), target);
+      routeEditing.attachLineEnd(attachLine, hungOntoClassId, reachableClasses.get(hungOntoClassId), target);
     }
     else {
-      routeEditing.moveWaypoint(anchorLine, handle - 1, target);
+      routeEditing.moveWaypoint(attachLine, handle - 1, target);
     }
   }
 
@@ -110,7 +110,7 @@ class AnchorHandleDrag extends Drag {
   /** The coordinates which the dragged point snaps to: those of the points before and after it in the line, which stay
    * where they were while it is dragged. An end of the line which isn't fixed doesn't stay: it moves with the dragged
    * point, so the point it was at when the drag started is nothing to snap to. What counts for such an end is where the
-   * point has to be so that the line leaves the note, or meets the target, straight: the center of the note or of the
+   * point has to be so that the line leaves its box, or meets the target, straight: the center of the box or of the
    * class, the middle of the height of an attribute. */
   private void collectSnapCoordinates(List<Double> xs, List<Double> ys) {
     if (handle > 0) {
@@ -125,8 +125,8 @@ class AnchorHandleDrag extends Drag {
     Double x = path.get(index).getX();
     Double y = path.get(index).getY();
     if (index == 0 && startIsComputed) {
-      x = noteArea.getCenterX();
-      y = noteArea.getCenterY();
+      x = boxArea.getCenterX();
+      y = boxArea.getCenterY();
     }
     else if (index == path.size() - 1 && endIsComputed) {
       x = ownTarget.alignmentX();
@@ -142,11 +142,11 @@ class AnchorHandleDrag extends Drag {
 
   @Override
   void cancel() {
-    anchorLine.waypoints.clear();
-    anchorLine.waypoints.addAll(waypointsBefore);
-    anchorLine.start = startBefore;
-    anchorLine.end = endBefore;
-    anchorLine.targetId = ownClassId;
+    attachLine.waypoints.clear();
+    attachLine.waypoints.addAll(waypointsBefore);
+    attachLine.start = startBefore;
+    attachLine.end = endBefore;
+    attachLine.targetId = ownClassId;
     hungOntoClassId = ownClassId;
     moved = false;
   }

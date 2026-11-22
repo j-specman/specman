@@ -1,7 +1,6 @@
 package classman.model.v001.change;
 
 import classman.model.v001.AbstractDiagramElementModel_V001;
-import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
@@ -56,10 +55,6 @@ final class ResolvedDiagrams {
     for (AbstractDiagramElementModel_V001 element : model.elements) {
       if (id.equals(element.id)) {
         return element;
-      }
-      if (element instanceof AssociationRelationModel_V001 association && association.assocClass != null
-          && id.equals(association.assocClass.id)) {
-        return association.assocClass;
       }
     }
     throw new AssertionError("no element " + id);

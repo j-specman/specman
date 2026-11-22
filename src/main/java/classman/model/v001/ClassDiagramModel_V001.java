@@ -36,22 +36,53 @@ public class ClassDiagramModel_V001 {
         return elementsOfType(AnchorLineModel_V001.class);
     }
 
+    public List<AssocClassLinkModel_V001> assocClassLinks() {
+        return elementsOfType(AssocClassLinkModel_V001.class);
+    }
+
+    /** The dashed lines which attach a note or a class to something: anchor lines and association class links. */
+    public List<AttachLineModel_V001> attachLines() {
+        return elementsOfType(AttachLineModel_V001.class);
+    }
+
     /** The anchor lines which start at the note and which no change set removed. A note without an ID has none. */
     public List<AnchorLineModel_V001> liveAnchorLinesOf(NoteModel_V001 note) {
         List<AnchorLineModel_V001> lines = new ArrayList<>();
         for (AnchorLineModel_V001 line : anchorLines()) {
-            if (note.id != null && note.id.equals(line.noteId) && !line.isRemoved()) {
+            if (note.id != null && note.id.equals(line.startId) && !line.isRemoved()) {
                 lines.add(line);
             }
         }
         return lines;
     }
 
-    /** @return the note with the ID, null if the diagram has none */
-    public NoteModel_V001 noteWithId(String id) {
-        for (NoteModel_V001 note : notes()) {
-            if (note.id != null && note.id.equals(id)) {
-                return note;
+    /** @return the association class link which no change set removed and which starts at the class, null if there is
+     * none. A class without an ID has none. */
+    public AssocClassLinkModel_V001 liveAssocClassLinkOf(ClassModel_V001 classModel) {
+        for (AssocClassLinkModel_V001 link : assocClassLinks()) {
+            if (classModel.id != null && classModel.id.equals(link.startId) && !link.isRemoved()) {
+                return link;
+            }
+        }
+        return null;
+    }
+
+    /** @return the association class link which no change set removed and which leads to the relation, null if there is
+     * none. A relation without an ID has none. */
+    public AssocClassLinkModel_V001 liveAssocClassLinkTo(AbstractRelationModel_V001 relation) {
+        for (AssocClassLinkModel_V001 link : assocClassLinks()) {
+            if (relation.id != null && relation.id.equals(link.targetId) && !link.isRemoved()) {
+                return link;
+            }
+        }
+        return null;
+    }
+
+    /** @return the class or note with the ID, null if the diagram has none */
+    public AbstractBoxModel_V001 boxWithId(String id) {
+        for (AbstractBoxModel_V001 box : boxes()) {
+            if (box.id != null && box.id.equals(id)) {
+                return box;
             }
         }
         return null;

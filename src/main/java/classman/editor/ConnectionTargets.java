@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
@@ -50,7 +51,7 @@ class ConnectionTargets {
     if (attribute != null) {
       return attribute;
     }
-    RelationTarget relation = closestRelation(point, tolerance);
+    RelationTarget relation = closestRelation(point, tolerance, candidate -> true);
     if (relation != null) {
       return relation;
     }
@@ -75,13 +76,17 @@ class ConnectionTargets {
       && text.element instanceof ClassModel_V001 owner && model.classes().contains(owner);
   }
 
-  private RelationTarget closestRelation(Point2D point, double tolerance) {
+  /** @param allowed tells which of the relations count, the others are not there for this search. A relation which a
+   * change set has removed never counts.
+   * @return the relation whose line is at most the tolerance away from the point, the closest one, null if there is
+   * none */
+  RelationTarget closestRelation(Point2D point, double tolerance, Predicate<AbstractRelationModel_V001> allowed) {
     SceneRelationLine closest = null;
     double closestDistance = tolerance;
     for (SceneRelationLine candidate : scene.relationLines) {
       boolean removed = candidate.relation.change != null && candidate.relation.change.type == ChangeType_V001.REMOVED;
       double distance = candidate.distanceTo(point);
-      if (!removed && distance <= closestDistance) {
+      if (!removed && allowed.test(candidate.relation) && distance <= closestDistance) {
         closest = candidate;
         closestDistance = distance;
       }

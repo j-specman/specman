@@ -10,33 +10,22 @@ public class RelationLayout {
     public final List<AbstractSceneElement> underlay;
     public final List<AbstractSceneElement> elements;
     public final Rectangle2D.Double bounds;
-    /** The line of the relation. Null for the layout of an association class, which has none. */
     public final ScenePolyline line;
-    /** The marks at the ends of the line: diamond, triangle or arrowhead. Empty for an association class. */
+    /** The marks at the ends of the line: diamond, triangle or arrowhead. */
     public final List<AbstractSceneElement> decorations;
-    /** Null for the layout of an association class, which has nothing to attach to. */
     public final List<Point2D.Double> path;
-    /** The boxes which belong to the relation: its association class, if it has one. */
-    public final List<SceneElementArea> elementAreas;
-    /** The texts of the relation itself and of the boxes which belong to it, which the user can change in place. */
+    /** The texts of the relation, which the user can change in place. */
     public final List<SceneTextArea> textAreas;
-
-    public RelationLayout(List<AbstractSceneElement> elements, Rectangle2D.Double bounds,
-                          List<SceneElementArea> elementAreas, List<SceneTextArea> textAreas) {
-        this(List.of(), elements, bounds, null, List.of(), null, elementAreas, textAreas);
-    }
 
     public RelationLayout(List<AbstractSceneElement> underlay, List<AbstractSceneElement> elements,
                           Rectangle2D.Double bounds, ScenePolyline line, List<AbstractSceneElement> decorations,
-                          List<Point2D.Double> path, List<SceneElementArea> elementAreas,
-                          List<SceneTextArea> textAreas) {
+                          List<Point2D.Double> path, List<SceneTextArea> textAreas) {
         this.underlay = List.copyOf(underlay);
         this.elements = List.copyOf(elements);
         this.bounds = bounds;
         this.line = line;
         this.decorations = List.copyOf(decorations);
         this.path = path;
-        this.elementAreas = List.copyOf(elementAreas);
         this.textAreas = List.copyOf(textAreas);
     }
 }

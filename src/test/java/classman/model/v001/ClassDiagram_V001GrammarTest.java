@@ -53,9 +53,9 @@ class ClassDiagram_V001GrammarTest {
   @Test
   void benchmarkDiagram() throws IOException {
     String source = example("benchmark");
-    assertEquals(11, countIn(source, ClassDiagram_V001Parser.RULE_classDecl));
+    assertEquals(17, countIn(source, ClassDiagram_V001Parser.RULE_classDecl));
     assertEquals(17, countIn(source, ClassDiagram_V001Parser.RULE_relation));
-    assertEquals(6, countIn(source, ClassDiagram_V001Parser.RULE_assocClass));
+    assertEquals(6, countIn(source, ClassDiagram_V001Parser.RULE_assocClassLink));
     assertEquals(2, countIn(source, ClassDiagram_V001Parser.RULE_note));
   }
 

@@ -13,7 +13,8 @@ class ElementDeletionTest {
       class B (bbbbbbbb)
       class C (cccccccc)
       association (11111111) aaaaaaaa -- bbbbbbbb
-        assocclass L (eeeeeeee)
+      class L (eeeeeeee)
+      assocclass (f0000004) eeeeeeee -- 11111111
       association (22222222) bbbbbbbb -- cccccccc
       note (a0000001) "on A"
       note (a0000002) "on relation of A"
@@ -24,12 +25,14 @@ class ElementDeletionTest {
       anchor (f0000003) a0000003 -- 22222222
       """;
 
-  /** Deleting a class takes its relations with their association classes and the notes attached to them along. */
+  /** Deleting a class takes its relations, their association class links and the notes attached to them along. The
+   * association class stays, it is a class. */
   @Test
   void deletedClass() throws ClassDiagramParseException {
     String expected = """
         class B (bbbbbbbb)
         class C (cccccccc)
+        class L (eeeeeeee)
         association (22222222) bbbbbbbb -- cccccccc
         note (a0000003) "on survivor"
         note (a0000004) "free"
@@ -59,10 +62,18 @@ class ElementDeletionTest {
         deleted(SOURCE, "f0000003"));
   }
 
-  /** Deleting an association class leaves its relation. */
+  /** Deleting an association class takes its link along and leaves its relation. */
   @Test
   void deletedAssociationClass() throws ClassDiagramParseException {
-    assertEquals(canonical(SOURCE.replace("  assocclass L (eeeeeeee)\n", "")), deleted(SOURCE, "eeeeeeee"));
+    String expected = SOURCE.replace("class L (eeeeeeee)\n", "").replace("assocclass (f0000004) eeeeeeee -- 11111111\n", "");
+    assertEquals(canonical(expected), deleted(SOURCE, "eeeeeeee"));
+  }
+
+  /** Deleting the link leaves the class and the relation. */
+  @Test
+  void deletedAssocClassLink() throws ClassDiagramParseException {
+    assertEquals(canonical(SOURCE.replace("assocclass (f0000004) eeeeeeee -- 11111111\n", "")),
+        deleted(SOURCE, "f0000004"));
   }
 
   /** While changes are tracked, a class is marked as removed, and so is what hangs on it. */
@@ -73,7 +84,8 @@ class ElementDeletionTest {
         class B (bbbbbbbb)
         class C (cccccccc)
         association (11111111) change(removed, blue) aaaaaaaa -- bbbbbbbb
-          assocclass L (eeeeeeee) change(removed, blue)
+        class L (eeeeeeee)
+        assocclass (f0000004) change(removed, blue) eeeeeeee -- 11111111
         association (22222222) bbbbbbbb -- cccccccc
         note (a0000001) change(removed, blue) "on A"
         note (a0000002) change(removed, blue) "on relation of A"
@@ -108,6 +120,7 @@ class ElementDeletionTest {
     String expected = """
         class B (bbbbbbbb)
         class C (cccccccc)
+        class L (eeeeeeee)
         association (22222222) bbbbbbbb -- cccccccc
         note (a0000003) "on survivor"
         note (a0000004) "free"

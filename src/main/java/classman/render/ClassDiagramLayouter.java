@@ -3,7 +3,7 @@ package classman.render;
 import classman.model.v001.AbstractBoxModel_V001;
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
-import classman.model.v001.AnchorLineModel_V001;
+import classman.model.v001.AttachLineModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.NoteModel_V001;
@@ -26,8 +26,8 @@ import static classman.render.DiagramStyle.STACK_GAP;
 public class ClassDiagramLayouter {
     private final ClassBoxLayouter classLayouter;
     private final NoteBoxLayouter noteLayouter;
-    private final NoteLinkLayouter noteLinkLayouter = new NoteLinkLayouter();
-    private final AnchorMarkLayouter anchorMarkLayouter;
+    private final AttachLineLayouter attachLineLayouter = new AttachLineLayouter();
+    private final AttachLineMarkLayouter attachLineMarkLayouter;
     private final RelationLayouter relationLayouter;
 
     /** Lays out diagrams whose change marks all get the color for unknown change sets. */
@@ -39,8 +39,8 @@ public class ClassDiagramLayouter {
         ChangePalette palette = new ChangePalette(changeColors);
         this.classLayouter = new ClassBoxLayouter(measurer, palette);
         this.noteLayouter = new NoteBoxLayouter(measurer, palette);
-        this.anchorMarkLayouter = new AnchorMarkLayouter(palette);
-        this.relationLayouter = new RelationLayouter(measurer, classLayouter, palette);
+        this.attachLineMarkLayouter = new AttachLineMarkLayouter(palette);
+        this.relationLayouter = new RelationLayouter(measurer, palette);
     }
 
     /** @throws IllegalArgumentException if a relation refers to a class ID which isn't in the diagram, or a note to an unknown ID */
@@ -78,23 +78,22 @@ public class ClassDiagramLayouter {
             elements.addAll(relationLayout.elements);
             underlays.addAll(relationLayout.underlay);
             covered = BoxGeometry.union(covered, relationLayout.bounds);
-            elementAreas.addAll(relationLayout.elementAreas);
             textAreas.addAll(relationLayout.textAreas);
             relationLines.add(new SceneRelationLine(relation, relationLayout.line, relationLayout.decorations));
             attachTargets.add(relation.id, new RelationAttachTarget(relationLayout.path));
         }
-        List<SceneAnchorLine> anchorLines = noteLinks(model, areas, attachTargets);
-        for (SceneAnchorLine anchorLine : anchorLines) {
-            underlays.addAll(anchorMarkLayouter.underlay(anchorLine.anchorLine, anchorLine.line));
-            elements.add(anchorLine.line);
-            elements.addAll(anchorMarkLayouter.overlay(anchorLine.anchorLine, anchorLine.line));
-            covered = BoxGeometry.union(covered, anchorLine.line.bounds());
+        List<SceneAttachLine> attachLines = attachLines(model, areas, attachTargets);
+        for (SceneAttachLine attachLine : attachLines) {
+            underlays.addAll(attachLineMarkLayouter.underlay(attachLine.attachLine, attachLine.line));
+            elements.add(attachLine.line);
+            elements.addAll(attachLineMarkLayouter.overlay(attachLine.attachLine, attachLine.line));
+            covered = BoxGeometry.union(covered, attachLine.line.bounds());
         }
         elements.addAll(0, underlays);
         if (covered == null) {
-            return new Scene(elements, elementAreas, textAreas, relationLines, anchorLines, attachTargets, 0, 0, 0, 0);
+            return new Scene(elements, elementAreas, textAreas, relationLines, attachLines, attachTargets, 0, 0, 0, 0);
         }
-        return new Scene(elements, elementAreas, textAreas, relationLines, anchorLines, attachTargets, covered.x,
+        return new Scene(elements, elementAreas, textAreas, relationLines, attachLines, attachTargets, covered.x,
             covered.y,
             covered.width, covered.height);
     }
@@ -151,28 +150,28 @@ public class ClassDiagramLayouter {
         return widest;
     }
 
-    /** The dashed lines from the notes to the elements they are attached to.
-     * @throws IllegalArgumentException if an anchor line starts at a note which the diagram doesn't have, or leads to an
+    /** The dashed lines from the notes and classes to the elements they are attached to.
+     * @throws IllegalArgumentException if a dashed line starts at a box which the diagram doesn't have, or leads to an
      * element which it doesn't have */
-    private List<SceneAnchorLine> noteLinks(ClassDiagramModel_V001 model,
+    private List<SceneAttachLine> attachLines(ClassDiagramModel_V001 model,
             Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas, AttachTargetIndex attachTargets) {
-        List<SceneAnchorLine> links = new ArrayList<>();
-        for (AnchorLineModel_V001 anchorLine : model.anchorLines()) {
-            NoteModel_V001 note = model.noteWithId(anchorLine.noteId);
-            if (note == null) {
-                throw new IllegalArgumentException("The diagram has no note with the ID " + anchorLine.noteId
-                    + ", an anchor line starts at it");
+        List<SceneAttachLine> lines = new ArrayList<>();
+        for (AttachLineModel_V001 attachLine : model.attachLines()) {
+            AbstractBoxModel_V001 box = model.boxWithId(attachLine.startId);
+            if (box == null) {
+                throw new IllegalArgumentException("The diagram has no box with the ID " + attachLine.startId
+                    + ", a dashed line starts at it");
             }
-            links.add(new SceneAnchorLine(anchorLine, note, noteLinkLayouter.layout(areas.get(note),
-                attachTargets.find(anchorLine.targetId), waypoints(anchorLine), anchorLine.start, anchorLine.end,
-                anchorMarkLayouter.lineColor(anchorLine))));
+            lines.add(new SceneAttachLine(attachLine, box, attachLineLayouter.layout(areas.get(box),
+                attachTargets.find(attachLine.targetId), waypoints(attachLine), attachLine.start, attachLine.end,
+                attachLineMarkLayouter.lineColor(attachLine))));
         }
-        return links;
+        return lines;
     }
 
-    private List<Point2D.Double> waypoints(AnchorLineModel_V001 anchorLine) {
+    private List<Point2D.Double> waypoints(AttachLineModel_V001 attachLine) {
         List<Point2D.Double> waypoints = new ArrayList<>();
-        for (PositionModel_V001 waypoint : anchorLine.waypoints) {
+        for (PositionModel_V001 waypoint : attachLine.waypoints) {
             waypoints.add(new Point2D.Double(waypoint.x, waypoint.y));
         }
         return waypoints;

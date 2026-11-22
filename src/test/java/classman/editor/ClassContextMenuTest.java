@@ -27,8 +27,6 @@ class ClassContextMenuTest {
 
   private static final String BARE = "classdiagram {\n  class A (11111111) at(10, 60)\n  note (22222222) at(300, 60) \"n\"\n}";
   private static final String WITH_STEREOTYPE = "classdiagram {\n  class A (11111111) at(10, 60) <<Entity>>\n}";
-  private static final String ASSOCIATED = "classdiagram {\n  class A (aaaaaaaa) at(0, 0)\n  class B (bbbbbbbb) at(300, 0)\n"
-    + "  association aaaaaaaa -- bbbbbbbb\n  assocclass link\n}";
 
   private final RecordingEditorHost host = new RecordingEditorHost();
   private final EditorTexts texts = new EditorTexts(host.locale());
@@ -79,8 +77,8 @@ class ClassContextMenuTest {
     assertEquals(List.of(insideClass()), menusRequestedAt);
   }
 
-  /** Where there is no class or note, there is no menu: on empty space, on an association class. The selection
-   * follows the click, as with any press. */
+  /** Where there is no class or note, there is no menu: on empty space. The selection follows the click, as with any
+   * press. */
   @Test
   void noMenuElsewhere() throws Exception {
     open(BARE);
@@ -89,12 +87,6 @@ class ClassContextMenuTest {
 
     control.contextMenuRequested(new Point2D.Double(2000, 2000));
     assertFalse(editing.hasSelection());
-
-    open(ASSOCIATED);
-    Rectangle2D assocClass = editing.scene().elementAreas.get(editing.scene().elementAreas.size() - 1).area;
-    control.contextMenuRequested(new Point2D.Double(assocClass.getCenterX(), assocClass.getCenterY()));
-    assertNull(editing.selectedClass());
-    assertTrue(menusRequestedAt.isEmpty());
   }
 
   /** A note has a menu which only switches back to the automatic width, that is not offered as long as it is on. */

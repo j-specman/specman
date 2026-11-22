@@ -36,7 +36,7 @@ class AnchorLineSelectionTest {
   }
 
   private Point2D middleOfLine() {
-    List<Point2D> points = editing.scene().anchorLines.get(0).points();
+    List<Point2D> points = editing.scene().attachLines.get(0).points();
     return new Point2D.Double((points.get(0).getX() + points.get(1).getX()) / 2,
       (points.get(0).getY() + points.get(1).getY()) / 2);
   }
@@ -61,7 +61,7 @@ class AnchorLineSelectionTest {
     assertNull(editing.selectedNote());
     assertNull(editing.selectedArea());
     assertEquals(2, editing.selectedHandles().size());
-    assertEquals(DiagramStyle.SELECTED_LINE_WIDTH, editing.scene().anchorLines.get(0).line.strokeWidth);
+    assertEquals(DiagramStyle.SELECTED_LINE_WIDTH, editing.scene().attachLines.get(0).line.strokeWidth);
   }
 
   /** A double click on the selected line adds a waypoint, on the waypoint it takes it away: the line is straight again. */
@@ -201,7 +201,7 @@ class AnchorLineSelectionTest {
     assertTrue(new ClassDiagramParser_V001().parse(editing.source()).anchorLines().isEmpty());
     assertFalse(editing.hasSelection());
     assertEquals(2, host.reportedSources.size());
-    assertTrue(editing.scene().anchorLines.isEmpty());
+    assertTrue(editing.scene().attachLines.isEmpty());
   }
 
   /** While changes are tracked, a line which a change set has added goes at once. */
@@ -228,7 +228,7 @@ class AnchorLineSelectionTest {
 
     assertEquals(ChangeType_V001.REMOVED, anchorLine().change.type);
     assertEquals("yellow", anchorLine().change.changeSet);
-    assertEquals(1, editing.scene().anchorLines.size());
+    assertEquals(1, editing.scene().attachLines.size());
     assertEquals(1, host.reportedSources.size());
   }
 }

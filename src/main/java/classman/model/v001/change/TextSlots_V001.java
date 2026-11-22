@@ -26,7 +26,7 @@ final class TextSlots_V001 {
         List<TextSlot_V001> slots = new ArrayList<>();
         slots.add(mandatory(() -> model.name, text -> model.name = text,
             () -> model.nameChange, mark -> model.nameChange = mark));
-        for (ClassModel_V001 classModel : ClassBoxes_V001.of(model)) {
+        for (ClassModel_V001 classModel : model.classes()) {
             addClass(slots, classModel);
         }
         for (AbstractRelationModel_V001 relation : model.relations()) {

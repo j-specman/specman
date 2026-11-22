@@ -15,10 +15,11 @@ classdiagram "Changes" {
 
     composition (dddddddd) change(added, yellow) aaaaaaaa 1 -> * bbbbbbbb "consists of"
         route aaaaaaaa.right@10 bbbbbbbb.left@10
-    association change(removed, blue) aaaaaaaa -- cccccccc
-        assocclass since change(added, yellow) {
-            -date
-        }
+    association (ffffffff) change(removed, blue) aaaaaaaa -- cccccccc
+    class since (99999999) change(added, yellow) at(600, 100) {
+        -date
+    }
+    assocclass change(added, yellow) 99999999 -- ffffffff
     extends change(added, yellow) bbbbbbbb -> aaaaaaaa
     note (eeeeeeee) change(added, yellow) "A new note"
     anchor change(added, yellow) eeeeeeee -- aaaaaaaa

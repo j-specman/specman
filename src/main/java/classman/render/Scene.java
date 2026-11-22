@@ -21,7 +21,7 @@ public class Scene {
     /** The lines of the relations, in the order they are drawn. */
     public final List<SceneRelationLine> relationLines;
     /** The dashed lines from the notes to what they are attached to, in the order they are drawn. */
-    public final List<SceneAnchorLine> anchorLines;
+    public final List<SceneAttachLine> attachLines;
     /** The things notes can be attached to: classes, attributes which have an ID, relations. */
     public final AttachTargetIndex attachTargets;
     public final double x;
@@ -36,21 +36,21 @@ public class Scene {
     /** @param textAreas the areas of the texts, including the placeholders, which the scene keeps apart */
     public Scene(List<AbstractSceneElement> elements, List<SceneElementArea> elementAreas,
                  List<SceneTextArea> textAreas, List<SceneRelationLine> relationLines,
-                 List<SceneAnchorLine> anchorLines, double x, double y, double width, double height) {
-        this(elements, elementAreas, textAreas, relationLines, anchorLines, new AttachTargetIndex(), x, y, width, height);
+                 List<SceneAttachLine> attachLines, double x, double y, double width, double height) {
+        this(elements, elementAreas, textAreas, relationLines, attachLines, new AttachTargetIndex(), x, y, width, height);
     }
 
     /** @param attachTargets the things notes can be attached to, found by their IDs */
     public Scene(List<AbstractSceneElement> elements, List<SceneElementArea> elementAreas,
                  List<SceneTextArea> textAreas, List<SceneRelationLine> relationLines,
-                 List<SceneAnchorLine> anchorLines, AttachTargetIndex attachTargets, double x, double y, double width,
+                 List<SceneAttachLine> attachLines, AttachTargetIndex attachTargets, double x, double y, double width,
                  double height) {
         this.elements = List.copyOf(elements);
         this.elementAreas = List.copyOf(elementAreas);
         this.textAreas = textAreas.stream().filter(area -> !area.placeholder).toList();
         this.placeholderAreas = textAreas.stream().filter(area -> area.placeholder).toList();
         this.relationLines = List.copyOf(relationLines);
-        this.anchorLines = List.copyOf(anchorLines);
+        this.attachLines = List.copyOf(attachLines);
         this.attachTargets = attachTargets;
         this.x = x;
         this.y = y;
@@ -95,7 +95,7 @@ public class Scene {
 
     private List<SceneConnectionLine> connectionLines() {
         List<SceneConnectionLine> lines = new ArrayList<>(relationLines);
-        lines.addAll(anchorLines);
+        lines.addAll(attachLines);
         return lines;
     }
 
@@ -109,10 +109,10 @@ public class Scene {
         return null;
     }
 
-    /** @return where the anchor line is drawn, null if it is not an anchor line of this scene */
-    public SceneAnchorLine anchorLineOf(AbstractDiagramElementModel_V001 anchorLine) {
-        for (SceneAnchorLine candidate : anchorLines) {
-            if (candidate.anchorLine == anchorLine) {
+    /** @return where the dashed line is drawn, null if it is not an attach line of this scene */
+    public SceneAttachLine attachLineOf(AbstractDiagramElementModel_V001 attachLine) {
+        for (SceneAttachLine candidate : attachLines) {
+            if (candidate.attachLine == attachLine) {
                 return candidate;
             }
         }
@@ -136,9 +136,9 @@ public class Scene {
         for (SceneRelationLine candidate : relationLines) {
             widerRelationLines.add(candidate == connectionLine ? (SceneRelationLine) wider : candidate);
         }
-        List<SceneAnchorLine> widerAnchorLines = new ArrayList<>();
-        for (SceneAnchorLine candidate : anchorLines) {
-            widerAnchorLines.add(candidate == connectionLine ? (SceneAnchorLine) wider : candidate);
+        List<SceneAttachLine> widerAnchorLines = new ArrayList<>();
+        for (SceneAttachLine candidate : attachLines) {
+            widerAnchorLines.add(candidate == connectionLine ? (SceneAttachLine) wider : candidate);
         }
         List<SceneTextArea> allTextAreas = new ArrayList<>(textAreas);
         allTextAreas.addAll(placeholderAreas);

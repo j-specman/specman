@@ -1,7 +1,6 @@
 package classman.editor;
 
 import classman.model.v001.AbstractBoxModel_V001;
-import classman.model.v001.ClassModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.render.Scene;
 import classman.render.SceneElementArea;
@@ -16,17 +15,13 @@ import java.util.Map;
 class PositionFreezer {
   private final Scene startScene;
   private final List<AbstractBoxModel_V001> placedBoxes;
-  private final List<ClassModel_V001> associationClasses;
   private Map<AbstractBoxModel_V001, PositionModel_V001> positionsBefore;
 
   /** @param startScene the diagram as it is before the first change
-   * @param placedBoxes the classes and notes of the diagram, which the layout stacks if they have no position
-   * @param associationClasses the association classes, which the layout puts beside their relation if they have none */
-  PositionFreezer(Scene startScene, List<AbstractBoxModel_V001> placedBoxes,
-                  List<ClassModel_V001> associationClasses) {
+   * @param placedBoxes the classes and notes of the diagram, which the layout stacks if they have no position */
+  PositionFreezer(Scene startScene, List<AbstractBoxModel_V001> placedBoxes) {
     this.startScene = startScene;
     this.placedBoxes = placedBoxes;
-    this.associationClasses = associationClasses;
   }
 
   boolean isFrozen() { return positionsBefore != null; }
@@ -40,9 +35,6 @@ class PositionFreezer {
     positionsBefore = new LinkedHashMap<>();
     for (AbstractBoxModel_V001 placed : placedBoxes) {
       positionsBefore.put(placed, placed.position);
-    }
-    for (ClassModel_V001 associationClass : associationClasses) {
-      positionsBefore.put(associationClass, associationClass.position);
     }
     for (AbstractBoxModel_V001 placed : placedBoxes) {
       SceneElementArea area = startScene.elementAreaOf(placed);

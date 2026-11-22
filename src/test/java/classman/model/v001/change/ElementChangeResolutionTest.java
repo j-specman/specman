@@ -70,14 +70,13 @@ class ElementChangeResolutionTest {
         accepted(classes + "extends change(removed, yellow) aaaaaaaa -> bbbbbbbb", "yellow"));
   }
 
-  /** A removed or rejected association class leaves the relation without it, the relation stays. */
+  /** A removed or rejected association class link leaves the class and the relation without it, both stay. */
   @Test
-  void assocClassMarks() throws ClassDiagramParseException {
-    String classes = "class A (aaaaaaaa)\nclass B (bbbbbbbb)\n";
-    String source = classes + "association aaaaaaaa -- bbbbbbbb\n assocclass L change(added, yellow) {\n -x\n}";
-    assertEquals(canonical(classes + "association aaaaaaaa -- bbbbbbbb\n assocclass L {\n -x\n}"),
-        accepted(source, "yellow"));
-    assertEquals(canonical(classes + "association aaaaaaaa -- bbbbbbbb"), rejected(source, "yellow"));
+  void assocClassLinkMarks() throws ClassDiagramParseException {
+    String base = "class A (aaaaaaaa)\nclass B (bbbbbbbb)\nclass L (cccccccc)\nassociation (11111111) aaaaaaaa -- bbbbbbbb\n";
+    String source = base + "assocclass change(added, yellow) cccccccc -- 11111111";
+    assertEquals(canonical(base + "assocclass cccccccc -- 11111111"), accepted(source, "yellow"));
+    assertEquals(canonical(base), rejected(source, "yellow"));
   }
 
   /** Notes follow the same rules as classes. */

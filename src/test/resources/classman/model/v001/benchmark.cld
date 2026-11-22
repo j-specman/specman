@@ -75,31 +75,33 @@ classdiagram "Hilfe-Versionierung" {
     composition c0de0007 1 -> 1..* b3e94d10 "sprachabh. Bezeichnung"
         route c0de0007.bottom@140 (820, 880) b3e94d10.left@29
 
-    association 7c01a5e2 * -> * c0de0002 "kategorisiert"
+    association (a0000001) 7c01a5e2 * -> * c0de0002 "kategorisiert"
         route 7c01a5e2.right@50 c0de0002.left@50
-        assocclass helpentrycategory at(200, 335) {
-        }
-    association 7c01a5e2 * -> * c0de0007 "kategorisiert"
+    association (a0000002) 7c01a5e2 * -> * c0de0007 "kategorisiert"
         route 7c01a5e2.bottom@150 (180, 780) (720, 780) c0de0007.bottom@40
-        assocclass manualpagecategory {
-            -"Seitenzahl in Kategorie" : Zahl
-        }
-    association c0de0002 * -> * c0de0006 "sichtbar für"
+    association (a0000003) c0de0002 * -> * c0de0006 "sichtbar für"
         route c0de0002.bottom@100 (640, 500) c0de0006.left@22
-        assocclass helpentryinmandate {
-        }
-    association c0de0003 * -> * c0de0006 "sichtbar für"
+    association (a0000004) c0de0003 * -> * c0de0006 "sichtbar für"
         route c0de0003.bottom@20 (920, 486) c0de0006.right@8
-        assocclass helptextblockinmandate {
-        }
-    association c0de0007 * -> * c0de0006 "sichtbar für"
+    association (a0000005) c0de0007 * -> * c0de0006 "sichtbar für"
         route c0de0007.top@110 c0de0006.bottom@30
-        assocclass manualpageinmandate {
-        }
-    association c0de0008 * -> * c0de0006 "sichtbar für"
+    association (a0000006) c0de0008 * -> * c0de0006 "sichtbar für"
         route c0de0008.top@60 (1100, 514) c0de0006.right@36
-        assocclass manualtextblockinmandate {
-        }
+
+    class helpentrycategory (b0000001) at(200, 335)
+    class manualpagecategory (b0000002) at(300, 830) {
+        -"Seitenzahl in Kategorie" : Zahl
+    }
+    class helpentryinmandate (b0000003) at(640, 420)
+    class helptextblockinmandate (b0000004) at(920, 420)
+    class manualpageinmandate (b0000005) at(500, 600)
+    class manualtextblockinmandate (b0000006) at(1100, 560)
+    assocclass b0000001 -- a0000001
+    assocclass b0000002 -- a0000002
+    assocclass b0000003 -- a0000003
+    assocclass b0000004 -- a0000004
+    assocclass b0000005 -- a0000005
+    assocclass b0000006 -- a0000006
 
     note (ed9e0001) at(30, 400) width=140 "Aus Level und lfd. Nummer ergibt sich eine Baumstruktur aller Hilfekategorien. Kategorien und deren Zuordnungen zu Handbuchseiten und Hilfeeinträgen werden nicht vererbt sondern bei Neuanlage einer Version kopiert."
     note (ed9e0002) at(1080, 950) "Mindestens\nEnglisch muss\nvorhanden sein"

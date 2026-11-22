@@ -6,5 +6,7 @@ enum Tool {
   /** Draws a relation of the chosen type from a class to a class. */
   RELATION,
   /** Draws the anchor of a note to the element which the note is attached to. */
-  ANCHOR
+  ANCHOR,
+  /** Draws the link from a class to the relation it is the association class of. */
+  ASSOC_CLASS
 }

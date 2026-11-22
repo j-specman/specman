@@ -61,7 +61,7 @@ class AnchorToolTest {
 
     draw(inBox(2), inBox(0));
 
-    assertEquals("33333333", anchorLine().noteId);
+    assertEquals("33333333", anchorLine().startId);
     assertEquals("11111111", anchorLine().targetId);
     assertNull(anchorLine().change);
     assertFalse(editing.isToolArmed());
@@ -124,7 +124,7 @@ class AnchorToolTest {
     assertNotNull(model.classes().get(0).id);
     assertNotNull(model.notes().get(0).id);
     assertEquals(model.classes().get(0).id, anchorLine().targetId);
-    assertEquals(model.notes().get(0).id, anchorLine().noteId);
+    assertEquals(model.notes().get(0).id, anchorLine().startId);
   }
 
   /** While changes are tracked, a note which exists can get an anchor line too: it is marked as added. */

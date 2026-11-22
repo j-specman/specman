@@ -10,10 +10,11 @@ classdiagram "Texts" was(yellow, "Old title") {
     class Line (bbbbbbbb) at(300, 20)
 
     association (dddddddd) aaaaaaaa 1 was(yellow, "0..1") -> * was(yellow, 1..*) bbbbbbbb "gehört zu" was(yellow, "enthält")
-    association aaaaaaaa -- bbbbbbbb "" was(yellow, "alt")
-        assocclass since was(yellow, seit) {
-            -date
-        }
+    association (ffffffff) aaaaaaaa -- bbbbbbbb "" was(yellow, "alt")
+    class since was(yellow, seit) (99999999) at(600, 100) {
+        -date
+    }
+    assocclass 99999999 -- ffffffff
     association aaaaaaaa -- bbbbbbbb "neu" was(yellow)
     note "Neu" was(yellow, "Alt\nText")
     note (eeeeeeee) "x" was(blue, "")

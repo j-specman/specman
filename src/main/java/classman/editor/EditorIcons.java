@@ -20,6 +20,7 @@ final class EditorIcons {
   static final String EXTENDS = "classman/editor/icons/extends.svg";
   static final String IMPLEMENTS = "classman/editor/icons/implements.svg";
   static final String ANCHOR = "classman/editor/icons/anchor.svg";
+  static final String ASSOC_CLASS = "classman/editor/icons/assocclass.svg";
   static final String HIDE_TEXT = "images/svg/material/left_panel_close.svg";
   static final String SHOW_TEXT = "images/svg/material/left_panel_open.svg";
 

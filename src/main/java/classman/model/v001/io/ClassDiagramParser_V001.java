@@ -3,6 +3,8 @@ package classman.model.v001.io;
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AnchorLineModel_V001;
+import classman.model.v001.AssocClassLinkModel_V001;
+import classman.model.v001.AttachLineModel_V001;
 import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.ClassKind_V001;
@@ -33,11 +35,12 @@ import classman.model.v001.ClassDiagram_V001Parser.InfosContext;
 import classman.model.v001.ClassDiagram_V001Parser.LinePointContext;
 import classman.model.v001.ClassDiagram_V001Parser.MultiplicityContext;
 import classman.model.v001.ClassDiagram_V001Parser.NameContext;
-import classman.model.v001.ClassDiagram_V001Parser.NoteAnchorContext;
+import classman.model.v001.ClassDiagram_V001Parser.AttachAnchorContext;
 import classman.model.v001.ClassDiagram_V001Parser.NoteContext;
 import classman.model.v001.ClassDiagram_V001Parser.PositionContext;
 import classman.model.v001.ClassDiagram_V001Parser.RelationContext;
-import classman.model.v001.ClassDiagram_V001Parser.NoteRouteContext;
+import classman.model.v001.ClassDiagram_V001Parser.AttachRouteContext;
+import classman.model.v001.ClassDiagram_V001Parser.AssocClassLinkContext;
 import classman.model.v001.ClassDiagram_V001Parser.RouteContext;
 import classman.model.v001.ClassDiagram_V001Parser.TaggedValueContext;
 import classman.model.v001.ClassDiagram_V001Parser.TextChangeContext;
@@ -106,6 +109,9 @@ public class ClassDiagramParser_V001 {
         }
         if (element.anchorLine() != null) {
             return buildAnchorLine(element.anchorLine());
+        }
+        if (element.assocClassLink() != null) {
+            return buildAssocClassLink(element.assocClassLink());
         }
         return buildNote(element.note());
     }
@@ -263,9 +269,6 @@ public class ClassDiagramParser_V001 {
                 + " The source of an " + type.name().toLowerCase(Locale.ROOT) + " has the diamond and no arrowhead.");
         }
         fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.route());
-        if (ctx.assocClass() != null) {
-            model.assocClass = buildClass(ClassKind_V001.CLASS, ctx.assocClass().classHead(), ctx.assocClass().classBody());
-        }
         return model;
     }
 
@@ -332,27 +335,37 @@ public class ClassDiagramParser_V001 {
         return model;
     }
 
-    // ---- anchor lines ----
+    // ---- dashed lines of notes and classes ----
 
     private AnchorLineModel_V001 buildAnchorLine(AnchorLineContext ctx) throws ClassDiagramParseException {
         AnchorLineModel_V001 model = new AnchorLineModel_V001(ctx.noteRef.getText(), ctx.targetRef.getText());
         model.id = id(ctx.ELEMENT_ID());
         model.change = change(ctx.changeMark());
-        if (ctx.noteRoute() != null) {
-            buildRoute(model, ctx.noteRoute());
+        if (ctx.attachRoute() != null) {
+            buildRoute(model, ctx.attachRoute());
         }
         return model;
     }
 
-    /** An anchor on the note is the start of the line, one on the target the end. A point on a line is only an end. */
-    private void buildRoute(AnchorLineModel_V001 model, NoteRouteContext route) throws ClassDiagramParseException {
+    private AssocClassLinkModel_V001 buildAssocClassLink(AssocClassLinkContext ctx) throws ClassDiagramParseException {
+        AssocClassLinkModel_V001 model = new AssocClassLinkModel_V001(ctx.classRef.getText(), ctx.relationRef.getText());
+        model.id = id(ctx.ELEMENT_ID());
+        model.change = change(ctx.changeMark());
+        if (ctx.attachRoute() != null) {
+            buildRoute(model, ctx.attachRoute());
+        }
+        return model;
+    }
+
+    /** An anchor on the box is the start of the line, one on the target the end. A point on a line is only an end. */
+    private void buildRoute(AttachLineModel_V001 model, AttachRouteContext route) throws ClassDiagramParseException {
         for (WaypointContext waypoint : route.waypoint()) {
             model.waypoints.add(position(waypoint.NUMBER(0), waypoint.NUMBER(1)));
         }
-        for (NoteAnchorContext anchor : route.noteAnchor()) {
+        for (AttachAnchorContext anchor : route.attachAnchor()) {
             AnchorModel_V001 built = anchor.anchor() != null ? buildAnchor(anchor.anchor())
                 : buildLinePoint(anchor.linePoint());
-            if (!built.isOnLine() && built.classId.equals(model.noteId) && model.start == null) {
+            if (!built.isOnLine() && built.classId.equals(model.startId) && model.start == null) {
                 model.start = built;
             }
             else if (built.classId.equals(model.targetId) && model.end == null) {
@@ -361,8 +374,8 @@ public class ClassDiagramParser_V001 {
             else {
                 Token start = anchor.getStart();
                 throw new ClassDiagramParseException("line " + start.getLine() + ":" + start.getCharPositionInLine()
-                    + " An anchor in the route of an anchor line must name the note (for the start of the line) or the"
-                    + " element it leads to (for the end), and each of them only once.");
+                    + " An anchor in the route of a dashed line must name the box it starts at (for the start of the line) or"
+                    + " the element it leads to (for the end), and each of them only once.");
             }
         }
     }

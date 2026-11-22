@@ -56,7 +56,7 @@ public class ClassDiagramEditorWindow extends JDialog {
 
     palette = new EditorPalette(texts, this::classDropped,
       screenPoint -> boxDropped(screenPoint, textEditor::startNewNote), this::relationToolToggled,
-      this::relationTypeChosen, this::anchorToolToggled);
+      this::relationTypeChosen, this::anchorToolToggled, this::assocClassToolToggled);
     getContentPane().add(palette, BorderLayout.WEST);
     getContentPane().add(scrollPane, BorderLayout.CENTER);
 
@@ -132,7 +132,7 @@ public class ClassDiagramEditorWindow extends JDialog {
     canvas.setScene(editing.scene());
     canvas.setSelection(editing.selectionMarks());
     palette.showToolsArmed(editing.isRelationToolArmed() ? editing.armedRelationType() : null,
-      editing.isAnchorToolArmed());
+      editing.isAnchorToolArmed(), editing.isAssocClassToolArmed());
     canvas.refreshCursor();
   }
 
@@ -175,6 +175,11 @@ public class ClassDiagramEditorWindow extends JDialog {
 
   private void anchorToolToggled() {
     editing.toggleAnchorTool();
+    showDiagram();
+  }
+
+  private void assocClassToolToggled() {
+    editing.toggleAssocClassTool();
     showDiagram();
   }
 

@@ -12,90 +12,49 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Association classes and note links. A and B stacked: 40 wide and 56 high, A at (0, 0), B at (0, 96), the line
- * between them runs from (20, 56) to (20, 96). An association class named link is 52 wide and 56 high.
+ * Association class links and note links. A and B stacked: 40 wide and 56 high, A at (0, 0), B at (0, 96), the line
+ * between them runs from (20, 56) to (20, 96).
  */
 class AttachedElementsTest {
 
   private static final String STACKED = "class A (aaaaaaaa)\nclass B (bbbbbbbb)\n";
   private static final String SIDE_BY_SIDE = "class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(300, 0)\n";
 
-  private static SceneRectangle thirdBox(Scene scene) {
-    return all(scene, SceneRectangle.class).get(2);
-  }
-
   private static ScenePolyline lastLine(Scene scene) {
     List<ScenePolyline> lines = all(scene, ScenePolyline.class);
     return lines.get(lines.size() - 1);
   }
 
-  // ---- association classes ----
+  // ---- association class links ----
 
-  /** Beside a vertical line the association class stands left of it, centered on the middle of the line. */
+  private static final String LINKED = STACKED + "association (11110000) aaaaaaaa -- bbbbbbbb" + "\n"
+      + "class L (cc000001) at(200, 200)\n";
+
+  /** The class which is linked to a relation is drawn as any class, a dashed line leads to the middle of the relation. */
   @Test
-  void assocClassLeftOfVerticalLine() throws ClassDiagramParseException {
-    Scene scene = layout(STACKED + "association aaaaaaaa -- bbbbbbbb\n  assocclass link");
-    SceneRectangle box = thirdBox(scene);
-    assertEquals(-62, box.x, 1e-9);
-    assertEquals(48, box.y, 1e-9);
-    assertEquals(52, box.width, 1e-9);
-    assertEquals(56, box.height, 1e-9);
+  void assocClassLinkDashed() throws ClassDiagramParseException {
+    Scene scene = layout(LINKED + "assocclass cc000001 -- 11110000");
+    ScenePolyline link = lastLine(scene);
+    assertTrue(link.dashed);
+    assertEquals(20, link.xs[1], 1e-9);
+    assertEquals(76, link.ys[1], 1e-9);
+    assertTrue(link.xs[0] >= 200 && link.ys[0] >= 200);
   }
 
-  /** Beside a horizontal line it stands below the line, as the label is above. */
+  /** The end on the relation can be fixed at a point of its line, in percent of its length. */
   @Test
-  void assocClassBelowHorizontalLine() throws ClassDiagramParseException {
-    Scene scene = layout(SIDE_BY_SIDE + "association aaaaaaaa -- bbbbbbbb\n  assocclass link");
-    SceneRectangle box = thirdBox(scene);
-    assertEquals(144, box.x, 1e-9);
-    assertEquals(58, box.y, 1e-9);
+  void assocClassLinkAtPercent() throws ClassDiagramParseException {
+    ScenePolyline link = lastLine(layout(LINKED + "assocclass cc000001 -- 11110000 route 11110000@25%"));
+    assertEquals(20, link.xs[1], 1e-9);
+    assertEquals(66, link.ys[1], 1e-9);
   }
 
-  /** A dashed line connects the association class to the middle of the relation. */
+  /** A link to a relation which the diagram doesn't have can't be drawn. */
   @Test
-  void assocClassConnectorDashed() throws ClassDiagramParseException {
-    ScenePolyline connector = lastLine(layout(STACKED + "association aaaaaaaa -- bbbbbbbb\n  assocclass link"));
-    assertTrue(connector.dashed);
-    assertEquals(20, connector.xs[0], 1e-9);
-    assertEquals(76, connector.ys[0], 1e-9);
-    assertEquals(-10, connector.xs[1], 1e-9);
-    assertEquals(76, connector.ys[1], 1e-9);
-  }
-
-  /** With at() the association class stands there, and the connector ends where it meets its border. */
-  @Test
-  void assocClassExplicitPosition() throws ClassDiagramParseException {
-    Scene scene = layout(SIDE_BY_SIDE + "association aaaaaaaa -- bbbbbbbb\n  assocclass link at(200, 200)");
-    SceneRectangle box = thirdBox(scene);
-    assertEquals(200, box.x, 1e-9);
-    assertEquals(200, box.y, 1e-9);
-    ScenePolyline connector = lastLine(scene);
-    assertEquals(170, connector.xs[0], 1e-9);
-    assertEquals(28, connector.ys[0], 1e-9);
-    assertEquals(200, connector.ys[1], 1e-9);
-  }
-
-  /** The scene covers an association class which stands outside of the other boxes. */
-  @Test
-  void sceneCoversAssocClass() throws ClassDiagramParseException {
-    Scene scene = layout(SIDE_BY_SIDE + "association aaaaaaaa -- bbbbbbbb\n  assocclass link at(500, 400)");
-    assertTrue(scene.x + scene.width >= 552);
-    assertTrue(scene.y + scene.height >= 456);
-  }
-
-  /** An association class is grey, to tell it from the classes of the diagram. */
-  @Test
-  void assocClassGrey() throws ClassDiagramParseException {
-    Scene scene = layout(STACKED + "association aaaaaaaa -- bbbbbbbb\n  assocclass link");
-    assertEquals(DiagramStyle.ASSOC_CLASS_FILL, thirdBox(scene).fill);
-  }
-
-  /** Attributes of the association class are shown like those of any class. */
-  @Test
-  void assocClassWithAttributes() throws ClassDiagramParseException {
-    Scene scene = layout(STACKED + "association aaaaaaaa -- bbbbbbbb\n  assocclass link {\n    since\n    until\n  }");
-    assertTrue(SceneTestHelper.texts(scene).contains("since"));
-    assertTrue(thirdBox(scene).height > 56);
+  void assocClassLinkToUnknownRelationRejected() {
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> layout(LINKED + "assocclass cc000001 -- deadbeef"));
+    assertTrue(e.getMessage().contains("deadbeef"), e.getMessage());
   }
 
   // ---- note links ----

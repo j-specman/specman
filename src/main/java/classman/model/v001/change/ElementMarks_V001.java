@@ -16,12 +16,12 @@ final class ElementMarks_V001 {
     private ElementMarks_V001() {
     }
 
-    /** Replaces the mark of every class, association class, attribute, relation and note by what the operator makes of it. */
+    /** Replaces the mark of every class, attribute, relation, note and dashed line by what the operator makes of it. */
     static void replaceAll(ClassDiagramModel_V001 model, UnaryOperator<ChangeModel_V001> replacement) {
         for (AbstractDiagramElementModel_V001 element : model.elements) {
             element.change = replacement.apply(element.change);
         }
-        for (ClassModel_V001 classModel : ClassBoxes_V001.of(model)) {
+        for (ClassModel_V001 classModel : model.classes()) {
             classModel.change = replacement.apply(classModel.change);
             classModel.stereotypeElementChange = replacement.apply(classModel.stereotypeElementChange);
             for (TaggedValueModel_V001 tag : classModel.taggedValues) {

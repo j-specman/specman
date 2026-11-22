@@ -115,7 +115,7 @@ class CenterEndTest {
 
   private void openAndSelectAnchorLine(String source) throws ClassDiagramParseException {
     editing = new DiagramEditing(source, host);
-    List<Point2D> points = editing.scene().anchorLines.get(0).points();
+    List<Point2D> points = editing.scene().attachLines.get(0).points();
     editing.selectAt(new Point2D.Double((points.get(0).getX() + points.get(1).getX()) / 2,
       (points.get(0).getY() + points.get(1).getY()) / 2));
     assertTrue(editing.hasSelection(), "the anchor line is selected");

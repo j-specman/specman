@@ -36,6 +36,7 @@ class EditorPalette extends JToolBar {
   private final List<AbstractButton> elementButtons = new ArrayList<>();
   private final List<VariantButton<RelationType_V001>> relationButtons = new ArrayList<>();
   private final JToggleButton anchorToolButton = new JToggleButton();
+  private final JToggleButton assocClassToolButton = new JToggleButton();
   private final JButton toggleButton = new JButton();
   private final Map<AbstractButton, String> labels = new HashMap<>();
   private final Map<AbstractButton, String> tooltips = new HashMap<>();
@@ -46,10 +47,11 @@ class EditorPalette extends JToolBar {
    * @param noteDropped gets the point on the screen where the note button was released
    * @param relationToolToggled is run with the type of the relation when the button for drawing relations is pressed
    * @param relationTypeChosen is run with the type of the relation which the user chose in the menu of a button
-   * @param anchorToolToggled is run when the button for drawing the anchor of a note is pressed */
+   * @param anchorToolToggled is run when the button for drawing the anchor of a note is pressed
+   * @param assocClassToolToggled is run when the button for drawing the link of an association class is pressed */
   EditorPalette(EditorTexts texts, BiConsumer<ClassKind_V001, Point> classDropped, Consumer<Point> noteDropped,
                 Consumer<RelationType_V001> relationToolToggled, Consumer<RelationType_V001> relationTypeChosen,
-                Runnable anchorToolToggled) {
+                Runnable anchorToolToggled, Runnable assocClassToolToggled) {
     super(JToolBar.VERTICAL);
     this.texts = texts;
     this.showText = Preferences.userNodeForPackage(EditorPalette.class).getBoolean(PREF_SHOW_TEXT, true);
@@ -69,6 +71,7 @@ class EditorPalette extends JToolBar {
       new PaletteVariant<>("extends", RelationType_V001.EXTENDS, EditorIcons.EXTENDS),
       new PaletteVariant<>("implements", RelationType_V001.IMPLEMENTS, EditorIcons.IMPLEMENTS));
     addToolButton("anchor", EditorIcons.ANCHOR, anchorToolButton, anchorToolToggled);
+    addToolButton("assocclass", EditorIcons.ASSOC_CLASS, assocClassToolButton, assocClassToolToggled);
 
     add(Box.createVerticalGlue());
     addSeparator();
@@ -135,7 +138,8 @@ class EditorPalette extends JToolBar {
 
   /** Shows which tool is armed, if one is, as a pressed button. The button of a relation shows the type which is armed.
    * @param armedRelationType null if the tool for relations isn't armed */
-  void showToolsArmed(RelationType_V001 armedRelationType, boolean isAnchorToolArmed) {
+  void showToolsArmed(RelationType_V001 armedRelationType, boolean isAnchorToolArmed,
+                      boolean isAssocClassToolArmed) {
     for (VariantButton<RelationType_V001> button : relationButtons) {
       boolean isArmed = armedRelationType != null && button.offers(armedRelationType);
       if (isArmed) {
@@ -144,6 +148,7 @@ class EditorPalette extends JToolBar {
       button.setSelected(isArmed);
     }
     anchorToolButton.setSelected(isAnchorToolArmed);
+    assocClassToolButton.setSelected(isAssocClassToolArmed);
   }
 
   private void toggleShowText() {

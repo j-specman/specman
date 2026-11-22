@@ -4,6 +4,8 @@ import classman.model.v001.AbstractBoxModel_V001;
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AnchorLineModel_V001;
+import classman.model.v001.AssocClassLinkModel_V001;
+import classman.model.v001.AttachLineModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeModel_V001;
@@ -26,7 +28,7 @@ import classman.model.v001.io.ClassDiagramSerializer_V001;
 import classman.render.Scene;
 import classman.render.AttachTarget;
 import classman.render.DiagramStyle;
-import classman.render.SceneAnchorLine;
+import classman.render.SceneAttachLine;
 import classman.render.SceneConnectionLine;
 import classman.render.SceneRelationLine;
 import classman.render.SceneElementArea;
@@ -43,6 +45,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 /** The operations of the diagram editor on the diagram, without any window. Each operation writes the new source
  * and reports it to the host. The host keeps the history: undo and redo are forwarded to it, but only for the sources
@@ -161,8 +165,8 @@ public class DiagramEditing {
       return;
     }
     SceneConnectionLine line = scene.connectionLineAt(point, tolerance);
-    if (line instanceof SceneAnchorLine anchorLine) {
-      selected = anchorLine.anchorLine;
+    if (line instanceof SceneAttachLine attachLine) {
+      selected = attachLine.attachLine;
     }
     else {
       selected = line != null ? ((SceneRelationLine) line).relation : null;
@@ -203,13 +207,13 @@ public class DiagramEditing {
    * @return true if a waypoint was deleted */
   public boolean deleteWaypointAt(Point2D point, double tolerance) {
     int handle = handleIndexAt(point, tolerance);
-    if (selected instanceof AnchorLineModel_V001 anchorLine) {
-      boolean isAnchorWaypoint = handle > 0 && handle <= anchorLine.waypoints.size();
-      if (isAnchorWaypoint) {
-        routeEditing.deleteWaypoint(anchorLine, handle - 1);
+    if (selected instanceof AttachLineModel_V001 attachLine) {
+      boolean isAttachLineWaypoint = handle > 0 && handle <= attachLine.waypoints.size();
+      if (isAttachLineWaypoint) {
+        routeEditing.deleteWaypoint(attachLine, handle - 1);
         publish();
       }
-      return isAnchorWaypoint;
+      return isAttachLineWaypoint;
     }
     boolean isWaypoint = handle > 0 && handle < selectedHandles().size() - 1;
     if (!isWaypoint || !(selected instanceof AbstractRelationModel_V001 relation) || relation.route == null) {
@@ -234,8 +238,8 @@ public class DiagramEditing {
     }
     int segment = line.nearestSegment(point);
     Point2D onLine = line.nearestPointOnSegment(segment, point);
-    if (selected instanceof AnchorLineModel_V001 anchorLine) {
-      routeEditing.insertWaypoint(anchorLine, segment, onLine);
+    if (selected instanceof AttachLineModel_V001 attachLine) {
+      routeEditing.insertWaypoint(attachLine, segment, onLine);
     }
     else {
       AbstractRelationModel_V001 relation = ((SceneRelationLine) line).relation;
@@ -259,7 +263,7 @@ public class DiagramEditing {
 
   public boolean hasSelection() { return selected != null; }
 
-  /** @return the selected box if it is a class of the diagram (not an association class), null if something else or
+  /** @return the selected box if it is a class of the diagram, null if something else or
    * nothing is selected */
   public ClassModel_V001 selectedClass() {
     return selected instanceof ClassModel_V001 box && model.classes().contains(box) ? box : null;
@@ -284,14 +288,14 @@ public class DiagramEditing {
   }
 
   /** An anchor line leads to a class if the ID it refers to is the ID of a class, else to an attribute or a relation. */
-  private boolean leadsToClass(AnchorLineModel_V001 anchorLine) {
-    return model.classes().stream().anyMatch(box -> anchorLine.targetId.equals(box.id));
+  private boolean leadsToClass(AttachLineModel_V001 attachLine) {
+    return model.classes().stream().anyMatch(box -> attachLine.targetId.equals(box.id));
   }
 
   /** @return where the line is drawn of the selected relation or anchor, null if none is selected */
   private SceneConnectionLine selectedLine() {
-    if (selected instanceof AnchorLineModel_V001 anchorLine) {
-      return scene.anchorLineOf(anchorLine);
+    if (selected instanceof AttachLineModel_V001 attachLine) {
+      return scene.attachLineOf(attachLine);
     }
     return selected != null ? scene.relationLineOf(selected) : null;
   }
@@ -346,7 +350,7 @@ public class DiagramEditing {
    * its line is the end FROM (for an anchor line the end on the note), the one at the end of its line the end TO (the
    * end on the target). Null if the point is on no such handle or no such line is selected. */
   public RelationEnd_V001 endHandleAt(Point2D point, double tolerance) {
-    if (!(selected instanceof AbstractRelationModel_V001) && !(selected instanceof AnchorLineModel_V001)) {
+    if (!(selected instanceof AbstractRelationModel_V001) && !(selected instanceof AttachLineModel_V001)) {
       return null;
     }
     int handle = handleIndexAt(point, tolerance);
@@ -408,8 +412,8 @@ public class DiagramEditing {
    * point of the line of a relation, for the end of an anchor line on a relation), so that it can be linked to the
    * center of the box again */
   public boolean canCenterEnd(RelationEnd_V001 end) {
-    if (selected instanceof AnchorLineModel_V001 anchorLine) {
-      return (end == RelationEnd_V001.FROM ? anchorLine.start : anchorLine.end) != null;
+    if (selected instanceof AttachLineModel_V001 attachLine) {
+      return (end == RelationEnd_V001.FROM ? attachLine.start : attachLine.end) != null;
     }
     if (!(selected instanceof AbstractRelationModel_V001 relation) || relation.route == null) {
       return false;
@@ -425,8 +429,8 @@ public class DiagramEditing {
     if (!canCenterEnd(end)) {
       return;
     }
-    if (selected instanceof AnchorLineModel_V001 anchorLine) {
-      routeEditing.centerEnd(anchorLine, end);
+    if (selected instanceof AttachLineModel_V001 attachLine) {
+      routeEditing.centerEnd(attachLine, end);
     }
     else {
       routeEditing.centerEnd((AbstractRelationModel_V001) selected, end);
@@ -593,7 +597,7 @@ public class DiagramEditing {
     return scene.textAreas.stream().filter(text -> text.attribute == placeholder).findFirst().orElseThrow();
   }
 
-  /** @return true if the class can get parts: it is no association class and no change set has removed it */
+  /** @return true if the class can get parts: no change set has removed it */
   public boolean canAddPartsTo(ClassModel_V001 box) {
     boolean isRemoved = box.change != null && box.change.type == ChangeType_V001.REMOVED;
     return !isRemoved && model.classes().contains(box);
@@ -675,7 +679,7 @@ public class DiagramEditing {
   }
 
   private PositionFreezer positionFreezer() {
-    return new PositionFreezer(scene, model.boxes(), associationClasses());
+    return new PositionFreezer(scene, model.boxes());
   }
 
   /** @return the width below which the box can't be made: what the layout makes of it with the least width */
@@ -726,11 +730,11 @@ public class DiagramEditing {
   }
 
   private Drag handleDrag(int handle, Point2D at) {
-    if (selected instanceof AnchorLineModel_V001 anchorLine) {
-      AttachTarget slideTarget = leadsToClass(anchorLine) ? null : scene.attachTargets.find(anchorLine.targetId);
-      return new AnchorHandleDrag(routeEditing, anchorLine, scene.elementAreaOf(model.noteWithId(anchorLine.noteId)).area,
-        handle, selectedLine().points(), at, classesAnAnchorMayHangOnto(anchorLine), slideTarget,
-        scene.attachTargets.find(anchorLine.targetId));
+    if (selected instanceof AttachLineModel_V001 attachLine) {
+      AttachTarget slideTarget = leadsToClass(attachLine) ? null : scene.attachTargets.find(attachLine.targetId);
+      return new AttachLineHandleDrag(routeEditing, attachLine, scene.elementAreaOf(model.boxWithId(attachLine.startId)).area,
+        handle, selectedLine().points(), at, classesAnAttachLineMayHangOnto(attachLine), slideTarget,
+        scene.attachTargets.find(attachLine.targetId));
     }
     SceneRelationLine line = scene.relationLineOf(selected);
     AbstractRelationModel_V001 relation = line.relation;
@@ -756,11 +760,11 @@ public class DiagramEditing {
 
   /** The classes by ID in the order of drawing which the end of the anchor line may be hung onto: all of them, but
    * while changes are tracked only the class it leads to, unless a change set has added the line. */
-  private Map<String, Rectangle2D> classesAnAnchorMayHangOnto(AnchorLineModel_V001 anchorLine) {
-    boolean mayChange = host.trackedChangeSet() == null || anchorLine.change != null;
+  private Map<String, Rectangle2D> classesAnAttachLineMayHangOnto(AttachLineModel_V001 attachLine) {
+    boolean mayChange = host.trackedChangeSet() == null || attachLine.change != null;
     Map<String, Rectangle2D> classes = new LinkedHashMap<>();
     for (ClassModel_V001 box : model.classes()) {
-      boolean allowed = mayChange || anchorLine.targetId.equals(box.id);
+      boolean allowed = mayChange || attachLine.targetId.equals(box.id);
       if (box.id != null && allowed) {
         classes.put(box.id, scene.elementAreaOf(box).area);
       }
@@ -826,22 +830,14 @@ public class DiagramEditing {
     return true;
   }
 
-  private List<ClassModel_V001> associationClasses() {
-    List<ClassModel_V001> classes = new ArrayList<>();
-    for (AbstractRelationModel_V001 relation : model.relations()) {
-      if (relation instanceof AssociationRelationModel_V001 association && association.assocClass != null) {
-        classes.add(association.assocClass);
-      }
-    }
-    return classes;
-  }
-
   public boolean isRelationToolArmed() { return armedTool == Tool.RELATION; }
 
   /** @return the type of the relation which the relation tool draws, the last one which it was armed with */
   public RelationType_V001 armedRelationType() { return armedRelationType; }
 
   public boolean isAnchorToolArmed() { return armedTool == Tool.ANCHOR; }
+
+  public boolean isAssocClassToolArmed() { return armedTool == Tool.ASSOC_CLASS; }
 
   /** @return true if a tool of the palette is armed, which takes the presses on the diagram for itself */
   public boolean isToolArmed() { return armedTool != Tool.NONE; }
@@ -869,6 +865,11 @@ public class DiagramEditing {
     toggle(Tool.ANCHOR);
   }
 
+  /** Arms the tool which draws the link of an association class to its relation, or disarms it if it is armed. */
+  public void toggleAssocClassTool() {
+    toggle(Tool.ASSOC_CLASS);
+  }
+
   private void toggle(Tool tool) {
     armedTool = armedTool == tool ? Tool.NONE : tool;
     drawing = null;
@@ -880,7 +881,7 @@ public class DiagramEditing {
   }
 
   /** Starts to draw with the armed tool at the box which the press is on or at most the tolerance away from: a class
-   * for a relation, a note for an anchor. Which boxes a relation may start and end at is told by {@link RelationRules}. Nothing happens if there is none. The connection is created where the
+   * for a relation or an association class link, a note for an anchor. Which boxes a relation may start and end at is told by {@link RelationRules}. Nothing happens if there is none. The connection is created where the
    * mouse is released on a class, see {@link #endDrag}. */
   public void startDrawing(Point2D at, double tolerance) {
     ConnectionTargets targets = new ConnectionTargets(model, scene);
@@ -903,6 +904,14 @@ public class DiagramEditing {
         drawing = new ConnectionDrawing(from, notes.get(from), targets::closestForAnchor, at);
       }
     }
+    else if (armedTool == Tool.ASSOC_CLASS) {
+      ClassTarget from = targets.closestClass(at, tolerance, box -> AssocClassRules.canBeAssocClass(model, box));
+      if (from != null) {
+        TargetFinder finder = (point, distance) -> targets.closestRelation(point, distance,
+          relation -> AssocClassRules.canTake(model, relation, from.box));
+        drawing = new ConnectionDrawing(from.box, from.frame(), finder, at);
+      }
+    }
   }
 
   /** Creates what was drawn, if the mouse was released on a class, and leaves the tool. If it was released on none,
@@ -916,8 +925,11 @@ public class DiagramEditing {
     if (armedTool == Tool.RELATION) {
       createRelation(finished);
     }
-    else {
+    else if (armedTool == Tool.ANCHOR) {
       anchorNote(finished);
+    }
+    else {
+      linkAssocClass(finished);
     }
   }
 
@@ -954,14 +966,33 @@ public class DiagramEditing {
    * note which isn't attached gets a new line, marked as added while changes are tracked. */
   private void anchorNote(ConnectionDrawing finished) {
     NoteModel_V001 note = (NoteModel_V001) finished.from();
-    String targetId = finished.target().ensureId(this::newId);
+    attach(note, finished.target(), () -> firstOrNull(model.liveAnchorLinesOf(note)), AnchorLineModel_V001::new);
+  }
+
+  /** Makes the class the association class of the relation which the mouse was released on, with an association class
+   * link. The class and the relation get an ID if they have none. The class is selected. The tool only starts at
+   * a class which is no association class yet, see {@link AssocClassRules}. */
+  private void linkAssocClass(ConnectionDrawing finished) {
+    ClassModel_V001 assocClass = (ClassModel_V001) finished.from();
+    attach(assocClass, finished.target(), () -> null, AssocClassLinkModel_V001::new);
+  }
+
+  private <T> T firstOrNull(List<T> list) {
+    return list.isEmpty() ? null : list.get(0);
+  }
+
+  /** Attaches the box to the target with a dashed line, or moves its line to the target.
+   * @param currentLine finds the live line of the box, which can only be asked for once the box has an ID
+   * @param newLine creates a line from the ID of the box to the ID of the target */
+  private void attach(AbstractBoxModel_V001 box, ConnectionTarget target, Supplier<AttachLineModel_V001> currentLine,
+                      BiFunction<String, String, AttachLineModel_V001> newLine) {
+    String targetId = target.ensureId(this::newId);
     armedTool = Tool.NONE;
-    selected = note;
-    if (note.id == null) {
-      note.id = newId();
+    selected = box;
+    if (box.id == null) {
+      box.id = newId();
     }
-    List<AnchorLineModel_V001> attached = model.liveAnchorLinesOf(note);
-    AnchorLineModel_V001 current = attached.isEmpty() ? null : attached.get(0);
+    AttachLineModel_V001 current = currentLine.get();
     if (current != null && targetId.equals(current.targetId)) {
       return;
     }
@@ -974,9 +1005,9 @@ public class DiagramEditing {
       if (current != null) {
         current.change = new ChangeModel_V001(ChangeType_V001.REMOVED, changeSet);
       }
-      AnchorLineModel_V001 anchorLine = new AnchorLineModel_V001(note.id, targetId);
-      markAsAdded(anchorLine);
-      model.elements.add(anchorLine);
+      AttachLineModel_V001 attachLine = newLine.apply(box.id, targetId);
+      markAsAdded(attachLine);
+      model.elements.add(attachLine);
     }
     publish();
   }
@@ -1058,14 +1089,11 @@ public class DiagramEditing {
     return true;
   }
 
-  /** The IDs of the elements of the diagram including its attributes and association classes, which notes attach to. */
+  /** The IDs of the elements of the diagram including its attributes, which notes attach to. */
   private Set<String> usedIds() {
     Set<String> used = new HashSet<>();
     for (AbstractDiagramElementModel_V001 element : model.elements) {
       addIds(used, element);
-      if (element instanceof AssociationRelationModel_V001 association && association.assocClass != null) {
-        addIds(used, association.assocClass);
-      }
     }
     return used;
   }

@@ -104,7 +104,7 @@ class AnchorToAttributeAndRelationTest {
     assertNotNull(name.id);
     assertEquals(name.id, attachedTo());
     assertEquals(1, host.reportedSources.size());
-    assertEquals(1, editing.scene().anchorLines.size());
+    assertEquals(1, editing.scene().attachLines.size());
   }
 
   /** On the lines of the attributes the attribute wins, around them the class does. */
@@ -126,7 +126,7 @@ class AnchorToAttributeAndRelationTest {
     draw(noteCenter(), onRelation());
 
     assertEquals("44444444", attachedTo());
-    assertEquals(1, editing.scene().anchorLines.size());
+    assertEquals(1, editing.scene().attachLines.size());
     assertEquals(1, host.reportedSources.size());
   }
 

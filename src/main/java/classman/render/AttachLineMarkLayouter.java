@@ -1,6 +1,6 @@
 package classman.render;
 
-import classman.model.v001.AnchorLineModel_V001;
+import classman.model.v001.AttachLineModel_V001;
 import classman.model.v001.ChangeModel_V001;
 
 import java.awt.geom.Point2D;
@@ -14,23 +14,23 @@ import static classman.render.DiagramStyle.STRIKE_WIDTH;
 import static classman.render.DiagramStyle.STROKE;
 import static classman.render.DiagramStyle.VEILED_LINE;
 
-/** Makes the change marks of an anchor line like those of a relation: an added or removed line gets a thick line in the
+/** Makes the change marks of an anchor line or an association class link like those of a relation: an added or removed line gets a thick line in the
  * color of the change set under its own dashed line. A removed one is veiled and has a cross on its line. */
-public class AnchorMarkLayouter {
+public class AttachLineMarkLayouter {
     private final ChangePalette palette;
 
-    public AnchorMarkLayouter(ChangePalette palette) {
+    public AttachLineMarkLayouter(ChangePalette palette) {
         this.palette = palette;
     }
 
     /** The color of the dashed line. */
-    public String lineColor(AnchorLineModel_V001 anchorLine) {
-        return anchorLine.isRemoved() ? VEILED_LINE : STROKE;
+    public String lineColor(AttachLineModel_V001 attachLine) {
+        return attachLine.isRemoved() ? VEILED_LINE : STROKE;
     }
 
-    /** What goes below the dashed line of the anchor line. */
-    public List<AbstractSceneElement> underlay(AnchorLineModel_V001 anchorLine, ScenePolyline line) {
-        ChangeModel_V001 change = anchorLine.change;
+    /** What goes below the dashed line. */
+    public List<AbstractSceneElement> underlay(AttachLineModel_V001 attachLine, ScenePolyline line) {
+        ChangeModel_V001 change = attachLine.change;
         if (change == null) {
             return List.of();
         }
@@ -38,9 +38,9 @@ public class AnchorMarkLayouter {
             RELATION_HIGHLIGHT_WIDTH).keepingVisible());
     }
 
-    /** What goes above the dashed line: the cross on a removed anchor line. */
-    public List<AbstractSceneElement> overlay(AnchorLineModel_V001 anchorLine, ScenePolyline line) {
-        if (!anchorLine.isRemoved()) {
+    /** What goes above the dashed line: the cross on a removed line. */
+    public List<AbstractSceneElement> overlay(AttachLineModel_V001 attachLine, ScenePolyline line) {
+        if (!attachLine.isRemoved()) {
             return List.of();
         }
         List<Point2D.Double> path = new ArrayList<>();

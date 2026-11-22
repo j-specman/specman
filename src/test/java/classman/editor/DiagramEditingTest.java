@@ -208,32 +208,6 @@ class DiagramEditingTest {
     assertEquals(300, editing.selectedArea().getX(), 0.001);
   }
 
-  /** An association class can be selected wherever it stands, also where the layout has placed it. */
-  @Test
-  void selectingAssociationClass() throws ClassDiagramParseException {
-    String source = "classdiagram {\n  class A (aaaaaaaa) at(0, 0)\n  class B (bbbbbbbb) at(300, 0)\n"
-      + "  association aaaaaaaa -- bbbbbbbb\n  assocclass link\n}";
-    DiagramEditing editing = new DiagramEditing(source, host);
-    Rectangle2D placed = editing.scene().elementAreas.get(2).area;
-
-    editing.selectAt(new Point2D.Double(placed.getCenterX(), placed.getCenterY()));
-
-    assertEquals(placed, editing.selectedArea());
-  }
-
-  /** The user's own position of an association class counts. */
-  @Test
-  void selectingPositionedAssociationClass() throws ClassDiagramParseException {
-    String source = "classdiagram {\n  class A (aaaaaaaa) at(0, 0)\n  class B (bbbbbbbb) at(300, 0)\n"
-      + "  association aaaaaaaa -- bbbbbbbb\n  assocclass link at(100, 200)\n}";
-    DiagramEditing editing = new DiagramEditing(source, host);
-
-    editing.selectAt(new Point2D.Double(105, 205));
-
-    assertEquals(100, editing.selectedArea().getX(), 0.001);
-    assertEquals(200, editing.selectedArea().getY(), 0.001);
-  }
-
   /** Deleting the selected class takes it out of the diagram, and nothing stays selected. */
   @Test
   void deletedClass() throws ClassDiagramParseException {

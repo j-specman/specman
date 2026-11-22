@@ -50,7 +50,7 @@ class TextMarkResolver_V001 {
     /** Info items without a text are taken out, and a stereotype without a text loses its ID and marks. A tagged value
      * without a value keeps its key. */
     private void removeGoneTexts(ClassDiagramModel_V001 model) {
-        for (ClassModel_V001 classModel : ClassBoxes_V001.of(model)) {
+        for (ClassModel_V001 classModel : model.classes()) {
             if (classModel.stereotype == null) {
                 StereotypeChanger_V001.clear(classModel);
             }

@@ -3,6 +3,8 @@ package classman.model.v001.io;
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AnchorLineModel_V001;
+import classman.model.v001.AssocClassLinkModel_V001;
+import classman.model.v001.AttachLineModel_V001;
 import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.AttributeModel_V001;
@@ -74,8 +76,10 @@ public class ClassDiagramSerializer_V001 {
             appendRelation(out, relation);
         } else if (element instanceof NoteModel_V001 note) {
             appendNote(out, note);
-        } else if (element instanceof AnchorLineModel_V001 anchorLine) {
-            appendAnchorLine(out, anchorLine);
+        } else if (element instanceof AnchorLineModel_V001 line) {
+            appendAttachLine(out, "anchor", line);
+        } else if (element instanceof AssocClassLinkModel_V001 link) {
+            appendAttachLine(out, "assocclass", link);
         } else {
             throw new IllegalArgumentException("Unknown diagram element: " + element.getClass().getName());
         }
@@ -205,9 +209,6 @@ public class ClassDiagramSerializer_V001 {
         if (relation.route != null) {
             appendRoute(out, relation.route);
         }
-        if (relation instanceof AssociationRelationModel_V001 association && association.assocClass != null) {
-            appendClass(out, INDENT + INDENT, "assocclass", association.assocClass);
-        }
     }
 
     private void appendMultiplicity(StringBuilder out, String multiplicity, TextChangeModel_V001 change) {
@@ -253,21 +254,21 @@ public class ClassDiagramSerializer_V001 {
         out.append('\n');
     }
 
-    // ---- anchor lines ----
+    // ---- anchor lines and association class links ----
 
-    private void appendAnchorLine(StringBuilder out, AnchorLineModel_V001 anchorLine) {
-        out.append(INDENT).append("anchor");
-        appendId(out, anchorLine.id);
-        appendChange(out, anchorLine.change);
-        out.append(' ').append(anchorLine.noteId).append(" -- ").append(anchorLine.targetId);
-        if (anchorLine.start != null || !anchorLine.waypoints.isEmpty() || anchorLine.end != null) {
+    private void appendAttachLine(StringBuilder out, String keyword, AttachLineModel_V001 line) {
+        out.append(INDENT).append(keyword);
+        appendId(out, line.id);
+        appendChange(out, line.change);
+        out.append(' ').append(line.startId).append(" -- ").append(line.targetId);
+        if (line.start != null || !line.waypoints.isEmpty() || line.end != null) {
             out.append(" route");
-            if (anchorLine.start != null) {
-                out.append(' ').append(anchor(anchorLine.start));
+            if (line.start != null) {
+                out.append(' ').append(anchor(line.start));
             }
-            appendWaypoints(out, anchorLine.waypoints);
-            if (anchorLine.end != null) {
-                out.append(' ').append(anchor(anchorLine.end));
+            appendWaypoints(out, line.waypoints);
+            if (line.end != null) {
+                out.append(' ').append(anchor(line.end));
             }
         }
         out.append('\n');

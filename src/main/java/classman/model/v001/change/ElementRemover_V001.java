@@ -1,14 +1,13 @@
 package classman.model.v001.change;
 
 import classman.model.v001.AbstractRelationModel_V001;
-import classman.model.v001.AnchorLineModel_V001;
-import classman.model.v001.AssociationRelationModel_V001;
+import classman.model.v001.AttachLineModel_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.NoteModel_V001;
 
-/** Removes the elements, attributes and association classes which go away, the survivors keep their order. */
+/** Removes the elements and attributes which go away, the survivors keep their order. */
 class ElementRemover_V001 {
     private final VanishingElements_V001 vanishing;
 
@@ -18,7 +17,7 @@ class ElementRemover_V001 {
 
     void remove(ClassDiagramModel_V001 model) {
         model.elements.removeIf(element -> elementVanishes(element));
-        for (ClassModel_V001 classModel : ClassBoxes_V001.of(model)) {
+        for (ClassModel_V001 classModel : model.classes()) {
             if (vanishing.vanishes(classModel.stereotypeElementChange)) {
                 StereotypeChanger_V001.clear(classModel);
             }
@@ -27,9 +26,6 @@ class ElementRemover_V001 {
             for (AttributeModel_V001 attribute : classModel.attributes) {
                 attribute.infos.removeIf(info -> vanishing.vanishes(info.change));
             }
-        }
-        for (AbstractRelationModel_V001 relation : model.relations()) {
-            removeVanishingAssocClass(relation);
         }
     }
 
@@ -40,16 +36,9 @@ class ElementRemover_V001 {
         if (element instanceof AbstractRelationModel_V001 relation) {
             return vanishing.relationVanishes(relation);
         }
-        if (element instanceof AnchorLineModel_V001 anchorLine) {
-            return vanishing.anchorLineVanishes(anchorLine);
+        if (element instanceof AttachLineModel_V001 line) {
+            return vanishing.attachLineVanishes(line);
         }
         return vanishing.noteVanishes((NoteModel_V001) element);
-    }
-
-    private void removeVanishingAssocClass(AbstractRelationModel_V001 relation) {
-        if (relation instanceof AssociationRelationModel_V001 association && association.assocClass != null
-                && vanishing.vanishes(association.assocClass.change)) {
-            association.assocClass = null;
-        }
     }
 }

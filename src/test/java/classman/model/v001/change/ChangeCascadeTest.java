@@ -16,9 +16,10 @@ class ChangeCascadeTest {
       class B (bbbbbbbb)
       class C (cccccccc)
       association (11111111) aaaaaaaa -- bbbbbbbb
-        assocclass L {
-          -y
-        }
+      class L (dddddddd) {
+        -y
+      }
+      assocclass dddddddd -- 11111111
       extends change(added, blue) cccccccc -> aaaaaaaa
       association (22222222) bbbbbbbb -- cccccccc
       note (a0000001) "on class"
@@ -32,12 +33,16 @@ class ChangeCascadeTest {
       anchor a0000004 -- 22222222
       """;
 
-  /** A vanishing class takes its relations, with their association classes, and the notes attached to them along. */
+  /** A vanishing class takes its relations and the notes attached to them along, and the association class links
+   * of the relations. The association classes stay, they are classes. */
   @Test
   void vanishingClass() throws ClassDiagramParseException {
     String expected = """
         class B (bbbbbbbb)
         class C (cccccccc)
+        class L (dddddddd) {
+          -y
+        }
         association (22222222) bbbbbbbb -- cccccccc
         note (a0000004) "on survivor"
         note "free"
@@ -111,9 +116,10 @@ class ChangeCascadeTest {
         class B (bbbbbbbb)
         class C (cccccccc)
         association (11111111) aaaaaaaa -- bbbbbbbb
-          assocclass L {
-            -y
-          }
+        class L (dddddddd) {
+          -y
+        }
+        assocclass dddddddd -- 11111111
         extends change(added, blue) cccccccc -> aaaaaaaa
         association (22222222) bbbbbbbb -- cccccccc
         note (a0000001) "on class"

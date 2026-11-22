@@ -37,8 +37,6 @@ public final class DiagramStyle {
     public static final double TEXT_HIT_PADDING = 3;
     /** The space between the text of an attribute and the end of a note line which is attached to it. */
     public static final double ATTRIBUTE_ATTACH_GAP = 2;
-    /** The distance between the line of a relation and its association class. */
-    public static final double ASSOC_CLASS_GAP = 30;
     /** How far the loop of a relation from a class to itself reaches out of the class. */
     public static final double LOOP_SIZE = 20;
 
@@ -50,7 +48,6 @@ public final class DiagramStyle {
     public static final double SVG_MARGIN = 10;
 
     public static final String CLASS_FILL = "#f2e9c4";
-    public static final String ASSOC_CLASS_FILL = "#e0e0e0";
     public static final String NOTE_FILL = "#c0e8f9";
     public static final String STROKE = "#000000";
     public static final String WHITE = "#ffffff";

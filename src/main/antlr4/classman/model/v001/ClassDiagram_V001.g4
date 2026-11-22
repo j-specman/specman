@@ -16,7 +16,7 @@ grammar ClassDiagram_V001;
 //   composition    like association plus a filled diamond at the source (so no <- or <->)
 //   extends    hollow triangle at the target (the superclass), always ->, no multiplicities
 //   implements     dashed line, hollow triangle at the target (the interface), always ->, no multiplicities
-// Only association, aggregation and composition take multiplicities and an assocclass.
+// Only association, aggregation and composition take multiplicities and can have an association class.
 // A multiplicity is free text: written bare if it is a number, a range like 0..1 or 1..*, or *, else in double
 // quotes, for example "1..<maximum capacity>".
 // A relation refers to its two classes by their IDs, written bare (without parentheses, unlike the ID of the
@@ -27,7 +27,6 @@ grammar ClassDiagram_V001;
 //   * A class (or note) without at(x,y) is placed in the vertical stack: source order, top to bottom,
 //     centered on a common axis, default gap between them. Mixing placed and stacked elements is allowed,
 //     collisions are not resolved.
-//   * An association class without at(x,y) is placed next to its relation (rule open).
 //   * A class with width=N is N pixels wide; text wraps at spaces. Without width the content decides.
 //     The height is always computed.
 //   * A relation without route is a straight line from center to center, clipped at the box borders.
@@ -52,7 +51,7 @@ grammar ClassDiagram_V001;
 //     anchor 11223344 -- 04de91aa route (120, 40) 04de91aa@40%. An end without anchor is computed as without waypoints.
 //     An anchor which doesn't fit the target (a side anchor on a relation, a percent on a box) is ignored by the renderer.
 //   * A change mark change(added, yellow) or change(removed, blue) follows the ID of a class, attribute, relation,
-//     association class or note, and the text (and ID) of a stereotype or an info. Moving an element is never marked.
+//     note, anchor line or association class link, and the text (and ID) of a stereotype or an info. Moving an element is never marked.
 //   * A text change mark was(yellow, "old text") follows the text it belongs to: the diagram name, class name,
 //     stereotype, key or value of a tagged value, attribute name or type, the visibility sign of an attribute, an info
 //     item, a multiplicity, a relation label, a note text. The first value names the change set, the optional second
@@ -65,7 +64,10 @@ grammar ClassDiagram_V001;
 //     keeps its text when removed, <<Entity>> change(removed, yellow). Marks of the name come before the ID.
 //   * Text marks inside an element which is marked added or removed are accepted and ignored by the renderer:
 //     accepting or rejecting the element decides about everything in it.
-//   * An assocclass nested in a relation belongs to that relation.
+//   * A class is the association class of a relation by an association class link, an element of its own which looks
+//     like an anchor line: assocclass 11223344 -- 04de91aa (the class, then the association, aggregation or
+//     composition). It has an optional ID, a change mark and a route like an anchor line. A relation has at most one
+//     link and a class belongs to at most one relation, which the editor takes care of.
 //   * Strings (names, labels, note texts) are in double quotes. Escapes: backslash-n is a line break, backslash-quote
 //     a quote, two backslashes one backslash, backslash-u0060 a backtick. The latter is the only way to write
 //     a backtick: a diagram source embedded in a Specman model file must not contain one.
@@ -92,6 +94,7 @@ element
     | relation
     | note
     | anchorLine
+    | assocClassLink
     ;
 
 // ------------------------------------------------------------ classes
@@ -206,7 +209,7 @@ relation
 associationRelation
     : type=(ASSOCIATION | AGGREGATION | COMPOSITION) ELEMENT_ID? changeMark? from=HEX_ID (fromMultiplicity=multiplicity fromMultiplicityChange=textChange?)?
       (ARROW | LINE | BACK_ARROW | BOTH_ARROW) (toMultiplicity=multiplicity toMultiplicityChange=textChange?)? to=HEX_ID
-      (label=QUOTED_STRING labelChange=textChange?)? route? assocClass?
+      (label=QUOTED_STRING labelChange=textChange?)? route?
     ;
 
 extendsRelation
@@ -257,10 +260,6 @@ waypoint
     : LPAREN NUMBER COMMA NUMBER RPAREN
     ;
 
-assocClass
-    : ASSOCCLASS classHead classBody?
-    ;
-
 // ------------------------------------------------------------ notes
 
 note
@@ -271,19 +270,25 @@ note
 // like a relation: it can carry an ID and a change mark. The note and the target are named by their IDs, the note
 // needs one. A note can have several.
 anchorLine
-    : ANCHOR ELEMENT_ID? changeMark? noteRef=HEX_ID LINE targetRef=HEX_ID noteRoute?
+    : ANCHOR ELEMENT_ID? changeMark? noteRef=HEX_ID LINE targetRef=HEX_ID attachRoute?
     ;
 
-// Waypoints of the dashed line from a note to its target, and optionally anchors which fix its start (on the note)
-// and its end (on the target). An end without anchor is computed. A single anchor belongs to the start if it
-// names the note, to the end if it names the target, which the parser checks. The end on a relation is a point of
+// The dashed line from a class to the relation it is the association class of, an element of the diagram like an
+// anchor line. The class and the relation are named by their IDs, both need one.
+assocClassLink
+    : ASSOCCLASS ELEMENT_ID? changeMark? classRef=HEX_ID LINE relationRef=HEX_ID attachRoute?
+    ;
+
+// Waypoints of a dashed line from a box (note or class) to its target, and optionally anchors which fix its start
+// (on the box) and its end (on the target). An end without anchor is computed. A single anchor belongs to the start if it
+// names the box, to the end if it names the target, which the parser checks. The end on a relation is a point of
 // its line, given in percent of its length, the start is never one.
-noteRoute
-    : ROUTE noteAnchor waypoint* noteAnchor?
-    | ROUTE waypoint+ noteAnchor?
+attachRoute
+    : ROUTE attachAnchor waypoint* attachAnchor?
+    | ROUTE waypoint+ attachAnchor?
     ;
 
-noteAnchor
+attachAnchor
     : anchor
     | linePoint
     ;

@@ -124,25 +124,6 @@ class DiagramMovingTest {
     assertEquals(bookBefore.getY(), areaOfClassAt(editing, 0).getY(), 0.5);
   }
 
-  /** An association class which the layout had placed gets the position the user drops it on. */
-  @Test
-  void movedAssociationClass() throws ClassDiagramParseException {
-    String source = "classdiagram {\n  class A (aaaaaaaa) at(0, 0)\n  class B (bbbbbbbb) at(300, 0)\n"
-      + "  association aaaaaaaa -- bbbbbbbb\n  assocclass link\n}";
-    DiagramEditing editing = new DiagramEditing(source, host);
-    Rectangle2D link = editing.scene().elementAreas.get(2).area;
-    Point2D grab = new Point2D.Double(link.getCenterX(), link.getCenterY());
-    editing.selectAt(grab);
-
-    editing.startDrag(grab);
-    editing.dragTo(new Point2D.Double(grab.getX() + 20, grab.getY() + 100));
-    editing.endDrag();
-
-    assertTrue(editing.source().contains("assocclass link"), editing.source());
-    assertEquals(link.getX() + 20, editing.selectedArea().getX(), 0.5);
-    assertEquals(link.getY() + 100, editing.selectedArea().getY(), 0.5);
-  }
-
   private static void select(DiagramEditing editing, double x, double y) {
     editing.selectAt(new Point2D.Double(x, y));
   }
