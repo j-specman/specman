@@ -39,7 +39,7 @@ class PointerControl implements PointerListener {
    * the width at the left or right side of a class or note. */
   @Override
   public Cursor cursorAt(Point2D at) {
-    if (editing.isRelationToolArmed()) {
+    if (editing.isToolArmed()) {
       return Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
     }
     ResizeTarget edge = editing.resizeTargetAt(at, toDiagramLength.applyAsDouble(HIT_PIXELS));
@@ -50,14 +50,14 @@ class PointerControl implements PointerListener {
   }
 
   /** A press selects what is below it. Dragging moves a handle of the selected relation if the press was on one,
-   * a side of a class changes its width, otherwise the selected box is moved. While the tool for relations is armed, a
-   * press on a class starts a relation instead, which is drawn by dragging to another class, and nothing is
-   * selected. */
+   * a side of a class changes its width, otherwise the selected box is moved. While a tool is armed, a
+   * press on a class (or a note, for the anchor) starts a connection instead, which is drawn by dragging to a class, and
+   * nothing is selected. */
   @Override
   public void pressed(Point2D at) {
     double tolerance = toDiagramLength.applyAsDouble(HIT_PIXELS);
-    if (editing.isRelationToolArmed()) {
-      editing.startRelation(at, tolerance);
+    if (editing.isToolArmed()) {
+      editing.startDrawing(at, tolerance);
       showDiagram.run();
       return;
     }
@@ -80,10 +80,10 @@ class PointerControl implements PointerListener {
 
   /** A double click on a waypoint of the selected relation deletes it, one on its line elsewhere adds a waypoint. A
    * double click on a text of the box it selects, or on a text of a relation, lets the user change the text. Nothing
-   * of this happens while the tool for relations is armed. */
+   * of this happens while a tool is armed. */
   @Override
   public void doubleClicked(Point2D at) {
-    if (editing.isRelationToolArmed()) {
+    if (editing.isToolArmed()) {
       return;
     }
     double tolerance = toDiagramLength.applyAsDouble(HIT_PIXELS);
@@ -100,10 +100,10 @@ class PointerControl implements PointerListener {
   }
 
   /** The context menu selects what is below the point, like a press, and is shown if that is a class or a note. Nothing
-   * else has a menu yet, and nothing happens while the tool for relations is armed. */
+   * else has a menu yet, and nothing happens while a tool is armed. */
   @Override
   public void contextMenuRequested(Point2D at) {
-    if (editing.isRelationToolArmed()) {
+    if (editing.isToolArmed()) {
       return;
     }
     editing.selectAt(at, toDiagramLength.applyAsDouble(HIT_PIXELS));

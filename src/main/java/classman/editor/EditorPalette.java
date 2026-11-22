@@ -29,6 +29,7 @@ class EditorPalette extends JToolBar {
   private final EditorTexts texts;
   private final List<AbstractButton> elementButtons = new ArrayList<>();
   private final JToggleButton relationToolButton = new JToggleButton();
+  private final JToggleButton anchorToolButton = new JToggleButton();
   private final JButton toggleButton = new JButton();
   private final List<String> labels = new ArrayList<>();
   private final List<String> tooltips = new ArrayList<>();
@@ -36,9 +37,10 @@ class EditorPalette extends JToolBar {
 
   /** @param classDropped gets the point on the screen where the class button was released
    * @param noteDropped gets the point on the screen where the note button was released
-   * @param relationToolToggled is run when the button for drawing associations is pressed */
+   * @param relationToolToggled is run when the button for drawing associations is pressed
+   * @param anchorToolToggled is run when the button for drawing the anchor of a note is pressed */
   EditorPalette(EditorTexts texts, Consumer<Point> classDropped, Consumer<Point> noteDropped,
-                Runnable relationToolToggled) {
+                Runnable relationToolToggled, Runnable anchorToolToggled) {
     super(JToolBar.VERTICAL);
     this.texts = texts;
     this.showText = Preferences.userNodeForPackage(EditorPalette.class).getBoolean(PREF_SHOW_TEXT, true);
@@ -51,6 +53,7 @@ class EditorPalette extends JToolBar {
     addDragButton("class", EditorIcons.CLASS, classDropped);
     addDragButton("note", EditorIcons.NOTE, noteDropped);
     addToolButton("association", EditorIcons.ASSOCIATION, relationToolButton, relationToolToggled);
+    addToolButton("anchor", EditorIcons.ANCHOR, anchorToolButton, anchorToolToggled);
 
     add(Box.createVerticalGlue());
     addSeparator();
@@ -87,9 +90,10 @@ class EditorPalette extends JToolBar {
     add(button);
   }
 
-  /** Shows whether the tool for drawing associations is armed, as a pressed button. */
-  void showRelationToolArmed(boolean isArmed) {
-    relationToolButton.setSelected(isArmed);
+  /** Shows which tool is armed, if one is, as a pressed button. */
+  void showToolsArmed(boolean isRelationToolArmed, boolean isAnchorToolArmed) {
+    relationToolButton.setSelected(isRelationToolArmed);
+    anchorToolButton.setSelected(isAnchorToolArmed);
   }
 
   private void toggleShowText() {

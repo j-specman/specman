@@ -29,6 +29,14 @@ class ClassDiagramSerializer_V001Test {
     return serializer.serialize(parser.parse(source));
   }
 
+  /** The fixed ends of the dashed line of a note are written around the waypoints. */
+  @Test
+  void noteRouteAnchorsKept() throws ClassDiagramParseException {
+    String source = "classdiagram {\n    class A (aaaaaaaa)\n\n    note (22222222) \"n\" attach(aaaaaaaa) route 22222222.right@3 (10, 20) aaaaaaaa.top@5\n}\n";
+
+    assertTrue(roundTrip(source).contains("attach(aaaaaaaa) route 22222222.right@3 (10, 20) aaaaaaaa.top@5"));
+  }
+
   /** Writing a model and reading the text again gives the same model, checked for all examples. */
   @ParameterizedTest
   @ValueSource(strings = {"hello", "benchmark", "edgecases", "changes", "textchanges", "change-colors"})

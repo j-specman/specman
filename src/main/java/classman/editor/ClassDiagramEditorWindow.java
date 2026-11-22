@@ -52,7 +52,8 @@ public class ClassDiagramEditorWindow extends JDialog {
     scrollPane = new JScrollPane(canvas);
 
     palette = new EditorPalette(texts, screenPoint -> boxDropped(screenPoint, textEditor::startNewClass),
-      screenPoint -> boxDropped(screenPoint, textEditor::startNewNote), this::relationToolToggled);
+      screenPoint -> boxDropped(screenPoint, textEditor::startNewNote), this::relationToolToggled,
+      this::anchorToolToggled);
     getContentPane().add(palette, BorderLayout.WEST);
     getContentPane().add(scrollPane, BorderLayout.CENTER);
 
@@ -105,14 +106,14 @@ public class ClassDiagramEditorWindow extends JDialog {
     return new Rectangle(origin.x + visible.x, origin.y + visible.y, visible.width, visible.height);
   }
 
-  /** Esc puts a box which is being dragged back first, or stops a relation which is being drawn, then puts the tool
-   * for relations away, then takes the selection away, and leaves the editor if there is none. */
+  /** Esc puts a box which is being dragged back first, or stops a connection which is being drawn, then puts the tool
+   * away, then takes the selection away, and leaves the editor if there is none. */
   private void escape() {
     if (editing.cancelDrag()) {
       showDiagram();
     }
-    else if (editing.isRelationToolArmed()) {
-      editing.disarmRelationTool();
+    else if (editing.isToolArmed()) {
+      editing.disarmTool();
       showDiagram();
     }
     else if (editing.hasSelection()) {
@@ -127,7 +128,7 @@ public class ClassDiagramEditorWindow extends JDialog {
   private void showDiagram() {
     canvas.setScene(editing.scene());
     canvas.setSelection(editing.selectionMarks());
-    palette.showRelationToolArmed(editing.isRelationToolArmed());
+    palette.showToolsArmed(editing.isRelationToolArmed(), editing.isAnchorToolArmed());
     canvas.refreshCursor();
   }
 
@@ -152,6 +153,11 @@ public class ClassDiagramEditorWindow extends JDialog {
 
   private void relationToolToggled() {
     editing.toggleRelationTool();
+    showDiagram();
+  }
+
+  private void anchorToolToggled() {
+    editing.toggleAnchorTool();
     showDiagram();
   }
 

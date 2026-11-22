@@ -138,6 +138,18 @@ class AttachedElementsTest {
     assertEquals(76, link.ys[1], 1e-9);
   }
 
+  /** An anchor fixes an end of the line at a point of the border: the start on the note, the end on the class. */
+  @Test
+  void noteLinkWithAnchors() throws ClassDiagramParseException {
+    ScenePolyline link = lastLine(layout(
+        "class A (aa000001) at(0, 0)\nnote (bb000001) at(0, 100) \"n\" attach(aa000001) route bb000001.top@10 aa000001.bottom@15"));
+    assertEquals(2, link.xs.length);
+    assertEquals(10, link.xs[0], 1e-9);
+    assertEquals(100, link.ys[0], 1e-9);
+    assertEquals(15, link.xs[1], 1e-9);
+    assertEquals(56, link.ys[1], 1e-9);
+  }
+
   /** With waypoints the line leads over them, starting at the note facing the first and ending at the class facing the last. */
   @Test
   void noteLinkOverWaypoints() throws ClassDiagramParseException {

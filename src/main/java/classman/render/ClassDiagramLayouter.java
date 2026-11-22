@@ -81,15 +81,16 @@ public class ClassDiagramLayouter {
             attachTargets.add(relation.id, new RelationAttachTarget(relationLayout.attachPoint));
         }
         elements.addAll(0, underlays);
-        for (ScenePolyline link : noteLinks(boxes.keySet(), areas, attachTargets)) {
-            elements.add(link);
-            covered = BoxGeometry.union(covered, link.bounds());
+        List<SceneAnchorLine> anchorLines = noteLinks(boxes.keySet(), areas, attachTargets);
+        for (SceneAnchorLine anchorLine : anchorLines) {
+            elements.add(anchorLine.line);
+            covered = BoxGeometry.union(covered, anchorLine.line.bounds());
         }
         if (covered == null) {
-            return new Scene(elements, elementAreas, textAreas, relationLines, 0, 0, 0, 0);
+            return new Scene(elements, elementAreas, textAreas, relationLines, anchorLines, 0, 0, 0, 0);
         }
-        return new Scene(elements, elementAreas, textAreas, relationLines, covered.x, covered.y, covered.width,
-            covered.height);
+        return new Scene(elements, elementAreas, textAreas, relationLines, anchorLines, covered.x, covered.y,
+            covered.width, covered.height);
     }
 
     private void addAttachTargets(AttachTargetIndex attachTargets, ClassModel_V001 classModel,
@@ -145,13 +146,13 @@ public class ClassDiagramLayouter {
     }
 
     /** The dashed lines from the notes to the elements they are attached to. */
-    private List<ScenePolyline> noteLinks(Iterable<AbstractDiagramElementModel_V001> elements,
+    private List<SceneAnchorLine> noteLinks(Iterable<AbstractDiagramElementModel_V001> elements,
             Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas, AttachTargetIndex attachTargets) {
-        List<ScenePolyline> links = new ArrayList<>();
+        List<SceneAnchorLine> links = new ArrayList<>();
         for (AbstractDiagramElementModel_V001 element : elements) {
             if (element instanceof NoteModel_V001 note && note.attachedToId != null) {
-                links.add(noteLinkLayouter.layout(areas.get(note), attachTargets.find(note.attachedToId),
-                    waypoints(note)));
+                links.add(new SceneAnchorLine(note, noteLinkLayouter.layout(areas.get(note),
+                    attachTargets.find(note.attachedToId), waypoints(note), note.attachStart, note.attachEnd)));
             }
         }
         return links;

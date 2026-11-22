@@ -30,6 +30,7 @@ import classman.model.v001.ClassDiagram_V001Parser.NameContext;
 import classman.model.v001.ClassDiagram_V001Parser.NoteContext;
 import classman.model.v001.ClassDiagram_V001Parser.PositionContext;
 import classman.model.v001.ClassDiagram_V001Parser.RelationContext;
+import classman.model.v001.ClassDiagram_V001Parser.NoteRouteContext;
 import classman.model.v001.ClassDiagram_V001Parser.RouteContext;
 import classman.model.v001.ClassDiagram_V001Parser.TaggedValueContext;
 import classman.model.v001.ClassDiagram_V001Parser.TextChangeContext;
@@ -288,11 +289,31 @@ public class ClassDiagramParser_V001 {
         model.width = width(ctx.widthSpec());
         model.attachedToId = id(ctx.target);
         if (ctx.noteRoute() != null) {
-            for (WaypointContext waypoint : ctx.noteRoute().waypoint()) {
-                model.attachWaypoints.add(position(waypoint.NUMBER(0), waypoint.NUMBER(1)));
-            }
+            buildNoteRoute(model, ctx.noteRoute());
         }
         return model;
+    }
+
+    /** An anchor on the note is the start of the line, one on the target the end. */
+    private void buildNoteRoute(NoteModel_V001 model, NoteRouteContext route) throws ClassDiagramParseException {
+        for (WaypointContext waypoint : route.waypoint()) {
+            model.attachWaypoints.add(position(waypoint.NUMBER(0), waypoint.NUMBER(1)));
+        }
+        for (AnchorContext anchor : route.anchor()) {
+            AnchorModel_V001 built = buildAnchor(anchor);
+            if (built.classId.equals(model.id) && model.attachStart == null) {
+                model.attachStart = built;
+            }
+            else if (built.classId.equals(model.attachedToId) && model.attachEnd == null) {
+                model.attachEnd = built;
+            }
+            else {
+                Token start = anchor.getStart();
+                throw new ClassDiagramParseException("line " + start.getLine() + ":" + start.getCharPositionInLine()
+                    + " An anchor in the route of a note must name the note (for the start of the line) or the"
+                    + " element it is attached to (for the end), and each of them only once.");
+            }
+        }
     }
 
     // ---- small parts ----

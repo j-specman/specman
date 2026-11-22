@@ -63,6 +63,7 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Tagged values |built |One row each, edited as KEY=value or KEY, see <<The Tagged Values of a Class>>.
 |Diagram name |open |
 |Create a note |built |Palette button, dragged onto the canvas like a class, see <<Creating Elements>>.
+|Attach a note to a class (anchor) |built |Palette tool: press on the note, drag to the class. Attributes and relations as targets are planned, see <<Creating Elements>>.
 |Create other element kinds (interface, enum, association class) |open |
 |Create an association |built |By a tool: click the button, drag from one class to another, see <<Creating Elements>>. The other relation types (aggregation, composition, inheritance, implementation) are planned, with the same gesture.
 |Move the points of a route |built |Waypoints freely, the ends along the border of their class or hung onto another class (not while changes are tracked), see <<Selecting>>. Adding a waypoint and deleting one (double click on the line and on a handle) too.
@@ -137,7 +138,17 @@ Specman's step buttons are drag sources: The user drags a step onto the diagram.
 * The note button is dragged onto the canvas like the class button, and the drop point becomes the top left corner of the note (`at(x, y)`).
 * The field for the text opens right after the drop, empty, in the new note. The note has no made-up text. Return with a text creates the note; Return with an empty text, Esc, or leaving the field takes the note away again, without an operation. While the text is typed, the box is `DiagramStyle.NEW_BOX_WIDTH` wide, like a class; the created note has no `width=`, so it is as wide as its text, but at most as wide as <<Width of a Note>> says.
 * It gets an ID and, if changes are tracked, `change(added, <change set>)`; its text needs no mark of its own. The new note is selected. One operation, one undo step.
-* A note is not attached to anything when it is created. How a note gets attached is an open point.
+* A note is not attached to anything when it is created. It is attached with the anchor tool, see below.
+
+*Built, the anchor of a note (first target: a class):*
+
+* The dashed line from a note to what it is about is called the *anchor* (`attach(<ID>)` in the source). It is a *tool* like the association: the user clicks the *Anchor* button, which stays pressed, and the cursor becomes a crosshair. A press on a note (or at most 4 pixels of the screen away from it) and a drag onto a class draws the anchor. A press on anything else starts nothing.
+* While the mouse is dragged, a line in the color of the selection runs from the center of the note to the mouse. Where the mouse is on a class, or close to it (the same rule as for the association), that class is framed and the line ends at its center.
+* Released on a class, the note is attached to it: the line which the diagram shows is the usual dashed one, running straight to the class. A class which has no ID gets one. The note is selected and the tool is put away (one-shot). One operation, one undo step.
+* A note which is attached already is re-attached the same way: the new class replaces the old target, and the waypoints of the old dashed line go. Released on the class which the note is attached to already, nothing happens and no operation is made.
+* Released on no class, nothing happens and the tool stays armed. Esc stops a drawing which is going on, another Esc puts the tool away. The tool for associations and the anchor tool exclude each other: arming one puts the other away. While a tool is armed, nothing can be selected, moved or edited.
+* *While changes are tracked,* only a note which a change set has added can get an anchor, for the same reason as hanging a relation onto another class (see <<Selecting>>): a changed target is a change which the format has no mark for, and a rejected change couldn't bring the old one back. The press on another note starts nothing. The user deletes the note and adds a new one.
+* *Planned:* attributes and relations as targets, with the same gesture (the format and the layout know them already: `attach(<ID>)` refers to a class, an attribute or a relation). An attribute gets an ID then, see <<Attributes>>. Selecting, bending and deleting the anchor are built, see <<Selecting>> and <<Deleting>>.
 
 *Built, the association (first relation, as a vertical slice):*
 
@@ -179,9 +190,12 @@ Specman's step buttons are drag sources: The user drags a step onto the diagram.
 * The canvas keeps its origin during the drag, otherwise it would follow the box and the mouse could never get ahead of it. Dragging to the edge of the window scrolls.
 * *Known limits:* A box which is dragged left of or above the top left of the diagram is cut off until the mouse is released. The waypoints of routes, and of the dashed lines of notes, are absolute points and don't move with the box. The user moves them by their handles, see <<Selecting>>; no operation moves them along with a box. There is no move cursor and no grid snapping.
 
+* *Anchors:* The dashed line from a note to its target is selected like the line of a relation: a press at most 4 pixels of the screen away from it selects it (a box still wins where both are hit). It is shown 2.5 units wide with round corners. It has handles at its start, at each waypoint and at its end; a new anchor shows the two end handles only. A double click on the selected line adds a waypoint at the closest point, a double click on a waypoint handle deletes it, and dragging a handle moves it (snapping to its neighbors, one undo step, Esc puts it back), all as with a relation. With its last waypoint gone the anchor is straight again. Waypoints are never marked as a change. An anchor has no label and no multiplicities, so it shows no places for texts. *The ends are optional to fix:* as long as a handle isn't moved, the layout works out where the line leaves the note and meets the target. Moving the *start handle* slides it along the border of the note and fixes it there (`<note ID>.side@offset`, the note gets an ID if it has none). Moving the *end handle* slides it along the border of the class and fixes it there (`<class ID>.side@offset`); it is hung onto another class while the mouse is on it or at most 6 pixels away, which attaches the note to that class (the class is framed, like when a relation is hung onto it), the same gesture as for a relation. The two ends are fixed independently of each other, and a fixed end moves with its box, because its offset counts from the side. A note which is attached to an attribute or a relation has no end handle: its end is where the layout puts it. *While changes are tracked,* an end can be slid along its own box, but the end of an existing note isn't hung onto another class, for the same reason as for the relations: only a note which a change set has added can change its target. Drawing the anchor again with the tool, see <<Creating Elements>>, replaces the target and takes the route (waypoints and fixed ends) away.
+
 ## Deleting
-* The Delete key deletes the selected box or relation and what hangs on it, and afterwards nothing is selected, also if it only got marked as removed. There is no confirmation. Backspace does not delete.
+* The Delete key deletes the selected box, relation or anchor and what hangs on it, and afterwards nothing is selected, also if it only got marked as removed. There is no confirmation. Backspace does not delete.
 * *What hangs on a box:* A class takes its relations along, with their association classes, and the notes attached to the class or to those relations. A relation takes its association class and the notes attached to it. An association class and a note take only themselves. An attribute takes the notes attached to it.
+* *Anchors:* Deleting the selected anchor takes the attachment away from the note, with its waypoints; the note stays, unattached, and nothing is selected. While changes are tracked, this is only done for a note which a change set has added: taking the anchor from any other note is a change which the format has no mark for, so the Delete key does nothing then and the anchor stays selected.
 * *Without change tracking* everything which goes is removed.
 * *With change tracking* the rule is the one of deleting a step in Specman: What a change set has added is removed at once, whichever change set it was. Whatever else goes is marked `change(removed, <change set>)` and stays visible, veiled. What is marked removed already stays as it is.
 * The deletion is one operation and one undo step.
@@ -453,6 +467,7 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 * All strings are in double quotes, which is why a source can be embedded into Specman's model without escaping. Backticks are not allowed.
 * The visibility sign of an attribute can carry a text change mark.
 * The infos of an attribute are list entries: they take the element marks `change(added|removed, ...)`, and keep their text as a removed info. Their text mark `was(...)` is for changing the text.
+* The route of the dashed line of a note may fix its ends with anchors like the route of a relation: `attach(<target>) route <note ID>.right@10 (120, 40) <target ID>.top@25`. Either anchor, or both, or none; the parser tells the start from the end by the ID the anchor names. A fixed end is a point of the border of a box, so it is only used where the target is a class.
 * Elements created by the editor get an ID (classes) and a position `at(x, y)`. Attributes get an ID only if a note is attached.
 * Planned: new keywords `interface` and `enum`. An interface has no body. An enum has values written like attributes without a type. The layouter and the change mark logic have to handle the new kinds.
 
@@ -463,7 +478,7 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 
 ## Open Points
 . Is the association class a variant of the note button, or an element of its own?
-. How are notes attached to elements: as a relation-like tool, or by dragging a handle?
+. How is an anchor removed, as soon as the dashed lines of notes can be selected?
 . Snapping of points is built (see <<Selecting>>); does it feel right with 6 pixels? Decided: no guide line which shows what a point has snapped to, it isn't needed. Open: a key which switches snapping off, snapping of boxes to each other, and straightening a whole route.
 . Hanging an end onto an element which is not a class (note, association class), and the capture distance: is 6 pixels right for hanging, or should it differ from snapping?
 . Everything which the user adds to a class which is new in the same change set is not colored on its own, only the frame of the class says that it is new (see <<What the User Sees When an Input is Completed>>). It has to be seen whether this feels right in practice. The other way round would mean that the new class gets no frame as soon as it has parts, or that its parts are colored too and the frame is no longer needed to read the diagram.

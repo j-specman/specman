@@ -236,9 +236,15 @@ public class ClassDiagramSerializer_V001 {
         appendTextChange(out, note.textChange);
         if (note.attachedToId != null) {
             out.append(" attach(").append(note.attachedToId).append(')');
-            if (!note.attachWaypoints.isEmpty()) {
+            if (note.attachStart != null || !note.attachWaypoints.isEmpty() || note.attachEnd != null) {
                 out.append(" route");
+                if (note.attachStart != null) {
+                    out.append(' ').append(anchor(note.attachStart));
+                }
                 appendWaypoints(out, note.attachWaypoints);
+                if (note.attachEnd != null) {
+                    out.append(' ').append(anchor(note.attachEnd));
+                }
             }
         }
         out.append('\n');

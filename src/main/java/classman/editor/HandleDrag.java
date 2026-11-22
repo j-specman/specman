@@ -63,8 +63,8 @@ class HandleDrag extends Drag {
       moved = true;
     }
     Point2D grabbed = path.get(handle);
-    Point2D target = snapped(new Point2D.Double(grabbed.getX() + at.getX() - pressedAt.getX(),
-      grabbed.getY() + at.getY() - pressedAt.getY()), tolerance);
+    Point2D target = PointSnapper.snapped(new Point2D.Double(grabbed.getX() + at.getX() - pressedAt.getX(),
+      grabbed.getY() + at.getY() - pressedAt.getY()), neighbors(), tolerance);
     if (handle == 0) {
       hungOntoClassId = classAt(at, tolerance);
       routeEditing.attachStart(relation, hungOntoClassId, reachableClasses.get(hungOntoClassId), target);
@@ -98,33 +98,6 @@ class HandleDrag extends Drag {
   private String classAt(Point2D point, double tolerance) {
     String closest = ClassPicker.closest(reachableClasses, point, tolerance);
     return closest != null ? closest : hungOntoClassId;
-  }
-
-  /** A coordinate which is within the tolerance of the same coordinate of a neighbor in the line becomes that one, so
-   * that the part of the line to that neighbor is vertical or horizontal. Each coordinate takes the closest neighbor
-   * within the tolerance, so a point can snap to one neighbor in x and to the other in y. */
-  private Point2D snapped(Point2D target, double tolerance) {
-    List<Double> neighborXs = new ArrayList<>();
-    List<Double> neighborYs = new ArrayList<>();
-    for (Point2D neighbor : neighbors()) {
-      neighborXs.add(neighbor.getX());
-      neighborYs.add(neighbor.getY());
-    }
-    return new Point2D.Double(snapped(target.getX(), neighborXs, tolerance),
-      snapped(target.getY(), neighborYs, tolerance));
-  }
-
-  private static double snapped(double value, List<Double> candidates, double tolerance) {
-    double snapped = value;
-    double closestDistance = tolerance;
-    for (double candidate : candidates) {
-      double distance = Math.abs(candidate - value);
-      if (distance <= closestDistance) {
-        snapped = candidate;
-        closestDistance = distance;
-      }
-    }
-    return snapped;
   }
 
   /** The points before and after the dragged one in the line. They stay where they were while it is dragged. */

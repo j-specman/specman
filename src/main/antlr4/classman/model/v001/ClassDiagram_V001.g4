@@ -43,6 +43,10 @@ grammar ClassDiagram_V001;
 //     stereotype is defined there once and assigned to the classes. A diagram which stands for itself needs none.
 //   * The dashed line of a note can lead over waypoints (absolute pixel points): attach(04de91aa) route (120, 40) (120, 90).
 //     The line starts at the note border facing the first waypoint and ends at the target facing the last one.
+//     Either end can be fixed at a point of the border like the ends of a route of a relation, with an anchor
+//     classId.side@offset: the start on the note itself (the note needs an ID), the end on the class it is attached to:
+//     note (11223344) "..." attach(04de91aa) route 11223344.right@10 (120, 40) 04de91aa.top@25.
+//     An end without anchor is computed as without waypoints. Anchors of the end are only used for a class.
 //   * A change mark change(added, yellow) or change(removed, blue) follows the ID of a class, attribute, relation,
 //     association class or note, and the text (and ID) of a stereotype or an info. Moving an element is never marked.
 //   * A text change mark was(yellow, "old text") follows the text it belongs to: the diagram name, class name,
@@ -244,9 +248,12 @@ note
     : NOTE noteId=ELEMENT_ID? changeMark? position? widthSpec? QUOTED_STRING textChange? (ATTACH target=ELEMENT_ID noteRoute?)?
     ;
 
-// Waypoints of the dashed line from a note to its target. Start and end of the line are computed.
+// Waypoints of the dashed line from a note to its target, and optionally anchors which fix its start (on the note)
+// and its end (on the target class). An end without anchor is computed. A single anchor belongs to the start if it
+// names the note, to the end if it names the target, which the parser checks.
 noteRoute
-    : ROUTE waypoint+
+    : ROUTE anchor waypoint* anchor?
+    | ROUTE waypoint+ anchor?
     ;
 
 // A plain word, including the keywords: they are only reserved where a class name is expected.

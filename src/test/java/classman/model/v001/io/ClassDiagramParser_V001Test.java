@@ -185,6 +185,25 @@ class ClassDiagramParser_V001Test {
     assertEquals("cccccccc", relations.get(1).toId);
   }
 
+  /** The route of a note can fix its ends: an anchor on the note is the start, one on the target the end. */
+  @Test
+  void noteRouteAnchors() throws ClassDiagramParseException {
+    NoteModel_V001 both = parse("class A (aaaaaaaa)\nnote (22222222) \"n\" attach(aaaaaaaa) route 22222222.right@3 (10, 20) aaaaaaaa.top@5")
+      .notes().get(0);
+    assertEquals(Side_V001.RIGHT, both.attachStart.side);
+    assertEquals(3, both.attachStart.offset);
+    assertEquals("aaaaaaaa", both.attachEnd.classId);
+    assertEquals(1, both.attachWaypoints.size());
+
+    NoteModel_V001 endOnly = parse("class A (aaaaaaaa)\nnote (22222222) \"n\" attach(aaaaaaaa) route (10, 20) aaaaaaaa.left@4")
+      .notes().get(0);
+    assertNull(endOnly.attachStart);
+    assertEquals(Side_V001.LEFT, endOnly.attachEnd.side);
+
+    assertThrows(ClassDiagramParseException.class,
+      () -> parse("class A (aaaaaaaa)\nnote (22222222) \"n\" attach(aaaaaaaa) route 33333333.top@1"));
+  }
+
   /** A route has a start anchor, waypoints and an end anchor. The anchors name the classes by ID. */
   @Test
   void routeAnchorsAndWaypoints() throws ClassDiagramParseException {

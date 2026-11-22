@@ -2,6 +2,7 @@ package classman.editor;
 
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AnchorModel_V001;
+import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RouteModel_V001;
 import classman.model.v001.Side_V001;
@@ -12,7 +13,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Changes the route of a relation. A route is no change which a change set tracks, so nothing here is marked. */
+/** Changes the route of a relation, and the waypoints of the anchor of a note. A route is no change which a change
+ * set tracks, so nothing here is marked. */
 class RouteEditing {
 
   /** Removes a waypoint. With the last one the route is gone, and the relation runs as if it never had one.
@@ -42,6 +44,40 @@ class RouteEditing {
     if (relation.route == null) {
       relation.route = routeAlong(relation, path, fromArea, toArea);
     }
+  }
+
+  /** Removes a waypoint of the anchor of a note. Without waypoints the anchor is a straight line. */
+  void deleteWaypoint(NoteModel_V001 note, int waypointIndex) {
+    note.attachWaypoints.remove(waypointIndex);
+  }
+
+  /** Puts a new waypoint into the anchor of a note, as the waypoint with the given index. */
+  void insertWaypoint(NoteModel_V001 note, int waypointIndex, Point2D at) {
+    note.attachWaypoints.add(waypointIndex, positionOf(at));
+  }
+
+  void moveWaypoint(NoteModel_V001 note, int waypointIndex, Point2D to) {
+    note.attachWaypoints.set(waypointIndex, positionOf(to));
+  }
+
+  /** Fixes the start of the anchor of a note at the point of the border of the note which is closest to the given
+   * point. The note needs an ID. */
+  void attachNoteStart(NoteModel_V001 note, Rectangle2D noteArea, Point2D to) {
+    note.attachStart = anchorAt(note.id, noteArea, to);
+  }
+
+  /** Fixes the end of the anchor of a note at the point of the border of the class which is closest to the given
+   * point. The note is attached to that class from then on. */
+  void attachNoteEnd(NoteModel_V001 note, String classId, Rectangle2D classArea, Point2D to) {
+    note.attachedToId = classId;
+    note.attachEnd = anchorAt(classId, classArea, to);
+  }
+
+  /** Takes the route of the anchor of a note away: the waypoints and the fixed ends. */
+  void clearRoute(NoteModel_V001 note) {
+    note.attachWaypoints.clear();
+    note.attachStart = null;
+    note.attachEnd = null;
   }
 
   /** @param waypointIndex the index in the waypoints of the route */
