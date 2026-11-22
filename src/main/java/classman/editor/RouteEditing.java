@@ -4,6 +4,7 @@ import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AnchorLineModel_V001;
 import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.PositionModel_V001;
+import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RouteModel_V001;
 import classman.render.BoxGeometry;
 
@@ -90,6 +91,26 @@ class RouteEditing {
     RouteModel_V001 route = relation.route;
     relation.toId = classId;
     relation.route = new RouteModel_V001(route.start, route.waypoints, anchorAt(classId, classArea, to));
+  }
+
+  /** Links the end of the relation's route to the center of its class again. A route which then has no waypoints and
+   * no fixed end is dropped, the relation is a straight line again. */
+  void centerEnd(AbstractRelationModel_V001 relation, RelationEnd_V001 end) {
+    RouteModel_V001 route = relation.route;
+    AnchorModel_V001 start = end == RelationEnd_V001.FROM ? AnchorModel_V001.center(relation.fromId) : route.start;
+    AnchorModel_V001 last = end == RelationEnd_V001.TO ? AnchorModel_V001.center(relation.toId) : route.end;
+    boolean isStraight = start.center && last.center && route.waypoints.isEmpty();
+    relation.route = isStraight ? null : new RouteModel_V001(start, route.waypoints, last);
+  }
+
+  /** Lets the layout work out the end of an anchor line again, where it leaves the note or meets its target. */
+  void centerEnd(AnchorLineModel_V001 anchorLine, RelationEnd_V001 end) {
+    if (end == RelationEnd_V001.FROM) {
+      anchorLine.start = null;
+    }
+    else {
+      anchorLine.end = null;
+    }
   }
 
   /** @return a copy of the route which doesn't change when the route does, null if there is none */

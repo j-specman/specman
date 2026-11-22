@@ -8,8 +8,10 @@ public class AssociationRelationModel_V001 extends AbstractRelationModel_V001 {
     /** Null if no change set changed the multiplicity. A removed multiplicity is the empty string with the mark. */
     public TextChangeModel_V001 fromMultiplicityChange;
     public TextChangeModel_V001 toMultiplicityChange;
-    /** True for an arrowhead at the target (written ->), false for no arrowhead (written --). */
-    public boolean directed;
+    /** True for an arrowhead at the source. Never for aggregation and composition, whose source has the diamond. */
+    public boolean fromArrow;
+    /** True for an arrowhead at the target. */
+    public boolean toArrow;
     /** Null if the relation has no association class. */
     public ClassModel_V001 assocClass;
 

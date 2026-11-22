@@ -151,7 +151,8 @@ class ClassDiagramParser_V001Test {
     assertEquals("bbbbbbbb", r.toId);
     assertEquals("1", r.fromMultiplicity);
     assertEquals("0..*", r.toMultiplicity);
-    assertTrue(r.directed);
+    assertTrue(r.toArrow);
+    assertFalse(r.fromArrow);
     assertEquals("first\nsecond", r.label);
     assertNull(r.route);
     assertNull(r.assocClass);
@@ -172,9 +173,9 @@ class ClassDiagramParser_V001Test {
   void aggregationCompositionUndirected() throws ClassDiagramParseException {
     List<AbstractRelationModel_V001> relations = parse("aggregation aaaaaaaa -- bbbbbbbb\ncomposition aaaaaaaa -> bbbbbbbb").relations();
     assertEquals(RelationType_V001.AGGREGATION, relations.get(0).type);
-    assertFalse(assertInstanceOf(AssociationRelationModel_V001.class, relations.get(0)).directed);
+    assertFalse(assertInstanceOf(AssociationRelationModel_V001.class, relations.get(0)).toArrow);
     assertEquals(RelationType_V001.COMPOSITION, relations.get(1).type);
-    assertTrue(assertInstanceOf(AssociationRelationModel_V001.class, relations.get(1)).directed);
+    assertTrue(assertInstanceOf(AssociationRelationModel_V001.class, relations.get(1)).toArrow);
   }
 
   /** Extends and implements become their own model classes. */
@@ -565,5 +566,47 @@ class ClassDiagramParser_V001Test {
     ClassDiagramParseException e = assertThrows(ClassDiagramParseException.class,
         () -> parse("enum Color {\n  RED : int\n}"));
     assertTrue(e.getMessage().contains("no type"), e.getMessage());
+  }
+
+  /** An association can have an arrowhead at the source (<-), at both ends (<->), at the target (->) or none (--). */
+  @Test
+  void arrowheadsAtBothEnds() throws ClassDiagramParseException {
+    List<AbstractRelationModel_V001> relations = parse("""
+        class A (aaaaaaaa)
+        class B (bbbbbbbb)
+        association aaaaaaaa <- bbbbbbbb
+        association aaaaaaaa <-> bbbbbbbb
+        association aaaaaaaa -> bbbbbbbb
+        association aaaaaaaa -- bbbbbbbb
+        """).relations();
+    boolean[][] expected = {{true, false}, {true, true}, {false, true}, {false, false}};
+    for (int i = 0; i < expected.length; i++) {
+      AssociationRelationModel_V001 relation = assertInstanceOf(AssociationRelationModel_V001.class, relations.get(i));
+      assertEquals(expected[i][0], relation.fromArrow, "from of " + i);
+      assertEquals(expected[i][1], relation.toArrow, "to of " + i);
+    }
+  }
+
+  /** The source of an aggregation or composition has the diamond: no arrowhead there. */
+  @Test
+  void noArrowheadAtTheDiamond() {
+    ClassDiagramParseException e = assertThrows(ClassDiagramParseException.class,
+        () -> parse("class A (aaaaaaaa)\nclass B (bbbbbbbb)\ncomposition aaaaaaaa <-> bbbbbbbb"));
+    assertTrue(e.getMessage().contains("diamond"), e.getMessage());
+  }
+
+  /** An end of a route can be linked to the center of its class: classId.center. */
+  @Test
+  void centerAnchorInRoute() throws ClassDiagramParseException {
+    AbstractRelationModel_V001 relation = parse("""
+        class A (aaaaaaaa)
+        class B (bbbbbbbb)
+        association aaaaaaaa -- bbbbbbbb
+          route aaaaaaaa.center (10, 20) bbbbbbbb.top@5
+        """).relations().get(0);
+    assertTrue(relation.route.start.center);
+    assertEquals("aaaaaaaa", relation.route.start.classId);
+    assertFalse(relation.route.end.center);
+    assertEquals(5, relation.route.end.offset);
   }
 }

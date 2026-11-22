@@ -2,6 +2,7 @@ package classman.render;
 
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
+import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
 
 import java.awt.geom.Point2D;
@@ -37,14 +38,18 @@ public class RelationDecorator {
         }
         if (relation.type == RelationType_V001.EXTENDS || relation.type == RelationType_V001.IMPLEMENTS) {
             decorations.add(triangle(end, endDirection, triangleFill, lineColor));
-        } else if (isDirected(relation)) {
+        } else if (hasArrow(relation, RelationEnd_V001.TO)) {
             decorations.add(arrow(end, endDirection, lineColor));
+        }
+        if (hasArrow(relation, RelationEnd_V001.FROM)) {
+            decorations.add(arrow(start, startDirection, lineColor));
         }
         return decorations;
     }
 
-    private boolean isDirected(AbstractRelationModel_V001 relation) {
-        return relation instanceof AssociationRelationModel_V001 association && association.directed;
+    private boolean hasArrow(AbstractRelationModel_V001 relation, RelationEnd_V001 end) {
+        return relation instanceof AssociationRelationModel_V001 association
+            && (end == RelationEnd_V001.FROM ? association.fromArrow : association.toArrow);
     }
 
     /**

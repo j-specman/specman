@@ -64,7 +64,7 @@ class RelationCreationTest {
     assertEquals(RelationType_V001.ASSOCIATION, relation.type);
     assertEquals("11111111", relation.fromId);
     assertEquals("22222222", relation.toId);
-    assertTrue(relation.directed);
+    assertTrue(relation.toArrow);
     assertNotNull(relation.id);
     assertNull(relation.change);
     assertFalse(editing.isRelationToolArmed());
@@ -193,7 +193,7 @@ class RelationCreationTest {
       assertEquals(type, relation.type);
       assertEquals("11111111", relation.fromId);
       assertEquals("22222222", relation.toId);
-      assertFalse(relation.directed);
+      assertFalse(relation.toArrow);
       assertFalse(editing.isRelationToolArmed());
     }
   }
@@ -266,7 +266,7 @@ class RelationCreationTest {
       assertFalse(drawn(CLASS_AND_ENUM, type, 1, 0), type + " enum to class");
     }
     assertTrue(drawn(CLASS_AND_ENUM, RelationType_V001.ASSOCIATION, 0, 1));
-    assertTrue(((AssociationRelationModel_V001) relationOf(editing.source())).directed);
+    assertTrue(((AssociationRelationModel_V001) relationOf(editing.source())).toArrow);
   }
 
   /** An enum neither extends nor is extended, but it may implement an interface. */

@@ -35,13 +35,30 @@ public class RelationPathBuilder {
         return path;
     }
 
+    /** An end which is linked to the center of its class leaves the class towards the next point of the line: the first
+     * waypoint, else the other end, else the center of the other class. */
     private List<Point2D.Double> routedPath(RouteModel_V001 route, Map<String, Rectangle2D.Double> classAreas) {
         List<Point2D.Double> path = new ArrayList<>();
-        path.add(anchorPoint(route.start, classAreas));
+        List<Point2D.Double> inner = new ArrayList<>();
         for (PositionModel_V001 waypoint : route.waypoints) {
-            path.add(new Point2D.Double(waypoint.x, waypoint.y));
+            inner.add(new Point2D.Double(waypoint.x, waypoint.y));
         }
-        path.add(anchorPoint(route.end, classAreas));
+        Rectangle2D.Double startArea = areaOf(route.start.classId, classAreas);
+        Rectangle2D.Double endArea = areaOf(route.end.classId, classAreas);
+        Point2D.Double start = route.start.center ? null : anchorPoint(route.start, classAreas);
+        Point2D.Double end = route.end.center ? null : anchorPoint(route.end, classAreas);
+        if (start == null) {
+            Point2D.Double towards = !inner.isEmpty() ? inner.get(0) : end != null ? end : BoxGeometry.center(endArea);
+            start = BoxGeometry.exitPoint(startArea, towards);
+        }
+        if (end == null) {
+            Point2D.Double towards = !inner.isEmpty() ? inner.get(inner.size() - 1)
+                : route.start.center ? BoxGeometry.center(startArea) : start;
+            end = BoxGeometry.exitPoint(endArea, towards);
+        }
+        path.add(start);
+        path.addAll(inner);
+        path.add(end);
         return path;
     }
 

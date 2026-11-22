@@ -202,4 +202,27 @@ class ClassDiagramSerializer_V001Test {
     assertTrue(written.contains("enum Color (aaaaaaaa) {\n"), written);
     assertEquals(ClassDiagramDump.of(parser.parse(source)), ClassDiagramDump.of(parser.parse(written)));
   }
+
+  /** The four forms of the line of an association survive writing and reading again. */
+  @Test
+  void arrowTokensRoundTrip() throws Exception {
+    String source = "classdiagram {\n class A (aaaaaaaa)\n class B (bbbbbbbb)\n association aaaaaaaa <- bbbbbbbb\n"
+      + " association aaaaaaaa 1 <-> * bbbbbbbb\n association aaaaaaaa -> bbbbbbbb\n association aaaaaaaa -- bbbbbbbb\n}";
+    String written = roundTrip(source);
+    assertTrue(written.contains("aaaaaaaa <- bbbbbbbb\n"), written);
+    assertTrue(written.contains("aaaaaaaa 1 <-> * bbbbbbbb\n"), written);
+    assertTrue(written.contains("aaaaaaaa -> bbbbbbbb\n"), written);
+    assertTrue(written.contains("aaaaaaaa -- bbbbbbbb\n"), written);
+    assertEquals(ClassDiagramDump.of(parser.parse(source)), ClassDiagramDump.of(parser.parse(written)));
+  }
+
+  /** A center anchor is written as classId.center and read again. */
+  @Test
+  void centerAnchorRoundTrip() throws Exception {
+    String source = "classdiagram {\n class A (aaaaaaaa)\n class B (bbbbbbbb)\n association aaaaaaaa -- bbbbbbbb\n"
+      + "  route aaaaaaaa.center (10, 20) bbbbbbbb.center\n}";
+    String written = roundTrip(source);
+    assertTrue(written.contains("route aaaaaaaa.center (10, 20) bbbbbbbb.center\n"), written);
+    assertEquals(ClassDiagramDump.of(parser.parse(source)), ClassDiagramDump.of(parser.parse(written)));
+  }
 }

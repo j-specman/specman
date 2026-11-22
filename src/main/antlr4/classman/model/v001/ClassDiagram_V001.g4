@@ -11,9 +11,9 @@ grammar ClassDiagram_V001;
 // Keywords can't be unquoted class names. As attribute names, types and info texts they work unquoted.
 //
 // Relation types and how they are drawn:
-//   association    line, open arrowhead at the target with ->, no arrowhead with --
-//   aggregation    like association plus a hollow diamond at the source
-//   composition    like association plus a filled diamond at the source
+//   association    line, open arrowhead at the target with ->, at the source with <-, at both with <->, none with --
+//   aggregation    like association plus a hollow diamond at the source (so no <- or <->)
+//   composition    like association plus a filled diamond at the source (so no <- or <->)
 //   extends    hollow triangle at the target (the superclass), always ->, no multiplicities
 //   implements     dashed line, hollow triangle at the target (the interface), always ->, no multiplicities
 // Only association, aggregation and composition take multiplicities and an assocclass.
@@ -205,7 +205,7 @@ relation
 
 associationRelation
     : type=(ASSOCIATION | AGGREGATION | COMPOSITION) ELEMENT_ID? changeMark? from=HEX_ID (fromMultiplicity=multiplicity fromMultiplicityChange=textChange?)?
-      (ARROW | LINE) (toMultiplicity=multiplicity toMultiplicityChange=textChange?)? to=HEX_ID
+      (ARROW | LINE | BACK_ARROW | BOTH_ARROW) (toMultiplicity=multiplicity toMultiplicityChange=textChange?)? to=HEX_ID
       (label=QUOTED_STRING labelChange=textChange?)? route? assocClass?
     ;
 
@@ -227,8 +227,19 @@ bareMultiplicity
     | STAR
     ;
 
+// An end of the route is a point of the border of its class, or classId.center: linked to the center of the class, so
+// the line leaves the class where a line from the center to the next point crosses its border.
 route
-    : ROUTE anchor waypoint* anchor
+    : ROUTE routeAnchor waypoint* routeAnchor
+    ;
+
+routeAnchor
+    : anchor
+    | centerAnchor
+    ;
+
+centerAnchor
+    : HEX_ID DOT CENTER
     ;
 
 anchor
@@ -286,7 +297,7 @@ word
     : NAME
     | HEX_ID
     | CLASSDIAGRAM | CLASS | INTERFACE | ENUM | ASSOCCLASS | ASSOCIATION | AGGREGATION | COMPOSITION | EXTENDS | IMPLEMENTS
-    | NOTE | ROUTE | ANCHOR | CHANGE | WAS | AT | WIDTH | TOP | RIGHT | BOTTOM | LEFT
+    | NOTE | ROUTE | ANCHOR | CHANGE | WAS | AT | WIDTH | TOP | RIGHT | BOTTOM | LEFT | CENTER
     ;
 
 // ============================================================
@@ -314,8 +325,11 @@ TOP          : 'top' ;
 RIGHT        : 'right' ;
 BOTTOM       : 'bottom' ;
 LEFT         : 'left' ;
+CENTER       : 'center' ;
 
 ARROW        : '->' ;
+BACK_ARROW   : '<-' ;
+BOTH_ARROW   : '<->' ;
 LINE         : '--' ;
 ELLIPSIS     : '...' ;
 DOTDOT       : '..' ;

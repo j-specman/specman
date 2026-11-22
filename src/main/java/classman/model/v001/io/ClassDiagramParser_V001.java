@@ -20,6 +20,7 @@ import classman.model.v001.ClassDiagram_V001Parser.BackupTextContext;
 import classman.model.v001.ClassDiagram_V001Parser.ChangeMarkContext;
 import classman.model.v001.ClassDiagram_V001Parser.ClassBodyContext;
 import classman.model.v001.ClassDiagram_V001Parser.ClassDeclContext;
+import classman.model.v001.ClassDiagram_V001Parser.RouteAnchorContext;
 import classman.model.v001.ClassDiagram_V001Parser.ClassDiagramContext;
 import classman.model.v001.ClassDiagram_V001Parser.ClassHeadContext;
 import classman.model.v001.ClassDiagram_V001Parser.DiagramNameContext;
@@ -49,6 +50,7 @@ import classman.model.v001.ImplementsRelationModel_V001;
 import classman.model.v001.InfoModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
+import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.RouteModel_V001;
 import classman.model.v001.Side_V001;
@@ -253,7 +255,13 @@ public class ClassDiagramParser_V001 {
         model.toMultiplicity = multiplicity(ctx.toMultiplicity);
         model.fromMultiplicityChange = textChange(ctx.fromMultiplicityChange);
         model.toMultiplicityChange = textChange(ctx.toMultiplicityChange);
-        model.directed = ctx.ARROW() != null;
+        model.fromArrow = ctx.BACK_ARROW() != null || ctx.BOTH_ARROW() != null;
+        model.toArrow = ctx.ARROW() != null || ctx.BOTH_ARROW() != null;
+        if (model.fromArrow && !type.canHaveArrowAt(RelationEnd_V001.FROM)) {
+            Token token = ctx.BACK_ARROW() != null ? ctx.BACK_ARROW().getSymbol() : ctx.BOTH_ARROW().getSymbol();
+            throw new ClassDiagramParseException("line " + token.getLine() + ":" + token.getCharPositionInLine()
+                + " The source of an " + type.name().toLowerCase(Locale.ROOT) + " has the diamond and no arrowhead.");
+        }
         fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.route());
         if (ctx.assocClass() != null) {
             model.assocClass = buildClass(ClassKind_V001.CLASS, ctx.assocClass().classHead(), ctx.assocClass().classBody());
@@ -292,12 +300,19 @@ public class ClassDiagramParser_V001 {
     }
 
     private RouteModel_V001 buildRoute(RouteContext route) {
-        List<AnchorContext> anchors = route.anchor();
+        List<RouteAnchorContext> anchors = route.routeAnchor();
         List<PositionModel_V001> waypoints = new ArrayList<>();
         for (WaypointContext waypoint : route.waypoint()) {
             waypoints.add(position(waypoint.NUMBER(0), waypoint.NUMBER(1)));
         }
-        return new RouteModel_V001(buildAnchor(anchors.get(0)), waypoints, buildAnchor(anchors.get(1)));
+        return new RouteModel_V001(buildRouteAnchor(anchors.get(0)), waypoints, buildRouteAnchor(anchors.get(1)));
+    }
+
+    private AnchorModel_V001 buildRouteAnchor(RouteAnchorContext anchor) {
+        if (anchor.centerAnchor() != null) {
+            return AnchorModel_V001.center(anchor.centerAnchor().HEX_ID().getText());
+        }
+        return buildAnchor(anchor.anchor());
     }
 
     private AnchorModel_V001 buildAnchor(AnchorContext anchor) {

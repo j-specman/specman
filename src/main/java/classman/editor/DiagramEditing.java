@@ -337,6 +337,103 @@ public class DiagramEditing {
     return placeholder != null && placeholder.element == selected ? placeholder : null;
   }
 
+  /** @return true if a relation is selected, and no other element, in particular no anchor line */
+  public boolean isRelationSelected() {
+    return selected instanceof AbstractRelationModel_V001;
+  }
+
+  /** @return the end of the selected relation or anchor line whose handle is at the point: the handle at the start of
+   * its line is the end FROM (for an anchor line the end on the note), the one at the end of its line the end TO (the
+   * end on the target). Null if the point is on no such handle or no such line is selected. */
+  public RelationEnd_V001 endHandleAt(Point2D point, double tolerance) {
+    if (!(selected instanceof AbstractRelationModel_V001) && !(selected instanceof AnchorLineModel_V001)) {
+      return null;
+    }
+    int handle = handleIndexAt(point, tolerance);
+    if (handle < 0) {
+      return null;
+    }
+    if (handle == 0) {
+      return RelationEnd_V001.FROM;
+    }
+    return handle == selectedHandles().size() - 1 ? RelationEnd_V001.TO : null;
+  }
+
+  /** @return true if the selected relation has an arrowhead at the end */
+  public boolean hasArrowAt(RelationEnd_V001 end) {
+    return selected instanceof AssociationRelationModel_V001 association
+      && (end == RelationEnd_V001.FROM ? association.fromArrow : association.toArrow);
+  }
+
+  /** @return true if the user may switch the arrowhead of the selected relation at the end. The relation must be one
+   * which can have an arrowhead there (an association at both ends, an aggregation or composition at the target), and
+   * must not run to or from an enum, which doesn't know who uses it and so is only ever the target of a directed
+   * association. A removed relation can't be switched. The switching is no change which a change set tracks, so it is
+   * possible with and without change tracking, and marks nothing. */
+  public boolean canSwitchArrowAt(RelationEnd_V001 end) {
+    if (!(selected instanceof AssociationRelationModel_V001 relation) || !relation.type.canHaveArrowAt(end)
+      || involvesEnum(relation)) {
+      return false;
+    }
+    return relation.change == null || relation.change.type == ChangeType_V001.ADDED;
+  }
+
+  private boolean involvesEnum(AbstractRelationModel_V001 relation) {
+    for (ClassModel_V001 box : model.classes()) {
+      if (box.kind == ClassKind_V001.ENUM && box.id != null
+        && (box.id.equals(relation.fromId) || box.id.equals(relation.toId))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Switches the arrowhead of the selected relation at the end on if it is off and off if it is on. Not marked as a
+   * change, see {@link #canSwitchArrowAt}. One operation. Nothing happens if the user may not switch it. */
+  public void toggleArrowAt(RelationEnd_V001 end) {
+    if (!canSwitchArrowAt(end)) {
+      return;
+    }
+    AssociationRelationModel_V001 association = (AssociationRelationModel_V001) selected;
+    if (end == RelationEnd_V001.FROM) {
+      association.fromArrow = !association.fromArrow;
+    }
+    else {
+      association.toArrow = !association.toArrow;
+    }
+    publish();
+  }
+
+  /** @return true if the end of the selected relation or anchor line is fixed at a point of the border of its box (a
+   * point of the line of a relation, for the end of an anchor line on a relation), so that it can be linked to the
+   * center of the box again */
+  public boolean canCenterEnd(RelationEnd_V001 end) {
+    if (selected instanceof AnchorLineModel_V001 anchorLine) {
+      return (end == RelationEnd_V001.FROM ? anchorLine.start : anchorLine.end) != null;
+    }
+    if (!(selected instanceof AbstractRelationModel_V001 relation) || relation.route == null) {
+      return false;
+    }
+    return !(end == RelationEnd_V001.FROM ? relation.route.start : relation.route.end).center;
+  }
+
+  /** Links the end of the selected relation or anchor line to the center of its box again: the line leaves the box
+   * where a line from the center towards the next point of the line crosses its border, like a line without a route.
+   * A route which then has no waypoints and no fixed end is dropped. Not marked as a change, a route never is. One
+   * operation. */
+  public void centerEnd(RelationEnd_V001 end) {
+    if (!canCenterEnd(end)) {
+      return;
+    }
+    if (selected instanceof AnchorLineModel_V001 anchorLine) {
+      routeEditing.centerEnd(anchorLine, end);
+    }
+    else {
+      routeEditing.centerEnd((AbstractRelationModel_V001) selected, end);
+    }
+    publish();
+  }
+
   /** @return where the selected relation could get the texts which it doesn't have yet, empty if no relation is
    * selected or it has all */
   public List<Rectangle2D> selectedPlaceholders() {
@@ -835,7 +932,7 @@ public class DiagramEditing {
       case IMPLEMENTS -> new ImplementsRelationModel_V001(fromId, toId);
       default -> {
         AssociationRelationModel_V001 association = new AssociationRelationModel_V001(armedRelationType, fromId, toId);
-        association.directed = armedRelationType == RelationType_V001.ASSOCIATION;
+        association.toArrow = armedRelationType == RelationType_V001.ASSOCIATION;
         yield association;
       }
     };

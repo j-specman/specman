@@ -13,7 +13,7 @@ import java.util.function.DoubleUnaryOperator;
  * which the cursor shows. Distances which the user judges on the screen are given in pixels and
  * turned into units of the diagram, so they feel the same at every zoom. */
 class PointerControl implements PointerListener {
-  private static final double HIT_PIXELS = 4;
+  static final double HIT_PIXELS = 4;
   private static final double SNAP_PIXELS = 6;
 
   private final DiagramEditing editing;
@@ -101,8 +101,9 @@ class PointerControl implements PointerListener {
     }
   }
 
-  /** The context menu selects what is below the point, like a press, and is shown if that is a class or a note. Nothing
-   * else has a menu yet, and nothing happens while a tool is armed. */
+  /** The context menu selects what is below the point, like a press, and is shown if that is a class or a note, or an
+   * end handle of the selected relation (the press doesn't select anything else there). Nothing else has a menu yet, and
+   * nothing happens while a tool is armed. */
   @Override
   public void contextMenuRequested(Point2D at) {
     if (editing.isToolArmed()) {
@@ -110,7 +111,8 @@ class PointerControl implements PointerListener {
     }
     editing.selectAt(at, toDiagramLength.applyAsDouble(HIT_PIXELS));
     showDiagram.run();
-    if (editing.selectedClass() != null || editing.selectedNote() != null) {
+    boolean onEndHandle = editing.endHandleAt(at, toDiagramLength.applyAsDouble(HIT_PIXELS)) != null;
+    if (editing.selectedClass() != null || editing.selectedNote() != null || onEndHandle) {
       showContextMenu.accept(at);
     }
   }

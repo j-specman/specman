@@ -174,4 +174,11 @@ class RelationLayouterTest {
     assertTrue(relationLine(scene).dashed);
     assertEquals(3, all(scene, ScenePolygon.class).get(0).xs.length);
   }
+
+  /** An association with an arrowhead at both ends is drawn with both. */
+  @Test
+  void arrowheadsAtBothEnds() throws ClassDiagramParseException {
+    Scene both = layout(STACKED + "association aaaaaaaa <-> bbbbbbbb");
+    assertEquals(2, all(both, ScenePolyline.class).stream().filter(line -> line.xs.length == 3).count());
+  }
 }

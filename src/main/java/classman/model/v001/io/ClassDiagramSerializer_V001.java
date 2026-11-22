@@ -177,6 +177,13 @@ public class ClassDiagramSerializer_V001 {
 
     // ---- relations ----
 
+    private static String arrowToken(AssociationRelationModel_V001 association) {
+        if (association.fromArrow) {
+            return association.toArrow ? " <->" : " <-";
+        }
+        return association.toArrow ? " ->" : " --";
+    }
+
     private void appendRelation(StringBuilder out, AbstractRelationModel_V001 relation) {
         out.append(INDENT).append(relation.type.name().toLowerCase(Locale.ROOT));
         appendId(out, relation.id);
@@ -184,7 +191,7 @@ public class ClassDiagramSerializer_V001 {
         out.append(' ').append(relation.fromId);
         if (relation instanceof AssociationRelationModel_V001 association) {
             appendMultiplicity(out, association.fromMultiplicity, association.fromMultiplicityChange);
-            out.append(association.directed ? " ->" : " --");
+            out.append(arrowToken(association));
             appendMultiplicity(out, association.toMultiplicity, association.toMultiplicityChange);
         } else {
             out.append(" ->");
@@ -226,6 +233,9 @@ public class ClassDiagramSerializer_V001 {
     private String anchor(AnchorModel_V001 anchor) {
         if (anchor.isOnLine()) {
             return anchor.classId + "@" + anchor.offset + "%";
+        }
+        if (anchor.center) {
+            return anchor.classId + ".center";
         }
         return anchor.classId + "." + anchor.side.name().toLowerCase(Locale.ROOT) + "@" + anchor.offset;
     }

@@ -1,6 +1,7 @@
 package classman.editor;
 
 import classman.model.v001.ClassKind_V001;
+import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 
@@ -148,9 +149,17 @@ public class ClassDiagramEditorWindow extends JDialog {
 
   private void showContextMenu(Point2D at) {
     Rectangle where = canvas.toCanvas(new Rectangle2D.Double(at.getX(), at.getY(), 0, 0));
-    JPopupMenu menu = editing.selectedClass() != null
-      ? new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, this::showDiagram)
-      : new NoteContextMenu(editing, editing.selectedNote(), texts, this::showDiagram);
+    RelationEnd_V001 end = editing.endHandleAt(at, canvas.toDiagramLength(PointerControl.HIT_PIXELS));
+    JPopupMenu menu;
+    if (end != null) {
+      menu = new LineEndContextMenu(editing, end, texts, this::showDiagram);
+    }
+    else if (editing.selectedClass() != null) {
+      menu = new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, this::showDiagram);
+    }
+    else {
+      menu = new NoteContextMenu(editing, editing.selectedNote(), texts, this::showDiagram);
+    }
     menu.show(canvas, where.x, where.y);
   }
 
