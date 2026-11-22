@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.ClassKind_V001;
 import classman.model.v001.RelationType_V001;
 
 import javax.swing.AbstractButton;
@@ -18,13 +19,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
 /** The vertical tool bar at the left edge of the editor window. Buttons show an icon and a text, or an icon only,
  * which the button at the bottom switches. The most important element comes first, at the top. A class or a note is
  * dragged from its button onto the diagram, the button of a tool for relations is switched on and then used on the
- * diagram. The relation buttons have variants, see {@link RelationVariantButton}. */
+ * diagram. The relation buttons have variants, see {@link VariantButton}. */
 class EditorPalette extends JToolBar {
   private static final String PREF_SHOW_TEXT = "paletteShowText";
   private static final float TEXT_SCALE = 1.2f;
@@ -32,19 +34,20 @@ class EditorPalette extends JToolBar {
 
   private final EditorTexts texts;
   private final List<AbstractButton> elementButtons = new ArrayList<>();
-  private final List<RelationVariantButton> relationButtons = new ArrayList<>();
+  private final List<VariantButton<RelationType_V001>> relationButtons = new ArrayList<>();
   private final JToggleButton anchorToolButton = new JToggleButton();
   private final JButton toggleButton = new JButton();
   private final Map<AbstractButton, String> labels = new HashMap<>();
   private final Map<AbstractButton, String> tooltips = new HashMap<>();
   private boolean showText;
 
-  /** @param classDropped gets the point on the screen where the class button was released
+  /** @param classDropped gets the kind of the class which the class button creates, and the point on the screen where
+   * it was released
    * @param noteDropped gets the point on the screen where the note button was released
    * @param relationToolToggled is run with the type of the relation when the button for drawing relations is pressed
    * @param relationTypeChosen is run with the type of the relation which the user chose in the menu of a button
    * @param anchorToolToggled is run when the button for drawing the anchor of a note is pressed */
-  EditorPalette(EditorTexts texts, Consumer<Point> classDropped, Consumer<Point> noteDropped,
+  EditorPalette(EditorTexts texts, BiConsumer<ClassKind_V001, Point> classDropped, Consumer<Point> noteDropped,
                 Consumer<RelationType_V001> relationToolToggled, Consumer<RelationType_V001> relationTypeChosen,
                 Runnable anchorToolToggled) {
     super(JToolBar.VERTICAL);
@@ -56,15 +59,15 @@ class EditorPalette extends JToolBar {
     toggleButton.setAlignmentX(Component.LEFT_ALIGNMENT);
     toggleButton.addActionListener(e -> toggleShowText());
 
-    addDragButton("class", EditorIcons.CLASS, classDropped);
+    addClassButton(classDropped);
     addDragButton("note", EditorIcons.NOTE, noteDropped);
     addRelationButton("variantAssociation", relationToolToggled, relationTypeChosen,
-      new RelationVariant(RelationType_V001.ASSOCIATION, EditorIcons.ASSOCIATION),
-      new RelationVariant(RelationType_V001.AGGREGATION, EditorIcons.AGGREGATION),
-      new RelationVariant(RelationType_V001.COMPOSITION, EditorIcons.COMPOSITION));
+      new PaletteVariant<>("association", RelationType_V001.ASSOCIATION, EditorIcons.ASSOCIATION),
+      new PaletteVariant<>("aggregation", RelationType_V001.AGGREGATION, EditorIcons.AGGREGATION),
+      new PaletteVariant<>("composition", RelationType_V001.COMPOSITION, EditorIcons.COMPOSITION));
     addRelationButton("variantInheritance", relationToolToggled, relationTypeChosen,
-      new RelationVariant(RelationType_V001.EXTENDS, EditorIcons.EXTENDS),
-      new RelationVariant(RelationType_V001.IMPLEMENTS, EditorIcons.IMPLEMENTS));
+      new PaletteVariant<>("extends", RelationType_V001.EXTENDS, EditorIcons.EXTENDS),
+      new PaletteVariant<>("implements", RelationType_V001.IMPLEMENTS, EditorIcons.IMPLEMENTS));
     addToolButton("anchor", EditorIcons.ANCHOR, anchorToolButton, anchorToolToggled);
 
     add(Box.createVerticalGlue());
@@ -76,10 +79,24 @@ class EditorPalette extends JToolBar {
   private void addDragButton(String key, String iconPath, Consumer<Point> dropped) {
     JButton button = new JButton();
     Icon icon = EditorIcons.read(iconPath, EditorIcons.SIZE);
-    PaletteDragAdapter dragAdapter = new PaletteDragAdapter(texts.get("palette.label." + key), icon, dropped);
+    PaletteDragAdapter dragAdapter = new PaletteDragAdapter(() -> texts.get("palette.label." + key), () -> icon,
+      dropped);
     button.addMouseListener(dragAdapter);
     button.addMouseMotionListener(dragAdapter);
     addElementButton(button, key, icon);
+  }
+
+  private void addClassButton(BiConsumer<ClassKind_V001, Point> dropped) {
+    VariantButton<ClassKind_V001> button = new VariantButton<>(texts, List.of(
+      new PaletteVariant<>("class", ClassKind_V001.CLASS, EditorIcons.CLASS),
+      new PaletteVariant<>("interface", ClassKind_V001.INTERFACE, EditorIcons.INTERFACE)), "variantClass", kind -> { });
+    PaletteDragAdapter dragAdapter = new PaletteDragAdapter(button::currentLabel,
+      () -> EditorIcons.read(button.currentIconPath(), EditorIcons.SIZE),
+      screenPoint -> dropped.accept(button.currentValue(), screenPoint));
+    button.addMouseListener(dragAdapter);
+    button.addMouseMotionListener(dragAdapter);
+    styleElementButton(button);
+    add(button);
   }
 
   private void addToolButton(String key, String iconPath, JToggleButton button, Runnable toggled) {
@@ -88,9 +105,9 @@ class EditorPalette extends JToolBar {
   }
 
   private void addRelationButton(String preferenceKey, Consumer<RelationType_V001> toggled,
-                                 Consumer<RelationType_V001> chosen, RelationVariant... variants) {
-    RelationVariantButton button = new RelationVariantButton(texts, List.of(variants), preferenceKey, chosen);
-    button.addActionListener(e -> toggled.accept(button.currentType()));
+                                 Consumer<RelationType_V001> chosen, PaletteVariant<RelationType_V001>... variants) {
+    VariantButton<RelationType_V001> button = new VariantButton<>(texts, List.of(variants), preferenceKey, chosen);
+    button.addActionListener(e -> toggled.accept(button.currentValue()));
     styleElementButton(button);
     relationButtons.add(button);
     add(button);
@@ -118,10 +135,10 @@ class EditorPalette extends JToolBar {
   /** Shows which tool is armed, if one is, as a pressed button. The button of a relation shows the type which is armed.
    * @param armedRelationType null if the tool for relations isn't armed */
   void showToolsArmed(RelationType_V001 armedRelationType, boolean isAnchorToolArmed) {
-    for (RelationVariantButton button : relationButtons) {
+    for (VariantButton<RelationType_V001> button : relationButtons) {
       boolean isArmed = armedRelationType != null && button.offers(armedRelationType);
       if (isArmed) {
-        button.showType(armedRelationType);
+        button.showValue(armedRelationType);
       }
       button.setSelected(isArmed);
     }
@@ -144,7 +161,7 @@ class EditorPalette extends JToolBar {
       EditorIcons.TOGGLE_SIZE));
     toggleButton.setToolTipText(texts.get(showText ? "palette.toggle.icons.only" : "palette.toggle.icons.text"));
     for (AbstractButton button : elementButtons) {
-      if (button instanceof RelationVariantButton variantButton) {
+      if (button instanceof VariantButton<?> variantButton) {
         variantButton.showText(showText);
       }
       else {

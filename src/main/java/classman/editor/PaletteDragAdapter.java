@@ -12,6 +12,7 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /** Makes a palette button a drag source: while the mouse is dragged, a small window with the icon and label of the
  * button follows it, and where the mouse is released, the screen point is reported. A click without a drag creates
@@ -20,13 +21,15 @@ class PaletteDragAdapter extends MouseAdapter {
   private static final int DRAG_THRESHOLD = 6;
   private static final int GHOST_OFFSET = 8;
 
-  private final String label;
-  private final Icon icon;
+  private final Supplier<String> label;
+  private final Supplier<Icon> icon;
   private final Consumer<Point> dropped;
   private Point pressedAt;
   private JWindow ghost;
 
-  PaletteDragAdapter(String label, Icon icon, Consumer<Point> dropped) {
+  /** @param label the text of the ghost, asked when the drag starts, since a button with variants changes it
+   * @param icon the icon of the ghost, asked when the drag starts */
+  PaletteDragAdapter(Supplier<String> label, Supplier<Icon> icon, Consumer<Point> dropped) {
     this.label = label;
     this.icon = icon;
     this.dropped = dropped;
@@ -62,7 +65,7 @@ class PaletteDragAdapter extends MouseAdapter {
 
   private JWindow newGhost(AbstractButton button) {
     JWindow window = new JWindow(SwingUtilities.getWindowAncestor(button));
-    JLabel content = new JLabel(label, icon, JLabel.LEADING);
+    JLabel content = new JLabel(label.get(), icon.get(), JLabel.LEADING);
     content.setOpaque(true);
     content.setBackground(UIManager.getColor("Panel.background"));
     content.setBorder(new LineBorder(Color.GRAY));

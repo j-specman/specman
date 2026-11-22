@@ -93,6 +93,20 @@ class ClassResizeTest {
     assertEquals(Cursor.CROSSHAIR_CURSOR, cursorAt(rightEdge()).getType());
   }
 
+  /** Where a selected relation hangs on the side of a class, its handle is there: the cursor is the usual one and not
+   * the one for the width, because a drag there moves the handle. Next to the handle it is the cursor for the width. */
+  @Test
+  void noResizeCursorOnHandle() throws ClassDiagramParseException {
+    open("classdiagram {\n  class A (11111111) at(10, 20) width=100 { x }\n"
+      + "  class B (22222222) at(300, 20) width=100 { x }\n  association 11111111 -- 22222222\n}");
+    Rectangle2D area = editing.scene().elementAreas.get(0).area;
+    editing.selectAt(new Point2D.Double(area.getMaxX() + 50, area.getCenterY()));
+    Point2D handle = editing.selectedHandles().get(0);
+
+    assertEquals(Cursor.DEFAULT_CURSOR, cursorAt(handle).getType());
+    assertEquals(Cursor.E_RESIZE_CURSOR, cursorAt(new Point2D.Double(area.getMaxX(), area.getMinY() + 2)).getType());
+  }
+
   /** A press at the side of a class, also a little outside of it, selects the class. */
   @Test
   void pressAtSideSelectsClass() throws ClassDiagramParseException {

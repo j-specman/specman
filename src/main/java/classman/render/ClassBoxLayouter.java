@@ -27,7 +27,8 @@ import static classman.render.DiagramStyle.VEILED_TEXT;
 import static classman.render.DiagramStyle.WHITE;
 
 /**
- * Lays out one class box: header with stereotype, name and tagged values, then the attributes. An added or removed
+ * Lays out one class box: header with stereotype, name and tagged values, then the attributes. An interface shows
+ * <<interface>> above its other stereotype and has no attributes. An added or removed
  * class gets a frame, a removed one is veiled and its name struck through. The texts and attributes of such a class
  * are not marked on their own. In any other class a changed text gets a colored background, an added or removed
  * attribute a colored row.
@@ -56,20 +57,23 @@ public class ClassBoxLayouter {
         boolean isRemoved = change != null && change.type == ChangeType_V001.REMOVED;
         String textColor = isRemoved ? VEILED_TEXT : null;
         String lineColor = isRemoved ? VEILED_STROKE : STROKE;
+        String derivedStereotype = model.kind.derivedStereotype == null ? null
+            : stereotypeText(model.kind.derivedStereotype);
         String stereotype = model.stereotype == null ? null : stereotypeText(model.stereotype);
         List<MarkedText> taggedValues = taggedValueTexts(model);
         List<MarkedText> attributes = attributeTexts(model);
-        double contentWidth = contentWidth(model, stereotype, taggedValues, attributes);
+        double contentWidth = contentWidth(model, derivedStereotype, stereotype, taggedValues, attributes);
         double width = contentWidth + 2 * PADDING_X;
 
         List<AbstractSceneElement> backgrounds = new ArrayList<>();
         List<AbstractSceneElement> elements = new ArrayList<>();
         List<AbstractSceneElement> overlays = new ArrayList<>();
         double y = PADDING_Y;
+        y = addClippedCenteredText(elements, new ArrayList<>(), derivedStereotype, contentWidth, width, y, textColor);
+        double stereotypeTop = y;
         List<SceneText> stereotypeLines = new ArrayList<>();
         y = addClippedCenteredText(elements, stereotypeLines, stereotype, contentWidth, width, y, textColor);
         double nameTop = y;
-        double stereotypeTop = PADDING_Y;
         List<SceneText> nameLines = new ArrayList<>();
         y = addCenteredText(elements, nameLines, model.name, true, contentWidth, width, y,
             isRemoved ? VEILED_MARKED_TEXT : null);
@@ -87,13 +91,15 @@ public class ClassBoxLayouter {
             }
         }
         y += PADDING_Y;
-        elements.add(new SceneLine(0, y, width, y, false, lineColor, STROKE_WIDTH));
-        y += PADDING_Y;
         Map<String, Rectangle2D.Double> attributeAreas = new LinkedHashMap<>();
         Map<AttributeModel_V001, Rectangle2D.Double> lineAreas = new LinkedHashMap<>();
-        y = addAttributes(elements, backgrounds, overlays, model, attributes, width, y, attributeAreas, lineAreas,
-            textColor);
-        y += PADDING_Y;
+        if (model.kind.hasAttributes()) {
+            elements.add(new SceneLine(0, y, width, y, false, lineColor, STROKE_WIDTH));
+            y += PADDING_Y;
+            y = addAttributes(elements, backgrounds, overlays, model, attributes, width, y, attributeAreas, lineAreas,
+                textColor);
+            y += PADDING_Y;
+        }
 
         if (change == null) {
             addHeaderMarks(backgrounds, overlays, model, stereotypeLines, nameLines, taggedValues, taggedLines);
@@ -201,17 +207,20 @@ public class ClassBoxLayouter {
 
     // ---- width ----
 
-    private double contentWidth(ClassModel_V001 model, String stereotype, List<MarkedText> taggedValues,
-                                List<MarkedText> attributes) {
+    private double contentWidth(ClassModel_V001 model, String derivedStereotype, String stereotype,
+                                List<MarkedText> taggedValues, List<MarkedText> attributes) {
         if (model.width == null) {
-            return Math.max(naturalWidth(model, stereotype, taggedValues, attributes), MIN_BOX_WIDTH - 2 * PADDING_X);
+            return Math.max(naturalWidth(model, derivedStereotype, stereotype, taggedValues, attributes), MIN_BOX_WIDTH - 2 * PADDING_X);
         }
         return Math.max(model.width - 2 * PADDING_X, wrapper.longestWord(model.name, true));
     }
 
-    private double naturalWidth(ClassModel_V001 model, String stereotype, List<MarkedText> taggedValues,
-                                List<MarkedText> attributes) {
+    private double naturalWidth(ClassModel_V001 model, String derivedStereotype, String stereotype,
+                                List<MarkedText> taggedValues, List<MarkedText> attributes) {
         double widest = measurer.width(model.name, true);
+        if (derivedStereotype != null) {
+            widest = Math.max(widest, measurer.width(derivedStereotype, false));
+        }
         if (stereotype != null) {
             widest = Math.max(widest, measurer.width(TextWrapper.oneLine(stereotype), false));
         }

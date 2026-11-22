@@ -96,9 +96,10 @@ element
 
 // ------------------------------------------------------------ classes
 
-// The body is optional, class Hello is a complete class.
+// The body is optional, class Hello is a complete class. An interface has no attributes and so no body.
 classDecl
     : CLASS classHead classBody?
+    | INTERFACE classHead
     ;
 
 // Fixed order. The ID and the change mark after the name belong to the class, those after the stereotype to the
@@ -282,7 +283,7 @@ linePoint
 word
     : NAME
     | HEX_ID
-    | CLASSDIAGRAM | CLASS | ASSOCCLASS | ASSOCIATION | AGGREGATION | COMPOSITION | EXTENDS | IMPLEMENTS
+    | CLASSDIAGRAM | CLASS | INTERFACE | ASSOCCLASS | ASSOCIATION | AGGREGATION | COMPOSITION | EXTENDS | IMPLEMENTS
     | NOTE | ROUTE | ANCHOR | CHANGE | WAS | AT | WIDTH | TOP | RIGHT | BOTTOM | LEFT
     ;
 
@@ -292,6 +293,7 @@ word
 
 CLASSDIAGRAM : 'classdiagram' ;
 CLASS        : 'class' ;
+INTERFACE    : 'interface' ;
 ASSOCCLASS   : 'assocclass' ;
 ASSOCIATION  : 'association' ;
 AGGREGATION  : 'aggregation' ;

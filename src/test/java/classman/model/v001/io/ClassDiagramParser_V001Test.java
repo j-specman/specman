@@ -7,6 +7,7 @@ import classman.model.v001.AssociationRelationModel_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
+import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.ExtendsRelationModel_V001;
 import classman.model.v001.ImplementsRelationModel_V001;
@@ -531,5 +532,16 @@ class ClassDiagramParser_V001Test {
   @Test
   void multiLineBackup() throws ClassDiagramParseException {
     assertTextChange("yellow", "one\ntwo", parse("note \"n\" was(yellow, \"one\\ntwo\")").notes().get(0).textChange);
+  }
+
+  /** An interface is a class box of its own kind, with the head of a class and no body. */
+  @Test
+  void interfaceDeclaration() throws ClassDiagramParseException {
+    ClassModel_V001 box = onlyClass("interface Runnable (aaaaaaaa) at(10, 20) <<Service>>");
+    assertEquals(ClassKind_V001.INTERFACE, box.kind);
+    assertEquals("Runnable", box.name);
+    assertEquals("Service", box.stereotype);
+    assertEquals(ClassKind_V001.CLASS, onlyClass("class Runnable").kind);
+    assertThrows(ClassDiagramParseException.class, () -> parse("interface I { x }"));
   }
 }

@@ -69,7 +69,7 @@ public class ClassDiagramSerializer_V001 {
 
     private void appendElement(StringBuilder out, AbstractDiagramElementModel_V001 element) {
         if (element instanceof ClassModel_V001 classModel) {
-            appendClass(out, INDENT, "class", classModel);
+            appendClass(out, INDENT, classModel.kind.keyword, classModel);
         } else if (element instanceof AbstractRelationModel_V001 relation) {
             appendRelation(out, relation);
         } else if (element instanceof NoteModel_V001 note) {

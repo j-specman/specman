@@ -17,7 +17,7 @@ class ClassContextMenu extends JPopupMenu {
       () -> textEditor.startNewStereotype(box)));
     add(entry(texts.get("menu.class.add.taggedvalue"), editing.canAddPartsTo(box),
       () -> textEditor.startNewTaggedValue(box)));
-    add(entry(texts.get("menu.class.add.attribute"), editing.canAddPartsTo(box),
+    add(entry(texts.get("menu.class.add.attribute"), editing.canAddAttributeTo(box),
       () -> textEditor.startNewAttribute(box)));
     addSeparator();
     add(new AutomaticWidthMenuItem(editing, box, texts, showDiagram));

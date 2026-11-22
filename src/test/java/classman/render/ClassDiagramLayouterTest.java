@@ -229,4 +229,24 @@ class ClassDiagramLayouterTest {
     ScenePolygon note = all(scene, ScenePolygon.class).get(0);
     assertEquals(box.y + box.height + STACK_GAP, note.ys[0]);
   }
+
+  /** An interface shows <<interface>> above its name, in the line of a stereotype, and has no attribute part. */
+  @Test
+  void interfaceBox() throws ClassDiagramParseException {
+    Scene scene = layout("interface Runnable at(0, 0)");
+    SceneRectangle box = all(scene, SceneRectangle.class).get(0);
+    assertEquals(2 * PADDING_Y + LINE * 2, box.height);
+    assertTrue(texts(scene).contains("<<interface>>"));
+    assertTrue(all(scene, SceneLine.class).isEmpty());
+  }
+
+  /** The stereotype of an interface comes below <<interface>>, and the box is as wide as the longest of the two. */
+  @Test
+  void interfaceWithStereotype() throws ClassDiagramParseException {
+    Scene scene = layout("interface A at(0, 0) <<Service>>");
+    SceneText derived = textNamed(scene, "<<interface>>");
+    SceneText own = textNamed(scene, "<<Service>>");
+    assertEquals(LINE, own.y - derived.y);
+    assertEquals(13 * CHAR + 2 * PADDING_X, all(scene, SceneRectangle.class).get(0).width);
+  }
 }

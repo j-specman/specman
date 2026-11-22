@@ -3,8 +3,9 @@ package classman.model.v001;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Model of a class box, also used for the class of an association. */
+/** Model of a class box or an interface box, also used for the class of an association. */
 public class ClassModel_V001 extends AbstractBoxModel_V001 {
+    public final ClassKind_V001 kind;
     public String name;
     /** Null if no change set changed the name. */
     public TextChangeModel_V001 nameChange;
@@ -21,6 +22,11 @@ public class ClassModel_V001 extends AbstractBoxModel_V001 {
     public final List<AttributeModel_V001> attributes = new ArrayList<>();
 
     public ClassModel_V001(String name) {
+        this(name, ClassKind_V001.CLASS);
+    }
+
+    public ClassModel_V001(String name, ClassKind_V001 kind) {
         this.name = name;
+        this.kind = kind;
     }
 }

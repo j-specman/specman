@@ -11,6 +11,7 @@ final class EditorIcons {
   static final int TOGGLE_SIZE = 24;
 
   static final String CLASS = "classman/editor/icons/class.svg";
+  static final String INTERFACE = "classman/editor/icons/interface.svg";
   static final String NOTE = "classman/editor/icons/note.svg";
   static final String ASSOCIATION = "classman/editor/icons/association.svg";
   static final String AGGREGATION = "classman/editor/icons/aggregation.svg";

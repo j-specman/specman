@@ -25,6 +25,9 @@ class RelationCreationTest {
   private static final String TWO_CLASSES = "classdiagram {\n  class A (11111111) at(10, 20)\n"
     + "  class B (22222222) at(300, 20)\n}";
 
+  private static final String CLASS_AND_INTERFACE = "classdiagram {\n  class A (11111111) at(10, 20)\n"
+    + "  interface B (22222222) at(300, 20)\n}";
+
   private final RecordingEditorHost host = new RecordingEditorHost();
   private DiagramEditing editing;
   private PointerControl control;
@@ -206,10 +209,42 @@ class RelationCreationTest {
     assertEquals("11111111", extendsRelation.fromId);
     assertEquals("22222222", extendsRelation.toId);
 
-    open(TWO_CLASSES);
+    open(CLASS_AND_INTERFACE);
     editing.toggleRelationTool(RelationType_V001.IMPLEMENTS);
     draw(inClass(0), inClass(1));
     assertEquals(RelationType_V001.IMPLEMENTS, relationOf(editing.source()).type);
+  }
+
+  /** An implementation starts at a class and ends at an interface, nothing else: not between two classes, and not
+   * from an interface. */
+  @Test
+  void implementationOnlyFromClassToInterface() throws ClassDiagramParseException {
+    open(CLASS_AND_INTERFACE);
+    editing.toggleRelationTool(RelationType_V001.IMPLEMENTS);
+    draw(inClass(1), inClass(0));
+    assertTrue(new ClassDiagramParser_V001().parse(editing.source()).relations().isEmpty());
+
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.IMPLEMENTS);
+    draw(inClass(0), inClass(1));
+    assertTrue(new ClassDiagramParser_V001().parse(editing.source()).relations().isEmpty());
+    assertTrue(editing.isRelationToolArmed());
+  }
+
+  /** A class extends a class and an interface an interface, but a class can't extend an interface or the other way
+   * round. */
+  @Test
+  void inheritanceOnlyBetweenBoxesOfTheSameKind() throws ClassDiagramParseException {
+    open(CLASS_AND_INTERFACE);
+    editing.toggleRelationTool(RelationType_V001.EXTENDS);
+    draw(inClass(0), inClass(1));
+    draw(inClass(1), inClass(0));
+    assertTrue(new ClassDiagramParser_V001().parse(editing.source()).relations().isEmpty());
+
+    open("classdiagram {\n  interface A (11111111) at(10, 20)\n  interface B (22222222) at(300, 20)\n}");
+    editing.toggleRelationTool(RelationType_V001.EXTENDS);
+    draw(inClass(0), inClass(1));
+    assertEquals(RelationType_V001.EXTENDS, relationOf(editing.source()).type);
   }
 
   /** The button of another type changes what is drawn; the button of the type which is armed puts the tool away. */

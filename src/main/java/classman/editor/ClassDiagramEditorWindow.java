@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.ClassKind_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 
@@ -52,7 +53,7 @@ public class ClassDiagramEditorWindow extends JDialog {
       canvas::toDiagramLength));
     scrollPane = new JScrollPane(canvas);
 
-    palette = new EditorPalette(texts, screenPoint -> boxDropped(screenPoint, textEditor::startNewClass),
+    palette = new EditorPalette(texts, this::classDropped,
       screenPoint -> boxDropped(screenPoint, textEditor::startNewNote), this::relationToolToggled,
       this::relationTypeChosen, this::anchorToolToggled);
     getContentPane().add(palette, BorderLayout.WEST);
@@ -166,6 +167,10 @@ public class ClassDiagramEditorWindow extends JDialog {
   private void anchorToolToggled() {
     editing.toggleAnchorTool();
     showDiagram();
+  }
+
+  private void classDropped(ClassKind_V001 kind, Point screenPoint) {
+    boxDropped(screenPoint, kind == ClassKind_V001.INTERFACE ? textEditor::startNewInterface : textEditor::startNewClass);
   }
 
   /** @param startBox puts the new box at the point of the diagram, in whole units, and starts to type its text */

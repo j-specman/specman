@@ -184,4 +184,13 @@ class ClassDiagramSerializer_V001Test {
     String written = roundTrip("classdiagram { class A (aaaaaaaa)\n association aaaaaaaa -- aaaaaaaa \"\" was(yellow)\n}");
     assertTrue(written.contains("aaaaaaaa -- aaaaaaaa \"\" was(yellow)\n"), written);
   }
+
+  /** An interface is written with its own keyword and read again as one. */
+  @Test
+  void interfaceRoundTrip() throws Exception {
+    String source = "classdiagram { interface Runnable (aaaaaaaa) <<Service>> {A=1} class B }";
+    String written = roundTrip(source);
+    assertTrue(written.contains("interface Runnable (aaaaaaaa) <<Service>> {A=1}\n"), written);
+    assertEquals(ClassDiagramDump.of(parser.parse(source)), ClassDiagramDump.of(parser.parse(written)));
+  }
 }

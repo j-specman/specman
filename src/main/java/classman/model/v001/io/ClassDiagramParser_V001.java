@@ -5,6 +5,7 @@ import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AnchorLineModel_V001;
 import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
+import classman.model.v001.ClassKind_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
@@ -94,7 +95,8 @@ public class ClassDiagramParser_V001 {
 
     private AbstractDiagramElementModel_V001 buildElement(ElementContext element) throws ClassDiagramParseException {
         if (element.classDecl() != null) {
-            return buildClass(element.classDecl().classHead(), element.classDecl().classBody());
+            ClassKind_V001 kind = element.classDecl().INTERFACE() != null ? ClassKind_V001.INTERFACE : ClassKind_V001.CLASS;
+            return buildClass(kind, element.classDecl().classHead(), element.classDecl().classBody());
         }
         if (element.relation() != null) {
             return buildRelation(element.relation());
@@ -107,8 +109,9 @@ public class ClassDiagramParser_V001 {
 
     // ---- classes ----
 
-    private ClassModel_V001 buildClass(ClassHeadContext head, ClassBodyContext body) throws ClassDiagramParseException {
-        ClassModel_V001 model = new ClassModel_V001(text(head.name()));
+    private ClassModel_V001 buildClass(ClassKind_V001 kind, ClassHeadContext head, ClassBodyContext body)
+            throws ClassDiagramParseException {
+        ClassModel_V001 model = new ClassModel_V001(text(head.name()), kind);
         model.id = id(head.classId);
         model.nameChange = textChange(head.nameChange);
         model.change = change(head.classMark);
@@ -236,7 +239,7 @@ public class ClassDiagramParser_V001 {
         model.directed = ctx.ARROW() != null;
         fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.route());
         if (ctx.assocClass() != null) {
-            model.assocClass = buildClass(ctx.assocClass().classHead(), ctx.assocClass().classBody());
+            model.assocClass = buildClass(ClassKind_V001.CLASS, ctx.assocClass().classHead(), ctx.assocClass().classBody());
         }
         return model;
     }

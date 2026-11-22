@@ -36,14 +36,16 @@ class PointerControl implements PointerListener {
   }
 
   /** The cursor shows what a press would do: it draws a relation while the tool for relations is armed, it changes
-   * the width at the left or right side of a class or note. */
+   * the width at the left or right side of a class or note, except where a handle of the selected relation is: a drag there
+   * moves the handle. */
   @Override
   public Cursor cursorAt(Point2D at) {
     if (editing.isToolArmed()) {
       return Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
     }
-    ResizeTarget edge = editing.resizeTargetAt(at, toDiagramLength.applyAsDouble(HIT_PIXELS));
-    if (edge == null) {
+    double tolerance = toDiagramLength.applyAsDouble(HIT_PIXELS);
+    ResizeTarget edge = editing.resizeTargetAt(at, tolerance);
+    if (edge == null || editing.isOnHandle(at, tolerance)) {
       return Cursor.getDefaultCursor();
     }
     return Cursor.getPredefinedCursor(edge.side == ResizeSide.LEFT ? Cursor.W_RESIZE_CURSOR : Cursor.E_RESIZE_CURSOR);

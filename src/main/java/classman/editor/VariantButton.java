@@ -18,29 +18,26 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
-import classman.model.v001.RelationType_V001;
-
-/** A tool button of the palette which can draw several kinds of relations. It shows the icon and the text of the
+/** A button of the palette which can create several kinds of elements, or draw several kinds of relations. It shows the icon and the text of the
  * current kind and has a small arrow at its corner, which opens a menu with all kinds. Choosing one makes it the
  * current kind, which is remembered, and arms the tool for it. */
-class RelationVariantButton extends JToggleButton {
+class VariantButton<T> extends JToggleButton {
   private static final int ARROW_WIDTH = 7;
   private static final int ARROW_HEIGHT = 4;
   private static final int ARROW_ROOM = 12;
   private static final int ARROW_MARGIN = 4;
 
   private final EditorTexts texts;
-  private final List<RelationVariant> variants;
+  private final List<PaletteVariant<T>> variants;
   private final String preferenceKey;
-  private final Consumer<RelationType_V001> chosen;
-  private RelationVariant current;
+  private final Consumer<T> chosen;
+  private PaletteVariant<T> current;
   private boolean withText = true;
 
   /** @param variants the kinds of the button, the first one is current as long as the user hasn't chosen
    * @param preferenceKey where the choice is remembered
-   * @param chosen is run with the type of a kind which the user chose in the menu */
-  RelationVariantButton(EditorTexts texts, List<RelationVariant> variants, String preferenceKey,
-                        Consumer<RelationType_V001> chosen) {
+   * @param chosen is run with the value of a kind which the user chose in the menu */
+  VariantButton(EditorTexts texts, List<PaletteVariant<T>> variants, String preferenceKey, Consumer<T> chosen) {
     this.texts = texts;
     this.variants = variants;
     this.preferenceKey = preferenceKey;
@@ -49,45 +46,49 @@ class RelationVariantButton extends JToggleButton {
     show(current);
   }
 
-  RelationType_V001 currentType() {
-    return current.type;
+  T currentValue() {
+    return current.value;
+  }
+
+  String currentIconPath() {
+    return current.iconPath;
   }
 
   String currentLabel() {
     return labelOf(current);
   }
 
-  /** @return true if the button draws relations of the type */
-  boolean offers(RelationType_V001 type) {
-    return variants.stream().anyMatch(v -> v.type == type);
+  /** @return true if the button has a kind with the value */
+  boolean offers(T value) {
+    return variants.stream().anyMatch(v -> v.value == value);
   }
 
-  /** Shows the kind with the type as the current one, without remembering it. */
-  void showType(RelationType_V001 type) {
-    for (RelationVariant variant : variants) {
-      if (variant.type == type) {
+  /** Shows the kind with the value as the current one, without remembering it. */
+  void showValue(T value) {
+    for (PaletteVariant<T> variant : variants) {
+      if (variant.value == value) {
         show(variant);
       }
     }
   }
 
-  private RelationVariant remembered() {
-    String name = Preferences.userNodeForPackage(RelationVariantButton.class).get(preferenceKey, null);
-    for (RelationVariant variant : variants) {
-      if (variant.type.name().equals(name)) {
+  private PaletteVariant<T> remembered() {
+    String name = Preferences.userNodeForPackage(VariantButton.class).get(preferenceKey, null);
+    for (PaletteVariant<T> variant : variants) {
+      if (variant.key().equals(name)) {
         return variant;
       }
     }
     return variants.get(0);
   }
 
-  private void show(RelationVariant variant) {
+  private void show(PaletteVariant<T> variant) {
     current = variant;
     setIcon(EditorIcons.read(variant.iconPath, EditorIcons.SIZE));
     refreshTexts();
   }
 
-  private String labelOf(RelationVariant variant) {
+  private String labelOf(PaletteVariant<T> variant) {
     return texts.get("palette.label." + variant.key());
   }
 
@@ -141,7 +142,7 @@ class RelationVariantButton extends JToggleButton {
 
   private void openMenu() {
     JPopupMenu menu = new JPopupMenu();
-    for (RelationVariant variant : variants) {
+    for (PaletteVariant<T> variant : variants) {
       Icon icon = EditorIcons.read(variant.iconPath, EditorIcons.TOGGLE_SIZE);
       JMenuItem item = new JMenuItem(labelOf(variant), icon);
       item.addActionListener(e -> choose(variant));
@@ -150,10 +151,10 @@ class RelationVariantButton extends JToggleButton {
     menu.show(this, getWidth(), 0);
   }
 
-  private void choose(RelationVariant variant) {
-    Preferences.userNodeForPackage(RelationVariantButton.class).put(preferenceKey, variant.type.name());
+  private void choose(PaletteVariant<T> variant) {
+    Preferences.userNodeForPackage(VariantButton.class).put(preferenceKey, variant.key());
     show(variant);
-    chosen.accept(variant.type);
+    chosen.accept(variant.value);
   }
 
   @Override

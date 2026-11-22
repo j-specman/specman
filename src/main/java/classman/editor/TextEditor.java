@@ -241,6 +241,15 @@ class TextEditor {
     start(name);
   }
 
+  /** Puts an interface without a name at the point of the diagram and starts to type the name. A text which is being
+   * typed is finished first. */
+  void startNewInterface(int x, int y) {
+    commit(false);
+    SceneTextArea name = editing.newInterface(x, y);
+    showDiagram.run();
+    start(name);
+  }
+
   /** Puts a note without a text at the point of the diagram and starts to type the text. A text which is being typed
    * is finished first. */
   void startNewNote(int x, int y) {

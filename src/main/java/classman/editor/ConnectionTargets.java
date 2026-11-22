@@ -12,6 +12,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /** The things a connection can end at in a diagram as it is shown now. */
 class ConnectionTargets {
@@ -25,9 +26,17 @@ class ConnectionTargets {
 
   /** @return the class which the point is on or at most the tolerance away from, null if there is none */
   ClassTarget closestClass(Point2D point, double tolerance) {
+    return closestClass(point, tolerance, box -> true);
+  }
+
+  /** @param allowed tells which of the classes count, the others are not there for this search
+   * @return the class which the point is on or at most the tolerance away from, null if there is none */
+  ClassTarget closestClass(Point2D point, double tolerance, Predicate<ClassModel_V001> allowed) {
     Map<ClassModel_V001, Rectangle2D> areas = new LinkedHashMap<>();
     for (ClassModel_V001 box : model.classes()) {
-      areas.put(box, scene.elementAreaOf(box).area);
+      if (allowed.test(box)) {
+        areas.put(box, scene.elementAreaOf(box).area);
+      }
     }
     ClassModel_V001 closest = ClassPicker.closest(areas, point, tolerance);
     return closest != null ? new ClassTarget(closest, areas.get(closest)) : null;

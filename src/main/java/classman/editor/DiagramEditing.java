@@ -9,6 +9,7 @@ import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
+import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.ExtendsRelationModel_V001;
 import classman.model.v001.ImplementsRelationModel_V001;
@@ -172,6 +173,11 @@ public class DiagramEditing {
    * units away at most, or nothing if there is none. */
   public void selectAt(Point2D point) {
     selectAt(point, DEFAULT_LINE_TOLERANCE);
+  }
+
+  /** @return true if the point is at most the tolerance away from a handle of the selected relation or anchor */
+  public boolean isOnHandle(Point2D point, double tolerance) {
+    return handleIndexAt(point, tolerance) >= 0;
   }
 
   /** @return the index in {@link #selectedHandles()} of the handle which is at most the tolerance away from the
@@ -496,6 +502,11 @@ public class DiagramEditing {
     return !isRemoved && model.classes().contains(box);
   }
 
+  /** @return true if the class can get an attribute: it can get parts and is not an interface */
+  public boolean canAddAttributeTo(ClassModel_V001 box) {
+    return canAddPartsTo(box) && box.kind.hasAttributes();
+  }
+
   /** Puts a blank row after the last tagged value of the class, for a new tagged value to be typed into. It is part
    * of the picture, but not of the diagram, until it is given a text with {@link #setText}.
    * @return the area of the blank row
@@ -772,15 +783,20 @@ public class DiagramEditing {
   }
 
   /** Starts to draw with the armed tool at the box which the press is on or at most the tolerance away from: a class
-   * for an association, a note for an anchor. Nothing happens if there is none. The connection is created where the
+   * for a relation, a note for an anchor. An implementation starts at a class which is no interface and ends at an
+   * interface, an inheritance ends at a box of the kind of its start. Nothing happens if there is none. The connection is created where the
    * mouse is released on a class, see {@link #endDrag}. */
   public void startDrawing(Point2D at, double tolerance) {
     ConnectionTargets targets = new ConnectionTargets(model, scene);
     drawing = null;
     if (armedTool == Tool.RELATION) {
-      ClassTarget from = targets.closestClass(at, tolerance);
+      boolean isImplementation = armedRelationType == RelationType_V001.IMPLEMENTS;
+      ClassTarget from = targets.closestClass(at, tolerance,
+        box -> !isImplementation || box.kind == ClassKind_V001.CLASS);
       if (from != null) {
-        drawing = new ConnectionDrawing(from.box, from.frame(), targets::closestClass, at);
+        TargetFinder finder = (point, distance) -> targets.closestClass(point, distance,
+          box -> canEnd(armedRelationType, from.box, box));
+        drawing = new ConnectionDrawing(from.box, from.frame(), finder, at);
       }
     }
     else if (armedTool == Tool.ANCHOR) {
@@ -793,6 +809,16 @@ public class DiagramEditing {
         drawing = new ConnectionDrawing(from, notes.get(from), targets::closestForAnchor, at);
       }
     }
+  }
+
+  /** An implementation ends at an interface, an inheritance at a box of the kind of its start: a class extends a
+   * class, an interface an interface. The other relations end at any class. */
+  private static boolean canEnd(RelationType_V001 type, ClassModel_V001 from, ClassModel_V001 to) {
+    return switch (type) {
+      case IMPLEMENTS -> to.kind == ClassKind_V001.INTERFACE;
+      case EXTENDS -> to.kind == from.kind;
+      default -> true;
+    };
   }
 
   /** Creates what was drawn, if the mouse was released on a class, and leaves the tool. If it was released on none,
@@ -899,6 +925,12 @@ public class DiagramEditing {
    * @return the area of the name */
   public SceneTextArea newClass(int x, int y) {
     return putPendingBox(new ClassModel_V001(""), x, y, TextKind.CLASS_NAME);
+  }
+
+  /** Puts an interface without a name into the picture, in the same way as {@link #newClass} does with a class.
+   * @return the area of the name */
+  public SceneTextArea newInterface(int x, int y) {
+    return putPendingBox(new ClassModel_V001("", ClassKind_V001.INTERFACE), x, y, TextKind.CLASS_NAME);
   }
 
   /** Puts a note without a text into the picture, in the same way as {@link #newClass} does with a class: the text is
