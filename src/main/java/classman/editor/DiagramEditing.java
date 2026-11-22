@@ -389,7 +389,7 @@ public class DiagramEditing {
       return Can.not(texts.get("reason.arrow.enum"));
     }
     boolean isRemoved = relation.change != null && relation.change.type == ChangeType_V001.REMOVED;
-    return isRemoved ? Can.not(texts.get("reason.relation.removed")) : Can.YES;
+    return Can.IF(!isRemoved, texts.get("reason.relation.removed"));
   }
 
   private boolean involvesEnum(AbstractRelationModel_V001 relation) {
@@ -422,17 +422,17 @@ public class DiagramEditing {
    * point of the line of a relation, for the end of an anchor line on a relation), so that it can be linked to the
    * center of the box again */
   public Can canCenterEnd(RelationEnd_V001 end) {
-    Can centeredAlready = Can.not(texts.get("reason.center.already"));
+    String centeredAlready = texts.get("reason.center.already");
     if (selected instanceof AttachLineModel_V001 attachLine) {
-      return (end == RelationEnd_V001.FROM ? attachLine.start : attachLine.end) != null ? Can.YES : centeredAlready;
+      return Can.IF((end == RelationEnd_V001.FROM ? attachLine.start : attachLine.end) != null, centeredAlready);
     }
     if (!(selected instanceof AbstractRelationModel_V001 relation)) {
       return Can.NOT;
     }
     if (relation.route == null) {
-      return centeredAlready;
+      return Can.not(centeredAlready);
     }
-    return (end == RelationEnd_V001.FROM ? relation.route.start : relation.route.end).center ? centeredAlready : Can.YES;
+    return Can.IF(!(end == RelationEnd_V001.FROM ? relation.route.start : relation.route.end).center, centeredAlready);
   }
 
   /** Links the end of the selected relation or anchor line to the center of its box again: the line leaves the box
@@ -617,7 +617,7 @@ public class DiagramEditing {
       return Can.NOT;
     }
     boolean isRemoved = box.change != null && box.change.type == ChangeType_V001.REMOVED;
-    return isRemoved ? Can.not(texts.get("reason.class.removed")) : Can.YES;
+    return Can.IF(!isRemoved, texts.get("reason.class.removed"));
   }
 
   /** @return whether the class can get an attribute or, for an enum, a value: it can get parts, is not an interface
@@ -630,7 +630,7 @@ public class DiagramEditing {
     if (!box.kind.hasAttributes()) {
       return Can.not(texts.get("reason.interface.noattributes"));
     }
-    return box.showsAttributes() ? Can.YES : Can.not(texts.get("reason.attributes.hidden"));
+    return Can.IF(box.showsAttributes(), texts.get("reason.attributes.hidden"));
   }
 
   /** @return whether the class has an attribute compartment which can be hidden or shown: it is no interface, no
@@ -643,7 +643,7 @@ public class DiagramEditing {
     if (!box.kind.hasAttributes()) {
       return Can.not(texts.get("reason.interface.noattributes"));
     }
-    return box.hasMarkedAttributes() ? Can.not(texts.get("reason.attributes.marked")) : Can.YES;
+    return Can.IF(!box.hasMarkedAttributes(), texts.get("reason.attributes.marked"));
   }
 
   /** @return whether the attribute can be hidden: the class shows it, no change set has removed the class, and it
@@ -724,7 +724,7 @@ public class DiagramEditing {
     if (!parts.can()) {
       return parts;
     }
-    return stereotypeOf(box).isEmpty() ? Can.YES : Can.not(texts.get("reason.stereotype.exists"));
+    return Can.IF(stereotypeOf(box).isEmpty(), texts.get("reason.stereotype.exists"));
   }
 
   /** Puts a blank stereotype row into the class, for the stereotype to be typed into. It is part of the picture, but

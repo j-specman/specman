@@ -23,8 +23,13 @@ final class Can {
   }
 
   /** @return yes if the condition holds, otherwise no without a reason */
-  static Can when(boolean condition) {
+  static Can IF(boolean condition) {
     return condition ? YES : NOT;
+  }
+
+  /** @return yes if the condition holds, otherwise no with the reason */
+  static Can IF(boolean condition, String reason) {
+    return condition ? YES : not(reason);
   }
 
   boolean can() {

@@ -35,7 +35,7 @@ class ClassContextMenu extends JPopupMenu {
     addSeparator();
     add(entry(texts.get("menu.class.color"), editing.canChangeFill(box), () -> chooseColor(editing, box, colorPicker,
       showDiagram)));
-    Can hasOwnColor = box.fill != null ? Can.YES : Can.not(texts.get("reason.fill.standard"));
+    Can hasOwnColor = Can.IF(box.fill != null, texts.get("reason.fill.standard"));
     add(entry(texts.get("menu.class.color.standard"), editing.canChangeFill(box).and(hasOwnColor), () -> {
       editing.setFill(box, null);
       showDiagram.run();

@@ -43,8 +43,10 @@ class CanReasonTest {
     assertFalse(Can.NOT.can());
     assertEquals("", Can.NOT.whyNot());
     assertEquals("why", Can.not("why").whyNot());
-    assertTrue(Can.when(true).can());
-    assertFalse(Can.when(false).can());
+    assertTrue(Can.IF(true).can());
+    assertFalse(Can.IF(false).can());
+    assertTrue(Can.IF(true, "why").can());
+    assertEquals("why", Can.IF(false, "why").whyNot());
     assertEquals("first", Can.not("first").and(Can.not("second")).whyNot());
     assertEquals("second", Can.YES.and(Can.not("second")).whyNot());
     assertTrue(Can.YES.and(Can.YES).can());
