@@ -6,7 +6,6 @@ import classman.model.v001.RelationType_V001;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -26,11 +25,18 @@ public class RelationLayouter {
         this.markLayouter = new RelationMarkLayouter(measurer, palette);
     }
 
-    /** @param boxAreas the areas of all boxes of the diagram, which the texts of the relation keep clear of */
-    public RelationLayout layout(AbstractRelationModel_V001 relation, Map<String, Rectangle2D.Double> classAreas,
-                                 Collection<Rectangle2D.Double> boxAreas) {
-        List<Point2D.Double> path = pathBuilder.pathOf(relation, classAreas);
-        RelationTexts texts = textLayouter.texts(relation, path, boxAreas);
+    /** @return the points the relation runs through
+     * @throws IllegalArgumentException if the relation refers to a class which isn't in the diagram */
+    public List<Point2D.Double> pathOf(AbstractRelationModel_V001 relation, Map<String, Rectangle2D.Double> classAreas) {
+        return pathBuilder.pathOf(relation, classAreas);
+    }
+
+    /** @param path the points of the relation, see {@link #pathOf}
+     * @param surroundings what the texts of the relation keep clear of: the boxes, the lines of the other relations and
+     * the texts of the relations laid out before */
+    public RelationLayout layout(AbstractRelationModel_V001 relation, List<Point2D.Double> path,
+                                 TextObstacles surroundings) {
+        RelationTexts texts = textLayouter.texts(relation, path, surroundings);
         String lineColor = markLayouter.lineColor(relation);
         List<AbstractSceneElement> underlay = markLayouter.underlay(relation, path, texts);
         List<AbstractSceneElement> elements = new ArrayList<>();
@@ -44,7 +50,7 @@ public class RelationLayouter {
         Rectangle2D.Double bounds = boundsOf(path, underlay, elements);
         List<SceneTextArea> textAreas = new ArrayList<>(textAreaLayouter.of(relation, texts));
         textAreas.addAll(textAreaLayouter.placeholdersOf(relation,
-            textLayouter.placeholders(relation, path, boxAreas)));
+            textLayouter.placeholders(relation, path, surroundings)));
         return new RelationLayout(underlay, elements, bounds, line, decorations, path, textAreas);
     }
 

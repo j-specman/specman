@@ -17,8 +17,8 @@ class LabelPlacement {
 
     /**
      * Beside a part which runs sideways the label is centered above or below the point, beside one which runs up and
-     * down it is centered vertically right or left of the point. A slanted part keeps the gap to the label at the
-     * place where it is closest.
+     * down it is centered vertically right or left of the point, see {@link PathGeometry#runsSideways}. A slanted part
+     * keeps the gap to the label at the place where it is closest.
      * @param along where on the part the label is centered, 0 at its start and 1 at its end
      * @return the lines of the label
      */
@@ -30,7 +30,7 @@ class LabelPlacement {
         }
         double x = from.x + along * (to.x - from.x);
         double y = from.y + along * (to.y - from.y);
-        if (PathGeometry.isHorizontal(from, to)) {
+        if (PathGeometry.runsSideways(from, to, widest, lines.length * measurer.lineHeight())) {
             return aboveOrBelow(lines, x, widest, from, to, side);
         }
         return rightOrLeft(lines, y, from, to, side);

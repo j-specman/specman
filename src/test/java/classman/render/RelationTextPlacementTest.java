@@ -24,7 +24,11 @@ class RelationTextPlacementTest {
   }
 
   private static boolean touchesLine(Scene scene, Rectangle2D area) {
-    ScenePolyline line = scene.relationLines.get(0).line;
+    return touchesLine(scene, 0, area);
+  }
+
+  private static boolean touchesLine(Scene scene, int relationIndex, Rectangle2D area) {
+    ScenePolyline line = scene.relationLines.get(relationIndex).line;
     for (int i = 0; i < line.xs.length - 1; i++) {
       if (area.intersectsLine(line.xs[i], line.ys[i], line.xs[i + 1], line.ys[i + 1])) {
         return true;
@@ -157,5 +161,60 @@ class RelationTextPlacementTest {
     scene.placeholderAreas.forEach(place -> places.add(place.area));
     assertTrue(places.stream().noneMatch(place -> scene.elementAreas.stream()
         .anyMatch(box -> box.area.intersects(place))));
+  }
+
+  /** A multiplicity stands at the box, just beyond its bottom side, also where the line leaves it in a slant. */
+  @Test
+  void multiplicityStaysAtBottomSideOfWideBox() throws ClassDiagramParseException {
+    Scene scene = layout("class AAAAAAAAAAAAAAAA (aaaaaaaa) at(0, 0)\nclass BBBBBBBBBBBBBBBB (bbbbbbbb) at(150, 100)\n"
+        + "association aaaaaaaa 1 -> * bbbbbbbb");
+    Rectangle2D area = scene.elementAreas.get(0).area;
+    assertEquals(area.getMaxY() + 5, areaOf(textNamed(scene, "1")).y, 1e-9);
+  }
+
+  /** Where the line leaves a box at its corner, a wide multiplicity stands just beyond the border beside the line
+   * and doesn't float away from the box. */
+  @Test
+  void multiplicityAtCorner() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(100, 140)\n"
+        + "association aaaaaaaa 2..99 -> * bbbbbbbb");
+    assertEquals(56 + 5, areaOf(textNamed(scene, "2..99")).y, 1e-9);
+  }
+
+  // ---- other relations ----
+
+  /** The labels of two relations between the same classes don't lie over each other. */
+  @Test
+  void labelsOfParallelRelations() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(300, 0)\n"
+        + "association aaaaaaaa -- bbbbbbbb \"owns\"\nassociation aaaaaaaa -- bbbbbbbb \"uses\"");
+    assertFalse(areaOf(textNamed(scene, "owns")).intersects(areaOf(textNamed(scene, "uses"))));
+  }
+
+  /** A label moves along its line if the line of another relation runs through its place. */
+  @Test
+  void labelClearsOtherLine() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(300, 0)\n"
+        + "class C (cccccccc) at(150, -100)\nclass D (dddddddd) at(150, 100)\n"
+        + "association aaaaaaaa -- bbbbbbbb \"owns\"\nassociation cccccccc -- dddddddd");
+    assertFalse(touchesLine(scene, 1, areaOf(textNamed(scene, "owns"))));
+  }
+
+  /** The other relation's line is kept clear of also if that relation comes later in the source. */
+  @Test
+  void laterLineIsKeptClearToo() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(300, 0)\n"
+        + "class C (cccccccc) at(150, -100)\nclass D (dddddddd) at(150, 100)\n"
+        + "association cccccccc -- dddddddd\nassociation aaaaaaaa -- bbbbbbbb \"owns\"");
+    assertFalse(touchesLine(scene, 0, areaOf(textNamed(scene, "owns"))));
+  }
+
+  /** Multiplicities of relations which leave the same side close together don't lie over each other. */
+  @Test
+  void multiplicitiesAtSameSide() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(300, 0)\n"
+        + "class C (cccccccc) at(300, 100)\n"
+        + "association aaaaaaaa 1 -> * bbbbbbbb\nassociation aaaaaaaa 2 -> * cccccccc");
+    assertFalse(areaOf(textNamed(scene, "1")).intersects(areaOf(textNamed(scene, "2"))));
   }
 }

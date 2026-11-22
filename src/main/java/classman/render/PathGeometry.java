@@ -66,9 +66,13 @@ public final class PathGeometry {
         return new Point2D.Double(from.x + (to.x - from.x) / 4, from.y + (to.y - from.y) / 4);
     }
 
-    /** True if the part from one point to the other runs more sideways than up or down. */
-    public static boolean isHorizontal(Point2D.Double from, Point2D.Double to) {
-        return Math.abs(to.x - from.x) > Math.abs(to.y - from.y);
+    /** True if a text of the given size stands better above or below the part from one point to the other than right
+     * or left of it: if it has to be moved less up or down to clear a slanted line than sideways. A flat line is
+     * sideways, a steep one not, and a wide text takes a steeper line as sideways than a narrow one. */
+    public static boolean runsSideways(Point2D.Double from, Point2D.Double to, double textWidth, double textHeight) {
+        double dx = to.x - from.x;
+        double dy = to.y - from.y;
+        return textWidth * dy * dy <= textHeight * dx * dx;
     }
 
     /** The point which lies the given percent of the length of the path from its start, the percent limited to 0 to 100. */

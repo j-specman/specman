@@ -51,20 +51,22 @@ class RelationTextTest {
     assertText(textNamed(scene, "1..*"), 294, 20, TextAnchor.END);
   }
 
-  /** Beside a line which runs down to the right, the text stands right of the line's lowest point under it. */
+  /** Beside a line which runs down to the right from a box, the text stands left of it, at the border, where the line
+   * goes away from it. */
   @Test
   void multiplicityClearsSlantedDownLine() throws ClassDiagramParseException {
     Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(100, 200)\nassociation aaaaaaaa 1 -> * bbbbbbbb");
-    assertText(textNamed(scene, "1"), 54.5, 76, TextAnchor.START);
+    assertText(textNamed(scene, "1"), 26, 76, TextAnchor.END);
   }
 
-  /** Above a line which rises to the right, the text stands above the line's highest point under it. */
+  /** Beside a line which rises to the right from a box, the text stands below it, at the border, where the line goes
+   * away from it. */
   @Test
   void multiplicityClearsRisingLine() throws ClassDiagramParseException {
     Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(300, -100)\nassociation aaaaaaaa 0..1 -> * bbbbbbbb");
     SceneText text = textNamed(scene, "0..1");
     assertEquals(46, text.x, 1e-9);
-    assertEquals(-2.0, text.y, 0.01);
+    assertEquals(44.33, text.y, 0.01);
   }
 
   /** A multiplicity which the source leaves out isn't drawn. */
