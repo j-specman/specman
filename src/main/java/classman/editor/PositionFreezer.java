@@ -1,8 +1,7 @@
 package classman.editor;
 
-import classman.model.v001.AbstractDiagramElementModel_V001;
+import classman.model.v001.AbstractBoxModel_V001;
 import classman.model.v001.ClassModel_V001;
-import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.render.Scene;
 import classman.render.SceneElementArea;
@@ -16,14 +15,14 @@ import java.util.Map;
  * the position they have, and only the dragged box changes after that. Everything can be put back. */
 class PositionFreezer {
   private final Scene startScene;
-  private final List<AbstractDiagramElementModel_V001> placedBoxes;
+  private final List<AbstractBoxModel_V001> placedBoxes;
   private final List<ClassModel_V001> associationClasses;
-  private Map<AbstractDiagramElementModel_V001, PositionModel_V001> positionsBefore;
+  private Map<AbstractBoxModel_V001, PositionModel_V001> positionsBefore;
 
   /** @param startScene the diagram as it is before the first change
    * @param placedBoxes the classes and notes of the diagram, which the layout stacks if they have no position
    * @param associationClasses the association classes, which the layout puts beside their relation if they have none */
-  PositionFreezer(Scene startScene, List<AbstractDiagramElementModel_V001> placedBoxes,
+  PositionFreezer(Scene startScene, List<AbstractBoxModel_V001> placedBoxes,
                   List<ClassModel_V001> associationClasses) {
     this.startScene = startScene;
     this.placedBoxes = placedBoxes;
@@ -39,17 +38,16 @@ class PositionFreezer {
       return;
     }
     positionsBefore = new LinkedHashMap<>();
-    for (AbstractDiagramElementModel_V001 placed : placedBoxes) {
-      positionsBefore.put(placed, positionOf(placed));
+    for (AbstractBoxModel_V001 placed : placedBoxes) {
+      positionsBefore.put(placed, placed.position);
     }
     for (ClassModel_V001 associationClass : associationClasses) {
       positionsBefore.put(associationClass, associationClass.position);
     }
-    for (AbstractDiagramElementModel_V001 placed : placedBoxes) {
+    for (AbstractBoxModel_V001 placed : placedBoxes) {
       SceneElementArea area = startScene.elementAreaOf(placed);
-      if (positionOf(placed) == null && area != null) {
-        setPosition(placed, new PositionModel_V001((int) Math.round(area.area.getX()),
-          (int) Math.round(area.area.getY())));
+      if (placed.position == null && area != null) {
+        placed.position = new PositionModel_V001((int) Math.round(area.area.getX()), (int) Math.round(area.area.getY()));
       }
     }
   }
@@ -57,21 +55,8 @@ class PositionFreezer {
   /** Puts all positions back as they were before {@link #freeze}. */
   void restore() {
     if (positionsBefore != null) {
-      positionsBefore.forEach(PositionFreezer::setPosition);
+      positionsBefore.forEach((box, position) -> box.position = position);
       positionsBefore = null;
-    }
-  }
-
-  static PositionModel_V001 positionOf(AbstractDiagramElementModel_V001 element) {
-    return element instanceof ClassModel_V001 classModel ? classModel.position : ((NoteModel_V001) element).position;
-  }
-
-  static void setPosition(AbstractDiagramElementModel_V001 element, PositionModel_V001 position) {
-    if (element instanceof ClassModel_V001 classModel) {
-      classModel.position = position;
-    }
-    else {
-      ((NoteModel_V001) element).position = position;
     }
   }
 }

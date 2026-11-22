@@ -19,24 +19,24 @@ class PointerControl implements PointerListener {
   private final DiagramEditing editing;
   private final Runnable showDiagram;
   private final Consumer<SceneTextArea> editText;
-  private final Consumer<Point2D> showClassMenu;
+  private final Consumer<Point2D> showContextMenu;
   private final DoubleUnaryOperator toDiagramLength;
 
   /** @param showDiagram shows the diagram and the selection as the editing has them now
    * @param editText lets the user change a text of the diagram
-   * @param showClassMenu shows the menu of the selected class at the point of the diagram
+   * @param showContextMenu shows the menu of the selected class or note at the point of the diagram
    * @param toDiagramLength turns a length in pixels of the screen into a length in units of the diagram */
   PointerControl(DiagramEditing editing, Runnable showDiagram, Consumer<SceneTextArea> editText,
-                 Consumer<Point2D> showClassMenu, DoubleUnaryOperator toDiagramLength) {
+                 Consumer<Point2D> showContextMenu, DoubleUnaryOperator toDiagramLength) {
     this.editing = editing;
     this.showDiagram = showDiagram;
     this.editText = editText;
-    this.showClassMenu = showClassMenu;
+    this.showContextMenu = showContextMenu;
     this.toDiagramLength = toDiagramLength;
   }
 
   /** The cursor shows what a press would do: it draws a relation while the tool for relations is armed, it changes
-   * the width at the left or right side of a class. */
+   * the width at the left or right side of a class or note. */
   @Override
   public Cursor cursorAt(Point2D at) {
     if (editing.isRelationToolArmed()) {
@@ -99,8 +99,8 @@ class PointerControl implements PointerListener {
     }
   }
 
-  /** The context menu selects what is below the point, like a press, and is shown if that is a class. Nothing else has
-   * a menu yet, and nothing happens while the tool for relations is armed. */
+  /** The context menu selects what is below the point, like a press, and is shown if that is a class or a note. Nothing
+   * else has a menu yet, and nothing happens while the tool for relations is armed. */
   @Override
   public void contextMenuRequested(Point2D at) {
     if (editing.isRelationToolArmed()) {
@@ -108,8 +108,8 @@ class PointerControl implements PointerListener {
     }
     editing.selectAt(at, toDiagramLength.applyAsDouble(HIT_PIXELS));
     showDiagram.run();
-    if (editing.selectedClass() != null) {
-      showClassMenu.accept(at);
+    if (editing.selectedClass() != null || editing.selectedNote() != null) {
+      showContextMenu.accept(at);
     }
   }
 }

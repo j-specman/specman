@@ -4,6 +4,7 @@ import classman.model.v001.io.ClassDiagramParseException;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
@@ -20,6 +21,7 @@ import java.awt.Point;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
+import java.util.function.BiConsumer;
 import java.awt.geom.Rectangle2D;
 
 /** The window in which a class diagram is edited. It is modal: While it is open the rest of the application can't
@@ -45,11 +47,12 @@ public class ClassDiagramEditorWindow extends JDialog {
     editing = new DiagramEditing(source, host);
     canvas = new DiagramCanvas(editing.scene());
     textEditor = new TextEditor(canvas, editing, this::showDiagram);
-    canvas.setPointerListener(new PointerControl(editing, this::showDiagram, textEditor::start, this::showClassMenu,
+    canvas.setPointerListener(new PointerControl(editing, this::showDiagram, textEditor::start, this::showContextMenu,
       canvas::toDiagramLength));
     scrollPane = new JScrollPane(canvas);
 
-    palette = new EditorPalette(texts, this::classDropped, this::relationToolToggled);
+    palette = new EditorPalette(texts, screenPoint -> boxDropped(screenPoint, textEditor::startNewClass),
+      screenPoint -> boxDropped(screenPoint, textEditor::startNewNote), this::relationToolToggled);
     getContentPane().add(palette, BorderLayout.WEST);
     getContentPane().add(scrollPane, BorderLayout.CENTER);
 
@@ -139,10 +142,12 @@ public class ClassDiagramEditorWindow extends JDialog {
     }, KeyStroke.getKeyStroke(keyCode, modifiers), JComponent.WHEN_IN_FOCUSED_WINDOW);
   }
 
-  private void showClassMenu(Point2D at) {
+  private void showContextMenu(Point2D at) {
     Rectangle where = canvas.toCanvas(new Rectangle2D.Double(at.getX(), at.getY(), 0, 0));
-    new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, this::showDiagram)
-      .show(canvas, where.x, where.y);
+    JPopupMenu menu = editing.selectedClass() != null
+      ? new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, this::showDiagram)
+      : new NoteContextMenu(editing, editing.selectedNote(), texts, this::showDiagram);
+    menu.show(canvas, where.x, where.y);
   }
 
   private void relationToolToggled() {
@@ -150,7 +155,8 @@ public class ClassDiagramEditorWindow extends JDialog {
     showDiagram();
   }
 
-  private void classDropped(Point screenPoint) {
+  /** @param startBox puts the new box at the point of the diagram, in whole units, and starts to type its text */
+  private void boxDropped(Point screenPoint, BiConsumer<Integer, Integer> startBox) {
     JViewport viewport = scrollPane.getViewport();
     Point inViewport = new Point(screenPoint);
     SwingUtilities.convertPointFromScreen(inViewport, viewport);
@@ -160,6 +166,6 @@ public class ClassDiagramEditorWindow extends JDialog {
     Point inCanvas = new Point(screenPoint);
     SwingUtilities.convertPointFromScreen(inCanvas, canvas);
     Point2D inDiagram = canvas.toDiagram(inCanvas);
-    textEditor.startNewClass((int) Math.round(inDiagram.getX()), (int) Math.round(inDiagram.getY()));
+    startBox.accept((int) Math.round(inDiagram.getX()), (int) Math.round(inDiagram.getY()));
   }
 }

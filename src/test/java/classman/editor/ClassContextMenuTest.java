@@ -78,7 +78,7 @@ class ClassContextMenuTest {
     assertEquals(List.of(insideClass()), menusRequestedAt);
   }
 
-  /** Where there is no class, there is no menu: on empty space, on a note, on an association class. The selection
+  /** Where there is no class or note, there is no menu: on empty space, on an association class. The selection
    * follows the click, as with any press. */
   @Test
   void noMenuElsewhere() throws Exception {
@@ -88,15 +88,28 @@ class ClassContextMenuTest {
 
     control.contextMenuRequested(new Point2D.Double(2000, 2000));
     assertFalse(editing.hasSelection());
-    control.contextMenuRequested(new Point2D.Double(310, 70));
-    assertTrue(editing.hasSelection());
-    assertNull(editing.selectedClass());
 
     open(ASSOCIATED);
     Rectangle2D assocClass = editing.scene().elementAreas.get(editing.scene().elementAreas.size() - 1).area;
     control.contextMenuRequested(new Point2D.Double(assocClass.getCenterX(), assocClass.getCenterY()));
     assertNull(editing.selectedClass());
     assertTrue(menusRequestedAt.isEmpty());
+  }
+
+  /** A note has a menu which only switches back to the automatic width, that is not offered as long as it is on. */
+  @Test
+  void noteMenuHasAutomaticWidthOnly() throws Exception {
+    open(BARE);
+
+    control.contextMenuRequested(new Point2D.Double(310, 70));
+
+    assertNotNull(editing.selectedNote());
+    assertEquals(1, menusRequestedAt.size());
+    NoteContextMenu menu = new NoteContextMenu(editing, editing.selectedNote(), texts, () -> { });
+    JMenuItem item = (JMenuItem) menu.getComponent(0);
+    assertEquals(1, menu.getComponentCount());
+    assertEquals("Automatic width", item.getText());
+    assertFalse(item.isEnabled());
   }
 
   /** While the tool for relations is armed, a click on a class means something else. */

@@ -2,7 +2,6 @@ package classman.editor;
 
 import classman.model.v001.ClassModel_V001;
 
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -21,14 +20,7 @@ class ClassContextMenu extends JPopupMenu {
     add(entry(texts.get("menu.class.add.attribute"), editing.canAddPartsTo(box),
       () -> textEditor.startNewAttribute(box)));
     addSeparator();
-    JCheckBoxMenuItem automaticWidth = new JCheckBoxMenuItem(texts.get("menu.class.automatic.width"),
-      !editing.hasFixedWidth(box));
-    automaticWidth.setEnabled(editing.hasFixedWidth(box));
-    automaticWidth.addActionListener(e -> {
-      editing.resetWidth(box);
-      showDiagram.run();
-    });
-    add(automaticWidth);
+    add(new AutomaticWidthMenuItem(editing, box, texts, showDiagram));
   }
 
   private static JMenuItem entry(String label, boolean enabled, Runnable action) {

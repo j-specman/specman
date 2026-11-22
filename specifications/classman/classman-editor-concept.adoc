@@ -62,13 +62,14 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Context menu of a class |built |Add stereotype, add tagged value, add attribute, automatic width, see <<The Context Menu of a Class>>.
 |Tagged values |built |One row each, edited as KEY=value or KEY, see <<The Tagged Values of a Class>>.
 |Diagram name |open |
-|Create other element kinds (interface, enum, note, association class) |open |
+|Create a note |built |Palette button, dragged onto the canvas like a class, see <<Creating Elements>>.
+|Create other element kinds (interface, enum, association class) |open |
 |Create an association |built |By a tool: click the button, drag from one class to another, see <<Creating Elements>>. The other relation types (aggregation, composition, inheritance, implementation) are planned, with the same gesture.
 |Move the points of a route |built |Waypoints freely, the ends along the border of their class or hung onto another class (not while changes are tracked), see <<Selecting>>. Adding a waypoint and deleting one (double click on the line and on a handle) too.
 |Create a text which an element doesn't have yet (relation label, multiplicity) |built |Dashed places on the selected relation, see <<Texts Which a Relation Doesn't Have Yet>>. Tagged values are created with the context menu of the class. Not yet for the diagram name.
 |Reorder attributes, attribute selection |open |
-|Width of a class by dragging its side |built |At the left and right side of a class, shown by the cursor, see <<Width of a Class Box>>. The other boxes (notes, association classes) will get the same.
-|Automatic width again |built |Context menu of the class, see <<The Context Menu of a Class>>.
+|Width of a class or note by dragging its side |built |At the left and right side of the box, shown by the cursor, see <<Width of a Class Box>> and <<Width of a Note>>. Association classes will get the same.
+|Automatic width again |built |Context menu of the class or note, see <<The Context Menu of a Class>> and <<Width of a Note>>.
 |===
 
 ## Editor Window
@@ -109,8 +110,15 @@ Interface and enum are keywords of their own, because their content differs from
 ** The marks of changes (backgrounds, strikes) cover only what is shown.
 * *Changing the width:* there are no handles. Where the mouse is at the left or right side of a class, along its whole height and 4 pixels of the screen to both sides of the border, the cursor becomes the horizontal resize cursor. The class needn't be selected. A press there selects the class, and dragging gives it a width of its own (`width=N`): the opposite side stays where it is, so dragging the left side moves the box. The box can't be made narrower than its layout allows, which is the longest word of its name; the stored width is the shown one. The class gets a position of its own (`at(x, y)`) if it had none, and so do the other classes and notes which are stacked, so that they stay where they are (like with moving). Esc during the drag puts everything back. One drag is one operation, one undo step. Like moving, resizing is never marked as a change.
 * *Back to the automatic width:* the entry *Automatic width* of the context menu of the class. It is checked while the class has no width of its own and can't be chosen then; dragging a side switches it off, choosing it removes `width=`. One operation.
-* *Not built:* the same for notes and association classes, a minimum width for the whole class (stereotype, attributes) beyond the name.
+* *Not built:* the same for association classes, a minimum width for the whole class (stereotype, attributes) beyond the name.
 * *Planned:* a cut-off text ends with `...`, so the user sees that there is more. The field for typing an attribute is wrapped at the width of the box for now; it shows the whole text.
+
+### Width of a Note
+* *Without `width=`* the note is as wide as its longest line, but at most `DiagramStyle.NOTE_MAX_AUTO_WIDTH` (240). A longer text is wrapped at that width and the note grows downwards instead of becoming an endless strip. Its text never wraps in the middle of a word, so the note is at least as wide as the longest word.
+* *With `width=`* the text is wrapped at that width, whatever it is. A very wide note is the decision of the user, like a very narrow one.
+* *Changing the width* works like for a class: dragging the left or right side gives the note a width of its own, the opposite side stays, and a note which is stacked gets a position, so that all boxes stay where they are. The note can't be made narrower than its longest word. One drag is one undo step, Esc puts everything back, and the width is never marked as a change.
+* *Back to the automatic width:* the right mouse button on a note selects it and opens a menu with the one entry *Automatic width*, the same check item as in the menu of a class.
+* *Not for classes:* a class has no upper limit for its automatic width. Its name can't wrap, and cutting off an attribute which the user never asked to shorten would hide content. Whether that feels right has to show in practice.
 
 ### Creating Elements
 Specman's step buttons are drag sources: The user drags a step onto the diagram. The palette follows this for everything that is a single box.
@@ -119,10 +127,17 @@ Specman's step buttons are drag sources: The user drags a step onto the diagram.
 
 * The user presses the class button and drags. A ghost of the class follows the mouse. The class is created where the mouse is released, if that is inside the canvas of the window. Released anywhere else, nothing happens.
 * The drop point becomes the top left corner of the new class: `at(x, y)` in diagram coordinates, rounded to whole pixels, whatever the zoom is.
-* The field for the name opens right after the drop, over the name row of the new class, empty. The class has no made-up name. Return with a name creates the class; Return with an empty name, Esc, or leaving the field takes the class away again. Until then the class is part of the picture (selected, with its box) but not of the diagram: nothing is reported to the host and there is no undo step. While the name is typed, the box is `DiagramStyle.NEW_CLASS_WIDTH` (140) units wide, so that the empty field (120 pixels at 100 % zoom) lies completely inside it. That width is only for typing: the created class has no `width=`, so it is as wide as its content, see <<Width of a Class Box>>. Fields have their minimum width in proportion to the zoom, like their font. Class names need not be unique.
+* The field for the name opens right after the drop, over the name row of the new class, empty. The class has no made-up name. Return with a name creates the class; Return with an empty name, Esc, or leaving the field takes the class away again. Until then the class is part of the picture (selected, with its box) but not of the diagram: nothing is reported to the host and there is no undo step. While the name is typed, the box is `DiagramStyle.NEW_BOX_WIDTH` (140) units wide, so that the empty field (120 pixels at 100 % zoom) lies completely inside it. That width is only for typing: the created class has no `width=`, so it is as wide as its content, see <<Width of a Class Box>>. Fields have their minimum width in proportion to the zoom, like their font. Class names need not be unique.
 * It gets an ID: 8 hexadecimal characters, different from all IDs in the diagram.
 * If changes are tracked, it gets `change(added, <change set>)`.
 * The new class is selected. Creating it with its name is one operation, one undo step. While changes are tracked, the name needs no mark of its own: a class which a change set has added is named plainly.
+
+*Built, the note:*
+
+* The note button is dragged onto the canvas like the class button, and the drop point becomes the top left corner of the note (`at(x, y)`).
+* The field for the text opens right after the drop, empty, in the new note. The note has no made-up text. Return with a text creates the note; Return with an empty text, Esc, or leaving the field takes the note away again, without an operation. While the text is typed, the box is `DiagramStyle.NEW_BOX_WIDTH` wide, like a class; the created note has no `width=`, so it is as wide as its text, but at most as wide as <<Width of a Note>> says.
+* It gets an ID and, if changes are tracked, `change(added, <change set>)`; its text needs no mark of its own. The new note is selected. One operation, one undo step.
+* A note is not attached to anything when it is created. How a note gets attached is an open point.
 
 *Built, the association (first relation, as a vertical slice):*
 
@@ -135,7 +150,7 @@ Specman's step buttons are drag sources: The user drags a step onto the diagram.
 
 *Planned:*
 
-* Boxes (interface, enum, note) are dragged onto the canvas in the same way.
+* Boxes (interface, enum) are dragged onto the canvas in the same way.
 * *The other relation types* (aggregation, composition, inheritance, implementation) work like the association, with the buttons and variants of <<Buttons with Variants (planned)>>. Inheritance and implementation have no multiplicities and always an arrowhead.
 * *Everything within a box* has no button: Attributes, enum values, stereotypes and tagged values are created by the context menu of the class and edited in place, labels and multiplicities by their places on a selected relation, see <<Attributes>> and <<The Context Menu of a Class>>.
 
@@ -243,7 +258,7 @@ A class has any number of tagged values. Each one is drawn in a row of its own, 
 * *Accepting and rejecting* a change set: an added tagged value stays or goes, a removed one goes or stays, the text marks keep the new or bring back the old key and value, like for every text.
 
 ## The Context Menu of a Class
-The right mouse button on a class selects it, like a press, and opens a menu with the parts which the class can get. Parts of a class are not created by buttons or by dashed places on the diagram, because a place above or between the parts is hard to hit and the number of places grows with every kind of part. The menu is the one way to create them; editing what exists stays a double click.
+The right mouse button on a class selects it, like a press, and opens a menu with the parts which the class can get. A note has a menu too, with only the automatic width, see <<Width of a Note>>. Parts of a class are not created by buttons or by dashed places on the diagram, because a place above or between the parts is hard to hit and the number of places grows with every kind of part. The menu is the one way to create them; editing what exists stays a double click.
 
 * *Add stereotype:* see <<The Stereotype of a Class>>. Offered (can be chosen) only if the class has no stereotype, or one which a change set has removed.
 * *Add attribute:* puts a blank line at the end of the attributes and starts typing into it, see <<Adding Attributes>>. Return in that line goes on with the next one.

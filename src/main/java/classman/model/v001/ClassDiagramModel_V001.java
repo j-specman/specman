@@ -23,6 +23,11 @@ public class ClassDiagramModel_V001 {
         return elementsOfType(AbstractRelationModel_V001.class);
     }
 
+    /** The classes and notes in the order they are drawn, the last one on top. */
+    public List<AbstractBoxModel_V001> boxes() {
+        return elementsOfType(AbstractBoxModel_V001.class);
+    }
+
     public List<NoteModel_V001> notes() {
         return elementsOfType(NoteModel_V001.class);
     }

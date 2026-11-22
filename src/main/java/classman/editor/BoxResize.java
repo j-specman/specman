@@ -1,17 +1,17 @@
 package classman.editor;
 
-import classman.model.v001.ClassModel_V001;
+import classman.model.v001.AbstractBoxModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.render.Scene;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
-/** The dragging of the left or right side of a class, which gives it a width of its own. The opposite side stays
+/** The dragging of the left or right side of a box, which gives it a width of its own. The opposite side stays
  * where it is, so dragging the left side moves the box too. The box doesn't get narrower than its layout allows, which
- * is the widest word of its name. A class which is resized has a position afterwards, see {@link PositionFreezer}. */
+ * is the widest word of its name or text. A box which is resized has a position afterwards, see {@link PositionFreezer}. */
 class BoxResize extends Drag {
-  private final ClassModel_V001 box;
+  private final AbstractBoxModel_V001 box;
   private final ResizeSide side;
   private final Rectangle2D startArea;
   private final double minimumWidth;
@@ -20,7 +20,7 @@ class BoxResize extends Drag {
 
   /** @param startScene the diagram before the drag
    * @param minimumWidth the width below which the box can't be made, in units of the diagram */
-  BoxResize(ClassModel_V001 box, ResizeSide side, Scene startScene, double minimumWidth, PositionFreezer freezer) {
+  BoxResize(AbstractBoxModel_V001 box, ResizeSide side, Scene startScene, double minimumWidth, PositionFreezer freezer) {
     this.box = box;
     this.side = side;
     this.startArea = startScene.elementAreaOf(box).area;

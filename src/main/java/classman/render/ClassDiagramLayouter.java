@@ -1,5 +1,6 @@
 package classman.render;
 
+import classman.model.v001.AbstractBoxModel_V001;
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
@@ -130,10 +131,7 @@ public class ClassDiagramLayouter {
     }
 
     private PositionModel_V001 positionOf(AbstractDiagramElementModel_V001 element) {
-        if (element instanceof ClassModel_V001 classModel) {
-            return classModel.position;
-        }
-        return ((NoteModel_V001) element).position;
+        return ((AbstractBoxModel_V001) element).position;
     }
 
     private double stackWidth(Map<AbstractDiagramElementModel_V001, BoxLayout> boxes) {

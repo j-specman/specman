@@ -18,8 +18,9 @@ import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
 /** The vertical tool bar at the left edge of the editor window. Buttons show an icon and a text, or an icon only,
- * which the button at the bottom switches. The most important element comes first, at the top. A class is dragged from
- * its button onto the diagram, the button of a tool for relations is switched on and then used on the diagram. */
+ * which the button at the bottom switches. The most important element comes first, at the top. A class or a note is
+ * dragged from its button onto the diagram, the button of a tool for relations is switched on and then used on the
+ * diagram. */
 class EditorPalette extends JToolBar {
   private static final String PREF_SHOW_TEXT = "paletteShowText";
   private static final float TEXT_SCALE = 1.2f;
@@ -34,8 +35,10 @@ class EditorPalette extends JToolBar {
   private boolean showText;
 
   /** @param classDropped gets the point on the screen where the class button was released
+   * @param noteDropped gets the point on the screen where the note button was released
    * @param relationToolToggled is run when the button for drawing associations is pressed */
-  EditorPalette(EditorTexts texts, Consumer<Point> classDropped, Runnable relationToolToggled) {
+  EditorPalette(EditorTexts texts, Consumer<Point> classDropped, Consumer<Point> noteDropped,
+                Runnable relationToolToggled) {
     super(JToolBar.VERTICAL);
     this.texts = texts;
     this.showText = Preferences.userNodeForPackage(EditorPalette.class).getBoolean(PREF_SHOW_TEXT, true);
@@ -46,6 +49,7 @@ class EditorPalette extends JToolBar {
     toggleButton.addActionListener(e -> toggleShowText());
 
     addDragButton("class", EditorIcons.CLASS, classDropped);
+    addDragButton("note", EditorIcons.NOTE, noteDropped);
     addToolButton("association", EditorIcons.ASSOCIATION, relationToolButton, relationToolToggled);
 
     add(Box.createVerticalGlue());

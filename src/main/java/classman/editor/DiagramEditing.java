@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.AbstractBoxModel_V001;
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
@@ -51,7 +52,7 @@ public class DiagramEditing {
   private AttributeEditing attributeEditing;
   private TaggedValueEditing taggedValueEditing;
   private PendingStereotype pendingStereotype;
-  private ClassModel_V001 pendingClass;
+  private AbstractBoxModel_V001 pendingBox;
   private String source;
   private Scene scene;
   private AbstractDiagramElementModel_V001 selected;
@@ -73,7 +74,7 @@ public class DiagramEditing {
     attributeEditing = new AttributeEditing(model);
     taggedValueEditing = new TaggedValueEditing();
     pendingStereotype = new PendingStereotype();
-    pendingClass = null;
+    pendingBox = null;
     scene = host.renderer().layout(model);
     source = newSource;
     selected = null;
@@ -221,6 +222,11 @@ public class DiagramEditing {
    * nothing is selected */
   public ClassModel_V001 selectedClass() {
     return selected instanceof ClassModel_V001 box && model.classes().contains(box) ? box : null;
+  }
+
+  /** @return the selected box if it is a note, null if something else or nothing is selected */
+  public NoteModel_V001 selectedNote() {
+    return selected instanceof NoteModel_V001 note ? note : null;
   }
 
   /** @return where the selected box is drawn, null if nothing is selected */
@@ -373,10 +379,7 @@ public class DiagramEditing {
     switch (text.kind) {
       case CLASS_NAME -> {
         ClassModel_V001 box = (ClassModel_V001) text.element;
-        if (box == pendingClass) {
-          pendingClass = null;
-          box.width = null;
-        }
+        confirmPendingBox(box);
         if (changeSet != null) {
           textChanger.setClassName(box, newText, changeSet);
         }
@@ -391,6 +394,7 @@ public class DiagramEditing {
       }
       case NOTE_TEXT -> {
         NoteModel_V001 note = (NoteModel_V001) text.element;
+        confirmPendingBox(note);
         if (changeSet != null) {
           textChanger.setNoteText(note, newText, changeSet);
         }
@@ -491,8 +495,8 @@ public class DiagramEditing {
     boolean attributeGone = attributeEditing.discardPending();
     boolean stereotypeGone = pendingStereotype.discard();
     boolean taggedValueGone = taggedValueEditing.discardPending();
-    boolean classGone = discardPendingClass();
-    return attributeGone || stereotypeGone || taggedValueGone || classGone;
+    boolean boxGone = discardPendingBox();
+    return attributeGone || stereotypeGone || taggedValueGone || boxGone;
   }
 
   /** Starts to drag, from the point where the mouse was pressed: a handle of the selected relation if the point is at
@@ -508,18 +512,18 @@ public class DiagramEditing {
       drag = new BoxResize(edge.box, edge.side, scene, minimumWidthOf(edge.box), positionFreezer());
     }
     else {
-      drag = selected != null && scene.elementAreaOf(selected) != null
-        ? new BoxDrag(selected, at, scene, positionFreezer())
+      drag = selected instanceof AbstractBoxModel_V001 box && scene.elementAreaOf(box) != null
+        ? new BoxDrag(box, at, scene, positionFreezer())
         : null;
     }
   }
 
   private PositionFreezer positionFreezer() {
-    return new PositionFreezer(scene, placedBoxes(), associationClasses());
+    return new PositionFreezer(scene, model.boxes(), associationClasses());
   }
 
-  /** @return the width below which the class can't be made: what the layout makes of it with the least width */
-  private double minimumWidthOf(ClassModel_V001 box) {
+  /** @return the width below which the box can't be made: what the layout makes of it with the least width */
+  private double minimumWidthOf(AbstractBoxModel_V001 box) {
     Integer widthBefore = box.width;
     box.width = 1;
     double minimum = host.renderer().layout(model).elementAreaOf(box).area.getWidth();
@@ -527,14 +531,14 @@ public class DiagramEditing {
     return minimum;
   }
 
-  /** @return the side of a class of the diagram which the point is at, where dragging changes the width of the class:
-   * at most the tolerance away from the left or right side, along its whole height. The class which is drawn on top
-   * wins. Null if the point is at none. */
+  /** @return the side of a class or note of the diagram which the point is at, where dragging changes the width of
+   * the box: at most the tolerance away from the left or right side, along its whole height. The box which is drawn on
+   * top wins. Null if the point is at none. */
   ResizeTarget resizeTargetAt(Point2D point, double tolerance) {
-    List<ClassModel_V001> classes = model.classes();
-    for (int i = classes.size() - 1; i >= 0; i--) {
-      ClassModel_V001 box = classes.get(i);
-      SceneElementArea boxArea = box == pendingClass ? null : scene.elementAreaOf(box);
+    List<AbstractBoxModel_V001> boxes = model.boxes();
+    for (int i = boxes.size() - 1; i >= 0; i--) {
+      AbstractBoxModel_V001 box = boxes.get(i);
+      SceneElementArea boxArea = box == pendingBox ? null : scene.elementAreaOf(box);
       if (boxArea == null || point.getY() < boxArea.area.getMinY() || point.getY() > boxArea.area.getMaxY()) {
         continue;
       }
@@ -547,13 +551,13 @@ public class DiagramEditing {
     return null;
   }
 
-  /** @return true if the class has a width of its own, which the user has set, and not the one of its content */
-  public boolean hasFixedWidth(ClassModel_V001 box) {
+  /** @return true if the box has a width of its own, which the user has set, and not the one of its content */
+  public boolean hasFixedWidth(AbstractBoxModel_V001 box) {
     return box.width != null;
   }
 
-  /** Takes the width of its own away from the class, so it is as wide as its content again. One operation. */
-  public void resetWidth(ClassModel_V001 box) {
+  /** Takes the width of its own away from the box, so it is as wide as its content again. One operation. */
+  public void resetWidth(AbstractBoxModel_V001 box) {
     if (box.width != null) {
       box.width = null;
       publish();
@@ -646,12 +650,6 @@ public class DiagramEditing {
     return true;
   }
 
-  private List<AbstractDiagramElementModel_V001> placedBoxes() {
-    List<AbstractDiagramElementModel_V001> boxes = new ArrayList<>(model.classes());
-    boxes.addAll(model.notes());
-    return boxes;
-  }
-
   private List<ClassModel_V001> associationClasses() {
     List<ClassModel_V001> classes = new ArrayList<>();
     for (AbstractRelationModel_V001 relation : model.relations()) {
@@ -737,29 +735,47 @@ public class DiagramEditing {
    * {@link #setText}: that is one operation. It goes away again with the empty name, or if it is dropped.
    * @return the area of the name */
   public SceneTextArea newClass(int x, int y) {
+    return putPendingBox(new ClassModel_V001(""), x, y, TextKind.CLASS_NAME);
+  }
+
+  /** Puts a note without a text into the picture, in the same way as {@link #newClass} does with a class: the text is
+   * typed into it, and it is part of the diagram only when it has a text.
+   * @return the area of the text */
+  public SceneTextArea newNote(int x, int y) {
+    return putPendingBox(new NoteModel_V001(""), x, y, TextKind.NOTE_TEXT);
+  }
+
+  private SceneTextArea putPendingBox(AbstractBoxModel_V001 box, int x, int y, TextKind textKind) {
     discardPendingParts();
-    ClassModel_V001 box = new ClassModel_V001("");
     box.id = ids.newIdNotIn(usedIds());
     box.position = new PositionModel_V001(x, y);
-    box.width = DiagramStyle.NEW_CLASS_WIDTH;
+    box.width = DiagramStyle.NEW_BOX_WIDTH;
     markAsAdded(box);
     model.elements.add(box);
     selected = box;
-    pendingClass = box;
+    pendingBox = box;
     scene = host.renderer().layout(model);
-    return scene.textAreas.stream().filter(text -> text.element == box && text.kind == TextKind.CLASS_NAME)
+    return scene.textAreas.stream().filter(text -> text.element == box && text.kind == textKind)
       .findFirst().orElseThrow();
   }
 
-  private boolean discardPendingClass() {
-    if (pendingClass == null) {
+  /** Makes the box which was put into the picture a box of the diagram: it keeps no width of its own. */
+  private void confirmPendingBox(AbstractBoxModel_V001 box) {
+    if (box == pendingBox) {
+      pendingBox = null;
+      box.width = null;
+    }
+  }
+
+  private boolean discardPendingBox() {
+    if (pendingBox == null) {
       return false;
     }
-    model.elements.remove(pendingClass);
-    if (selected == pendingClass) {
+    model.elements.remove(pendingBox);
+    if (selected == pendingBox) {
       selected = null;
     }
-    pendingClass = null;
+    pendingBox = null;
     return true;
   }
 

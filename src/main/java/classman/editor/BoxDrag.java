@@ -1,6 +1,6 @@
 package classman.editor;
 
-import classman.model.v001.AbstractDiagramElementModel_V001;
+import classman.model.v001.AbstractBoxModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.render.Scene;
 
@@ -10,13 +10,13 @@ import java.awt.geom.Rectangle2D;
 /** The dragging of one box over the diagram. It changes the position in the model as the mouse moves and can put it
  * back. The other boxes keep their places, see {@link PositionFreezer}. */
 class BoxDrag extends Drag {
-  private final AbstractDiagramElementModel_V001 box;
+  private final AbstractBoxModel_V001 box;
   private final Point2D pressedAt;
   private final Rectangle2D startArea;
   private final PositionFreezer freezer;
 
   /** @param startScene the diagram before the drag */
-  BoxDrag(AbstractDiagramElementModel_V001 box, Point2D pressedAt, Scene startScene, PositionFreezer freezer) {
+  BoxDrag(AbstractBoxModel_V001 box, Point2D pressedAt, Scene startScene, PositionFreezer freezer) {
     this.box = box;
     this.pressedAt = pressedAt;
     this.startArea = startScene.elementAreaOf(box).area;
@@ -30,9 +30,9 @@ class BoxDrag extends Drag {
   @Override
   void to(Point2D at, double snapTolerance) {
     freezer.freeze();
-    PositionFreezer.setPosition(box, new PositionModel_V001(
+    box.position = new PositionModel_V001(
       (int) Math.round(startArea.getX() + at.getX() - pressedAt.getX()),
-      (int) Math.round(startArea.getY() + at.getY() - pressedAt.getY())));
+      (int) Math.round(startArea.getY() + at.getY() - pressedAt.getY()));
   }
 
   /** Puts everything back where it was before the first move. */

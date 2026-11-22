@@ -241,6 +241,15 @@ class TextEditor {
     start(name);
   }
 
+  /** Puts a note without a text at the point of the diagram and starts to type the text. A text which is being typed
+   * is finished first. */
+  void startNewNote(int x, int y) {
+    commit(false);
+    SceneTextArea text = editing.newNote(x, y);
+    showDiagram.run();
+    start(text);
+  }
+
   /** Puts a blank row after the tagged values of the class and starts to type a new one into it. */
   void startNewTaggedValue(ClassModel_V001 box) {
     SceneTextArea row = editing.newTaggedValue(box);
