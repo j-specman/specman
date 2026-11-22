@@ -41,6 +41,22 @@ public class TextWrapper {
         lines.add(line);
     }
 
+    /** The text as one line: line breaks become blanks, so the marks of the text keep their places. */
+    public static String oneLine(String text) {
+        return text.replace('\n', ' ');
+    }
+
+    /** The text as one line, cut off where it doesn't fit into the width. What is left of it is a beginning of the
+     * text, so the marks of the text keep their places. */
+    public String clip(String text, double width, boolean bold) {
+        String line = oneLine(text);
+        int end = line.length();
+        while (end > 0 && measurer.width(line.substring(0, end), bold) > width) {
+            end--;
+        }
+        return end == line.length() ? line : line.substring(0, end).stripTrailing();
+    }
+
     /** The width of the widest word in the text, which no wrapping can make smaller. */
     public double longestWord(String text, boolean bold) {
         double longest = 0;

@@ -355,6 +355,7 @@ public class DiagramEditing {
         ClassModel_V001 box = (ClassModel_V001) text.element;
         if (box == pendingClass) {
           pendingClass = null;
+          box.width = null;
         }
         if (changeSet != null) {
           textChanger.setClassName(box, newText, changeSet);
@@ -647,7 +648,8 @@ public class DiagramEditing {
   }
 
   /** Puts a class without a name into the picture, its top left corner at the given point of the diagram, with a new
-   * ID, selected, for the name to be typed into. The class is not part of the diagram until its name is given with
+   * ID, selected, for the name to be typed into. It is wide enough for the field of the name while that is typed; with
+   * the name it gets no width of its own, so it is as wide as its content. The class is not part of the diagram until its name is given with
    * {@link #setText}: that is one operation. It goes away again with the empty name, or if it is dropped.
    * @return the area of the name */
   public SceneTextArea newClass(int x, int y) {

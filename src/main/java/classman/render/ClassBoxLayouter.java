@@ -14,7 +14,6 @@ import java.util.Map;
 
 import static classman.render.DiagramStyle.ATTRIBUTE_ATTACH_GAP;
 import static classman.render.DiagramStyle.CLASS_FILL;
-import static classman.render.DiagramStyle.CONTINUATION_INDENT;
 import static classman.render.DiagramStyle.FRAME_STROKE_WIDTH;
 import static classman.render.DiagramStyle.MIN_BOX_WIDTH;
 import static classman.render.DiagramStyle.PADDING_X;
@@ -68,7 +67,7 @@ public class ClassBoxLayouter {
         List<AbstractSceneElement> overlays = new ArrayList<>();
         double y = PADDING_Y;
         List<SceneText> stereotypeLines = new ArrayList<>();
-        y = addCenteredText(elements, stereotypeLines, stereotype, false, contentWidth, width, y, textColor);
+        y = addClippedCenteredText(elements, stereotypeLines, stereotype, contentWidth, width, y, textColor);
         double nameTop = y;
         double stereotypeTop = PADDING_Y;
         List<SceneText> nameLines = new ArrayList<>();
@@ -76,7 +75,7 @@ public class ClassBoxLayouter {
             isRemoved ? VEILED_MARKED_TEXT : null);
         double nameBottom = y;
         List<SceneText> taggedLines = new ArrayList<>();
-        y = addCenteredText(elements, taggedLines, taggedValues == null ? null : taggedValues.text(), false,
+        y = addClippedCenteredText(elements, taggedLines, taggedValues == null ? null : taggedValues.text(),
             contentWidth, width, y, textColor);
         y += PADDING_Y;
         elements.add(new SceneLine(0, y, width, y, false, lineColor, STROKE_WIDTH));
@@ -186,52 +185,56 @@ public class ClassBoxLayouter {
         if (model.width == null) {
             return Math.max(naturalWidth(model, stereotype, taggedValues, attributes), MIN_BOX_WIDTH - 2 * PADDING_X);
         }
-        return Math.max(model.width - 2 * PADDING_X, longestWord(model, stereotype, taggedValues, attributes));
+        return Math.max(model.width - 2 * PADDING_X, wrapper.longestWord(model.name, true));
     }
 
     private double naturalWidth(ClassModel_V001 model, String stereotype, MarkedText taggedValues,
                                 List<MarkedText> attributes) {
         double widest = measurer.width(model.name, true);
         if (stereotype != null) {
-            widest = Math.max(widest, measurer.width(stereotype, false));
+            widest = Math.max(widest, measurer.width(TextWrapper.oneLine(stereotype), false));
         }
         if (taggedValues != null) {
-            widest = Math.max(widest, measurer.width(taggedValues.text(), false));
+            widest = Math.max(widest, measurer.width(TextWrapper.oneLine(taggedValues.text()), false));
         }
         for (MarkedText attribute : attributes) {
-            widest = Math.max(widest, measurer.width(attribute.text(), false));
+            widest = Math.max(widest, measurer.width(TextWrapper.oneLine(attribute.text()), false));
         }
         return widest;
-    }
-
-    private double longestWord(ClassModel_V001 model, String stereotype, MarkedText taggedValues,
-                               List<MarkedText> attributes) {
-        double longest = wrapper.longestWord(model.name, true);
-        if (stereotype != null) {
-            longest = Math.max(longest, wrapper.longestWord(stereotype, false));
-        }
-        if (taggedValues != null) {
-            longest = Math.max(longest, wrapper.longestWord(taggedValues.text(), false));
-        }
-        for (MarkedText attribute : attributes) {
-            longest = Math.max(longest, wrapper.longestWord(attribute.text(), false));
-        }
-        return longest;
     }
 
     // ---- parts ----
 
     /**
-     * Adds the text as centered lines, wrapped if needed, and notes the lines in placed. Returns the y below the
-     * last line.
+     * Adds the text as centered lines, wrapped at spaces if needed, and notes the lines in placed. Returns the y
+     * below the last line.
      */
     private double addCenteredText(List<AbstractSceneElement> elements, List<SceneText> placed, String text,
                                    boolean bold, double contentWidth, double boxWidth, double y, String textColor) {
         if (text == null) {
             return y;
         }
+        return addCenteredLines(elements, placed, wrapper.wrap(text, contentWidth, contentWidth, bold), bold, boxWidth,
+            y, textColor);
+    }
+
+    /**
+     * Adds the text as one centered line which is cut off where it doesn't fit, and notes it in placed. Returns the
+     * y below the line.
+     */
+    private double addClippedCenteredText(List<AbstractSceneElement> elements, List<SceneText> placed, String text,
+                                          double contentWidth, double boxWidth, double y, String textColor) {
+        if (text == null) {
+            return y;
+        }
+        return addCenteredLines(elements, placed, List.of(wrapper.clip(text, contentWidth, false)), false, boxWidth, y,
+            textColor);
+    }
+
+    private double addCenteredLines(List<AbstractSceneElement> elements, List<SceneText> placed, List<String> lines,
+                                    boolean bold, double boxWidth, double y, String textColor) {
         double lineY = y;
-        for (String line : wrapper.wrap(text, contentWidth, contentWidth, bold)) {
+        for (String line : lines) {
             SceneText sceneText = new SceneText(boxWidth / 2, lineY + measurer.ascent(), line, bold, TextAnchor.MIDDLE,
                 measurer.width(line, bold), textColor);
             elements.add(sceneText);
@@ -259,20 +262,14 @@ public class ClassBoxLayouter {
         double lineY = y;
         for (int i = 0; i < attributes.size(); i++) {
             double top = lineY;
-            double textRight = PADDING_X;
-            boolean first = true;
-            List<SceneText> lines = new ArrayList<>();
-            for (String line : wrapper.wrap(attributes.get(i).text(), contentWidth, contentWidth - CONTINUATION_INDENT, false)) {
-                double x = first ? PADDING_X : PADDING_X + CONTINUATION_INDENT;
-                double lineWidth = measurer.width(line, false);
-                SceneText sceneText = new SceneText(x, lineY + measurer.ascent(), line, false, TextAnchor.START,
-                    lineWidth, textColor);
-                elements.add(sceneText);
-                lines.add(sceneText);
-                textRight = Math.max(textRight, x + lineWidth);
-                lineY += measurer.lineHeight();
-                first = false;
-            }
+            String line = wrapper.clip(attributes.get(i).text(), contentWidth, false);
+            double lineWidth = measurer.width(line, false);
+            SceneText sceneText = new SceneText(PADDING_X, lineY + measurer.ascent(), line, false, TextAnchor.START,
+                lineWidth, textColor);
+            elements.add(sceneText);
+            List<SceneText> lines = List.of(sceneText);
+            double textRight = PADDING_X + lineWidth;
+            lineY += measurer.lineHeight();
             AttributeModel_V001 attribute = model.attributes.get(i);
             if (model.change == null) {
                 markAttribute(backgrounds, overlays, attribute, attributes.get(i), lines, boxWidth, top, lineY);

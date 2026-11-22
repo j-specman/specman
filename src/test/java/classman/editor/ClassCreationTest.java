@@ -17,6 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ClassCreationTest {
@@ -86,6 +87,7 @@ class ClassCreationTest {
     assertEquals(2, classes().size());
     ClassModel_V001 book = classes().get(1);
     assertEquals("Book", book.name);
+    assertNull(book.width);
     assertEquals(300, book.position.x);
     assertEquals(40, book.position.y);
     assertNotNull(book.id);

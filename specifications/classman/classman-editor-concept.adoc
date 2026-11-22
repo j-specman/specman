@@ -99,6 +99,14 @@ Variants are grouped if they are used with the same gesture and differ in one pr
 
 Interface and enum are keywords of their own, because their content differs from a class: A class has attributes, an enum holds only its values, which are entered like attributes without a type, and an interface has no attributes. See <<Consequences for the Format>>.
 
+### Width of a Class Box
+* *Without `width=`* the box is as wide as its widest part: the longest line of the name, the stereotype, the tagged values or an attribute (at least `DiagramStyle.MIN_BOX_WIDTH`). Nothing is wrapped or cut off. The box grows with long attributes and shrinks again when they get shorter. The editor creates classes this way.
+* *With `width=`* (set by the user, there is no way to do that in the editor yet) the width stays, whatever the content is:
+** The *class name* wraps at spaces. The box is at least as wide as the longest single word of the name.
+** The *stereotype*, the *tagged values* and every *attribute* never wrap. They stay one line and are cut off at the right end of the box. A line break in them (only a hand-written source can have one) is shown as a blank.
+** The marks of changes (backgrounds, strikes) cover only what is shown.
+* *Planned:* a cut-off text ends with `...`, so the user sees that there is more. The field for typing an attribute is wrapped at the width of the box for now; it shows the whole text.
+
 ### Creating Elements
 Specman's step buttons are drag sources: The user drags a step onto the diagram. The palette follows this for everything that is a single box.
 
@@ -106,7 +114,7 @@ Specman's step buttons are drag sources: The user drags a step onto the diagram.
 
 * The user presses the class button and drags. A ghost of the class follows the mouse. The class is created where the mouse is released, if that is inside the canvas of the window. Released anywhere else, nothing happens.
 * The drop point becomes the top left corner of the new class: `at(x, y)` in diagram coordinates, rounded to whole pixels, whatever the zoom is.
-* The field for the name opens right after the drop, over the name row of the new class, empty. The class has no made-up name. Return with a name creates the class; Return with an empty name, Esc, or leaving the field takes the class away again. Until then the class is part of the picture (selected, with its box) but not of the diagram: nothing is reported to the host and there is no undo step. The class is created with `width=140` (`DiagramStyle.NEW_CLASS_WIDTH`), wide enough for the empty field (120 pixels at 100 % zoom) to lie completely inside the box. Fields have their minimum width in proportion to the zoom, like their font. Class names need not be unique.
+* The field for the name opens right after the drop, over the name row of the new class, empty. The class has no made-up name. Return with a name creates the class; Return with an empty name, Esc, or leaving the field takes the class away again. Until then the class is part of the picture (selected, with its box) but not of the diagram: nothing is reported to the host and there is no undo step. While the name is typed, the box is `DiagramStyle.NEW_CLASS_WIDTH` (140) units wide, so that the empty field (120 pixels at 100 % zoom) lies completely inside it. That width is only for typing: the created class has no `width=`, so it is as wide as its content, see <<Width of a Class Box>>. Fields have their minimum width in proportion to the zoom, like their font. Class names need not be unique.
 * It gets an ID: 8 hexadecimal characters, different from all IDs in the diagram.
 * If changes are tracked, it gets `change(added, <change set>)`.
 * The new class is selected. Creating it with its name is one operation, one undo step. While changes are tracked, the name needs no mark of its own: a class which a change set has added is named plainly.
@@ -170,7 +178,7 @@ All texts are edited in place, with a text field which lies over the text.
 
 ### The Field
 * The field lies exactly where the text is, in its font, scaled with the zoom, aligned like the text (the class name is centered, the others start where the text starts). It has a blue border and is white. While changes are tracked, it has the pale color of the change set, as a reminder that the change will be marked.
-* *Size:* A class name, a label and a multiplicity grow with the text as it is typed, at least 120, 80 and 40 pixels wide. The text of a note and the line of an attribute are wrapped at the width of their box: the field has the width of the box and grows downwards. The height always fits the text.
+* *Size:* A class name, a label and a multiplicity grow with the text as it is typed, at least 120, 80 and 40 pixels wide. The text of a note and the line of an attribute are wrapped at the width of their box while they are typed: the field has the width of the box and grows downwards (an attribute is wrapped only in the field, never in the diagram, see <<Width of a Class Box>>). The height always fits the text.
 * The diagram is laid out anew after the commit only, not while typing.
 
 ### Ending
@@ -241,7 +249,7 @@ An attribute is edited as a whole line, in the form in which the diagram shows i
 * The field shows the attribute as the diagram does, so a line which is committed unchanged is no operation.
 
 ### Changing an Attribute
-* Double click on a line of the selected class; the field covers all rows of the line if it wraps.
+* Double click on a line of the selected class; the field covers all rows of the line if it wraps in the field.
 * The parts which differ are changed, the others stay. Without change tracking nothing is marked.
 * *Infos:* The infos which are the same in the old and the new line stay, in their order. In the gaps between them, the old infos are changed into the new ones one by one, whatever is left over is removed, or added after the last info before it. This makes a changed info one change and not a removal and an addition.
 * *Change tracking:* The name and the type get `was(<change set>, <old text>)` where they differ. An info is a list entry, like an attribute in a class, so it takes element marks: an info which is added is marked `change(added, ...)`, one which is removed is marked `change(removed, ...)` and keeps its text. An info whose text is changed gets a text mark with its old text. An info which a change set has added is simply gone if it is removed, whichever change set it was. An info which the change set has removed and which is typed again is not removed any more: it is found by its text and stays where it was, also if it was typed at another place of the line. Another text typed in its place is a new info, and the removed one stays struck through next to it. A removed type stays as the empty text with its mark and is not shown, see <<Removed Parts of a Line>>. Setting a part back to its old text takes the mark away.
@@ -261,7 +269,7 @@ The empty text deletes the attribute: the user selects all, deletes, presses Ret
 * Every committed line is one operation and one undo step.
 
 ### Not Built
-Moving an attribute within its class (by dragging, or with Alt+Up and Alt+Down), editing the `...` marker, selecting an attribute, the indent of the following rows of a wrapped line in the field.
+Moving an attribute within its class (by dragging, or with Alt+Up and Alt+Down), editing the `...` marker, selecting an attribute.
 
 ## Change Tracking in the Editor
 If the host says that changes are tracked, the editor writes the marks: the user never writes them by hand. Accepting, rejecting and merging change sets is done by the host on the source, see `ChangeResolver_V001`, outside of the editor.

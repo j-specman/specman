@@ -86,22 +86,44 @@ class ClassDiagramLayouterTest {
     assertTrue(stereotype < name && name < tagged);
   }
 
-  /** With a given width, attributes wrap at spaces and the following lines are indented. */
+  /** With a given width, an attribute which doesn't fit is cut off, not wrapped, and the box keeps its width. */
   @Test
-  void attributeWrapping() throws ClassDiagramParseException {
+  void attributeClipping() throws ClassDiagramParseException {
     Scene scene = layout("class A at(0, 0) width=60 { \"xx yy zz\" }");
     assertEquals(60, all(scene, SceneRectangle.class).get(0).width);
-    assertEquals(List.of("A", "xx", "yy", "zz"), texts(scene));
-    assertEquals(PADDING_X, textNamed(scene, "xx").x);
-    assertEquals(PADDING_X + DiagramStyle.CONTINUATION_INDENT, textNamed(scene, "yy").x);
-    assertEquals(textNamed(scene, "yy").y + LINE, textNamed(scene, "zz").y);
+    assertEquals(List.of("A", "xx y"), texts(scene));
+    assertEquals(PADDING_X, textNamed(scene, "xx y").x);
   }
 
-  /** A word wider than the given width widens the box. */
+  /** Without a width, the box is as wide as its widest part, so nothing is cut off, and it shrinks again with the
+   * text. */
   @Test
-  void longWordWidensBox() throws ClassDiagramParseException {
+  void boxFollowsContent() throws ClassDiagramParseException {
+    assertEquals(8 * CHAR + 2 * PADDING_X, all(layout("class A { \"xx yy zz\" }"), SceneRectangle.class).get(0).width);
+    assertEquals(DiagramStyle.MIN_BOX_WIDTH, all(layout("class A { xx }"), SceneRectangle.class).get(0).width);
+  }
+
+  /** A stereotype and the tagged values are cut off like attributes, not wrapped. */
+  @Test
+  void headerPartsClipping() throws ClassDiagramParseException {
+    Scene scene = layout("class Abc at(0, 0) width=82 <<Entity>> {TABLE=books}");
+    assertEquals(List.of("<<Entit", "Abc", "{TABLE="), texts(scene));
+    assertEquals(82, all(scene, SceneRectangle.class).get(0).width);
+  }
+
+  /** The name wraps at spaces with a given width, and the widest single word widens the box. */
+  @Test
+  void nameWrapsAndWidens() throws ClassDiagramParseException {
+    assertEquals(List.of("aa bb", "cc"), texts(layout("class \"aa bb cc\" width=70")));
+    Scene widened = layout("class Abcdefgh width=30");
+    assertEquals(8 * CHAR + 2 * PADDING_X, all(widened, SceneRectangle.class).get(0).width);
+  }
+
+  /** A word of an attribute wider than the given width doesn't widen the box. */
+  @Test
+  void longAttributeWordDoesNotWidenBox() throws ClassDiagramParseException {
     Scene scene = layout("class A width=30 { abcdefgh }");
-    assertEquals(8 * CHAR + 2 * PADDING_X, all(scene, SceneRectangle.class).get(0).width);
+    assertEquals(30, all(scene, SceneRectangle.class).get(0).width);
   }
 
   // ---- placing ----
