@@ -88,13 +88,13 @@ class HiddenAttributeEditingTest {
   void whatCannotBeHidden() throws ClassDiagramParseException {
     open("classdiagram {\n  class A (11111111) at(10, 20) {\n    -x (hidden)\n    ...\n  }\n}");
 
-    assertFalse(editing.canHideAttribute(editing.selectedClass(), attribute("x")));
-    assertFalse(editing.canHideAttribute(editing.selectedClass(), editing.selectedClass().attributes.get(1)));
-    assertFalse(editing.canHideAttribute(editing.selectedClass(), null));
+    assertFalse(editing.canHideAttribute(editing.selectedClass(), attribute("x")).can());
+    assertFalse(editing.canHideAttribute(editing.selectedClass(), editing.selectedClass().attributes.get(1)).can());
+    assertFalse(editing.canHideAttribute(editing.selectedClass(), null).can());
 
     open("classdiagram {\n  class A (11111111) change(removed, yellow) at(10, 20) {\n    -x\n  }\n}");
 
-    assertFalse(editing.canHideAttribute(editing.selectedClass(), attribute("x")));
+    assertFalse(editing.canHideAttribute(editing.selectedClass(), attribute("x")).can());
   }
 
   /** Showing takes the mark away, the attribute is back in its place. */

@@ -73,7 +73,7 @@ class StereotypeEditingTest {
     open(WITH_STEREOTYPE);
     selectClass();
 
-    assertFalse(editing.canAddStereotypeTo(editing.selectedClass()));
+    assertFalse(editing.canAddStereotypeTo(editing.selectedClass()).can());
     assertEquals(stereotypeText(), editing.editableTextAt(centerOf(stereotypeText())));
     assertEquals("Entity", editing.textOf(stereotypeText()));
   }
@@ -149,7 +149,7 @@ class StereotypeEditingTest {
     open("classdiagram {\n  class A (11111111) change(removed, yellow) at(10, 60)\n}");
     selectClass();
 
-    assertFalse(editing.canAddStereotypeTo(editing.selectedClass()));
+    assertFalse(editing.canAddStereotypeTo(editing.selectedClass()).can());
     assertThrows(IllegalArgumentException.class, () -> editing.newStereotype(editing.selectedClass()));
   }
 
@@ -167,7 +167,7 @@ class StereotypeEditingTest {
     assertEquals("Entity", removed.stereotype);
     assertEquals(ChangeType_V001.REMOVED, removed.stereotypeElementChange.type);
     assertEquals("", editing.textOf(stereotypeText()));
-    assertTrue(editing.canAddStereotypeTo(editing.selectedClass()));
+    assertTrue(editing.canAddStereotypeTo(editing.selectedClass()).can());
 
     editing.setText(stereotypeText(), "Entity");
 

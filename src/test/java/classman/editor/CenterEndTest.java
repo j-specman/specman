@@ -49,7 +49,7 @@ class CenterEndTest {
   void endLinkedToCenter() throws ClassDiagramParseException {
     openAndSelect(ROUTED);
     Point2D other = editing.selectedHandles().get(editing.selectedHandles().size() - 1);
-    assertTrue(editing.canCenterEnd(RelationEnd_V001.FROM));
+    assertTrue(editing.canCenterEnd(RelationEnd_V001.FROM).can());
 
     editing.centerEnd(RelationEnd_V001.FROM);
 
@@ -57,8 +57,8 @@ class CenterEndTest {
     assertFalse(relation().route.end.center);
     List<Point2D> points = editing.scene().relationLines.get(0).points();
     assertEquals(other, points.get(points.size() - 1));
-    assertFalse(editing.canCenterEnd(RelationEnd_V001.FROM));
-    assertTrue(editing.canCenterEnd(RelationEnd_V001.TO));
+    assertFalse(editing.canCenterEnd(RelationEnd_V001.FROM).can());
+    assertTrue(editing.canCenterEnd(RelationEnd_V001.TO).can());
     assertEquals(1, host.reportedSources.size());
   }
 
@@ -93,7 +93,7 @@ class CenterEndTest {
   void straightRelationNothingToLink() throws ClassDiagramParseException {
     openAndSelect(CLASSES + "  association 11111111 -- 22222222\n}");
 
-    assertFalse(editing.canCenterEnd(RelationEnd_V001.FROM));
+    assertFalse(editing.canCenterEnd(RelationEnd_V001.FROM).can());
     editing.centerEnd(RelationEnd_V001.FROM);
     assertFalse(editing.canUndo());
   }
@@ -133,15 +133,15 @@ class CenterEndTest {
     assertEquals(RelationEnd_V001.FROM, editing.endHandleAt(handles.get(0), 4));
     assertEquals(RelationEnd_V001.TO, editing.endHandleAt(handles.get(handles.size() - 1), 4));
     assertFalse(editing.isRelationSelected());
-    assertTrue(editing.canCenterEnd(RelationEnd_V001.FROM));
-    assertTrue(editing.canCenterEnd(RelationEnd_V001.TO));
+    assertTrue(editing.canCenterEnd(RelationEnd_V001.FROM).can());
+    assertTrue(editing.canCenterEnd(RelationEnd_V001.TO).can());
 
     editing.centerEnd(RelationEnd_V001.FROM);
 
     assertNull(anchorLine().start);
     assertNotNull(anchorLine().end);
     assertEquals(1, anchorLine().waypoints.size());
-    assertFalse(editing.canCenterEnd(RelationEnd_V001.FROM));
+    assertFalse(editing.canCenterEnd(RelationEnd_V001.FROM).can());
     assertEquals(1, host.reportedSources.size());
 
     editing.centerEnd(RelationEnd_V001.TO);

@@ -96,7 +96,7 @@ class ClassAppearanceTest {
     assertTrue(parsedClass().attributesHidden);
     assertEquals(2, parsedClass().attributes.size());
     assertTrue(editing.selectedArea().getHeight() < heightWith);
-    assertFalse(editing.canAddAttributeTo(editing.selectedClass()));
+    assertFalse(editing.canAddAttributeTo(editing.selectedClass()).can());
     assertTrue(editing.scene().textAreas.stream().noneMatch(text -> text.attribute != null));
 
     editing.setAttributesHidden(editing.selectedClass(), false);
@@ -110,7 +110,7 @@ class ClassAppearanceTest {
   void markedAttributesCannotBeHidden() throws ClassDiagramParseException {
     open("classdiagram {\n  class A (11111111) at(10, 20) {\n    -x change(added, yellow)\n    -y\n  }\n}");
 
-    assertFalse(editing.canHideAttributesOf(editing.selectedClass()));
+    assertFalse(editing.canHideAttributesOf(editing.selectedClass()).can());
     editing.setAttributesHidden(editing.selectedClass(), true);
 
     assertFalse(parsedClass().attributesHidden);
@@ -125,8 +125,8 @@ class ClassAppearanceTest {
   void interfaceCannotHideAttributes() throws ClassDiagramParseException {
     open("classdiagram {\n  interface I (11111111) at(10, 20)\n}");
 
-    assertFalse(editing.canHideAttributesOf(editing.selectedClass()));
-    assertTrue(editing.canChangeFill(editing.selectedClass()));
+    assertFalse(editing.canHideAttributesOf(editing.selectedClass()).can());
+    assertTrue(editing.canChangeFill(editing.selectedClass()).can());
   }
 
   /** What is attached to a hidden attribute is attached to the class. */

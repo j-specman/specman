@@ -13,9 +13,10 @@ import java.awt.Color;
 import java.util.function.UnaryOperator;
 
 /** The menu of a class: it adds the parts which a class can have, each typed into its place in the class right away,
- * shows and hides single attributes by a submenu of check items, which stays open while the user checks them. It gives the box a color of its own, shows or hides its attribute compartment, and switches back to the
- * width which follows the content. An entry which doesn't fit the class right now, like a second stereotype, is
- * there but can't be chosen. */
+ * shows and hides single attributes by a submenu of check items, which stays open while the user checks them. It
+ * gives the box a color of its own, shows or hides its attribute compartment, and switches back to the width which
+ * follows the content. An entry which doesn't fit the class right now, like a second stereotype, is there but can't
+ * be chosen, and its tooltip says why. */
 class ClassContextMenu extends JPopupMenu {
 
   /** @param colorPicker asks the user for a color, given the one to start from, and gives null if the user doesn't
@@ -34,13 +35,14 @@ class ClassContextMenu extends JPopupMenu {
     addSeparator();
     add(entry(texts.get("menu.class.color"), editing.canChangeFill(box), () -> chooseColor(editing, box, colorPicker,
       showDiagram)));
-    add(entry(texts.get("menu.class.color.standard"), editing.canChangeFill(box) && box.fill != null, () -> {
+    Can hasOwnColor = box.fill != null ? Can.YES : Can.not(texts.get("reason.fill.standard"));
+    add(entry(texts.get("menu.class.color.standard"), editing.canChangeFill(box).and(hasOwnColor), () -> {
       editing.setFill(box, null);
       showDiagram.run();
     }));
     JCheckBoxMenuItem showsAttributes = new JCheckBoxMenuItem(
       texts.get(isEnum ? "menu.class.show.values" : "menu.class.show.attributes"), box.showsAttributes());
-    showsAttributes.setEnabled(editing.canHideAttributesOf(box));
+    editing.canHideAttributesOf(box).applyTo(showsAttributes);
     showsAttributes.addActionListener(e -> {
       editing.setAttributesHidden(box, box.showsAttributes());
       showDiagram.run();
@@ -67,7 +69,7 @@ class ClassContextMenu extends JPopupMenu {
   private static JCheckBoxMenuItem visibleItem(DiagramEditing editing, ClassModel_V001 box,
                                                AttributeModel_V001 attribute, Runnable showDiagram) {
     JCheckBoxMenuItem item = new StayOpenCheckBoxMenuItem(attribute.name, !attribute.hidden);
-    item.setEnabled(attribute.hidden ? editing.canShowAttribute(box, attribute) : editing.canHideAttribute(box, attribute));
+    canSwitch(editing, box, attribute).applyTo(item);
     item.addActionListener(e -> {
       if (attribute.hidden) {
         editing.showAttribute(box, attribute);
@@ -76,10 +78,14 @@ class ClassContextMenu extends JPopupMenu {
         editing.hideAttribute(box, attribute);
       }
       item.setSelected(!attribute.hidden);
-      item.setEnabled(attribute.hidden ? editing.canShowAttribute(box, attribute) : editing.canHideAttribute(box, attribute));
+      canSwitch(editing, box, attribute).applyTo(item);
       showDiagram.run();
     });
     return item;
+  }
+
+  private static Can canSwitch(DiagramEditing editing, ClassModel_V001 box, AttributeModel_V001 attribute) {
+    return attribute.hidden ? editing.canShowAttribute(box, attribute) : editing.canHideAttribute(box, attribute);
   }
 
   private static void chooseColor(DiagramEditing editing, ClassModel_V001 box, UnaryOperator<Color> colorPicker,
@@ -92,9 +98,9 @@ class ClassContextMenu extends JPopupMenu {
     }
   }
 
-  private static JMenuItem entry(String label, boolean enabled, Runnable action) {
+  private static JMenuItem entry(String label, Can can, Runnable action) {
     JMenuItem item = new JMenuItem(label);
-    item.setEnabled(enabled);
+    can.applyTo(item);
     item.addActionListener(e -> action.run());
     return item;
   }

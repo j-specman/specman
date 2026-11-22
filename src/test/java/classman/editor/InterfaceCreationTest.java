@@ -77,8 +77,8 @@ class InterfaceCreationTest {
     editing.selectAt(centerOf(editing, 1));
     ClassModel_V001 aClass = editing.selectedClass();
 
-    assertFalse(editing.canAddAttributeTo(anInterface));
-    assertTrue(editing.canAddAttributeTo(aClass));
+    assertFalse(editing.canAddAttributeTo(anInterface).can());
+    assertTrue(editing.canAddAttributeTo(aClass).can());
   }
 
   /** An enum is created like a class. Its values are lines without a type: a colon is not allowed, an info is. */
@@ -88,7 +88,7 @@ class InterfaceCreationTest {
     editing.setText(editing.newClass(300, 40, ClassKind_V001.ENUM), "Color");
     editing.selectAt(centerOf(editing, 0));
     ClassModel_V001 box = editing.selectedClass();
-    assertTrue(editing.canAddAttributeTo(box));
+    assertTrue(editing.canAddAttributeTo(box).can());
 
     SceneTextArea line = editing.newAttributeAtEnd(box);
 

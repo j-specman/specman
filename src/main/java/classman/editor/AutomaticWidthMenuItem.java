@@ -11,7 +11,7 @@ class AutomaticWidthMenuItem extends JCheckBoxMenuItem {
   /** @param showDiagram shows the diagram as the editing has it now */
   AutomaticWidthMenuItem(DiagramEditing editing, AbstractBoxModel_V001 box, EditorTexts texts, Runnable showDiagram) {
     super(texts.get("menu.automatic.width"), !editing.hasFixedWidth(box));
-    setEnabled(editing.hasFixedWidth(box));
+    (editing.hasFixedWidth(box) ? Can.YES : Can.not(texts.get("reason.width.automatic"))).applyTo(this);
     addActionListener(e -> {
       editing.resetWidth(box);
       showDiagram.run();

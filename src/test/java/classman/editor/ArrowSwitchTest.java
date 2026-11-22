@@ -82,8 +82,8 @@ class ArrowSwitchTest {
   void diamondEndCantSwitch() throws ClassDiagramParseException {
     openAndSelect("composition 11111111 -- 22222222");
 
-    assertFalse(editing.canSwitchArrowAt(RelationEnd_V001.FROM));
-    assertTrue(editing.canSwitchArrowAt(RelationEnd_V001.TO));
+    assertFalse(editing.canSwitchArrowAt(RelationEnd_V001.FROM).can());
+    assertTrue(editing.canSwitchArrowAt(RelationEnd_V001.TO).can());
     editing.toggleArrowAt(RelationEnd_V001.FROM);
     assertFalse(relation().fromArrow);
     editing.toggleArrowAt(RelationEnd_V001.TO);
@@ -95,8 +95,8 @@ class ArrowSwitchTest {
   void inheritanceCantSwitch() throws ClassDiagramParseException {
     openAndSelect("extends 11111111 -> 22222222");
 
-    assertFalse(editing.canSwitchArrowAt(RelationEnd_V001.FROM));
-    assertFalse(editing.canSwitchArrowAt(RelationEnd_V001.TO));
+    assertFalse(editing.canSwitchArrowAt(RelationEnd_V001.FROM).can());
+    assertFalse(editing.canSwitchArrowAt(RelationEnd_V001.TO).can());
   }
 
   /** A relation to an enum, or from one, keeps its arrowheads: the enum doesn't know who uses it. */
@@ -104,8 +104,8 @@ class ArrowSwitchTest {
   void enumRelationsCantSwitch() throws ClassDiagramParseException {
     openAndSelect("association 11111111 -> 33333333");
 
-    assertFalse(editing.canSwitchArrowAt(RelationEnd_V001.FROM));
-    assertFalse(editing.canSwitchArrowAt(RelationEnd_V001.TO));
+    assertFalse(editing.canSwitchArrowAt(RelationEnd_V001.FROM).can());
+    assertFalse(editing.canSwitchArrowAt(RelationEnd_V001.TO).can());
     editing.toggleArrowAt(RelationEnd_V001.TO);
     assertTrue(relation().toArrow);
   }
@@ -116,16 +116,16 @@ class ArrowSwitchTest {
   void trackedNotMarked() throws ClassDiagramParseException {
     host.trackedChangeSet = "yellow";
     openAndSelect("association 11111111 -> 22222222");
-    assertTrue(editing.canSwitchArrowAt(RelationEnd_V001.FROM));
+    assertTrue(editing.canSwitchArrowAt(RelationEnd_V001.FROM).can());
     editing.toggleArrowAt(RelationEnd_V001.FROM);
     assertTrue(relation().fromArrow);
     assertNull(relation().change);
 
     openAndSelect("association (44444444) change(added, yellow) 11111111 -> 22222222");
-    assertTrue(editing.canSwitchArrowAt(RelationEnd_V001.FROM));
+    assertTrue(editing.canSwitchArrowAt(RelationEnd_V001.FROM).can());
 
     openAndSelect("association (44444444) change(removed, yellow) 11111111 -> 22222222");
-    assertFalse(editing.canSwitchArrowAt(RelationEnd_V001.FROM));
+    assertFalse(editing.canSwitchArrowAt(RelationEnd_V001.FROM).can());
   }
 
   /** A right click on an end handle asks for the menu of the end, one on a waypoint doesn't. */

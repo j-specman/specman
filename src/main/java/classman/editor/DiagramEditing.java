@@ -56,6 +56,7 @@ import java.util.function.Supplier;
 public class DiagramEditing {
   private static final double DEFAULT_LINE_TOLERANCE = 4;
   private final EditorHost host;
+  private final EditorTexts texts;
   private final ClassDiagramSerializer_V001 serializer = new ClassDiagramSerializer_V001();
   private final ElementDeleter_V001 deleter = new ElementDeleter_V001();
   private final ElementTextChanger_V001 textChanger = new ElementTextChanger_V001();
@@ -80,6 +81,7 @@ public class DiagramEditing {
    * @throws IllegalArgumentException if the diagram refers to an element which it doesn't have */
   public DiagramEditing(String source, EditorHost host) throws ClassDiagramParseException {
     this.host = host;
+    this.texts = new EditorTexts(host.locale());
     load(source);
   }
 
@@ -371,17 +373,23 @@ public class DiagramEditing {
       && (end == RelationEnd_V001.FROM ? association.fromArrow : association.toArrow);
   }
 
-  /** @return true if the user may switch the arrowhead of the selected relation at the end. The relation must be one
+  /** @return whether the user may switch the arrowhead of the selected relation at the end. The relation must be one
    * which can have an arrowhead there (an association at both ends, an aggregation or composition at the target), and
    * must not run to or from an enum, which doesn't know who uses it and so is only ever the target of a directed
    * association. A removed relation can't be switched. The switching is no change which a change set tracks, so it is
    * possible with and without change tracking, and marks nothing. */
-  public boolean canSwitchArrowAt(RelationEnd_V001 end) {
-    if (!(selected instanceof AssociationRelationModel_V001 relation) || !relation.type.canHaveArrowAt(end)
-      || involvesEnum(relation)) {
-      return false;
+  public Can canSwitchArrowAt(RelationEnd_V001 end) {
+    if (!(selected instanceof AssociationRelationModel_V001 relation)) {
+      return Can.NOT;
     }
-    return relation.change == null || relation.change.type == ChangeType_V001.ADDED;
+    if (!relation.type.canHaveArrowAt(end)) {
+      return Can.not(texts.get("reason.arrow.notpossible"));
+    }
+    if (involvesEnum(relation)) {
+      return Can.not(texts.get("reason.arrow.enum"));
+    }
+    boolean isRemoved = relation.change != null && relation.change.type == ChangeType_V001.REMOVED;
+    return isRemoved ? Can.not(texts.get("reason.relation.removed")) : Can.YES;
   }
 
   private boolean involvesEnum(AbstractRelationModel_V001 relation) {
@@ -397,7 +405,7 @@ public class DiagramEditing {
   /** Switches the arrowhead of the selected relation at the end on if it is off and off if it is on. Not marked as a
    * change, see {@link #canSwitchArrowAt}. One operation. Nothing happens if the user may not switch it. */
   public void toggleArrowAt(RelationEnd_V001 end) {
-    if (!canSwitchArrowAt(end)) {
+    if (!canSwitchArrowAt(end).can()) {
       return;
     }
     AssociationRelationModel_V001 association = (AssociationRelationModel_V001) selected;
@@ -410,17 +418,21 @@ public class DiagramEditing {
     publish();
   }
 
-  /** @return true if the end of the selected relation or anchor line is fixed at a point of the border of its box (a
+  /** @return whether the end of the selected relation or anchor line is fixed at a point of the border of its box (a
    * point of the line of a relation, for the end of an anchor line on a relation), so that it can be linked to the
    * center of the box again */
-  public boolean canCenterEnd(RelationEnd_V001 end) {
+  public Can canCenterEnd(RelationEnd_V001 end) {
+    Can centeredAlready = Can.not(texts.get("reason.center.already"));
     if (selected instanceof AttachLineModel_V001 attachLine) {
-      return (end == RelationEnd_V001.FROM ? attachLine.start : attachLine.end) != null;
+      return (end == RelationEnd_V001.FROM ? attachLine.start : attachLine.end) != null ? Can.YES : centeredAlready;
     }
-    if (!(selected instanceof AbstractRelationModel_V001 relation) || relation.route == null) {
-      return false;
+    if (!(selected instanceof AbstractRelationModel_V001 relation)) {
+      return Can.NOT;
     }
-    return !(end == RelationEnd_V001.FROM ? relation.route.start : relation.route.end).center;
+    if (relation.route == null) {
+      return centeredAlready;
+    }
+    return (end == RelationEnd_V001.FROM ? relation.route.start : relation.route.end).center ? centeredAlready : Can.YES;
   }
 
   /** Links the end of the selected relation or anchor line to the center of its box again: the line leaves the box
@@ -428,7 +440,7 @@ public class DiagramEditing {
    * A route which then has no waypoints and no fixed end is dropped. Not marked as a change, a route never is. One
    * operation. */
   public void centerEnd(RelationEnd_V001 end) {
-    if (!canCenterEnd(end)) {
+    if (!canCenterEnd(end).can()) {
       return;
     }
     if (selected instanceof AttachLineModel_V001 attachLine) {
@@ -599,47 +611,71 @@ public class DiagramEditing {
     return scene.textAreas.stream().filter(text -> text.attribute == placeholder).findFirst().orElseThrow();
   }
 
-  /** @return true if the class can get parts: no change set has removed it */
-  public boolean canAddPartsTo(ClassModel_V001 box) {
+  /** @return whether the class can get parts: no change set has removed it */
+  public Can canAddPartsTo(ClassModel_V001 box) {
+    if (!model.classes().contains(box)) {
+      return Can.NOT;
+    }
     boolean isRemoved = box.change != null && box.change.type == ChangeType_V001.REMOVED;
-    return !isRemoved && model.classes().contains(box);
+    return isRemoved ? Can.not(texts.get("reason.class.removed")) : Can.YES;
   }
 
-  /** @return true if the class can get an attribute or, for an enum, a value: it can get parts and is not an interface */
-  public boolean canAddAttributeTo(ClassModel_V001 box) {
-    return canAddPartsTo(box) && box.showsAttributes();
+  /** @return whether the class can get an attribute or, for an enum, a value: it can get parts, is not an interface
+   * and shows its attributes */
+  public Can canAddAttributeTo(ClassModel_V001 box) {
+    Can parts = canAddPartsTo(box);
+    if (!parts.can()) {
+      return parts;
+    }
+    if (!box.kind.hasAttributes()) {
+      return Can.not(texts.get("reason.interface.noattributes"));
+    }
+    return box.showsAttributes() ? Can.YES : Can.not(texts.get("reason.attributes.hidden"));
   }
 
-  /** @return true if the class has an attribute compartment which can be hidden or shown: it is no interface, no
+  /** @return whether the class has an attribute compartment which can be hidden or shown: it is no interface, no
    * change set has removed it, and its attributes carry no marks of a change set, which must not be hidden */
-  public boolean canHideAttributesOf(ClassModel_V001 box) {
-    return canAddPartsTo(box) && box.kind.hasAttributes() && !box.hasMarkedAttributes();
+  public Can canHideAttributesOf(ClassModel_V001 box) {
+    Can parts = canAddPartsTo(box);
+    if (!parts.can()) {
+      return parts;
+    }
+    if (!box.kind.hasAttributes()) {
+      return Can.not(texts.get("reason.interface.noattributes"));
+    }
+    return box.hasMarkedAttributes() ? Can.not(texts.get("reason.attributes.marked")) : Can.YES;
   }
 
-  /** @return true if the attribute can be hidden: the class shows it, no change set has removed the class, and it
+  /** @return whether the attribute can be hidden: the class shows it, no change set has removed the class, and it
    * is not the line ". . ." */
-  public boolean canHideAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
-    return attribute != null && !attribute.hidden && !attribute.hiddenAttributesMarker && canAddAttributeTo(box)
-      && box.attributes.contains(attribute);
+  public Can canHideAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
+    if (attribute == null || attribute.hidden || attribute.hiddenAttributesMarker
+      || !box.attributes.contains(attribute)) {
+      return Can.NOT;
+    }
+    return canAddAttributeTo(box);
   }
 
   /** Hides the attribute, which stays in the diagram. Marks of change sets on it are not lost, the line ". . ." shows
    * their color. Not marked as a change, like the width. One operation. */
   public void hideAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
-    if (canHideAttribute(box, attribute)) {
+    if (canHideAttribute(box, attribute).can()) {
       attribute.hidden = true;
       publish();
     }
   }
 
-  /** @return true if the hidden attribute of the class can be shown again: no change set has removed the class */
-  public boolean canShowAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
-    return attribute.hidden && canAddPartsTo(box) && box.attributes.contains(attribute);
+  /** @return whether the hidden attribute of the class can be shown again: no change set has removed the class */
+  public Can canShowAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
+    if (!attribute.hidden || !box.attributes.contains(attribute)) {
+      return Can.NOT;
+    }
+    return canAddPartsTo(box);
   }
 
   /** Shows the hidden attribute again. Not marked as a change. One operation. */
   public void showAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
-    if (canShowAttribute(box, attribute)) {
+    if (canShowAttribute(box, attribute).can()) {
       attribute.hidden = false;
       publish();
     }
@@ -648,14 +684,14 @@ public class DiagramEditing {
   /** Hides or shows the attribute compartment of the class. The attributes stay in the diagram. Not marked as a
    * change, like the width. One operation. */
   public void setAttributesHidden(ClassModel_V001 box, boolean hidden) {
-    if (box.attributesHidden != hidden && canAddPartsTo(box) && (!hidden || canHideAttributesOf(box))) {
+    if (box.attributesHidden != hidden && canAddPartsTo(box).can() && (!hidden || canHideAttributesOf(box).can())) {
       box.attributesHidden = hidden;
       publish();
     }
   }
 
-  /** @return true if the box can get a background color of its own: no change set has removed it */
-  public boolean canChangeFill(ClassModel_V001 box) {
+  /** @return whether the box can get a background color of its own: no change set has removed it */
+  public Can canChangeFill(ClassModel_V001 box) {
     return canAddPartsTo(box);
   }
 
@@ -663,7 +699,7 @@ public class DiagramEditing {
    * marked as a change, like the width. One operation. */
   public void setFill(ClassModel_V001 box, String color) {
     String normalized = color == null ? null : color.toLowerCase(Locale.ROOT);
-    if (canChangeFill(box) && !Objects.equals(box.fill, normalized)) {
+    if (canChangeFill(box).can() && !Objects.equals(box.fill, normalized)) {
       box.fill = normalized;
       publish();
     }
@@ -674,7 +710,7 @@ public class DiagramEditing {
    * @return the area of the blank row
    * @throws IllegalArgumentException if the class can't get parts */
   public SceneTextArea newTaggedValue(ClassModel_V001 box) {
-    if (!canAddPartsTo(box)) {
+    if (!canAddPartsTo(box).can()) {
       throw new IllegalArgumentException("The class can't get a tagged value: " + box.name);
     }
     TaggedValueModel_V001 pending = taggedValueEditing.beginAtEnd(box);
@@ -682,9 +718,13 @@ public class DiagramEditing {
     return scene.textAreas.stream().filter(text -> text.taggedValue == pending).findFirst().orElseThrow();
   }
 
-  /** @return true if the class has no stereotype, or only one which a change set has removed */
-  public boolean canAddStereotypeTo(ClassModel_V001 box) {
-    return canAddPartsTo(box) && stereotypeOf(box).isEmpty();
+  /** @return whether the class has no stereotype, or only one which a change set has removed */
+  public Can canAddStereotypeTo(ClassModel_V001 box) {
+    Can parts = canAddPartsTo(box);
+    if (!parts.can()) {
+      return parts;
+    }
+    return stereotypeOf(box).isEmpty() ? Can.YES : Can.not(texts.get("reason.stereotype.exists"));
   }
 
   /** Puts a blank stereotype row into the class, for the stereotype to be typed into. It is part of the picture, but
@@ -693,7 +733,7 @@ public class DiagramEditing {
    * @return the area of the row
    * @throws IllegalArgumentException if the class has a stereotype */
   public SceneTextArea newStereotype(ClassModel_V001 box) {
-    if (!canAddStereotypeTo(box)) {
+    if (!canAddStereotypeTo(box).can()) {
       throw new IllegalArgumentException("The class can't get a stereotype: " + box.name);
     }
     if (box.stereotype == null) {

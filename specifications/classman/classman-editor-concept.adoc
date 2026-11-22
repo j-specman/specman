@@ -326,7 +326,7 @@ The right mouse button on a class selects it, like a press, and opens a menu wit
 * *Show attributes* (*Show values* for an enum): a check item, see <<Color and Hidden Attributes of a Class>>.
 * *Automatic width:* see <<Width of a Class Box>>. A check item, separated from the entries which add parts.
 * *Add tagged value:* puts a blank row after the last tagged value and starts typing into it, see <<The Tagged Values of a Class>>. A class which a change set has removed offers nothing.
-* An entry which doesn't fit can't be chosen, it is not hidden, so the menu looks the same on every class. A class which a change set has removed offers nothing.
+* An entry which doesn't fit can't be chosen, it is not hidden, so the menu looks the same on every class. The tooltip of such an entry says why (`reason.*` in the bundles): the editing answers every question whether the user may do something with a `Can`, which is yes, or no with the reason; the menus apply it to the entry (`Can.applyTo`). A no without a reason (`Can.NOT`) is for what is obvious. A class which a change set has removed offers nothing.
 * A text which is being typed is finished first when the menu is opened: the right button takes the focus to the canvas.
 * The menu belongs to classes of the diagram. Relations have none yet, a right click on them only selects them. While the tool for relations is armed, there is no menu.
 * The texts of the entries are in the editor's own bundle (`menu.class.add.*`).
