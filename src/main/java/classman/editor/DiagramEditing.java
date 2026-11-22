@@ -87,10 +87,19 @@ public class DiagramEditing {
 
   public String source() { return source; }
 
-  /** @return the picture of the diagram as it is now, with the line of the selected relation or anchor drawn thicker */
+  /** @return the picture of the diagram as it is now, with the line of the selected relation or anchor drawn thicker,
+   * and the line of the relation which a connection which is drawn would end at */
   public Scene scene() {
+    Scene shown = scene;
     SceneConnectionLine selectedLine = selectedLine();
-    return selectedLine != null ? scene.withStrokeWidth(selectedLine, DiagramStyle.SELECTED_LINE_WIDTH) : scene;
+    if (selectedLine != null) {
+      shown = shown.withStrokeWidth(selectedLine, DiagramStyle.SELECTED_LINE_WIDTH);
+    }
+    SceneConnectionLine targetLine = drawing != null ? drawing.targetLine() : null;
+    if (targetLine != null && targetLine != selectedLine) {
+      shown = shown.withStrokeWidth(targetLine, DiagramStyle.SELECTED_LINE_WIDTH);
+    }
+    return shown;
   }
 
   public boolean canUndo() { return undoableSteps > 0; }
@@ -615,7 +624,7 @@ public class DiagramEditing {
     if (selected instanceof AnchorSelection anchor) {
       NoteModel_V001 note = anchor.note;
       if (note.id == null) {
-        note.id = ids.newIdNotIn(usedIds());
+        note.id = newId();
       }
       return new AnchorHandleDrag(routeEditing, note, scene.elementAreaOf(note).area, handle,
         selectedLine().points(), at, classesAnAnchorMayHangOnto(note));
@@ -659,7 +668,7 @@ public class DiagramEditing {
    * it stays on its own class or nothing is dragged */
   public Rectangle2D connectionTargetArea() {
     if (drawing != null) {
-      return drawing.targetArea();
+      return drawing.targetFrame();
     }
     return drag != null ? drag.connectionTarget() : null;
   }
@@ -754,15 +763,13 @@ public class DiagramEditing {
    * for an association, a note for an anchor. Nothing happens if there is none. The connection is created where the
    * mouse is released on a class, see {@link #endDrag}. */
   public void startDrawing(Point2D at, double tolerance) {
-    Map<ClassModel_V001, Rectangle2D> classes = new LinkedHashMap<>();
-    for (ClassModel_V001 box : model.classes()) {
-      classes.put(box, scene.elementAreaOf(box).area);
-    }
-    AbstractBoxModel_V001 from = null;
-    Rectangle2D fromArea = null;
+    ConnectionTargets targets = new ConnectionTargets(model, scene);
+    drawing = null;
     if (armedTool == Tool.ASSOCIATION) {
-      from = ClassPicker.closest(classes, at, tolerance);
-      fromArea = from != null ? classes.get(from) : null;
+      ClassTarget from = targets.closestClass(at, tolerance);
+      if (from != null) {
+        drawing = new ConnectionDrawing(from.box, from.frame(), targets::closestClass, at);
+      }
     }
     else if (armedTool == Tool.ANCHOR) {
       Map<NoteModel_V001, Rectangle2D> notes = new LinkedHashMap<>();
@@ -771,10 +778,11 @@ public class DiagramEditing {
           notes.put(note, scene.elementAreaOf(note).area);
         }
       }
-      from = ClassPicker.closest(notes, at, tolerance);
-      fromArea = from != null ? notes.get(from) : null;
+      NoteModel_V001 from = ClassPicker.closest(notes, at, tolerance);
+      if (from != null) {
+        drawing = new ConnectionDrawing(from, notes.get(from), targets::closestForAnchor, at);
+      }
     }
-    drawing = from != null ? new ConnectionDrawing(from, fromArea, classes, at) : null;
   }
 
   /** While changes are tracked, only a note which a change set has added gets a new anchor or loses its anchor: for
@@ -802,10 +810,11 @@ public class DiagramEditing {
 
   private void createAssociation(ConnectionDrawing finished) {
     ClassModel_V001 from = (ClassModel_V001) finished.from();
+    String fromId = new ClassTarget(from, scene.elementAreaOf(from).area).ensureId(this::newId);
     AssociationRelationModel_V001 relation = new AssociationRelationModel_V001(RelationType_V001.ASSOCIATION,
-      idOf(from), idOf(finished.target()));
+      fromId, finished.target().ensureId(this::newId));
     relation.directed = true;
-    relation.id = ids.newIdNotIn(usedIds());
+    relation.id = newId();
     markAsAdded(relation);
     model.elements.add(relation);
     selected = relation;
@@ -813,27 +822,24 @@ public class DiagramEditing {
     publish();
   }
 
-  /** Attaches the note to the class, so the dashed line of the note leads straight to it. The note is selected. Nothing
-   * happens, and no operation is made, if it is attached to that class already. */
+  /** Attaches the note to the class, attribute or relation which the mouse was released on, so the dashed line of the
+   * note leads to it. A class or attribute which has no ID gets one. The note is selected. Nothing happens, and no
+   * operation is made, if it is attached to that target already. */
   private void anchorNote(ConnectionDrawing finished) {
     NoteModel_V001 note = (NoteModel_V001) finished.from();
-    ClassModel_V001 target = finished.target();
+    String targetId = finished.target().ensureId(this::newId);
     armedTool = Tool.NONE;
     selected = note;
-    if (target.id != null && target.id.equals(note.attachedToId)) {
+    if (targetId.equals(note.attachedToId)) {
       return;
     }
-    note.attachedToId = idOf(target);
+    note.attachedToId = targetId;
     routeEditing.clearRoute(note);
     publish();
   }
 
-  /** A relation refers to its classes by ID, so a class which has none gets one. */
-  private String idOf(ClassModel_V001 box) {
-    if (box.id == null) {
-      box.id = ids.newIdNotIn(usedIds());
-    }
-    return box.id;
+  private String newId() {
+    return ids.newIdNotIn(usedIds());
   }
 
   /** Deletes the selected box and what hangs on it, and selects nothing afterwards. While changes are tracked, what
@@ -888,7 +894,7 @@ public class DiagramEditing {
 
   private SceneTextArea putPendingBox(AbstractBoxModel_V001 box, int x, int y, TextKind textKind) {
     discardPendingParts();
-    box.id = ids.newIdNotIn(usedIds());
+    box.id = newId();
     box.position = new PositionModel_V001(x, y);
     box.width = DiagramStyle.NEW_BOX_WIDTH;
     markAsAdded(box);
@@ -920,14 +926,29 @@ public class DiagramEditing {
     return true;
   }
 
+  /** The IDs of the elements of the diagram including its attributes and association classes, which notes attach to. */
   private Set<String> usedIds() {
     Set<String> used = new HashSet<>();
     for (AbstractDiagramElementModel_V001 element : model.elements) {
-      if (element.id != null) {
-        used.add(element.id);
+      addIds(used, element);
+      if (element instanceof AssociationRelationModel_V001 association && association.assocClass != null) {
+        addIds(used, association.assocClass);
       }
     }
     return used;
+  }
+
+  private void addIds(Set<String> used, AbstractDiagramElementModel_V001 element) {
+    if (element.id != null) {
+      used.add(element.id);
+    }
+    if (element instanceof ClassModel_V001 box) {
+      for (AttributeModel_V001 attribute : box.attributes) {
+        if (attribute.id != null) {
+          used.add(attribute.id);
+        }
+      }
+    }
   }
 
   private void markAsAdded(AbstractDiagramElementModel_V001 element) {
