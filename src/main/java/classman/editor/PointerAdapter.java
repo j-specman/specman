@@ -8,7 +8,8 @@ import java.awt.geom.Point2D;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-/** Turns the mouse events of the left button into the calls of a {@link PointerListener}, in points of the diagram.
+/** Turns the mouse events of the left button into the calls of a {@link PointerListener}, in points of the diagram,
+ * and a click which opens the context menu into a request for it.
  * A drag only starts when the mouse has moved a few pixels, so that a click which shakes a little is no drag. */
 class PointerAdapter extends MouseAdapter {
   private static final int DRAG_THRESHOLD = 3;
@@ -34,7 +35,13 @@ class PointerAdapter extends MouseAdapter {
 
   @Override
   public void mousePressed(MouseEvent e) {
-    if (listener != null && SwingUtilities.isLeftMouseButton(e)) {
+    if (listener == null) {
+      return;
+    }
+    if (e.isPopupTrigger()) {
+      requestContextMenu(e);
+    }
+    else if (SwingUtilities.isLeftMouseButton(e)) {
       e.getComponent().requestFocusInWindow();
       if (e.getClickCount() > 1) {
         listener.doubleClicked(toDiagram.apply(e.getPoint()));
@@ -44,6 +51,12 @@ class PointerAdapter extends MouseAdapter {
       dragging = false;
       listener.pressed(toDiagram.apply(pressedAt));
     }
+  }
+
+  /** The focus goes to the canvas first, so that a text which is typed is finished before the menu. */
+  private void requestContextMenu(MouseEvent e) {
+    e.getComponent().requestFocusInWindow();
+    listener.contextMenuRequested(toDiagram.apply(e.getPoint()));
   }
 
   @Override
@@ -58,6 +71,10 @@ class PointerAdapter extends MouseAdapter {
 
   @Override
   public void mouseReleased(MouseEvent e) {
+    if (listener != null && e.isPopupTrigger()) {
+      requestContextMenu(e);
+      return;
+    }
     if (pressedAt == null) {
       return;
     }

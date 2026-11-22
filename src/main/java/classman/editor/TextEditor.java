@@ -213,19 +213,32 @@ class TextEditor {
     if (accepted && !unchanged) {
       editing.setText(text, content);
     }
-    editing.discardNewAttribute();
+    editing.discardNewPart();
     if (goOn) {
-      SceneTextArea next = editing.newAttributeAtEnd((ClassModel_V001) text.element);
-      showDiagram.run();
-      start(next);
+      startNewAttribute((ClassModel_V001) text.element);
       return;
     }
     showDiagram.run();
   }
 
+  /** Puts a blank line at the end of the class and starts to type a new attribute into it. */
+  void startNewAttribute(ClassModel_V001 box) {
+    SceneTextArea line = editing.newAttributeAtEnd(box);
+    showDiagram.run();
+    start(line);
+  }
+
+  /** Puts a blank row for the stereotype into the class and starts to type it. A stereotype which a change set has
+   * removed is typed into its struck row. */
+  void startNewStereotype(ClassModel_V001 box) {
+    SceneTextArea row = editing.newStereotype(box);
+    showDiagram.run();
+    start(row);
+  }
+
   private void cancel() {
     close();
-    editing.discardNewAttribute();
+    editing.discardNewPart();
     showDiagram.run();
   }
 

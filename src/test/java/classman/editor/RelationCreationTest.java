@@ -31,7 +31,7 @@ class RelationCreationTest {
 
   private void open(String source) throws ClassDiagramParseException {
     editing = new DiagramEditing(source, host, new EditorTexts(host.locale()));
-    control = new PointerControl(editing, () -> { }, text -> { }, pixels -> pixels);
+    control = new PointerControl(editing, () -> { }, text -> { }, at -> { }, pixels -> pixels);
   }
 
   private Point2D inClass(int index) {

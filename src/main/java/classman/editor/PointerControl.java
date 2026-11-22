@@ -7,9 +7,9 @@ import java.util.function.Consumer;
 import java.util.function.DoubleUnaryOperator;
 
 /** What the mouse does in the editor: a press selects the box or relation below it, dragging moves the selected box
- * or a handle of the relation, and a double click on one of its texts lets the user change the text. Distances which
- * the user judges on the screen are given in pixels and turned into units of the diagram, so they feel the same at
- * every zoom. */
+ * or a handle of the relation, a double click on one of its texts lets the user change the text, and the context menu
+ * of a class lets the user add parts to it. Distances which the user judges on the screen are given in pixels and
+ * turned into units of the diagram, so they feel the same at every zoom. */
 class PointerControl implements PointerListener {
   private static final double HIT_PIXELS = 4;
   private static final double SNAP_PIXELS = 6;
@@ -17,16 +17,19 @@ class PointerControl implements PointerListener {
   private final DiagramEditing editing;
   private final Runnable showDiagram;
   private final Consumer<SceneTextArea> editText;
+  private final Consumer<Point2D> showClassMenu;
   private final DoubleUnaryOperator toDiagramLength;
 
   /** @param showDiagram shows the diagram and the selection as the editing has them now
    * @param editText lets the user change a text of the diagram
+   * @param showClassMenu shows the menu of the selected class at the point of the diagram
    * @param toDiagramLength turns a length in pixels of the screen into a length in units of the diagram */
   PointerControl(DiagramEditing editing, Runnable showDiagram, Consumer<SceneTextArea> editText,
-                 DoubleUnaryOperator toDiagramLength) {
+                 Consumer<Point2D> showClassMenu, DoubleUnaryOperator toDiagramLength) {
     this.editing = editing;
     this.showDiagram = showDiagram;
     this.editText = editText;
+    this.showClassMenu = showClassMenu;
     this.toDiagramLength = toDiagramLength;
   }
 
@@ -76,6 +79,20 @@ class PointerControl implements PointerListener {
     SceneTextArea text = editing.editableTextAt(at);
     if (text != null) {
       editText.accept(text);
+    }
+  }
+
+  /** The context menu selects what is below the point, like a press, and is shown if that is a class. Nothing else has
+   * a menu yet, and nothing happens while the tool for relations is armed. */
+  @Override
+  public void contextMenuRequested(Point2D at) {
+    if (editing.isRelationToolArmed()) {
+      return;
+    }
+    editing.selectAt(at, toDiagramLength.applyAsDouble(HIT_PIXELS));
+    showDiagram.run();
+    if (editing.selectedClass() != null) {
+      showClassMenu.accept(at);
     }
   }
 }

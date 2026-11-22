@@ -13,4 +13,8 @@ interface PointerListener {
 
   /** Called instead of {@link #pressed} for the second press of a double click. */
   void doubleClicked(Point2D at);
+
+  /** Called when the user asks for the context menu, with the right mouse button or the key of the keyboard which
+   * does the same. */
+  void contextMenuRequested(Point2D at);
 }

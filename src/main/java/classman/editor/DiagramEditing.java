@@ -49,6 +49,7 @@ public class DiagramEditing {
   private final ElementIds ids = new ElementIds(new SecureRandom());
   private ClassDiagramModel_V001 model;
   private AttributeEditing attributeEditing;
+  private PendingStereotype pendingStereotype;
   private String source;
   private Scene scene;
   private AbstractDiagramElementModel_V001 selected;
@@ -69,6 +70,7 @@ public class DiagramEditing {
   private void load(String newSource) throws ClassDiagramParseException {
     model = new ClassDiagramParser_V001().parse(newSource);
     attributeEditing = new AttributeEditing(model);
+    pendingStereotype = new PendingStereotype();
     scene = host.renderer().layout(model);
     source = newSource;
     selected = null;
@@ -206,6 +208,12 @@ public class DiagramEditing {
 
   public boolean hasSelection() { return selected != null; }
 
+  /** @return the selected box if it is a class of the diagram (not an association class), null if something else or
+   * nothing is selected */
+  public ClassModel_V001 selectedClass() {
+    return selected instanceof ClassModel_V001 box && model.classes().contains(box) ? box : null;
+  }
+
   /** @return where the selected box is drawn, null if nothing is selected */
   public Rectangle2D selectedArea() {
     SceneElementArea selectedArea = selected != null ? scene.elementAreaOf(selected) : null;
@@ -321,14 +329,12 @@ public class DiagramEditing {
   }
 
   /** Gives the text a new content. While changes are tracked, the change set gets the mark for the change. The text it
-   * has already is no operation, and a blank line for a new attribute which stays empty goes away. An empty text
-   * removes a label or multiplicity, or deletes an attribute.
+   * has already is no operation, and a blank line for a new attribute or stereotype which stays empty goes away. An
+   * empty text removes a label, multiplicity or stereotype, or deletes an attribute.
    * @throws IllegalArgumentException if {@link #accepts} says no */
   public void setText(SceneTextArea text, String newText) {
     if (textOf(text).equals(newText)) {
-      if (text.kind == TextKind.ATTRIBUTE_LINE) {
-        discardNewAttribute();
-      }
+      discardNewPart();
       return;
     }
     if (!accepts(text, newText)) {
@@ -355,6 +361,7 @@ public class DiagramEditing {
         }
       }
       case STEREOTYPE -> {
+        pendingStereotype.discard();
         ClassModel_V001 box = (ClassModel_V001) text.element;
         textChanger.setStereotype(box, newText, changeSet);
       }
@@ -407,11 +414,45 @@ public class DiagramEditing {
     return scene.textAreas.stream().filter(text -> text.attribute == placeholder).findFirst().orElseThrow();
   }
 
-  /** Takes away the blank line for a new attribute, if it is still there. */
-  public void discardNewAttribute() {
-    if (attributeEditing.discardPending()) {
+  /** @return true if the class can get parts: it is no association class and no change set has removed it */
+  public boolean canAddPartsTo(ClassModel_V001 box) {
+    boolean isRemoved = box.change != null && box.change.type == ChangeType_V001.REMOVED;
+    return !isRemoved && model.classes().contains(box);
+  }
+
+  /** @return true if the class has no stereotype, or only one which a change set has removed */
+  public boolean canAddStereotypeTo(ClassModel_V001 box) {
+    return canAddPartsTo(box) && stereotypeOf(box).isEmpty();
+  }
+
+  /** Puts a blank stereotype row into the class, for the stereotype to be typed into. It is part of the picture, but
+   * not of the diagram, until it is given a text with {@link #setText}. A stereotype which a change set has removed is
+   * still there as a struck row, which is the area to type into.
+   * @return the area of the row
+   * @throws IllegalArgumentException if the class has a stereotype */
+  public SceneTextArea newStereotype(ClassModel_V001 box) {
+    if (!canAddStereotypeTo(box)) {
+      throw new IllegalArgumentException("The class can't get a stereotype: " + box.name);
+    }
+    if (box.stereotype == null) {
+      pendingStereotype.begin(box);
       scene = host.renderer().layout(model);
     }
+    return scene.textAreas.stream().filter(text -> text.element == box && text.kind == TextKind.STEREOTYPE)
+      .findFirst().orElseThrow();
+  }
+
+  /** Takes away the blank line or row for a new attribute or stereotype, if it is still there. */
+  public void discardNewPart() {
+    if (discardPendingParts()) {
+      scene = host.renderer().layout(model);
+    }
+  }
+
+  private boolean discardPendingParts() {
+    boolean attributeGone = attributeEditing.discardPending();
+    boolean stereotypeGone = pendingStereotype.discard();
+    return attributeGone || stereotypeGone;
   }
 
   /** Starts to drag, from the point where the mouse was pressed: a handle of the selected relation if the point is at
@@ -642,7 +683,7 @@ public class DiagramEditing {
   }
 
   private void publish() {
-    attributeEditing.discardPending();
+    discardPendingParts();
     String newSource = serializer.serialize(model);
     scene = host.renderer().layout(model);
     if (!newSource.equals(source)) {

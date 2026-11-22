@@ -33,7 +33,7 @@ class PointerControlTest {
 
   private void open(String source) throws ClassDiagramParseException {
     editing = new DiagramEditing(source, host, new EditorTexts(host.locale()));
-    control = new PointerControl(editing, () -> { }, text -> nameEdits.incrementAndGet(), pixels -> pixels);
+    control = new PointerControl(editing, () -> { }, text -> nameEdits.incrementAndGet(), at -> { }, pixels -> pixels);
   }
 
   private static final String ROUTED = "classdiagram {\n  class A (11111111) at(10, 20)\n"

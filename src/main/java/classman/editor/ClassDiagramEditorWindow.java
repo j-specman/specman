@@ -21,6 +21,7 @@ import java.awt.Point;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 /** The window in which a class diagram is edited. It is modal: While it is open the rest of the application can't
  * be operated, so nothing else changes the diagram. Esc and closing the window leave the editor, every operation has
@@ -30,6 +31,7 @@ public class ClassDiagramEditorWindow extends JDialog {
   private static final int MIN_HEIGHT = 350;
 
   private final DiagramEditing editing;
+  private final EditorTexts texts;
   private final DiagramCanvas canvas;
   private final JScrollPane scrollPane;
   private final TextEditor textEditor;
@@ -39,12 +41,12 @@ public class ClassDiagramEditorWindow extends JDialog {
    * @throws IllegalArgumentException if the diagram refers to an element which it doesn't have */
   public ClassDiagramEditorWindow(Component owner, String source, EditorHost host) throws ClassDiagramParseException {
     super(SwingUtilities.getWindowAncestor(owner), ModalityType.APPLICATION_MODAL);
-    EditorTexts texts = new EditorTexts(host.locale());
+    texts = new EditorTexts(host.locale());
     setTitle(texts.get("window.title"));
     editing = new DiagramEditing(source, host, texts);
     canvas = new DiagramCanvas(editing.scene());
     textEditor = new TextEditor(canvas, editing, this::showDiagram);
-    canvas.setPointerListener(new PointerControl(editing, this::showDiagram, textEditor::start,
+    canvas.setPointerListener(new PointerControl(editing, this::showDiagram, textEditor::start, this::showClassMenu,
       canvas::toDiagramLength));
     scrollPane = new JScrollPane(canvas);
 
@@ -138,6 +140,11 @@ public class ClassDiagramEditorWindow extends JDialog {
         showDiagram();
       }
     }, KeyStroke.getKeyStroke(keyCode, modifiers), JComponent.WHEN_IN_FOCUSED_WINDOW);
+  }
+
+  private void showClassMenu(Point2D at) {
+    Rectangle where = canvas.toCanvas(new Rectangle2D.Double(at.getX(), at.getY(), 0, 0));
+    new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts).show(canvas, where.x, where.y);
   }
 
   private void relationToolToggled() {

@@ -58,7 +58,8 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Edit relation labels and multiplicities |built |Only where the relation already has the text.
 |Edit, add and delete attributes |built |By lines, see <<Attributes>>.
 |Undo and redo |built |Forwarded to Specman's history.
-|Stereotype |built |Existing one: double click, new one: dashed place above the selected class, see <<The Stereotype of a Class>>.
+|Stereotype |built |Existing one: double click, new one: context menu of the class, see <<The Stereotype of a Class>>.
+|Context menu of a class |built |Add stereotype, add attribute, see <<The Context Menu of a Class>>. Tagged values will be the next entry.
 |Tagged values, diagram name |open |
 |Create other element kinds (interface, enum, note, association class) |open |
 |Create an association |built |By a tool: click the button, drag from one class to another, see <<Creating Elements>>. The other relation types (aggregation, composition, inheritance, implementation) are planned, with the same gesture.
@@ -123,7 +124,7 @@ Specman's step buttons are drag sources: The user drags a step onto the diagram.
 
 * Boxes (interface, enum, note) are dragged onto the canvas in the same way.
 * *The other relation types* (aggregation, composition, inheritance, implementation) work like the association, with the buttons and variants of <<Buttons with Variants (planned)>>. Inheritance and implementation have no multiplicities and always an arrowhead.
-* *Everything within a box* has no button: Attributes, enum values, stereotypes, tagged values, labels and multiplicities are created by editing in place, see <<Attributes>>.
+* *Everything within a box* has no button: Attributes, enum values, stereotypes and tagged values are created by the context menu of the class and edited in place, labels and multiplicities by their places on a selected relation, see <<Attributes>> and <<The Context Menu of a Class>>.
 
 ## Selecting
 * A mouse press on a box selects it. Boxes are classes, notes and association classes. Where boxes overlap, the one drawn on top is selected. A press on empty canvas, or on anything which isn't a box or a relation, takes the selection away.
@@ -211,11 +212,21 @@ A relation which has no label or multiplicity yet and isn't selected has no area
 A class has at most one stereotype, shown as `<<Entity>>` in a row above its name. In the source it is a list entry like an info of an attribute: it can be added or removed as a whole, `change(added|removed, <change set>)`, and keeps its text when it is removed, and its text can be changed, `was(<change set>, <old text>)`. The order in the source is: text, text mark, ID, element mark. There is no empty stereotype `<<>>`.
 
 * *Changing the text:* a double click on the row of the selected class starts the field. The user types the text without the angle brackets, which the field draws around it in the font of the text, so the field looks like the row. Return commits. The text is one line and can't contain `>`. Empty removes the stereotype. The ID of the stereotype stays when the text changes, and goes with the stereotype when it is removed.
-* *A class without a stereotype:* a selected class shows a dashed place above its top edge, centered and outside of the box (`DiagramStyle.STEREOTYPE_PLACEHOLDER_GAP` above it, sized by a sample text like the places of the relations). A double click on it starts the field, which covers the place sideways. After Return the header of the class has one more row, the top edge of the box stays where it was. The place belongs to the selection like those of the relations: it is not part of the diagram, not in the Aktogramm and not in the PDF. A press or a double click on it keeps the class selected. Classes which are association classes get no place so far.
-* *Room above the diagram:* the canvas of the editor has 24 units of empty space above the diagram, so that the place above the top class can be reached. It is there always, so the diagram doesn't jump when the first stereotype is created.
-* *While changes are tracked:* a new stereotype is marked as added (`<<Entity>> change(added, yellow)`), one which is removed keeps its text and is marked as removed, a changed one gets the text mark with the old text. A stereotype which the change set has added is gone without a trace if it is removed. The place is filled with the pale color of the change set, like the field.
-* *A removed stereotype* is drawn like a removed info: its text has the strong color behind it and a line through it. For the editor it counts as missing: its field is empty, typing the old text takes the removal back, typing another text changes the stereotype (text mark with the old text as backup), and it has no place of its own, because the struck row is there to double click. If another change set has removed it, a new text changes the text without a mark.
+* *A class without a stereotype:* shows nothing for it. The entry *Add stereotype* of the context menu of the class (see <<The Context Menu of a Class>>) puts a blank row above the name, with the field in it, so the user types the text right away. Before, a dashed place above the class did this; it was dropped because it was too tricky to hit and could not serve tagged values and attributes. The blank row is part of the picture, not of the diagram, like the blank line of a new attribute: the box of the class is one row taller while it is typed, nothing is reported to the host, and the row goes away if it stays empty, Esc is pressed, or the field is left.
+* *While changes are tracked:* a new stereotype is marked as added (`<<Entity>> change(added, yellow)`), one which is removed keeps its text and is marked as removed, a changed one gets the text mark with the old text. A stereotype which the change set has added is gone without a trace if it is removed.
+* *A removed stereotype* is drawn like a removed info: its text has the strong color behind it and a line through it. For the editor it counts as missing: its field is empty, typing the old text takes the removal back, typing another text changes the stereotype (text mark with the old text as backup). *Add stereotype* is offered for it and types into the struck row, which is there already. If another change set has removed it, a new text changes the text without a mark.
 * *Display:* an added stereotype has the strong color behind its text, a changed one too (as a whole, the diff is not worth it for a word). The marks of a stereotype inside a class which a change set has added or removed are ignored.
+
+## The Context Menu of a Class
+The right mouse button on a class selects it, like a press, and opens a menu with the parts which the class can get. Parts of a class are not created by buttons or by dashed places on the diagram, because a place above or between the parts is hard to hit and the number of places grows with every kind of part. The menu is the one way to create them; editing what exists stays a double click.
+
+* *Add stereotype:* see <<The Stereotype of a Class>>. Offered (can be chosen) only if the class has no stereotype, or one which a change set has removed.
+* *Add attribute:* puts a blank line at the end of the attributes and starts typing into it, see <<Adding Attributes>>. Return in that line goes on with the next one.
+* *Tagged values:* planned, as the next entry. They need editing of their own first, see the open points.
+* An entry which doesn't fit can't be chosen, it is not hidden, so the menu looks the same on every class. A class which a change set has removed offers nothing.
+* A text which is being typed is finished first when the menu is opened: the right button takes the focus to the canvas.
+* The menu belongs to classes of the diagram. Association classes, notes and relations have none yet, a right click on them only selects them. While the tool for relations is armed, there is no menu.
+* The texts of the entries are in the editor's own bundle (`menu.class.add.*`).
 
 ## Attributes
 An attribute is edited as a whole line, in the form in which the diagram shows it: `+name : type [info, info]`. The user types it as text, the editor splits it into its parts when the line is committed. Reason: it is one gesture for everything, including adding a type or an info which the attribute doesn't have yet, and it is how UML tools are used. The alternative, a field for each part, needs many small click areas in one short line, and has none for parts which are missing.
@@ -241,7 +252,8 @@ An attribute is edited as a whole line, in the form in which the diagram shows i
 The empty text deletes the attribute: the user selects all, deletes, presses Return. Without change tracking the attribute and the notes attached to it are removed. With it, the rule of <<Deleting>> applies: an attribute which a change set has added is removed at once, otherwise it is marked `change(removed, <change set>)`, and so are the notes attached to it.
 
 ### Adding Attributes
-* A class without attributes shows one blank line. Double clicking it starts a new attribute.
+* The entry *Add attribute* of the context menu of the class puts a blank line at the end of the attributes and starts typing into it.
+* A class without attributes shows one blank line. Double clicking it starts a new attribute, too.
 * *Return in the last line of a class* commits it and opens a blank line below for the next attribute, until a line is committed empty. *Esc*, or leaving the field, ends the sequence; a blank line which stays empty is not an attribute. Return in any other line only commits.
 * While the blank line is typed, the box of the class is one line taller. The blank line is part of the picture but not of the diagram: it is not reported to the host, and it goes away again if it is dropped.
 * The new attribute is marked `change(added, <change set>)` while changes are tracked, in an added or removed class it carries no mark.
@@ -359,7 +371,7 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 . How are notes attached to elements: as a relation-like tool, or by dragging a handle?
 . Snapping of points is built (see <<Selecting>>); does it feel right with 6 pixels? Decided: no guide line which shows what a point has snapped to, it isn't needed. Open: a key which switches snapping off, snapping of boxes to each other, and straightening a whole route.
 . Hanging an end onto an element which is not a class (note, association class), and the capture distance: is 6 pixels right for hanging, or should it differ from snapping?
-. Context menus on everything which now needs a double click (add or delete a waypoint, edit a text), for users who don't like double clicks. Decided: this comes last, when the editor is complete and it is clear where menus make sense; until then nothing is built for it.
+. Context menus on everything else which now needs a double click (add or delete a waypoint, edit a text), for users who don't like double clicks. Decided 2026-11-22: the context menu of a class comes first, because the parts of a class (stereotype, tagged values, attributes) have no good place on the diagram; the menus for relations, notes and the rest come when the editor is complete and it is clear where they make sense.
 . Moving a box should move its waypoints or re-route them. Left to the user for now.
 . Tagged values and the diagram name as editable texts.
 . Reordering attributes, selecting attributes.

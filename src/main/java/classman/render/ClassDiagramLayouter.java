@@ -65,8 +65,6 @@ public class ClassDiagramLayouter {
                 textAreas.add(new SceneTextArea(element, kind, textArea)));
             if (element instanceof ClassModel_V001 classModel) {
                 textAreas.addAll(boxes.get(element).attributeTextAreasAt(classModel, area.x, area.y));
-                boxes.get(element).placeholderAreasAt(area.x, area.y).forEach((kind, placeholder) ->
-                    textAreas.add(SceneTextArea.placeholder(element, kind, placeholder)));
             }
         });
         Map<String, Rectangle2D.Double> classAreas = classAreas(areas);

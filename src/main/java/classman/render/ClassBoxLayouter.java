@@ -107,11 +107,8 @@ public class ClassBoxLayouter {
                 new Rectangle2D.Double(PADDING_X, stereotypeTop, contentWidth, nameTop - stereotypeTop));
         }
         textAreas.put(TextKind.CLASS_NAME, new Rectangle2D.Double(PADDING_X, nameTop, contentWidth, nameBottom - nameTop));
-        Map<TextKind, Rectangle2D.Double> placeholderAreas = stereotype == null && !isRemoved
-            ? Map.of(TextKind.STEREOTYPE, stereotypePlaceholder(width))
-            : Map.of();
         return new BoxLayout(width, y, all, attributeAreas, change == null ? 0 : FRAME_STROKE_WIDTH / 2, textAreas,
-            new AttributeLineAreas(lineAreas), placeholderAreas);
+            new AttributeLineAreas(lineAreas));
     }
 
     private SceneRectangle frame(double width, double height, ChangeModel_V001 change) {
@@ -146,14 +143,6 @@ public class ClassBoxLayouter {
         if (stereotypeChange.type == ChangeType_V001.REMOVED) {
             overlays.addAll(highlighter.strikes(stereotypeLines));
         }
-    }
-
-    /** Where a stereotype would stand: centered above the top edge of the class, outside of the box. */
-    private Rectangle2D.Double stereotypePlaceholder(double boxWidth) {
-        double width = measurer.width(stereotypeText(DiagramStyle.STEREOTYPE_PLACEHOLDER), false);
-        double height = measurer.lineHeight();
-        return new Rectangle2D.Double((boxWidth - width) / 2,
-            -DiagramStyle.STEREOTYPE_PLACEHOLDER_GAP - height, width, height);
     }
 
     private static String stereotypeText(String stereotype) {

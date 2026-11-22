@@ -17,7 +17,6 @@ public class BoxLayout {
     private final Map<String, Rectangle2D.Double> attributeAreas;
     private final Map<TextKind, Rectangle2D.Double> textAreas;
     private final AttributeLineAreas attributeLines;
-    private final Map<TextKind, Rectangle2D.Double> placeholderAreas;
 
     public BoxLayout(double width, double height, List<AbstractSceneElement> elements) {
         this(width, height, elements, Map.of(), 0, Map.of());
@@ -40,17 +39,6 @@ public class BoxLayout {
     public BoxLayout(double width, double height, List<AbstractSceneElement> elements,
                      Map<String, Rectangle2D.Double> attributeAreas, double outset,
                      Map<TextKind, Rectangle2D.Double> textAreas, AttributeLineAreas attributeLines) {
-        this(width, height, elements, attributeAreas, outset, textAreas, attributeLines, Map.of());
-    }
-
-    /**
-     * @param placeholderAreas where the texts would stand which the box doesn't have yet, relative to the top left
-     * corner. They may lie outside the box.
-     */
-    public BoxLayout(double width, double height, List<AbstractSceneElement> elements,
-                     Map<String, Rectangle2D.Double> attributeAreas, double outset,
-                     Map<TextKind, Rectangle2D.Double> textAreas, AttributeLineAreas attributeLines,
-                     Map<TextKind, Rectangle2D.Double> placeholderAreas) {
         this.width = width;
         this.height = height;
         this.outset = outset;
@@ -58,7 +46,6 @@ public class BoxLayout {
         this.attributeAreas = Map.copyOf(attributeAreas);
         this.textAreas = Map.copyOf(textAreas);
         this.attributeLines = attributeLines;
-        this.placeholderAreas = Map.copyOf(placeholderAreas);
     }
 
     /** The areas of the attribute lines of the class, moved so that the top left corner of the box is at the given point. */
@@ -89,12 +76,6 @@ public class BoxLayout {
         areas.forEach((kind, area) ->
             placed.put(kind, new Rectangle2D.Double(area.x + x, area.y + y, area.width, area.height)));
         return placed;
-    }
-
-    /** The areas where the texts would stand which the box doesn't have yet, moved so that the top left corner of the
-     * box is at the given point. */
-    public Map<TextKind, Rectangle2D.Double> placeholderAreasAt(double x, double y) {
-        return moved(placeholderAreas, x, y);
     }
 
     /** The area of the box at the given point including the parts which reach out of it. */

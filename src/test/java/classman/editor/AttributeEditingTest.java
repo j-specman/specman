@@ -221,7 +221,7 @@ class AttributeEditingTest {
     ClassModel_V001 book = (ClassModel_V001) editing.scene().textAreas.get(0).element;
 
     editing.newAttributeAtEnd(book);
-    editing.discardNewAttribute();
+    editing.discardNewPart();
 
     assertEquals(heightBefore, editing.scene().height);
     assertEquals(2, lines(editing).size());
