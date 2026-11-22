@@ -8,41 +8,35 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/** What the texts of a relation shouldn't cover: the boxes, the lines of relations, and texts which are placed
- * already. */
-public final class TextObstacles {
+/** What the texts of a relation shouldn't cover: the boxes, the line of the relation itself, and texts of it which are
+ * placed already. */
+final class TextObstacles {
     /** How far from the edge of a box a point may be and still lie on that side, in pixels. */
     private static final double ON_SIDE = 0.5;
 
     private final List<Rectangle2D.Double> boxes;
-    private final List<List<Point2D.Double>> paths;
+    private final List<Point2D.Double> path;
     private final List<Rectangle2D.Double> texts;
 
     /**
      * @param boxes the areas of all boxes of the diagram
-     * @param paths the lines of the relations which have to be kept clear of, the line of the relation whose texts are
-     * placed not among them, see {@link #withPath}
-     * @param texts the areas of the texts which are placed already
+     * @param path the line of the relation whose texts are placed
      */
-    public TextObstacles(Collection<Rectangle2D.Double> boxes, List<List<Point2D.Double>> paths,
-                         Collection<Rectangle2D.Double> texts) {
-        this.boxes = List.copyOf(boxes);
-        this.paths = List.copyOf(paths);
-        this.texts = List.copyOf(texts);
+    TextObstacles(Collection<Rectangle2D.Double> boxes, List<Point2D.Double> path) {
+        this(List.copyOf(boxes), path, List.of());
     }
 
-    /** @return the same obstacles and the line of one more relation */
-    TextObstacles withPath(List<Point2D.Double> path) {
-        List<List<Point2D.Double>> morePaths = new ArrayList<>(paths);
-        morePaths.add(path);
-        return new TextObstacles(boxes, morePaths, texts);
+    private TextObstacles(List<Rectangle2D.Double> boxes, List<Point2D.Double> path, List<Rectangle2D.Double> texts) {
+        this.boxes = boxes;
+        this.path = path;
+        this.texts = texts;
     }
 
     /** @return the same obstacles and the area of a text which is placed now */
     TextObstacles with(Rectangle2D.Double text) {
         List<Rectangle2D.Double> moreTexts = new ArrayList<>(texts);
         moreTexts.add(text);
-        return new TextObstacles(boxes, paths, moreTexts);
+        return new TextObstacles(boxes, path, moreTexts);
     }
 
     /** @return the side of a box which the point lies on, null if it lies on the corner of a box or on no box */
@@ -62,7 +56,7 @@ public final class TextObstacles {
         return null;
     }
 
-    /** @return true if the area overlaps a box or a text, or a line runs through it */
+    /** @return true if the area overlaps a box or a text, or the line runs through it */
     boolean covers(Rectangle2D.Double area) {
         return overlapsOne(boxes, area) || overlapsOne(texts, area) || crossedByPath(area);
     }
@@ -77,13 +71,11 @@ public final class TextObstacles {
     }
 
     private boolean crossedByPath(Rectangle2D.Double area) {
-        for (List<Point2D.Double> path : paths) {
-            for (int i = 0; i < path.size() - 1; i++) {
-                Point2D.Double from = path.get(i);
-                Point2D.Double to = path.get(i + 1);
-                if (area.intersectsLine(from.x, from.y, to.x, to.y)) {
-                    return true;
-                }
+        for (int i = 0; i < path.size() - 1; i++) {
+            Point2D.Double from = path.get(i);
+            Point2D.Double to = path.get(i + 1);
+            if (area.intersectsLine(from.x, from.y, to.x, to.y)) {
+                return true;
             }
         }
         return false;

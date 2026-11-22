@@ -74,17 +74,8 @@ public class ClassDiagramLayouter {
             }
         });
         Map<String, Rectangle2D.Double> classAreas = classAreas(areas);
-        List<AbstractRelationModel_V001> relations = model.relations();
-        List<List<Point2D.Double>> paths = new ArrayList<>();
-        for (AbstractRelationModel_V001 relation : relations) {
-            paths.add(relationLayouter.pathOf(relation, classAreas));
-        }
-        List<Rectangle2D.Double> placedTexts = new ArrayList<>();
-        for (int i = 0; i < relations.size(); i++) {
-            AbstractRelationModel_V001 relation = relations.get(i);
-            TextObstacles surroundings = new TextObstacles(areas.values(), pathsExcept(paths, i), placedTexts);
-            RelationLayout relationLayout = relationLayouter.layout(relation, paths.get(i), surroundings);
-            addTextAreas(placedTexts, relationLayout);
+        for (AbstractRelationModel_V001 relation : model.relations()) {
+            RelationLayout relationLayout = relationLayouter.layout(relation, classAreas, areas.values());
             elements.addAll(relationLayout.elements);
             underlays.addAll(relationLayout.underlay);
             covered = BoxGeometry.union(covered, relationLayout.bounds);
@@ -106,21 +97,6 @@ public class ClassDiagramLayouter {
         return new Scene(elements, elementAreas, textAreas, relationLines, attachLines, attachTargets, covered.x,
             covered.y,
             covered.width, covered.height);
-    }
-
-    private static List<List<Point2D.Double>> pathsExcept(List<List<Point2D.Double>> paths, int index) {
-        List<List<Point2D.Double>> others = new ArrayList<>(paths);
-        others.remove(index);
-        return others;
-    }
-
-    /** Adds the areas of the texts which the relation has, not those of the places for texts it doesn't have. */
-    private static void addTextAreas(List<Rectangle2D.Double> areas, RelationLayout relationLayout) {
-        for (SceneTextArea textArea : relationLayout.textAreas) {
-            if (!textArea.placeholder) {
-                areas.add(textArea.area);
-            }
-        }
     }
 
     private void addAttachTargets(AttachTargetIndex attachTargets, ClassModel_V001 classModel,

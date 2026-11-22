@@ -181,40 +181,11 @@ class RelationTextPlacementTest {
     assertEquals(56 + 5, areaOf(textNamed(scene, "2..99")).y, 1e-9);
   }
 
-  // ---- other relations ----
-
-  /** The labels of two relations between the same classes don't lie over each other. */
+  /** A line which leaves a box nearly along its bottom side doesn't take the multiplicity far away from the box. */
   @Test
-  void labelsOfParallelRelations() throws ClassDiagramParseException {
-    Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(300, 0)\n"
-        + "association aaaaaaaa -- bbbbbbbb \"owns\"\nassociation aaaaaaaa -- bbbbbbbb \"uses\"");
-    assertFalse(areaOf(textNamed(scene, "owns")).intersects(areaOf(textNamed(scene, "uses"))));
-  }
-
-  /** A label moves along its line if the line of another relation runs through its place. */
-  @Test
-  void labelClearsOtherLine() throws ClassDiagramParseException {
-    Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(300, 0)\n"
-        + "class C (cccccccc) at(150, -100)\nclass D (dddddddd) at(150, 100)\n"
-        + "association aaaaaaaa -- bbbbbbbb \"owns\"\nassociation cccccccc -- dddddddd");
-    assertFalse(touchesLine(scene, 1, areaOf(textNamed(scene, "owns"))));
-  }
-
-  /** The other relation's line is kept clear of also if that relation comes later in the source. */
-  @Test
-  void laterLineIsKeptClearToo() throws ClassDiagramParseException {
-    Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(300, 0)\n"
-        + "class C (cccccccc) at(150, -100)\nclass D (dddddddd) at(150, 100)\n"
-        + "association cccccccc -- dddddddd\nassociation aaaaaaaa -- bbbbbbbb \"owns\"");
-    assertFalse(touchesLine(scene, 0, areaOf(textNamed(scene, "owns"))));
-  }
-
-  /** Multiplicities of relations which leave the same side close together don't lie over each other. */
-  @Test
-  void multiplicitiesAtSameSide() throws ClassDiagramParseException {
-    Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(300, 0)\n"
-        + "class C (cccccccc) at(300, 100)\n"
-        + "association aaaaaaaa 1 -> * bbbbbbbb\nassociation aaaaaaaa 2 -> * cccccccc");
-    assertFalse(areaOf(textNamed(scene, "1")).intersects(areaOf(textNamed(scene, "2"))));
+  void multiplicityAtLineAlongSide() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(200, 100)\n"
+        + "association aaaaaaaa 1 -> * bbbbbbbb\n  route aaaaaaaa.bottom@20 (150, 52) bbbbbbbb.top@20");
+    assertTrue(areaOf(textNamed(scene, "1")).getCenterX() < 120);
   }
 }

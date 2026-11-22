@@ -24,26 +24,18 @@ class MultiplicityPlacement {
      * the line, next to the border. False if it leaves at the top or bottom: the text stands right or left of the line,
      * just beyond the border. This follows the side of the box and not the direction of the line, so the text stays at
      * the box also where the line is slanted.
-     * @param shift how far the text is moved along the line, away from the border
-     * @return the text, null if it is moved so far that it would not be beside the part of the line any more
      */
     SceneText atEnd(String multiplicity, Point2D.Double border, Point2D.Double inside, LineSide side,
-                    boolean leavesSideways, double shift) {
+                    boolean leavesSideways) {
         double width = measurer.width(multiplicity, false);
-        if (leavesSideways) {
-            boolean fits = shift == 0 || MULTIPLICITY_ALONG_GAP + shift + width <= Math.abs(inside.x - border.x);
-            return fits ? aboveOrBelow(multiplicity, width, border, inside, side, shift) : null;
-        }
-        boolean fits = shift == 0
-            || MULTIPLICITY_BORDER_GAP + shift + measurer.lineHeight() <= Math.abs(inside.y - border.y);
-        return fits ? rightOrLeft(multiplicity, width, border, inside, side, shift) : null;
+        return leavesSideways ? aboveOrBelow(multiplicity, width, border, inside, side)
+            : rightOrLeft(multiplicity, width, border, inside, side);
     }
 
     private SceneText aboveOrBelow(String multiplicity, double width, Point2D.Double border, Point2D.Double inside,
-                                   LineSide side, double shift) {
+                                   LineSide side) {
         boolean towardsRight = inside.x > border.x;
-        double distance = MULTIPLICITY_ALONG_GAP + shift;
-        double x = towardsRight ? border.x + distance : border.x - distance;
+        double x = towardsRight ? border.x + MULTIPLICITY_ALONG_GAP : border.x - MULTIPLICITY_ALONG_GAP;
         double farEnd = towardsRight ? x + width : x - width;
         double yNear = PathGeometry.yOnLine(border, inside, x);
         double yFar = PathGeometry.yOnLine(border, inside, farEnd);
@@ -54,9 +46,9 @@ class MultiplicityPlacement {
     }
 
     private SceneText rightOrLeft(String multiplicity, double width, Point2D.Double border, Point2D.Double inside,
-                                  LineSide side, double shift) {
-        double top = inside.y > border.y ? border.y + MULTIPLICITY_BORDER_GAP + shift
-            : border.y - MULTIPLICITY_BORDER_GAP - shift - measurer.lineHeight();
+                                  LineSide side) {
+        double top = inside.y > border.y ? border.y + MULTIPLICITY_BORDER_GAP
+            : border.y - MULTIPLICITY_BORDER_GAP - measurer.lineHeight();
         double xTop = PathGeometry.xOnLine(border, inside, top);
         double xBottom = PathGeometry.xOnLine(border, inside, top + measurer.lineHeight());
         double baseline = top + measurer.ascent();

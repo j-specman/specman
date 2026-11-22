@@ -7,21 +7,21 @@ import classman.model.v001.Side_V001;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-
-import static classman.render.DiagramStyle.MULTIPLICITY_ALONG_GAP;
 
 /**
  * Places the texts of a relation: the multiplicities next to the borders where the line starts and ends, and the
- * label at the middle of the longest part of the line. A text which would cover a box, a line of any relation or
- * another text goes to the next free place: the other side of the line, then the same on the next places along the
- * line, a label then on the other parts of the line. Where nothing is free it stays at the first place.
+ * label at the middle of the longest part of the line. A text which would cover a box, the line of its relation or
+ * another text of it goes to the next free place: the other side of the line, a label then the same on the next
+ * places along the line, then on the other parts of the line. Where nothing is free it stays at the first place. It
+ * doesn't avoid the texts and lines of other relations.
  */
 public class RelationTextLayouter {
     /** Where on a part of the line the label is tried, as a fraction of its length. */
     private static final double[] LABEL_PLACES_ALONG = {0.5, 0.35, 0.65, 0.2, 0.8};
-    /** How many places along the line a multiplicity is tried at, each one text width and gap farther from the box. */
-    private static final int MULTIPLICITY_PLACES_ALONG = 4;
+    /** A line which leaves a box this much more along its side than away from it counts as running along the side. */
+    private static final double ALONG_SIDE_FACTOR = 2;
 
     private final TextMeasurer measurer;
     private final LabelPlacement labelPlacement;
@@ -33,11 +33,10 @@ public class RelationTextLayouter {
         this.multiplicityPlacement = new MultiplicityPlacement(measurer);
     }
 
-    /** @param path the line of the relation
-     * @param surroundings what the texts keep clear of, the line of the relation itself not included */
+    /** @param boxes the areas of all boxes of the diagram, which the texts keep clear of */
     public RelationTexts texts(AbstractRelationModel_V001 relation, List<Point2D.Double> path,
-                               TextObstacles surroundings) {
-        return placeAll(surroundings.withPath(path), path, fromMultiplicity(relation), toMultiplicity(relation),
+                               Collection<Rectangle2D.Double> boxes) {
+        return placeAll(new TextObstacles(boxes, path), path, fromMultiplicity(relation), toMultiplicity(relation),
             relation.label);
     }
 
@@ -45,9 +44,9 @@ public class RelationTextLayouter {
      * for every relation, multiplicities for those which can have them. They keep clear of the texts which the
      * relation has. */
     public RelationTexts placeholders(AbstractRelationModel_V001 relation, List<Point2D.Double> path,
-                                      TextObstacles surroundings) {
-        TextObstacles obstacles = surroundings.withPath(path);
-        RelationTexts real = texts(relation, path, surroundings);
+                                      Collection<Rectangle2D.Double> boxes) {
+        TextObstacles obstacles = new TextObstacles(boxes, path);
+        RelationTexts real = texts(relation, path, boxes);
         obstacles = with(obstacles, listOf(real.fromMultiplicity));
         obstacles = with(obstacles, listOf(real.toMultiplicity));
         obstacles = with(obstacles, real.labelLines);
@@ -100,27 +99,27 @@ public class RelationTextLayouter {
         double width = measurer.width(multiplicity, false);
         boolean leavesSideways = leavesSideways(border, inside, obstacles, width);
         List<List<SceneText>> candidates = new ArrayList<>();
-        for (int place = 0; place < MULTIPLICITY_PLACES_ALONG; place++) {
-            for (LineSide side : sidesStartingWith(hugsOtherSide(border, inside, leavesSideways))) {
-                SceneText candidate = multiplicityPlacement.atEnd(multiplicity, border, inside, side,
-                    leavesSideways, place * (width + MULTIPLICITY_ALONG_GAP));
-                if (candidate != null) {
-                    candidates.add(List.of(candidate));
-                }
-            }
+        for (LineSide side : sidesStartingWith(hugsOtherSide(border, inside, leavesSideways))) {
+            candidates.add(List.of(multiplicityPlacement.atEnd(multiplicity, border, inside, side, leavesSideways)));
         }
         return firstFree(candidates, obstacles).get(0);
     }
 
-    /** The line leaves a box at its left or right side: sideways. Where the border is on no side of a box, or on a
-     * corner, the text decides: it stands where it has to be moved least to clear the slanted line. */
+    /** The line leaves a box at its left or right side: sideways. Where the border is on no side of a box, on a
+     * corner, or where the line runs along the side more than away from it, the text decides: it stands where it has
+     * to be moved least to clear the slanted line. */
     private boolean leavesSideways(Point2D.Double border, Point2D.Double inside, TextObstacles obstacles,
                                    double width) {
         Side_V001 side = obstacles.boxSideAt(border);
-        if (side == null) {
-            return PathGeometry.runsSideways(border, inside, width, measurer.lineHeight());
+        if (side != null) {
+            boolean leftOrRight = side == Side_V001.LEFT || side == Side_V001.RIGHT;
+            double away = Math.abs(leftOrRight ? inside.x - border.x : inside.y - border.y);
+            double along = Math.abs(leftOrRight ? inside.y - border.y : inside.x - border.x);
+            if (away * ALONG_SIDE_FACTOR >= along) {
+                return leftOrRight;
+            }
         }
-        return side == Side_V001.LEFT || side == Side_V001.RIGHT;
+        return PathGeometry.runsSideways(border, inside, width, measurer.lineHeight());
     }
 
     /** A text next to a box stands closest to the border on the side where the line goes away from the text: below
