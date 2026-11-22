@@ -9,6 +9,7 @@ import static classman.render.DiagramStyle.PADDING_X;
 import static classman.render.DiagramStyle.PADDING_Y;
 import static classman.render.DiagramStyle.STACK_GAP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static classman.render.SceneTestHelper.all;
 import static classman.render.SceneTestHelper.layout;
@@ -240,13 +241,16 @@ class ClassDiagramLayouterTest {
     assertTrue(all(scene, SceneLine.class).isEmpty());
   }
 
-  /** The stereotype of an interface comes below <<interface>>, and the box is as wide as the longest of the two. */
+  /** A stereotype of its own takes the place of <<interface>>, also a removed one, so only one is ever shown. */
   @Test
-  void interfaceWithStereotype() throws ClassDiagramParseException {
-    Scene scene = layout("interface A at(0, 0) <<Service>>");
-    SceneText derived = textNamed(scene, "<<interface>>");
-    SceneText own = textNamed(scene, "<<Service>>");
-    assertEquals(LINE, own.y - derived.y);
-    assertEquals(13 * CHAR + 2 * PADDING_X, all(scene, SceneRectangle.class).get(0).width);
+  void ownStereotypeHidesDerivedOne() throws ClassDiagramParseException {
+    Scene own = layout("interface A at(0, 0) <<Service>>");
+    assertTrue(texts(own).contains("<<Service>>"));
+    assertFalse(texts(own).contains("<<interface>>"));
+    assertEquals(2 * PADDING_Y + LINE * 2, all(own, SceneRectangle.class).get(0).height);
+
+    Scene removed = layout("interface A at(0, 0) <<Service>> change(removed, yellow)");
+    assertTrue(texts(removed).contains("<<Service>>"));
+    assertFalse(texts(removed).contains("<<interface>>"));
   }
 }

@@ -28,7 +28,8 @@ import static classman.render.DiagramStyle.WHITE;
 
 /**
  * Lays out one class box: header with stereotype, name and tagged values, then the attributes. An interface shows
- * <<interface>> above its other stereotype and has no attributes. An added or removed
+ * <<interface>> in place of a stereotype, as long as it has no stereotype of its own, also not a removed one, so
+ * there is never more than one stereotype to see. It has no attributes. An added or removed
  * class gets a frame, a removed one is veiled and its name struck through. The texts and attributes of such a class
  * are not marked on their own. In any other class a changed text gets a colored background, an added or removed
  * attribute a colored row.
@@ -57,8 +58,8 @@ public class ClassBoxLayouter {
         boolean isRemoved = change != null && change.type == ChangeType_V001.REMOVED;
         String textColor = isRemoved ? VEILED_TEXT : null;
         String lineColor = isRemoved ? VEILED_STROKE : STROKE;
-        String derivedStereotype = model.kind.derivedStereotype == null ? null
-            : stereotypeText(model.kind.derivedStereotype);
+        boolean showsDerivedStereotype = model.kind.derivedStereotype != null && model.stereotype == null;
+        String derivedStereotype = showsDerivedStereotype ? stereotypeText(model.kind.derivedStereotype) : null;
         String stereotype = model.stereotype == null ? null : stereotypeText(model.stereotype);
         List<MarkedText> taggedValues = taggedValueTexts(model);
         List<MarkedText> attributes = attributeTexts(model);
