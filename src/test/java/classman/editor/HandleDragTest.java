@@ -136,6 +136,18 @@ class HandleDragTest {
     assertEquals(10, relationOf(editing.source()).route.start.offset);
   }
 
+  /** A waypoint can't be dragged left of or above the top left corner of the diagram, which is at (0, 0). */
+  @Test
+  void waypointStopsAtTopLeftCorner() throws ClassDiagramParseException {
+    DiagramEditing editing = selectedAt(ROUTED, new Point2D.Double(100, 150));
+
+    editing.startDrag(new Point2D.Double(20, 150), TOLERANCE);
+    editing.dragTo(new Point2D.Double(-30, -40));
+    editing.endDrag();
+
+    assertWaypoint(editing, 0, 0, 0);
+  }
+
   /** A press on a handle without a move changes nothing. */
   @Test
   void clickOnHandle() throws ClassDiagramParseException {

@@ -92,10 +92,21 @@ class NoteResizeTest {
   void dragLeftSide() throws ClassDiagramParseException {
     open(FIXED);
 
+    drag(leftEdge(), 5);
+
+    assertEquals(125, noteOf(0).width);
+    assertEquals(5, noteOf(0).position.x);
+  }
+
+  /** The left side doesn't go beyond the left edge of the diagram, which is at 0. */
+  @Test
+  void leftSideStopsAtDiagramEdge() throws ClassDiagramParseException {
+    open(FIXED);
+
     drag(leftEdge(), -20);
 
-    assertEquals(150, noteOf(0).width);
-    assertEquals(-20, noteOf(0).position.x);
+    assertEquals(130, noteOf(0).width);
+    assertEquals(0, noteOf(0).position.x);
   }
 
   /** The note doesn't get narrower than its longest word. */

@@ -34,7 +34,7 @@ class RouteEditing {
   void insertWaypoint(AbstractRelationModel_V001 relation, List<Point2D> path, int segment, Point2D at,
                       Rectangle2D fromArea, Rectangle2D toArea) {
     ensureRoute(relation, path, fromArea, toArea);
-    relation.route.waypoints.add(segment, positionOf(at));
+    relation.route.waypoints.add(segment, positionWithinDiagram(at));
   }
 
   /** Gives a relation without a route one which runs along the path it has now: its ends become anchors where the
@@ -53,11 +53,11 @@ class RouteEditing {
 
   /** Puts a new waypoint into an anchor line, as the waypoint with the given index. */
   void insertWaypoint(AttachLineModel_V001 attachLine, int waypointIndex, Point2D at) {
-    attachLine.waypoints.add(waypointIndex, positionOf(at));
+    attachLine.waypoints.add(waypointIndex, positionWithinDiagram(at));
   }
 
   void moveWaypoint(AttachLineModel_V001 attachLine, int waypointIndex, Point2D to) {
-    attachLine.waypoints.set(waypointIndex, positionOf(to));
+    attachLine.waypoints.set(waypointIndex, positionWithinDiagram(to));
   }
 
   /** Fixes the start of an anchor line or association class link at the point of the border of its box which is closest to the given point. */
@@ -74,7 +74,7 @@ class RouteEditing {
 
   /** @param waypointIndex the index in the waypoints of the route */
   void moveWaypoint(AbstractRelationModel_V001 relation, int waypointIndex, Point2D to) {
-    relation.route.waypoints.set(waypointIndex, positionOf(to));
+    relation.route.waypoints.set(waypointIndex, positionWithinDiagram(to));
   }
 
   /** Hangs the start of the route onto the class, at the point of its border which is closest to the given point. It
@@ -136,6 +136,13 @@ class RouteEditing {
     }
     return new RouteModel_V001(anchorAt(relation.fromId, fromArea, path.get(0)), waypoints,
       anchorAt(relation.toId, toArea, path.get(path.size() - 1)));
+  }
+
+  /** The position of a waypoint which the user puts at the point: not left of or above the top left corner of the
+   * diagram, which is at (0, 0). */
+  private static PositionModel_V001 positionWithinDiagram(Point2D point) {
+    return new PositionModel_V001(Math.max(0, (int) Math.round(point.getX())),
+      Math.max(0, (int) Math.round(point.getY())));
   }
 
   private static PositionModel_V001 positionOf(Point2D point) {

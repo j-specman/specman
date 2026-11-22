@@ -138,10 +138,22 @@ class ClassResizeTest {
     open(FIXED);
     selectFirstClass();
 
+    drag(leftEdge(), 5);
+
+    assertEquals(105, classOf(0).width);
+    assertEquals(5, classOf(0).position.x);
+  }
+
+  /** The left side doesn't go beyond the left edge of the diagram, which is at 0. */
+  @Test
+  void leftSideStopsAtDiagramEdge() throws ClassDiagramParseException {
+    open(FIXED);
+    selectFirstClass();
+
     drag(leftEdge(), -20);
 
-    assertEquals(130, classOf(0).width);
-    assertEquals(-20, classOf(0).position.x);
+    assertEquals(110, classOf(0).width);
+    assertEquals(0, classOf(0).position.x);
   }
 
   /** The class doesn't get narrower than its layout allows, and what is stored is what is shown. */

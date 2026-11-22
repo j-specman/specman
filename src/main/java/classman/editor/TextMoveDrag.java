@@ -6,6 +6,8 @@ import classman.render.PathGeometry;
 import classman.render.PathSpot;
 import classman.render.TextKind;
 
+import java.awt.Dimension;
+import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -13,7 +15,8 @@ import java.util.List;
 /**
  * The dragging of the label or a multiplicity of a relation. The text follows the mouse by the distance between where
  * it was grabbed and the middle of the text, so it doesn't jump. Its place is worked out from the point of the line
- * which is closest to the middle of the text, and the distance from the line: a label snaps to the middle of the line
+ * which is closest to the middle of the text, and the distance from the line; the text doesn't go left of or above the
+ * top left corner of the diagram. A label snaps to the middle of the line
  * if it comes close, so that a label can be put back there easily. Cancelling takes the place back.
  */
 class TextMoveDrag extends Drag {
@@ -24,6 +27,7 @@ class TextMoveDrag extends Drag {
   private final List<Point2D> path;
   private final Point2D pressedAt;
   private final Point2D textMiddle;
+  private final Dimension2D textSize;
   private final TextPlaceModel_V001 placeBefore;
   private boolean moved;
 
@@ -36,6 +40,7 @@ class TextMoveDrag extends Drag {
     this.path = path;
     this.pressedAt = pressedAt;
     this.textMiddle = new Point2D.Double(textArea.getCenterX(), textArea.getCenterY());
+    this.textSize = new Dimension((int) Math.ceil(textArea.getWidth()), (int) Math.ceil(textArea.getHeight()));
     this.placeBefore = TextPlaces.of(relation, kind);
   }
 
@@ -46,8 +51,9 @@ class TextMoveDrag extends Drag {
   @Override
   void to(Point2D at, double snapTolerance) {
     moved = true;
-    Point2D middle = new Point2D.Double(textMiddle.getX() + at.getX() - pressedAt.getX(),
-      textMiddle.getY() + at.getY() - pressedAt.getY());
+    Point2D middle = new Point2D.Double(
+      Math.max(textSize.getWidth() / 2, textMiddle.getX() + at.getX() - pressedAt.getX()),
+      Math.max(textSize.getHeight() / 2, textMiddle.getY() + at.getY() - pressedAt.getY()));
     PathSpot spot = PathGeometry.spotNear(path, middle);
     double length = PathGeometry.length(path);
     int across = (int) Math.round(spot.across);

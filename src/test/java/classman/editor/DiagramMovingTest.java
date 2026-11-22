@@ -45,6 +45,36 @@ class DiagramMovingTest {
     assertEquals(400, classNamed(editing.source(), "Page").position.x);
   }
 
+  /** A box can't be dragged left of or above the top left corner of the diagram, which is at (0, 0). */
+  @Test
+  void boxStopsAtTopLeftCorner() throws ClassDiagramParseException {
+    DiagramEditing editing = new DiagramEditing(TWO_PLACED, host);
+    select(editing, 15, 25);
+
+    editing.startDrag(new Point2D.Double(15, 25));
+    editing.dragTo(new Point2D.Double(-100, -30));
+    editing.endDrag();
+
+    ClassModel_V001 book = classNamed(editing.source(), "Book");
+    assertEquals(0, book.position.x);
+    assertEquals(0, book.position.y);
+  }
+
+  /** Each direction stops on its own: a box which is dragged up beyond the corner still moves sideways. */
+  @Test
+  void boxStopsOnlyInTheDirectionOfTheEdge() throws ClassDiagramParseException {
+    DiagramEditing editing = new DiagramEditing(TWO_PLACED, host);
+    select(editing, 15, 25);
+
+    editing.startDrag(new Point2D.Double(15, 25));
+    editing.dragTo(new Point2D.Double(115, -30));
+    editing.endDrag();
+
+    ClassModel_V001 book = classNamed(editing.source(), "Book");
+    assertEquals(110, book.position.x);
+    assertEquals(0, book.position.y);
+  }
+
   /** Nothing is reported while the mouse is dragged, and only one source when it is released. */
   @Test
   void reportedOnRelease() throws ClassDiagramParseException {

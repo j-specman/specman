@@ -23,8 +23,8 @@ class TextMoveTest {
     System.setProperty("java.awt.headless", "true");
   }
 
-  private static final String SOURCE = "classdiagram {\n  class A (11111111) at(10, 20)\n"
-    + "  class B (22222222) at(400, 20)\n"
+  private static final String SOURCE = "classdiagram {\n  class A (11111111) at(10, 120)\n"
+    + "  class B (22222222) at(400, 120)\n"
     + "  association (33333333) 11111111 1 -> * 22222222 \"owns\"\n}";
   private static final double TOLERANCE = 4;
   private static final double SNAP = 6;
@@ -74,6 +74,18 @@ class TextMoveTest {
     drag(editing, TextKind.RELATION_LABEL, 3, -40, SNAP);
 
     assertEquals(50, relationOf(editing).labelPlace.along);
+  }
+
+  /** A text can't be dragged left of or above the top left corner of the diagram, which is at (0, 0). */
+  @Test
+  void textStopsAtTopLeftCorner() throws ClassDiagramParseException {
+    DiagramEditing editing = new DiagramEditing(SOURCE, host);
+
+    drag(editing, TextKind.RELATION_LABEL, -2000, -2000, 0);
+
+    Rectangle2D area = areaOf(editing, TextKind.RELATION_LABEL);
+    assertTrue(area.getMinX() >= -1, "left edge " + area.getMinX());
+    assertTrue(area.getMinY() >= -1, "top edge " + area.getMinY());
   }
 
   /** A multiplicity moves along the line from its end, and the other one stays where it is. */

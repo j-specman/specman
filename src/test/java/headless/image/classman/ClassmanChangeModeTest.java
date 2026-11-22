@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static specman.DiagramToolBar.ACCEPT_CHANGES_BUTTON;
 import static specman.DiagramToolBar.REJECT_CHANGES_BUTTON;
@@ -175,6 +176,46 @@ class ClassmanChangeModeTest extends AbstractClassmanTest {
 
     assertTrue(diagram.getChangeInfo().isDeleted(), "diagram must be marked as deleted");
     assertEquals(MARKED, diagram.getSource());
+  }
+
+  /** Scenario: The picture of a diagram which a change set has added stays white inside the frame, because the marks of
+   * its content show what is new, and the pale color of the change set would make them harder to see. The rest of the
+   * area has the color. */
+  @Test
+  void testAddedDiagramHasWhitePicture() {
+    startChangeMode(BLUE);
+
+    ClassmanImageEditArea diagram = insertDiagramByToolbarButton(containerOfNewStep());
+
+    assertTrue(diagram.getChangeInfo().isAdded(), "diagram must be marked as added");
+    assertEquals(BLUE.panelColor(), diagram.getBackground());
+    assertEquals(BACKGROUND_COLOR_STANDARD, diagram.getPictureBackground());
+  }
+
+  /** Scenario: Accepting the addition takes the color and the white picture away: the diagram is an ordinary one. */
+  @Test
+  void testAcceptingTheAdditionLeavesNoColor() {
+    startChangeMode(BLUE);
+    ClassmanImageEditArea diagram = insertDiagramByToolbarButton(containerOfNewStep());
+
+    specman.click(ACCEPT_CHANGES_BUTTON);
+
+    assertEquals(BACKGROUND_COLOR_STANDARD, diagram.getBackground());
+    assertNull(diagram.getPictureBackground());
+  }
+
+  /** Scenario: A deleted diagram has the color of the change set behind its picture too, nothing in it says that it
+   * is gone. */
+  @Test
+  void testDeletedDiagramHasColoredPicture() {
+    ClassmanImageEditArea diagram = diagramWithSource(containerOfNewStep(), MARKED);
+    startChangeMode(PINK);
+    specman.focus(diagram);
+
+    specman.press(KeyEvent.VK_DELETE);
+
+    assertEquals(PINK.panelColor(), diagram.getBackground());
+    assertNull(diagram.getPictureBackground());
   }
 
   /** Scenario: A diagram nobody changed is saved as the compact one-line image block. */

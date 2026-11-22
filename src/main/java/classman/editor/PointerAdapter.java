@@ -33,7 +33,6 @@ class PointerAdapter extends MouseAdapter {
     this.listener = listener;
   }
 
-  boolean isDragging() { return dragging; }
 
   /** Gives the component the cursor which the listener wants at the place where the mouse was last seen. While the
    * mouse is dragged the cursor stays as it is. */

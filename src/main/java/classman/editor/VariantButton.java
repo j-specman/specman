@@ -14,33 +14,37 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
-import java.util.prefs.Preferences;
 
 /** A button of the palette which can create several kinds of elements, or draw several kinds of relations. It shows the icon and the text of the
  * current kind and has a small arrow at its corner, which opens a menu with all kinds. Choosing one makes it the
- * current kind, which is remembered, and arms the tool for it. */
+ * current kind, which is remembered while the application runs, and arms the tool for it. A button which is made
+ * for the first time shows its first kind. */
 class VariantButton<T> extends JToggleButton {
   private static final int ARROW_WIDTH = 7;
   private static final int ARROW_HEIGHT = 4;
   private static final int ARROW_ROOM = 12;
   private static final int ARROW_MARGIN = 4;
+  /** The kind which the user chose last, by the name of the button, as long as the application runs. */
+  private static final Map<String, String> CHOSEN = new HashMap<>();
 
   private final EditorTexts texts;
   private final List<PaletteVariant<T>> variants;
-  private final String preferenceKey;
+  private final String buttonName;
   private final Consumer<T> chosen;
   private PaletteVariant<T> current;
   private boolean withText = true;
 
   /** @param variants the kinds of the button, the first one is current as long as the user hasn't chosen
-   * @param preferenceKey where the choice is remembered
+   * @param buttonName names the button, under this name the choice is remembered
    * @param chosen is run with the value of a kind which the user chose in the menu */
-  VariantButton(EditorTexts texts, List<PaletteVariant<T>> variants, String preferenceKey, Consumer<T> chosen) {
+  VariantButton(EditorTexts texts, List<PaletteVariant<T>> variants, String buttonName, Consumer<T> chosen) {
     this.texts = texts;
     this.variants = variants;
-    this.preferenceKey = preferenceKey;
+    this.buttonName = buttonName;
     this.chosen = chosen;
     this.current = remembered();
     show(current);
@@ -73,7 +77,7 @@ class VariantButton<T> extends JToggleButton {
   }
 
   private PaletteVariant<T> remembered() {
-    String name = Preferences.userNodeForPackage(VariantButton.class).get(preferenceKey, null);
+    String name = CHOSEN.get(buttonName);
     for (PaletteVariant<T> variant : variants) {
       if (variant.key().equals(name)) {
         return variant;
@@ -151,8 +155,22 @@ class VariantButton<T> extends JToggleButton {
     menu.show(this, getWidth(), 0);
   }
 
+  /** Makes the kind with the value the current one, remembers it, and runs what a choice in the menu runs. */
+  void chooseValue(T value) {
+    for (PaletteVariant<T> variant : variants) {
+      if (variant.value == value) {
+        choose(variant);
+      }
+    }
+  }
+
+  /** Lets all buttons start with their first kind again, as after a restart of the application. */
+  static void forgetChoices() {
+    CHOSEN.clear();
+  }
+
   private void choose(PaletteVariant<T> variant) {
-    Preferences.userNodeForPackage(VariantButton.class).put(preferenceKey, variant.key());
+    CHOSEN.put(buttonName, variant.key());
     show(variant);
     chosen.accept(variant.value);
   }

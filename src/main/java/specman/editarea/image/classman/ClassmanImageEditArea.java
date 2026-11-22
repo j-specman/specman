@@ -14,10 +14,12 @@ import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.undo.props.UDBL;
 
 import javax.swing.SwingUtilities;
+import java.awt.Color;
 import java.awt.Rectangle;
 
 import static specman.ChangeSet.changeset;
 import static specman.Specman.editor;
+import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
 
 /** An edit area showing a Classman class diagram, painted with Graphics2D so it stays sharp at any zoom level; the PDF
  * gets it as SVG.
@@ -46,6 +48,15 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
     super(source, individualScalePercent, changeInfo);
     displayInitially();
     setBackground(panelColor());
+  }
+
+  /** The picture of a diagram which a change set has added stays white inside the frame of the change set: the marks
+   * of its content show what is new, and the pale color of the change set behind the picture would make them harder to
+   * see. The rest of the area keeps the color. A deleted diagram has the color behind the picture too, since nothing in
+   * it says that it is gone. */
+  @Override
+  protected Color pictureBackground() {
+    return getChangeInfo().isAdded() ? BACKGROUND_COLOR_STANDARD : null;
   }
 
   @Override

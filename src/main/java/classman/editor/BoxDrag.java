@@ -26,13 +26,14 @@ class BoxDrag extends Drag {
   @Override
   boolean hasMoved() { return freezer.isFrozen(); }
 
-  /** Puts the box where it is when the mouse is at the given point. A box doesn't snap to anything. */
+  /** Puts the box where it is when the mouse is at the given point, but not left of or above the top left corner of the
+   * diagram, which is at (0, 0). A box doesn't snap to anything. */
   @Override
   void to(Point2D at, double snapTolerance) {
     freezer.freeze();
     box.position = new PositionModel_V001(
-      (int) Math.round(startArea.getX() + at.getX() - pressedAt.getX()),
-      (int) Math.round(startArea.getY() + at.getY() - pressedAt.getY()));
+      Math.max(0, (int) Math.round(startArea.getX() + at.getX() - pressedAt.getX())),
+      Math.max(0, (int) Math.round(startArea.getY() + at.getY() - pressedAt.getY())));
   }
 
   /** Puts everything back where it was before the first move. */

@@ -21,16 +21,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.prefs.Preferences;
 
 /** The vertical tool bar at the left edge of the editor window. Buttons show an icon and a text, or an icon only,
- * which the button at the bottom switches. The most important element comes first, at the top. A class or a note is
+ * which the button at the bottom switches, and which is remembered while the application runs. The most important element comes first, at the top. A class or a note is
  * dragged from its button onto the diagram, the button of a tool for relations is switched on and then used on the
  * diagram. The relation buttons have variants, see {@link VariantButton}. */
 class EditorPalette extends JToolBar {
-  private static final String PREF_SHOW_TEXT = "paletteShowText";
   private static final float TEXT_SCALE = 1.2f;
   private static final int ICON_TEXT_GAP = 8;
+  /** Whether the buttons show a text, for the palettes which are made from now on: what the user switched to last, as
+   * long as the application runs. Text at first. */
+  private static boolean showTextInNewPalettes = true;
 
   private final EditorTexts texts;
   private final List<AbstractButton> elementButtons = new ArrayList<>();
@@ -54,7 +55,7 @@ class EditorPalette extends JToolBar {
                 Runnable anchorToolToggled, Runnable assocClassToolToggled) {
     super(JToolBar.VERTICAL);
     this.texts = texts;
-    this.showText = Preferences.userNodeForPackage(EditorPalette.class).getBoolean(PREF_SHOW_TEXT, true);
+    this.showText = showTextInNewPalettes;
     setFloatable(false);
 
     toggleButton.setMargin(new Insets(0, 0, 0, 0));
@@ -108,9 +109,9 @@ class EditorPalette extends JToolBar {
     addElementButton(button, key, EditorIcons.read(iconPath, EditorIcons.SIZE));
   }
 
-  private void addRelationButton(String preferenceKey, Consumer<RelationType_V001> toggled,
+  private void addRelationButton(String buttonName, Consumer<RelationType_V001> toggled,
                                  Consumer<RelationType_V001> chosen, PaletteVariant<RelationType_V001>... variants) {
-    VariantButton<RelationType_V001> button = new VariantButton<>(texts, List.of(variants), preferenceKey, chosen);
+    VariantButton<RelationType_V001> button = new VariantButton<>(texts, List.of(variants), buttonName, chosen);
     button.addActionListener(e -> toggled.accept(button.currentValue()));
     styleElementButton(button);
     relationButtons.add(button);
@@ -153,7 +154,7 @@ class EditorPalette extends JToolBar {
 
   private void toggleShowText() {
     showText = !showText;
-    Preferences.userNodeForPackage(EditorPalette.class).putBoolean(PREF_SHOW_TEXT, showText);
+    showTextInNewPalettes = showText;
     applyShowText();
     Container topLevel = getTopLevelAncestor();
     if (topLevel != null) {

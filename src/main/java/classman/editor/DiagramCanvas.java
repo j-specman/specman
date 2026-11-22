@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.render.DiagramStyle;
 import classman.render.Scene;
 import classman.render.SceneGraphicsPainter;
 import classman.render.SvgFrame;
@@ -43,11 +44,14 @@ class DiagramCanvas extends JPanel implements Scrollable {
   private SelectionMarks marks = SelectionMarks.none();
   private double zoom = 1;
 
-  /** The point of the diagram at the top left of the canvas, and the size of the canvas in points of the diagram.
-   * They follow the scene, but not while a box is dragged: the scene starts at the top left box, and the canvas would
-   * move along with the box and the mouse would never get ahead of it. */
+  /** The point of the diagram at the top left of the canvas, and the size of the canvas in points of the diagram. The
+   * origin is fixed: the point (0, 0) of the diagram stands at the same place of the canvas whatever the user moves,
+   * and the user moves the visible part with the scroll bars only. It is the diagram's own top left corner minus a
+   * margin, further out only if a diagram which has been made earlier reaches into negative coordinates. The size
+   * follows the scene. */
   private double originX;
   private double originY;
+  private boolean hasOrigin;
   private double extentWidth;
   private double extentHeight;
   private final PointerAdapter pointer = new PointerAdapter(this::toDiagram, this::showPoint);
@@ -73,9 +77,10 @@ class DiagramCanvas extends JPanel implements Scrollable {
   void setScene(Scene scene) {
     this.scene = scene;
     SvgFrame frame = SvgFrame.of(scene);
-    if (!pointer.isDragging()) {
-      originX = frame.x;
-      originY = frame.y;
+    if (!hasOrigin) {
+      originX = Math.min(frame.x, -DiagramStyle.SVG_MARGIN);
+      originY = Math.min(frame.y, -DiagramStyle.SVG_MARGIN);
+      hasOrigin = true;
     }
     extentWidth = Math.max(0, frame.x + frame.width - originX);
     extentHeight = Math.max(0, frame.y + frame.height - originY);

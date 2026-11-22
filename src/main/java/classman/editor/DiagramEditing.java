@@ -1212,7 +1212,7 @@ public class DiagramEditing {
   private SceneTextArea putPendingBox(AbstractBoxModel_V001 box, int x, int y, TextKind textKind) {
     discardPendingParts();
     box.id = newId();
-    box.position = new PositionModel_V001(x, y);
+    box.position = new PositionModel_V001(Math.max(0, x), Math.max(0, y));
     box.width = DiagramStyle.NEW_BOX_WIDTH;
     markAsAdded(box);
     model.elements.add(box);

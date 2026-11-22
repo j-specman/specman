@@ -38,7 +38,8 @@ class BoxResize extends Drag {
     freezer.freeze();
     int left = box.position.x;
     int right = (int) Math.round(startArea.getMaxX());
-    int width = side == ResizeSide.RIGHT ? (int) Math.round(at.getX() - left) : (int) Math.round(right - at.getX());
+    int width = side == ResizeSide.RIGHT ? (int) Math.round(at.getX() - left)
+      : (int) Math.min(right, Math.round(right - at.getX()));
     box.width = Math.max(width, (int) Math.ceil(minimumWidth));
     if (side == ResizeSide.LEFT) {
       box.position = new PositionModel_V001(right - box.width, box.position.y);

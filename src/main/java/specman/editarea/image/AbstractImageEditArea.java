@@ -98,6 +98,7 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
     this.add(new SpaltenResizer(this, IRRELEVANT_COLUMNRESIZE_INDEX), CC.xy(2, 1));
     setBackground(panelColor());
     image.setBorder(changetype2border());
+    updatePictureBackground();
     addComponentListener(this);
     updateListenersByChangeInfo();
   }
@@ -300,6 +301,7 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
 
   public void setChangeInfo(ChangeInfo changeInfo) {
     this.changeInfo = changeInfo;
+    updatePictureBackground();
     updateListenersByChangeInfo();
     if (changeInfo.isDeleted()) {
       addGlassPanel();
@@ -360,6 +362,25 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
   @Override
   public void setEditBackgroundUDBL(Color bg) {
     setBackgroundUDBL(panelColor());
+  }
+
+  /** The background of the picture inside the border of the image, null if it has none, so that the background of the
+   * area shows through. Note that it is also asked while the base class is being constructed. */
+  protected Color pictureBackground() {
+    return null;
+  }
+
+  /** @return the background of the picture inside the border of the image, null if it has none */
+  public Color getPictureBackground() {
+    return image.isOpaque() ? image.getBackground() : null;
+  }
+
+  private void updatePictureBackground() {
+    Color background = pictureBackground();
+    image.setOpaque(background != null);
+    if (background != null) {
+      image.setBackground(background);
+    }
   }
 
   /** The background of the area, which marks its changes. Subclasses with changes of their own content
