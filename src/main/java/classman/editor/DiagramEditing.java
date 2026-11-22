@@ -502,7 +502,7 @@ public class DiagramEditing {
     return !isRemoved && model.classes().contains(box);
   }
 
-  /** @return true if the class can get an attribute: it can get parts and is not an interface */
+  /** @return true if the class can get an attribute or, for an enum, a value: it can get parts and is not an interface */
   public boolean canAddAttributeTo(ClassModel_V001 box) {
     return canAddPartsTo(box) && box.kind.hasAttributes();
   }
@@ -783,19 +783,16 @@ public class DiagramEditing {
   }
 
   /** Starts to draw with the armed tool at the box which the press is on or at most the tolerance away from: a class
-   * for a relation, a note for an anchor. An implementation starts at a class which is no interface and ends at an
-   * interface, an inheritance ends at a box of the kind of its start. Nothing happens if there is none. The connection is created where the
+   * for a relation, a note for an anchor. Which boxes a relation may start and end at is told by {@link RelationRules}. Nothing happens if there is none. The connection is created where the
    * mouse is released on a class, see {@link #endDrag}. */
   public void startDrawing(Point2D at, double tolerance) {
     ConnectionTargets targets = new ConnectionTargets(model, scene);
     drawing = null;
     if (armedTool == Tool.RELATION) {
-      boolean isImplementation = armedRelationType == RelationType_V001.IMPLEMENTS;
-      ClassTarget from = targets.closestClass(at, tolerance,
-        box -> !isImplementation || box.kind == ClassKind_V001.CLASS);
+      ClassTarget from = targets.closestClass(at, tolerance, box -> RelationRules.canStart(armedRelationType, box));
       if (from != null) {
         TargetFinder finder = (point, distance) -> targets.closestClass(point, distance,
-          box -> canEnd(armedRelationType, from.box, box));
+          box -> RelationRules.canEnd(armedRelationType, from.box, box));
         drawing = new ConnectionDrawing(from.box, from.frame(), finder, at);
       }
     }
@@ -809,16 +806,6 @@ public class DiagramEditing {
         drawing = new ConnectionDrawing(from, notes.get(from), targets::closestForAnchor, at);
       }
     }
-  }
-
-  /** An implementation ends at an interface, an inheritance at a box of the kind of its start: a class extends a
-   * class, an interface an interface. The other relations end at any class. */
-  private static boolean canEnd(RelationType_V001 type, ClassModel_V001 from, ClassModel_V001 to) {
-    return switch (type) {
-      case IMPLEMENTS -> to.kind == ClassKind_V001.INTERFACE;
-      case EXTENDS -> to.kind == from.kind;
-      default -> true;
-    };
   }
 
   /** Creates what was drawn, if the mouse was released on a class, and leaves the tool. If it was released on none,
@@ -924,13 +911,13 @@ public class DiagramEditing {
    * {@link #setText}: that is one operation. It goes away again with the empty name, or if it is dropped.
    * @return the area of the name */
   public SceneTextArea newClass(int x, int y) {
-    return putPendingBox(new ClassModel_V001(""), x, y, TextKind.CLASS_NAME);
+    return newClass(x, y, ClassKind_V001.CLASS);
   }
 
-  /** Puts an interface without a name into the picture, in the same way as {@link #newClass} does with a class.
+  /** Puts a box of the kind (class, interface, enum) without a name into the picture, see {@link #newClass(int, int)}.
    * @return the area of the name */
-  public SceneTextArea newInterface(int x, int y) {
-    return putPendingBox(new ClassModel_V001("", ClassKind_V001.INTERFACE), x, y, TextKind.CLASS_NAME);
+  public SceneTextArea newClass(int x, int y, ClassKind_V001 kind) {
+    return putPendingBox(new ClassModel_V001("", kind), x, y, TextKind.CLASS_NAME);
   }
 
   /** Puts a note without a text into the picture, in the same way as {@link #newClass} does with a class: the text is

@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.render.DiagramFonts;
 import classman.render.DiagramStyle;
@@ -235,17 +236,14 @@ class TextEditor {
   /** Puts a class without a name at the point of the diagram and starts to type the name. A text which is being typed
    * is finished first. */
   void startNewClass(int x, int y) {
-    commit(false);
-    SceneTextArea name = editing.newClass(x, y);
-    showDiagram.run();
-    start(name);
+    startNewClass(x, y, ClassKind_V001.CLASS);
   }
 
-  /** Puts an interface without a name at the point of the diagram and starts to type the name. A text which is being
-   * typed is finished first. */
-  void startNewInterface(int x, int y) {
+  /** Puts a box of the kind (class, interface, enum) without a name at the point of the diagram and starts to type the
+   * name. A text which is being typed is finished first. */
+  void startNewClass(int x, int y, ClassKind_V001 kind) {
     commit(false);
-    SceneTextArea name = editing.newInterface(x, y);
+    SceneTextArea name = editing.newClass(x, y, kind);
     showDiagram.run();
     start(name);
   }

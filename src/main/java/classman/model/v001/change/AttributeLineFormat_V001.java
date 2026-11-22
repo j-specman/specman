@@ -52,6 +52,12 @@ public class AttributeLineFormat_V001 {
 
     /** @return the parts of the line, none if it has no name, brackets which aren't closed, or line breaks */
     public Optional<AttributeLine_V001> parse(String text) {
+        return parse(text, true);
+    }
+
+    /** @param hasType false for the value of an enum, which has no type: a colon makes the line invalid
+     * @return the parts of the line, none if it has no name, brackets which aren't closed, or line breaks */
+    public Optional<AttributeLine_V001> parse(String text, boolean hasType) {
         String rest = text.strip();
         if (rest.isEmpty() || rest.contains("\n") || rest.equals("...")) {
             return Optional.empty();
@@ -71,6 +77,9 @@ public class AttributeLineFormat_V001 {
             rest = rest.substring(0, infosStart);
         }
         int colon = rest.indexOf(':');
+        if (colon >= 0 && !hasType) {
+            return Optional.empty();
+        }
         String name = (colon < 0 ? rest : rest.substring(0, colon)).strip();
         String type = colon < 0 ? "" : rest.substring(colon + 1).strip();
         if (name.isEmpty()) {

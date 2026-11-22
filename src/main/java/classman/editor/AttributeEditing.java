@@ -41,7 +41,7 @@ class AttributeEditing {
     if (newText.isEmpty()) {
       return true;
     }
-    Optional<AttributeLine_V001> parsed = format.parse(newText);
+    Optional<AttributeLine_V001> parsed = parse((ClassModel_V001) line.element, newText);
     if (parsed.isEmpty()) {
       return false;
     }
@@ -64,10 +64,10 @@ class AttributeEditing {
       }
     }
     else if (line.attribute == null) {
-      owner.attributes.add(changer.create(owner, parsed(newText), changeSet));
+      owner.attributes.add(changer.create(owner, parsed(owner, newText), changeSet));
     }
     else {
-      changer.apply(owner, line.attribute, parsed(newText), changeSet);
+      changer.apply(owner, line.attribute, parsed(owner, newText), changeSet);
     }
     return true;
   }
@@ -78,7 +78,7 @@ class AttributeEditing {
     if (newText.isEmpty()) {
       return false;
     }
-    owner.attributes.add(index, changer.create(owner, parsed(newText), changeSet));
+    owner.attributes.add(index, changer.create(owner, parsed(owner, newText), changeSet));
     return true;
   }
 
@@ -91,8 +91,13 @@ class AttributeEditing {
     }
   }
 
-  private AttributeLine_V001 parsed(String text) {
-    return format.parse(text).orElseThrow(() -> new IllegalArgumentException("Not an attribute line: " + text));
+  /** The line of an attribute, or of a value of an enum, which has no type and so no colon. */
+  private Optional<AttributeLine_V001> parse(ClassModel_V001 owner, String text) {
+    return format.parse(text, owner.kind.hasTypedAttributes());
+  }
+
+  private AttributeLine_V001 parsed(ClassModel_V001 owner, String text) {
+    return parse(owner, text).orElseThrow(() -> new IllegalArgumentException("Not an attribute line: " + text));
   }
 
   /** @return true if the line is the last one of its class, or the blank line of a class without attributes */

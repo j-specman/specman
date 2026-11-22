@@ -89,7 +89,8 @@ class EditorPalette extends JToolBar {
   private void addClassButton(BiConsumer<ClassKind_V001, Point> dropped) {
     VariantButton<ClassKind_V001> button = new VariantButton<>(texts, List.of(
       new PaletteVariant<>("class", ClassKind_V001.CLASS, EditorIcons.CLASS),
-      new PaletteVariant<>("interface", ClassKind_V001.INTERFACE, EditorIcons.INTERFACE)), "variantClass", kind -> { });
+      new PaletteVariant<>("interface", ClassKind_V001.INTERFACE, EditorIcons.INTERFACE),
+      new PaletteVariant<>("enum", ClassKind_V001.ENUM, EditorIcons.ENUM)), "variantClass", kind -> { });
     PaletteDragAdapter dragAdapter = new PaletteDragAdapter(button::currentLabel,
       () -> EditorIcons.read(button.currentIconPath(), EditorIcons.SIZE),
       screenPoint -> dropped.accept(button.currentValue(), screenPoint));

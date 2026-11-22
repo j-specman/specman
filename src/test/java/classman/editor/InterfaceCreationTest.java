@@ -4,6 +4,7 @@ import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
+import classman.render.SceneTextArea;
 import org.junit.jupiter.api.Test;
 
 import java.awt.geom.Point2D;
@@ -35,7 +36,7 @@ class InterfaceCreationTest {
   void interfaceCreated() throws ClassDiagramParseException {
     DiagramEditing editing = new DiagramEditing("classdiagram {\n}", host);
 
-    editing.setText(editing.newInterface(300, 40), "Runnable");
+    editing.setText(editing.newClass(300, 40, ClassKind_V001.INTERFACE), "Runnable");
 
     ClassModel_V001 box = onlyBox(editing);
     assertEquals(ClassKind_V001.INTERFACE, box.kind);
@@ -51,7 +52,7 @@ class InterfaceCreationTest {
     host.trackedChangeSet = "yellow";
     DiagramEditing editing = new DiagramEditing("classdiagram {\n}", host);
 
-    editing.setText(editing.newInterface(300, 40), "Runnable");
+    editing.setText(editing.newClass(300, 40, ClassKind_V001.INTERFACE), "Runnable");
 
     assertEquals("yellow", onlyBox(editing).change.changeSet);
   }
@@ -61,7 +62,7 @@ class InterfaceCreationTest {
   void interfaceWithoutNameDiscarded() throws ClassDiagramParseException {
     DiagramEditing editing = new DiagramEditing("classdiagram {\n}", host);
 
-    editing.setText(editing.newInterface(300, 40), "");
+    editing.setText(editing.newClass(300, 40, ClassKind_V001.INTERFACE), "");
 
     assertTrue(new ClassDiagramParser_V001().parse(editing.source()).classes().isEmpty());
   }
@@ -78,5 +79,24 @@ class InterfaceCreationTest {
 
     assertFalse(editing.canAddAttributeTo(anInterface));
     assertTrue(editing.canAddAttributeTo(aClass));
+  }
+
+  /** An enum is created like a class. Its values are lines without a type: a colon is not allowed, an info is. */
+  @Test
+  void enumValues() throws ClassDiagramParseException {
+    DiagramEditing editing = new DiagramEditing("classdiagram {\n}", host);
+    editing.setText(editing.newClass(300, 40, ClassKind_V001.ENUM), "Color");
+    editing.selectAt(centerOf(editing, 0));
+    ClassModel_V001 box = editing.selectedClass();
+    assertTrue(editing.canAddAttributeTo(box));
+
+    SceneTextArea line = editing.newAttributeAtEnd(box);
+
+    assertFalse(editing.accepts(line, "RED : int"));
+    assertTrue(editing.accepts(line, "RED [primary]"));
+    editing.setText(line, "RED [primary]");
+    assertEquals(ClassKind_V001.ENUM, onlyBox(editing).kind);
+    assertEquals("RED", onlyBox(editing).attributes.get(0).name);
+    assertEquals("primary", onlyBox(editing).attributes.get(0).infos.get(0).text);
   }
 }

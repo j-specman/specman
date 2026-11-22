@@ -19,6 +19,7 @@ import classman.model.v001.ClassDiagram_V001Parser.AttributeContext;
 import classman.model.v001.ClassDiagram_V001Parser.BackupTextContext;
 import classman.model.v001.ClassDiagram_V001Parser.ChangeMarkContext;
 import classman.model.v001.ClassDiagram_V001Parser.ClassBodyContext;
+import classman.model.v001.ClassDiagram_V001Parser.ClassDeclContext;
 import classman.model.v001.ClassDiagram_V001Parser.ClassDiagramContext;
 import classman.model.v001.ClassDiagram_V001Parser.ClassHeadContext;
 import classman.model.v001.ClassDiagram_V001Parser.DiagramNameContext;
@@ -95,7 +96,7 @@ public class ClassDiagramParser_V001 {
 
     private AbstractDiagramElementModel_V001 buildElement(ElementContext element) throws ClassDiagramParseException {
         if (element.classDecl() != null) {
-            ClassKind_V001 kind = element.classDecl().INTERFACE() != null ? ClassKind_V001.INTERFACE : ClassKind_V001.CLASS;
+            ClassKind_V001 kind = kindOf(element.classDecl());
             return buildClass(kind, element.classDecl().classHead(), element.classDecl().classBody());
         }
         if (element.relation() != null) {
@@ -129,10 +130,18 @@ public class ClassDiagramParser_V001 {
         if (body != null) {
             checkOneAttributePerLine(body);
             for (AttributeContext attribute : body.attribute()) {
+                checkTypeAllowed(kind, attribute);
                 model.attributes.add(buildAttribute(attribute));
             }
         }
         return model;
+    }
+
+    private ClassKind_V001 kindOf(ClassDeclContext declaration) {
+        if (declaration.INTERFACE() != null) {
+            return ClassKind_V001.INTERFACE;
+        }
+        return declaration.ENUM() != null ? ClassKind_V001.ENUM : ClassKind_V001.CLASS;
     }
 
     private String stereotype(TerminalNode stereotype) {
@@ -164,6 +173,14 @@ public class ClassDiagramParser_V001 {
     // ---- attributes ----
 
     /** Names and types with spaces must be in double quotes, else one attribute would silently become several. */
+    private void checkTypeAllowed(ClassKind_V001 kind, AttributeContext attribute) throws ClassDiagramParseException {
+        if (!kind.hasTypedAttributes() && attribute.COLON() != null) {
+            Token start = attribute.getStart();
+            throw new ClassDiagramParseException("line " + start.getLine() + ":" + start.getCharPositionInLine()
+                + " The value of an enum has no type.");
+        }
+    }
+
     private void checkOneAttributePerLine(ClassBodyContext body) throws ClassDiagramParseException {
         List<AttributeContext> attributes = body.attribute();
         for (int i = 1; i < attributes.size(); i++) {

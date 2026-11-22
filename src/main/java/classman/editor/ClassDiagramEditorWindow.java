@@ -170,7 +170,7 @@ public class ClassDiagramEditorWindow extends JDialog {
   }
 
   private void classDropped(ClassKind_V001 kind, Point screenPoint) {
-    boxDropped(screenPoint, kind == ClassKind_V001.INTERFACE ? textEditor::startNewInterface : textEditor::startNewClass);
+    boxDropped(screenPoint, (x, y) -> textEditor.startNewClass(x, y, kind));
   }
 
   /** @param startBox puts the new box at the point of the diagram, in whole units, and starts to type its text */

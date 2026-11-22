@@ -544,4 +544,26 @@ class ClassDiagramParser_V001Test {
     assertEquals(ClassKind_V001.CLASS, onlyClass("class Runnable").kind);
     assertThrows(ClassDiagramParseException.class, () -> parse("interface I { x }"));
   }
+
+  /** An enum has a body with values, which are attributes without a type, and may have infos. */
+  @Test
+  void enumDeclaration() throws ClassDiagramParseException {
+    ClassModel_V001 box = onlyClass("""
+        enum Color (aaaaaaaa) {
+          RED [primary]
+          GREEN
+        }""");
+    assertEquals(ClassKind_V001.ENUM, box.kind);
+    assertEquals(2, box.attributes.size());
+    assertEquals("RED", box.attributes.get(0).name);
+    assertEquals("primary", box.attributes.get(0).infos.get(0).text);
+  }
+
+  /** The value of an enum has no type. */
+  @Test
+  void enumValueWithTypeRejected() {
+    ClassDiagramParseException e = assertThrows(ClassDiagramParseException.class,
+        () -> parse("enum Color {\n  RED : int\n}"));
+    assertTrue(e.getMessage().contains("no type"), e.getMessage());
+  }
 }

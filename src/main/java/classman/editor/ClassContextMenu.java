@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
 
 import javax.swing.JMenuItem;
@@ -17,7 +18,7 @@ class ClassContextMenu extends JPopupMenu {
       () -> textEditor.startNewStereotype(box)));
     add(entry(texts.get("menu.class.add.taggedvalue"), editing.canAddPartsTo(box),
       () -> textEditor.startNewTaggedValue(box)));
-    add(entry(texts.get("menu.class.add.attribute"), editing.canAddAttributeTo(box),
+    add(entry(texts.get(box.kind == ClassKind_V001.ENUM ? "menu.class.add.value" : "menu.class.add.attribute"), editing.canAddAttributeTo(box),
       () -> textEditor.startNewAttribute(box)));
     addSeparator();
     add(new AutomaticWidthMenuItem(editing, box, texts, showDiagram));

@@ -247,6 +247,39 @@ class RelationCreationTest {
     assertEquals(RelationType_V001.EXTENDS, relationOf(editing.source()).type);
   }
 
+  private static final String CLASS_AND_ENUM = "classdiagram {\n  class A (11111111) at(10, 20)\n"
+    + "  enum E (22222222) at(300, 20)\n}";
+
+  private boolean drawn(String source, RelationType_V001 type, int from, int to) throws ClassDiagramParseException {
+    open(source);
+    editing.toggleRelationTool(type);
+    draw(inClass(from), inClass(to));
+    return !new ClassDiagramParser_V001().parse(editing.source()).relations().isEmpty();
+  }
+
+  /** An association, aggregation or composition may end at an enum but not start at one. */
+  @Test
+  void enumOnlyAsTargetOfAssociations() throws ClassDiagramParseException {
+    for (RelationType_V001 type : new RelationType_V001[] {RelationType_V001.ASSOCIATION, RelationType_V001.AGGREGATION,
+      RelationType_V001.COMPOSITION}) {
+      assertTrue(drawn(CLASS_AND_ENUM, type, 0, 1), type + " class to enum");
+      assertFalse(drawn(CLASS_AND_ENUM, type, 1, 0), type + " enum to class");
+    }
+    assertTrue(drawn(CLASS_AND_ENUM, RelationType_V001.ASSOCIATION, 0, 1));
+    assertTrue(((AssociationRelationModel_V001) relationOf(editing.source())).directed);
+  }
+
+  /** An enum neither extends nor is extended, but it may implement an interface. */
+  @Test
+  void enumInheritance() throws ClassDiagramParseException {
+    String twoEnums = "classdiagram {\n  enum A (11111111) at(10, 20)\n  enum B (22222222) at(300, 20)\n}";
+    assertFalse(drawn(twoEnums, RelationType_V001.EXTENDS, 0, 1));
+    assertFalse(drawn(CLASS_AND_ENUM, RelationType_V001.EXTENDS, 0, 1));
+    assertFalse(drawn(CLASS_AND_ENUM, RelationType_V001.EXTENDS, 1, 0));
+    String enumAndInterface = "classdiagram {\n  enum E (11111111) at(10, 20)\n  interface I (22222222) at(300, 20)\n}";
+    assertTrue(drawn(enumAndInterface, RelationType_V001.IMPLEMENTS, 0, 1));
+  }
+
   /** The button of another type changes what is drawn; the button of the type which is armed puts the tool away. */
   @Test
   void switchingTheRelationType() throws ClassDiagramParseException {

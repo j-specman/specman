@@ -65,7 +65,9 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Create a note |built |Palette button, dragged onto the canvas like a class, see <<Creating Elements>>.
 |Attach a note to a class, an attribute or a relation (anchor) |built |Palette tool: press on the note, drag to the target, see <<Creating Elements>>.
 |Create an interface |built |Variant of the class button, dragged onto the canvas, see <<Interfaces>>.
-|Create other element kinds (enum, association class) |open |
+|Create an enum |built |Variant of the class button, see <<Enums>>.
+|Create an association class |open |
+|Export to and import from PlantUML |open |Not first priority, see <<Open Points>>.
 |Create a relation (association, aggregation, composition, inheritance, implementation) |built |By a tool: click the button, drag from one class to another, see <<Creating Elements>>. Two buttons with variants, see <<Buttons with Variants>>.
 |Move the points of a route |built |Waypoints freely, the ends along the border of their class or hung onto another class (not while changes are tracked), see <<Selecting>>. Adding a waypoint and deleting one (double click on the line and on a handle) too.
 |Create a text which an element doesn't have yet (relation label, multiplicity) |built |Dashed places on the selected relation, see <<Texts Which a Relation Doesn't Have Yet>>. Tagged values are created with the context menu of the class. Not yet for the diagram name.
@@ -90,7 +92,7 @@ The palette is a vertical tool bar at the left edge of the window, built like th
 #### Buttons with Variants
 The number of element kinds will grow, so related kinds share one button. A button with variants shows the icon and the text of the variant it creates, and has a small arrow at its corner which opens a menu with all variants. Choosing a variant makes it the current one of the button and arms the tool for it right away (so one click less than choosing and then pressing the button). The last choice is remembered between sessions (preferences `variantAssociation` and `variantInheritance`). A press on the button itself, away from the arrow, arms the tool for the current variant; the button is as wide as the longest text of its variants, so the palette doesn't change its width. While a tool is armed, its button shows the variant which is armed.
 
-*Built:* the two relation buttons (association, aggregation, composition) and (inheritance, implementation), and the class button (class, interface). *Planned:* enum for the class button, and the note button with association class. The variant button of a box is a drag source: the ghost which follows the mouse shows the icon and the text of the current variant.
+*Built:* the two relation buttons (association, aggregation, composition) and (inheritance, implementation), and the class button (class, interface, enum). *Planned:* the note button with association class. The variant button of a box is a drag source: the ghost which follows the mouse shows the icon and the text of the current variant.
 
 Variants are grouped if they are used with the same gesture and differ in one property only:
 
@@ -98,7 +100,7 @@ Variants are grouped if they are used with the same gesture and differ in one pr
 |===
 |Button |Variants |Gesture
 
-|Class |class, interface (built), enum (planned) |drag onto canvas
+|Class |class, interface, enum (all built) |drag onto canvas
 |Note |note, association class (open) |drag onto canvas
 |Association |association, aggregation, composition |tool (built)
 |Inheritance |extends, implements |tool (built)
@@ -111,9 +113,16 @@ An interface is a box like a class, with a part less. It is created by the class
 
 * *Look:* the line `<<interface>>` stands above the name, in the style of a stereotype. It is not a stereotype of the box: it is derived from the kind when the box is drawn, is not in the source and can't be edited. It is shown in place of a stereotype: as soon as the interface has a stereotype of its own, which the user adds with the context menu, the derived line is hidden, also while the own one is marked as removed, so there are never two to see. It comes back when the own one is gone. The assumption is that a stereotype is a domain specific specialization, so the basic kind needn't be shown as well. Tagged values are possible, attributes are not: an interface has no part with attributes and no separating line.
 * *Context menu:* *Add attribute* can't be chosen.
-* *Implementation:* the tool for implementations starts at a class which is not an interface and ends at an interface only; the mouse on any other class is not a target.
-* *Inheritance:* the tool for inheritance ends only at a box of the kind of its start: a class extends a class, an interface extends an interface. A class can't extend an interface, and an interface can't implement anything.
+* *Implementation:* the tool for implementations starts at a class or an enum (not at an interface) and ends at an interface only; the mouse on any other box is not a target.
+* *Inheritance:* the tool for inheritance connects two classes or two interfaces: a class extends a class, an interface extends an interface. A class can't extend an interface, and an interface can't implement anything. An enum neither extends nor is extended.
+* *Enums and the other relations:* the tools for association, aggregation and composition don't start at an enum, which doesn't know who uses it, but they may end at one: an association from a class to an enum says what an attribute of the enum's type says. These rules are in `RelationRules`; the tools only offer what they allow (the mouse on a box which is no allowed start or end is no target).
 * *Decided after trying it:* hiding `<<interface>>` behind an own stereotype reads well.
+
+### Enums
+An enum is created like an interface, by the class button with the variant *Enum*. Its box shows `<<enumeration>>` above the name, hidden like `<<interface>>` as soon as the enum has a stereotype of its own, and below the separating line its values, one in a line.
+
+* *Values* are the attributes of the box without a type: `RED`, with an info `RED [primary]` and, if the user likes, a visibility sign. They are created, edited, deleted, marked and noted like attributes, see <<Attributes>>. The colon between name and type is not allowed in a value: the line is invalid (red border) while it has one, and a source with a colon in a value of an enum can't be read.
+* *Context menu:* the entry which adds an attribute to a class is *Add value* for an enum.
 
 ### Width of a Class Box
 * *Without `width=`* the box is as wide as its widest part: the longest line of the name, the stereotype, the tagged values or an attribute (at least `DiagramStyle.MIN_BOX_WIDTH`). Nothing is wrapped or cut off. The box grows with long attributes and shrinks again when they get shorter. The editor creates classes this way.
@@ -177,7 +186,6 @@ Specman's step buttons are drag sources: The user drags a step onto the diagram.
 
 *Planned:*
 
-* Enums are dragged onto the canvas in the same way.
 * *Everything within a box* has no button: Attributes, enum values, stereotypes and tagged values are created by the context menu of the class and edited in place, labels and multiplicities by their places on a selected relation, see <<Attributes>> and <<The Context Menu of a Class>>.
 
 ## Selecting
@@ -485,7 +493,7 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 * The anchor line of a note is an element of its own, written like a relation: `anchor (<ID>) change(added, yellow) <note ID> -- <target ID>`. The ID and the mark are optional, the note and the target are named by their IDs, so both need one. The route of an anchor line may fix its ends with anchors like the route of a relation: `anchor <note ID> -- <target ID> route <note ID>.right@10 (120, 40) <target ID>.top@25`. Either anchor, or both, or none; the parser tells the start from the end by the ID the anchor names. A fixed end is a point of the border of a box (a class, or the text of an attribute), or, for a relation, a point of its line in percent of its length: `anchor <note ID> -- <relation ID> route (120, 40) <relation ID>@40%`. An anchor which doesn't fit the target (a side on a relation, a percentage on a box) is ignored by the renderer; a percentage can only be the end, never the start. The note no longer has an `attach(...)` part: that form of the source is gone, the source is written by the editor and isn't meant to be edited by hand.
 * Elements created by the editor get an ID (classes) and a position `at(x, y)`. Attributes get an ID only if a note is attached. Anchor lines get no ID: nothing refers to them.
 * Built: the keyword `interface`, `interface Runnable (aaaaaaaa) at(10, 20) <<Service>> {A=1}`: the head of a class and no body. In the model it is a `ClassModel_V001` with `kind = INTERFACE`, so selecting, moving, naming, change marks and relations work as for a class.
-* Planned: the keyword `enum`. An enum has values written like attributes without a type. The layouter and the change mark logic have to handle it.
+* Built: the keyword `enum`, `enum Color (aaaaaaaa) at(10, 20) { RED [primary] GREEN }`: the head of a class and a body with the values. A value is an attribute without a type; the parser refuses a colon in it.
 
 ## Tests
 * Tool state and every operation on the model are plain logic and are tested without a window; the field and its keys are tested headless on the event dispatch thread.
@@ -493,6 +501,7 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 * The dependency rule between `classman.*` and `specman.*` is tested.
 
 ## Open Points
+. *Export to and import from PlantUML.* Later this may bring PlantUML users to Classman, so it has to be worked out properly first; it is not a first priority. Questions to answer then: which part of a class diagram has a counterpart in PlantUML (classes, interfaces, enums, attributes, stereotypes, relations with multiplicities and labels, notes and their anchors) and how the rest is treated (tagged values, infos of attributes, IDs, change marks, routes and positions have none, and PlantUML places everything itself); on import, where Classman puts the boxes, since a source without `at(x, y)` is only stacked; on export, whether the result is to be edited further in PlantUML or only to be read; whether it works through the PlantUML text or the model; where the entry points are (menu of the editor window, context menu of the diagram in Specman, command line). Specman has PlantUML images of its own already, which is a reason to think of the two together.
 . Is the association class a variant of the note button, or an element of its own?
 . Snapping of points is built (see <<Selecting>>); does it feel right with 6 pixels? Decided: no guide line which shows what a point has snapped to, it isn't needed. Open: a key which switches snapping off, snapping of boxes to each other, and straightening a whole route.
 . Hanging an end onto an element which is not a class (note, association class), and the capture distance: is 6 pixels right for hanging, or should it differ from snapping?

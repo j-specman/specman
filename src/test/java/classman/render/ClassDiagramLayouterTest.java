@@ -253,4 +253,14 @@ class ClassDiagramLayouterTest {
     assertTrue(texts(removed).contains("<<Service>>"));
     assertFalse(texts(removed).contains("<<interface>>"));
   }
+
+  /** An enum shows <<enumeration>> above its name and its values below the line, like attributes. */
+  @Test
+  void enumBox() throws ClassDiagramParseException {
+    Scene scene = layout("enum Color at(0, 0) {\n  RED\n  GREEN\n}");
+    assertTrue(texts(scene).contains("<<enumeration>>"));
+    assertTrue(texts(scene).contains("RED"));
+    assertEquals(1, all(scene, SceneLine.class).size());
+    assertEquals(4 * PADDING_Y + LINE * (2 + 2), all(scene, SceneRectangle.class).get(0).height);
+  }
 }

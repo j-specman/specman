@@ -193,4 +193,13 @@ class ClassDiagramSerializer_V001Test {
     assertTrue(written.contains("interface Runnable (aaaaaaaa) <<Service>> {A=1}\n"), written);
     assertEquals(ClassDiagramDump.of(parser.parse(source)), ClassDiagramDump.of(parser.parse(written)));
   }
+
+  /** An enum is written with its own keyword, its values in the body, and read again as an enum. */
+  @Test
+  void enumRoundTrip() throws Exception {
+    String source = "classdiagram { enum Color (aaaaaaaa) {\n RED [primary]\n GREEN\n } }";
+    String written = roundTrip(source);
+    assertTrue(written.contains("enum Color (aaaaaaaa) {\n"), written);
+    assertEquals(ClassDiagramDump.of(parser.parse(source)), ClassDiagramDump.of(parser.parse(written)));
+  }
 }
