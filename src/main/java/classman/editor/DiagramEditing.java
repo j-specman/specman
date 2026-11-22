@@ -43,7 +43,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -605,7 +607,37 @@ public class DiagramEditing {
 
   /** @return true if the class can get an attribute or, for an enum, a value: it can get parts and is not an interface */
   public boolean canAddAttributeTo(ClassModel_V001 box) {
-    return canAddPartsTo(box) && box.kind.hasAttributes();
+    return canAddPartsTo(box) && box.showsAttributes();
+  }
+
+  /** @return true if the class has an attribute compartment which can be hidden or shown: it is no interface, no
+   * change set has removed it, and its attributes carry no marks of a change set, which must not be hidden */
+  public boolean canHideAttributesOf(ClassModel_V001 box) {
+    return canAddPartsTo(box) && box.kind.hasAttributes() && !box.hasMarkedAttributes();
+  }
+
+  /** Hides or shows the attribute compartment of the class. The attributes stay in the diagram. Not marked as a
+   * change, like the width. One operation. */
+  public void setAttributesHidden(ClassModel_V001 box, boolean hidden) {
+    if (box.attributesHidden != hidden && canAddPartsTo(box) && (!hidden || canHideAttributesOf(box))) {
+      box.attributesHidden = hidden;
+      publish();
+    }
+  }
+
+  /** @return true if the box can get a background color of its own: no change set has removed it */
+  public boolean canChangeFill(ClassModel_V001 box) {
+    return canAddPartsTo(box);
+  }
+
+  /** Gives the class the background color, written #rrggbb, or the standard color of classes if it is null. Not
+   * marked as a change, like the width. One operation. */
+  public void setFill(ClassModel_V001 box, String color) {
+    String normalized = color == null ? null : color.toLowerCase(Locale.ROOT);
+    if (canChangeFill(box) && !Objects.equals(box.fill, normalized)) {
+      box.fill = normalized;
+      publish();
+    }
   }
 
   /** Puts a blank row after the last tagged value of the class, for a new tagged value to be typed into. It is part

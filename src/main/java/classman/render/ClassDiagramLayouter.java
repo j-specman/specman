@@ -4,6 +4,7 @@ import classman.model.v001.AbstractBoxModel_V001;
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AttachLineModel_V001;
+import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.NoteModel_V001;
@@ -101,8 +102,20 @@ public class ClassDiagramLayouter {
     private void addAttachTargets(AttachTargetIndex attachTargets, ClassModel_V001 classModel,
                                   Rectangle2D.Double classArea, BoxLayout box) {
         attachTargets.add(classModel.id, new ClassAttachTarget(classArea));
+        if (!classModel.showsAttributes()) {
+            hiddenAttributesLeadToClass(attachTargets, classModel, classArea);
+            return;
+        }
         box.attributeAreasAt(classArea.x, classArea.y).forEach((id, attributeArea) ->
             attachTargets.add(id, new AttributeAttachTarget(attributeArea)));
+    }
+
+    /** What is attached to a hidden attribute is attached to the class instead. */
+    private void hiddenAttributesLeadToClass(AttachTargetIndex attachTargets, ClassModel_V001 classModel,
+                                             Rectangle2D.Double classArea) {
+        for (AttributeModel_V001 attribute : classModel.attributes) {
+            attachTargets.add(attribute.id, new ClassAttachTarget(classArea));
+        }
     }
 
     private Map<AbstractDiagramElementModel_V001, BoxLayout> layoutBoxes(ClassDiagramModel_V001 model) {

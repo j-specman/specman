@@ -20,6 +20,26 @@ public class ClassModel_V001 extends AbstractBoxModel_V001 {
     public ChangeModel_V001 stereotypeElementChange;
     public final List<TaggedValueModel_V001> taggedValues = new ArrayList<>();
     public final List<AttributeModel_V001> attributes = new ArrayList<>();
+    /** The background color of the box as #rrggbb, null for the standard color of classes. */
+    public String fill;
+    /** True if the box doesn't show its attribute compartment, which keeps its attributes. */
+    public boolean attributesHidden;
+
+    /** @return true if a change set added or removed an attribute or one of its infos, or changed one of their texts */
+    public boolean hasMarkedAttributes() {
+        for (AttributeModel_V001 attribute : attributes) {
+            if (attribute.hasMarks()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** @return true if the box shows its attribute compartment: a class or enum does, unless the source hides it. The
+     * marks of a change set must stay visible, so attributes with marks are shown whatever the source says. */
+    public boolean showsAttributes() {
+        return kind.hasAttributes() && (!attributesHidden || hasMarkedAttributes());
+    }
 
     public ClassModel_V001(String name) {
         this(name, ClassKind_V001.CLASS);

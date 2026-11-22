@@ -39,6 +39,15 @@ public class AttributeModel_V001 {
         this.hiddenAttributesMarker = hiddenAttributesMarker;
     }
 
+    /** @return true if a change set added or removed the attribute or one of its infos, or changed a text of them */
+    public boolean hasMarks() {
+        boolean marked = change != null || visibilityChange != null || nameChange != null || typeChange != null;
+        for (InfoModel_V001 info : infos) {
+            marked = marked || info.change != null || info.textChange != null;
+        }
+        return marked;
+    }
+
     public static AttributeModel_V001 hiddenAttributesMarker() {
         return new AttributeModel_V001(null, null, null, new ArrayList<>(), true);
     }

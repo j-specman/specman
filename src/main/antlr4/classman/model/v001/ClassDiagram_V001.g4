@@ -28,6 +28,8 @@ grammar ClassDiagram_V001;
 //     centered on a common axis, default gap between them. Mixing placed and stacked elements is allowed,
 //     collisions are not resolved.
 //   * A class with width=N is N pixels wide; text wraps at spaces. Without width the content decides.
+//   * fill="#rrggbb" in the head gives the class box a background color of its own, the word hideattributes behind it
+//     hides the attribute compartment (the values of an enum); the attributes stay in the source.
 //     The height is always computed.
 //   * A relation without route is a straight line from center to center, clipped at the box borders.
 //   * Route anchors: classId.side@offset, side = top|right|bottom|left, offset in pixels from the start of the
@@ -111,7 +113,7 @@ classDecl
 // stereotype. Like an info of an attribute, a stereotype is a list entry which can be added or removed as a whole,
 // change(removed, yellow), and keeps its text then; or its text can be changed, was(yellow, Old).
 classHead
-    : name nameChange=textChange? classId=ELEMENT_ID? classMark=changeMark? position? widthSpec?
+    : name nameChange=textChange? classId=ELEMENT_ID? classMark=changeMark? position? widthSpec? fillSpec? hideSpec?
       (STEREOTYPE stereotypeChange=textChange? stereotypeId=ELEMENT_ID? stereotypeMark=changeMark?)? taggedValues?
     ;
 
@@ -178,6 +180,16 @@ position
 
 widthSpec
     : WIDTH EQUALS NUMBER
+    ;
+
+// A background color of the class box of its own, as a string "#rrggbb", which the parser checks.
+fillSpec
+    : FILL EQUALS QUOTED_STRING
+    ;
+
+// The class box doesn't show its attribute compartment (the values of an enum). The attributes stay in the model.
+hideSpec
+    : HIDEATTRIBUTES
     ;
 
 // change(added, yellow): a change set added the element, or change(removed, blue): it removed the element, which
@@ -302,7 +314,7 @@ word
     : NAME
     | HEX_ID
     | CLASSDIAGRAM | CLASS | INTERFACE | ENUM | ASSOCCLASS | ASSOCIATION | AGGREGATION | COMPOSITION | EXTENDS | IMPLEMENTS
-    | NOTE | ROUTE | ANCHOR | CHANGE | WAS | AT | WIDTH | TOP | RIGHT | BOTTOM | LEFT | CENTER
+    | NOTE | ROUTE | ANCHOR | CHANGE | WAS | AT | WIDTH | FILL | HIDEATTRIBUTES | TOP | RIGHT | BOTTOM | LEFT | CENTER
     ;
 
 // ============================================================
@@ -326,6 +338,8 @@ WAS          : 'was' ;
 CHANGE       : 'change' ;
 AT           : 'at' ;
 WIDTH        : 'width' ;
+FILL         : 'fill' ;
+HIDEATTRIBUTES : 'hideattributes' ;
 TOP          : 'top' ;
 RIGHT        : 'right' ;
 BOTTOM       : 'bottom' ;

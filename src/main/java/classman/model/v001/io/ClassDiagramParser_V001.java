@@ -41,6 +41,7 @@ import classman.model.v001.ClassDiagram_V001Parser.PositionContext;
 import classman.model.v001.ClassDiagram_V001Parser.RelationContext;
 import classman.model.v001.ClassDiagram_V001Parser.AttachRouteContext;
 import classman.model.v001.ClassDiagram_V001Parser.AssocClassLinkContext;
+import classman.model.v001.ClassDiagram_V001Parser.FillSpecContext;
 import classman.model.v001.ClassDiagram_V001Parser.RouteContext;
 import classman.model.v001.ClassDiagram_V001Parser.TaggedValueContext;
 import classman.model.v001.ClassDiagram_V001Parser.TextChangeContext;
@@ -69,9 +70,11 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 /** Reads the text of a class diagram, see ClassDiagram_V001.g4, into the model. */
 public class ClassDiagramParser_V001 {
+    private static final Pattern FILL_COLOR = Pattern.compile("#[0-9a-fA-F]{6}");
 
     /** @throws ClassDiagramParseException if the content has a syntax error, or two attributes in one line. */
     public ClassDiagramModel_V001 parse(String content) throws ClassDiagramParseException {
@@ -126,6 +129,8 @@ public class ClassDiagramParser_V001 {
         model.change = change(head.classMark);
         model.position = position(head.position());
         model.width = width(head.widthSpec());
+        model.fill = fill(head.fillSpec());
+        model.attributesHidden = head.hideSpec() != null;
         model.stereotype = stereotype(head.STEREOTYPE());
         model.stereotypeId = id(head.stereotypeId);
         model.stereotypeChange = textChange(head.stereotypeChange);
@@ -426,6 +431,19 @@ public class ClassDiagramParser_V001 {
 
     private PositionModel_V001 position(TerminalNode x, TerminalNode y) {
         return new PositionModel_V001(Integer.parseInt(x.getText()), Integer.parseInt(y.getText()));
+    }
+
+    private String fill(FillSpecContext spec) throws ClassDiagramParseException {
+        if (spec == null) {
+            return null;
+        }
+        String color = unquote(spec.QUOTED_STRING().getText());
+        if (!FILL_COLOR.matcher(color).matches()) {
+            Token token = spec.QUOTED_STRING().getSymbol();
+            throw new ClassDiagramParseException("line " + token.getLine() + ":" + token.getCharPositionInLine()
+                + " The fill of a class must be a color written \"#rrggbb\".");
+        }
+        return color.toLowerCase(Locale.ROOT);
     }
 
     private Integer width(WidthSpecContext width) {

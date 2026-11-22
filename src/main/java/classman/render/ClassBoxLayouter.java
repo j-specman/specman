@@ -57,7 +57,9 @@ public class ClassBoxLayouter {
         String derivedStereotype = showsDerivedStereotype ? stereotypeText(model.kind.derivedStereotype) : null;
         String stereotype = model.stereotype == null ? null : stereotypeText(model.stereotype);
         List<MarkedText> taggedValues = taggedValueTexts(model);
-        List<MarkedText> attributes = attributeTexts(model);
+        boolean showsAttributes = model.showsAttributes();
+        List<MarkedText> attributes = showsAttributes ? attributeTexts(model) : List.of();
+        String fill = model.fill != null ? model.fill : CLASS_FILL;
         double contentWidth = contentWidth(model, derivedStereotype, stereotype, taggedValues, attributes);
         double width = contentWidth + 2 * PADDING_X;
 
@@ -89,7 +91,7 @@ public class ClassBoxLayouter {
         y += PADDING_Y;
         Map<String, Rectangle2D.Double> attributeAreas = new LinkedHashMap<>();
         Map<AttributeModel_V001, Rectangle2D.Double> lineAreas = new LinkedHashMap<>();
-        if (model.kind.hasAttributes()) {
+        if (showsAttributes) {
             elements.add(new SceneLine(0, y, width, y, false, lineColor, STROKE_WIDTH));
             y += PADDING_Y;
             y = addAttributes(elements, backgrounds, overlays, model, attributes, width, y, attributeAreas, lineAreas,
@@ -107,7 +109,7 @@ public class ClassBoxLayouter {
         if (change != null) {
             all.add(frame(width, y, change));
         }
-        all.add(new SceneRectangle(0, 0, width, y, isRemoved ? veiled(CLASS_FILL) : CLASS_FILL, lineColor));
+        all.add(new SceneRectangle(0, 0, width, y, isRemoved ? veiled(fill) : fill, lineColor));
         all.addAll(backgrounds);
         all.addAll(elements);
         all.addAll(overlays);

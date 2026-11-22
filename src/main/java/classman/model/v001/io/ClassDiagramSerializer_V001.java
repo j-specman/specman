@@ -94,6 +94,12 @@ public class ClassDiagramSerializer_V001 {
         appendChange(out, classModel.change);
         appendPosition(out, classModel.position);
         appendWidth(out, classModel.width);
+        if (classModel.fill != null) {
+            out.append(" fill=").append(quoted(classModel.fill));
+        }
+        if (classModel.attributesHidden) {
+            out.append(" hideattributes");
+        }
         if (classModel.stereotype != null) {
             out.append(" <<").append(classModel.stereotype).append(">>");
             appendTextChange(out, classModel.stereotypeChange);

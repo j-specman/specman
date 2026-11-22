@@ -56,7 +56,7 @@ class ClassContextMenuTest {
   }
 
   private List<JMenuItem> entries() {
-    ClassContextMenu menu = new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, () -> { });
+    ClassContextMenu menu = new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, start -> null, () -> { });
     List<JMenuItem> items = new ArrayList<>();
     for (java.awt.Component component : menu.getComponents()) {
       if (component instanceof JMenuItem item) {
@@ -125,7 +125,8 @@ class ClassContextMenuTest {
 
     List<JMenuItem> entries = entries();
 
-    assertEquals(List.of("Add stereotype", "Add tagged value", "Add attribute", "Automatic width"),
+    assertEquals(List.of("Add stereotype", "Add tagged value", "Add attribute", "Background color...", "Standard color",
+      "Show attributes", "Automatic width"),
       entries.stream().map(JMenuItem::getText).toList());
     assertTrue(entries.get(0).isEnabled());
     assertTrue(entries.get(1).isEnabled());
@@ -150,13 +151,13 @@ class ClassContextMenuTest {
   void automaticWidthEntry() throws Exception {
     open(BARE);
     editing.selectAt(insideClass());
-    JMenuItem automatic = entries().get(3);
+    JMenuItem automatic = entries().get(6);
     assertTrue(((javax.swing.JCheckBoxMenuItem) automatic).isSelected());
     assertFalse(automatic.isEnabled());
 
     open("classdiagram {\n  class A (11111111) at(10, 60) width=200\n}");
     editing.selectAt(insideClass());
-    automatic = entries().get(3);
+    automatic = entries().get(6);
     assertFalse(((javax.swing.JCheckBoxMenuItem) automatic).isSelected());
     assertTrue(automatic.isEnabled());
 

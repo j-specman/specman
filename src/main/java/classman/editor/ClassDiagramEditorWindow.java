@@ -5,6 +5,7 @@ import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 
+import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPopupMenu;
@@ -13,6 +14,7 @@ import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
@@ -155,12 +157,17 @@ public class ClassDiagramEditorWindow extends JDialog {
       menu = new LineEndContextMenu(editing, end, texts, this::showDiagram);
     }
     else if (editing.selectedClass() != null) {
-      menu = new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, this::showDiagram);
+      menu = new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, this::pickColor,
+        this::showDiagram);
     }
     else {
       menu = new NoteContextMenu(editing, editing.selectedNote(), texts, this::showDiagram);
     }
     menu.show(canvas, where.x, where.y);
+  }
+
+  private Color pickColor(Color start) {
+    return JColorChooser.showDialog(this, texts.get("menu.class.color.title"), start);
   }
 
   private void relationToolToggled(RelationType_V001 type) {
