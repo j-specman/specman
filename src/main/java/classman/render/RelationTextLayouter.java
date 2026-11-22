@@ -26,18 +26,20 @@ public class RelationTextLayouter {
     private final TextMeasurer measurer;
     private final LabelPlacement labelPlacement;
     private final MultiplicityPlacement multiplicityPlacement;
+    private final ManualTextPlacement manualPlacement;
 
     public RelationTextLayouter(TextMeasurer measurer) {
         this.measurer = measurer;
         this.labelPlacement = new LabelPlacement(measurer);
         this.multiplicityPlacement = new MultiplicityPlacement(measurer);
+        this.manualPlacement = new ManualTextPlacement(measurer);
     }
 
     /** @param boxes the areas of all boxes of the diagram, which the texts keep clear of */
     public RelationTexts texts(AbstractRelationModel_V001 relation, List<Point2D.Double> path,
                                Collection<Rectangle2D.Double> boxes) {
         return placeAll(new TextObstacles(boxes, path), path, fromMultiplicity(relation), toMultiplicity(relation),
-            relation.label);
+            new RelationText(relation.label, relation.labelPlace));
     }
 
     /** @return where the texts would stand which the relation doesn't have yet, laid out with sample texts: a label
@@ -52,17 +54,27 @@ public class RelationTextLayouter {
         obstacles = with(obstacles, real.labelLines);
         boolean hasMultiplicities = relation instanceof AssociationRelationModel_V001;
         return placeAll(obstacles, path,
-            hasMultiplicities && isMissing(fromMultiplicity(relation)) ? DiagramStyle.MULTIPLICITY_PLACEHOLDER : null,
-            hasMultiplicities && isMissing(toMultiplicity(relation)) ? DiagramStyle.MULTIPLICITY_PLACEHOLDER : null,
-            isMissing(relation.label) ? DiagramStyle.LABEL_PLACEHOLDER : null);
+            placeholder(hasMultiplicities && isMissing(fromMultiplicity(relation).text),
+                DiagramStyle.MULTIPLICITY_PLACEHOLDER),
+            placeholder(hasMultiplicities && isMissing(toMultiplicity(relation).text),
+                DiagramStyle.MULTIPLICITY_PLACEHOLDER),
+            placeholder(isMissing(relation.label), DiagramStyle.LABEL_PLACEHOLDER));
     }
 
-    private static String fromMultiplicity(AbstractRelationModel_V001 relation) {
-        return relation instanceof AssociationRelationModel_V001 association ? association.fromMultiplicity : null;
+    private static RelationText placeholder(boolean needed, String sampleText) {
+        return new RelationText(needed ? sampleText : null, null);
     }
 
-    private static String toMultiplicity(AbstractRelationModel_V001 relation) {
-        return relation instanceof AssociationRelationModel_V001 association ? association.toMultiplicity : null;
+    private static RelationText fromMultiplicity(AbstractRelationModel_V001 relation) {
+        return relation instanceof AssociationRelationModel_V001 association
+            ? new RelationText(association.fromMultiplicity, association.fromMultiplicityPlace)
+            : new RelationText(null, null);
+    }
+
+    private static RelationText toMultiplicity(AbstractRelationModel_V001 relation) {
+        return relation instanceof AssociationRelationModel_V001 association
+            ? new RelationText(association.toMultiplicity, association.toMultiplicityPlace)
+            : new RelationText(null, null);
     }
 
     private static boolean isMissing(String text) {
@@ -71,14 +83,14 @@ public class RelationTextLayouter {
 
     /** Places the multiplicities, which are closest to the ends of the line, first, then the label. A text which is
      * null or empty isn't placed. */
-    private RelationTexts placeAll(TextObstacles start, List<Point2D.Double> path, String fromMultiplicity,
-                                   String toMultiplicity, String label) {
+    private RelationTexts placeAll(TextObstacles start, List<Point2D.Double> path, RelationText fromMultiplicity,
+                                   RelationText toMultiplicity, RelationText label) {
         TextObstacles obstacles = start;
-        SceneText from = multiplicity(fromMultiplicity, path.get(0), path.get(1), obstacles);
+        SceneText from = multiplicity(fromMultiplicity, path, true, obstacles);
         obstacles = with(obstacles, listOf(from));
-        SceneText to = multiplicity(toMultiplicity, path.get(path.size() - 1), path.get(path.size() - 2), obstacles);
+        SceneText to = multiplicity(toMultiplicity, path, false, obstacles);
         obstacles = with(obstacles, listOf(to));
-        List<SceneText> labelLines = isMissing(label) ? List.of() : label(label, path, obstacles);
+        List<SceneText> labelLines = label.isMissing() ? List.of() : label(label, path, obstacles);
         return new RelationTexts(from, to, labelLines);
     }
 
@@ -91,11 +103,17 @@ public class RelationTextLayouter {
         return text == null ? List.of() : List.of(text);
     }
 
-    private SceneText multiplicity(String multiplicity, Point2D.Double border, Point2D.Double inside,
+    private SceneText multiplicity(RelationText text, List<Point2D.Double> path, boolean atStart,
                                    TextObstacles obstacles) {
-        if (isMissing(multiplicity)) {
+        if (text.isMissing()) {
             return null;
         }
+        if (text.place != null) {
+            return manualPlacement.multiplicity(text.text, text.place, path, atStart);
+        }
+        String multiplicity = text.text;
+        Point2D.Double border = atStart ? path.get(0) : path.get(path.size() - 1);
+        Point2D.Double inside = atStart ? path.get(1) : path.get(path.size() - 2);
         double width = measurer.width(multiplicity, false);
         boolean leavesSideways = leavesSideways(border, inside, obstacles, width);
         List<List<SceneText>> candidates = new ArrayList<>();
@@ -134,7 +152,11 @@ public class RelationTextLayouter {
         return other ? List.of(LineSide.OTHER, LineSide.USUAL) : List.of(LineSide.USUAL, LineSide.OTHER);
     }
 
-    private List<SceneText> label(String label, List<Point2D.Double> path, TextObstacles obstacles) {
+    private List<SceneText> label(RelationText text, List<Point2D.Double> path, TextObstacles obstacles) {
+        if (text.place != null) {
+            return manualPlacement.label(text.text, text.place, path);
+        }
+        String label = text.text;
         List<List<SceneText>> candidates = new ArrayList<>();
         for (int segment : PathGeometry.segmentsByLength(path)) {
             for (double along : LABEL_PLACES_ALONG) {

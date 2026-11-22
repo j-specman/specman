@@ -19,6 +19,7 @@ import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RouteModel_V001;
 import classman.model.v001.TaggedValueModel_V001;
 import classman.model.v001.TextChangeModel_V001;
+import classman.model.v001.TextPlaceModel_V001;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 
@@ -203,9 +204,11 @@ public class ClassDiagramSerializer_V001 {
         appendChange(out, relation.change);
         out.append(' ').append(relation.fromId);
         if (relation instanceof AssociationRelationModel_V001 association) {
-            appendMultiplicity(out, association.fromMultiplicity, association.fromMultiplicityChange);
+            appendMultiplicity(out, association.fromMultiplicity, association.fromMultiplicityChange,
+                association.fromMultiplicityPlace);
             out.append(arrowToken(association));
-            appendMultiplicity(out, association.toMultiplicity, association.toMultiplicityChange);
+            appendMultiplicity(out, association.toMultiplicity, association.toMultiplicityChange,
+                association.toMultiplicityPlace);
         } else {
             out.append(" ->");
         }
@@ -213,6 +216,10 @@ public class ClassDiagramSerializer_V001 {
         if (relation.label != null || relation.labelChange != null) {
             out.append(' ').append(quoted(relation.label == null ? "" : relation.label));
             appendTextChange(out, relation.labelChange);
+            if (relation.labelPlace != null) {
+                out.append(" at(").append(relation.labelPlace.along).append("%, ").append(relation.labelPlace.across)
+                    .append(')');
+            }
         }
         out.append('\n');
         if (relation.route != null) {
@@ -220,11 +227,15 @@ public class ClassDiagramSerializer_V001 {
         }
     }
 
-    private void appendMultiplicity(StringBuilder out, String multiplicity, TextChangeModel_V001 change) {
+    private void appendMultiplicity(StringBuilder out, String multiplicity, TextChangeModel_V001 change,
+                                    TextPlaceModel_V001 place) {
         if (multiplicity != null || change != null) {
             String text = multiplicity == null ? "" : multiplicity;
             out.append(' ').append(Multiplicity_V001.isBare(text) ? text : quoted(text));
             appendTextChange(out, change);
+            if (place != null) {
+                out.append(" at(").append(place.along).append(", ").append(place.across).append(')');
+            }
         }
     }
 

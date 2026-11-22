@@ -75,6 +75,83 @@ public final class PathGeometry {
         return textWidth * dy * dy <= textHeight * dx * dx;
     }
 
+    /** The point which lies the given distance along the path from its start, the distance limited to the path. */
+    public static Point2D.Double pointAtDistance(List<? extends Point2D> path, double distance) {
+        double wanted = Math.max(0, Math.min(length(path), distance));
+        double passed = 0;
+        for (int i = 0; i < path.size() - 1; i++) {
+            Point2D from = path.get(i);
+            Point2D to = path.get(i + 1);
+            double segment = from.distance(to);
+            if (passed + segment >= wanted && segment > 0) {
+                double part = (wanted - passed) / segment;
+                return new Point2D.Double(from.getX() + part * (to.getX() - from.getX()),
+                    from.getY() + part * (to.getY() - from.getY()));
+            }
+            passed += segment;
+        }
+        return new Point2D.Double(path.get(0).getX(), path.get(0).getY());
+    }
+
+    /** The middle of a text which stands the given distance along the path from its start and the given distance
+     * across it, left of the line if that is positive, seen in the direction of the path. */
+    public static Point2D.Double pointBeside(List<? extends Point2D> path, double distance, double across) {
+        Point2D.Double onLine = pointAtDistance(path, distance);
+        Point2D.Double direction = directionAtDistance(path, distance);
+        return new Point2D.Double(onLine.x + direction.y * across, onLine.y - direction.x * across);
+    }
+
+    /** The unit vector in which the path runs at the given distance from its start, in the part which the distance
+     * falls into, in the last one for a distance beyond the path. A path without length runs to the right. */
+    public static Point2D.Double directionAtDistance(List<? extends Point2D> path, double distance) {
+        double wanted = Math.max(0, distance);
+        double passed = 0;
+        Point2D.Double last = new Point2D.Double(1, 0);
+        for (int i = 0; i < path.size() - 1; i++) {
+            Point2D from = path.get(i);
+            Point2D to = path.get(i + 1);
+            double segment = from.distance(to);
+            if (segment == 0) {
+                continue;
+            }
+            last = new Point2D.Double((to.getX() - from.getX()) / segment, (to.getY() - from.getY()) / segment);
+            if (passed + segment >= wanted) {
+                return last;
+            }
+            passed += segment;
+        }
+        return last;
+    }
+
+    /** Where the point stands in relation to the path: the distance along it of its closest point, and the distance
+     * from the line, left of the line if it is positive, seen in the direction of the path. */
+    public static PathSpot spotNear(List<? extends Point2D> path, Point2D point) {
+        double closestDistance = Double.MAX_VALUE;
+        PathSpot spot = new PathSpot(0, 0);
+        double passed = 0;
+        for (int i = 0; i < path.size() - 1; i++) {
+            Point2D from = path.get(i);
+            Point2D to = path.get(i + 1);
+            double segment = from.distance(to);
+            if (segment == 0) {
+                continue;
+            }
+            double part = projection(from, to, point, segment);
+            double nearX = from.getX() + part * (to.getX() - from.getX());
+            double nearY = from.getY() + part * (to.getY() - from.getY());
+            double distance = Math.hypot(point.getX() - nearX, point.getY() - nearY);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                double leftX = (to.getY() - from.getY()) / segment;
+                double leftY = -(to.getX() - from.getX()) / segment;
+                spot = new PathSpot(passed + part * segment,
+                    (point.getX() - nearX) * leftX + (point.getY() - nearY) * leftY);
+            }
+            passed += segment;
+        }
+        return spot;
+    }
+
     /** The point which lies the given percent of the length of the path from its start, the percent limited to 0 to 100. */
     public static Point2D.Double pointAlong(List<? extends Point2D> path, double percent) {
         double wanted = Math.max(0, Math.min(100, percent)) / 100 * length(path);
@@ -124,7 +201,8 @@ public final class PathGeometry {
         return Math.max(0, Math.min(1, along));
     }
 
-    private static double length(List<? extends Point2D> path) {
+    /** The length of the path. */
+    public static double length(List<? extends Point2D> path) {
         double length = 0;
         for (int i = 0; i < path.size() - 1; i++) {
             length += path.get(i).distance(path.get(i + 1));

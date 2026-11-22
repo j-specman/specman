@@ -112,7 +112,8 @@ class PointerControl implements PointerListener {
     editing.selectAt(at, toDiagramLength.applyAsDouble(HIT_PIXELS));
     showDiagram.run();
     boolean onEndHandle = editing.endHandleAt(at, toDiagramLength.applyAsDouble(HIT_PIXELS)) != null;
-    if (editing.selectedClass() != null || editing.selectedNote() != null || onEndHandle) {
+    boolean onMovableText = editing.movableTextAt(at) != null;
+    if (editing.selectedClass() != null || editing.selectedNote() != null || onEndHandle || onMovableText) {
       showContextMenu.accept(at);
     }
   }

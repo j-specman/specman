@@ -29,6 +29,8 @@ public final class DiagramStyle {
     public static final double MULTIPLICITY_ALONG_GAP = 6;
     public static final double MULTIPLICITY_BORDER_GAP = 5;
     public static final double LABEL_GAP = 6;
+    /** How far a text which the user has moved may stand from its line before the editor shows a thin dashed line which joins it to it while the relation is selected. */
+    public static final double TEXT_LEADER_DISTANCE = 30;
     /** The texts whose size gives the editor the size of the places where a relation could get a label or a
      * multiplicity. They are not shown. */
     public static final String LABEL_PLACEHOLDER = "label";

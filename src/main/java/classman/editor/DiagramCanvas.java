@@ -18,6 +18,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
@@ -140,6 +141,7 @@ class DiagramCanvas extends JPanel implements Scrollable {
       paintSelection(g);
       paintConnectionLine(g);
       paintPlaceholders(g);
+      paintLeaders(g);
       paintHandles(g);
     }
     finally {
@@ -184,6 +186,17 @@ class DiagramCanvas extends JPanel implements Scrollable {
       g.setColor(selectionColor());
       g.setStroke(new BasicStroke((float) (1 / zoom), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10, dashes, 0));
       g.draw(outline);
+    }
+  }
+
+  /** Thin dashed lines in the color of the selection from the texts of a selected relation which stand far from its line
+   * to the line, as thin and with as long dashes on the screen at every zoom. */
+  private void paintLeaders(Graphics2D g) {
+    float[] dashes = {(float) (PLACEHOLDER_DASH / zoom), (float) (PLACEHOLDER_DASH / zoom)};
+    g.setColor(selectionColor());
+    g.setStroke(new BasicStroke((float) (1 / zoom), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10, dashes, 0));
+    for (Line2D leader : marks.leaders) {
+      g.draw(leader);
     }
   }
 

@@ -15,6 +15,8 @@ class SelectionMarks {
   final List<Point2D> handles;
   /** The places of the texts which a selected relation could get, marked by dashed rectangles. */
   final List<Rectangle2D> placeholders;
+  /** The thin dashed lines which join the texts of a selected relation which the user has moved far away to its line. */
+  final List<Line2D> leaders;
   /** The fill of the places while changes are tracked, the pale color of the change set, null otherwise. */
   final Color placeholderFill;
   /** The line of a relation which is being drawn, null if none is. */
@@ -22,17 +24,18 @@ class SelectionMarks {
   /** The color of the frames if the usual one can't be told from what is selected, null otherwise. */
   final Color specialColor;
 
-  SelectionMarks(List<Rectangle2D> frames, List<Point2D> handles, List<Rectangle2D> placeholders,
+  SelectionMarks(List<Rectangle2D> frames, List<Point2D> handles, List<Rectangle2D> placeholders, List<Line2D> leaders,
                  Color placeholderFill, Line2D connectionLine, Color specialColor) {
     this.frames = List.copyOf(frames);
     this.handles = List.copyOf(handles);
     this.placeholders = List.copyOf(placeholders);
+    this.leaders = List.copyOf(leaders);
     this.placeholderFill = placeholderFill;
     this.connectionLine = connectionLine;
     this.specialColor = specialColor;
   }
 
   static SelectionMarks none() {
-    return new SelectionMarks(List.of(), List.of(), List.of(), null, null, null);
+    return new SelectionMarks(List.of(), List.of(), List.of(), List.of(), null, null, null);
   }
 }

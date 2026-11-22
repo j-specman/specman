@@ -4,6 +4,7 @@ import classman.model.v001.ClassKind_V001;
 import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.io.ClassDiagramParseException;
+import classman.render.SceneTextArea;
 
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
@@ -153,8 +154,12 @@ public class ClassDiagramEditorWindow extends JDialog {
     Rectangle where = canvas.toCanvas(new Rectangle2D.Double(at.getX(), at.getY(), 0, 0));
     RelationEnd_V001 end = editing.endHandleAt(at, canvas.toDiagramLength(PointerControl.HIT_PIXELS));
     JPopupMenu menu;
+    SceneTextArea text = editing.movableTextAt(at);
     if (end != null) {
       menu = new LineEndContextMenu(editing, end, texts, this::showDiagram);
+    }
+    else if (text != null) {
+      menu = new TextContextMenu(editing, text, texts, this::showDiagram);
     }
     else if (editing.selectedClass() != null) {
       menu = new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, this::pickColor,

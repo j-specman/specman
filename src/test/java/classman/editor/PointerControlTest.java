@@ -87,7 +87,8 @@ class PointerControlTest {
     assertFalse(editing.canUndo());
   }
 
-  /** A double click on the label of a relation starts the editor for it, although no box is selected. */
+  /** A double click on the label of a relation starts the editor for it, and selects the relation, as a press on its
+   * text does. */
   @Test
   void doubleClickOnRelationLabel() throws ClassDiagramParseException {
     open("classdiagram {\n  class A (11111111) at(10, 20)\n  class B (22222222) at(300, 20)\n"
@@ -101,7 +102,7 @@ class PointerControlTest {
     control.doubleClicked(new Point2D.Double(label.getCenterX(), label.getCenterY()));
 
     assertEquals(1, nameEdits.get());
-    assertFalse(editing.hasSelection());
+    assertTrue(editing.isRelationSelected());
   }
 
   /** A double click on the name of a class starts the name editor. */

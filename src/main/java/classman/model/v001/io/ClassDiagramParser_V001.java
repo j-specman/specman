@@ -33,6 +33,7 @@ import classman.model.v001.ClassDiagram_V001Parser.InfoContext;
 import classman.model.v001.ClassDiagram_V001Parser.InfoTextContext;
 import classman.model.v001.ClassDiagram_V001Parser.InfosContext;
 import classman.model.v001.ClassDiagram_V001Parser.LinePointContext;
+import classman.model.v001.ClassDiagram_V001Parser.LabelPositionContext;
 import classman.model.v001.ClassDiagram_V001Parser.MultiplicityContext;
 import classman.model.v001.ClassDiagram_V001Parser.NameContext;
 import classman.model.v001.ClassDiagram_V001Parser.AttachAnchorContext;
@@ -54,6 +55,7 @@ import classman.model.v001.ImplementsRelationModel_V001;
 import classman.model.v001.InfoModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
+import classman.model.v001.TextPlaceModel_V001;
 import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.RouteModel_V001;
@@ -267,6 +269,8 @@ public class ClassDiagramParser_V001 {
         model.toMultiplicity = multiplicity(ctx.toMultiplicity);
         model.fromMultiplicityChange = textChange(ctx.fromMultiplicityChange);
         model.toMultiplicityChange = textChange(ctx.toMultiplicityChange);
+        model.fromMultiplicityPlace = place(ctx.fromPlace);
+        model.toMultiplicityPlace = place(ctx.toPlace);
         model.fromArrow = ctx.BACK_ARROW() != null || ctx.BOTH_ARROW() != null;
         model.toArrow = ctx.ARROW() != null || ctx.BOTH_ARROW() != null;
         if (model.fromArrow && !type.canHaveArrowAt(RelationEnd_V001.FROM)) {
@@ -274,31 +278,39 @@ public class ClassDiagramParser_V001 {
             throw new ClassDiagramParseException("line " + token.getLine() + ":" + token.getCharPositionInLine()
                 + " The source of an " + type.name().toLowerCase(Locale.ROOT) + " has the diamond and no arrowhead.");
         }
-        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.route());
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.labelPlace, ctx.route());
         return model;
     }
 
     private ExtendsRelationModel_V001 buildExtends(ExtendsRelationContext ctx) throws ClassDiagramParseException {
         ExtendsRelationModel_V001 model = new ExtendsRelationModel_V001(ctx.from.getText(), ctx.to.getText());
-        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.route());
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.labelPlace, ctx.route());
         return model;
     }
 
     private ImplementsRelationModel_V001 buildImplements(ImplementsRelationContext ctx)
             throws ClassDiagramParseException {
         ImplementsRelationModel_V001 model = new ImplementsRelationModel_V001(ctx.from.getText(), ctx.to.getText());
-        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.route());
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.labelPlace, ctx.route());
         return model;
     }
 
     private void fillCommon(AbstractRelationModel_V001 model, TerminalNode id, ChangeMarkContext changeMark, Token label,
-                            TextChangeContext labelChange,
+                            TextChangeContext labelChange, LabelPositionContext labelPlace,
                             RouteContext route) throws ClassDiagramParseException {
         model.id = id(id);
         model.change = change(changeMark);
         model.label = label == null ? null : unquote(label.getText());
         model.labelChange = textChange(labelChange);
+        model.labelPlace = labelPlace == null ? null
+            : new TextPlaceModel_V001(Integer.parseInt(labelPlace.NUMBER(0).getText()),
+                Integer.parseInt(labelPlace.NUMBER(1).getText()));
         model.route = route == null ? null : buildRoute(route);
+    }
+
+    private TextPlaceModel_V001 place(PositionContext position) {
+        return position == null ? null : new TextPlaceModel_V001(Integer.parseInt(position.NUMBER(0).getText()),
+            Integer.parseInt(position.NUMBER(1).getText()));
     }
 
     private String multiplicity(MultiplicityContext multiplicity) {

@@ -34,6 +34,10 @@ grammar ClassDiagram_V001;
 //   * An attribute which ends with (hidden) is not shown: the attribute compartment ends with a line "..." instead,
 //     in the color of the first change set which marked one of the hidden attributes.
 //   * A relation without route is a straight line from center to center, clipped at the box borders.
+//   * The label and the multiplicities of a relation stand where the layout puts them, unless a position is given:
+//     label "owns" at(40%, -12) and composition 04de91aa 1 at(14, -8) -> * b7c20f13. The label is at 40 percent of the
+//     length of the route, the multiplicity 14 units along the route from its end, both 12 or 8 units to the left
+//     of the line (negative) seen from the source to the target; the middle of the text stands there.
 //   * Route anchors: classId.side@offset, side = top|right|bottom|left, offset in pixels from the start of the
 //     side (left end of top/bottom, upper end of left/right), clamped to the side's length. Waypoints are
 //     absolute pixel points.
@@ -222,17 +226,26 @@ relation
     ;
 
 associationRelation
-    : type=(ASSOCIATION | AGGREGATION | COMPOSITION) ELEMENT_ID? changeMark? from=HEX_ID (fromMultiplicity=multiplicity fromMultiplicityChange=textChange?)?
-      (ARROW | LINE | BACK_ARROW | BOTH_ARROW) (toMultiplicity=multiplicity toMultiplicityChange=textChange?)? to=HEX_ID
-      (label=QUOTED_STRING labelChange=textChange?)? route?
+    : type=(ASSOCIATION | AGGREGATION | COMPOSITION) ELEMENT_ID? changeMark? from=HEX_ID (fromMultiplicity=multiplicity fromMultiplicityChange=textChange? fromPlace=position?)?
+      (ARROW | LINE | BACK_ARROW | BOTH_ARROW) (toMultiplicity=multiplicity toMultiplicityChange=textChange? toPlace=position?)? to=HEX_ID
+      (label=QUOTED_STRING labelChange=textChange? labelPlace=labelPosition?)? route?
     ;
 
 extendsRelation
-    : EXTENDS ELEMENT_ID? changeMark? from=HEX_ID ARROW to=HEX_ID (label=QUOTED_STRING labelChange=textChange?)? route?
+    : EXTENDS ELEMENT_ID? changeMark? from=HEX_ID ARROW to=HEX_ID (label=QUOTED_STRING labelChange=textChange? labelPlace=labelPosition?)? route?
     ;
 
 implementsRelation
-    : IMPLEMENTS ELEMENT_ID? changeMark? from=HEX_ID ARROW to=HEX_ID (label=QUOTED_STRING labelChange=textChange?)? route?
+    : IMPLEMENTS ELEMENT_ID? changeMark? from=HEX_ID ARROW to=HEX_ID (label=QUOTED_STRING labelChange=textChange? labelPlace=labelPosition?)? route?
+    ;
+
+// A relation label which the user has moved: at(40%, -12) is 40 percent of the length of the route from its start, 12
+// units to the right of the line seen from the source to the target (a negative number is left of it). A multiplicity
+// which the user has moved has an at(14, -8) behind its text (and its change mark): 14 units along the route from the
+// end where it belongs, 8 units left of the line. Both give where the middle of the text stands. A text without it is
+// placed by the layout.
+labelPosition
+    : AT LPAREN NUMBER PERCENT COMMA NUMBER RPAREN
     ;
 
 multiplicity

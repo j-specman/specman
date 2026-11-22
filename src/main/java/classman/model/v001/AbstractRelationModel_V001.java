@@ -13,6 +13,8 @@ public abstract class AbstractRelationModel_V001 extends AbstractDiagramElementM
     public String label;
     /** Null if no change set changed the label. A removed label is the empty string with the mark. */
     public TextChangeModel_V001 labelChange;
+    /** Null if the layout places the label. Only for a label which exists. */
+    public TextPlaceModel_V001 labelPlace;
     /** Null if the relation is a straight line from center to center. */
     public RouteModel_V001 route;
 

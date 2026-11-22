@@ -34,12 +34,15 @@ import classman.render.SceneRelationLine;
 import classman.render.SceneElementArea;
 import classman.render.SceneTextArea;
 import classman.render.TextKind;
+import classman.render.TextLeaders;
 
 import java.awt.Color;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -155,7 +158,8 @@ public class DiagramEditing {
    * relation selected. The dashed line of a note, its anchor, is selected like the line of a relation. A point at the left or right side of a class, where its width is changed, selects the class,
    * also if the point is a little outside of it. */
   public void selectAt(Point2D point, double tolerance) {
-    if (handleIndexAt(point, tolerance) >= 0 || selectedPlaceholderAt(point) != null) {
+    if (handleIndexAt(point, tolerance) >= 0 || selectedPlaceholderAt(point) != null
+        || movableTextAt(point) != null) {
       return;
     }
     ResizeTarget edge = resizeTargetAt(point, tolerance);
@@ -166,6 +170,12 @@ public class DiagramEditing {
     SceneElementArea hit = scene.elementAreaAt(point);
     if (hit != null) {
       selected = hit.element;
+      return;
+    }
+    SceneTextArea relationText = scene.textAreaAt(point);
+    if (relationText != null && relationText.element instanceof AbstractRelationModel_V001 relation
+        && TextPlaces.isMovable(relation, relationText.kind)) {
+      selected = relation;
       return;
     }
     SceneConnectionLine line = scene.connectionLineAt(point, tolerance);
@@ -315,7 +325,7 @@ public class DiagramEditing {
     if (connectionTargetArea() != null) {
       frames.add(connectionTargetArea());
     }
-    return new SelectionMarks(frames, selectedHandles(), selectedPlaceholders(), trackedFieldColor(),
+    return new SelectionMarks(frames, selectedHandles(), selectedPlaceholders(), selectedTextLeaders(), trackedFieldColor(),
       drawing != null ? drawing.line() : null, specialSelectionColor());
   }
 
@@ -338,6 +348,29 @@ public class DiagramEditing {
       return text;
     }
     return text == null ? selectedPlaceholderAt(point) : null;
+  }
+
+  /** @return the label or multiplicity of the selected relation at the point, which the user can move, null if there
+   * is none */
+  public SceneTextArea movableTextAt(Point2D point) {
+    SceneTextArea text = scene.textAreaAt(point);
+    boolean movable = text != null && text.element == selected && selected instanceof AbstractRelationModel_V001 relation
+      && TextPlaces.isMovable(relation, text.kind);
+    return movable ? text : null;
+  }
+
+  /** @return true if the user has put the text at a place, so that the layout doesn't place it */
+  public boolean hasFixedPlace(SceneTextArea text) {
+    return TextPlaces.of((AbstractRelationModel_V001) text.element, text.kind) != null;
+  }
+
+  /** Gives the text back to the layout, which places it where it would put it without the user. Not marked as a
+   * change while changes are tracked. One operation. */
+  public void resetPlace(SceneTextArea text) {
+    if (hasFixedPlace(text)) {
+      TextPlaces.set((AbstractRelationModel_V001) text.element, text.kind, null);
+      publish();
+    }
   }
 
   private SceneTextArea selectedPlaceholderAt(Point2D point) {
@@ -462,6 +495,21 @@ public class DiagramEditing {
       }
     }
     return areas;
+  }
+
+  /** @return the lines which join the texts of the selected relation which the user has moved far from its line to the
+   * line, none if no relation is selected */
+  private List<Line2D> selectedTextLeaders() {
+    if (!(selected instanceof AbstractRelationModel_V001 relation) || selectedLine() == null) {
+      return List.of();
+    }
+    Map<TextKind, Rectangle2D> areas = new EnumMap<>(TextKind.class);
+    for (SceneTextArea text : scene.textAreas) {
+      if (text.element == relation) {
+        areas.put(text.kind, text.area);
+      }
+    }
+    return new ArrayList<Line2D>(TextLeaders.of(relation, selectedLine().points(), areas));
   }
 
   /** @return the area of the box which the text belongs to, the area of the text itself if it belongs to a relation */
@@ -766,8 +814,13 @@ public class DiagramEditing {
   public void startDrag(Point2D at, double tolerance) {
     int handle = handleIndexAt(at, tolerance);
     ResizeTarget edge = resizeTargetAt(at, tolerance);
+    SceneTextArea movableText = movableTextAt(at);
     if (handle >= 0) {
       drag = handleDrag(handle, at);
+    }
+    else if (movableText != null) {
+      drag = new TextMoveDrag((AbstractRelationModel_V001) selected, movableText.kind, selectedLine().points(), at,
+        movableText.area);
     }
     else if (edge != null) {
       drag = new BoxResize(edge.box, edge.side, scene, minimumWidthOf(edge.box), positionFreezer());

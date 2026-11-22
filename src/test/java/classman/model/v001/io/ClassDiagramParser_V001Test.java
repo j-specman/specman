@@ -452,6 +452,26 @@ class ClassDiagramParser_V001Test {
     assertTextChange("red", "Alt", diagram.notes().get(0).textChange);
   }
 
+  /** A label and the multiplicities may carry the place where the user has put them. */
+  @Test
+  void textPlaces() throws ClassDiagramParseException {
+    ClassDiagramModel_V001 diagram = parse("""
+        class A (aaaaaaaa)
+        class B (bbbbbbbb)
+        association aaaaaaaa 1 at(14, -8) -> 0..* bbbbbbbb "owns" at(40%, -12)
+        association aaaaaaaa -> bbbbbbbb "plain"
+        """);
+    AssociationRelationModel_V001 placed = (AssociationRelationModel_V001) diagram.relations().get(0);
+    assertEquals(14, placed.fromMultiplicityPlace.along);
+    assertEquals(-8, placed.fromMultiplicityPlace.across);
+    assertNull(placed.toMultiplicityPlace);
+    assertEquals(40, placed.labelPlace.along);
+    assertEquals(-12, placed.labelPlace.across);
+    AssociationRelationModel_V001 plain = (AssociationRelationModel_V001) diagram.relations().get(1);
+    assertNull(plain.labelPlace);
+    assertNull(plain.fromMultiplicityPlace);
+  }
+
   /** The visibility sign of an attribute takes a was mark right behind it, the sign before is the backup. */
   @Test
   void visibilityChange() throws ClassDiagramParseException {

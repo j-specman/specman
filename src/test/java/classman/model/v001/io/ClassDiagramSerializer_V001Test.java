@@ -145,6 +145,22 @@ class ClassDiagramSerializer_V001Test {
     assertTrue(written.contains("aaaaaaaa \"1..<max capacity>\" -> \"a \\\"quoted\\\" one\" bbbbbbbb\n"), written);
   }
 
+  /** The place of a moved label stands behind the label and its mark, the place of a multiplicity behind the
+   * multiplicity and its mark. */
+  @Test
+  void textPlacesWritten() throws ClassDiagramParseException {
+    String written = roundTrip("""
+        classdiagram {
+          class A (aaaaaaaa)
+          class B (bbbbbbbb)
+          association aaaaaaaa 1 at(14, -8) -> 0..* was(blue, 1) at(20, 6) bbbbbbbb "owns" was(yellow) at(40%, -12)
+          extends aaaaaaaa -> bbbbbbbb "is" at(70%, 5)
+        }""");
+    assertTrue(written.contains(
+      "aaaaaaaa 1 at(14, -8) -> 0..* was(blue, 1) at(20, 6) bbbbbbbb \"owns\" was(yellow) at(40%, -12)\n"), written);
+    assertTrue(written.contains("extends aaaaaaaa -> bbbbbbbb \"is\" at(70%, 5)\n"), written);
+  }
+
   /** The mark of a visibility sign stands behind the sign, and the name follows after a blank. */
   @Test
   void visibilityChangeWritten() throws ClassDiagramParseException {
