@@ -17,6 +17,7 @@ public class BoxLayout {
     private final Map<String, Rectangle2D.Double> attributeAreas;
     private final Map<TextKind, Rectangle2D.Double> textAreas;
     private final AttributeLineAreas attributeLines;
+    private final TaggedValueAreas taggedValueRows;
 
     public BoxLayout(double width, double height, List<AbstractSceneElement> elements) {
         this(width, height, elements, Map.of(), 0, Map.of());
@@ -30,15 +31,17 @@ public class BoxLayout {
     public BoxLayout(double width, double height, List<AbstractSceneElement> elements,
                      Map<String, Rectangle2D.Double> attributeAreas, double outset,
                      Map<TextKind, Rectangle2D.Double> textAreas) {
-        this(width, height, elements, attributeAreas, outset, textAreas, AttributeLineAreas.NONE);
+        this(width, height, elements, attributeAreas, outset, textAreas, AttributeLineAreas.NONE, TaggedValueAreas.NONE);
     }
 
     /**
      * @param attributeLines where the lines of the attributes are, which the user can change
+     * @param taggedValueRows where the rows of the tagged values are, which the user can change
      */
     public BoxLayout(double width, double height, List<AbstractSceneElement> elements,
                      Map<String, Rectangle2D.Double> attributeAreas, double outset,
-                     Map<TextKind, Rectangle2D.Double> textAreas, AttributeLineAreas attributeLines) {
+                     Map<TextKind, Rectangle2D.Double> textAreas, AttributeLineAreas attributeLines,
+                     TaggedValueAreas taggedValueRows) {
         this.width = width;
         this.height = height;
         this.outset = outset;
@@ -46,11 +49,17 @@ public class BoxLayout {
         this.attributeAreas = Map.copyOf(attributeAreas);
         this.textAreas = Map.copyOf(textAreas);
         this.attributeLines = attributeLines;
+        this.taggedValueRows = taggedValueRows;
     }
 
     /** The areas of the attribute lines of the class, moved so that the top left corner of the box is at the given point. */
     public List<SceneTextArea> attributeTextAreasAt(ClassModel_V001 owner, double x, double y) {
         return attributeLines.textAreasAt(owner, x, y);
+    }
+
+    /** The areas of the tagged value rows of the class, moved so that the top left corner of the box is at the given point. */
+    public List<SceneTextArea> taggedValueTextAreasAt(ClassModel_V001 owner, double x, double y) {
+        return taggedValueRows.textAreasAt(owner, x, y);
     }
 
     /** The parts of the box, moved so that its top left corner is at the given point. */

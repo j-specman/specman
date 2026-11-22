@@ -64,6 +64,7 @@ public class ClassDiagramLayouter {
             boxes.get(element).textAreasAt(area.x, area.y).forEach((kind, textArea) ->
                 textAreas.add(new SceneTextArea(element, kind, textArea)));
             if (element instanceof ClassModel_V001 classModel) {
+                textAreas.addAll(boxes.get(element).taggedValueTextAreasAt(classModel, area.x, area.y));
                 textAreas.addAll(boxes.get(element).attributeTextAreasAt(classModel, area.x, area.y));
             }
         });

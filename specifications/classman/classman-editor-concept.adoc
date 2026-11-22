@@ -59,12 +59,13 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Edit, add and delete attributes |built |By lines, see <<Attributes>>.
 |Undo and redo |built |Forwarded to Specman's history.
 |Stereotype |built |Existing one: double click, new one: context menu of the class, see <<The Stereotype of a Class>>.
-|Context menu of a class |built |Add stereotype, add attribute, see <<The Context Menu of a Class>>. Tagged values will be the next entry.
-|Tagged values, diagram name |open |
+|Context menu of a class |built |Add stereotype, add tagged value, add attribute, automatic width, see <<The Context Menu of a Class>>.
+|Tagged values |built |One row each, edited as KEY=value or KEY, see <<The Tagged Values of a Class>>.
+|Diagram name |open |
 |Create other element kinds (interface, enum, note, association class) |open |
 |Create an association |built |By a tool: click the button, drag from one class to another, see <<Creating Elements>>. The other relation types (aggregation, composition, inheritance, implementation) are planned, with the same gesture.
 |Move the points of a route |built |Waypoints freely, the ends along the border of their class or hung onto another class (not while changes are tracked), see <<Selecting>>. Adding a waypoint and deleting one (double click on the line and on a handle) too.
-|Create a text which an element doesn't have yet (relation label, multiplicity) |built |Dashed places on the selected relation, see <<Texts Which a Relation Doesn't Have Yet>>. Not yet for tagged values and the diagram name.
+|Create a text which an element doesn't have yet (relation label, multiplicity) |built |Dashed places on the selected relation, see <<Texts Which a Relation Doesn't Have Yet>>. Tagged values are created with the context menu of the class. Not yet for the diagram name.
 |Reorder attributes, attribute selection |open |
 |Width of a class by dragging its side |built |At the left and right side of a class, shown by the cursor, see <<Width of a Class Box>>. The other boxes (notes, association classes) will get the same.
 |Automatic width again |built |Context menu of the class, see <<The Context Menu of a Class>>.
@@ -176,7 +177,7 @@ All texts are edited in place, with a text field which lies over the text.
 
 ### Starting
 * A double click on a text starts it. The first press of the double click selects the box under it, if there is one.
-* The texts of the selected box can be changed: the name of a class (its name row), its stereotype (its row above the name, not the tagged values), the text of a note, the lines of the attributes. The texts of a relation, its label and its multiplicities, can be changed without selecting anything. A text on a box which isn't selected can't be edited.
+* The texts of the selected box can be changed: the name of a class (its name row), its stereotype (its row above the name), each tagged value (its row below the name), the text of a note, the lines of the attributes. The texts of a relation, its label and its multiplicities, can be changed without selecting anything. A text on a box which isn't selected can't be edited.
 * Short texts have a larger area where a double click counts: the multiplicities and labels of relations reach 3 diagram units around the text.
 * Only one text is edited at a time.
 
@@ -202,6 +203,7 @@ All texts are edited in place, with a text field which lies over the text.
 
 |Class name |Bold, centered. May have several lines. Mandatory.
 |Stereotype |Plain, centered, one line, above the name. Typed without the angle brackets, which the field shows around the text and the diagram draws. May not contain `>`. Optional: empty removes it. See <<The Stereotype of a Class>>.
+|Tagged value |Plain, centered, one line, one row for each, below the name. Typed as KEY=value or KEY without the braces, which the field shows around the text and the diagram draws. Optional: empty deletes it. See <<The Tagged Values of a Class>>.
 |Note text |Plain, left aligned, wrapped at the width of the note. May have several lines. Mandatory.
 |Relation label |Plain. May have several lines. Optional: empty removes it. Stands at the middle of the longest part of the line.
 |Multiplicity |One at each end of an association, aggregation and composition. Free text, one line, optional. Anything is allowed, for example `1..<maximum capacity>`. In the source it is written without quotes if it is a number, a range like `0..1` or `1..*`, or `*`, otherwise in double quotes.
@@ -229,13 +231,24 @@ A class has at most one stereotype, shown as `<<Entity>>` in a row above its nam
 * *A removed stereotype* is drawn like a removed info: its text has the strong color behind it and a line through it. For the editor it counts as missing: its field is empty, typing the old text takes the removal back, typing another text changes the stereotype (text mark with the old text as backup). *Add stereotype* is offered for it and types into the struck row, which is there already. If another change set has removed it, a new text changes the text without a mark.
 * *Display:* an added stereotype has the strong color behind its text, a changed one too (as a whole, the diff is not worth it for a word). The marks of a stereotype inside a class which a change set has added or removed are ignored.
 
+### The Tagged Values of a Class
+A class has any number of tagged values. Each one is drawn in a row of its own, below the name, in braces: `{TABLE=books}`, `{author=Jan}`, one below the other, centered like the name. In the source they stay one list in braces after the stereotype, `{TABLE=books, author=Jan}`. A tagged value without a value is written with an equals sign and nothing behind it, `{persistent=}`, because a bare `{persistent}` could not be told from the body of a class with one attribute. It is drawn as `{persistent}`. Like an info of an attribute, a tagged value is a list entry: it can be added or removed as a whole, `change(added|removed, <change set>)` behind its value, and keeps its text when it is removed. Its key and value can be changed, `was(<change set>, <old text>)` behind each of them. Tagged values have no ID of their own. Model-bound tags are a topic of Classman itself, see the open points.
+
+* *Changing:* a double click on the row of a tagged value of the selected class starts the field, with the braces drawn around it like the angle brackets of a stereotype. The user types `KEY=value` or only `KEY`: the key is what stands before the first equals sign, written like a name without quotes (letters, digits, underscore, a hyphen or slash between them, not starting with a digit), the value is everything behind it, with blanks and equals signs, but no line break. The key is mandatory. The value is optional, but if there is an equals sign there must be a value: `eins` and `eins=zwei` are tagged values, `eins=` is not, and gets the red border at Return like any other text which isn't like that. Ctrl+Return and Shift+Return make no line break, pasted line breaks become blanks, as for attributes. Return commits.
+* *Each tagged value on its own:* only the row which was double clicked changes. The empty text deletes the tagged value. Typing only the key takes the value away, which is marked like any changed value while changes are tracked (the old value is the backup). A removed value can't be shown, so the change is visible only in the source, as a small open point.
+* *Adding:* the entry *Add tagged value* of the context menu puts a blank row after the last tagged value and starts the field in it, empty. The blank row is part of the picture, not of the diagram (nothing is reported to the host, no undo step), and goes away if it stays empty, Esc is pressed or the field is left. There is no going on with the next one after Return, as there is for attributes: the entry is chosen again.
+* *Deleting:* the empty text. Without change tracking the tagged value is gone. While changes are tracked, one which the change set has added is gone without a trace, any other is marked removed and keeps its text. A removed tagged value has no row to change any more, it can be taken back with undo or by rejecting the change set.
+* *While changes are tracked:* a new tagged value is marked as added, a changed key or value gets the text mark with the old text, so only what changed is marked, not the whole row. In a class which a change set has added or removed, and in a tagged value of that kind, nothing is marked, the marks would be ignored.
+* *Display:* an added tagged value has the strong color behind its row, a removed one the color and a line through it, a changed key or value the color behind just that part. With a width of its own the class cuts every row off on its own, see <<Width of a Class Box>>.
+* *Accepting and rejecting* a change set: an added tagged value stays or goes, a removed one goes or stays, the text marks keep the new or bring back the old key and value, like for every text.
+
 ## The Context Menu of a Class
 The right mouse button on a class selects it, like a press, and opens a menu with the parts which the class can get. Parts of a class are not created by buttons or by dashed places on the diagram, because a place above or between the parts is hard to hit and the number of places grows with every kind of part. The menu is the one way to create them; editing what exists stays a double click.
 
 * *Add stereotype:* see <<The Stereotype of a Class>>. Offered (can be chosen) only if the class has no stereotype, or one which a change set has removed.
 * *Add attribute:* puts a blank line at the end of the attributes and starts typing into it, see <<Adding Attributes>>. Return in that line goes on with the next one.
 * *Automatic width:* see <<Width of a Class Box>>. A check item, separated from the entries which add parts.
-* *Tagged values:* planned, as the next entry. They need editing of their own first, see the open points.
+* *Add tagged value:* puts a blank row after the last tagged value and starts typing into it, see <<The Tagged Values of a Class>>. A class which a change set has removed offers nothing.
 * An entry which doesn't fit can't be chosen, it is not hidden, so the menu looks the same on every class. A class which a change set has removed offers nothing.
 * A text which is being typed is finished first when the menu is opened: the right button takes the focus to the canvas.
 * The menu belongs to classes of the diagram. Association classes, notes and relations have none yet, a right click on them only selects them. While the tool for relations is armed, there is no menu.
@@ -311,7 +324,7 @@ A diagram is changed by change sets, as the steps of an Aktogramm are, and the m
 How the editor writes the marks for each operation is described with the operation. The rules for texts are collected below.
 
 ### Marks of Elements
-`change(added, <change set>)` and `change(removed, <change set>)` follow the ID of a class, attribute, relation, association class or note, and the text of an info of an attribute (`[a, b change(removed, yellow)]`) or of a stereotype (`<<Entity>> change(removed, yellow)`). Moving an element is never marked. Rules for deleting: <<Deleting>>.
+`change(added, <change set>)` and `change(removed, <change set>)` follow the ID of a class, attribute, relation, association class or note, and the text of an info of an attribute (`[a, b change(removed, yellow)]`), of a stereotype (`<<Entity>> change(removed, yellow)`) or of a tagged value (`{a=1 change(removed, yellow), b=2}`). Moving an element is never marked. Rules for deleting: <<Deleting>>.
 
 ### Marks of Texts
 `was(<change set>, <old text>)` follows the text which a change set has changed, which always stands for the new state. Every text of the diagram can carry one: the diagram name, class name, stereotype, key and value of a tagged value, the visibility sign, name and type of an attribute, an info, a multiplicity, a relation label, a note text.
@@ -322,6 +335,60 @@ How the editor writes the marks for each operation is described with the operati
 * If another change set has changed the text before, the change set which changes it now takes the change over: its old text is the text from before this change.
 * The marks of texts inside an element which a change set has added or removed are ignored in the display. So these texts are changed without a mark.
 * If a text which a change set has added is removed again, it is gone without a trace.
+
+### What the User Sees When an Input is Completed
+This section collects, for every input which the user completes, what is colored afterwards and in what color. It repeats rules which are given with the operations, so that the use cases can be derived from one place. The color is always the color of the change set which tracks the changes, and what is colored is always the new state, the old text is only in the source.
+
+*Completing an input:*
+
+* *Return* completes it. *Leaving the field* (a click elsewhere, another window) completes it in the same way. The result is drawn at once.
+* *Esc* completes nothing: nothing changes and nothing is colored.
+* *The same text as before* changes nothing and colors nothing.
+* *A text which isn't valid* completes nothing. After Return the field stays open with a red border, and nothing is colored. After leaving the field the text is dropped.
+* *The empty text* completes nothing for a mandatory text (class name, note text): the old text stays. For an optional text (label, multiplicity, stereotype, tagged value, attribute line) it removes the text or the element. A new class, stereotype, tagged value or attribute which is completed empty is not created and nothing is colored.
+* *While typing,* nothing of the diagram is colored yet. The field has the pale color of the change set if changes are tracked, white otherwise. A new part (class, stereotype row, tagged value row, attribute line) is already shown as a blank place, which is not part of the diagram yet.
+
+*What happens to the colors:* Three circumstances decide.
+
+* *Not tracked:* the host does not track changes. Nothing is colored, in no case.
+* *Tracked, element not marked:* changes are tracked, and the element which the input belongs to (the class, the note, the relation, the attribute) has no mark of its own.
+* *Tracked, element added or removed:* changes are tracked, but the element has been added or removed by a change set already. The frame, band or row of that element says that everything in it is new or gone, so what is typed into it is not colored on its own, whichever change set it was. This is the case for everything the user adds to a class which was created in the same change set.
+
+[cols="2,1,3,1"]
+|===
+|Input |Not tracked |Tracked, element not marked |Tracked, element added or removed
+
+|*New class,* name typed after the drop |none |The class gets the frame of the change set: 12 units wide in the strong color, 6 of them outside the border. The name has no color of its own. |-
+|New class, empty name |The class disappears again, nothing is colored |same |-
+|*Class name* changed |none |The changed part of the name has the strong color behind it, the whole name if it is shorter than 12 characters or most of it changed. Setting it back to the old text takes the color away. |none, the frame shows it
+|*Note text* changed |none |as for the class name |none
+|*Relation label or multiplicity,* new |none |The new text has the strong color behind it, as a whole. |none
+|Label or multiplicity changed |none |as for the class name, the changed part |none
+|Label or multiplicity removed (empty text) |gone |Nothing. The text is gone from the diagram and there is nothing left to color, the old text is only in the source. |gone
+|*Stereotype,* new |none |The text has the strong color behind it. |none
+|Stereotype changed |none |The whole text has the strong color behind it. |none
+|Stereotype removed (empty text) |gone |The stereotype stays, with the strong color behind it and a line through it. If the change set has added it itself, it is gone without a trace. |gone
+|Stereotype typed again after the change set has removed it |- |Typing the old text takes the removal back: no color. Another text is a change: the whole text has the color. |-
+|*Tagged value,* new (key, or key and value) |none |The row has the strong color behind it. |none
+|Tagged value changed |none |The changed part has the strong color behind it: the key, the value, or both. The other part and the other rows have none. |none
+|Tagged value removed (empty text) |gone |The row stays, with the strong color behind it and a line through it, and can't be changed any more. If the change set has added it itself, it is gone without a trace. |gone
+|Value taken away (only the key typed) |value gone |Nothing is colored: there is no text left to color. The old value is only in the source. |value gone
+|*Attribute,* new (Return in a blank line) |none |The whole row has the pale color, and the text the strong color behind it. |none
+|Attribute changed |none |What differs has the strong color behind it: the visibility sign, the name, the type, each info on its own. An info which is new has the color, a removed info stays with the color and a line through it, a changed info has the color. Parts which stay the same have none. |none
+|Attribute removed (empty text) |gone |The row stays with the pale color, the text with the strong color behind it and a line through it. If the change set has added it itself, it is gone without a trace. |gone
+|Type removed from an attribute |gone |The last character of the name has the strong color behind it, the type is not shown. |gone
+|Visibility sign removed |gone |Not possible: the line is invalid (red border), because there would be nothing left to color. |gone
+|===
+
+*Not completed by Return, but also drawn right away:*
+
+* *Drawing an association* (releasing the mouse on a class): not tracked: none. Tracked: a band of 9 units in the strong color below the line. It is the same with the other kinds of relations which will come.
+* *Deleting with the Delete key:* not tracked: gone. Tracked: a class or note which a change set has added is gone without a trace, any other gets the frame of the change set, is veiled, and its name has the strong color behind it and a line through it. A relation which is not added gets the band, a grey line, a cross and a struck label. What hangs on it is marked in the same way.
+* *Moving and changing the width* of a class are never colored, in no case.
+
+*Which color:* Every change set has its own. If a change set changes a text which another change set has changed before, the color becomes the color of the change set which changed it last, and it takes over the old text of the other one as its own old text. The marks of other change sets stay where they are, so a diagram can show several colors at once.
+
+*Small diagrams:* when the diagram is shown small, frames, bands and the strong color behind texts keep a minimum size on the screen, so that none of this disappears, see <<Marks in Small Diagrams>>.
 
 ## Display of Changes
 These rules decide how a diagram with marks looks, also in the Aktogramm and in the PDF.
@@ -384,9 +451,10 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 . How are notes attached to elements: as a relation-like tool, or by dragging a handle?
 . Snapping of points is built (see <<Selecting>>); does it feel right with 6 pixels? Decided: no guide line which shows what a point has snapped to, it isn't needed. Open: a key which switches snapping off, snapping of boxes to each other, and straightening a whole route.
 . Hanging an end onto an element which is not a class (note, association class), and the capture distance: is 6 pixels right for hanging, or should it differ from snapping?
+. Everything which the user adds to a class which is new in the same change set is not colored on its own, only the frame of the class says that it is new (see <<What the User Sees When an Input is Completed>>). It has to be seen whether this feels right in practice. The other way round would mean that the new class gets no frame as soon as it has parts, or that its parts are colored too and the frame is no longer needed to read the diagram.
 . Context menus on everything else which now needs a double click (add or delete a waypoint, edit a text), for users who don't like double clicks. Decided 2026-11-22: the context menu of a class comes first, because the parts of a class (stereotype, tagged values, attributes) have no good place on the diagram; the menus for relations, notes and the rest come when the editor is complete and it is clear where they make sense.
 . Moving a box should move its waypoints or re-route them. Left to the user for now.
-. Tagged values and the diagram name as editable texts.
+. The diagram name as an editable text.
 . Reordering attributes, selecting attributes.
 . A removed label or multiplicity is not shown and not marked at all, there is nothing to mark next to. Where could the place be shown, for example by the line of the relation?
 . Is the restriction on removing a visibility sign under change tracking a nuisance in practice? Alternatives: let the sign stay, or give the removal a mark of its own in the format.

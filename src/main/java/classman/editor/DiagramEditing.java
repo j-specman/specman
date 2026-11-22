@@ -12,6 +12,7 @@ import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
+import classman.model.v001.TaggedValueModel_V001;
 import classman.model.v001.change.ElementTextChanger_V001;
 import classman.model.v001.change.ElementDeleter_V001;
 import classman.model.v001.io.ClassDiagramParseException;
@@ -48,6 +49,7 @@ public class DiagramEditing {
   private final ElementIds ids = new ElementIds(new SecureRandom());
   private ClassDiagramModel_V001 model;
   private AttributeEditing attributeEditing;
+  private TaggedValueEditing taggedValueEditing;
   private PendingStereotype pendingStereotype;
   private ClassModel_V001 pendingClass;
   private String source;
@@ -69,6 +71,7 @@ public class DiagramEditing {
   private void load(String newSource) throws ClassDiagramParseException {
     model = new ClassDiagramParser_V001().parse(newSource);
     attributeEditing = new AttributeEditing(model);
+    taggedValueEditing = new TaggedValueEditing();
     pendingStereotype = new PendingStereotype();
     pendingClass = null;
     scene = host.renderer().layout(model);
@@ -302,6 +305,7 @@ public class DiagramEditing {
       case FROM_MULTIPLICITY -> orEmpty(((AssociationRelationModel_V001) text.element).fromMultiplicity);
       case TO_MULTIPLICITY -> orEmpty(((AssociationRelationModel_V001) text.element).toMultiplicity);
       case ATTRIBUTE_LINE -> attributeEditing.textOf(text);
+      case TAGGED_VALUE -> taggedValueEditing.textOf(text);
     };
   }
 
@@ -330,6 +334,7 @@ public class DiagramEditing {
       case FROM_MULTIPLICITY, TO_MULTIPLICITY -> !newText.contains("\n");
       case STEREOTYPE -> !newText.contains("\n") && !newText.contains(">");
       case ATTRIBUTE_LINE -> attributeEditing.accepts(text, newText, host.trackedChangeSet());
+      case TAGGED_VALUE -> taggedValueEditing.accepts(newText);
       default -> true;
     };
   }
@@ -349,6 +354,15 @@ public class DiagramEditing {
     String changeSet = host.trackedChangeSet();
     if (text.kind == TextKind.ATTRIBUTE_LINE) {
       if (attributeEditing.setText(text, newText, changeSet)) {
+        publish();
+      }
+      else {
+        scene = host.renderer().layout(model);
+      }
+      return;
+    }
+    if (text.kind == TextKind.TAGGED_VALUE) {
+      if (taggedValueEditing.setText(text, newText, changeSet)) {
         publish();
       }
       else {
@@ -430,6 +444,19 @@ public class DiagramEditing {
     return !isRemoved && model.classes().contains(box);
   }
 
+  /** Puts a blank row after the last tagged value of the class, for a new tagged value to be typed into. It is part
+   * of the picture, but not of the diagram, until it is given a text with {@link #setText}.
+   * @return the area of the blank row
+   * @throws IllegalArgumentException if the class can't get parts */
+  public SceneTextArea newTaggedValue(ClassModel_V001 box) {
+    if (!canAddPartsTo(box)) {
+      throw new IllegalArgumentException("The class can't get a tagged value: " + box.name);
+    }
+    TaggedValueModel_V001 pending = taggedValueEditing.beginAtEnd(box);
+    scene = host.renderer().layout(model);
+    return scene.textAreas.stream().filter(text -> text.taggedValue == pending).findFirst().orElseThrow();
+  }
+
   /** @return true if the class has no stereotype, or only one which a change set has removed */
   public boolean canAddStereotypeTo(ClassModel_V001 box) {
     return canAddPartsTo(box) && stereotypeOf(box).isEmpty();
@@ -452,8 +479,8 @@ public class DiagramEditing {
       .findFirst().orElseThrow();
   }
 
-  /** Takes away the blank line or row for a new attribute or stereotype, or the class without a name, if it is still
-   * there. */
+  /** Takes away the blank line or row for a new attribute, stereotype or tagged value, or the class without a name,
+   * if it is still there. */
   public void discardNewPart() {
     if (discardPendingParts()) {
       scene = host.renderer().layout(model);
@@ -463,8 +490,9 @@ public class DiagramEditing {
   private boolean discardPendingParts() {
     boolean attributeGone = attributeEditing.discardPending();
     boolean stereotypeGone = pendingStereotype.discard();
+    boolean taggedValueGone = taggedValueEditing.discardPending();
     boolean classGone = discardPendingClass();
-    return attributeGone || stereotypeGone || classGone;
+    return attributeGone || stereotypeGone || taggedValueGone || classGone;
   }
 
   /** Starts to drag, from the point where the mouse was pressed: a handle of the selected relation if the point is at

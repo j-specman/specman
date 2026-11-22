@@ -7,8 +7,8 @@ import classman.model.v001.TextChangeModel_V001;
 
 /**
  * Resolves the text marks of a change set. Accepting keeps the new text, rejecting brings back the backup. An
- * optional text, which is empty or has no backup after that, is gone: the label, type, stereotype, multiplicity, info
- * item or tagged value disappears.
+ * optional text, which is empty or has no backup after that, is gone: the label, type, stereotype, multiplicity or info
+ * item disappears, a tagged value is left with its key.
  */
 class TextMarkResolver_V001 {
     private final String changeSet;
@@ -47,13 +47,13 @@ class TextMarkResolver_V001 {
         return text == null || text.isEmpty() ? null : text;
     }
 
-    /** Tagged values and info items without a text are taken out, and a stereotype without a text loses its ID and marks. */
+    /** Info items without a text are taken out, and a stereotype without a text loses its ID and marks. A tagged value
+     * without a value keeps its key. */
     private void removeGoneTexts(ClassDiagramModel_V001 model) {
         for (ClassModel_V001 classModel : ClassBoxes_V001.of(model)) {
             if (classModel.stereotype == null) {
                 StereotypeChanger_V001.clear(classModel);
             }
-            classModel.taggedValues.removeIf(tag -> tag.value == null);
             for (AttributeModel_V001 attribute : classModel.attributes) {
                 attribute.infos.removeIf(info -> info.text == null);
             }

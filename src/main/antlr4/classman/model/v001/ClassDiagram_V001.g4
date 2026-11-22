@@ -101,13 +101,15 @@ classHead
     ;
 
 // {TABLENAME=helpversion} or {A=1, B=2}. A '{' followed by word '=' starts tagged values,
-// any other '{' starts the body.
+// any other '{' starts the body. Like an info of an attribute, a tagged value is a list entry which can be added or
+// removed as a whole, change(removed, yellow), and keeps its text then; or its key or value can be changed, was(...).
+// The value may be missing, a tag which only has a key is written {persistent=}.
 taggedValues
     : LBRACE taggedValue (COMMA taggedValue)* RBRACE
     ;
 
 taggedValue
-    : word keyChange=textChange? EQUALS (word | NUMBER | QUOTED_STRING) valueChange=textChange?
+    : word keyChange=textChange? EQUALS (word | NUMBER | QUOTED_STRING)? valueChange=textChange? changeMark?
     ;
 
 classBody

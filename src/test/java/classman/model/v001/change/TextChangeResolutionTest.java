@@ -85,7 +85,7 @@ class TextChangeResolutionTest {
     String source = "class A (aaaaaaaa) {K=\"\" was(yellow, v), L=w} {\n"
         + " -x : \"\" was(yellow, Integer) [\"\" was(yellow, a), b]\n}\nclass B (bbbbbbbb)\n"
         + "association aaaaaaaa -- bbbbbbbb \"\" was(yellow, \"gone\")";
-    assertEquals(canonical("class A (aaaaaaaa) {L=w} {\n -x [b]\n}\nclass B (bbbbbbbb)\nassociation aaaaaaaa -- bbbbbbbb"),
+    assertEquals(canonical("class A (aaaaaaaa) {K=, L=w} {\n -x [b]\n}\nclass B (bbbbbbbb)\nassociation aaaaaaaa -- bbbbbbbb"),
         accepted(source, "yellow"));
   }
 
@@ -96,7 +96,7 @@ class TextChangeResolutionTest {
     String source = "class A (aaaaaaaa) <<Entity>> was(yellow) (e3a1d7c2) {K=v was(yellow), L=w} {\n"
         + " -x : String was(yellow) [a was(yellow), b]\n}\nclass B (bbbbbbbb)\n"
         + "association aaaaaaaa 1 was(yellow) -> bbbbbbbb \"new\" was(yellow)";
-    assertEquals(canonical("class A (aaaaaaaa) {L=w} {\n -x [b]\n}\nclass B (bbbbbbbb)\nassociation aaaaaaaa -> bbbbbbbb"),
+    assertEquals(canonical("class A (aaaaaaaa) {K=, L=w} {\n -x [b]\n}\nclass B (bbbbbbbb)\nassociation aaaaaaaa -> bbbbbbbb"),
         rejected(source, "yellow"));
   }
 

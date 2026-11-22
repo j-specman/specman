@@ -119,10 +119,11 @@ class ClassContextMenuTest {
 
     List<JMenuItem> entries = entries();
 
-    assertEquals(List.of("Add stereotype", "Add attribute", "Automatic width"),
+    assertEquals(List.of("Add stereotype", "Add tagged value", "Add attribute", "Automatic width"),
       entries.stream().map(JMenuItem::getText).toList());
     assertTrue(entries.get(0).isEnabled());
     assertTrue(entries.get(1).isEnabled());
+    assertTrue(entries.get(2).isEnabled());
   }
 
   /** A class which has a stereotype can't get a second one, but can get attributes. */
@@ -143,13 +144,13 @@ class ClassContextMenuTest {
   void automaticWidthEntry() throws Exception {
     open(BARE);
     editing.selectAt(insideClass());
-    JMenuItem automatic = entries().get(2);
+    JMenuItem automatic = entries().get(3);
     assertTrue(((javax.swing.JCheckBoxMenuItem) automatic).isSelected());
     assertFalse(automatic.isEnabled());
 
     open("classdiagram {\n  class A (11111111) at(10, 60) width=200\n}");
     editing.selectAt(insideClass());
-    automatic = entries().get(2);
+    automatic = entries().get(3);
     assertFalse(((javax.swing.JCheckBoxMenuItem) automatic).isSelected());
     assertTrue(automatic.isEnabled());
 
@@ -172,13 +173,26 @@ class ClassContextMenuTest {
     assertTrue(editing.scene().textAreas.stream().anyMatch(text -> text.kind == TextKind.STEREOTYPE));
   }
 
+  /** The tagged value entry opens a field in a new row after the tagged values, with the braces around it. */
+  @Test
+  void taggedValueEntryStartsField() throws Exception {
+    open(BARE);
+    editing.selectAt(insideClass());
+
+    SwingUtilities.invokeAndWait(() -> entries().get(1).doClick(0));
+
+    assertTrue(textEditor.isEditing());
+    assertEquals("", ((JTextComponent) canvas.getComponent(0)).getText());
+    assertTrue(editing.scene().textAreas.stream().anyMatch(text -> text.kind == TextKind.TAGGED_VALUE));
+  }
+
   /** The attribute entry opens a field in a new line at the end of the class. */
   @Test
   void attributeEntryStartsField() throws Exception {
     open(BARE);
     editing.selectAt(insideClass());
 
-    SwingUtilities.invokeAndWait(() -> entries().get(1).doClick(0));
+    SwingUtilities.invokeAndWait(() -> entries().get(2).doClick(0));
 
     assertTrue(textEditor.isEditing());
     ClassModel_V001 box = editing.selectedClass();

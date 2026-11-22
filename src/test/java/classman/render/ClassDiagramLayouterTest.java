@@ -82,8 +82,30 @@ class ClassDiagramLayouterTest {
     Scene scene = layout("class A <<Entity>> {TABLENAME=helpversion, X=1}");
     double stereotype = textNamed(scene, "<<Entity>>").y;
     double name = textNamed(scene, "A").y;
-    double tagged = textNamed(scene, "{TABLENAME=helpversion, X=1}").y;
+    double tagged = textNamed(scene, "{TABLENAME=helpversion}").y;
     assertTrue(stereotype < name && name < tagged);
+  }
+
+  /** Each tagged value has a row of its own with braces around it, one below the other. */
+  @Test
+  void taggedValuesInRows() throws ClassDiagramParseException {
+    Scene scene = layout("class A {TABLE=books, author=Jan}");
+    assertEquals(List.of("A", "{TABLE=books}", "{author=Jan}"), texts(scene));
+    assertEquals(textNamed(scene, "{TABLE=books}").y + LINE, textNamed(scene, "{author=Jan}").y);
+    assertEquals("{TABLE=books}".length() * CHAR + 2 * PADDING_X, all(scene, SceneRectangle.class).get(0).width);
+  }
+
+  /** A tagged value without a value is drawn as its key in braces. */
+  @Test
+  void keyOnlyTaggedValue() throws ClassDiagramParseException {
+    assertEquals(List.of("A", "{persistent}", "{a=b}"), texts(layout("class A {persistent=, a=b}")));
+  }
+
+  /** Every row of tagged values is cut off on its own where it doesn't fit. */
+  @Test
+  void taggedValueRowsClipping() throws ClassDiagramParseException {
+    Scene scene = layout("class Abc at(0, 0) width=82 {TABLE=books, a=b}");
+    assertEquals(List.of("Abc", "{TABLE=", "{a=b}"), texts(scene));
   }
 
   /** With a given width, an attribute which doesn't fit is cut off, not wrapped, and the box keeps its width. */

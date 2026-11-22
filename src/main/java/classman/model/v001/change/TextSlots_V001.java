@@ -72,14 +72,20 @@ final class TextSlots_V001 {
         slots.add(nameOf(classModel));
         slots.add(stereotypeOf(classModel));
         for (TaggedValueModel_V001 tag : classModel.taggedValues) {
-            slots.add(mandatory(() -> tag.key, text -> tag.key = text,
-                () -> tag.keyChange, mark -> tag.keyChange = mark));
-            slots.add(optional(() -> tag.value, text -> tag.value = text,
-                () -> tag.valueChange, mark -> tag.valueChange = mark));
+            slots.add(keyOf(tag));
+            slots.add(valueOf(tag));
         }
         for (AttributeModel_V001 attribute : classModel.attributes) {
             addAttribute(slots, attribute);
         }
+    }
+
+    static TextSlot_V001 keyOf(TaggedValueModel_V001 tag) {
+        return mandatory(() -> tag.key, text -> tag.key = text, () -> tag.keyChange, mark -> tag.keyChange = mark);
+    }
+
+    static TextSlot_V001 valueOf(TaggedValueModel_V001 tag) {
+        return optional(() -> tag.value, text -> tag.value = text, () -> tag.valueChange, mark -> tag.valueChange = mark);
     }
 
     private static void addAttribute(List<TextSlot_V001> slots, AttributeModel_V001 attribute) {

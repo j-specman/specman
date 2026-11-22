@@ -91,7 +91,7 @@ class TextEditor {
     }));
     component.registerKeyboardAction(e -> commit(true), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
       JComponent.WHEN_FOCUSED);
-    if (text.kind == TextKind.ATTRIBUTE_LINE) {
+    if (text.kind == TextKind.ATTRIBUTE_LINE || text.kind == TextKind.TAGGED_VALUE) {
       ((AbstractDocument) component.getDocument()).setDocumentFilter(new SingleLineFilter());
     }
     else {
@@ -239,6 +239,13 @@ class TextEditor {
     SceneTextArea name = editing.newClass(x, y);
     showDiagram.run();
     start(name);
+  }
+
+  /** Puts a blank row after the tagged values of the class and starts to type a new one into it. */
+  void startNewTaggedValue(ClassModel_V001 box) {
+    SceneTextArea row = editing.newTaggedValue(box);
+    showDiagram.run();
+    start(row);
   }
 
   /** Puts a blank line at the end of the class and starts to type a new attribute into it. */

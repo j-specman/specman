@@ -132,10 +132,11 @@ public class ClassDiagramParser_V001 {
         return text.substring(2, text.length() - 2).trim();
     }
 
-    private TaggedValueModel_V001 buildTaggedValue(TaggedValueContext tag) {
+    private TaggedValueModel_V001 buildTaggedValue(TaggedValueContext tag) throws ClassDiagramParseException {
         TaggedValueModel_V001 model = new TaggedValueModel_V001(tag.word(0).getText(), taggedValueText(tag));
         model.keyChange = textChange(tag.keyChange);
         model.valueChange = textChange(tag.valueChange);
+        model.change = change(tag.changeMark());
         return model;
     }
 
@@ -146,7 +147,7 @@ public class ClassDiagramParser_V001 {
         if (tag.NUMBER() != null) {
             return tag.NUMBER().getText();
         }
-        return unquote(tag.QUOTED_STRING().getText());
+        return tag.QUOTED_STRING() != null ? unquote(tag.QUOTED_STRING().getText()) : null;
     }
 
     // ---- attributes ----

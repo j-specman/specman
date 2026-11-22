@@ -6,6 +6,7 @@ import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.InfoModel_V001;
+import classman.model.v001.TaggedValueModel_V001;
 
 import java.util.function.UnaryOperator;
 
@@ -23,6 +24,9 @@ final class ElementMarks_V001 {
         for (ClassModel_V001 classModel : ClassBoxes_V001.of(model)) {
             classModel.change = replacement.apply(classModel.change);
             classModel.stereotypeElementChange = replacement.apply(classModel.stereotypeElementChange);
+            for (TaggedValueModel_V001 tag : classModel.taggedValues) {
+                tag.change = replacement.apply(tag.change);
+            }
             for (AttributeModel_V001 attribute : classModel.attributes) {
                 attribute.change = replacement.apply(attribute.change);
                 for (InfoModel_V001 info : attribute.infos) {

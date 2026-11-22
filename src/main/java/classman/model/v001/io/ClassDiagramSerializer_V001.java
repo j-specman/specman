@@ -120,9 +120,19 @@ public class ClassDiagramSerializer_V001 {
 
     private void appendTaggedValue(StringBuilder out, TaggedValueModel_V001 tag) {
         out.append(word(tag.key));
-        appendTextChange(out, tag.keyChange);
-        out.append('=').append(INTEGER.matcher(tag.value).matches() ? tag.value : word(tag.value));
-        appendTextChange(out, tag.valueChange);
+        if (tag.change == null) {
+            appendTextChange(out, tag.keyChange);
+        }
+        out.append('=');
+        if (tag.value != null && !tag.value.isEmpty()) {
+            out.append(INTEGER.matcher(tag.value).matches() ? tag.value : word(tag.value));
+        }
+        if (tag.change != null) {
+            appendChange(out, tag.change);
+        }
+        else {
+            appendTextChange(out, tag.valueChange);
+        }
     }
 
     private String attribute(AttributeModel_V001 attribute) {

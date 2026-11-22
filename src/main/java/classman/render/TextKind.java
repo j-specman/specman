@@ -5,6 +5,8 @@ public enum TextKind {
     CLASS_NAME(true, true, false, false, 120, 0),
     /** Typed without the angle brackets, which the diagram draws around it. Empty removes the stereotype. */
     STEREOTYPE(false, true, false, true, 80, 0, "<<", ">>"),
+    /** One tagged value, typed as KEY=value without the braces, which the diagram draws around it. Empty deletes it. */
+    TAGGED_VALUE(false, true, false, true, 120, 0, "{", "}"),
     NOTE_TEXT(false, false, true, false, 120, 0),
     RELATION_LABEL(false, false, false, true, 80, DiagramStyle.TEXT_HIT_PADDING),
     FROM_MULTIPLICITY(false, false, false, true, 40, DiagramStyle.TEXT_HIT_PADDING),

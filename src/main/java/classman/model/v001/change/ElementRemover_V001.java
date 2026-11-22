@@ -21,6 +21,7 @@ class ElementRemover_V001 {
             if (vanishing.vanishes(classModel.stereotypeElementChange)) {
                 StereotypeChanger_V001.clear(classModel);
             }
+            classModel.taggedValues.removeIf(tag -> vanishing.vanishes(tag.change));
             classModel.attributes.removeIf(attribute -> vanishing.vanishes(attribute.change));
             for (AttributeModel_V001 attribute : classModel.attributes) {
                 attribute.infos.removeIf(info -> vanishing.vanishes(info.change));

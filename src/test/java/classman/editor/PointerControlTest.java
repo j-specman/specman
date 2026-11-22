@@ -117,7 +117,7 @@ class PointerControlTest {
     assertEquals(1, nameEdits.get());
   }
 
-  /** Above the stereotype, on the tagged values and on the attributes, a double click selects the class only. */
+  /** In the padding above the stereotype and below the attributes, a double click selects the class only. */
   @Test
   void doubleClickElsewhereInClass() throws ClassDiagramParseException {
     open();
@@ -129,11 +129,23 @@ class PointerControlTest {
     assertTrue(name.getMaxY() < box.getMaxY() - 4, "the tagged values and attributes are below the name");
 
     control.doubleClicked(new Point2D.Double(name.getCenterX(), box.getMinY() + 2));
-    control.doubleClicked(new Point2D.Double(name.getCenterX(), name.getMaxY() + 2));
     control.doubleClicked(new Point2D.Double(name.getCenterX(), box.getMaxY() - 3));
 
     assertEquals(0, nameEdits.get());
     assertTrue(editing.hasSelection());
+  }
+
+  /** A double click on a tagged value of the selected class starts the editor for it. */
+  @Test
+  void doubleClickOnTaggedValue() throws ClassDiagramParseException {
+    open();
+    editing.selectAt(new Point2D.Double(15, 25));
+    Rectangle2D row = editing.scene().textAreas.stream()
+      .filter(area -> area.kind == TextKind.TAGGED_VALUE).findFirst().orElseThrow().area;
+
+    control.doubleClicked(new Point2D.Double(row.getCenterX(), row.getCenterY()));
+
+    assertEquals(1, nameEdits.get());
   }
 
   /** A double click on the text of a note starts the editor for it, one on the margin of the note does not. */

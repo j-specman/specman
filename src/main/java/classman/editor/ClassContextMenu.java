@@ -16,6 +16,8 @@ class ClassContextMenu extends JPopupMenu {
                    Runnable showDiagram) {
     add(entry(texts.get("menu.class.add.stereotype"), editing.canAddStereotypeTo(box),
       () -> textEditor.startNewStereotype(box)));
+    add(entry(texts.get("menu.class.add.taggedvalue"), editing.canAddPartsTo(box),
+      () -> textEditor.startNewTaggedValue(box)));
     add(entry(texts.get("menu.class.add.attribute"), editing.canAddPartsTo(box),
       () -> textEditor.startNewAttribute(box)));
     addSeparator();

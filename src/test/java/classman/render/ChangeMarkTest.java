@@ -168,6 +168,32 @@ class ChangeMarkTest {
     assertTrue(strikes(scene).isEmpty());
   }
 
+  /** A tagged value which a change set has added has the strong color behind its row only, a removed one keeps its
+   * text and has a line through it as well. The other tagged values stay as they are. */
+  @Test
+  void addedAndRemovedTaggedValue() throws ClassDiagramParseException {
+    Scene added = layout("class A (aaaaaaaa) at(0, 0) {a=1 change(added, yellow), b=2}");
+    assertEquals(1, rectanglesFilled(added, YELLOW).size());
+    assertEquals(SceneTestHelper.textNamed(added, "{a=1}").y - 15 + 1, rectanglesFilled(added, YELLOW).get(0).y);
+    assertTrue(strikes(added).isEmpty());
+
+    Scene removed = layout("class A (aaaaaaaa) at(0, 0) {a=1 change(removed, yellow), b=2}");
+    assertEquals(1, rectanglesFilled(removed, YELLOW).size());
+    assertEquals(1, strikes(removed).size());
+    assertTrue(SceneTestHelper.texts(removed).contains("{a=1}"));
+  }
+
+  /** The key and the value of a tagged value are marked on their own, when a change set has changed them. */
+  @Test
+  void changedTaggedValueParts() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0) {a=1 was(yellow, 0), b=2}");
+    SceneText row = SceneTestHelper.textNamed(scene, "{a=1}");
+    List<SceneRectangle> highlights = rectanglesFilled(scene, YELLOW);
+    assertEquals(1, highlights.size());
+    assertEquals(row.left() + 30 - DiagramStyle.HIGHLIGHT_MARGIN, highlights.get(0).x);
+    assertEquals(10 + 2 * DiagramStyle.HIGHLIGHT_MARGIN, highlights.get(0).width);
+  }
+
   /** An info which a change set has added has the strong color behind it, and no line through it. */
   @Test
   void addedInfoHighlighted() throws ClassDiagramParseException {

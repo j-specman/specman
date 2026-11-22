@@ -57,7 +57,7 @@ public class ClassBoxLayouter {
         String textColor = isRemoved ? VEILED_TEXT : null;
         String lineColor = isRemoved ? VEILED_STROKE : STROKE;
         String stereotype = model.stereotype == null ? null : stereotypeText(model.stereotype);
-        MarkedText taggedValues = taggedValues(model);
+        List<MarkedText> taggedValues = taggedValueTexts(model);
         List<MarkedText> attributes = attributeTexts(model);
         double contentWidth = contentWidth(model, stereotype, taggedValues, attributes);
         double width = contentWidth + 2 * PADDING_X;
@@ -74,9 +74,18 @@ public class ClassBoxLayouter {
         y = addCenteredText(elements, nameLines, model.name, true, contentWidth, width, y,
             isRemoved ? VEILED_MARKED_TEXT : null);
         double nameBottom = y;
-        List<SceneText> taggedLines = new ArrayList<>();
-        y = addClippedCenteredText(elements, taggedLines, taggedValues == null ? null : taggedValues.text(),
-            contentWidth, width, y, textColor);
+        List<List<SceneText>> taggedLines = new ArrayList<>();
+        Map<TaggedValueModel_V001, Rectangle2D.Double> taggedAreas = new LinkedHashMap<>();
+        for (int i = 0; i < taggedValues.size(); i++) {
+            double rowTop = y;
+            List<SceneText> rowLines = new ArrayList<>();
+            y = addClippedCenteredText(elements, rowLines, taggedValues.get(i).text(), contentWidth, width, y, textColor);
+            taggedLines.add(rowLines);
+            TaggedValueModel_V001 tag = model.taggedValues.get(i);
+            if (tag.change == null || tag.change.type != ChangeType_V001.REMOVED) {
+                taggedAreas.put(tag, new Rectangle2D.Double(PADDING_X, rowTop, contentWidth, y - rowTop));
+            }
+        }
         y += PADDING_Y;
         elements.add(new SceneLine(0, y, width, y, false, lineColor, STROKE_WIDTH));
         y += PADDING_Y;
@@ -107,7 +116,7 @@ public class ClassBoxLayouter {
         }
         textAreas.put(TextKind.CLASS_NAME, new Rectangle2D.Double(PADDING_X, nameTop, contentWidth, nameBottom - nameTop));
         return new BoxLayout(width, y, all, attributeAreas, change == null ? 0 : FRAME_STROKE_WIDTH / 2, textAreas,
-            new AttributeLineAreas(lineAreas));
+            new AttributeLineAreas(lineAreas), new TaggedValueAreas(taggedAreas));
     }
 
     private SceneRectangle frame(double width, double height, ChangeModel_V001 change) {
@@ -120,12 +129,26 @@ public class ClassBoxLayouter {
     }
 
     private void addHeaderMarks(List<AbstractSceneElement> backgrounds, List<AbstractSceneElement> overlays,
-                                ClassModel_V001 model, List<SceneText> stereotypeLines, List<SceneText> nameLines, MarkedText taggedValues,
-                                List<SceneText> taggedLines) {
+                                ClassModel_V001 model, List<SceneText> stereotypeLines, List<SceneText> nameLines,
+                                List<MarkedText> taggedValues, List<List<SceneText>> taggedLines) {
         markStereotype(backgrounds, overlays, model, stereotypeLines);
         backgrounds.addAll(highlighter.changeHighlights(model.nameChange, model.name, nameLines));
-        if (taggedValues != null) {
-            backgrounds.addAll(highlighter.highlights(taggedValues, taggedLines));
+        for (int i = 0; i < taggedValues.size(); i++) {
+            markTaggedValue(backgrounds, overlays, model.taggedValues.get(i), taggedValues.get(i), taggedLines.get(i));
+        }
+    }
+
+    /** An added tagged value is marked, a removed one keeps its text and has a line through it, the text marks of any
+     * other one cover the changed parts. */
+    private void markTaggedValue(List<AbstractSceneElement> backgrounds, List<AbstractSceneElement> overlays,
+                                 TaggedValueModel_V001 tag, MarkedText text, List<SceneText> lines) {
+        if (tag.change == null) {
+            backgrounds.addAll(highlighter.highlights(text, lines));
+            return;
+        }
+        backgrounds.addAll(highlighter.wholeHighlights(tag.change.changeSet, lines));
+        if (tag.change.type == ChangeType_V001.REMOVED) {
+            overlays.addAll(highlighter.strikes(lines));
         }
     }
 
@@ -150,20 +173,18 @@ public class ClassBoxLayouter {
 
     // ---- texts ----
 
-    private MarkedText taggedValues(ClassModel_V001 model) {
-        if (model.taggedValues.isEmpty()) {
-            return null;
-        }
-        MarkedText text = new MarkedText().append("{");
-        boolean first = true;
+    /** One text for each tagged value, {key=value}, or {key} if it has no value. The marks of a tagged value which is added or removed are ignored. */
+    private List<MarkedText> taggedValueTexts(ClassModel_V001 model) {
+        List<MarkedText> texts = new ArrayList<>();
         for (TaggedValueModel_V001 tag : model.taggedValues) {
-            if (!first) {
-                text.append(", ");
+            boolean hasTextMarks = tag.change == null;
+            MarkedText text = new MarkedText().append("{").append(tag.key, hasTextMarks ? tag.keyChange : null);
+            if (tag.value != null && !tag.value.isEmpty()) {
+                text.append("=").append(tag.value, hasTextMarks ? tag.valueChange : null);
             }
-            first = false;
-            text.append(tag.key, tag.keyChange).append("=").append(tag.value, tag.valueChange);
+            texts.add(text.append("}"));
         }
-        return text.append("}");
+        return texts;
     }
 
     private List<MarkedText> attributeTexts(ClassModel_V001 model) {
@@ -180,7 +201,7 @@ public class ClassBoxLayouter {
 
     // ---- width ----
 
-    private double contentWidth(ClassModel_V001 model, String stereotype, MarkedText taggedValues,
+    private double contentWidth(ClassModel_V001 model, String stereotype, List<MarkedText> taggedValues,
                                 List<MarkedText> attributes) {
         if (model.width == null) {
             return Math.max(naturalWidth(model, stereotype, taggedValues, attributes), MIN_BOX_WIDTH - 2 * PADDING_X);
@@ -188,14 +209,14 @@ public class ClassBoxLayouter {
         return Math.max(model.width - 2 * PADDING_X, wrapper.longestWord(model.name, true));
     }
 
-    private double naturalWidth(ClassModel_V001 model, String stereotype, MarkedText taggedValues,
+    private double naturalWidth(ClassModel_V001 model, String stereotype, List<MarkedText> taggedValues,
                                 List<MarkedText> attributes) {
         double widest = measurer.width(model.name, true);
         if (stereotype != null) {
             widest = Math.max(widest, measurer.width(TextWrapper.oneLine(stereotype), false));
         }
-        if (taggedValues != null) {
-            widest = Math.max(widest, measurer.width(TextWrapper.oneLine(taggedValues.text()), false));
+        for (MarkedText tag : taggedValues) {
+            widest = Math.max(widest, measurer.width(TextWrapper.oneLine(tag.text()), false));
         }
         for (MarkedText attribute : attributes) {
             widest = Math.max(widest, measurer.width(TextWrapper.oneLine(attribute.text()), false));
