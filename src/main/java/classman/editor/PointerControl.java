@@ -31,10 +31,16 @@ class PointerControl implements PointerListener {
   }
 
   /** A press selects what is below it. Dragging moves a handle of the selected relation if the press was on one,
-   * otherwise the selected box. */
+   * otherwise the selected box. While the tool for relations is armed, a press on a class starts a relation instead,
+   * which is drawn by dragging to another class, and nothing is selected. */
   @Override
   public void pressed(Point2D at) {
     double tolerance = toDiagramLength.applyAsDouble(HIT_PIXELS);
+    if (editing.isRelationToolArmed()) {
+      editing.startRelation(at, tolerance);
+      showDiagram.run();
+      return;
+    }
     editing.selectAt(at, tolerance);
     editing.startDrag(at, tolerance);
     showDiagram.run();
@@ -53,9 +59,13 @@ class PointerControl implements PointerListener {
   }
 
   /** A double click on a waypoint of the selected relation deletes it, one on its line elsewhere adds a waypoint. A
-   * double click on a text of the box it selects, or on a text of a relation, lets the user change the text. */
+   * double click on a text of the box it selects, or on a text of a relation, lets the user change the text. Nothing
+   * of this happens while the tool for relations is armed. */
   @Override
   public void doubleClicked(Point2D at) {
+    if (editing.isRelationToolArmed()) {
+      return;
+    }
     double tolerance = toDiagramLength.applyAsDouble(HIT_PIXELS);
     if (editing.deleteWaypointAt(at, tolerance) || editing.insertWaypointAt(at, tolerance)) {
       showDiagram.run();

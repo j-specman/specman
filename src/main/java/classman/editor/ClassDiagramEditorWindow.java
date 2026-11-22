@@ -10,6 +10,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
@@ -32,6 +33,7 @@ public class ClassDiagramEditorWindow extends JDialog {
   private final DiagramCanvas canvas;
   private final JScrollPane scrollPane;
   private final TextEditor textEditor;
+  private final EditorPalette palette;
 
   /** @throws ClassDiagramParseException if the source has a syntax error
    * @throws IllegalArgumentException if the diagram refers to an element which it doesn't have */
@@ -46,7 +48,7 @@ public class ClassDiagramEditorWindow extends JDialog {
       canvas::toDiagramLength));
     scrollPane = new JScrollPane(canvas);
 
-    EditorPalette palette = new EditorPalette(texts, this::classDropped);
+    palette = new EditorPalette(texts, this::classDropped, this::relationToolToggled);
     getContentPane().add(palette, BorderLayout.WEST);
     getContentPane().add(scrollPane, BorderLayout.CENTER);
 
@@ -99,10 +101,14 @@ public class ClassDiagramEditorWindow extends JDialog {
     return new Rectangle(origin.x + visible.x, origin.y + visible.y, visible.width, visible.height);
   }
 
-  /** Esc puts a box which is being dragged back first, then takes the selection away, and leaves the editor if
-   * there is none. */
+  /** Esc puts a box which is being dragged back first, or stops a relation which is being drawn, then puts the tool
+   * for relations away, then takes the selection away, and leaves the editor if there is none. */
   private void escape() {
     if (editing.cancelDrag()) {
+      showDiagram();
+    }
+    else if (editing.isRelationToolArmed()) {
+      editing.disarmRelationTool();
       showDiagram();
     }
     else if (editing.hasSelection()) {
@@ -117,6 +123,10 @@ public class ClassDiagramEditorWindow extends JDialog {
   private void showDiagram() {
     canvas.setScene(editing.scene());
     canvas.setSelection(editing.selectionMarks());
+    palette.showRelationToolArmed(editing.isRelationToolArmed());
+    canvas.setCursor(editing.isRelationToolArmed()
+      ? Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)
+      : Cursor.getDefaultCursor());
   }
 
   /** Runs the operation on the key and shows the diagram as it is afterwards. While a name is typed, the keys belong
@@ -128,6 +138,11 @@ public class ClassDiagramEditorWindow extends JDialog {
         showDiagram();
       }
     }, KeyStroke.getKeyStroke(keyCode, modifiers), JComponent.WHEN_IN_FOCUSED_WINDOW);
+  }
+
+  private void relationToolToggled() {
+    editing.toggleRelationTool();
+    showDiagram();
   }
 
   private void classDropped(Point screenPoint) {

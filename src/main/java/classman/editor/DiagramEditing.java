@@ -11,6 +11,7 @@ import classman.model.v001.ClassModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RelationEnd_V001;
+import classman.model.v001.RelationType_V001;
 import classman.model.v001.change.ElementTextChanger_V001;
 import classman.model.v001.change.ElementDeleter_V001;
 import classman.model.v001.io.ClassDiagramParseException;
@@ -52,6 +53,8 @@ public class DiagramEditing {
   private Scene scene;
   private AbstractDiagramElementModel_V001 selected;
   private Drag drag;
+  private RelationDrawing drawing;
+  private boolean isRelationToolArmed;
   private int undoableSteps;
   private int redoableSteps;
 
@@ -70,6 +73,8 @@ public class DiagramEditing {
     source = newSource;
     selected = null;
     drag = null;
+    drawing = null;
+    isRelationToolArmed = false;
   }
 
   public String source() { return source; }
@@ -215,8 +220,8 @@ public class DiagramEditing {
   }
 
   /** @return what the canvas shows to mark the selection: a frame around the selected box and around the class which
-   * the end of a relation is going to be hung onto, the handles and the places for missing texts of a selected
-   * relation, which are filled with the pale color of the change set while changes are tracked */
+   * the end of a relation is going to be hung onto or a relation which is drawn ends at, the line of that relation, the
+   * handles and the places for missing texts of a selected relation, which are filled with the pale color of the change set while changes are tracked */
   SelectionMarks selectionMarks() {
     List<Rectangle2D> frames = new ArrayList<>();
     if (selectedArea() != null) {
@@ -226,7 +231,7 @@ public class DiagramEditing {
       frames.add(connectionTargetArea());
     }
     return new SelectionMarks(frames, selectedHandles(), selectedPlaceholders(), trackedFieldColor(),
-      specialSelectionColor());
+      drawing != null ? drawing.line() : null, specialSelectionColor());
   }
 
   /** @return the color for the frame around the selected box if the usual one can't be told from the change set which
@@ -455,6 +460,9 @@ public class DiagramEditing {
   /** @return where the class is which the end of a relation which is being dragged is going to be hung onto, null if
    * it stays on its own class or nothing is dragged */
   public Rectangle2D connectionTargetArea() {
+    if (drawing != null) {
+      return drawing.targetArea();
+    }
     return drag != null ? drag.connectionTarget() : null;
   }
 
@@ -462,6 +470,10 @@ public class DiagramEditing {
    * at most the tolerance close, so that the line is vertical or horizontal. Nothing is reported to the host until the
    * drag ends. */
   public void dragTo(Point2D at, double snapTolerance) {
+    if (drawing != null) {
+      drawing.to(at, snapTolerance);
+      return;
+    }
     if (drag != null) {
       drag.to(at, snapTolerance);
       scene = host.renderer().layout(model);
@@ -475,6 +487,10 @@ public class DiagramEditing {
 
   /** Leaves the dragged thing where it is. If it has moved, that is one operation. */
   public void endDrag() {
+    if (drawing != null) {
+      endRelationDrawing();
+      return;
+    }
     Drag ended = drag;
     drag = null;
     if (ended != null && ended.hasMoved()) {
@@ -485,6 +501,10 @@ public class DiagramEditing {
   /** Puts the dragged thing back where it was before the drag.
    * @return false if there was no drag which had moved something */
   public boolean cancelDrag() {
+    if (drawing != null) {
+      drawing = null;
+      return true;
+    }
     Drag cancelled = drag;
     drag = null;
     if (cancelled == null || !cancelled.hasMoved()) {
@@ -509,6 +529,58 @@ public class DiagramEditing {
       }
     }
     return classes;
+  }
+
+  public boolean isRelationToolArmed() { return isRelationToolArmed; }
+
+  /** Arms the tool which draws an association from one class to another, or disarms it if it is armed. */
+  public void toggleRelationTool() {
+    isRelationToolArmed = !isRelationToolArmed;
+    drawing = null;
+  }
+
+  public void disarmRelationTool() {
+    isRelationToolArmed = false;
+    drawing = null;
+  }
+
+  /** Starts to draw a relation with the armed tool at the class which the press is on or at most the tolerance away
+   * from. Nothing happens if there is none. The relation is created where the mouse is released on a class, see
+   * {@link #endDrag}. */
+  public void startRelation(Point2D at, double tolerance) {
+    Map<ClassModel_V001, Rectangle2D> classes = new LinkedHashMap<>();
+    for (ClassModel_V001 box : model.classes()) {
+      classes.put(box, scene.elementAreaOf(box).area);
+    }
+    ClassModel_V001 from = ClassPicker.closest(classes, at, tolerance);
+    drawing = isRelationToolArmed && from != null ? new RelationDrawing(from, classes, at) : null;
+  }
+
+  /** Creates the association which was drawn, if the mouse was released on a class, and leaves the tool. If it was
+   * released on none, nothing is created and the tool stays armed, so the user can try again. */
+  private void endRelationDrawing() {
+    RelationDrawing finished = drawing;
+    drawing = null;
+    if (finished.target() == null) {
+      return;
+    }
+    AssociationRelationModel_V001 relation = new AssociationRelationModel_V001(RelationType_V001.ASSOCIATION,
+      idOf(finished.from()), idOf(finished.target()));
+    relation.directed = true;
+    relation.id = ids.newIdNotIn(usedIds());
+    markAsAdded(relation);
+    model.elements.add(relation);
+    selected = relation;
+    isRelationToolArmed = false;
+    publish();
+  }
+
+  /** A relation refers to its classes by ID, so a class which has none gets one. */
+  private String idOf(ClassModel_V001 box) {
+    if (box.id == null) {
+      box.id = ids.newIdNotIn(usedIds());
+    }
+    return box.id;
   }
 
   /** Deletes the selected box and what hangs on it, and selects nothing afterwards. While changes are tracked, what

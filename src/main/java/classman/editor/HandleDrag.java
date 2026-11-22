@@ -96,23 +96,8 @@ class HandleDrag extends Drag {
    * from it, the topmost one if several are equally close, otherwise the ID of the class the end hangs on now, so the
    * end keeps the class it caught last and doesn't jump back while the mouse is in the open */
   private String classAt(Point2D point, double tolerance) {
-    String closest = null;
-    double closestDistance = tolerance;
-    for (Map.Entry<String, Rectangle2D> reachable : reachableClasses.entrySet()) {
-      double distance = distance(reachable.getValue(), point);
-      if (distance <= closestDistance) {
-        closest = reachable.getKey();
-        closestDistance = distance;
-      }
-    }
+    String closest = ClassPicker.closest(reachableClasses, point, tolerance);
     return closest != null ? closest : hungOntoClassId;
-  }
-
-  /** The distance from the point to the rectangle, 0 if the point is on it. */
-  private static double distance(Rectangle2D area, Point2D point) {
-    double dx = Math.max(Math.max(area.getMinX() - point.getX(), 0), point.getX() - area.getMaxX());
-    double dy = Math.max(Math.max(area.getMinY() - point.getY(), 0), point.getY() - area.getMaxY());
-    return Math.hypot(dx, dy);
   }
 
   /** A coordinate which is within the tolerance of the same coordinate of a neighbor in the line becomes that one, so

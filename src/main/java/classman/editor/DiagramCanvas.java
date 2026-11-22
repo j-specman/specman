@@ -134,6 +134,7 @@ class DiagramCanvas extends JPanel implements Scrollable {
       g.translate(-originX, -originY);
       painter.paint(scene, g);
       paintSelection(g);
+      paintConnectionLine(g);
       paintPlaceholders(g);
       paintHandles(g);
     }
@@ -151,6 +152,15 @@ class DiagramCanvas extends JPanel implements Scrollable {
     for (Rectangle2D frame : marks.frames) {
       g.draw(new Rectangle2D.Double(frame.getX() - gap, frame.getY() - gap,
         frame.getWidth() + 2 * gap, frame.getHeight() + 2 * gap));
+    }
+  }
+
+  /** The line of a relation which is being drawn, as thick on the screen at every zoom as the frames. */
+  private void paintConnectionLine(Graphics2D g) {
+    if (marks.connectionLine != null) {
+      g.setColor(selectionColor());
+      g.setStroke(new BasicStroke((float) (SELECTION_WIDTH / zoom)));
+      g.draw(marks.connectionLine);
     }
   }
 

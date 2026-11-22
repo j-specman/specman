@@ -1,10 +1,8 @@
-|Stereotype |built |Existing one: double click, new one: dashed place above the selected class, see <<The Stereotype of a Class>>.
-|Tagged values, diagram name |open |
 :toc:
 
 # Classman Diagram Editor: Concept and Functional Description
 
-*Status: updated 2026-11-21. Describes what is built, what was decided and why, and what is open. It is kept up to date with every step of the editor, because it is the source for the Specman system use cases which will be derived from it later: the behavior is hard to read back from the code. Where something is planned and not built, it says so.*
+*Status: updated 2026-11-22. Describes what is built, what was decided and why, and what is open. It is kept up to date with every step of the editor, because it is the source for the Specman system use cases which will be derived from it later: the behavior is hard to read back from the code. Where something is planned and not built, it says so.*
 
 ## Goal
 Class diagrams are shown in the Aktogramm, painted with Graphics2D, and are edited in a window of their own: creating, moving, renaming and deleting every kind of element, without editing the diagram source by hand. The editor is later the core of Classman itself. It must not depend on Specman, and the interface between the two stays narrow.
@@ -51,7 +49,7 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Operation |Status |Remarks
 
 |Open the editor by double click on the diagram |built |Falls back to the source editor if the source can't be parsed or laid out.
-|Create a class by dragging it from the palette |built |The only palette button so far.
+|Create a class by dragging it from the palette |built |The first palette button; the second is the tool for associations.
 |Select a box |built |Classes, notes, association classes. Not yet: attributes, note links.
 |Select a relation |built |By a press on its line; the line is drawn thicker. Can be deleted, see <<Selecting>>.
 |Move a box |built |Routes and waypoints do not move with it.
@@ -60,9 +58,10 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Edit relation labels and multiplicities |built |Only where the relation already has the text.
 |Edit, add and delete attributes |built |By lines, see <<Attributes>>.
 |Undo and redo |built |Forwarded to Specman's history.
-|Stereotype, tagged values, diagram name |open |
+|Stereotype |built |Existing one: double click, new one: dashed place above the selected class, see <<The Stereotype of a Class>>.
+|Tagged values, diagram name |open |
 |Create other element kinds (interface, enum, note, association class) |open |
-|Create relations |open |
+|Create an association |built |By a tool: click the button, drag from one class to another, see <<Creating Elements>>. The other relation types (aggregation, composition, inheritance, implementation) are planned, with the same gesture.
 |Move the points of a route |built |Waypoints freely, the ends along the border of their class or hung onto another class (not while changes are tracked), see <<Selecting>>. Adding a waypoint and deleting one (double click on the line and on a handle) too.
 |Create a text which an element doesn't have yet (relation label, multiplicity) |built |Dashed places on the selected relation, see <<Texts Which a Relation Doesn't Have Yet>>. Not yet for tagged values and the diagram name.
 |Reorder attributes, attribute selection |open |
@@ -111,10 +110,19 @@ Specman's step buttons are drag sources: The user drags a step onto the diagram.
 * If changes are tracked, it gets `change(added, <change set>)`.
 * The new class is selected. One operation, one undo step.
 
+*Built, the association (first relation, as a vertical slice):*
+
+* A relation needs two ends and is a *tool*, not a drag source. The user clicks the button of the palette, which stays pressed, and the cursor on the diagram becomes a crosshair. A press on a class and a drag to another class draws the relation. A press which is not on a class (or at most 4 pixels of the screen away from one) starts nothing.
+* While the mouse is dragged, a line in the color of the selection runs from the center of the first class to the mouse. Where the mouse is on a class, or at most 6 pixels of the screen away from it (the closest one, the topmost one if equal, like for hanging an end), that class is framed like a selected box and the line ends at its center. Only classes can be ends, no notes or association classes.
+* Released on a class, the association is created: directed (open arrowhead at the target), from the first to the second class, a straight line without a route, no label, no multiplicities, a new ID. If changes are tracked, it gets `change(added, <change set>)`. A class which has no ID gets one, because a relation refers to its classes by ID. The new relation is selected, so its places for label and multiplicities are there right away, and the tool is put away (one-shot). One operation, one undo step.
+* Released on no class, nothing is created and the tool stays armed, so the user can try again. Esc stops a drawing which is going on; another Esc, or a click on the pressed button, puts the tool away. A press on a class without a drag creates nothing.
+* The same class can be both ends (a loop), but only after the mouse has been away from the class once, so that a shaky click on a class doesn't draw one.
+* While the tool is armed, classes can't be selected, moved or edited, and double clicks do nothing.
+
 *Planned:*
 
 * Boxes (interface, enum, note) are dragged onto the canvas in the same way.
-* *Relations* need two ends and are a *tool*: Click the button, the cursor changes, then drag from the first box to the second. The relation is created with a straight line, route points are the user's business afterwards. Afterwards the select tool is back (one-shot). Esc cancels an armed tool.
+* *The other relation types* (aggregation, composition, inheritance, implementation) work like the association, with the buttons and variants of <<Buttons with Variants (planned)>>. Inheritance and implementation have no multiplicities and always an arrowhead.
 * *Everything within a box* has no button: Attributes, enum values, stereotypes, tagged values, labels and multiplicities are created by editing in place, see <<Attributes>>.
 
 ## Selecting
