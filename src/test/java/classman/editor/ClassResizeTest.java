@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.RelationType_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
@@ -87,7 +88,7 @@ class ClassResizeTest {
     assertEquals(Cursor.W_RESIZE_CURSOR, cursorAt(leftEdge()).getType());
     assertEquals(Cursor.DEFAULT_CURSOR, cursorAt(new Point2D.Double(area.getCenterX(), area.getCenterY())).getType());
 
-    editing.toggleRelationTool();
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
 
     assertEquals(Cursor.CROSSHAIR_CURSOR, cursorAt(rightEdge()).getType());
   }

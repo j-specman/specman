@@ -65,7 +65,7 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Create a note |built |Palette button, dragged onto the canvas like a class, see <<Creating Elements>>.
 |Attach a note to a class, an attribute or a relation (anchor) |built |Palette tool: press on the note, drag to the target, see <<Creating Elements>>.
 |Create other element kinds (interface, enum, association class) |open |
-|Create an association |built |By a tool: click the button, drag from one class to another, see <<Creating Elements>>. The other relation types (aggregation, composition, inheritance, implementation) are planned, with the same gesture.
+|Create a relation (association, aggregation, composition, inheritance, implementation) |built |By a tool: click the button, drag from one class to another, see <<Creating Elements>>. Two buttons with variants, see <<Buttons with Variants>>.
 |Move the points of a route |built |Waypoints freely, the ends along the border of their class or hung onto another class (not while changes are tracked), see <<Selecting>>. Adding a waypoint and deleting one (double click on the line and on a handle) too.
 |Create a text which an element doesn't have yet (relation label, multiplicity) |built |Dashed places on the selected relation, see <<Texts Which a Relation Doesn't Have Yet>>. Tagged values are created with the context menu of the class. Not yet for the diagram name.
 |Reorder attributes, attribute selection |open |
@@ -86,8 +86,10 @@ There is one window, and it is modal: While it is open, the rest of Specman can'
 ### Palette
 The palette is a vertical tool bar at the left edge of the window, built like the step palette of Specman: buttons with an icon and a text, or with an icon only, which the user switches with the button at the bottom. The editor has its own preference for that. The most important element comes first, at the top: the class.
 
-#### Buttons with Variants (planned)
-The number of element kinds will grow, so related kinds share one button. A button with variants shows the icon and the text of the variant it creates, and has a small arrow at its corner which opens a menu with the other variants. Choosing a variant makes it the current one of the button; using the button creates it. The last choice is remembered.
+#### Buttons with Variants
+The number of element kinds will grow, so related kinds share one button. A button with variants shows the icon and the text of the variant it creates, and has a small arrow at its corner which opens a menu with all variants. Choosing a variant makes it the current one of the button and arms the tool for it right away (so one click less than choosing and then pressing the button). The last choice is remembered between sessions (preferences `variantAssociation` and `variantInheritance`). A press on the button itself, away from the arrow, arms the tool for the current variant; the button is as wide as the longest text of its variants, so the palette doesn't change its width. While a tool is armed, its button shows the variant which is armed.
+
+*Built:* the two relation buttons (association, aggregation, composition) and (inheritance, implementation). *Planned:* the buttons for class, interface, enum and for note, association class.
 
 Variants are grouped if they are used with the same gesture and differ in one property only:
 
@@ -97,8 +99,8 @@ Variants are grouped if they are used with the same gesture and differ in one pr
 
 |Class |class, interface, enum |drag onto canvas
 |Note |note, association class (open) |drag onto canvas
-|Association |association, aggregation, composition |tool
-|Inheritance |extends, implements |tool
+|Association |association, aggregation, composition |tool (built)
+|Inheritance |extends, implements |tool (built)
 |===
 
 Interface and enum are keywords of their own, because their content differs from a class: A class has attributes, an enum holds only its values, which are entered like attributes without a type, and an interface has no attributes. See <<Consequences for the Format>>.
@@ -152,7 +154,9 @@ Specman's step buttons are drag sources: The user drags a step onto the diagram.
 * *How the marks look:* like those of a relation. An added anchor line has a thick line in the strong color of the change set below its dashed line, along its whole route. A removed one is veiled grey, has a cross on its line (a quarter of the way along) and the thick line below it. The anchor line of a note which no change set marked has no mark. The anchor line of a new note has its own mark, the note's frame doesn't stand for it.
 * The end of the anchor line of a note which hangs on an attribute or a relation is placed by the layout as long as the end handle isn't moved (at the side of the attribute text which faces the note, at the middle of the longest part of the relation). Moving the end handle fixes it, see <<Selecting>>: along the border of the attribute text, or along the line of the relation. Selecting, bending and deleting the anchor line are built, see <<Selecting>> and <<Deleting>>.
 
-*Built, the association (first relation, as a vertical slice):*
+*Built, the association (first relation, as a vertical slice), and the other relation types:*
+
+* The other types work the same way, with the buttons and variants of <<Buttons with Variants>>. *Aggregation* and *composition* are drawn from the whole (the diamond) to the part and are not directed: the diamond is their mark, there is no arrowhead. *Inheritance* is drawn from the subclass to the superclass, *implementation* from the implementing class to the interface (any class for now, the interface is not an element of its own yet); both have the triangle at the target, no multiplicities and, for implementation, a dashed line. All of them get no route, no label and an ID, and are marked as added while changes are tracked, like the association.
 
 * A relation needs two ends and is a *tool*, not a drag source. The user clicks the button of the palette, which stays pressed, and the cursor on the diagram becomes a crosshair. A press on a class and a drag to another class draws the relation. A press which is not on a class (or at most 4 pixels of the screen away from one) starts nothing.
 * While the mouse is dragged, a line in the color of the selection runs from the center of the first class to the mouse. Where the mouse is on a class, or at most 6 pixels of the screen away from it (the closest one, the topmost one if equal, like for hanging an end), that class is framed like a selected box and the line ends at its center. Only classes can be ends, no notes or association classes.
@@ -164,7 +168,6 @@ Specman's step buttons are drag sources: The user drags a step onto the diagram.
 *Planned:*
 
 * Boxes (interface, enum) are dragged onto the canvas in the same way.
-* *The other relation types* (aggregation, composition, inheritance, implementation) work like the association, with the buttons and variants of <<Buttons with Variants (planned)>>. Inheritance and implementation have no multiplicities and always an arrowhead.
 * *Everything within a box* has no button: Attributes, enum values, stereotypes and tagged values are created by the context menu of the class and edited in place, labels and multiplicities by their places on a selected relation, see <<Attributes>> and <<The Context Menu of a Class>>.
 
 ## Selecting
@@ -429,7 +432,7 @@ These rules decide how a diagram with marks looks, also in the Aktogramm and in 
 * *Added or removed attribute:* the row has the pale color, its text the strong color behind it; removed attributes have a line through the text.
 * *Added or removed info of an attribute:* the same for the info only: its text has the strong color behind it, and a removed info keeps its text and has a line through it. The line keeps its length: a removed info was there before, so nothing grows.
 * *Added or removed stereotype:* the same as for an info: the text has the strong color behind it, a removed one keeps its text and has a line through it.
-* *Added or removed relation:* a band of 9 units in the strong color below the line. A removed relation has a grey line, a cross at a quarter of its longest part and a label which has the strong color behind it and a line through it.
+* *Added or removed relation:* a band of 9 units in the strong color below the line. A removed relation has a grey line, a cross at a quarter of its longest part and a label which has the strong color behind it and a line through it. The triangle of an inheritance or implementation is filled with the strong color too, because it would otherwise hide the band below it.
 * *Changed text:* a background in the strong color behind the part of the text which changed, see below. The old text is not shown, so the box doesn't change its size, which matters in hand-made layouts.
 * *Not marked:* moves, and the visibility sign of an attribute of an added or removed element.
 
@@ -492,7 +495,6 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 . A long changed text is marked by a diff now. Is the rule good for texts with many changes, and for the mark of a deletion? See the knobs under <<Which Part of a Changed Text is Marked>>.
 . Selection model: multiple selection, rubber band, keyboard navigation.
 . Keyboard shortcuts for tools and variants.
-. Does the variant of a button survive a restart?
 . Sticky tools (stay armed until Esc), e.g. with a double click on the button. One-shot is the default.
 . Does the window remember its position and size?
 . The marks in the PDF: which rule at which scale, see <<Display>>.

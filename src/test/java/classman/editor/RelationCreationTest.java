@@ -53,7 +53,7 @@ class RelationCreationTest {
   @Test
   void associationDrawn() throws ClassDiagramParseException {
     open(TWO_CLASSES);
-    editing.toggleRelationTool();
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
 
     draw(inClass(0), inClass(1));
 
@@ -74,7 +74,7 @@ class RelationCreationTest {
   @Test
   void targetFramedWhileDrawing() throws ClassDiagramParseException {
     open(TWO_CLASSES);
-    editing.toggleRelationTool();
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
     control.pressed(inClass(0));
 
     control.dragged(new Point2D.Double(200, 200));
@@ -90,7 +90,7 @@ class RelationCreationTest {
   @Test
   void cancelledDrawing() throws ClassDiagramParseException {
     open(TWO_CLASSES);
-    editing.toggleRelationTool();
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
 
     draw(inClass(0), new Point2D.Double(200, 200));
     assertTrue(editing.isRelationToolArmed());
@@ -109,7 +109,7 @@ class RelationCreationTest {
   @Test
   void pressOutsideOrWithoutDrag() throws ClassDiagramParseException {
     open(TWO_CLASSES);
-    editing.toggleRelationTool();
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
 
     draw(new Point2D.Double(200, 200), inClass(1));
     control.pressed(inClass(0));
@@ -123,7 +123,7 @@ class RelationCreationTest {
   @Test
   void loopOnlyAfterLeavingTheClass() throws ClassDiagramParseException {
     open(TWO_CLASSES);
-    editing.toggleRelationTool();
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
     Point2D inA = inClass(0);
 
     draw(inA, new Point2D.Double(inA.getX() + 2, inA.getY()));
@@ -143,7 +143,7 @@ class RelationCreationTest {
   void drawnRelationTracked() throws ClassDiagramParseException {
     host.trackedChangeSet = "yellow";
     open(TWO_CLASSES);
-    editing.toggleRelationTool();
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
 
     draw(inClass(0), inClass(1));
 
@@ -155,7 +155,7 @@ class RelationCreationTest {
   @Test
   void classWithoutIdGetsOne() throws ClassDiagramParseException {
     open("classdiagram {\n  class A at(10, 20)\n  class B (22222222) at(300, 20)\n}");
-    editing.toggleRelationTool();
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
 
     draw(inClass(0), inClass(1));
 
@@ -168,12 +168,73 @@ class RelationCreationTest {
   @Test
   void armedToolDoesNotMoveClasses() throws ClassDiagramParseException {
     open(TWO_CLASSES);
-    editing.toggleRelationTool();
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
     Rectangle2D before = editing.scene().elementAreas.get(0).area;
 
     draw(inClass(0), new Point2D.Double(200, 200));
 
     assertEquals(before, editing.scene().elementAreas.get(0).area);
     assertFalse(editing.hasSelection());
+  }
+
+  /** Aggregation and composition are drawn like the association, without an arrowhead: the diamond is their mark. */
+  @Test
+  void diamondRelationsAreUndirected() throws ClassDiagramParseException {
+    for (RelationType_V001 type : new RelationType_V001[] {RelationType_V001.AGGREGATION, RelationType_V001.COMPOSITION}) {
+      open(TWO_CLASSES);
+      editing.toggleRelationTool(type);
+
+      draw(inClass(0), inClass(1));
+
+      AssociationRelationModel_V001 relation = (AssociationRelationModel_V001) relationOf(editing.source());
+      assertEquals(type, relation.type);
+      assertEquals("11111111", relation.fromId);
+      assertEquals("22222222", relation.toId);
+      assertFalse(relation.directed);
+      assertFalse(editing.isRelationToolArmed());
+    }
+  }
+
+  /** Inheritance and implementation run from the subclass, or the implementing class, to the one they refer to. */
+  @Test
+  void inheritanceRelations() throws ClassDiagramParseException {
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.EXTENDS);
+    draw(inClass(0), inClass(1));
+    AbstractRelationModel_V001 extendsRelation = relationOf(editing.source());
+    assertEquals(RelationType_V001.EXTENDS, extendsRelation.type);
+    assertEquals("11111111", extendsRelation.fromId);
+    assertEquals("22222222", extendsRelation.toId);
+
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.IMPLEMENTS);
+    draw(inClass(0), inClass(1));
+    assertEquals(RelationType_V001.IMPLEMENTS, relationOf(editing.source()).type);
+  }
+
+  /** The button of another type changes what is drawn; the button of the type which is armed puts the tool away. */
+  @Test
+  void switchingTheRelationType() throws ClassDiagramParseException {
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.AGGREGATION);
+
+    editing.toggleRelationTool(RelationType_V001.EXTENDS);
+    assertTrue(editing.isRelationToolArmed());
+    assertEquals(RelationType_V001.EXTENDS, editing.armedRelationType());
+
+    editing.toggleRelationTool(RelationType_V001.EXTENDS);
+    assertFalse(editing.isRelationToolArmed());
+  }
+
+  /** The new relation is marked as added while changes are tracked, whatever its type is. */
+  @Test
+  void inheritanceTracked() throws ClassDiagramParseException {
+    host.trackedChangeSet = "yellow";
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.EXTENDS);
+
+    draw(inClass(0), inClass(1));
+
+    assertEquals(ChangeType_V001.ADDED, relationOf(editing.source()).change.type);
   }
 }

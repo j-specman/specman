@@ -10,6 +10,8 @@ import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.ExtendsRelationModel_V001;
+import classman.model.v001.ImplementsRelationModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RelationEnd_V001;
@@ -63,6 +65,7 @@ public class DiagramEditing {
   private Drag drag;
   private ConnectionDrawing drawing;
   private Tool armedTool = Tool.NONE;
+  private RelationType_V001 armedRelationType = RelationType_V001.ASSOCIATION;
   private int undoableSteps;
   private int redoableSteps;
 
@@ -725,16 +728,32 @@ public class DiagramEditing {
     return classes;
   }
 
-  public boolean isRelationToolArmed() { return armedTool == Tool.ASSOCIATION; }
+  public boolean isRelationToolArmed() { return armedTool == Tool.RELATION; }
+
+  /** @return the type of the relation which the relation tool draws, the last one which it was armed with */
+  public RelationType_V001 armedRelationType() { return armedRelationType; }
 
   public boolean isAnchorToolArmed() { return armedTool == Tool.ANCHOR; }
 
   /** @return true if a tool of the palette is armed, which takes the presses on the diagram for itself */
   public boolean isToolArmed() { return armedTool != Tool.NONE; }
 
-  /** Arms the tool which draws an association from one class to another, or disarms it if it is armed. */
-  public void toggleRelationTool() {
-    toggle(Tool.ASSOCIATION);
+  /** Arms the tool which draws a relation of the type from one class to another. If the tool is armed for that type
+   * already it is disarmed, if it is armed for another type it draws the new type from now on. */
+  public void toggleRelationTool(RelationType_V001 type) {
+    if (armedTool == Tool.RELATION && armedRelationType == type) {
+      disarmTool();
+    }
+    else {
+      armRelationTool(type);
+    }
+  }
+
+  /** Arms the tool which draws a relation of the type from one class to another, also if it is armed for it already. */
+  public void armRelationTool(RelationType_V001 type) {
+    armedRelationType = type;
+    armedTool = Tool.RELATION;
+    drawing = null;
   }
 
   /** Arms the tool which draws the anchor of a note to a class, or disarms it if it is armed. */
@@ -758,7 +777,7 @@ public class DiagramEditing {
   public void startDrawing(Point2D at, double tolerance) {
     ConnectionTargets targets = new ConnectionTargets(model, scene);
     drawing = null;
-    if (armedTool == Tool.ASSOCIATION) {
+    if (armedTool == Tool.RELATION) {
       ClassTarget from = targets.closestClass(at, tolerance);
       if (from != null) {
         drawing = new ConnectionDrawing(from.box, from.frame(), targets::closestClass, at);
@@ -784,20 +803,29 @@ public class DiagramEditing {
     if (finished.target() == null) {
       return;
     }
-    if (armedTool == Tool.ASSOCIATION) {
-      createAssociation(finished);
+    if (armedTool == Tool.RELATION) {
+      createRelation(finished);
     }
     else {
       anchorNote(finished);
     }
   }
 
-  private void createAssociation(ConnectionDrawing finished) {
+  /** Creates the relation of the armed type, a straight line without texts. An association is directed, the others
+   * have their marks (diamond, triangle) and no arrowhead of their own. */
+  private void createRelation(ConnectionDrawing finished) {
     ClassModel_V001 from = (ClassModel_V001) finished.from();
     String fromId = new ClassTarget(from, scene.elementAreaOf(from).area).ensureId(this::newId);
-    AssociationRelationModel_V001 relation = new AssociationRelationModel_V001(RelationType_V001.ASSOCIATION,
-      fromId, finished.target().ensureId(this::newId));
-    relation.directed = true;
+    String toId = finished.target().ensureId(this::newId);
+    AbstractRelationModel_V001 relation = switch (armedRelationType) {
+      case EXTENDS -> new ExtendsRelationModel_V001(fromId, toId);
+      case IMPLEMENTS -> new ImplementsRelationModel_V001(fromId, toId);
+      default -> {
+        AssociationRelationModel_V001 association = new AssociationRelationModel_V001(armedRelationType, fromId, toId);
+        association.directed = armedRelationType == RelationType_V001.ASSOCIATION;
+        yield association;
+      }
+    };
     relation.id = newId();
     markAsAdded(relation);
     model.elements.add(relation);

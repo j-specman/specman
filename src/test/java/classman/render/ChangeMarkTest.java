@@ -314,6 +314,19 @@ class ChangeMarkTest {
     assertEquals(1, rectanglesFilled(scene, YELLOW).size());
   }
 
+  /** The triangle of an inheritance or implementation which a change set added or removed is filled with the strong
+   * color, since it hides the thick line below it; an unmarked one stays white. */
+  @Test
+  void markedTriangleColored() throws ClassDiagramParseException {
+    String classes = "class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(200, 0)\n";
+    assertEquals(YELLOW, all(layout(classes + "extends change(added, yellow) aaaaaaaa -> bbbbbbbb"),
+        ScenePolygon.class).get(0).fill);
+    assertEquals(YELLOW, all(layout(classes + "implements change(removed, yellow) aaaaaaaa -> bbbbbbbb"),
+        ScenePolygon.class).get(0).fill);
+    assertEquals(DiagramStyle.WHITE, all(layout(classes + "extends aaaaaaaa -> bbbbbbbb"),
+        ScenePolygon.class).get(0).fill);
+  }
+
   /** A changed multiplicity and a changed label are highlighted, the line is left alone. */
   @Test
   void changedRelationTexts() throws ClassDiagramParseException {

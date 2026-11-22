@@ -20,9 +20,11 @@ import static classman.render.DiagramStyle.WHITE;
 /** Draws the marks at the ends of a relation: diamond, arrowhead or triangle. */
 public class RelationDecorator {
 
-    /** @param lineColor the color of the marks: the usual stroke color, or the veiled one for a removed relation */
+    /** @param lineColor the color of the marks: the usual stroke color, or the veiled one for a removed relation
+     * @param triangleFill the color inside the triangle of an inheritance or implementation: white, or the strong color
+     * of the change set which added or removed the relation */
     public List<AbstractSceneElement> decorations(AbstractRelationModel_V001 relation, List<Point2D.Double> path,
-                                                  String lineColor) {
+                                                  String lineColor, String triangleFill) {
         List<AbstractSceneElement> decorations = new ArrayList<>();
         Point2D.Double start = path.get(0);
         Point2D.Double end = path.get(path.size() - 1);
@@ -34,7 +36,7 @@ public class RelationDecorator {
             decorations.add(diamond(start, startDirection, lineColor, lineColor));
         }
         if (relation.type == RelationType_V001.EXTENDS || relation.type == RelationType_V001.IMPLEMENTS) {
-            decorations.add(triangle(end, endDirection, lineColor));
+            decorations.add(triangle(end, endDirection, triangleFill, lineColor));
         } else if (isDirected(relation)) {
             decorations.add(arrow(end, endDirection, lineColor));
         }
@@ -72,13 +74,13 @@ public class RelationDecorator {
             new double[]{tip.y, middle[1] + sideY, far[1], middle[1] - sideY}, fill, stroke);
     }
 
-    private ScenePolygon triangle(Point2D.Double tip, double[] direction, String stroke) {
+    private ScenePolygon triangle(Point2D.Double tip, double[] direction, String fill, String stroke) {
         double[] base = along(tip, direction, TRIANGLE_LENGTH);
         double sideX = -direction[1] * TRIANGLE_HALF_WIDTH;
         double sideY = direction[0] * TRIANGLE_HALF_WIDTH;
         return new ScenePolygon(
             new double[]{tip.x, base[0] + sideX, base[0] - sideX},
-            new double[]{tip.y, base[1] + sideY, base[1] - sideY}, WHITE, stroke);
+            new double[]{tip.y, base[1] + sideY, base[1] - sideY}, fill, stroke);
     }
 
     private ScenePolyline arrow(Point2D.Double tip, double[] direction, String stroke) {

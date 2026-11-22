@@ -36,7 +36,8 @@ public class RelationLayouter {
         List<AbstractSceneElement> elements = new ArrayList<>();
         ScenePolyline line = line(path, relation.type == RelationType_V001.IMPLEMENTS, lineColor);
         elements.add(line);
-        List<AbstractSceneElement> decorations = decorator.decorations(relation, path, lineColor);
+        List<AbstractSceneElement> decorations = decorator.decorations(relation, path, lineColor,
+            markLayouter.triangleFill(relation));
         elements.addAll(decorations);
         elements.addAll(texts.all());
         elements.addAll(markLayouter.overlay(relation, texts, PathGeometry.quarterPoint(path)));

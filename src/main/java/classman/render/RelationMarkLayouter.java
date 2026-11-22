@@ -15,6 +15,7 @@ import static classman.render.DiagramStyle.STRIKE_COLOR;
 import static classman.render.DiagramStyle.STRIKE_WIDTH;
 import static classman.render.DiagramStyle.STROKE;
 import static classman.render.DiagramStyle.VEILED_LINE;
+import static classman.render.DiagramStyle.WHITE;
 
 /**
  * Makes the change marks of a relation. An added or removed relation gets a thick line in the color of the change
@@ -34,6 +35,12 @@ public class RelationMarkLayouter {
     /** The color of the line and the marks at its ends. */
     public String lineColor(AbstractRelationModel_V001 relation) {
         return isRemoved(relation) ? VEILED_LINE : STROKE;
+    }
+
+    /** The color inside the triangle of an inheritance or implementation: the strong color of the change set if it
+     * added or removed the relation, since the thick line below would be hidden by a white triangle. */
+    public String triangleFill(AbstractRelationModel_V001 relation) {
+        return relation.change == null ? WHITE : palette.strong(relation.change.changeSet);
     }
 
     /** What goes below the line of the relation. */

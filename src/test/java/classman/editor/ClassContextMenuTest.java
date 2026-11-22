@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.RelationType_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.render.TextKind;
 import org.junit.jupiter.api.Test;
@@ -116,7 +117,7 @@ class ClassContextMenuTest {
   @Test
   void noMenuWhileToolIsArmed() throws Exception {
     open(BARE);
-    editing.toggleRelationTool();
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
 
     control.contextMenuRequested(insideClass());
 

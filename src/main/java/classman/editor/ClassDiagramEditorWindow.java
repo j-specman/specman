@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.RelationType_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 
 import javax.swing.JComponent;
@@ -53,7 +54,7 @@ public class ClassDiagramEditorWindow extends JDialog {
 
     palette = new EditorPalette(texts, screenPoint -> boxDropped(screenPoint, textEditor::startNewClass),
       screenPoint -> boxDropped(screenPoint, textEditor::startNewNote), this::relationToolToggled,
-      this::anchorToolToggled);
+      this::relationTypeChosen, this::anchorToolToggled);
     getContentPane().add(palette, BorderLayout.WEST);
     getContentPane().add(scrollPane, BorderLayout.CENTER);
 
@@ -128,7 +129,8 @@ public class ClassDiagramEditorWindow extends JDialog {
   private void showDiagram() {
     canvas.setScene(editing.scene());
     canvas.setSelection(editing.selectionMarks());
-    palette.showToolsArmed(editing.isRelationToolArmed(), editing.isAnchorToolArmed());
+    palette.showToolsArmed(editing.isRelationToolArmed() ? editing.armedRelationType() : null,
+      editing.isAnchorToolArmed());
     canvas.refreshCursor();
   }
 
@@ -151,8 +153,13 @@ public class ClassDiagramEditorWindow extends JDialog {
     menu.show(canvas, where.x, where.y);
   }
 
-  private void relationToolToggled() {
-    editing.toggleRelationTool();
+  private void relationToolToggled(RelationType_V001 type) {
+    editing.toggleRelationTool(type);
+    showDiagram();
+  }
+
+  private void relationTypeChosen(RelationType_V001 type) {
+    editing.armRelationTool(type);
     showDiagram();
   }
 

@@ -13,6 +13,10 @@ final class EditorIcons {
   static final String CLASS = "classman/editor/icons/class.svg";
   static final String NOTE = "classman/editor/icons/note.svg";
   static final String ASSOCIATION = "classman/editor/icons/association.svg";
+  static final String AGGREGATION = "classman/editor/icons/aggregation.svg";
+  static final String COMPOSITION = "classman/editor/icons/composition.svg";
+  static final String EXTENDS = "classman/editor/icons/extends.svg";
+  static final String IMPLEMENTS = "classman/editor/icons/implements.svg";
   static final String ANCHOR = "classman/editor/icons/anchor.svg";
   static final String HIDE_TEXT = "images/svg/material/left_panel_close.svg";
   static final String SHOW_TEXT = "images/svg/material/left_panel_open.svg";

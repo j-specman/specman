@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.RelationType_V001;
 import classman.model.v001.AnchorLineModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
@@ -195,7 +196,7 @@ class AnchorToolTest {
   void toolsExcludeEachOther() throws ClassDiagramParseException {
     open(DIAGRAM);
 
-    editing.toggleRelationTool();
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
     editing.toggleAnchorTool();
 
     assertTrue(editing.isAnchorToolArmed());
