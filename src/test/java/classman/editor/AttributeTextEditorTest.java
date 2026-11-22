@@ -82,6 +82,27 @@ class AttributeTextEditorTest {
     assertTrue(field().getWidth() >= box.width);
   }
 
+  /** An attribute takes one line: Ctrl+Return and Shift+Return make no line break, and pasted line breaks become
+   * blanks. */
+  @Test
+  void noLineBreaksInAttribute() throws Exception {
+    open(0);
+
+    SwingUtilities.invokeAndWait(() -> {
+      field().setText("-a\n: String\r\n[x]");
+      for (int modifiers : new int[] {java.awt.event.InputEvent.CTRL_DOWN_MASK, java.awt.event.InputEvent.SHIFT_DOWN_MASK}) {
+        java.awt.event.ActionListener action = field().getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, modifiers));
+        if (action != null) {
+          action.actionPerformed(new ActionEvent(field(), ActionEvent.ACTION_PERFORMED, ""));
+        }
+      }
+    });
+
+    String text = field().getText();
+    assertTrue(!text.contains("\n") && !text.contains("\r"), text);
+    assertEquals("-a : String [x]", text.strip());
+  }
+
   /** Return in a line which isn't the last commits it and ends. */
   @Test
   void returnInMiddleLine() throws Exception {

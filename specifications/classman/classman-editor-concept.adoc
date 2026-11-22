@@ -174,7 +174,7 @@ All texts are edited in place, with a text field which lies over the text.
 * The diagram is laid out anew after the commit only, not while typing.
 
 ### Ending
-* *Return* commits. A line break in a text is made with Shift+Return or Ctrl+Return; where a text must not have one (multiplicities, attribute lines), a line break makes the text invalid.
+* *Return* commits. A line break in a text is made with Shift+Return or Ctrl+Return; where a text must not have one (multiplicities), a line break makes the text invalid. In the field of an attribute line there is no line break at all: Ctrl+Return and Shift+Return do nothing, and line breaks which are pasted become blanks, so an attribute never has more than one line in its source (the diagram still wraps a long one at the width of the box).
 * *Esc* leaves the text as it was.
 * *Leaving the field* (a click elsewhere, another window) commits, as Return does. The element which is changed is the one which was edited, also if the click selected another box.
 * *Same text:* A text which is the same as before is no operation and no undo step.
@@ -237,7 +237,7 @@ An attribute is edited as a whole line, in the form in which the diagram shows i
 * *Type:* what stands after the first colon, up to the infos. Optional; a colon with nothing after it is no type. A diagram shows the colon only if there is a type: with no type, or with a type which a change set has removed, there is no colon either.
 * *Infos:* items between ` [` and the closing `]`, separated by commas. Optional. An item which contains a comma, a quote, a closing bracket or a backslash is shown and typed in double quotes: `["a, b", "say \"hi\""]`. Empty items are dropped.
 * *Not possible:* a name or type which contains a colon, or a name or type which contains ` [`: they would be taken for the next part.
-* *Invalid lines:* no name; brackets which aren't closed; a line break; the line `...` (the marker for attributes which the diagram doesn't show; it can't be edited and can't be typed).
+* *Invalid lines:* no name; brackets which aren't closed; a line break (which the field can't produce, only a hand-written source can); the line `...` (the marker for attributes which the diagram doesn't show; it can't be edited and can't be typed).
 * The field shows the attribute as the diagram does, so a line which is committed unchanged is no operation.
 
 ### Changing an Attribute

@@ -14,6 +14,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -90,10 +91,15 @@ class TextEditor {
     }));
     component.registerKeyboardAction(e -> commit(true), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
       JComponent.WHEN_FOCUSED);
-    component.registerKeyboardAction(e -> component.replaceSelection("\n"),
-      KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
-    component.registerKeyboardAction(e -> component.replaceSelection("\n"),
-      KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_FOCUSED);
+    if (text.kind == TextKind.ATTRIBUTE_LINE) {
+      ((AbstractDocument) component.getDocument()).setDocumentFilter(new SingleLineFilter());
+    }
+    else {
+      component.registerKeyboardAction(e -> component.replaceSelection("\n"),
+        KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
+      component.registerKeyboardAction(e -> component.replaceSelection("\n"),
+        KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_FOCUSED);
+    }
     component.registerKeyboardAction(e -> cancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
       JComponent.WHEN_FOCUSED);
     return component;
