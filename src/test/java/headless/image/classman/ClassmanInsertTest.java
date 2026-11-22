@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static specman.ops.AddImageSpecmanOp.EMPTY_CLASSMAN;
 
-/** A new Classman diagram is inserted with the toolbar button: empty, with the editor opening right away, or with the
- * source of a file. Only a file with source which the editor would accept as well is taken over. */
+/** A new Classman diagram is inserted with the toolbar button: empty, with the diagram editor opening right away, or
+ * with the source of a file. Only a file with source which the editor would accept as well is taken over. */
 class ClassmanInsertTest extends AbstractClassmanTest {
 
   private static final String REFUSED_MESSAGE_KEY = "msg.classman.file.invalid";
@@ -37,31 +37,35 @@ class ClassmanInsertTest extends AbstractClassmanTest {
     assertTrue(specman.classmanEmptyDiagramWasOffered(), "starting empty must be offered for a new diagram");
   }
 
-  /** Scenario: The first content of a new diagram belongs to its insertion, so a single undo takes the whole diagram
-   * out. Redo brings it back with its content. */
+  /** Scenario: The user works in the diagram editor which opened with the new diagram. The diagram stays when the
+   * editor is left, and what the editor did is undone step by step before the diagram itself goes. */
   @Test
-  void testFirstContentBelongsToTheInsertionSoOneUndoTakesTheWholeDiagramOut() {
+  void testDiagramStaysAfterTheDiagramEditorDidSomething() {
     EditContainer container = containerOfNewStep();
     ClassmanImageEditArea diagram = insertDiagramByToolbarButton(container);
 
-    diagram.commitSource(TWO_CLASSES);
+    diagram.changeSource(TWO_CLASSES);
+    diagram.firstEditClosed(EMPTY_CLASSMAN);
+
+    assertTrue(hasDiagram(container), "The diagram must stay");
     assertEquals(TWO_CLASSES, diagram.getSource());
 
     specman.undo();
-    assertFalse(hasDiagram(container), "A single undo must take the diagram out");
+    assertTrue(hasDiagram(container), "The first undo takes back what the editor did");
+    assertEquals(EMPTY_CLASSMAN, diagram.getSource());
 
-    specman.redo();
-    assertTrue(hasDiagram(container), "Redo must bring the diagram back");
-    assertEquals(TWO_CLASSES, diagram.getSource(), "...with its content");
+    specman.undo();
+    assertFalse(hasDiagram(container), "The second undo takes the diagram out");
   }
 
-  /** Scenario: Leaving the editor without content takes the diagram out as if it had never been inserted. */
+  /** Scenario: Leaving the diagram editor without having done anything takes the diagram out as if it had never been
+   * inserted. */
   @Test
   void testLeavingTheEditorWithoutContentTakesTheDiagramOutWithoutTrace() {
     EditContainer container = containerOfNewStep();
     ClassmanImageEditArea diagram = insertDiagramByToolbarButton(container);
 
-    diagram.editorClosed();
+    diagram.firstEditClosed(EMPTY_CLASSMAN);
 
     assertFalse(hasDiagram(container), "The diagram must be gone");
     assertFalse(specman.getUndoManager().canRedo(), "The insertion must not be redoable");

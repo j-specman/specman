@@ -38,8 +38,9 @@ class RelationTextTest {
   /** At a line coming up to a box, the multiplicity stands right of the line, just above the border. */
   @Test
   void multiplicityAboveBorderRightOfLine() throws ClassDiagramParseException {
-    Scene scene = layout(STACKED + "association aaaaaaaa 1 -> * bbbbbbbb");
-    assertText(textNamed(scene, "*"), 28, 86, TextAnchor.START);
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(0, 200)\n"
+        + "association aaaaaaaa 1 -> * bbbbbbbb");
+    assertText(textNamed(scene, "*"), 28, 190, TextAnchor.START);
   }
 
   /** At a horizontal line the multiplicities stand above it, next to the borders. */
@@ -98,12 +99,12 @@ class RelationTextTest {
     assertText(textNamed(scene, "lines"), 26, 91, TextAnchor.START);
   }
 
-  /** On a route the label goes to the middle of its longest part. */
+  /** On a route the label goes to the middle of its longest part, above the line where the line is highest under it. */
   @Test
   void labelOnLongestSegment() throws ClassDiagramParseException {
     Scene scene = layout("class A (aaaaaaaa) at(0, 0)\nclass B (bbbbbbbb) at(200, 100)\n"
         + "association aaaaaaaa -- bbbbbbbb \"on route\"\n  route aaaaaaaa.bottom@10 (10, 150) bbbbbbbb.left@20");
-    assertText(textNamed(scene, "on route"), 105, 129, TextAnchor.MIDDLE);
+    assertText(textNamed(scene, "on route"), 105, 122.68421052631578, TextAnchor.MIDDLE);
   }
 
   /** The scene is as large as it takes to show a label which reaches beyond the boxes. */

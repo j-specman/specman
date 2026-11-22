@@ -60,8 +60,9 @@ public final class BoxGeometry {
         return closest;
     }
 
-    /** How far from the start of the side the point is, in whole pixels, at most the length of the side. */
-    private static int offsetOn(Side_V001 side, Rectangle2D box, Point2D point) {
+    /** How far from the start of the side the point is, in whole pixels, at most the length of the side. Only the
+     * coordinate along the side counts. */
+    public static int offsetOn(Side_V001 side, Rectangle2D box, Point2D point) {
         boolean horizontal = side == Side_V001.TOP || side == Side_V001.BOTTOM;
         double along = horizontal ? point.getX() - box.getMinX() : point.getY() - box.getMinY();
         double length = horizontal ? box.getWidth() : box.getHeight();

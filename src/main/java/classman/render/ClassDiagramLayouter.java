@@ -75,7 +75,7 @@ public class ClassDiagramLayouter {
         });
         Map<String, Rectangle2D.Double> classAreas = classAreas(areas);
         for (AbstractRelationModel_V001 relation : model.relations()) {
-            RelationLayout relationLayout = relationLayouter.layout(relation, classAreas);
+            RelationLayout relationLayout = relationLayouter.layout(relation, classAreas, areas.values());
             elements.addAll(relationLayout.elements);
             underlays.addAll(relationLayout.underlay);
             covered = BoxGeometry.union(covered, relationLayout.bounds);

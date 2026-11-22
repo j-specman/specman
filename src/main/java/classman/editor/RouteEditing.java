@@ -80,17 +80,27 @@ class RouteEditing {
   /** Hangs the start of the route onto the class, at the point of its border which is closest to the given point. It
    * is the source class of the relation from then on. */
   void attachStart(AbstractRelationModel_V001 relation, String classId, Rectangle2D classArea, Point2D to) {
-    RouteModel_V001 route = relation.route;
     relation.fromId = classId;
-    relation.route = new RouteModel_V001(anchorAt(classId, classArea, to), route.waypoints, route.end);
+    slideStart(relation, anchorAt(classId, classArea, to));
   }
 
   /** Hangs the end of the route onto the class, at the point of its border which is closest to the given point. It is
    * the target class of the relation from then on. */
   void attachEnd(AbstractRelationModel_V001 relation, String classId, Rectangle2D classArea, Point2D to) {
-    RouteModel_V001 route = relation.route;
     relation.toId = classId;
-    relation.route = new RouteModel_V001(route.start, route.waypoints, anchorAt(classId, classArea, to));
+    slideEnd(relation, anchorAt(classId, classArea, to));
+  }
+
+  /** Puts the start of the route at another anchor, on the same class. */
+  void slideStart(AbstractRelationModel_V001 relation, AnchorModel_V001 anchor) {
+    RouteModel_V001 route = relation.route;
+    relation.route = new RouteModel_V001(anchor, route.waypoints, route.end);
+  }
+
+  /** Puts the end of the route at another anchor, on the same class. */
+  void slideEnd(AbstractRelationModel_V001 relation, AnchorModel_V001 anchor) {
+    RouteModel_V001 route = relation.route;
+    relation.route = new RouteModel_V001(route.start, route.waypoints, anchor);
   }
 
   /** Links the end of the relation's route to the center of its class again. A route which then has no waypoints and

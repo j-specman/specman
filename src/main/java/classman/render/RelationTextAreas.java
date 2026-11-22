@@ -39,25 +39,10 @@ public class RelationTextAreas {
 
     private void add(List<SceneTextArea> areas, AbstractRelationModel_V001 relation, TextKind kind,
                      List<SceneText> lines, boolean placeholder) {
-        Rectangle2D.Double area = areaOf(lines);
+        Rectangle2D.Double area = TextBlocks.areaOf(lines, measurer);
         if (area != null) {
             areas.add(placeholder ? SceneTextArea.placeholder(relation, kind, area)
                 : new SceneTextArea(relation, kind, area));
         }
-    }
-
-    private Rectangle2D.Double areaOf(List<SceneText> lines) {
-        Rectangle2D.Double area = null;
-        for (SceneText line : lines) {
-            Rectangle2D.Double lineArea = new Rectangle2D.Double(line.left(), line.y - measurer.ascent(),
-                line.width, measurer.lineHeight());
-            if (area == null) {
-                area = lineArea;
-            }
-            else {
-                area.add(lineArea);
-            }
-        }
-        return area;
     }
 }

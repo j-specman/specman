@@ -33,8 +33,8 @@ import java.awt.geom.Rectangle2D;
  * be operated, so nothing else changes the diagram. Esc and closing the window leave the editor, every operation has
  * already been reported to the host when it was completed. */
 public class ClassDiagramEditorWindow extends JDialog {
-  private static final int MIN_WIDTH = 500;
-  private static final int MIN_HEIGHT = 350;
+  private static final int MIN_WIDTH = 900;
+  private static final int MIN_HEIGHT = 650;
 
   private final DiagramEditing editing;
   private final EditorTexts texts;

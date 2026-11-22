@@ -13,6 +13,9 @@ import specman.editarea.image.SourceValidator;
 import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.undo.props.UDBL;
 
+import javax.swing.SwingUtilities;
+import java.awt.Rectangle;
+
 import static specman.ChangeSet.changeset;
 import static specman.Specman.editor;
 
@@ -65,11 +68,44 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
    * is also available in the context menu. */
   @Override
   protected void doubleClicked() {
+    openDiagramEditor();
+  }
+
+  /** @return false if the source can't be drawn, which opened the source editor instead */
+  private boolean openDiagramEditor() {
     try {
       new ClassDiagramEditorWindow(this, getSource(), new ClassmanEditorHost(this)).setVisible(true);
+      return true;
     }
     catch (ClassDiagramParseException | IllegalArgumentException problem) {
       editSource();
+      return false;
+    }
+  }
+
+  /** For a diagram which has just been inserted empty: opens the diagram editor right away, not the source editor
+   * like for other diagrams. The relayout which the insertion requested may still be pending, so the layout is
+   * completed and the diagram scrolled into view first, because the editor opens near the diagram. The window is
+   * modal, so this returns when the user has left it. */
+  @Override
+  public void startFirstEdit() {
+    if (!isShowing()) {
+      return;
+    }
+    SwingUtilities.getRoot(this).validate();
+    scrollRectToVisible(new Rectangle(getSize()));
+    String insertedSource = getSource();
+    if (openDiagramEditor()) {
+      firstEditClosed(insertedSource);
+    }
+  }
+
+  /** Called when the user has left the diagram editor which was opened for the diagram just inserted. If the source is
+   * as it was inserted, the user did nothing, and the diagram is taken out again, without trace. Otherwise it stays,
+   * and every operation of the editor is an undo step of its own. */
+  public void firstEditClosed(String insertedSource) {
+    if (getSource().equals(insertedSource)) {
+      editor().undoLastEditAndForget();
     }
   }
 

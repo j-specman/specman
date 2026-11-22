@@ -1,6 +1,8 @@
 package classman.render;
 
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /** Questions about the path of a relation. */
@@ -25,6 +27,29 @@ public final class PathGeometry {
 
     public static Point2D.Double middle(Point2D.Double from, Point2D.Double to) {
         return new Point2D.Double((from.x + to.x) / 2, (from.y + to.y) / 2);
+    }
+
+    /** The indexes of the points where the parts of the path start, the longest part first, parts of equal length in
+     * the order of the path. */
+    public static List<Integer> segmentsByLength(List<Point2D.Double> path) {
+        List<Integer> segments = new ArrayList<>();
+        for (int i = 0; i < path.size() - 1; i++) {
+            segments.add(i);
+        }
+        segments.sort(Comparator.comparingDouble((Integer i) -> path.get(i).distance(path.get(i + 1))).reversed());
+        return segments;
+    }
+
+    /** The y of the line through the two points at the given x. A line which doesn't run sideways is at the y of its first point. */
+    public static double yOnLine(Point2D.Double from, Point2D.Double to, double x) {
+        double dx = to.x - from.x;
+        return dx == 0 ? from.y : from.y + (x - from.x) * (to.y - from.y) / dx;
+    }
+
+    /** The x of the line through the two points at the given y. A line which doesn't run up or down is at the x of its first point. */
+    public static double xOnLine(Point2D.Double from, Point2D.Double to, double y) {
+        double dy = to.y - from.y;
+        return dy == 0 ? from.x : from.x + (y - from.y) * (to.x - from.x) / dy;
     }
 
     /** The point where things are attached to a relation: the middle of the longest part of its path. */

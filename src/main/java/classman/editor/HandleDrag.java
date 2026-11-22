@@ -1,7 +1,9 @@
 package classman.editor;
 
 import classman.model.v001.AbstractRelationModel_V001;
+import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RouteModel_V001;
+import classman.render.BoxGeometry;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -12,7 +14,9 @@ import java.util.Map;
 /** The dragging of one handle of a relation: a waypoint goes where the mouse takes it, an end slides along the border
  * of its class. The point follows the mouse by the distance between where the handle was grabbed and its center, so
  * it doesn't jump. It snaps to the line of its neighbors if it comes close, see {@link #snapped}, so that vertical and
- * horizontal lines are easy to get. An end is hung onto another class while the mouse is on that class or close to it,
+ * horizontal lines are easy to get. An end which is joined to the dragged point by a vertical or horizontal part of
+ * the line slides along its class with the point, so the part stays straight, see {@link StraightEnd}. An end is hung
+ * onto another class while the mouse is on that class or close to it,
  * and stays on the class it caught last while the mouse is on none. A relation without a route gets one on the first
  * move. Cancelling takes the route, the classes and the points back. */
 class HandleDrag extends Drag {
@@ -26,6 +30,7 @@ class HandleDrag extends Drag {
   private final Map<String, Rectangle2D> reachableClasses;
   private final String ownClassId;
   private boolean moved;
+  private List<StraightEnd> straightEnds = List.of();
   private RouteModel_V001 routeBefore;
   private String fromIdBefore;
   private String toIdBefore;
@@ -60,6 +65,7 @@ class HandleDrag extends Drag {
     if (!moved) {
       rememberState();
       routeEditing.ensureRoute(relation, path, fromArea, toArea);
+      straightEnds = StraightEnd.following(path, handle, relation.route, fromArea, toArea);
       moved = true;
     }
     Point2D grabbed = path.get(handle);
@@ -76,6 +82,23 @@ class HandleDrag extends Drag {
     else {
       routeEditing.moveWaypoint(relation, handle - 1, target);
     }
+    Point2D placed = placedHandle();
+    for (StraightEnd end : straightEnds) {
+      end.follow(routeEditing, relation, placed);
+    }
+  }
+
+  /** @return where the dragged handle stands now: a waypoint where it was put, an end where it sits on its class */
+  private Point2D placedHandle() {
+    RouteModel_V001 route = relation.route;
+    if (handle == 0) {
+      return BoxGeometry.sidePoint(reachableClasses.get(route.start.classId), route.start.side, route.start.offset);
+    }
+    if (handle == path.size() - 1) {
+      return BoxGeometry.sidePoint(reachableClasses.get(route.end.classId), route.end.side, route.end.offset);
+    }
+    PositionModel_V001 waypoint = route.waypoints.get(handle - 1);
+    return new Point2D.Double(waypoint.x, waypoint.y);
   }
 
   /** @return where the class is which the dragged end is hung onto now, if that is not the class it was hung onto when
