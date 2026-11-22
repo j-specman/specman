@@ -18,6 +18,7 @@ import classman.model.v001.RelationEnd_V001;
  * mark.
  */
 public class ElementTextChanger_V001 {
+    private final StereotypeChanger_V001 stereotypes = new StereotypeChanger_V001();
 
     /** Renames the class without tracking. */
     public void setClassName(ClassModel_V001 box, String newName) {
@@ -27,6 +28,18 @@ public class ElementTextChanger_V001 {
     /** Renames the class as a change of the change set. */
     public void setClassName(ClassModel_V001 box, String newName, String changeSet) {
         tracked(TextSlots_V001.nameOf(box), newName, changeSet, box.change == null);
+    }
+
+    /** Gives the class the stereotype, written without the angle brackets, without tracking. The empty text removes
+     * the stereotype. */
+    public void setStereotype(ClassModel_V001 box, String newStereotype) {
+        stereotypes.set(box, newStereotype, null);
+    }
+
+    /** Gives the class the stereotype, written without the angle brackets, as a change of the change set: it is added,
+     * removed (the empty text) or its text is changed, see {@link StereotypeChanger_V001}. */
+    public void setStereotype(ClassModel_V001 box, String newStereotype, String changeSet) {
+        stereotypes.set(box, newStereotype, changeSet);
     }
 
     /** Gives the note the text without tracking. */

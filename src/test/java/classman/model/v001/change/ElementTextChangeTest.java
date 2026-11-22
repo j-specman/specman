@@ -263,6 +263,72 @@ class ElementTextChangeTest {
     assertNull(added.toMultiplicityChange);
   }
 
+  /** A stereotype which a change set adds is marked as added, one which is changed gets a text mark. */
+  @Test
+  void stereotypeAddedAndChangedTracked() {
+    ClassModel_V001 box = new ClassModel_V001("A");
+
+    changer.setStereotype(box, "Entity", "blue");
+    assertEquals("Entity", box.stereotype);
+    assertEquals(ChangeType_V001.ADDED, box.stereotypeElementChange.type);
+    assertNull(box.stereotypeChange);
+
+    changer.setStereotype(box, "Table", "blue");
+    assertEquals("Table", box.stereotype);
+    assertNull(box.stereotypeChange);
+
+    ClassModel_V001 existing = new ClassModel_V001("B");
+    existing.stereotype = "Entity";
+    changer.setStereotype(existing, "Table", "blue");
+    assertEquals("Entity", existing.stereotypeChange.backup);
+    assertNull(existing.stereotypeElementChange);
+  }
+
+  /** A removed stereotype keeps its text and is marked as removed; typing it again takes the mark away, another text
+   * is a change of the text. One which the change set has added is gone completely. */
+  @Test
+  void stereotypeRemovedTracked() {
+    ClassModel_V001 box = new ClassModel_V001("A");
+    box.stereotype = "Entity";
+    box.stereotypeId = "e3a1d7c2";
+
+    changer.setStereotype(box, "", "blue");
+    assertEquals("Entity", box.stereotype);
+    assertEquals(ChangeType_V001.REMOVED, box.stereotypeElementChange.type);
+
+    changer.setStereotype(box, "Entity", "blue");
+    assertNull(box.stereotypeElementChange);
+    assertNull(box.stereotypeChange);
+
+    changer.setStereotype(box, "", "blue");
+    changer.setStereotype(box, "Table", "blue");
+    assertNull(box.stereotypeElementChange);
+    assertEquals("Entity", box.stereotypeChange.backup);
+
+    ClassModel_V001 added = new ClassModel_V001("B");
+    changer.setStereotype(added, "Entity", "blue");
+    changer.setStereotype(added, "", "blue");
+    assertNull(added.stereotype);
+    assertNull(added.stereotypeElementChange);
+  }
+
+  /** Without tracking the empty text takes the stereotype away with its ID, and marks inside a changed class are not set. */
+  @Test
+  void stereotypeUntrackedAndInChangedClass() {
+    ClassModel_V001 box = new ClassModel_V001("A");
+    box.stereotype = "Entity";
+    box.stereotypeId = "e3a1d7c2";
+    changer.setStereotype(box, "");
+    assertNull(box.stereotype);
+    assertNull(box.stereotypeId);
+
+    ClassModel_V001 added = new ClassModel_V001("B");
+    added.change = new ChangeModel_V001(ChangeType_V001.ADDED, "blue");
+    changer.setStereotype(added, "Entity", "blue");
+    assertEquals("Entity", added.stereotype);
+    assertNull(added.stereotypeElementChange);
+  }
+
   private static AssociationRelationModel_V001 association() {
     return new AssociationRelationModel_V001(RelationType_V001.ASSOCIATION, "11111111", "22222222");
   }

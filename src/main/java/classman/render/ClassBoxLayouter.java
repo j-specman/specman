@@ -57,7 +57,7 @@ public class ClassBoxLayouter {
         boolean isRemoved = change != null && change.type == ChangeType_V001.REMOVED;
         String textColor = isRemoved ? VEILED_TEXT : null;
         String lineColor = isRemoved ? VEILED_STROKE : STROKE;
-        String stereotype = model.stereotype == null ? null : "<<" + model.stereotype + ">>";
+        String stereotype = model.stereotype == null ? null : stereotypeText(model.stereotype);
         MarkedText taggedValues = taggedValues(model);
         List<MarkedText> attributes = attributeTexts(model);
         double contentWidth = contentWidth(model, stereotype, taggedValues, attributes);
@@ -70,6 +70,7 @@ public class ClassBoxLayouter {
         List<SceneText> stereotypeLines = new ArrayList<>();
         y = addCenteredText(elements, stereotypeLines, stereotype, false, contentWidth, width, y, textColor);
         double nameTop = y;
+        double stereotypeTop = PADDING_Y;
         List<SceneText> nameLines = new ArrayList<>();
         y = addCenteredText(elements, nameLines, model.name, true, contentWidth, width, y,
             isRemoved ? VEILED_MARKED_TEXT : null);
@@ -87,7 +88,7 @@ public class ClassBoxLayouter {
         y += PADDING_Y;
 
         if (change == null) {
-            addHeaderMarks(backgrounds, model, stereotypeLines, nameLines, taggedValues, taggedLines);
+            addHeaderMarks(backgrounds, overlays, model, stereotypeLines, nameLines, taggedValues, taggedLines);
         } else if (isRemoved) {
             backgrounds.addAll(highlighter.wholeHighlights(change.changeSet, nameLines));
             overlays.addAll(highlighter.strikes(nameLines));
@@ -100,10 +101,17 @@ public class ClassBoxLayouter {
         all.addAll(backgrounds);
         all.addAll(elements);
         all.addAll(overlays);
-        Map<TextKind, Rectangle2D.Double> textAreas = Map.of(TextKind.CLASS_NAME,
-            new Rectangle2D.Double(PADDING_X, nameTop, contentWidth, nameBottom - nameTop));
+        Map<TextKind, Rectangle2D.Double> textAreas = new LinkedHashMap<>();
+        if (stereotype != null) {
+            textAreas.put(TextKind.STEREOTYPE,
+                new Rectangle2D.Double(PADDING_X, stereotypeTop, contentWidth, nameTop - stereotypeTop));
+        }
+        textAreas.put(TextKind.CLASS_NAME, new Rectangle2D.Double(PADDING_X, nameTop, contentWidth, nameBottom - nameTop));
+        Map<TextKind, Rectangle2D.Double> placeholderAreas = stereotype == null && !isRemoved
+            ? Map.of(TextKind.STEREOTYPE, stereotypePlaceholder(width))
+            : Map.of();
         return new BoxLayout(width, y, all, attributeAreas, change == null ? 0 : FRAME_STROKE_WIDTH / 2, textAreas,
-            new AttributeLineAreas(lineAreas));
+            new AttributeLineAreas(lineAreas), placeholderAreas);
     }
 
     private SceneRectangle frame(double width, double height, ChangeModel_V001 change) {
@@ -115,14 +123,41 @@ public class ClassBoxLayouter {
         return ColorMix.blend(fill, WHITE, VEIL_SHARE);
     }
 
-    private void addHeaderMarks(List<AbstractSceneElement> backgrounds, ClassModel_V001 model,
-                                List<SceneText> stereotypeLines, List<SceneText> nameLines, MarkedText taggedValues,
+    private void addHeaderMarks(List<AbstractSceneElement> backgrounds, List<AbstractSceneElement> overlays,
+                                ClassModel_V001 model, List<SceneText> stereotypeLines, List<SceneText> nameLines, MarkedText taggedValues,
                                 List<SceneText> taggedLines) {
-        backgrounds.addAll(highlighter.wholeHighlights(model.stereotypeChange, stereotypeLines));
+        markStereotype(backgrounds, overlays, model, stereotypeLines);
         backgrounds.addAll(highlighter.changeHighlights(model.nameChange, model.name, nameLines));
         if (taggedValues != null) {
             backgrounds.addAll(highlighter.highlights(taggedValues, taggedLines));
         }
+    }
+
+    /** An added stereotype is marked, a removed one keeps its text and has a line through it, the text mark of any
+     * other one covers the whole text. */
+    private void markStereotype(List<AbstractSceneElement> backgrounds, List<AbstractSceneElement> overlays,
+                                ClassModel_V001 model, List<SceneText> stereotypeLines) {
+        ChangeModel_V001 stereotypeChange = model.stereotypeElementChange;
+        if (stereotypeChange == null) {
+            backgrounds.addAll(highlighter.wholeHighlights(model.stereotypeChange, stereotypeLines));
+            return;
+        }
+        backgrounds.addAll(highlighter.wholeHighlights(stereotypeChange.changeSet, stereotypeLines));
+        if (stereotypeChange.type == ChangeType_V001.REMOVED) {
+            overlays.addAll(highlighter.strikes(stereotypeLines));
+        }
+    }
+
+    /** Where a stereotype would stand: centered above the top edge of the class, outside of the box. */
+    private Rectangle2D.Double stereotypePlaceholder(double boxWidth) {
+        double width = measurer.width(stereotypeText(DiagramStyle.STEREOTYPE_PLACEHOLDER), false);
+        double height = measurer.lineHeight();
+        return new Rectangle2D.Double((boxWidth - width) / 2,
+            -DiagramStyle.STEREOTYPE_PLACEHOLDER_GAP - height, width, height);
+    }
+
+    private static String stereotypeText(String stereotype) {
+        return TextKind.STEREOTYPE.prefix + stereotype + TextKind.STEREOTYPE.suffix;
     }
 
     // ---- texts ----

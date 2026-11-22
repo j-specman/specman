@@ -3,6 +3,8 @@ package classman.render;
 /** The kinds of text which the editor lets the user change in place, and how each is drawn and typed. */
 public enum TextKind {
     CLASS_NAME(true, true, false, false, 120, 0),
+    /** Typed without the angle brackets, which the diagram draws around it. Empty removes the stereotype. */
+    STEREOTYPE(false, true, false, true, 80, 0, "<<", ">>"),
     NOTE_TEXT(false, false, true, false, 120, 0),
     RELATION_LABEL(false, false, false, true, 80, DiagramStyle.TEXT_HIT_PADDING),
     FROM_MULTIPLICITY(false, false, false, true, 40, DiagramStyle.TEXT_HIT_PADDING),
@@ -20,13 +22,23 @@ public enum TextKind {
     public final int minFieldWidth;
     /** How far around the text a double click still counts as one on the text, in diagram units. */
     public final double hitPadding;
+    /** What the diagram draws in front of and behind the text, which the user doesn't type. */
+    public final String prefix;
+    public final String suffix;
 
     TextKind(boolean bold, boolean centered, boolean wrapped, boolean optional, int minFieldWidth, double hitPadding) {
+        this(bold, centered, wrapped, optional, minFieldWidth, hitPadding, "", "");
+    }
+
+    TextKind(boolean bold, boolean centered, boolean wrapped, boolean optional, int minFieldWidth, double hitPadding,
+             String prefix, String suffix) {
         this.bold = bold;
         this.centered = centered;
         this.wrapped = wrapped;
         this.optional = optional;
         this.minFieldWidth = minFieldWidth;
         this.hitPadding = hitPadding;
+        this.prefix = prefix;
+        this.suffix = suffix;
     }
 }

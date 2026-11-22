@@ -63,10 +63,14 @@ final class TextSlots_V001 {
             () -> association.toMultiplicityChange, mark -> association.toMultiplicityChange = mark);
     }
 
+    static TextSlot_V001 stereotypeOf(ClassModel_V001 classModel) {
+        return optional(() -> classModel.stereotype, text -> classModel.stereotype = text,
+            () -> classModel.stereotypeChange, mark -> classModel.stereotypeChange = mark);
+    }
+
     private static void addClass(List<TextSlot_V001> slots, ClassModel_V001 classModel) {
         slots.add(nameOf(classModel));
-        slots.add(optional(() -> classModel.stereotype, text -> classModel.stereotype = text,
-            () -> classModel.stereotypeChange, mark -> classModel.stereotypeChange = mark));
+        slots.add(stereotypeOf(classModel));
         for (TaggedValueModel_V001 tag : classModel.taggedValues) {
             slots.add(mandatory(() -> tag.key, text -> tag.key = text,
                 () -> tag.keyChange, mark -> tag.keyChange = mark));

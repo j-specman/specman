@@ -161,6 +161,14 @@ class ClassDiagramSerializer_V001Test {
       written);
   }
 
+  /** The stereotype has its text mark, its ID and its element mark in this order, one behind the other. */
+  @Test
+  void stereotypeMarksWritten() throws ClassDiagramParseException {
+    String written = roundTrip("classdiagram { class A (aaaaaaaa) <<Entity>> was(yellow, Enty) (bbbbbbbb) change(added, yellow)\n}");
+    assertTrue(written.contains("class A (aaaaaaaa) <<Entity>> was(yellow, Enty) (bbbbbbbb) change(added, yellow)\n"),
+      written);
+  }
+
   /** A removed label (empty string with mark) is kept, a mark without backup stays without backup. */
   @Test
   void emptyTextWithMark() throws ClassDiagramParseException {

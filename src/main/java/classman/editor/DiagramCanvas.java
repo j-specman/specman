@@ -31,6 +31,8 @@ class DiagramCanvas extends JPanel implements Scrollable {
   private static final int SELECTION_GAP = 4;
   private static final int SELECTION_WIDTH = 2;
   private static final int SELECTION_ALPHA = 190;
+  /** Empty space above the diagram, in points of the diagram, for the place of a stereotype above the top class. */
+  private static final double HEADROOM = 24;
   private static final double HANDLE_DIAMETER = 9;
   private static final double PLACEHOLDER_DASH = 3;
   private static final int PLACEHOLDER_GAP = 2;
@@ -74,7 +76,7 @@ class DiagramCanvas extends JPanel implements Scrollable {
     SvgFrame frame = SvgFrame.of(scene);
     if (!pointer.isDragging()) {
       originX = frame.x;
-      originY = frame.y;
+      originY = frame.y - HEADROOM;
     }
     extentWidth = Math.max(0, frame.x + frame.width - originX);
     extentHeight = Math.max(0, frame.y + frame.height - originY);

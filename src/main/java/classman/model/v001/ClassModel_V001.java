@@ -18,6 +18,9 @@ public class ClassModel_V001 extends AbstractDiagramElementModel_V001 {
     public TextChangeModel_V001 stereotypeChange;
     /** Null if the stereotype has no ID, or there is no stereotype. */
     public String stereotypeId;
+    /** Null if no change set added or removed the stereotype. A removed stereotype keeps its text and is shown struck
+     * through, like a removed info of an attribute. Not used for a text which is changed. */
+    public ChangeModel_V001 stereotypeElementChange;
     public final List<TaggedValueModel_V001> taggedValues = new ArrayList<>();
     public final List<AttributeModel_V001> attributes = new ArrayList<>();
 

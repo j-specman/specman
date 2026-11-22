@@ -46,6 +46,18 @@ class ElementChangeResolutionTest {
     assertEquals(canonical("class A (aaaaaaaa) {\n -y\n -z\n}"), rejected(source, "yellow"));
   }
 
+
+  /** A stereotype is a list entry like an info: accepting or rejecting its mark keeps it or takes it away with its ID. */
+  @Test
+  void stereotypeMarks() throws ClassDiagramParseException {
+    String added = "class A (aaaaaaaa) <<Entity>> (bbbbbbbb) change(added, yellow)";
+    assertEquals(canonical("class A (aaaaaaaa) <<Entity>> (bbbbbbbb)"), accepted(added, "yellow"));
+    assertEquals(canonical("class A (aaaaaaaa)"), rejected(added, "yellow"));
+    String removed = "class A (aaaaaaaa) <<Entity>> (bbbbbbbb) change(removed, yellow)";
+    assertEquals(canonical("class A (aaaaaaaa)"), accepted(removed, "yellow"));
+    assertEquals(canonical("class A (aaaaaaaa) <<Entity>> (bbbbbbbb)"), rejected(removed, "yellow"));
+  }
+
   /** Relations follow the same rules as classes. */
   @Test
   void relationMarks() throws ClassDiagramParseException {

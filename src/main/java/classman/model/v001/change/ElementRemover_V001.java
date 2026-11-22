@@ -18,6 +18,9 @@ class ElementRemover_V001 {
     void remove(ClassDiagramModel_V001 model) {
         model.elements.removeIf(element -> elementVanishes(element));
         for (ClassModel_V001 classModel : ClassBoxes_V001.of(model)) {
+            if (vanishing.vanishes(classModel.stereotypeElementChange)) {
+                StereotypeChanger_V001.clear(classModel);
+            }
             classModel.attributes.removeIf(attribute -> vanishing.vanishes(attribute.change));
             for (AttributeModel_V001 attribute : classModel.attributes) {
                 attribute.infos.removeIf(info -> vanishing.vanishes(info.change));

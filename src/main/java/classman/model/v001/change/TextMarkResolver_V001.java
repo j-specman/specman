@@ -47,11 +47,11 @@ class TextMarkResolver_V001 {
         return text == null || text.isEmpty() ? null : text;
     }
 
-    /** Tagged values and info items without a text are taken out, and a stereotype without a text loses its ID. */
+    /** Tagged values and info items without a text are taken out, and a stereotype without a text loses its ID and marks. */
     private void removeGoneTexts(ClassDiagramModel_V001 model) {
         for (ClassModel_V001 classModel : ClassBoxes_V001.of(model)) {
             if (classModel.stereotype == null) {
-                classModel.stereotypeId = null;
+                StereotypeChanger_V001.clear(classModel);
             }
             classModel.taggedValues.removeIf(tag -> tag.value == null);
             for (AttributeModel_V001 attribute : classModel.attributes) {

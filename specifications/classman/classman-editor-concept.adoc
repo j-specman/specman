@@ -1,3 +1,5 @@
+|Stereotype |built |Existing one: double click, new one: dashed place above the selected class, see <<The Stereotype of a Class>>.
+|Tagged values, diagram name |open |
 :toc:
 
 # Classman Diagram Editor: Concept and Functional Description
@@ -62,7 +64,7 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Create other element kinds (interface, enum, note, association class) |open |
 |Create relations |open |
 |Move the points of a route |built |Waypoints freely, the ends along the border of their class or hung onto another class (not while changes are tracked), see <<Selecting>>. Adding a waypoint and deleting one (double click on the line and on a handle) too.
-|Create a text which an element doesn't have yet (relation label, multiplicity) |built |Dashed places on the selected relation, see <<Texts Which a Relation Doesn't Have Yet>>. Not yet for the stereotype, tagged values and diagram name.
+|Create a text which an element doesn't have yet (relation label, multiplicity) |built |Dashed places on the selected relation, see <<Texts Which a Relation Doesn't Have Yet>>. Not yet for tagged values and the diagram name.
 |Reorder attributes, attribute selection |open |
 |Width of a box by dragging its side |open |
 |===
@@ -120,7 +122,7 @@ Specman's step buttons are drag sources: The user drags a step onto the diagram.
 * *Relations:* A press on the line of a relation selects it, if it is at most 4 pixels of the screen away from the line, whatever the zoom is, so that the line can be hit when the diagram is shown small. Where a box and a line are both hit, the box wins: a press next to the border of a box, where lines start, selects the box.
 * A selected relation is shown by its line and the marks at its ends (arrowhead, triangle, diamond), which are drawn 2.5 units wide instead of 1, with round corners so that the sharp tips of the marks reach only about 1.25 units into the box they point at. It has no frame. Each part keeps its place in the order of drawing, so the marks stay above the line. A relation can be deleted with the Delete key, see <<Deleting>>. It can't be moved or dragged: it has no position.
 * A selected relation also shows its points: small circles (9 pixels of the screen wide, white, outlined in the color of the selection, the same size at every zoom) where its line starts, at each waypoint, and where it ends. They are the grips for moving the points, see below. A relation without a route has the two ends, a loop its five points.
-* *Moving a point:* A press on a handle of the selected relation, or of a relation which the press selects, and a drag (after 3 pixels, like for a box) moves the point; it is one operation, one undo step, Esc puts it back. The point follows the mouse by the distance which it was moved, so it doesn't jump to the mouse. A *waypoint* goes wherever the mouse takes it, in whole pixels. *Snapping:* so that vertical and horizontal lines are easy to get, a point which is dragged snaps to the line of its neighbors, the points before and after it in the line (the ends of the line count as neighbors too): if its x is at most 6 pixels of the screen (at every zoom) away from the x of a neighbor, it takes that x, so the part of the line to the neighbor is vertical; the same for y and horizontal. x and y snap on their own, so a point can snap to one neighbor in x and the other in y, which gives a right angle, and where both neighbors are close the closer one wins. The *start and end* of the line slide along the border of their class, also around its corners to another side: they are at the point of the border which is closest to the mouse, after snapping to their neighbor, and can be hung onto another class, see below. There is no guide line which shows the snapping, and no key which switches it off so far.
+* *Moving a point:* A press on a handle of the selected relation, or of a relation which the press selects, and a drag (after 3 pixels, like for a box) moves the point; it is one operation, one undo step, Esc puts it back. The point follows the mouse by the distance which it was moved, so it doesn't jump to the mouse. A *waypoint* goes wherever the mouse takes it, in whole pixels. *Snapping:* so that vertical and horizontal lines are easy to get, a point which is dragged snaps to the line of its neighbors, the points before and after it in the line (the ends of the line count as neighbors too): if its x is at most 6 pixels of the screen (at every zoom) away from the x of a neighbor, it takes that x, so the part of the line to the neighbor is vertical; the same for y and horizontal. x and y snap on their own, so a point can snap to one neighbor in x and the other in y, which gives a right angle, and where both neighbors are close the closer one wins. The *start and end* of the line slide along the border of their class, also around its corners to another side: they are at the point of the border which is closest to the mouse, after snapping to their neighbor, and can be hung onto another class, see below. There is no guide line which shows the snapping (decided: it isn't needed), and no key which switches it off so far.
 * *Hanging an end onto another class:* While an end of the line (start or end) is dragged, it hangs on the class which the mouse is on or at most 6 pixels of the screen away from, the closest one, and the topmost one where several are equally close. It sits at the point of that class's border which is closest to the mouse (after snapping), the waypoints stay. The class which it is going to hang on is framed like a selected box, as long as it is not the class the end was hanging on when the drag started. Where the mouse is on no class, the end stays on the class it caught last (at the start, its own), so the line doesn't jump back and forth between classes while the user drags over several; to take it back to its own class the mouse has to go onto that class again, or the user presses Esc. Only classes can be targets, no notes or association classes. The same class at both ends is possible (a loop). Esc puts the classes, the route and the points back. The relation keeps its ID, its association class and its attached notes. One operation, one undo step.
 * *Not while changes are tracked:* Hanging a relation onto another class is a change of what it connects, which the format has no mark for, and a rejected change couldn't bring back the old class and anchor. So while changes are tracked an end stays on its class and can only slide along its border. This is decided and final, not a gap: the user deletes the relation and adds a new one, so that the change is visible as one. A relation which the tracked change set has added itself is no exception. A relation without a route gets one with the first move, which runs along its line as it is now (see below), and loses it again if the drag is cancelled. A press on a handle without a move changes nothing. Not marked as a change.
 * A press on a handle of the selected relation (4 pixels of the screen around its center, like the line) keeps the relation selected, also where a box lies below the handle: the handles are above everything.
@@ -153,7 +155,7 @@ All texts are edited in place, with a text field which lies over the text.
 
 ### Starting
 * A double click on a text starts it. The first press of the double click selects the box under it, if there is one.
-* The texts of the selected box can be changed: the name of a class (only its name row, not the stereotype or the tagged values), the text of a note, the lines of the attributes. The texts of a relation, its label and its multiplicities, can be changed without selecting anything. A text on a box which isn't selected can't be edited.
+* The texts of the selected box can be changed: the name of a class (its name row), its stereotype (its row above the name, not the tagged values), the text of a note, the lines of the attributes. The texts of a relation, its label and its multiplicities, can be changed without selecting anything. A text on a box which isn't selected can't be edited.
 * Short texts have a larger area where a double click counts: the multiplicities and labels of relations reach 3 diagram units around the text.
 * Only one text is edited at a time.
 
@@ -178,6 +180,7 @@ All texts are edited in place, with a text field which lies over the text.
 |Text |Rules
 
 |Class name |Bold, centered. May have several lines. Mandatory.
+|Stereotype |Plain, centered, one line, above the name. Typed without the angle brackets, which the field shows around the text and the diagram draws. May not contain `>`. Optional: empty removes it. See <<The Stereotype of a Class>>.
 |Note text |Plain, left aligned, wrapped at the width of the note. May have several lines. Mandatory.
 |Relation label |Plain. May have several lines. Optional: empty removes it. Stands at the middle of the longest part of the line.
 |Multiplicity |One at each end of an association, aggregation and composition. Free text, one line, optional. Anything is allowed, for example `1..<maximum capacity>`. In the source it is written without quotes if it is a number, a range like `0..1` or `1..*`, or `*`, otherwise in double quotes.
@@ -195,6 +198,16 @@ A selected relation shows where its missing texts would stand, as dashed rectang
 * The places lie beside the line, so a double click on the line itself still adds a waypoint.
 
 A relation which has no label or multiplicity yet and isn't selected has no area to double click.
+
+### The Stereotype of a Class
+A class has at most one stereotype, shown as `<<Entity>>` in a row above its name. In the source it is a list entry like an info of an attribute: it can be added or removed as a whole, `change(added|removed, <change set>)`, and keeps its text when it is removed, and its text can be changed, `was(<change set>, <old text>)`. The order in the source is: text, text mark, ID, element mark. There is no empty stereotype `<<>>`.
+
+* *Changing the text:* a double click on the row of the selected class starts the field. The user types the text without the angle brackets, which the field draws around it in the font of the text, so the field looks like the row. Return commits. The text is one line and can't contain `>`. Empty removes the stereotype. The ID of the stereotype stays when the text changes, and goes with the stereotype when it is removed.
+* *A class without a stereotype:* a selected class shows a dashed place above its top edge, centered and outside of the box (`DiagramStyle.STEREOTYPE_PLACEHOLDER_GAP` above it, sized by a sample text like the places of the relations). A double click on it starts the field, which covers the place sideways. After Return the header of the class has one more row, the top edge of the box stays where it was. The place belongs to the selection like those of the relations: it is not part of the diagram, not in the Aktogramm and not in the PDF. A press or a double click on it keeps the class selected. Classes which are association classes get no place so far.
+* *Room above the diagram:* the canvas of the editor has 24 units of empty space above the diagram, so that the place above the top class can be reached. It is there always, so the diagram doesn't jump when the first stereotype is created.
+* *While changes are tracked:* a new stereotype is marked as added (`<<Entity>> change(added, yellow)`), one which is removed keeps its text and is marked as removed, a changed one gets the text mark with the old text. A stereotype which the change set has added is gone without a trace if it is removed. The place is filled with the pale color of the change set, like the field.
+* *A removed stereotype* is drawn like a removed info: its text has the strong color behind it and a line through it. For the editor it counts as missing: its field is empty, typing the old text takes the removal back, typing another text changes the stereotype (text mark with the old text as backup), and it has no place of its own, because the struck row is there to double click. If another change set has removed it, a new text changes the text without a mark.
+* *Display:* an added stereotype has the strong color behind its text, a changed one too (as a whole, the diff is not worth it for a word). The marks of a stereotype inside a class which a change set has added or removed are ignored.
 
 ## Attributes
 An attribute is edited as a whole line, in the form in which the diagram shows it: `+name : type [info, info]`. The user types it as text, the editor splits it into its parts when the line is committed. Reason: it is one gesture for everything, including adding a type or an info which the attribute doesn't have yet, and it is how UML tools are used. The alternative, a field for each part, needs many small click areas in one short line, and has none for parts which are missing.
@@ -265,14 +278,14 @@ A diagram is changed by change sets, as the steps of an Aktogramm are, and the m
 How the editor writes the marks for each operation is described with the operation. The rules for texts are collected below.
 
 ### Marks of Elements
-`change(added, <change set>)` and `change(removed, <change set>)` follow the ID of a class, attribute, relation, association class or note, and the text of an info of an attribute (`[a, b change(removed, yellow)]`). Moving an element is never marked. Rules for deleting: <<Deleting>>.
+`change(added, <change set>)` and `change(removed, <change set>)` follow the ID of a class, attribute, relation, association class or note, and the text of an info of an attribute (`[a, b change(removed, yellow)]`) or of a stereotype (`<<Entity>> change(removed, yellow)`). Moving an element is never marked. Rules for deleting: <<Deleting>>.
 
 ### Marks of Texts
 `was(<change set>, <old text>)` follows the text which a change set has changed, which always stands for the new state. Every text of the diagram can carry one: the diagram name, class name, stereotype, key and value of a tagged value, the visibility sign, name and type of an attribute, an info, a multiplicity, a relation label, a note text.
 
 * The old text is the text from before the change set started, however often it is changed. Setting the text back to it takes the mark away.
 * A text which didn't exist before has a mark without old text. An empty old text says it was empty.
-* An optional text which is removed stays as the empty text with the mark: `"" was(yellow, "old label")`. This holds for labels, multiplicities and types. It is not shown, there is nothing left to show. The exceptions are the visibility sign, which can't be removed, and the infos of an attribute, which are list entries and get element marks. A source which writes a removed info as `"" was(...)` is still read, and shown like a removed type.
+* An optional text which is removed stays as the empty text with the mark: `"" was(yellow, "old label")`. This holds for labels, multiplicities and types. It is not shown, there is nothing left to show. The exceptions are the visibility sign, which can't be removed, and the infos of an attribute and the stereotype of a class, which are list entries and get element marks. A source which writes a removed info as `"" was(...)` is still read, and shown like a removed type.
 * If another change set has changed the text before, the change set which changes it now takes the change over: its old text is the text from before this change.
 * The marks of texts inside an element which a change set has added or removed are ignored in the display. So these texts are changed without a mark.
 * If a text which a change set has added is removed again, it is gone without a trace.
@@ -284,6 +297,7 @@ These rules decide how a diagram with marks looks, also in the Aktogramm and in 
 * *Added or removed class or note:* a frame in the strong color around the box, 12 units wide, of which 6 show outside the border. Removed ones are also veiled (half white), their texts grey, their name has the strong color behind it and a line through it. The marks of the texts inside are not shown.
 * *Added or removed attribute:* the row has the pale color, its text the strong color behind it; removed attributes have a line through the text.
 * *Added or removed info of an attribute:* the same for the info only: its text has the strong color behind it, and a removed info keeps its text and has a line through it. The line keeps its length: a removed info was there before, so nothing grows.
+* *Added or removed stereotype:* the same as for an info: the text has the strong color behind it, a removed one keeps its text and has a line through it.
 * *Added or removed relation:* a band of 9 units in the strong color below the line. A removed relation has a grey line, a cross at a quarter of its longest part and a label which has the strong color behind it and a line through it.
 * *Changed text:* a background in the strong color behind the part of the text which changed, see below. The old text is not shown, so the box doesn't change its size, which matters in hand-made layouts.
 * *Not marked:* moves, and the visibility sign of an attribute of an added or removed element.
@@ -303,7 +317,7 @@ The numbers are tuning knobs in `DiagramStyle` (`DIFF_MIN_TEXT_LENGTH`, `DIFF_ME
 ### Removed Parts of a Line
 A type which a change set has removed is the empty text with a mark. It is not shown, and neither is its colon. The place where it was is marked by the same rule as a gap in a changed text: the last character before it, the end of the name. The same rule applies to an info which a source writes as the empty text with a mark.
 
-An info which is removed with the element mark, which is what the editor writes, keeps its text and is shown struck through, see <<Display of Changes>>. This was first done differently, with the empty text and the neighbors of the gap marked, until the user pointed out that an info is a list entry, as an attribute is, and the list should show what was removed from it. A removed label, multiplicity or stereotype has no line it could be struck through in and is not marked at all so far, see <<Open Points>>.
+An info which is removed with the element mark, which is what the editor writes, keeps its text and is shown struck through, see <<Display of Changes>>. This was first done differently, with the empty text and the neighbors of the gap marked, until the user pointed out that an info is a list entry, as an attribute is, and the list should show what was removed from it. A removed label or multiplicity has no line it could be struck through in and is not marked at all so far, see <<Open Points>>.
 
 ### Marks in Small Diagrams
 When the diagram is shown small, marks must not disappear. Strokes of frames and bands keep a width of at least 6 pixels on the screen, strong highlights of texts a height and width of at least 8 pixels, whatever the zoom is (`DiagramStyle.MIN_VISIBLE_STROKE` and `MIN_VISIBLE_HIGHLIGHT`). A highlight which is made larger this way may reach over its neighbors.
@@ -335,13 +349,13 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 ## Open Points
 . Is the association class a variant of the note button, or an element of its own?
 . How are notes attached to elements: as a relation-like tool, or by dragging a handle?
-. Snapping of points is built (see <<Selecting>>); does it feel right with 6 pixels? Open: a guide line which shows what a point has snapped to, a key which switches snapping off, snapping of boxes to each other, and straightening a whole route.
+. Snapping of points is built (see <<Selecting>>); does it feel right with 6 pixels? Decided: no guide line which shows what a point has snapped to, it isn't needed. Open: a key which switches snapping off, snapping of boxes to each other, and straightening a whole route.
 . Hanging an end onto an element which is not a class (note, association class), and the capture distance: is 6 pixels right for hanging, or should it differ from snapping?
 . Context menus on everything which now needs a double click (add or delete a waypoint, edit a text), for users who don't like double clicks. Decided: this comes last, when the editor is complete and it is clear where menus make sense; until then nothing is built for it.
 . Moving a box should move its waypoints or re-route them. Left to the user for now.
-. Stereotype (empty text removes it; how is one created on a class without), tagged values and the diagram name as editable texts. Places like those of the relations (see <<Texts Which a Relation Doesn't Have Yet>>) are one way.
+. Tagged values and the diagram name as editable texts.
 . Reordering attributes, selecting attributes.
-. A removed label or multiplicity is not shown and not marked at all, there is nothing to mark next to. Where could the place be shown, for example by the line of the relation? The same for a removed stereotype.
+. A removed label or multiplicity is not shown and not marked at all, there is nothing to mark next to. Where could the place be shown, for example by the line of the relation?
 . Is the restriction on removing a visibility sign under change tracking a nuisance in practice? Alternatives: let the sign stay, or give the removal a mark of its own in the format.
 . A long changed text is marked by a diff now. Is the rule good for texts with many changes, and for the mark of a deletion? See the knobs under <<Which Part of a Changed Text is Marked>>.
 . Selection model: multiple selection, rubber band, keyboard navigation.

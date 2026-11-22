@@ -91,6 +91,7 @@ public class ClassDiagramSerializer_V001 {
             out.append(" <<").append(classModel.stereotype).append(">>");
             appendTextChange(out, classModel.stereotypeChange);
             appendId(out, classModel.stereotypeId);
+            appendChange(out, classModel.stereotypeElementChange);
         }
         appendTaggedValues(out, classModel.taggedValues);
         if (!classModel.attributes.isEmpty()) {

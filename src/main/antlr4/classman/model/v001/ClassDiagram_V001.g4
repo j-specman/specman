@@ -44,7 +44,7 @@ grammar ClassDiagram_V001;
 //   * The dashed line of a note can lead over waypoints (absolute pixel points): attach(04de91aa) route (120, 40) (120, 90).
 //     The line starts at the note border facing the first waypoint and ends at the target facing the last one.
 //   * A change mark change(added, yellow) or change(removed, blue) follows the ID of a class, attribute, relation,
-//     association class or note. Moving an element is never marked.
+//     association class or note, and the text (and ID) of a stereotype or an info. Moving an element is never marked.
 //   * A text change mark was(yellow, "old text") follows the text it belongs to: the diagram name, class name,
 //     stereotype, key or value of a tagged value, attribute name or type, the visibility sign of an attribute, an info
 //     item, a multiplicity, a relation label, a note text. The first value names the change set, the optional second
@@ -53,7 +53,8 @@ grammar ClassDiagram_V001;
 //     before, an empty string says it was empty. The text itself always stands for the new state, the box is laid
 //     out for it. A removed text stays as an empty string with the mark: "" was(yellow, "old label"). That holds
 //     for a multiplicity too, but not for a visibility sign, which has no text left to carry a mark: a sign which
-//     was there can't be removed under change tracking. Marks of the name come before the ID.
+//     was there can't be removed under change tracking. Nor for a stereotype: it is a list entry like an info and
+//     keeps its text when removed, <<Entity>> change(removed, yellow). Marks of the name come before the ID.
 //   * Text marks inside an element which is marked added or removed are accepted and ignored by the renderer:
 //     accepting or rejecting the element decides about everything in it.
 //   * An assocclass nested in a relation belongs to that relation.
@@ -91,10 +92,12 @@ classDecl
     : CLASS classHead classBody?
     ;
 
-// Fixed order. The ID after the name belongs to the class, the one after the stereotype to the stereotype.
+// Fixed order. The ID and the change mark after the name belong to the class, those after the stereotype to the
+// stereotype. Like an info of an attribute, a stereotype is a list entry which can be added or removed as a whole,
+// change(removed, yellow), and keeps its text then; or its text can be changed, was(yellow, Old).
 classHead
-    : name nameChange=textChange? classId=ELEMENT_ID? changeMark? position? widthSpec?
-      (STEREOTYPE stereotypeChange=textChange? stereotypeId=ELEMENT_ID?)? taggedValues?
+    : name nameChange=textChange? classId=ELEMENT_ID? classMark=changeMark? position? widthSpec?
+      (STEREOTYPE stereotypeChange=textChange? stereotypeId=ELEMENT_ID? stereotypeMark=changeMark?)? taggedValues?
     ;
 
 // {TABLENAME=helpversion} or {A=1, B=2}. A '{' followed by word '=' starts tagged values,

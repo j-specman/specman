@@ -33,6 +33,10 @@ public final class DiagramStyle {
      * multiplicity. They are not shown. */
     public static final String LABEL_PLACEHOLDER = "label";
     public static final String MULTIPLICITY_PLACEHOLDER = "0..*";
+    /** The text whose size gives the editor the size of the place where a class could get a stereotype, and how far
+     * above the class that place is. It is not shown. */
+    public static final String STEREOTYPE_PLACEHOLDER = "Entity";
+    public static final double STEREOTYPE_PLACEHOLDER_GAP = 10;
     /** How far the double click area of a short text of a relation reaches around the text. */
     public static final double TEXT_HIT_PADDING = 3;
     /** The space between the text of an attribute and the end of a note line which is attached to it. */

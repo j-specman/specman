@@ -9,6 +9,7 @@ import classman.render.TextKind;
 import org.junit.jupiter.api.Test;
 
 import java.awt.geom.Point2D;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,6 +48,11 @@ class RelationTextPlaceholderTest {
     return editing.scene().placeholderAreas.stream().filter(area -> area.kind == kind).findFirst().orElseThrow();
   }
 
+  private List<SceneTextArea> relationPlaceholders() {
+    return editing.scene().placeholderAreas.stream().filter(area -> area.element instanceof AbstractRelationModel_V001)
+      .toList();
+  }
+
   private static Point2D centerOf(SceneTextArea area) {
     return new Point2D.Double(area.area.getCenterX(), area.area.getCenterY());
   }
@@ -68,7 +74,7 @@ class RelationTextPlaceholderTest {
     open(BARE);
 
     assertTrue(editing.scene().textAreas.stream().noneMatch(area -> area.element instanceof AbstractRelationModel_V001));
-    assertEquals(3, editing.scene().placeholderAreas.size());
+    assertEquals(3, relationPlaceholders().size());
   }
 
   /** An inheritance has no multiplicities, only a place for the label. */
@@ -78,7 +84,7 @@ class RelationTextPlaceholderTest {
     selectRelation();
 
     assertEquals(1, editing.selectedPlaceholders().size());
-    assertEquals(TextKind.RELATION_LABEL, editing.scene().placeholderAreas.get(0).kind);
+    assertEquals(TextKind.RELATION_LABEL, relationPlaceholders().get(0).kind);
   }
 
   /** Only the texts which are missing get a place. */
@@ -88,7 +94,7 @@ class RelationTextPlaceholderTest {
     selectRelation();
 
     assertEquals(1, editing.selectedPlaceholders().size());
-    assertEquals(TextKind.TO_MULTIPLICITY, editing.scene().placeholderAreas.get(0).kind);
+    assertEquals(TextKind.TO_MULTIPLICITY, relationPlaceholders().get(0).kind);
   }
 
   /** A label which a change set has removed counts as missing. */
@@ -98,7 +104,7 @@ class RelationTextPlaceholderTest {
     selectRelation();
 
     assertEquals(1, editing.selectedPlaceholders().size());
-    assertEquals(TextKind.RELATION_LABEL, editing.scene().placeholderAreas.get(0).kind);
+    assertEquals(TextKind.RELATION_LABEL, relationPlaceholders().get(0).kind);
   }
 
   /** Another relation which is not selected shows no places, and they can't be clicked. */

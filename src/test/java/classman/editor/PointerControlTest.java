@@ -109,20 +109,22 @@ class PointerControlTest {
   void doubleClickOnName() throws ClassDiagramParseException {
     open();
     editing.selectAt(new Point2D.Double(15, 25));
-    Rectangle2D name = editing.scene().textAreas.get(0).area;
+    Rectangle2D name = editing.scene().textAreas.stream()
+      .filter(area -> area.kind == TextKind.CLASS_NAME).findFirst().orElseThrow().area;
 
     control.doubleClicked(new Point2D.Double(name.getCenterX(), name.getCenterY()));
 
     assertEquals(1, nameEdits.get());
   }
 
-  /** On the stereotype, on the tagged values and on the attributes, a double click selects the class only. */
+  /** Above the stereotype, on the tagged values and on the attributes, a double click selects the class only. */
   @Test
   void doubleClickElsewhereInClass() throws ClassDiagramParseException {
     open();
     editing.selectAt(new Point2D.Double(15, 25));
     Rectangle2D box = editing.selectedArea();
-    Rectangle2D name = editing.scene().textAreas.get(0).area;
+    Rectangle2D name = editing.scene().textAreas.stream()
+      .filter(area -> area.kind == TextKind.CLASS_NAME).findFirst().orElseThrow().area;
     assertTrue(name.getMinY() > box.getMinY() + 4, "the stereotype is above the name");
     assertTrue(name.getMaxY() < box.getMaxY() - 4, "the tagged values and attributes are below the name");
 

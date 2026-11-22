@@ -22,6 +22,7 @@ final class ElementMarks_V001 {
         }
         for (ClassModel_V001 classModel : ClassBoxes_V001.of(model)) {
             classModel.change = replacement.apply(classModel.change);
+            classModel.stereotypeElementChange = replacement.apply(classModel.stereotypeElementChange);
             for (AttributeModel_V001 attribute : classModel.attributes) {
                 attribute.change = replacement.apply(attribute.change);
                 for (InfoModel_V001 info : attribute.infos) {

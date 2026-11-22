@@ -103,12 +103,13 @@ public class ClassDiagramParser_V001 {
         ClassModel_V001 model = new ClassModel_V001(text(head.name()));
         model.id = id(head.classId);
         model.nameChange = textChange(head.nameChange);
-        model.change = change(head.changeMark());
+        model.change = change(head.classMark);
         model.position = position(head.position());
         model.width = width(head.widthSpec());
         model.stereotype = stereotype(head.STEREOTYPE());
         model.stereotypeId = id(head.stereotypeId);
         model.stereotypeChange = textChange(head.stereotypeChange);
+        model.stereotypeElementChange = change(head.stereotypeMark);
         if (head.taggedValues() != null) {
             for (TaggedValueContext tag : head.taggedValues().taggedValue()) {
                 model.taggedValues.add(buildTaggedValue(tag));

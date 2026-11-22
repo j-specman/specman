@@ -145,6 +145,29 @@ class ChangeMarkTest {
     assertEquals(line.left() + 70 + 1, strikes.get(0).x2);
   }
 
+  /** A stereotype which a change set has removed keeps its text, has the strong color behind it and a line through
+   * it. An added one has the color and no line. */
+  @Test
+  void removedAndAddedStereotype() throws ClassDiagramParseException {
+    Scene removed = layout("class A (aaaaaaaa) at(0, 0) <<Entity>> change(removed, yellow)");
+    assertEquals(1, rectanglesFilled(removed, YELLOW).size());
+    assertEquals(1, strikes(removed).size());
+    assertEquals(strikes(removed).get(0).x2 - strikes(removed).get(0).x1 - 2,
+      SceneTestHelper.textNamed(removed, "<<Entity>>").width);
+
+    Scene added = layout("class A (aaaaaaaa) at(0, 0) <<Entity>> change(added, yellow)");
+    assertEquals(1, rectanglesFilled(added, YELLOW).size());
+    assertTrue(strikes(added).isEmpty());
+  }
+
+  /** A stereotype whose text a change set has changed is marked as a whole. */
+  @Test
+  void changedStereotypeHighlighted() throws ClassDiagramParseException {
+    Scene scene = layout("class A (aaaaaaaa) at(0, 0) <<Entity>> was(yellow, Table)");
+    assertEquals(1, rectanglesFilled(scene, YELLOW).size());
+    assertTrue(strikes(scene).isEmpty());
+  }
+
   /** An info which a change set has added has the strong color behind it, and no line through it. */
   @Test
   void addedInfoHighlighted() throws ClassDiagramParseException {

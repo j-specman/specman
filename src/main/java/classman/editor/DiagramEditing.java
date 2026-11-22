@@ -277,12 +277,20 @@ public class DiagramEditing {
   public String textOf(SceneTextArea text) {
     return switch (text.kind) {
       case CLASS_NAME -> ((ClassModel_V001) text.element).name;
+      case STEREOTYPE -> stereotypeOf((ClassModel_V001) text.element);
       case NOTE_TEXT -> ((NoteModel_V001) text.element).text;
       case RELATION_LABEL -> orEmpty(((AbstractRelationModel_V001) text.element).label);
       case FROM_MULTIPLICITY -> orEmpty(((AssociationRelationModel_V001) text.element).fromMultiplicity);
       case TO_MULTIPLICITY -> orEmpty(((AssociationRelationModel_V001) text.element).toMultiplicity);
       case ATTRIBUTE_LINE -> attributeEditing.textOf(text);
     };
+  }
+
+  /** A stereotype which a change set has removed still stands in the header, struck through, but counts as missing:
+   * typing it again takes the removal back, and another text changes the stereotype. */
+  private static String stereotypeOf(ClassModel_V001 box) {
+    boolean isRemoved = box.stereotypeElementChange != null && box.stereotypeElementChange.type == ChangeType_V001.REMOVED;
+    return isRemoved ? "" : orEmpty(box.stereotype);
   }
 
   private static String orEmpty(String text) {
@@ -296,11 +304,12 @@ public class DiagramEditing {
     return changeSet != null ? Color.decode(host.renderer().paleColorOf(changeSet)) : null;
   }
 
-  /** @return false if the text can't have that content: a multiplicity is free text, but only one line, and an
-   * attribute line needs a name. */
+  /** @return false if the text can't have that content: a multiplicity is free text, but only one line, a stereotype
+   * is one line without a closing angle bracket, and an attribute line needs a name. */
   public boolean accepts(SceneTextArea text, String newText) {
     return switch (text.kind) {
       case FROM_MULTIPLICITY, TO_MULTIPLICITY -> !newText.contains("\n");
+      case STEREOTYPE -> !newText.contains("\n") && !newText.contains(">");
       case ATTRIBUTE_LINE -> attributeEditing.accepts(text, newText, host.trackedChangeSet());
       default -> true;
     };
@@ -339,6 +348,10 @@ public class DiagramEditing {
         else {
           textChanger.setClassName(box, newText);
         }
+      }
+      case STEREOTYPE -> {
+        ClassModel_V001 box = (ClassModel_V001) text.element;
+        textChanger.setStereotype(box, newText, changeSet);
       }
       case NOTE_TEXT -> {
         NoteModel_V001 note = (NoteModel_V001) text.element;

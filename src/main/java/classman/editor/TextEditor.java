@@ -4,6 +4,7 @@ import classman.model.v001.ClassModel_V001;
 import classman.render.DiagramFonts;
 import classman.render.DiagramStyle;
 import classman.render.SceneTextArea;
+import classman.render.TextKind;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -98,9 +99,13 @@ class TextEditor {
     return component;
   }
 
-  private static Border border(Color color) {
-    return BorderFactory.createCompoundBorder(new LineBorder(color, BORDER_WIDTH),
+  /** The frame of the field, and inside it the text which the diagram draws around the edited one, if any. */
+  private Border border(Color color) {
+    Border frame = BorderFactory.createCompoundBorder(new LineBorder(color, BORDER_WIDTH),
       BorderFactory.createEmptyBorder(1, TEXT_MARGIN, 1, TEXT_MARGIN));
+    TextKind kind = edited.kind;
+    boolean hasBrackets = !kind.prefix.isEmpty() || !kind.suffix.isEmpty();
+    return hasBrackets ? BorderFactory.createCompoundBorder(frame, new BracketBorder(kind.prefix, kind.suffix)) : frame;
   }
 
   private void showAsAccepted() {
