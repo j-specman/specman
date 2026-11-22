@@ -82,6 +82,12 @@ class DiagramCanvas extends JPanel implements Scrollable {
     repaint();
   }
 
+  /** Shows the cursor which the diagram wants where the mouse is, after something has changed without the mouse
+   * being moved. */
+  void refreshCursor() {
+    pointer.updateCursor(this);
+  }
+
   void setPointerListener(PointerListener listener) {
     pointer.setListener(listener);
   }

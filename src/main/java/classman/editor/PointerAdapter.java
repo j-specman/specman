@@ -1,6 +1,7 @@
 package classman.editor;
 
 import javax.swing.SwingUtilities;
+import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -18,6 +19,7 @@ class PointerAdapter extends MouseAdapter {
   private final Consumer<Point> scrollTo;
   private PointerListener listener;
   private Point pressedAt;
+  private Point lastAt;
   private boolean dragging;
 
   /** @param toDiagram maps a point of the canvas to the point of the diagram it shows
@@ -33,11 +35,26 @@ class PointerAdapter extends MouseAdapter {
 
   boolean isDragging() { return dragging; }
 
+  /** Gives the component the cursor which the listener wants at the place where the mouse was last seen. While the
+   * mouse is dragged the cursor stays as it is. */
+  void updateCursor(Component component) {
+    if (listener != null && lastAt != null && !dragging) {
+      component.setCursor(listener.cursorAt(toDiagram.apply(lastAt)));
+    }
+  }
+
+  @Override
+  public void mouseMoved(MouseEvent e) {
+    lastAt = e.getPoint();
+    updateCursor(e.getComponent());
+  }
+
   @Override
   public void mousePressed(MouseEvent e) {
     if (listener == null) {
       return;
     }
+    lastAt = e.getPoint();
     if (e.isPopupTrigger()) {
       requestContextMenu(e);
     }
@@ -65,6 +82,7 @@ class PointerAdapter extends MouseAdapter {
       return;
     }
     dragging = true;
+    lastAt = e.getPoint();
     scrollTo.accept(e.getPoint());
     listener.dragged(toDiagram.apply(e.getPoint()));
   }
@@ -80,6 +98,8 @@ class PointerAdapter extends MouseAdapter {
     }
     pressedAt = null;
     dragging = false;
+    lastAt = e.getPoint();
     listener.released(toDiagram.apply(e.getPoint()));
+    updateCursor(e.getComponent());
   }
 }

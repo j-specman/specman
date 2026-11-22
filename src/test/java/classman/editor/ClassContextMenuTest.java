@@ -57,10 +57,12 @@ class ClassContextMenuTest {
   }
 
   private List<JMenuItem> entries() {
-    ClassContextMenu menu = new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts);
+    ClassContextMenu menu = new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, () -> { });
     List<JMenuItem> items = new ArrayList<>();
     for (java.awt.Component component : menu.getComponents()) {
-      items.add((JMenuItem) component);
+      if (component instanceof JMenuItem item) {
+        items.add(item);
+      }
     }
     return items;
   }
@@ -117,7 +119,8 @@ class ClassContextMenuTest {
 
     List<JMenuItem> entries = entries();
 
-    assertEquals(List.of("Add stereotype", "Add attribute"), entries.stream().map(JMenuItem::getText).toList());
+    assertEquals(List.of("Add stereotype", "Add attribute", "Automatic width"),
+      entries.stream().map(JMenuItem::getText).toList());
     assertTrue(entries.get(0).isEnabled());
     assertTrue(entries.get(1).isEnabled());
   }
@@ -132,6 +135,27 @@ class ClassContextMenuTest {
 
     assertFalse(entries.get(0).isEnabled());
     assertTrue(entries.get(1).isEnabled());
+  }
+
+  /** The entry for the automatic width is checked and can't be chosen while the class has none of its own. When it
+   * has, the entry takes it away. */
+  @Test
+  void automaticWidthEntry() throws Exception {
+    open(BARE);
+    editing.selectAt(insideClass());
+    JMenuItem automatic = entries().get(2);
+    assertTrue(((javax.swing.JCheckBoxMenuItem) automatic).isSelected());
+    assertFalse(automatic.isEnabled());
+
+    open("classdiagram {\n  class A (11111111) at(10, 60) width=200\n}");
+    editing.selectAt(insideClass());
+    automatic = entries().get(2);
+    assertFalse(((javax.swing.JCheckBoxMenuItem) automatic).isSelected());
+    assertTrue(automatic.isEnabled());
+
+    automatic.doClick(0);
+
+    assertFalse(editing.source().contains("width"), editing.source());
   }
 
   /** The stereotype entry opens a field in the row which the class got for it. */

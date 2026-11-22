@@ -2,13 +2,15 @@ package classman.editor;
 
 import classman.render.SceneTextArea;
 
+import java.awt.Cursor;
 import java.awt.geom.Point2D;
 import java.util.function.Consumer;
 import java.util.function.DoubleUnaryOperator;
 
 /** What the mouse does in the editor: a press selects the box or relation below it, dragging moves the selected box
  * or a handle of the relation, a double click on one of its texts lets the user change the text, and the context menu
- * of a class lets the user add parts to it. Distances which the user judges on the screen are given in pixels and
+ * of a class lets the user add parts to it. A class changes its width where the mouse is at its left or right side,
+ * which the cursor shows. Distances which the user judges on the screen are given in pixels and
  * turned into units of the diagram, so they feel the same at every zoom. */
 class PointerControl implements PointerListener {
   private static final double HIT_PIXELS = 4;
@@ -33,9 +35,24 @@ class PointerControl implements PointerListener {
     this.toDiagramLength = toDiagramLength;
   }
 
+  /** The cursor shows what a press would do: it draws a relation while the tool for relations is armed, it changes
+   * the width at the left or right side of a class. */
+  @Override
+  public Cursor cursorAt(Point2D at) {
+    if (editing.isRelationToolArmed()) {
+      return Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
+    }
+    ResizeTarget edge = editing.resizeTargetAt(at, toDiagramLength.applyAsDouble(HIT_PIXELS));
+    if (edge == null) {
+      return Cursor.getDefaultCursor();
+    }
+    return Cursor.getPredefinedCursor(edge.side == ResizeSide.LEFT ? Cursor.W_RESIZE_CURSOR : Cursor.E_RESIZE_CURSOR);
+  }
+
   /** A press selects what is below it. Dragging moves a handle of the selected relation if the press was on one,
-   * otherwise the selected box. While the tool for relations is armed, a press on a class starts a relation instead,
-   * which is drawn by dragging to another class, and nothing is selected. */
+   * a side of a class changes its width, otherwise the selected box is moved. While the tool for relations is armed, a
+   * press on a class starts a relation instead, which is drawn by dragging to another class, and nothing is
+   * selected. */
   @Override
   public void pressed(Point2D at) {
     double tolerance = toDiagramLength.applyAsDouble(HIT_PIXELS);

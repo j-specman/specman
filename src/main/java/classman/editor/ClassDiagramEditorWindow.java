@@ -10,7 +10,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
@@ -126,9 +125,7 @@ public class ClassDiagramEditorWindow extends JDialog {
     canvas.setScene(editing.scene());
     canvas.setSelection(editing.selectionMarks());
     palette.showRelationToolArmed(editing.isRelationToolArmed());
-    canvas.setCursor(editing.isRelationToolArmed()
-      ? Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)
-      : Cursor.getDefaultCursor());
+    canvas.refreshCursor();
   }
 
   /** Runs the operation on the key and shows the diagram as it is afterwards. While a name is typed, the keys belong
@@ -144,7 +141,8 @@ public class ClassDiagramEditorWindow extends JDialog {
 
   private void showClassMenu(Point2D at) {
     Rectangle where = canvas.toCanvas(new Rectangle2D.Double(at.getX(), at.getY(), 0, 0));
-    new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts).show(canvas, where.x, where.y);
+    new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, this::showDiagram)
+      .show(canvas, where.x, where.y);
   }
 
   private void relationToolToggled() {

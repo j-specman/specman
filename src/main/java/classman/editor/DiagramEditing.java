@@ -123,9 +123,15 @@ public class DiagramEditing {
   /** Selects the box at the point of the diagram, or else the relation whose line is at most the tolerance away, or
    * nothing if there is none. A box wins over a line, so that a click near the border of a box selects the box. The
    * handles and the placeholders of a selected relation are above everything: a point on one of them keeps the
-   * relation selected. */
+   * relation selected. A point at the left or right side of a class, where its width is changed, selects the class,
+   * also if the point is a little outside of it. */
   public void selectAt(Point2D point, double tolerance) {
     if (handleIndexAt(point, tolerance) >= 0 || selectedPlaceholderAt(point) != null) {
+      return;
+    }
+    ResizeTarget edge = resizeTargetAt(point, tolerance);
+    if (edge != null) {
+      selected = edge.box;
       return;
     }
     SceneElementArea hit = scene.elementAreaAt(point);
@@ -462,17 +468,67 @@ public class DiagramEditing {
   }
 
   /** Starts to drag, from the point where the mouse was pressed: a handle of the selected relation if the point is at
-   * most the tolerance away from one, otherwise the selected box, if there is one. Nothing is dragged if the user only
-   * clicks. */
+   * most the tolerance away from one, a side of a class if the point is at it, otherwise the selected box, if there is
+   * one. Nothing is dragged if the user only clicks. */
   public void startDrag(Point2D at, double tolerance) {
     int handle = handleIndexAt(at, tolerance);
+    ResizeTarget edge = resizeTargetAt(at, tolerance);
     if (handle >= 0) {
       drag = handleDrag(handle, at);
     }
+    else if (edge != null) {
+      drag = new BoxResize(edge.box, edge.side, scene, minimumWidthOf(edge.box), positionFreezer());
+    }
     else {
       drag = selected != null && scene.elementAreaOf(selected) != null
-        ? new BoxDrag(selected, at, scene, placedBoxes(), associationClasses())
+        ? new BoxDrag(selected, at, scene, positionFreezer())
         : null;
+    }
+  }
+
+  private PositionFreezer positionFreezer() {
+    return new PositionFreezer(scene, placedBoxes(), associationClasses());
+  }
+
+  /** @return the width below which the class can't be made: what the layout makes of it with the least width */
+  private double minimumWidthOf(ClassModel_V001 box) {
+    Integer widthBefore = box.width;
+    box.width = 1;
+    double minimum = host.renderer().layout(model).elementAreaOf(box).area.getWidth();
+    box.width = widthBefore;
+    return minimum;
+  }
+
+  /** @return the side of a class of the diagram which the point is at, where dragging changes the width of the class:
+   * at most the tolerance away from the left or right side, along its whole height. The class which is drawn on top
+   * wins. Null if the point is at none. */
+  ResizeTarget resizeTargetAt(Point2D point, double tolerance) {
+    List<ClassModel_V001> classes = model.classes();
+    for (int i = classes.size() - 1; i >= 0; i--) {
+      ClassModel_V001 box = classes.get(i);
+      SceneElementArea boxArea = box == pendingClass ? null : scene.elementAreaOf(box);
+      if (boxArea == null || point.getY() < boxArea.area.getMinY() || point.getY() > boxArea.area.getMaxY()) {
+        continue;
+      }
+      double toLeft = Math.abs(point.getX() - boxArea.area.getMinX());
+      double toRight = Math.abs(point.getX() - boxArea.area.getMaxX());
+      if (Math.min(toLeft, toRight) <= tolerance) {
+        return new ResizeTarget(box, toLeft < toRight ? ResizeSide.LEFT : ResizeSide.RIGHT);
+      }
+    }
+    return null;
+  }
+
+  /** @return true if the class has a width of its own, which the user has set, and not the one of its content */
+  public boolean hasFixedWidth(ClassModel_V001 box) {
+    return box.width != null;
+  }
+
+  /** Takes the width of its own away from the class, so it is as wide as its content again. One operation. */
+  public void resetWidth(ClassModel_V001 box) {
+    if (box.width != null) {
+      box.width = null;
+      publish();
     }
   }
 

@@ -66,7 +66,8 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Move the points of a route |built |Waypoints freely, the ends along the border of their class or hung onto another class (not while changes are tracked), see <<Selecting>>. Adding a waypoint and deleting one (double click on the line and on a handle) too.
 |Create a text which an element doesn't have yet (relation label, multiplicity) |built |Dashed places on the selected relation, see <<Texts Which a Relation Doesn't Have Yet>>. Not yet for tagged values and the diagram name.
 |Reorder attributes, attribute selection |open |
-|Width of a box by dragging its side |open |
+|Width of a class by dragging its side |built |At the left and right side of a class, shown by the cursor, see <<Width of a Class Box>>. The other boxes (notes, association classes) will get the same.
+|Automatic width again |built |Context menu of the class, see <<The Context Menu of a Class>>.
 |===
 
 ## Editor Window
@@ -101,10 +102,13 @@ Interface and enum are keywords of their own, because their content differs from
 
 ### Width of a Class Box
 * *Without `width=`* the box is as wide as its widest part: the longest line of the name, the stereotype, the tagged values or an attribute (at least `DiagramStyle.MIN_BOX_WIDTH`). Nothing is wrapped or cut off. The box grows with long attributes and shrinks again when they get shorter. The editor creates classes this way.
-* *With `width=`* (set by the user, there is no way to do that in the editor yet) the width stays, whatever the content is:
+* *With `width=`* (set by the user by dragging, see below) the width stays, whatever the content is:
 ** The *class name* wraps at spaces. The box is at least as wide as the longest single word of the name.
 ** The *stereotype*, the *tagged values* and every *attribute* never wrap. They stay one line and are cut off at the right end of the box. A line break in them (only a hand-written source can have one) is shown as a blank.
 ** The marks of changes (backgrounds, strikes) cover only what is shown.
+* *Changing the width:* there are no handles. Where the mouse is at the left or right side of a class, along its whole height and 4 pixels of the screen to both sides of the border, the cursor becomes the horizontal resize cursor. The class needn't be selected. A press there selects the class, and dragging gives it a width of its own (`width=N`): the opposite side stays where it is, so dragging the left side moves the box. The box can't be made narrower than its layout allows, which is the longest word of its name; the stored width is the shown one. The class gets a position of its own (`at(x, y)`) if it had none, and so do the other classes and notes which are stacked, so that they stay where they are (like with moving). Esc during the drag puts everything back. One drag is one operation, one undo step. Like moving, resizing is never marked as a change.
+* *Back to the automatic width:* the entry *Automatic width* of the context menu of the class. It is checked while the class has no width of its own and can't be chosen then; dragging a side switches it off, choosing it removes `width=`. One operation.
+* *Not built:* the same for notes and association classes, a minimum width for the whole class (stereotype, attributes) beyond the name.
 * *Planned:* a cut-off text ends with `...`, so the user sees that there is more. The field for typing an attribute is wrapped at the width of the box for now; it shows the whole text.
 
 ### Creating Elements
@@ -230,6 +234,7 @@ The right mouse button on a class selects it, like a press, and opens a menu wit
 
 * *Add stereotype:* see <<The Stereotype of a Class>>. Offered (can be chosen) only if the class has no stereotype, or one which a change set has removed.
 * *Add attribute:* puts a blank line at the end of the attributes and starts typing into it, see <<Adding Attributes>>. Return in that line goes on with the next one.
+* *Automatic width:* see <<Width of a Class Box>>. A check item, separated from the entries which add parts.
 * *Tagged values:* planned, as the next entry. They need editing of their own first, see the open points.
 * An entry which doesn't fit can't be chosen, it is not hidden, so the menu looks the same on every class. A class which a change set has removed offers nothing.
 * A text which is being typed is finished first when the menu is opened: the right button takes the focus to the canvas.
