@@ -85,28 +85,29 @@ class AnchorToolTest {
     assertTrue(editing.isAnchorToolArmed());
   }
 
-  /** A note is attached to another class by anchoring it again: the line leads there, without the waypoints of the old one. */
+  /** A note can hang on several elements: anchoring it again adds a line and leaves the old one as it is. */
   @Test
-  void anchorMovedToOtherClass() throws ClassDiagramParseException {
+  void secondAnchorLineToOtherClass() throws ClassDiagramParseException {
     open("classdiagram {\n  class A (11111111) at(10, 20)\n  class B (22222222) at(300, 20)\n"
       + "  note (33333333) at(10, 200) \"remember\"\n  anchor 33333333 -- 11111111 route (150, 150)\n}");
     editing.toggleAnchorTool();
 
     draw(inBox(2), inBox(1));
 
-    assertEquals(1, model().anchorLines().size());
-    assertEquals("22222222", anchorLine().targetId);
-    assertTrue(anchorLine().waypoints.isEmpty());
+    assertEquals(2, model().anchorLines().size());
+    assertEquals("11111111", model().anchorLines().get(0).targetId);
+    assertEquals(1, model().anchorLines().get(0).waypoints.size());
+    assertEquals("22222222", model().anchorLines().get(1).targetId);
   }
 
-  /** Anchoring a note to the class it hangs on is no operation. */
+  /** Anchoring a note to the class it hangs on is no operation, also if it hangs on others as well. */
   @Test
   void sameClassIsNoOperation() throws ClassDiagramParseException {
-    open("classdiagram {\n  class A (11111111) at(10, 20)\n  note (33333333) at(10, 200) \"n\"\n"
-      + "  anchor 33333333 -- 11111111\n}");
+    open("classdiagram {\n  class A (11111111) at(10, 20)\n  class B (22222222) at(300, 20)\n"
+      + "  note (33333333) at(10, 200) \"n\"\n  anchor 33333333 -- 11111111\n  anchor 33333333 -- 22222222\n}");
     editing.toggleAnchorTool();
 
-    draw(inBox(1), inBox(0));
+    draw(inBox(2), inBox(0));
 
     assertTrue(host.reportedSources.isEmpty());
     assertFalse(editing.canUndo());
@@ -141,10 +142,10 @@ class AnchorToolTest {
     assertNull(model().notes().get(0).change);
   }
 
-  /** While changes are tracked, a new target for a note with a line is a removed line and an added one, like a relation
-   * which is deleted and drawn again. */
+  /** While changes are tracked, a second target for a note with a line is just one more added line: the old one is
+   * not touched. */
   @Test
-  void trackedNewTargetRemovesAndAdds() throws ClassDiagramParseException {
+  void trackedSecondTargetAddsLine() throws ClassDiagramParseException {
     host.trackedChangeSet = "yellow";
     open("classdiagram {\n  class A (11111111) at(10, 20)\n  class B (22222222) at(300, 20)\n"
       + "  note (33333333) at(10, 200) \"old\"\n  anchor 33333333 -- 11111111\n}");
@@ -156,25 +157,10 @@ class AnchorToolTest {
     AnchorLineModel_V001 old = model().anchorLines().get(0);
     AnchorLineModel_V001 added = model().anchorLines().get(1);
     assertEquals("11111111", old.targetId);
-    assertEquals(ChangeType_V001.REMOVED, old.change.type);
+    assertNull(old.change);
     assertEquals("22222222", added.targetId);
     assertEquals(ChangeType_V001.ADDED, added.change.type);
     assertEquals(1, host.reportedSources.size());
-  }
-
-  /** A line which a change set has added is given a new target in place. */
-  @Test
-  void trackedAddedLineIsRetargeted() throws ClassDiagramParseException {
-    host.trackedChangeSet = "yellow";
-    open("classdiagram {\n  class A (11111111) at(10, 20)\n  class B (22222222) at(300, 20)\n"
-      + "  note (33333333) at(10, 200) \"old\"\n  anchor change(added, yellow) 33333333 -- 11111111\n}");
-    editing.toggleAnchorTool();
-
-    draw(inBox(2), inBox(1));
-
-    assertEquals(1, model().anchorLines().size());
-    assertEquals("22222222", anchorLine().targetId);
-    assertEquals(ChangeType_V001.ADDED, anchorLine().change.type);
   }
 
   /** A note whose line is removed is attached again by a new added line, also to the same class. */

@@ -13,13 +13,15 @@ import classman.model.v001.NoteModel_V001;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Set;
 
 /**
  * Knows which elements go away when the marks of a change set are accepted or rejected: the marked ones, and
- * everything which hangs on them. A class takes its relations along, a class, an attribute or a relation takes the
- * notes along which are attached to it, a note takes its anchor lines along, and so does the class, attribute or
- * relation an anchor line leads to. An association class link goes with its class and with its relation, the class
+ * everything which hangs on them. A class takes its relations along, a note takes its anchor lines along, and so does
+ * the class, attribute or relation an anchor line leads to. A note goes along with what it is attached to only if that
+ * is all it is attached to: a note which hangs on other elements as well stays and loses just the line to what goes.
+ * An association class link goes with its class and with its relation, the class
  * itself stays where only the relation goes. An anchor line which a change set removed doesn't attach its note any more, unless
  * it was removed together with the note, by the same change set: then it still counts, so that the note goes with the
  * target which the deletion of the note's lines was a consequence of.
@@ -90,18 +92,22 @@ class VanishingElements_V001 {
         }
     }
 
-    /** A note goes if its own mark says so, or if a line which attaches it leads to something which goes. */
+    /** A note goes if its own mark says so, or if it has lines which attach it and all of them lead to something which
+     * goes. A note which hangs on something else as well stays, only its line to what goes, goes. */
     private void collectNotes(ClassDiagramModel_V001 model) {
         for (NoteModel_V001 note : model.notes()) {
-            boolean attachedToVanishing = model.anchorLines().stream()
-                .anyMatch(line -> attaches(line, note) && leadsToVanishing(line));
-            if (vanishes(note.change) || attachedToVanishing) {
+            if (vanishes(note.change) || attachedToVanishingOnly(model, note)) {
                 notes.add(note);
                 if (note.id != null) {
                     noteIds.add(note.id);
                 }
             }
         }
+    }
+
+    private boolean attachedToVanishingOnly(ClassDiagramModel_V001 model, NoteModel_V001 note) {
+        List<AnchorLineModel_V001> attaching = model.anchorLines().stream().filter(line -> attaches(line, note)).toList();
+        return !attaching.isEmpty() && attaching.stream().allMatch(this::leadsToVanishing);
     }
 
     /** True if the line starts at the note and no change set removed it, or the change set which removed it removed

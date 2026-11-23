@@ -51,7 +51,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
 /** The operations of the diagram editor on the diagram, without any window. Each operation writes the new source
  * and reports it to the host. The host keeps the history: undo and redo are forwarded to it, but only for the sources
@@ -1111,16 +1110,11 @@ public class DiagramEditing {
   }
 
   /** Attaches the note to the class, attribute or relation which the mouse was released on, with an anchor line. A
-   * class or attribute which has no ID gets one, and so does the note. The note is selected. Nothing happens, and no
-   * operation is made, if it is attached to that target already.
-   * <p>
-   * A note which is attached already gets the new target in place of the old one, and the waypoints of the old line go.
-   * While changes are tracked this is so only if a change set has added the line. Otherwise the old line is marked as
-   * removed and a new one, marked as added, leads to the target, like a relation which is deleted and added again. A
-   * note which isn't attached gets a new line, marked as added while changes are tracked. */
+   * class or attribute which has no ID gets one, and so does the note. The note is selected. A note can have several
+   * anchor lines, so lines it has already stay as they are. Nothing happens, and no operation is made, if it is
+   * attached to that target already. The new line is marked as added while changes are tracked. */
   private void anchorNote(ConnectionDrawing finished) {
-    NoteModel_V001 note = (NoteModel_V001) finished.from();
-    attach(note, finished.target(), () -> firstOrNull(model.liveAnchorLinesOf(note)), AnchorLineModel_V001::new);
+    attach((NoteModel_V001) finished.from(), finished.target(), AnchorLineModel_V001::new);
   }
 
   /** Makes the class the association class of the relation which the mouse was released on, with an association class
@@ -1128,17 +1122,12 @@ public class DiagramEditing {
    * a class which is no association class yet, see {@link AssocClassRules}. */
   private void linkAssocClass(ConnectionDrawing finished) {
     ClassModel_V001 assocClass = (ClassModel_V001) finished.from();
-    attach(assocClass, finished.target(), () -> null, AssocClassLinkModel_V001::new);
+    attach(assocClass, finished.target(), AssocClassLinkModel_V001::new);
   }
 
-  private <T> T firstOrNull(List<T> list) {
-    return list.isEmpty() ? null : list.get(0);
-  }
-
-  /** Attaches the box to the target with a dashed line, or moves its line to the target.
-   * @param currentLine finds the live line of the box, which can only be asked for once the box has an ID
+  /** Attaches the box to the target with a new dashed line, unless a live line leads there already.
    * @param newLine creates a line from the ID of the box to the ID of the target */
-  private void attach(AbstractBoxModel_V001 box, ConnectionTarget target, Supplier<AttachLineModel_V001> currentLine,
+  private void attach(AbstractBoxModel_V001 box, ConnectionTarget target,
                       BiFunction<String, String, AttachLineModel_V001> newLine) {
     String targetId = target.ensureId(this::newId);
     armedTool = Tool.NONE;
@@ -1146,24 +1135,18 @@ public class DiagramEditing {
     if (box.id == null) {
       box.id = newId();
     }
-    AttachLineModel_V001 current = currentLine.get();
-    if (current != null && targetId.equals(current.targetId)) {
+    if (isAttached(box, targetId)) {
       return;
     }
-    String changeSet = host.trackedChangeSet();
-    if (current != null && (changeSet == null || current.change != null)) {
-      current.targetId = targetId;
-      current.clearRoute();
-    }
-    else {
-      if (current != null) {
-        current.change = new ChangeModel_V001(ChangeType_V001.REMOVED, changeSet);
-      }
-      AttachLineModel_V001 attachLine = newLine.apply(box.id, targetId);
-      markAsAdded(attachLine);
-      model.elements.add(attachLine);
-    }
+    AttachLineModel_V001 attachLine = newLine.apply(box.id, targetId);
+    markAsAdded(attachLine);
+    model.elements.add(attachLine);
     publish();
+  }
+
+  private boolean isAttached(AbstractBoxModel_V001 box, String targetId) {
+    return model.attachLines().stream().anyMatch(line -> !line.isRemoved()
+      && box.id.equals(line.startId) && targetId.equals(line.targetId));
   }
 
   private String newId() {

@@ -175,15 +175,18 @@ class AnchorToAttributeAndRelationTest {
     assertFalse(editing.canUndo());
   }
 
-  /** A note which is attached to an attribute is moved to a relation, and the waypoints of the old line go. */
+  /** A note which is attached to an attribute can hang on a relation as well; the old line keeps its waypoints. */
   @Test
-  void anchorMovedFromAttributeToRelation() throws ClassDiagramParseException {
+  void relationAddedToNoteOnAttribute() throws ClassDiagramParseException {
     open(withAnchorLine("anchor 33333333 -- 0a0a0a0a route (200, 250)"));
 
     draw(noteCenter(), onRelation());
 
-    assertEquals("44444444", attachedTo());
-    assertTrue(new ClassDiagramParser_V001().parse(editing.source()).anchorLines().get(0).waypoints.isEmpty());
+    List<AnchorLineModel_V001> lines = new ClassDiagramParser_V001().parse(editing.source()).anchorLines();
+    assertEquals(2, lines.size());
+    assertEquals("0a0a0a0a", lines.get(0).targetId);
+    assertEquals(1, lines.get(0).waypoints.size());
+    assertEquals("44444444", lines.get(1).targetId);
   }
 
   /** An attribute which a change set removed is no target any more: the point is on its class then. */

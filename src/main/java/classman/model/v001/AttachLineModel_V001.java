@@ -29,11 +29,4 @@ public abstract class AttachLineModel_V001 extends AbstractDiagramElementModel_V
     public boolean isRemoved() {
         return change != null && change.type == ChangeType_V001.REMOVED;
     }
-
-    /** Takes the waypoints and the fixed ends away, so the line is the straight one which the layout works out. */
-    public void clearRoute() {
-        waypoints.clear();
-        start = null;
-        end = null;
-    }
 }

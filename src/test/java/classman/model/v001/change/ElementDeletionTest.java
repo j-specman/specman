@@ -98,6 +98,44 @@ class ElementDeletionTest {
     assertEquals(canonical(expected), deleted(SOURCE, "aaaaaaaa", "blue"));
   }
 
+  /** A note which hangs on two classes stays when one of them is deleted, and only the line to that class goes. */
+  @Test
+  void deletedTargetKeepsNoteWithOtherLine() throws ClassDiagramParseException {
+    String source = "class A (aaaaaaaa)\nclass C (cccccccc)\nnote (a0000001) \"both\"\n"
+      + "anchor (f0000001) a0000001 -- aaaaaaaa\nanchor (f0000002) a0000001 -- cccccccc";
+    String expected = "class C (cccccccc)\nnote (a0000001) \"both\"\nanchor (f0000002) a0000001 -- cccccccc";
+    assertEquals(canonical(expected), deleted(source, "aaaaaaaa"));
+  }
+
+  /** The note goes with the last element it hangs on. */
+  @Test
+  void deletedLastTargetTakesNote() throws ClassDiagramParseException {
+    String source = "class A (aaaaaaaa)\nnote (a0000001) \"only\"\nanchor (f0000001) a0000001 -- aaaaaaaa";
+    assertEquals(canonical(""), deleted(source, "aaaaaaaa"));
+  }
+
+  /** While changes are tracked, only the line to the deleted class is marked as removed, the note isn't. */
+  @Test
+  void trackedDeletedTargetMarksOnlyLine() throws ClassDiagramParseException {
+    String source = "class A (aaaaaaaa)\nclass C (cccccccc)\nnote (a0000001) \"both\"\n"
+      + "anchor (f0000001) a0000001 -- aaaaaaaa\nanchor (f0000002) a0000001 -- cccccccc";
+    String expected = "class A (aaaaaaaa) change(removed, blue)\nclass C (cccccccc)\nnote (a0000001) \"both\"\n"
+      + "anchor (f0000001) change(removed, blue) a0000001 -- aaaaaaaa\nanchor (f0000002) a0000001 -- cccccccc";
+    assertEquals(canonical(expected), deleted(source, "aaaaaaaa", "blue"));
+  }
+
+  /** While changes are tracked, a line which is removed already doesn't count: the note goes with the last live one. */
+  @Test
+  void trackedLastLiveTargetMarksNote() throws ClassDiagramParseException {
+    String source = "class A (aaaaaaaa) change(removed, blue)\nclass C (cccccccc)\nnote (a0000001) \"both\"\n"
+      + "anchor (f0000001) change(removed, blue) a0000001 -- aaaaaaaa\nanchor (f0000002) a0000001 -- cccccccc";
+    String expected = "class A (aaaaaaaa) change(removed, blue)\nclass C (cccccccc) change(removed, blue)\n"
+      + "note (a0000001) change(removed, blue) \"both\"\n"
+      + "anchor (f0000001) change(removed, blue) a0000001 -- aaaaaaaa\n"
+      + "anchor (f0000002) change(removed, blue) a0000001 -- cccccccc";
+    assertEquals(canonical(expected), deleted(source, "cccccccc", "blue"));
+  }
+
   /** While changes are tracked, an anchor line is marked as removed, its note and its target stay as they are. */
   @Test
   void trackedAnchorLineMarkedRemoved() throws ClassDiagramParseException {

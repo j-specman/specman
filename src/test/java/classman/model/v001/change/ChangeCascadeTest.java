@@ -106,6 +106,23 @@ class ChangeCascadeTest {
         rejected(source, "blue"));
   }
 
+  /** A note which hangs on a vanishing class and on a class which stays, stays with its other line. */
+  @Test
+  void noteWithOtherLineStaysWhenOneTargetVanishes() throws ClassDiagramParseException {
+    String source = "class A (aaaaaaaa) change(added, blue)\nclass B (bbbbbbbb)\nnote (a0000001) \"n\"\n"
+        + "anchor a0000001 -- aaaaaaaa\nanchor a0000001 -- bbbbbbbb";
+    assertEquals(canonical("class B (bbbbbbbb)\nnote (a0000001) \"n\"\nanchor a0000001 -- bbbbbbbb"),
+        rejected(source, "blue"));
+  }
+
+  /** A note whose lines all lead to vanishing elements goes with them. */
+  @Test
+  void noteGoesWhenAllTargetsVanish() throws ClassDiagramParseException {
+    String source = "class A (aaaaaaaa) change(added, blue)\nclass B (bbbbbbbb) change(added, blue)\n"
+        + "note (a0000001) \"n\"\nanchor a0000001 -- aaaaaaaa\nanchor a0000001 -- bbbbbbbb";
+    assertEquals(canonical(""), rejected(source, "blue"));
+  }
+
   /** What survives keeps the marks of other change sets: the added relation of blue stays marked. */
   @Test
   void survivorsKeepOtherMarks() throws ClassDiagramParseException {
