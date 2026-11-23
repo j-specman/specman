@@ -2,7 +2,6 @@ package classman.editor;
 
 import classman.render.SceneRelationLine;
 
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.function.Supplier;
 
@@ -14,9 +13,6 @@ abstract class ConnectionTarget {
 
   /** @return the area which is framed while the connection would end here, null if the target has none */
   abstract Rectangle2D frame();
-
-  /** @return where the line which is shown while drawing ends, if the mouse is where it is given */
-  abstract Point2D lineEnd(Point2D mouse);
 
   /** @return the line which is drawn thick while the connection would end here, null if the target is no relation */
   SceneRelationLine thickLine() {

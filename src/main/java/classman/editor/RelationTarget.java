@@ -2,7 +2,6 @@ package classman.editor;
 
 import classman.render.SceneRelationLine;
 
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.function.Supplier;
 
@@ -19,11 +18,6 @@ class RelationTarget extends ConnectionTarget {
 
   @Override
   Rectangle2D frame() { return null; }
-
-  @Override
-  Point2D lineEnd(Point2D mouse) {
-    return relationLine.nearestPointOnSegment(relationLine.nearestSegment(mouse), mouse);
-  }
 
   @Override
   SceneRelationLine thickLine() { return relationLine; }

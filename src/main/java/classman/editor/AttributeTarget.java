@@ -3,7 +3,6 @@ package classman.editor;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassModel_V001;
 
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.function.Supplier;
 
@@ -24,11 +23,6 @@ class AttributeTarget extends ConnectionTarget {
 
   @Override
   Rectangle2D frame() { return line; }
-
-  @Override
-  Point2D lineEnd(Point2D mouse) {
-    return new Point2D.Double(line.getCenterX(), line.getCenterY());
-  }
 
   @Override
   String ensureId(Supplier<String> newId) {

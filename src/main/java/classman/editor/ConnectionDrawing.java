@@ -13,6 +13,7 @@ import java.awt.geom.Rectangle2D;
 class ConnectionDrawing {
   private final ConnectionTarget start;
   private final TargetFinder finder;
+  private final Point2D pressedAt;
   private Point2D mouse;
   private ConnectionTarget target;
   private boolean hasLeftStart;
@@ -22,6 +23,7 @@ class ConnectionDrawing {
   ConnectionDrawing(ConnectionTarget start, TargetFinder finder, Point2D pressedAt) {
     this.start = start;
     this.finder = finder;
+    this.pressedAt = pressedAt;
     this.mouse = pressedAt;
   }
 
@@ -49,11 +51,10 @@ class ConnectionDrawing {
   /** @return the line of the relation which the connection would end at, null if it would end at none */
   SceneRelationLine targetLine() { return target != null ? target.thickLine() : null; }
 
-  /** @return the line which is shown: from the center of the start to the center of the class or attribute which
-   * the connection would end at, to the relation at the point closest to the mouse, or to the mouse if it is on none */
+  /** @return the line which is shown: from the point where the mouse was pressed to the mouse, wherever it is. The
+   * target which the connection would end at is marked by its frame, the line only jumps to its place when the
+   * connection is created. */
   Line2D line() {
-    Point2D end = target != null ? target.lineEnd(mouse) : mouse;
-    Rectangle2D fromArea = start.frame();
-    return new Line2D.Double(fromArea.getCenterX(), fromArea.getCenterY(), end.getX(), end.getY());
+    return new Line2D.Double(pressedAt, mouse);
   }
 }

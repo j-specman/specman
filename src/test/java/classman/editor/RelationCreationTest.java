@@ -52,6 +52,30 @@ class RelationCreationTest {
     return new ClassDiagramParser_V001().parse(source).relations().get(0);
   }
 
+  /** While the line is drawn it runs from where the mouse was pressed to the mouse, also over a class which it would
+   * end at. The class is marked by its frame, the line only jumps to its place when the mouse is released. */
+  @Test
+  void drawnLineFollowsTheMouse() throws ClassDiagramParseException {
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
+    Point2D pressedAt = new Point2D.Double(inClass(0).getX() + 5, inClass(0).getY() - 3);
+    Point2D overB = new Point2D.Double(inClass(1).getX() - 7, inClass(1).getY() + 4);
+
+    control.pressed(pressedAt);
+    assertEquals(pressedAt, editing.selectionMarks().connectionLine.getP1());
+    assertEquals(pressedAt, editing.selectionMarks().connectionLine.getP2());
+    control.dragged(overB);
+
+    assertEquals(pressedAt, editing.selectionMarks().connectionLine.getP1());
+    assertEquals(overB, editing.selectionMarks().connectionLine.getP2());
+    assertNotNull(editing.connectionTargetArea());
+
+    control.released(overB);
+
+    assertNull(editing.selectionMarks().connectionLine);
+    assertEquals(1, new ClassDiagramParser_V001().parse(editing.source()).relations().size());
+  }
+
   /** A press on a class and a drag to another one creates a directed association, and the tool is left. */
   @Test
   void associationDrawn() throws ClassDiagramParseException {
