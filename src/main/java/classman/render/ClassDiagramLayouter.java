@@ -29,6 +29,7 @@ public class ClassDiagramLayouter {
     private final FontLayouters<RelationLayouter> relationLayouters;
     private final AttachLineLayouter attachLineLayouter = new AttachLineLayouter();
     private final AttachLineMarkLayouter attachLineMarkLayouter;
+    private final CrossingGaps crossingGaps = new CrossingGaps();
 
     /** Lays out diagrams whose change marks all get the color for unknown change sets. */
     public ClassDiagramLayouter(TextMeasurer measurer) {
@@ -67,6 +68,7 @@ public class ClassDiagramLayouter {
         List<SceneElementArea> elementAreas = new ArrayList<>();
         List<SceneTextArea> textAreas = new ArrayList<>();
         List<SceneRelationLine> relationLines = new ArrayList<>();
+        List<ScenePolyline> drawnLines = new ArrayList<>();
         areas.forEach((element, area) -> {
             elementAreas.add(new SceneElementArea(element, area));
             boxes.get(element).textAreasAt(area.x, area.y).forEach((kind, textArea) ->
@@ -84,8 +86,10 @@ public class ClassDiagramLayouter {
             covered = BoxGeometry.union(covered, relationLayout.bounds);
             textAreas.addAll(relationLayout.textAreas);
             relationLines.add(new SceneRelationLine(relation, relationLayout.line, relationLayout.decorations));
+            drawnLines.add(relationLayout.line);
             attachTargets.add(relation.id, new RelationAttachTarget(relationLayout.path));
         }
+        elements = crossingGaps.withGaps(elements, drawnLines);
         List<SceneAttachLine> attachLines = attachLines(model, areas, attachTargets, hidden);
         for (SceneAttachLine attachLine : attachLines) {
             underlays.addAll(attachLineMarkLayouter.underlay(attachLine.attachLine, attachLine.line));

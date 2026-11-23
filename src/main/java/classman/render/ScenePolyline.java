@@ -52,6 +52,11 @@ public class ScenePolyline extends AbstractSceneElement {
         return new ScenePolyline(xs, ys, dashed, stroke, width, keepsVisible, roundCorners);
     }
 
+    /** @return the same line with another course */
+    public ScenePolyline withPoints(double[] newXs, double[] newYs) {
+        return new ScenePolyline(newXs, newYs, dashed, stroke, strokeWidth, keepsVisible, roundCorners);
+    }
+
     /** The smallest rectangle around all points. */
     public Rectangle2D.Double bounds() {
         double minX = xs[0];
