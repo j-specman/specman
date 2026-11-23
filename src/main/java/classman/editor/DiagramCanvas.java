@@ -29,6 +29,7 @@ class DiagramCanvas extends JPanel implements Scrollable {
   private static final double ZOOM_STEP = 1.1;
   private static final double MIN_ZOOM = 0.25;
   private static final double MAX_ZOOM = 4;
+  private static final double ZOOM_ROUNDING_TOLERANCE = 1e-6;
   private static final int SCROLL_UNIT = 16;
   private static final int SELECTION_GAP = 4;
   private static final int SELECTION_WIDTH = 2;
@@ -38,11 +39,14 @@ class DiagramCanvas extends JPanel implements Scrollable {
   private static final int PLACEHOLDER_GAP = 2;
   private static final Color HANDLE_FILL = Color.WHITE;
   private static final Color DEFAULT_SELECTION_COLOR = new Color(0x2D7FF9);
+  /** The zoom which the user chose last, for the canvases which are made from now on, as long as the application
+   * runs. It belongs to the editor and has nothing to do with the zoom of the activity diagram. */
+  private static double rememberedZoom = 1;
 
   private final SceneGraphicsPainter painter = new SceneGraphicsPainter();
   private Scene scene;
   private SelectionMarks marks = SelectionMarks.none();
-  private double zoom = 1;
+  private double zoom = rememberedZoom;
 
   /** The point of the diagram at the top left of the canvas, and the size of the canvas in points of the diagram. The
    * origin is fixed: the point (0, 0) of the diagram stands at the same place of the canvas whatever the user moves,
@@ -124,8 +128,23 @@ class DiagramCanvas extends JPanel implements Scrollable {
       (int) Math.round(diagramArea.getWidth() * zoom), (int) Math.round(diagramArea.getHeight() * zoom));
   }
 
+  /** Zooms in to the next multiple of 10 percent. */
+  void zoomIn() {
+    zoomTo((Math.floor(zoom * 10 + ZOOM_ROUNDING_TOLERANCE) + 1) / 10);
+  }
+
+  /** Zooms out to the previous multiple of 10 percent. */
+  void zoomOut() {
+    zoomTo((Math.ceil(zoom * 10 - ZOOM_ROUNDING_TOLERANCE) - 1) / 10);
+  }
+
   private void zoomBy(double factor) {
-    zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom * factor));
+    zoomTo(zoom * factor);
+  }
+
+  private void zoomTo(double newZoom) {
+    zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
+    rememberedZoom = zoom;
     revalidate();
     repaint();
   }

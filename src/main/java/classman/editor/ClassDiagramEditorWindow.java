@@ -63,7 +63,7 @@ public class ClassDiagramEditorWindow extends JDialog {
     palette = new EditorPalette(texts, this::classDropped,
       screenPoint -> boxDropped(screenPoint, textEditor::startNewNote), this::relationToolToggled,
       this::relationTypeChosen, this::anchorToolToggled, this::assocClassToolToggled, this::formatPainterToggled,
-      this::dragSourcePressed);
+      this::dragSourcePressed, canvas::zoomIn, canvas::zoomOut);
     getContentPane().add(palette, BorderLayout.WEST);
     getContentPane().add(scrollPane, BorderLayout.CENTER);
 

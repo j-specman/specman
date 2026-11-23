@@ -56,11 +56,13 @@ class EditorPalette extends JToolBar {
    * @param assocClassToolToggled is run when the button for drawing the link of an association class is pressed
    * @param formatPainterToggled is run when the button for the format painter is pressed
    * @param dragSourcePressed is run when the mouse is pressed on the button of a class or a note, which are dragged
-   * and not switched on, so that a tool which is armed is put away */
+   * and not switched on, so that a tool which is armed is put away
+   * @param zoomedIn is run when the button for zooming in is pressed
+   * @param zoomedOut is run when the button for zooming out is pressed */
   EditorPalette(EditorTexts texts, BiConsumer<ClassKind_V001, Point> classDropped, Consumer<Point> noteDropped,
                 Consumer<RelationType_V001> relationToolToggled, Consumer<RelationType_V001> relationTypeChosen,
                 Runnable anchorToolToggled, Runnable assocClassToolToggled, Runnable formatPainterToggled,
-                Runnable dragSourcePressed) {
+                Runnable dragSourcePressed, Runnable zoomedIn, Runnable zoomedOut) {
     super(JToolBar.VERTICAL);
     this.texts = texts;
     this.dragSourcePressed = dragSourcePressed;
@@ -85,6 +87,9 @@ class EditorPalette extends JToolBar {
     addSeparator();
     addToolButton("formatpainter", EditorIcons.FORMAT_PAINTER, formatPainterButton, formatPainterToggled);
     formatPainterButton.setEnabled(false);
+    addSeparator();
+    addZoomButton("zoomin", EditorIcons.ZOOM_IN, zoomedIn);
+    addZoomButton("zoomout", EditorIcons.ZOOM_OUT, zoomedOut);
 
     add(Box.createVerticalGlue());
     addSeparator();
@@ -119,6 +124,12 @@ class EditorPalette extends JToolBar {
 
   private void addToolButton(String key, String iconPath, JToggleButton button, Runnable toggled) {
     button.addActionListener(e -> toggled.run());
+    addElementButton(button, key, EditorIcons.read(iconPath, EditorIcons.SIZE));
+  }
+
+  private void addZoomButton(String key, String iconPath, Runnable pressed) {
+    JButton button = new JButton();
+    button.addActionListener(e -> pressed.run());
     addElementButton(button, key, EditorIcons.read(iconPath, EditorIcons.SIZE));
   }
 
