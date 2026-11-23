@@ -27,8 +27,6 @@ public class VersionCLO extends AbstractCLO {
   }
 
   private static void assertVersionKnown(String version) throws CLIException {
-    if (SpecmanVersion.UNKNOWN_VERSION.equals(version)) {
-      throw error("The version of Specman is not known");
-    }
+    assertThat(!SpecmanVersion.UNKNOWN_VERSION.equals(version), "The version of Specman is not known");
   }
 }
