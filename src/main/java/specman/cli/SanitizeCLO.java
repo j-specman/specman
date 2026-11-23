@@ -1,9 +1,6 @@
 package specman.cli;
 
-import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.DiagramModel_V002;
-import specman.model.v002.MetaTagConfigModel_V002;
-import specman.model.v002.MetaTagModel_V002;
 import specman.model.v002.io.ModelFileReader_V002;
 import specman.model.v002.io.ModelParseException;
 import specman.model.v002.io.ModelRenumberer_V002;
@@ -19,11 +16,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static specman.cli.SpecmanCLI.EXIT_SUCCESS;
 
@@ -42,154 +37,140 @@ import static specman.cli.SpecmanCLI.EXIT_SUCCESS;
  */
 public class SanitizeCLO extends AbstractCLO {
 
+  private static final int REQUIRED_ARGUMENT_COUNT = 2;
+  private static final int FILENAME_ARGUMENT_INDEX = 1;
+
   private final String filename;
 
   SanitizeCLO(String[] args) throws CLIException {
-    if (args.length < 2) {
-      throw error("Usage: specman " + CLIOperation.SANITIZE + " <file>");
-    }
-    this.filename = args[1];
+    assertThat(args.length >= REQUIRED_ARGUMENT_COUNT, "Usage: specman " + CLIOperation.SANITIZE + " <file>");
+    this.filename = args[FILENAME_ARGUMENT_INDEX];
   }
 
-  int run() {
+  @Override
+  int run() throws CLIException {
     File file = new File(filename);
-    if (!file.exists()) {
-      throw error("File not found: " + file.getAbsolutePath());
-    }
+    assertFileExists(file);
+    printOutcome(sanitize(file));
+    return EXIT_SUCCESS;
+  }
+
+  private static SanitizeResult sanitize(File file) throws CLIException {
+    DiagramModel_V002 model = readModel(file);
+    SanitizeModelValidator.assertNoDuplicateIds(model);
+    SanitizeModelValidator.assertValidMetaTags(model);
+
+    Renumbering renumbering = renumberSteps(model);
+    SanitizeResult result = ModelStepnumberRewriter_V002.rewrite(model, renumbering.toNumberMapping());
+    assertNoBrokenRefs(result);
+
+    result.stepNumberChanges = ModelRenumberer_V002.buildStepNumberChanges(
+      model.mainSequence, renumbering.savedNumbers, renumbering.computedNumbers);
+    result.plainTextUpdates = PlainTextSynchronizer_V002.updateAllPlainTexts(model);
+
+    writeIfChanged(file, model, result);
+    return result;
+  }
+
+  private static DiagramModel_V002 readModel(File file) throws CLIException {
     try {
-      SanitizeResult result = sanitize(file);
-      if (!result.brokenRefs.isEmpty()) {
-        throw error("Unresolvable steplink references: " + result.brokenRefs);
-      }
-      if (result.hasChanges()) {
-        System.out.println("SANITIZED");
-        printChanges(result);
-      }
-      else {
-        System.out.println("OK");
-      }
-      return EXIT_SUCCESS;
+      return ModelFileReader_V002.read(file);
     }
-    catch (Exception e) {
+    catch (IOException | ModelParseException e) {
       throw error(e.getMessage());
     }
   }
 
-  private static void printChanges(SanitizeResult result) {
-    if (!result.stepNumberChanges.isEmpty()) {
-      System.out.println();
-      System.out.println("Step numbers changed (" + result.stepNumberChanges.size() + "):");
-      for (StepNumberChange c : result.stepNumberChanges) {
-        String text = c.plainText.isEmpty() ? "" : " \"" + c.plainText + "\"";
-        System.out.println("  " + c.oldNumber + " -> " + c.newNumber + " (" + c.stepType + ")" + text);
-      }
-    }
-    if (!result.steplinkUpdates.isEmpty()) {
-      // Group by location for compact output
-      java.util.LinkedHashMap<String, java.util.List<String>> byLocation = new java.util.LinkedHashMap<>();
-      for (SteplinkUpdate u : result.steplinkUpdates) {
-        byLocation.computeIfAbsent(u.location, k -> new java.util.ArrayList<>())
-          .add(u.oldNumber + " -> " + u.newNumber);
-      }
-      System.out.println();
-      System.out.println("Steplink references updated (" + result.steplinkUpdates.size() + "):");
-      for (Map.Entry<String, java.util.List<String>> entry : byLocation.entrySet()) {
-        System.out.println("  " + entry.getKey() + ": " + String.join(", ", entry.getValue()));
-      }
-    }
-    if (result.plainTextUpdates > 0) {
-      System.out.println();
-      System.out.println("Plain text fields refreshed: " + result.plainTextUpdates);
-    }
-  }
-
-  private static SanitizeResult sanitize(File file) throws IOException, ModelParseException {
-    DiagramModel_V002 model = ModelFileReader_V002.read(file);
-
-    List<String> idErrors = checkDuplicateIds(model);
-    if (!idErrors.isEmpty()) {
-      throw new RuntimeException("Duplicate step IDs:\n  " + String.join("\n  ", idErrors));
-    }
-
-    List<String> tagErrors = checkMetaTags(model);
-    if (!tagErrors.isEmpty()) {
-      throw new RuntimeException("Invalid meta tags:\n  " + String.join("\n  ", tagErrors));
-    }
-
+  private static Renumbering renumberSteps(DiagramModel_V002 model) {
     Map<String, String> savedNumbers = ModelRenumberer_V002.collectNumbers(model.mainSequence);
     ModelRenumberer_V002.renumber(model.mainSequence);
     Map<String, String> computedNumbers = ModelRenumberer_V002.collectNumbers(model.mainSequence);
-    Map<String, String> numberMapping = ModelRenumberer_V002.buildNumberMapping(
-      savedNumbers.isEmpty() ? computedNumbers : savedNumbers,
-      computedNumbers);
+    return new Renumbering(savedNumbers, computedNumbers);
+  }
 
-    SanitizeResult result;
-    try {
-      result = ModelStepnumberRewriter_V002.rewrite(model, numberMapping);
-    }
-    catch (Exception ex) {
-      throw new RuntimeException(ex);
-    }
-    if (!result.brokenRefs.isEmpty()) {
-      return result;
-    }
+  private static void assertNoBrokenRefs(SanitizeResult result) throws CLIException {
+    assertThat(result.brokenRefs.isEmpty(), "Unresolvable steplink references: " + result.brokenRefs);
+  }
 
-    result.stepNumberChanges = ModelRenumberer_V002.buildStepNumberChanges(
-      model.mainSequence, savedNumbers, computedNumbers);
-    result.plainTextUpdates = PlainTextSynchronizer_V002.updateAllPlainTexts(model);
-
+  private static void writeIfChanged(File file, DiagramModel_V002 model, SanitizeResult result) throws CLIException {
     if (result.hasChanges()) {
-      String corrected = new ModelSerializer_V002().serialize(model);
-      Files.write(file.toPath(), corrected.getBytes(StandardCharsets.UTF_8));
+      write(file, new ModelSerializer_V002().serialize(model));
     }
-    return result;
   }
 
-  private static List<String> checkDuplicateIds(DiagramModel_V002 model) {
-    Map<String, List<String>> idToStepNumbers = new LinkedHashMap<>();
-    for (AbstractStepModel_V002 step : model.queryAllSteps()) {
-      idToStepNumbers.computeIfAbsent(step.id, k -> new ArrayList<>())
-        .add(step.stepNumber != null ? step.stepNumber : "?");
+  private static void write(File file, String content) throws CLIException {
+    try {
+      Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
     }
-    List<String> errors = new ArrayList<>();
-    for (Map.Entry<String, List<String>> entry : idToStepNumbers.entrySet()) {
-      if (entry.getValue().size() > 1) {
-        errors.add("ID " + entry.getKey() + " used by steps: " + entry.getValue());
-      }
+    catch (IOException e) {
+      throw error("File can't be written: " + file.getAbsolutePath() + ": " + e.getMessage());
     }
-    return errors;
   }
 
-  private static List<String> checkMetaTags(DiagramModel_V002 model) {
-    Map<String, MetaTagConfigModel_V002> configs = new LinkedHashMap<>();
-    List<String> errors = new ArrayList<>();
-    for (MetaTagConfigModel_V002 config : model.metaTagConfigs) {
-      if (configs.put(config.name, config) != null) {
-        errors.add("Meta tag configuration '" + config.name + "' is defined more than once");
-      }
-      boolean hasLabel = config.label != null && !config.label.isEmpty();
-      boolean hasIcon = config.iconSvg != null && !config.iconSvg.isEmpty();
-      if (!hasLabel && !hasIcon) {
-        errors.add("Meta tag configuration '" + config.name + "' has neither label nor icon");
-      }
+  private void printOutcome(SanitizeResult result) {
+    if (!result.hasChanges()) {
+      out.println("OK");
+      return;
     }
-    for (AbstractStepModel_V002 step : model.queryAllSteps()) {
-      String stepLabel = "Step " + (step.stepNumber != null ? step.stepNumber : "?") + " (" + step.id + ")";
-      Set<String> assignedConfigNames = new HashSet<>();
-      for (MetaTagModel_V002 tag : step.tags) {
-        if (!assignedConfigNames.add(tag.configName)) {
-          errors.add(stepLabel + ": tag '" + tag.configName + "' is assigned more than once");
-        }
-        MetaTagConfigModel_V002 config = configs.get(tag.configName);
-        if (config == null) {
-          errors.add(stepLabel + ": tag '" + tag.configName + "' has no configuration");
-        }
-        else if (!config.freetextAllowed && tag.freetext != null && !tag.freetext.isEmpty()) {
-          errors.add(stepLabel + ": tag '" + tag.configName + "' has freetext but its configuration does not allow freetext");
-        }
-      }
-    }
-    return errors;
+    out.println("SANITIZED");
+    printStepNumberChanges(result.stepNumberChanges);
+    printSteplinkUpdates(result.steplinkUpdates);
+    printPlainTextUpdates(result.plainTextUpdates);
   }
 
+  private void printStepNumberChanges(List<StepNumberChange> changes) {
+    if (changes.isEmpty()) {
+      return;
+    }
+    out.println();
+    out.println("Step numbers changed (" + changes.size() + "):");
+    for (StepNumberChange change : changes) {
+      out.println("  " + describe(change));
+    }
+  }
+
+  private static String describe(StepNumberChange change) {
+    String text = change.plainText.isEmpty() ? "" : " \"" + change.plainText + "\"";
+    return describeNumberChange(change.oldNumber, change.newNumber) + " (" + change.stepType + ")" + text;
+  }
+
+  private void printSteplinkUpdates(List<SteplinkUpdate> updates) {
+    if (updates.isEmpty()) {
+      return;
+    }
+    out.println();
+    out.println("Steplink references updated (" + updates.size() + "):");
+    for (Map.Entry<String, List<String>> entry : groupByLocation(updates).entrySet()) {
+      out.println("  " + entry.getKey() + ": " + String.join(", ", entry.getValue()));
+    }
+  }
+
+  private static Map<String, List<String>> groupByLocation(List<SteplinkUpdate> updates) {
+    Map<String, List<String>> changesByLocation = new LinkedHashMap<>();
+    for (SteplinkUpdate update : updates) {
+      changesByLocation.computeIfAbsent(update.location, location -> new ArrayList<>())
+        .add(describeNumberChange(update.oldNumber, update.newNumber));
+    }
+    return changesByLocation;
+  }
+
+  private static String describeNumberChange(String oldNumber, String newNumber) {
+    return oldNumber + " -> " + newNumber;
+  }
+
+  private void printPlainTextUpdates(int plainTextUpdates) {
+    if (plainTextUpdates > 0) {
+      out.println();
+      out.println("Plain text fields refreshed: " + plainTextUpdates);
+    }
+  }
+
+  /** The step numbers before and after the steps have been renumbered. */
+  private record Renumbering(Map<String, String> savedNumbers, Map<String, String> computedNumbers) {
+
+    /** Maps the old to the new numbers. A model without saved numbers has nothing to map. */
+    Map<String, String> toNumberMapping() {
+      return ModelRenumberer_V002.buildNumberMapping(savedNumbers.isEmpty() ? computedNumbers : savedNumbers, computedNumbers);
+    }
+  }
 }
