@@ -18,10 +18,10 @@ public class SpecmanCLI {
 
       CLIOperation operation = CLIOperation.fromArgs(args);
       if (operation == CLIOperation.SANITIZE) {
-        return new SanitizeCLO(args).run();
+        return new SanitizeCLO(args).execute();
       }
       if (operation == CLIOperation.RESOLVE_LINK) {
-        return new ResolveLinkCLO(args).run();
+        return new ResolveLinkCLO(args).execute();
       }
       return EXIT_SUCCESS;
     }

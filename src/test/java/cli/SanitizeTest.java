@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import static builder.BuilderFactory.diagramm;
 import static builder.BuilderFactory.sequence;
 import static builder.BuilderFactory.simple;
+import static cli.SpecmanCLIFT.call;
 import static cli.SpecmanCLIFT.sanitize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,6 +21,11 @@ import static specman.cli.SpecmanCLI.EXIT_SUCCESS;
 
 /** Tests of the {@code --sanitize} command line operation. */
 public class SanitizeTest {
+
+  private static final String TAG_WITH_FREETEXT = "priority";
+  private static final String TAG_WITHOUT_FREETEXT = "done";
+  private static final String UNKNOWN_TAG = "unknown";
+  private static final String INVISIBLE_TAG = "invisible";
 
   @BeforeAll
   static void deleteOldNsdFiles() throws IOException {
@@ -141,6 +147,117 @@ public class SanitizeTest {
     CLIResult result = sanitize(nsdFile);
 
     assertERROR(result, "mismatched input '}'");
+  }
+
+  /** Without a file argument the call is reported as ERROR with a usage hint. */
+  @Test
+  void testMissingFileArgument() {
+    CLIResult result = call("--sanitize");
+
+    assertERROR(result, "Usage");
+  }
+
+  /** A consistent file is not touched, so its modification can't trigger anything like a file watcher. */
+  @Test
+  void testFileOfOKCaseStaysUnchanged() throws IOException {
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first")))
+      .persist();
+    String contentBefore = Files.readString(nsdFile.toPath());
+
+    sanitize(nsdFile);
+
+    assertEquals(contentBefore, Files.readString(nsdFile.toPath()));
+  }
+
+  /** A file with an error which can't be repaired is not written, even if it contains repairable errors as well. */
+  @Test
+  void testFileWithUnresolvableStepLinkStaysUnchanged() throws IOException {
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first").withPlainText("outdated"))
+        .withStep(simple("see step 9").withSteplink("9")))
+      .persist();
+    String contentBefore = Files.readString(nsdFile.toPath());
+
+    sanitize(nsdFile);
+
+    assertEquals(contentBefore, Files.readString(nsdFile.toPath()));
+  }
+
+  /** Tags which refer to a configuration and respect its freetext setting are accepted. */
+  @Test
+  void testValidMetaTagsAreAccepted() {
+    File nsdFile = diagramm()
+      .withMetaTagConfig(TAG_WITH_FREETEXT, "Priority", true)
+      .withMetaTagConfig(TAG_WITHOUT_FREETEXT, "Done", false)
+      .withMainSequence(sequence()
+        .withStep(simple("first")
+          .withTag(TAG_WITH_FREETEXT, "high")
+          .withTag(TAG_WITHOUT_FREETEXT)))
+      .persist();
+
+    CLIResult result = sanitize(nsdFile);
+
+    assertOK(result);
+  }
+
+  /** A tag which refers to a configuration that doesn't exist is reported as ERROR including the tag's name and step. */
+  @Test
+  void testTagWithoutConfiguration() {
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first").withTag(UNKNOWN_TAG)))
+      .persist();
+
+    CLIResult result = sanitize(nsdFile);
+
+    assertERROR(result, "Invalid meta tags", "Step 1", "'" + UNKNOWN_TAG + "' has no configuration");
+  }
+
+  /** A step with the same tag twice is reported as ERROR including the tag's name. */
+  @Test
+  void testTagAssignedTwiceToStep() {
+    File nsdFile = diagramm()
+      .withMetaTagConfig(TAG_WITH_FREETEXT, "Priority", true)
+      .withMainSequence(sequence()
+        .withStep(simple("first")
+          .withTag(TAG_WITH_FREETEXT, "high")
+          .withTag(TAG_WITH_FREETEXT, "low")))
+      .persist();
+
+    CLIResult result = sanitize(nsdFile);
+
+    assertERROR(result, "Invalid meta tags", "'" + TAG_WITH_FREETEXT + "' is assigned more than once");
+  }
+
+  /** A tag with freetext at a configuration which doesn't allow freetext is reported as ERROR. */
+  @Test
+  void testFreetextAtTagWithoutFreetextAllowed() {
+    File nsdFile = diagramm()
+      .withMetaTagConfig(TAG_WITHOUT_FREETEXT, "Done", false)
+      .withMainSequence(sequence()
+        .withStep(simple("first").withTag(TAG_WITHOUT_FREETEXT, "unexpected")))
+      .persist();
+
+    CLIResult result = sanitize(nsdFile);
+
+    assertERROR(result, "Invalid meta tags", "'" + TAG_WITHOUT_FREETEXT + "' has freetext");
+  }
+
+  /** A configuration which shows neither label nor icon is reported as ERROR including the configuration's name. */
+  @Test
+  void testTagConfigurationWithoutLabelAndIcon() {
+    File nsdFile = diagramm()
+      .withMetaTagConfig(INVISIBLE_TAG, "", true)
+      .withMainSequence(sequence()
+        .withStep(simple("first")))
+      .persist();
+
+    CLIResult result = sanitize(nsdFile);
+
+    assertERROR(result, "Invalid meta tags", "'" + INVISIBLE_TAG + "' has neither label nor icon");
   }
 
   private static void removeFromFile(File file, String fragment) throws IOException {
