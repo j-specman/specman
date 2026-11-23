@@ -30,19 +30,17 @@ abstract class AbstractCLO {
     throw new CLIException(message);
   }
 
-  protected static void assertThat(boolean condition, String message) throws CLIException {
-    if (!condition) {
-      throw error(message);
-    }
-  }
-
   protected static void assertFileExists(File file) throws CLIException {
-    assertThat(file.exists(), "File not found: " + file.getAbsolutePath());
+    if (!file.exists()) {
+      throw error("File not found: " + file.getAbsolutePath());
+    }
   }
 
   /** Fails with the heading followed by one line for each error, if there is any. */
   protected static void assertNoErrors(String heading, List<String> errors) throws CLIException {
-    assertThat(errors.isEmpty(), heading + ":" + ERROR_LINE_INDENT + String.join(ERROR_LINE_INDENT, errors));
+    if (!errors.isEmpty()) {
+      throw error(heading + ":" + ERROR_LINE_INDENT + String.join(ERROR_LINE_INDENT, errors));
+    }
   }
 
 }
