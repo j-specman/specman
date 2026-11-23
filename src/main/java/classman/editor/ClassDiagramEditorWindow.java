@@ -62,7 +62,8 @@ public class ClassDiagramEditorWindow extends JDialog {
 
     palette = new EditorPalette(texts, this::classDropped,
       screenPoint -> boxDropped(screenPoint, textEditor::startNewNote), this::relationToolToggled,
-      this::relationTypeChosen, this::anchorToolToggled, this::assocClassToolToggled, this::formatPainterToggled);
+      this::relationTypeChosen, this::anchorToolToggled, this::assocClassToolToggled, this::formatPainterToggled,
+      this::dragSourcePressed);
     getContentPane().add(palette, BorderLayout.WEST);
     getContentPane().add(scrollPane, BorderLayout.CENTER);
 
@@ -195,6 +196,11 @@ public class ClassDiagramEditorWindow extends JDialog {
 
   private void formatPainterToggled() {
     editing.toggleFormatPainter();
+    showDiagram();
+  }
+
+  private void dragSourcePressed() {
+    editing.disarmTool();
     showDiagram();
   }
 

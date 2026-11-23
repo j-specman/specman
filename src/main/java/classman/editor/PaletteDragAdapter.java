@@ -24,20 +24,24 @@ class PaletteDragAdapter extends MouseAdapter {
   private final Supplier<String> label;
   private final Supplier<Icon> icon;
   private final Consumer<Point> dropped;
+  private final Runnable pressed;
   private Point pressedAt;
   private JWindow ghost;
 
   /** @param label the text of the ghost, asked when the drag starts, since a button with variants changes it
-   * @param icon the icon of the ghost, asked when the drag starts */
-  PaletteDragAdapter(Supplier<String> label, Supplier<Icon> icon, Consumer<Point> dropped) {
+   * @param icon the icon of the ghost, asked when the drag starts
+   * @param pressed is run when the mouse is pressed on the button, whether a drag follows or not */
+  PaletteDragAdapter(Supplier<String> label, Supplier<Icon> icon, Consumer<Point> dropped, Runnable pressed) {
     this.label = label;
     this.icon = icon;
     this.dropped = dropped;
+    this.pressed = pressed;
   }
 
   @Override
   public void mousePressed(MouseEvent e) {
     pressedAt = e.getLocationOnScreen();
+    pressed.run();
   }
 
   @Override

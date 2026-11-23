@@ -5,6 +5,7 @@ import classman.model.v001.RelationType_V001;
 
 import javax.swing.AbstractButton;
 import javax.swing.Box;
+import javax.swing.DefaultButtonModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JToggleButton;
@@ -43,6 +44,7 @@ class EditorPalette extends JToolBar {
   private final JButton toggleButton = new JButton();
   private final Map<AbstractButton, String> labels = new HashMap<>();
   private final Map<AbstractButton, String> tooltips = new HashMap<>();
+  private final Runnable dragSourcePressed;
   private boolean showText;
 
   /** @param classDropped gets the kind of the class which the class button creates, and the point on the screen where
@@ -52,12 +54,16 @@ class EditorPalette extends JToolBar {
    * @param relationTypeChosen is run with the type of the relation which the user chose in the menu of a button
    * @param anchorToolToggled is run when the button for drawing the anchor of a note is pressed
    * @param assocClassToolToggled is run when the button for drawing the link of an association class is pressed
-   * @param formatPainterToggled is run when the button for the format painter is pressed */
+   * @param formatPainterToggled is run when the button for the format painter is pressed
+   * @param dragSourcePressed is run when the mouse is pressed on the button of a class or a note, which are dragged
+   * and not switched on, so that a tool which is armed is put away */
   EditorPalette(EditorTexts texts, BiConsumer<ClassKind_V001, Point> classDropped, Consumer<Point> noteDropped,
                 Consumer<RelationType_V001> relationToolToggled, Consumer<RelationType_V001> relationTypeChosen,
-                Runnable anchorToolToggled, Runnable assocClassToolToggled, Runnable formatPainterToggled) {
+                Runnable anchorToolToggled, Runnable assocClassToolToggled, Runnable formatPainterToggled,
+                Runnable dragSourcePressed) {
     super(JToolBar.VERTICAL);
     this.texts = texts;
+    this.dragSourcePressed = dragSourcePressed;
     this.showText = showTextInNewPalettes;
     setFloatable(false);
 
@@ -66,7 +72,6 @@ class EditorPalette extends JToolBar {
     toggleButton.addActionListener(e -> toggleShowText());
 
     addClassButton(classDropped);
-    addDragButton("note", EditorIcons.NOTE, noteDropped);
     addRelationButton("variantAssociation", relationToolToggled, relationTypeChosen,
       new PaletteVariant<>("association", RelationType_V001.ASSOCIATION, EditorIcons.ASSOCIATION),
       new PaletteVariant<>("aggregation", RelationType_V001.AGGREGATION, EditorIcons.AGGREGATION),
@@ -74,6 +79,7 @@ class EditorPalette extends JToolBar {
     addRelationButton("variantInheritance", relationToolToggled, relationTypeChosen,
       new PaletteVariant<>("extends", RelationType_V001.EXTENDS, EditorIcons.EXTENDS),
       new PaletteVariant<>("implements", RelationType_V001.IMPLEMENTS, EditorIcons.IMPLEMENTS));
+    addDragButton("note", EditorIcons.NOTE, noteDropped);
     addToolButton("anchor", EditorIcons.ANCHOR, anchorToolButton, anchorToolToggled);
     addToolButton("assocclass", EditorIcons.ASSOC_CLASS, assocClassToolButton, assocClassToolToggled);
     addSeparator();
@@ -90,7 +96,7 @@ class EditorPalette extends JToolBar {
     JButton button = new JButton();
     Icon icon = EditorIcons.read(iconPath, EditorIcons.SIZE);
     PaletteDragAdapter dragAdapter = new PaletteDragAdapter(() -> texts.get("palette.label." + key), () -> icon,
-      dropped);
+      dropped, dragSourcePressed);
     button.addMouseListener(dragAdapter);
     button.addMouseMotionListener(dragAdapter);
     addElementButton(button, key, icon);
@@ -103,7 +109,8 @@ class EditorPalette extends JToolBar {
       new PaletteVariant<>("enum", ClassKind_V001.ENUM, EditorIcons.ENUM)), "variantClass", kind -> { });
     PaletteDragAdapter dragAdapter = new PaletteDragAdapter(button::currentLabel,
       () -> EditorIcons.read(button.currentIconPath(), EditorIcons.SIZE),
-      screenPoint -> dropped.accept(button.currentValue(), screenPoint));
+      screenPoint -> dropped.accept(button.currentValue(), screenPoint), dragSourcePressed);
+    button.setModel(new DefaultButtonModel());
     button.addMouseListener(dragAdapter);
     button.addMouseMotionListener(dragAdapter);
     styleElementButton(button);
