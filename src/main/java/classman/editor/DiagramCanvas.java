@@ -34,6 +34,7 @@ class DiagramCanvas extends JPanel implements Scrollable {
   private static final int SELECTION_GAP = 4;
   private static final int SELECTION_WIDTH = 2;
   private static final int SELECTION_ALPHA = 190;
+  private static final int RUBBER_BAND_FILL_ALPHA = 40;
   private static final double HANDLE_DIAMETER = 9;
   private static final double PLACEHOLDER_DASH = 3;
   private static final int PLACEHOLDER_GAP = 2;
@@ -163,6 +164,7 @@ class DiagramCanvas extends JPanel implements Scrollable {
       g.translate(-originX, -originY);
       painter.paint(scene, g);
       paintSelection(g);
+      paintRubberBand(g);
       paintConnectionLine(g);
       paintPlaceholders(g);
       paintLeaders(g);
@@ -182,6 +184,17 @@ class DiagramCanvas extends JPanel implements Scrollable {
     for (Rectangle2D frame : marks.frames) {
       g.draw(new Rectangle2D.Double(frame.getX() - gap, frame.getY() - gap,
         frame.getWidth() + 2 * gap, frame.getHeight() + 2 * gap));
+    }
+  }
+
+  /** The rectangle which is pulled open to select boxes: a light fill and a thin outline in the color of the selection. */
+  private void paintRubberBand(Graphics2D g) {
+    if (marks.rubberBand != null) {
+      g.setColor(withAlpha(selectionColor(), RUBBER_BAND_FILL_ALPHA));
+      g.fill(marks.rubberBand);
+      g.setColor(selectionColor());
+      g.setStroke(new BasicStroke((float) (1 / zoom)));
+      g.draw(marks.rubberBand);
     }
   }
 

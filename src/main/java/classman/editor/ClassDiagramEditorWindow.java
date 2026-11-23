@@ -80,6 +80,7 @@ public class ClassDiagramEditorWindow extends JDialog {
     bindKey(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK, editing::undo);
     bindKey(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK, editing::redo);
     bindKey(KeyEvent.VK_DELETE, 0, editing::deleteSelected);
+    bindKey(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK, editing::selectAllBoxes);
     bindKey(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK, editing::redo);
     placeNear(owner);
   }

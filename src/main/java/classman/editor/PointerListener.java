@@ -7,6 +7,9 @@ import java.awt.geom.Point2D;
 interface PointerListener {
   void pressed(Point2D at);
 
+  /** Called instead of {@link #pressed} when the user holds Ctrl: the press adds to the selection. */
+  void pressedWithCtrl(Point2D at);
+
   /** Only called after the mouse has moved a little away from where it was pressed. */
   void dragged(Point2D at);
 

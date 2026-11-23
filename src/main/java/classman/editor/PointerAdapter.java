@@ -59,13 +59,18 @@ class PointerAdapter extends MouseAdapter {
     }
     else if (SwingUtilities.isLeftMouseButton(e)) {
       e.getComponent().requestFocusInWindow();
-      if (e.getClickCount() > 1) {
+      if (e.getClickCount() > 1 && !e.isControlDown()) {
         listener.doubleClicked(toDiagram.apply(e.getPoint()));
         return;
       }
       pressedAt = e.getPoint();
       dragging = false;
-      listener.pressed(toDiagram.apply(pressedAt));
+      if (e.isControlDown()) {
+        listener.pressedWithCtrl(toDiagram.apply(pressedAt));
+      }
+      else {
+        listener.pressed(toDiagram.apply(pressedAt));
+      }
     }
   }
 

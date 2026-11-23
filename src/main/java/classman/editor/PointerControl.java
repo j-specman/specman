@@ -74,6 +74,20 @@ class PointerControl implements PointerListener {
     }
     editing.selectAt(at, tolerance);
     editing.startDrag(at, tolerance);
+    editing.startRubberBand(at);
+    showDiagram.run();
+  }
+
+  /** A press with Ctrl on a box adds it to the selected boxes, or takes it out if it is among them. A press on empty
+   * space starts a rectangle which adds the boxes in it to the selection. Nothing else is selected this way, so a
+   * press on a relation does nothing. While a tool or the format painter is armed, Ctrl makes no difference. */
+  @Override
+  public void pressedWithCtrl(Point2D at) {
+    if (editing.isFormatPainterArmed() || editing.isToolArmed()) {
+      pressed(at);
+      return;
+    }
+    editing.pressWithCtrl(at, toDiagramLength.applyAsDouble(HIT_PIXELS));
     showDiagram.run();
   }
 

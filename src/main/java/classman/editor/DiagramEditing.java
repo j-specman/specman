@@ -44,6 +44,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -72,6 +73,8 @@ public class DiagramEditing {
   private String source;
   private Scene scene;
   private AbstractDiagramElementModel_V001 selected;
+  private final BoxGroup group = new BoxGroup();
+  private RubberBand band;
   private Drag drag;
   private ConnectionDrawing drawing;
   private Tool armedTool = Tool.NONE;
@@ -96,7 +99,8 @@ public class DiagramEditing {
     pendingBox = null;
     scene = host.renderer().layout(model);
     source = newSource;
-    selected = null;
+    select(null);
+    band = null;
     drag = null;
     drawing = null;
     armedTool = Tool.NONE;
@@ -161,32 +165,35 @@ public class DiagramEditing {
    * relation selected. The dashed line of a note, its anchor, is selected like the line of a relation. A point at the left or right side of a class, where its width is changed, selects the class,
    * also if the point is a little outside of it. */
   public void selectAt(Point2D point, double tolerance) {
+    if (groupMemberAt(point, tolerance) != null) {
+      return;
+    }
     if (handleIndexAt(point, tolerance) >= 0 || selectedPlaceholderAt(point) != null
         || movableTextAt(point) != null) {
       return;
     }
     ResizeTarget edge = resizeTargetAt(point, tolerance);
     if (edge != null) {
-      selected = edge.box;
+      select(edge.box);
       return;
     }
     SceneElementArea hit = scene.elementAreaAt(point);
     if (hit != null) {
-      selected = hit.element;
+      select(hit.element);
       return;
     }
     SceneTextArea relationText = scene.textAreaAt(point);
     if (relationText != null && relationText.element instanceof AbstractRelationModel_V001 relation
         && TextPlaces.isMovable(relation, relationText.kind)) {
-      selected = relation;
+      select(relation);
       return;
     }
     SceneConnectionLine line = scene.connectionLineAt(point, tolerance);
     if (line instanceof SceneAttachLine attachLine) {
-      selected = attachLine.attachLine;
+      select(attachLine.attachLine);
     }
     else {
-      selected = line != null ? ((SceneRelationLine) line).relation : null;
+      select(line != null ? ((SceneRelationLine) line).relation : null);
     }
   }
 
@@ -272,9 +279,98 @@ public class DiagramEditing {
     return scene.attachTargets.findEnd(endId, true).box();
   }
 
-  public void deselect() { selected = null; }
+  public void deselect() { select(null); }
 
-  public boolean hasSelection() { return selected != null; }
+  public boolean hasSelection() { return selected != null || !group.isEmpty(); }
+
+  /** Selects one element, or nothing if it is null. That ends a selection of several boxes. */
+  private void select(AbstractDiagramElementModel_V001 element) {
+    selected = element;
+    group.clear();
+  }
+
+  /** @return the box of the selected group which the point is on, or at its left or right side, null if no group is
+   * selected or the point is on none of its boxes */
+  private AbstractBoxModel_V001 groupMemberAt(Point2D point, double tolerance) {
+    if (group.isEmpty()) {
+      return null;
+    }
+    ResizeTarget edge = resizeTargetAt(point, tolerance);
+    SceneElementArea hit = scene.elementAreaAt(point);
+    AbstractBoxModel_V001 box = edge != null ? edge.box
+      : hit != null && hit.element instanceof AbstractBoxModel_V001 hitBox ? hitBox : null;
+    return box != null && group.contains(box) ? box : null;
+  }
+
+  /** Selects the boxes together, if there are two or more. One box is selected like any element, and no box means
+   * nothing selected. */
+  private void selectBoxes(List<AbstractBoxModel_V001> boxes) {
+    if (boxes.size() < 2) {
+      select(boxes.isEmpty() ? null : boxes.get(0));
+      return;
+    }
+    selected = null;
+    group.replace(boxes);
+  }
+
+  /** @return the boxes which are selected together, empty if fewer than two are */
+  public List<AbstractBoxModel_V001> selectedBoxes() { return group.members(); }
+
+  /** @return the boxes which are selected: the boxes of the group, or the one box which is selected, none if a relation
+   * or a line or nothing is */
+  private List<AbstractBoxModel_V001> currentBoxes() {
+    if (!group.isEmpty()) {
+      return group.members();
+    }
+    return selected instanceof AbstractBoxModel_V001 box ? List.of(box) : List.of();
+  }
+
+  /** @return the boxes of the diagram which are in the list, in the order of drawing */
+  private List<AbstractBoxModel_V001> inDrawingOrder(Collection<AbstractBoxModel_V001> boxes) {
+    return model.boxes().stream().filter(boxes::contains).toList();
+  }
+
+  /** A press with Ctrl: the box at the point is added to the selected boxes, or taken out if it is one of them. Where
+   * there is no box, a rectangle is started which adds the boxes in it to the selected ones, unless the point is on a
+   * relation or a line, which can't be selected together with boxes: nothing happens there. */
+  public void pressWithCtrl(Point2D at, double tolerance) {
+    AbstractBoxModel_V001 box = boxAt(at, tolerance);
+    if (box != null) {
+      List<AbstractBoxModel_V001> boxes = new ArrayList<>(currentBoxes());
+      if (!boxes.remove(box)) {
+        boxes.add(box);
+      }
+      selectBoxes(inDrawingOrder(boxes));
+      return;
+    }
+    boolean onLine = handleIndexAt(at, tolerance) >= 0 || scene.connectionLineAt(at, tolerance) != null;
+    if (!onLine && drag == null && drawing == null) {
+      band = new RubberBand(at, currentBoxes());
+    }
+  }
+
+  /** @return the box which the point is on, or at its left or right side, null if there is none */
+  private AbstractBoxModel_V001 boxAt(Point2D point, double tolerance) {
+    ResizeTarget edge = resizeTargetAt(point, tolerance);
+    if (edge != null) {
+      return edge.box;
+    }
+    SceneElementArea hit = scene.elementAreaAt(point);
+    return hit != null && hit.element instanceof AbstractBoxModel_V001 box ? box : null;
+  }
+
+  /** Selects all boxes of the diagram, the classes, notes and association classes. */
+  public void selectAllBoxes() {
+    selectBoxes(model.boxes().stream().filter(box -> box != pendingBox && scene.elementAreaOf(box) != null).toList());
+  }
+
+  /** Starts to pull a rectangle open from the point, if nothing is selected. Dragging makes it grow, and the boxes
+   * which lie completely inside of it are selected when the mouse is released. */
+  public void startRubberBand(Point2D at) {
+    if (!hasSelection() && drag == null && drawing == null) {
+      band = new RubberBand(at);
+    }
+  }
 
   /** @return the selected box if it is a class of the diagram, null if something else or
    * nothing is selected */
@@ -321,11 +417,19 @@ public class DiagramEditing {
     if (selectedArea() != null) {
       frames.add(selectedArea());
     }
+    for (AbstractBoxModel_V001 member : group.members()) {
+      frames.add(scene.elementAreaOf(member).area);
+    }
+    if (band != null) {
+      for (AbstractBoxModel_V001 inside : boxesInside(band.rectangle())) {
+        frames.add(scene.elementAreaOf(inside).area);
+      }
+    }
     if (connectionTargetArea() != null) {
       frames.add(connectionTargetArea());
     }
     return new SelectionMarks(frames, selectedHandles(), selectedPlaceholders(), selectedTextLeaders(), trackedFieldColor(),
-      drawing != null ? drawing.line() : null, specialSelectionColor());
+      drawing != null ? drawing.line() : null, specialSelectionColor(), band != null ? band.rectangle() : null);
   }
 
   /** @return the color for the frame around the selected box if the usual one can't be told from the change set which
@@ -824,8 +928,15 @@ public class DiagramEditing {
 
   /** Starts to drag, from the point where the mouse was pressed: a handle of the selected relation if the point is at
    * most the tolerance away from one, a side of a class if the point is at it, otherwise the selected box, if there is
-   * one. Nothing is dragged if the user only clicks. */
+   * one. A press on a box of a selected group drags the whole group. Nothing is dragged if the user only clicks: that
+   * makes the box which was pressed the only selected one. */
   public void startDrag(Point2D at, double tolerance) {
+    AbstractBoxModel_V001 groupMember = groupMemberAt(at, tolerance);
+    if (groupMember != null) {
+      drag = new GroupDrag(group.members(), groupMember, at, scene, positionFreezer(),
+        new GroupLines(model, group.members()).waypointLists());
+      return;
+    }
     int handle = handleIndexAt(at, tolerance);
     ResizeTarget edge = resizeTargetAt(at, tolerance);
     SceneTextArea movableText = movableTextAt(at);
@@ -984,6 +1095,10 @@ public class DiagramEditing {
       drawing.to(at, snapTolerance);
       return;
     }
+    if (band != null) {
+      band.to(at);
+      return;
+    }
     if (drag != null) {
       drag.to(at, snapTolerance);
       scene = host.renderer().layout(model);
@@ -1001,8 +1116,16 @@ public class DiagramEditing {
       endDrawing();
       return;
     }
+    if (band != null) {
+      finishBand();
+      return;
+    }
     Drag ended = drag;
     drag = null;
+    if (ended instanceof GroupDrag groupDrag && !groupDrag.hasMoved()) {
+      select(groupDrag.pressedBox());
+      return;
+    }
     if (ended != null && ended.hasMoved()) {
       publish();
     }
@@ -1015,6 +1138,10 @@ public class DiagramEditing {
       drawing = null;
       return true;
     }
+    if (band != null) {
+      band = null;
+      return true;
+    }
     Drag cancelled = drag;
     drag = null;
     if (cancelled == null || !cancelled.hasMoved()) {
@@ -1023,6 +1150,31 @@ public class DiagramEditing {
     cancelled.cancel();
     scene = host.renderer().layout(model);
     return true;
+  }
+
+  /** Selects the boxes in the rectangle, together with those which were kept if it adds to the selection. A rectangle
+   * which adds to the selection and hasn't been pulled open leaves the selection as it is. */
+  private void finishBand() {
+    RubberBand finished = band;
+    band = null;
+    if (finished.isAdditive() && !finished.hasMoved()) {
+      return;
+    }
+    List<AbstractBoxModel_V001> boxes = new ArrayList<>(finished.keptBoxes());
+    boxes.addAll(boxesInside(finished.rectangle()));
+    selectBoxes(inDrawingOrder(boxes));
+  }
+
+  /** @return the boxes of the diagram which lie completely inside of the area, in the order of drawing */
+  private List<AbstractBoxModel_V001> boxesInside(Rectangle2D area) {
+    List<AbstractBoxModel_V001> inside = new ArrayList<>();
+    for (AbstractBoxModel_V001 box : model.boxes()) {
+      SceneElementArea boxArea = box == pendingBox ? null : scene.elementAreaOf(box);
+      if (boxArea != null && area.contains(boxArea.area)) {
+        inside.add(box);
+      }
+    }
+    return inside;
   }
 
   public boolean isRelationToolArmed() { return armedTool == Tool.RELATION; }
@@ -1066,7 +1218,7 @@ public class DiagramEditing {
       return;
     }
     setStyle(target, formatPainter.styleFor(target));
-    selected = target;
+    select(target);
     armedTool = Tool.NONE;
   }
 
@@ -1214,7 +1366,7 @@ public class DiagramEditing {
     relation.id = newId();
     markAsAdded(relation);
     model.elements.add(relation);
-    selected = relation;
+    select(relation);
     armedTool = Tool.NONE;
     publish();
   }
@@ -1229,7 +1381,7 @@ public class DiagramEditing {
     dependency.id = newId();
     markAsAdded(dependency);
     model.elements.add(dependency);
-    selected = dependency;
+    select(dependency);
     armedTool = Tool.NONE;
     publish();
   }
@@ -1256,7 +1408,7 @@ public class DiagramEditing {
                       BiFunction<String, String, AttachLineModel_V001> newLine) {
     String targetId = target.ensureId(this::newId);
     armedTool = Tool.NONE;
-    selected = box;
+    select(box);
     if (box.id == null) {
       box.id = newId();
     }
@@ -1278,21 +1430,33 @@ public class DiagramEditing {
     return ids.newIdNotIn(usedIds());
   }
 
-  /** Deletes the selected box and what hangs on it, and selects nothing afterwards. While changes are tracked, what
-   * the change set has added is removed and the rest is marked as removed, so that the deletion can be rejected. */
+  /** Deletes the selected box, or all selected boxes, and what hangs on them, and selects nothing afterwards. It is one
+   * operation. While changes are tracked, what the change set has added is removed and the rest is marked as removed,
+   * so that the deletion can be rejected. */
   public void deleteSelected() {
-    if (selected == null) {
+    if (selected == null && group.isEmpty()) {
       return;
     }
-    String changeSet = host.trackedChangeSet();
-    if (changeSet != null) {
-      deleter.delete(model, selected, changeSet);
+    if (selected != null) {
+      delete(selected);
     }
-    else {
-      deleter.delete(model, selected);
+    for (AbstractBoxModel_V001 box : group.members()) {
+      if (model.boxes().contains(box)) {
+        delete(box);
+      }
     }
     publish();
-    selected = null;
+    select(null);
+  }
+
+  private void delete(AbstractDiagramElementModel_V001 element) {
+    String changeSet = host.trackedChangeSet();
+    if (changeSet != null) {
+      deleter.delete(model, element, changeSet);
+    }
+    else {
+      deleter.delete(model, element);
+    }
   }
 
   /** Puts a class without a name into the picture, its top left corner at the given point of the diagram, with a new
@@ -1324,7 +1488,7 @@ public class DiagramEditing {
     box.width = DiagramStyle.NEW_BOX_WIDTH;
     markAsAdded(box);
     model.elements.add(box);
-    selected = box;
+    select(box);
     pendingBox = box;
     scene = host.renderer().layout(model);
     return scene.textAreas.stream().filter(text -> text.element == box && text.kind == textKind)
@@ -1345,7 +1509,7 @@ public class DiagramEditing {
     }
     model.elements.remove(pendingBox);
     if (selected == pendingBox) {
-      selected = null;
+      select(null);
     }
     pendingBox = null;
     return true;
@@ -1385,7 +1549,11 @@ public class DiagramEditing {
     String newSource = serializer.serialize(model);
     scene = host.renderer().layout(model);
     if (selected != null && !isDrawn(selected)) {
-      selected = null;
+      select(null);
+    }
+    if (!group.isEmpty()) {
+      group.retain(this::isDrawn);
+      selectBoxes(group.members());
     }
     if (!newSource.equals(source)) {
       undoableSteps++;

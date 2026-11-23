@@ -23,9 +23,11 @@ class SelectionMarks {
   final Line2D connectionLine;
   /** The color of the frames if the usual one can't be told from what is selected, null otherwise. */
   final Color specialColor;
+  /** The rectangle which the user pulls open to select boxes, null if none is. */
+  final Rectangle2D rubberBand;
 
   SelectionMarks(List<Rectangle2D> frames, List<Point2D> handles, List<Rectangle2D> placeholders, List<Line2D> leaders,
-                 Color placeholderFill, Line2D connectionLine, Color specialColor) {
+                 Color placeholderFill, Line2D connectionLine, Color specialColor, Rectangle2D rubberBand) {
     this.frames = List.copyOf(frames);
     this.handles = List.copyOf(handles);
     this.placeholders = List.copyOf(placeholders);
@@ -33,9 +35,10 @@ class SelectionMarks {
     this.placeholderFill = placeholderFill;
     this.connectionLine = connectionLine;
     this.specialColor = specialColor;
+    this.rubberBand = rubberBand;
   }
 
   static SelectionMarks none() {
-    return new SelectionMarks(List.of(), List.of(), List.of(), List.of(), null, null, null);
+    return new SelectionMarks(List.of(), List.of(), List.of(), List.of(), null, null, null, null);
   }
 }
