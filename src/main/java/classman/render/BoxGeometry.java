@@ -8,6 +8,7 @@ import java.awt.geom.Rectangle2D;
 
 /** Points on and around the rectangle of a box. */
 public final class BoxGeometry {
+    private static final double INTERIOR_EPSILON = 1e-6;
 
     private BoxGeometry() {
     }
@@ -67,6 +68,44 @@ public final class BoxGeometry {
         double along = horizontal ? point.getX() - box.getMinX() : point.getY() - box.getMinY();
         double length = horizontal ? box.getWidth() : box.getHeight();
         return (int) Math.round(clamp(along, length));
+    }
+
+    /**
+     * Where a line from a point outside of the box to a point on its border first enters the interior of the box, if
+     * it runs through the box before it gets to the end. The line only touching the border at its end, running along
+     * the border, or starting inside of the box doesn't count: null then.
+     */
+    public static Point2D.Double entryIntoInterior(Rectangle2D box, Point2D from, Point2D to) {
+        double dx = to.getX() - from.getX();
+        double dy = to.getY() - from.getY();
+        double[] directions = {-dx, dx, -dy, dy};
+        double[] distances = {from.getX() - box.getMinX(), box.getMaxX() - from.getX(),
+            from.getY() - box.getMinY(), box.getMaxY() - from.getY()};
+        double enter = 0;
+        double exit = 1;
+        for (int i = 0; i < directions.length; i++) {
+            if (directions[i] == 0) {
+                if (distances[i] < 0) {
+                    return null;
+                }
+                continue;
+            }
+            double t = distances[i] / directions[i];
+            if (directions[i] < 0) {
+                enter = Math.max(enter, t);
+            } else {
+                exit = Math.min(exit, t);
+            }
+        }
+        if (enter <= INTERIOR_EPSILON || exit - enter <= INTERIOR_EPSILON) {
+            return null;
+        }
+        double middle = (enter + exit) / 2;
+        double middleX = from.getX() + dx * middle;
+        double middleY = from.getY() + dy * middle;
+        boolean middleIsInside = middleX > box.getMinX() + INTERIOR_EPSILON && middleX < box.getMaxX() - INTERIOR_EPSILON
+            && middleY > box.getMinY() + INTERIOR_EPSILON && middleY < box.getMaxY() - INTERIOR_EPSILON;
+        return middleIsInside ? new Point2D.Double(from.getX() + dx * enter, from.getY() + dy * enter) : null;
     }
 
     /** The smallest rectangle which covers both. Either may be null, then the result is the other one. */

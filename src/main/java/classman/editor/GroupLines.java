@@ -3,9 +3,7 @@ package classman.editor;
 import classman.model.v001.AbstractBoxModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AttachLineModel_V001;
-import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
-import classman.model.v001.ClassModel_V001;
 import classman.model.v001.PositionModel_V001;
 
 import java.util.ArrayList;
@@ -17,10 +15,12 @@ import java.util.List;
  * end outside of the group keep their waypoints, like the lines of a single box which is moved. */
 class GroupLines {
   private final ClassDiagramModel_V001 model;
+  private final ElementOwners owners;
   private final Collection<AbstractBoxModel_V001> members;
 
   GroupLines(ClassDiagramModel_V001 model, Collection<AbstractBoxModel_V001> members) {
     this.model = model;
+    this.owners = new ElementOwners(model);
     this.members = members;
   }
 
@@ -42,39 +42,20 @@ class GroupLines {
   }
 
   private boolean movesWithGroup(AbstractRelationModel_V001 relation) {
-    return isInGroup(boxOf(relation.fromId)) && isInGroup(boxOf(relation.toId));
+    return isInGroup(owners.boxOf(relation.fromId)) && isInGroup(owners.boxOf(relation.toId));
   }
 
   /** An attach line leads from a box to a class, attribute or relation, which moves if its ends do. */
   private boolean movesWithGroup(AttachLineModel_V001 attachLine) {
-    if (!isInGroup(boxOf(attachLine.startId))) {
+    if (!isInGroup(owners.boxOf(attachLine.startId))) {
       return false;
     }
-    AbstractRelationModel_V001 targetRelation = relationWithId(attachLine.targetId);
-    return targetRelation != null ? movesWithGroup(targetRelation) : isInGroup(boxOf(attachLine.targetId));
+    AbstractRelationModel_V001 targetRelation = owners.relationWithId(attachLine.targetId);
+    return targetRelation != null ? movesWithGroup(targetRelation) : isInGroup(owners.boxOf(attachLine.targetId));
   }
 
   private boolean isInGroup(AbstractBoxModel_V001 box) {
     return box != null && members.contains(box);
   }
 
-  /** @return the box with the ID, or the class which has the attribute with the ID, null if there is none */
-  private AbstractBoxModel_V001 boxOf(String id) {
-    AbstractBoxModel_V001 box = model.boxWithId(id);
-    if (box != null) {
-      return box;
-    }
-    for (ClassModel_V001 classModel : model.classes()) {
-      for (AttributeModel_V001 attribute : classModel.attributes) {
-        if (id.equals(attribute.id)) {
-          return classModel;
-        }
-      }
-    }
-    return null;
-  }
-
-  private AbstractRelationModel_V001 relationWithId(String id) {
-    return model.relations().stream().filter(relation -> id.equals(relation.id)).findFirst().orElse(null);
-  }
 }

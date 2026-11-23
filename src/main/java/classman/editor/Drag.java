@@ -1,7 +1,11 @@
 package classman.editor;
 
+import classman.model.v001.AbstractBoxModel_V001;
+
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Collection;
+import java.util.List;
 
 /** A drag of something over the diagram, which changes the model as the mouse moves and can put it back. */
 abstract class Drag {
@@ -16,6 +20,9 @@ abstract class Drag {
 
   /** Puts everything back where it was before the first move. */
   abstract void cancel();
+
+  /** @return the boxes which the drag moves, none if it moves no box */
+  Collection<AbstractBoxModel_V001> movedBoxes() { return List.of(); }
 
   /** @return the box which the dragged thing is going to be hung onto, null if it is not hung onto anything else */
   Rectangle2D connectionTarget() { return null; }

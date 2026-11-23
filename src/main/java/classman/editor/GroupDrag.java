@@ -6,6 +6,7 @@ import classman.render.Scene;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,6 +59,9 @@ class GroupDrag extends Drag {
 
   @Override
   boolean hasMoved() { return freezer.isFrozen(); }
+
+  @Override
+  Collection<AbstractBoxModel_V001> movedBoxes() { return startPositions.keySet(); }
 
   /** Moves all boxes and waypoints by the distance between the point where the mouse was pressed and the given one, rounded to
    * whole units and limited so that no box and no waypoint gets left of or above the top left corner of the diagram. */

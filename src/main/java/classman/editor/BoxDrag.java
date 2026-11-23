@@ -6,6 +6,8 @@ import classman.render.Scene;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Collection;
+import java.util.List;
 
 /** The dragging of one box over the diagram. It changes the position in the model as the mouse moves and can put it
  * back. The other boxes keep their places, see {@link PositionFreezer}. */
@@ -25,6 +27,9 @@ class BoxDrag extends Drag {
 
   @Override
   boolean hasMoved() { return freezer.isFrozen(); }
+
+  @Override
+  Collection<AbstractBoxModel_V001> movedBoxes() { return List.of(box); }
 
   /** Puts the box where it is when the mouse is at the given point, but not left of or above the top left corner of the
    * diagram, which is at (0, 0). A box doesn't snap to anything. */

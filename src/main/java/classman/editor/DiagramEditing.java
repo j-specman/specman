@@ -75,6 +75,7 @@ public class DiagramEditing {
   private AbstractDiagramElementModel_V001 selected;
   private final BoxGroup group = new BoxGroup();
   private RubberBand band;
+  private LineEndRepair lineEndRepair;
   private Drag drag;
   private ConnectionDrawing drawing;
   private Tool armedTool = Tool.NONE;
@@ -931,30 +932,32 @@ public class DiagramEditing {
    * one. A press on a box of a selected group drags the whole group. Nothing is dragged if the user only clicks: that
    * makes the box which was pressed the only selected one. */
   public void startDrag(Point2D at, double tolerance) {
+    drag = newDrag(at, tolerance);
+    lineEndRepair = drag != null && !drag.movedBoxes().isEmpty() ? new LineEndRepair(model, drag.movedBoxes()) : null;
+  }
+
+  private Drag newDrag(Point2D at, double tolerance) {
     AbstractBoxModel_V001 groupMember = groupMemberAt(at, tolerance);
     if (groupMember != null) {
-      drag = new GroupDrag(group.members(), groupMember, at, scene, positionFreezer(),
+      return new GroupDrag(group.members(), groupMember, at, scene, positionFreezer(),
         new GroupLines(model, group.members()).waypointLists());
-      return;
     }
     int handle = handleIndexAt(at, tolerance);
     ResizeTarget edge = resizeTargetAt(at, tolerance);
     SceneTextArea movableText = movableTextAt(at);
     if (handle >= 0) {
-      drag = handleDrag(handle, at);
+      return handleDrag(handle, at);
     }
-    else if (movableText != null) {
-      drag = new TextMoveDrag((AbstractRelationModel_V001) selected, movableText.kind, selectedLine().points(), at,
+    if (movableText != null) {
+      return new TextMoveDrag((AbstractRelationModel_V001) selected, movableText.kind, selectedLine().points(), at,
         movableText.area);
     }
-    else if (edge != null) {
-      drag = new BoxResize(edge.box, edge.side, scene, minimumWidthOf(edge.box), positionFreezer());
+    if (edge != null) {
+      return new BoxResize(edge.box, edge.side, scene, minimumWidthOf(edge.box), positionFreezer());
     }
-    else {
-      drag = selected instanceof AbstractBoxModel_V001 box && scene.elementAreaOf(box) != null
-        ? new BoxDrag(box, at, scene, positionFreezer())
-        : null;
-    }
+    return selected instanceof AbstractBoxModel_V001 box && scene.elementAreaOf(box) != null
+      ? new BoxDrag(box, at, scene, positionFreezer())
+      : null;
   }
 
   private PositionFreezer positionFreezer() {
@@ -1101,7 +1104,13 @@ public class DiagramEditing {
     }
     if (drag != null) {
       drag.to(at, snapTolerance);
+      if (lineEndRepair != null) {
+        lineEndRepair.reset();
+      }
       scene = host.renderer().layout(model);
+      if (lineEndRepair != null) {
+        scene = lineEndRepair.apply(scene, () -> host.renderer().layout(model));
+      }
     }
   }
 
@@ -1122,6 +1131,7 @@ public class DiagramEditing {
     }
     Drag ended = drag;
     drag = null;
+    lineEndRepair = null;
     if (ended instanceof GroupDrag groupDrag && !groupDrag.hasMoved()) {
       select(groupDrag.pressedBox());
       return;
@@ -1145,9 +1155,14 @@ public class DiagramEditing {
     Drag cancelled = drag;
     drag = null;
     if (cancelled == null || !cancelled.hasMoved()) {
+      lineEndRepair = null;
       return false;
     }
     cancelled.cancel();
+    if (lineEndRepair != null) {
+      lineEndRepair.reset();
+      lineEndRepair = null;
+    }
     scene = host.renderer().layout(model);
     return true;
   }
