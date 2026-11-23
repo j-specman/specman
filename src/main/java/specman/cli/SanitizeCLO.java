@@ -44,8 +44,14 @@ public class SanitizeCLO extends AbstractCLO {
   private final String filename;
 
   SanitizeCLO(String[] args) throws CLIException {
-    assertThat(args.length >= REQUIRED_ARGUMENT_COUNT, "Usage: specman " + CLIOperation.SANITIZE + " <file>");
+    assertFileArgumentGiven(args);
     this.filename = args[FILENAME_ARGUMENT_INDEX];
+  }
+
+  private static void assertFileArgumentGiven(String[] args) throws CLIException {
+    if (args.length < REQUIRED_ARGUMENT_COUNT) {
+      throw error("Usage: specman " + CLIOperation.SANITIZE + " <file>");
+    }
   }
 
   @Override
@@ -92,7 +98,9 @@ public class SanitizeCLO extends AbstractCLO {
   }
 
   private static void assertNoBrokenRefs(SanitizeResult result) throws CLIException {
-    assertThat(result.brokenRefs.isEmpty(), "Unresolvable steplink references: " + result.brokenRefs);
+    if (!result.brokenRefs.isEmpty()) {
+      throw error("Unresolvable steplink references: " + result.brokenRefs);
+    }
   }
 
   private static void writeIfChanged(File file, DiagramModel_V002 model, SanitizeResult result) throws CLIException {
