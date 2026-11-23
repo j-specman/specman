@@ -4,7 +4,6 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
-import specman.cli.CLIOperation;
 import specman.cli.SpecmanCLI;
 import specman.i18n.IFileNameExtensionFilter;
 import specman.i18n.Messages;
@@ -659,7 +658,7 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	 * before the window is fully initialized.
 	 */
 	public static void main(String[] args) throws Exception {
-		if (CLIOperation.fromArgs(args) != null) {
+		if (SpecmanCLI.isCLIInvocation(args)) {
 			SpecmanCLI.run(args);
 			return;
 		}

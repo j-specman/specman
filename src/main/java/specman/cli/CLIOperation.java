@@ -1,8 +1,12 @@
 package specman.cli;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public enum CLIOperation {
     SANITIZE("--sanitize"),
-    RESOLVE_LINK("--resolve-link");
+    RESOLVE_LINK("--resolve-link"),
+    VERSION("--version");
 
     private final String operationName;
 
@@ -19,6 +23,11 @@ public enum CLIOperation {
         }
       }
       return null;
+    }
+
+    /** @return the names of all operations, separated by commas, for messages */
+    public static String validOptions() {
+      return Arrays.stream(values()).map(CLIOperation::getOperationName).collect(Collectors.joining(", "));
     }
 
     public String getOperationName() {

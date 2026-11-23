@@ -22,6 +22,11 @@ public class SpecmanCLIFT {
     return call("--sanitize", file.getAbsolutePath());
   }
 
+  /** {@code specman --version} */
+  public static CLIResult version() {
+    return call("--version");
+  }
+
   /** {@code specman --resolve-link <link>...} */
   public static CLIResult resolveLinks(String... links) {
     String[] args = new String[links.length + 1];
