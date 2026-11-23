@@ -1,7 +1,8 @@
 package classman.editor;
 
+import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.ClassKind_V001;
-import classman.model.v001.ClassStyleModel_V001;
+import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.io.ClassDiagramParseException;
@@ -27,6 +28,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
 import java.util.function.BiConsumer;
+import java.util.function.UnaryOperator;
 import java.awt.geom.Rectangle2D;
 
 /** The window in which a class diagram is edited. It is modal: While it is open the rest of the application can't
@@ -157,23 +159,27 @@ public class ClassDiagramEditorWindow extends JDialog {
     JPopupMenu menu;
     SceneTextArea text = editing.movableTextAt(at);
     if (end != null) {
-      menu = new LineEndContextMenu(editing, end, texts, this::showDiagram);
+      menu = new LineEndContextMenu(editing, end, texts, stylePickerFor(editing.selectedRelation()),
+        this::showDiagram);
     }
     else if (text != null) {
       menu = new TextContextMenu(editing, text, texts, this::showDiagram);
     }
     else if (editing.selectedClass() != null) {
-      menu = new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, this::chooseStyle,
-        this::showDiagram);
+      menu = new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts,
+        stylePickerFor(editing.selectedClass()), this::showDiagram);
     }
     else {
-      menu = new NoteContextMenu(editing, editing.selectedNote(), texts, this::showDiagram);
+      menu = new NoteContextMenu(editing, editing.selectedNote(), texts, stylePickerFor(editing.selectedNote()),
+        this::showDiagram);
     }
     menu.show(canvas, where.x, where.y);
   }
 
-  private ClassStyleModel_V001 chooseStyle(ClassStyleModel_V001 start) {
-    return ClassStyleDialog.choose(this, start, host.renderer(), host.changeSets(), texts);
+  /** @return what asks the user for the style of the element, with the dialog for its kind */
+  private UnaryOperator<ElementStyleModel_V001> stylePickerFor(AbstractDiagramElementModel_V001 element) {
+    return start -> ElementStyleDialog.forElement(this, element, start, host.renderer(), host.changeSets(), texts)
+      .choose();
   }
 
   private void relationToolToggled(RelationType_V001 type) {

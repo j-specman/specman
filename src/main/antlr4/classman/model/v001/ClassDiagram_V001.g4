@@ -33,6 +33,8 @@ grammar ClassDiagram_V001;
 //     font size. The entries come in any order, each is optional and may stand once. The word hideattributes behind
 //     the style hides the attribute compartment (the values of an enum); the attributes stay in the source.
 //     The height is always computed.
+//   * A note has the same style(...), behind width= and before its text. A relation has it behind its change mark,
+//     before the classes it joins, and no fill: association style(linecolor="#cc0000") 04de91aa -> b7c20f13.
 //   * An attribute which ends with (hidden) is not shown: the attribute compartment ends with a line "..." instead,
 //     in the color of the first change set which marked one of the hidden attributes.
 //   * A relation without route is a straight line from center to center, clipped at the box borders.
@@ -191,8 +193,8 @@ widthSpec
     : WIDTH EQUALS NUMBER
     ;
 
-// The look of the class box. A color is a string "#rrggbb", the font a word, the font size a number, which the parser
-// checks. Each entry may stand once, which the parser checks too.
+// The look of a class, note or relation. A color is a string "#rrggbb", the font a word, the font size a number, which the parser
+// checks. Each entry may stand once, and a relation has no fill, which the parser checks too.
 styleSpec
     : STYLE LPAREN styleEntry (COMMA styleEntry)* RPAREN
     ;
@@ -235,17 +237,17 @@ relation
     ;
 
 associationRelation
-    : type=(ASSOCIATION | AGGREGATION | COMPOSITION) ELEMENT_ID? changeMark? from=HEX_ID (fromMultiplicity=multiplicity fromMultiplicityChange=textChange? fromPlace=position?)?
+    : type=(ASSOCIATION | AGGREGATION | COMPOSITION) ELEMENT_ID? changeMark? styleSpec? from=HEX_ID (fromMultiplicity=multiplicity fromMultiplicityChange=textChange? fromPlace=position?)?
       (ARROW | LINE | BACK_ARROW | BOTH_ARROW) (toMultiplicity=multiplicity toMultiplicityChange=textChange? toPlace=position?)? to=HEX_ID
       (label=QUOTED_STRING labelChange=textChange? labelPlace=labelPosition?)? route?
     ;
 
 extendsRelation
-    : EXTENDS ELEMENT_ID? changeMark? from=HEX_ID ARROW to=HEX_ID (label=QUOTED_STRING labelChange=textChange? labelPlace=labelPosition?)? route?
+    : EXTENDS ELEMENT_ID? changeMark? styleSpec? from=HEX_ID ARROW to=HEX_ID (label=QUOTED_STRING labelChange=textChange? labelPlace=labelPosition?)? route?
     ;
 
 implementsRelation
-    : IMPLEMENTS ELEMENT_ID? changeMark? from=HEX_ID ARROW to=HEX_ID (label=QUOTED_STRING labelChange=textChange? labelPlace=labelPosition?)? route?
+    : IMPLEMENTS ELEMENT_ID? changeMark? styleSpec? from=HEX_ID ARROW to=HEX_ID (label=QUOTED_STRING labelChange=textChange? labelPlace=labelPosition?)? route?
     ;
 
 // A relation label which the user has moved: at(40%, -12) is 40 percent of the length of the route from its start, 12
@@ -300,7 +302,7 @@ waypoint
 // ------------------------------------------------------------ notes
 
 note
-    : NOTE noteId=ELEMENT_ID? changeMark? position? widthSpec? QUOTED_STRING textChange?
+    : NOTE noteId=ELEMENT_ID? changeMark? position? widthSpec? styleSpec? QUOTED_STRING textChange?
     ;
 
 // The dashed line from a note to what it is about (a class, an attribute or a relation), an element of the diagram

@@ -6,4 +6,8 @@ public abstract class AbstractDiagramElementModel_V001 {
     public String id;
     /** Null if no change set added or removed the element. */
     public ChangeModel_V001 change;
+    /** The look of the element. Never null, the standard look is a style without any part. Which parts an element can
+     * have depends on its kind, see {@link StyleProperty_V001}: classes and notes all of them, relations all but the
+     * fill. The others keep the standard style. */
+    public ElementStyleModel_V001 style = new ElementStyleModel_V001();
 }

@@ -12,7 +12,6 @@ import classman.model.v001.PositionModel_V001;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,14 +24,11 @@ import static classman.render.DiagramStyle.STACK_GAP;
  * stack are straight vertical lines. The relations are drawn above the boxes.
  */
 public class ClassDiagramLayouter {
-    private final TextMeasurer measurer;
-    private final ChangePalette palette;
-    /** One layouter for each font which the classes use, because it measures texts in its font. */
-    private final Map<TextFont, ClassBoxLayouter> classLayouters = new HashMap<>();
-    private final NoteBoxLayouter noteLayouter;
+    private final FontLayouters<ClassBoxLayouter> classLayouters;
+    private final FontLayouters<NoteBoxLayouter> noteLayouters;
+    private final FontLayouters<RelationLayouter> relationLayouters;
     private final AttachLineLayouter attachLineLayouter = new AttachLineLayouter();
     private final AttachLineMarkLayouter attachLineMarkLayouter;
-    private final RelationLayouter relationLayouter;
 
     /** Lays out diagrams whose change marks all get the color for unknown change sets. */
     public ClassDiagramLayouter(TextMeasurer measurer) {
@@ -40,16 +36,14 @@ public class ClassDiagramLayouter {
     }
 
     public ClassDiagramLayouter(TextMeasurer measurer, ChangeColors changeColors) {
-        this.measurer = measurer;
-        this.palette = new ChangePalette(changeColors);
-        this.noteLayouter = new NoteBoxLayouter(measurer, palette);
+        ChangePalette palette = new ChangePalette(changeColors);
+        this.classLayouters = new FontLayouters<>(measurer, (fontMeasurer, font) ->
+            new ClassBoxLayouter(fontMeasurer, palette, font));
+        this.noteLayouters = new FontLayouters<>(measurer, (fontMeasurer, font) ->
+            new NoteBoxLayouter(fontMeasurer, palette, font));
+        this.relationLayouters = new FontLayouters<>(measurer, (fontMeasurer, font) ->
+            new RelationLayouter(fontMeasurer, palette, font));
         this.attachLineMarkLayouter = new AttachLineMarkLayouter(palette);
-        this.relationLayouter = new RelationLayouter(measurer, palette);
-    }
-
-    private ClassBoxLayouter classLayouterFor(ClassModel_V001 classModel) {
-        return classLayouters.computeIfAbsent(TextFont.of(classModel.style),
-            font -> new ClassBoxLayouter(measurer.forFont(font), palette, font));
     }
 
     /** @throws IllegalArgumentException if a relation refers to a class ID which isn't in the diagram, or a note to an unknown ID */
@@ -84,7 +78,7 @@ public class ClassDiagramLayouter {
         });
         Map<String, Rectangle2D.Double> classAreas = classAreas(areas);
         for (AbstractRelationModel_V001 relation : model.relations()) {
-            RelationLayout relationLayout = relationLayouter.layout(relation, classAreas, areas.values());
+            RelationLayout relationLayout = relationLayouters.of(relation.style).layout(relation, classAreas, areas.values());
             elements.addAll(relationLayout.elements);
             underlays.addAll(relationLayout.underlay);
             covered = BoxGeometry.union(covered, relationLayout.bounds);
@@ -123,9 +117,9 @@ public class ClassDiagramLayouter {
         Map<AbstractDiagramElementModel_V001, BoxLayout> boxes = new LinkedHashMap<>();
         for (AbstractDiagramElementModel_V001 element : model.elements) {
             if (element instanceof ClassModel_V001 classModel) {
-                boxes.put(classModel, classLayouterFor(classModel).layout(classModel));
+                boxes.put(classModel, classLayouters.of(classModel.style).layout(classModel));
             } else if (element instanceof NoteModel_V001 note && !hidden.isNoteHidden(note)) {
-                boxes.put(note, noteLayouter.layout(note));
+                boxes.put(note, noteLayouters.of(note.style).layout(note));
             }
         }
         return boxes;

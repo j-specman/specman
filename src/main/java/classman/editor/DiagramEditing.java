@@ -13,7 +13,7 @@ import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
-import classman.model.v001.ClassStyleModel_V001;
+import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.ExtendsRelationModel_V001;
 import classman.model.v001.ImplementsRelationModel_V001;
 import classman.model.v001.NoteModel_V001;
@@ -736,18 +736,34 @@ public class DiagramEditing {
     }
   }
 
-  /** @return whether the box can get a style of its own: no change set has removed it */
-  public Can canChangeStyle(ClassModel_V001 box) {
-    return canAddPartsTo(box);
+  /** @return whether the class, note or relation can get a style of its own: no change set has removed it */
+  public Can canChangeStyle(AbstractDiagramElementModel_V001 element) {
+    if (element instanceof ClassModel_V001 box) {
+      return canAddPartsTo(box);
+    }
+    boolean isRemoved = element.change != null && element.change.type == ChangeType_V001.REMOVED;
+    if (element instanceof NoteModel_V001) {
+      return Can.IF(!isRemoved, texts.get("reason.note.removed"));
+    }
+    if (element instanceof AbstractRelationModel_V001) {
+      return Can.IF(!isRemoved, texts.get("reason.relation.removed"));
+    }
+    return Can.NOT;
   }
 
-  /** Gives the class the style, a style without any part gives it the standard look of classes. Not marked as a
-   * change, like the width. One operation. The box keeps a copy, so the style can't be changed from outside. */
-  public void setStyle(ClassModel_V001 box, ClassStyleModel_V001 style) {
-    if (canChangeStyle(box).can() && !box.style.equals(style)) {
-      box.style = style.copy();
+  /** Gives the class, note or relation the style, a style without any part gives it the standard look. Not marked
+   * as a change, like the width. One operation. The element keeps a copy, so the style can't be changed from
+   * outside. */
+  public void setStyle(AbstractDiagramElementModel_V001 element, ElementStyleModel_V001 style) {
+    if (canChangeStyle(element).can() && !element.style.equals(style)) {
+      element.style = style.copy();
       publish();
     }
+  }
+
+  /** @return the selected relation, null if something else or nothing is selected */
+  public AbstractRelationModel_V001 selectedRelation() {
+    return selected instanceof AbstractRelationModel_V001 relation ? relation : null;
   }
 
   /** Puts a blank row after the last tagged value of the class, for a new tagged value to be typed into. It is part

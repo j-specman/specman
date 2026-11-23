@@ -4,7 +4,7 @@ import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassModel_V001;
-import classman.model.v001.ClassStyleModel_V001;
+import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.TaggedValueModel_V001;
 
 import java.awt.geom.Rectangle2D;
@@ -21,11 +21,9 @@ import static classman.render.DiagramStyle.PADDING_X;
 import static classman.render.DiagramStyle.PADDING_Y;
 import static classman.render.DiagramStyle.STROKE;
 import static classman.render.DiagramStyle.STROKE_WIDTH;
-import static classman.render.DiagramStyle.VEIL_SHARE;
 import static classman.render.DiagramStyle.VEILED_STROKE;
 import static classman.render.DiagramStyle.VEILED_MARKED_TEXT;
 import static classman.render.DiagramStyle.VEILED_TEXT;
-import static classman.render.DiagramStyle.WHITE;
 
 /**
  * Lays out one class box: header with stereotype, name and tagged values, then the attributes. An interface shows
@@ -55,10 +53,11 @@ public class ClassBoxLayouter {
     public BoxLayout layout(ClassModel_V001 model) {
         ChangeModel_V001 change = model.change;
         boolean isRemoved = change != null && change.type == ChangeType_V001.REMOVED;
-        ClassStyleModel_V001 style = model.style;
-        String textColor = isRemoved ? veiledText(style) : style.textColor;
-        String nameColor = isRemoved ? markedNameText(style) : style.textColor;
-        String lineColor = lineColor(style, isRemoved);
+        ElementStyleModel_V001 style = model.style;
+        StyleColors colors = new StyleColors(style, CLASS_FILL, STROKE, VEILED_STROKE);
+        String textColor = colors.text(isRemoved, VEILED_TEXT);
+        String nameColor = colors.markedText(isRemoved, VEILED_MARKED_TEXT);
+        String lineColor = colors.line(isRemoved);
         boolean showsDerivedStereotype = model.kind.derivedStereotype != null && model.stereotype == null;
         String derivedStereotype = showsDerivedStereotype ? stereotypeText(model.kind.derivedStereotype) : null;
         String stereotype = model.stereotype == null ? null : stereotypeText(model.stereotype);
@@ -66,7 +65,6 @@ public class ClassBoxLayouter {
         boolean showsAttributes = model.showsAttributes();
         List<AttributeModel_V001> shownAttributes = showsAttributes ? shownAttributes(model) : List.of();
         List<MarkedText> attributes = attributeTexts(shownAttributes);
-        String fill = style.fill != null ? style.fill : CLASS_FILL;
         double contentWidth = contentWidth(model, derivedStereotype, stereotype, taggedValues, attributes);
         double width = contentWidth + 2 * PADDING_X;
 
@@ -115,7 +113,7 @@ public class ClassBoxLayouter {
         if (change != null) {
             all.add(frame(width, y, change));
         }
-        all.add(new SceneRectangle(0, 0, width, y, isRemoved ? veiled(fill) : fill, lineColor));
+        all.add(new SceneRectangle(0, 0, width, y, colors.fill(isRemoved), lineColor));
         all.addAll(backgrounds);
         all.addAll(elements);
         all.addAll(overlays);
@@ -136,28 +134,6 @@ public class ClassBoxLayouter {
     /** The frame of an added or removed class, in the strong color of its change set. */
     public static SceneRectangle frameOf(double width, double height, String strongColor) {
         return new SceneRectangle(0, 0, width, height, null, strongColor, FRAME_STROKE_WIDTH).keepingVisible();
-    }
-
-    private String veiled(String fill) {
-        return ColorMix.blend(fill, WHITE, VEIL_SHARE);
-    }
-
-    /** The color of the texts of a removed class: its own text color veiled, the grey of veiled texts without one. */
-    private String veiledText(ClassStyleModel_V001 style) {
-        return style.textColor == null ? VEILED_TEXT : veiled(style.textColor);
-    }
-
-    /** The name of a removed class lies on the strong color of its change set, a veil would hardly show on it, so it
-     * keeps the own text color, or has the darker grey without one. */
-    private String markedNameText(ClassStyleModel_V001 style) {
-        return style.textColor == null ? VEILED_MARKED_TEXT : style.textColor;
-    }
-
-    private String lineColor(ClassStyleModel_V001 style, boolean isRemoved) {
-        if (isRemoved) {
-            return style.lineColor == null ? VEILED_STROKE : veiled(style.lineColor);
-        }
-        return style.lineColor == null ? STROKE : style.lineColor;
     }
 
     private void addHeaderMarks(List<AbstractSceneElement> backgrounds, List<AbstractSceneElement> overlays,

@@ -24,12 +24,15 @@ public class RelationTextLayouter {
     private static final double ALONG_SIDE_FACTOR = 2;
 
     private final TextMeasurer measurer;
+    private final TextFont font;
     private final LabelPlacement labelPlacement;
     private final MultiplicityPlacement multiplicityPlacement;
     private final ManualTextPlacement manualPlacement;
 
-    public RelationTextLayouter(TextMeasurer measurer) {
+    /** @param measurer measures texts in the font */
+    public RelationTextLayouter(TextMeasurer measurer, TextFont font) {
         this.measurer = measurer;
+        this.font = font;
         this.labelPlacement = new LabelPlacement(measurer);
         this.multiplicityPlacement = new MultiplicityPlacement(measurer);
         this.manualPlacement = new ManualTextPlacement(measurer);
@@ -39,7 +42,7 @@ public class RelationTextLayouter {
     public RelationTexts texts(AbstractRelationModel_V001 relation, List<Point2D.Double> path,
                                Collection<Rectangle2D.Double> boxes) {
         return placeAll(new TextObstacles(boxes, path), path, fromMultiplicity(relation), toMultiplicity(relation),
-            new RelationText(relation.label, relation.labelPlace));
+            new RelationText(relation.label, relation.labelPlace)).restyled(relation.style.textColor, font);
     }
 
     /** @return where the texts would stand which the relation doesn't have yet, laid out with sample texts: a label

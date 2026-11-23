@@ -77,7 +77,7 @@ class TextEditor {
 
   private JTextComponent newField(SceneTextArea text, String content, Color trackedColor) {
     JTextComponent component = text.kind.wrapped ? wrappingArea(content) : textPane(content, text.kind.centered);
-    TextFont textFont = text.element instanceof ClassModel_V001 box ? TextFont.of(box.style) : TextFont.DEFAULT;
+    TextFont textFont = TextFont.of(text.element.style);
     float size = (float) (textFont.size * canvas.zoom());
     component.setFont(text.kind.bold ? DiagramFonts.bold(textFont.family, size)
       : DiagramFonts.plain(textFont.family, size));

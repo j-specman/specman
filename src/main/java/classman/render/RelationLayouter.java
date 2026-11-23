@@ -19,9 +19,10 @@ public class RelationLayouter {
     private final RelationTextAreas textAreaLayouter;
     private final RelationMarkLayouter markLayouter;
 
-    public RelationLayouter(TextMeasurer measurer, ChangePalette palette) {
+    /** @param measurer measures texts in the font */
+    public RelationLayouter(TextMeasurer measurer, ChangePalette palette, TextFont font) {
         this.measurer = measurer;
-        this.textLayouter = new RelationTextLayouter(measurer);
+        this.textLayouter = new RelationTextLayouter(measurer, font);
         this.textAreaLayouter = new RelationTextAreas(measurer);
         this.markLayouter = new RelationMarkLayouter(measurer, palette);
     }

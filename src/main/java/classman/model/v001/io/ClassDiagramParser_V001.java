@@ -43,6 +43,7 @@ import classman.model.v001.ClassDiagram_V001Parser.RelationContext;
 import classman.model.v001.ClassDiagram_V001Parser.AttachRouteContext;
 import classman.model.v001.ClassDiagram_V001Parser.AssocClassLinkContext;
 import classman.model.v001.ClassDiagram_V001Parser.RouteContext;
+import classman.model.v001.ClassDiagram_V001Parser.StyleSpecContext;
 import classman.model.v001.ClassDiagram_V001Parser.TaggedValueContext;
 import classman.model.v001.ClassDiagram_V001Parser.TextChangeContext;
 import classman.model.v001.ClassDiagram_V001Parser.WaypointContext;
@@ -58,6 +59,7 @@ import classman.model.v001.TextPlaceModel_V001;
 import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.RouteModel_V001;
+import classman.model.v001.StyleProperty_V001;
 import classman.model.v001.Side_V001;
 import classman.model.v001.TaggedValueModel_V001;
 import classman.model.v001.TextChangeModel_V001;
@@ -74,7 +76,10 @@ import java.util.Locale;
 
 /** Reads the text of a class diagram, see ClassDiagram_V001.g4, into the model. */
 public class ClassDiagramParser_V001 {
-    private final ClassStyleReader_V001 styleReader = new ClassStyleReader_V001();
+    private final StyleReader_V001 classStyleReader = new StyleReader_V001("class", StyleProperty_V001.ALL);
+    private final StyleReader_V001 noteStyleReader = new StyleReader_V001("note", StyleProperty_V001.ALL);
+    private final StyleReader_V001 relationStyleReader =
+        new StyleReader_V001("relation", StyleProperty_V001.WITHOUT_FILL);
 
     /** @throws ClassDiagramParseException if the content has a syntax error, or two attributes in one line. */
     public ClassDiagramModel_V001 parse(String content) throws ClassDiagramParseException {
@@ -129,7 +134,7 @@ public class ClassDiagramParser_V001 {
         model.change = change(head.classMark);
         model.position = position(head.position());
         model.width = width(head.widthSpec());
-        model.style = styleReader.read(head.styleSpec());
+        model.style = classStyleReader.read(head.styleSpec());
         model.attributesHidden = head.hideSpec() != null;
         model.stereotype = stereotype(head.STEREOTYPE());
         model.stereotypeId = id(head.stereotypeId);
@@ -276,27 +281,31 @@ public class ClassDiagramParser_V001 {
             throw new ClassDiagramParseException("line " + token.getLine() + ":" + token.getCharPositionInLine()
                 + " The source of an " + type.name().toLowerCase(Locale.ROOT) + " has the diamond and no arrowhead.");
         }
-        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.labelPlace, ctx.route());
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.styleSpec(), ctx.label, ctx.labelChange,
+            ctx.labelPlace, ctx.route());
         return model;
     }
 
     private ExtendsRelationModel_V001 buildExtends(ExtendsRelationContext ctx) throws ClassDiagramParseException {
         ExtendsRelationModel_V001 model = new ExtendsRelationModel_V001(ctx.from.getText(), ctx.to.getText());
-        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.labelPlace, ctx.route());
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.styleSpec(), ctx.label, ctx.labelChange,
+            ctx.labelPlace, ctx.route());
         return model;
     }
 
     private ImplementsRelationModel_V001 buildImplements(ImplementsRelationContext ctx)
             throws ClassDiagramParseException {
         ImplementsRelationModel_V001 model = new ImplementsRelationModel_V001(ctx.from.getText(), ctx.to.getText());
-        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.label, ctx.labelChange, ctx.labelPlace, ctx.route());
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.styleSpec(), ctx.label, ctx.labelChange,
+            ctx.labelPlace, ctx.route());
         return model;
     }
 
-    private void fillCommon(AbstractRelationModel_V001 model, TerminalNode id, ChangeMarkContext changeMark, Token label,
-                            TextChangeContext labelChange, LabelPositionContext labelPlace,
-                            RouteContext route) throws ClassDiagramParseException {
+    private void fillCommon(AbstractRelationModel_V001 model, TerminalNode id, ChangeMarkContext changeMark,
+                            StyleSpecContext style, Token label, TextChangeContext labelChange,
+                            LabelPositionContext labelPlace, RouteContext route) throws ClassDiagramParseException {
         model.id = id(id);
+        model.style = relationStyleReader.read(style);
         model.change = change(changeMark);
         model.label = label == null ? null : unquote(label.getText());
         model.labelChange = textChange(labelChange);
@@ -345,6 +354,7 @@ public class ClassDiagramParser_V001 {
         NoteModel_V001 model = new NoteModel_V001(unquote(ctx.QUOTED_STRING().getText()));
         model.id = id(ctx.noteId);
         model.change = change(ctx.changeMark());
+        model.style = noteStyleReader.read(ctx.styleSpec());
         model.textChange = textChange(ctx.textChange());
         model.position = position(ctx.position());
         model.width = width(ctx.widthSpec());

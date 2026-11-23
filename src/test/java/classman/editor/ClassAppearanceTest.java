@@ -1,7 +1,7 @@
 package classman.editor;
 
 import classman.model.v001.ClassModel_V001;
-import classman.model.v001.ClassStyleModel_V001;
+import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.FontFamily_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
@@ -46,7 +46,7 @@ class ClassAppearanceTest {
     return new ClassDiagramParser_V001().parse(editing.source()).classes().get(0);
   }
 
-  private List<JMenuItem> menuEntries(UnaryOperator<ClassStyleModel_V001> picker) {
+  private List<JMenuItem> menuEntries(UnaryOperator<ElementStyleModel_V001> picker) {
     ClassContextMenu menu = new ClassContextMenu(editing, editing.selectedClass(), null, new EditorTexts(host.locale()),
       picker, () -> { });
     List<JMenuItem> items = new ArrayList<>();
@@ -58,8 +58,8 @@ class ClassAppearanceTest {
     return items;
   }
 
-  private static ClassStyleModel_V001 style(String fill, String textColor, FontFamily_V001 font, Integer fontSize) {
-    ClassStyleModel_V001 style = new ClassStyleModel_V001();
+  private static ElementStyleModel_V001 style(String fill, String textColor, FontFamily_V001 font, Integer fontSize) {
+    ElementStyleModel_V001 style = new ElementStyleModel_V001();
     style.fill = fill;
     style.textColor = textColor;
     style.font = font;
@@ -74,7 +74,7 @@ class ClassAppearanceTest {
 
     editing.setStyle(editing.selectedClass(), style("#cce5ff", "#112233", FontFamily_V001.COURIER, 16));
 
-    ClassStyleModel_V001 written = parsedClass().style;
+    ElementStyleModel_V001 written = parsedClass().style;
     assertEquals("#cce5ff", written.fill);
     assertEquals("#112233", written.textColor);
     assertEquals(FontFamily_V001.COURIER, written.font);
@@ -82,7 +82,7 @@ class ClassAppearanceTest {
     assertEquals(1, host.reportedSources.size());
     assertTrue(editing.canUndo());
 
-    editing.setStyle(editing.selectedClass(), new ClassStyleModel_V001());
+    editing.setStyle(editing.selectedClass(), new ElementStyleModel_V001());
 
     assertTrue(parsedClass().style.isStandard());
     assertFalse(editing.source().contains("style"), editing.source());
@@ -105,7 +105,7 @@ class ClassAppearanceTest {
   void sameStyleChangesNothing() throws ClassDiagramParseException {
     open(CLASS);
 
-    editing.setStyle(editing.selectedClass(), new ClassStyleModel_V001());
+    editing.setStyle(editing.selectedClass(), new ElementStyleModel_V001());
 
     assertTrue(host.reportedSources.isEmpty());
   }
@@ -140,7 +140,7 @@ class ClassAppearanceTest {
 
     assertFalse(parsedClass().attributesHidden);
     assertTrue(host.reportedSources.isEmpty());
-    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(6);
+    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(5);
     assertTrue(shows.isSelected());
     assertFalse(shows.isEnabled());
   }
@@ -211,31 +211,17 @@ class ClassAppearanceTest {
     assertTrue(parsedClass().style.isStandard());
   }
 
-  /** The standard style entry can only be chosen while the class has a style of its own. */
-  @Test
-  void standardStyleEntry() throws ClassDiagramParseException {
-    open(CLASS);
-    assertFalse(menuEntries(start -> null).get(5).isEnabled());
-
-    editing.setStyle(editing.selectedClass(), style("#cce5ff", null, null, null));
-    JMenuItem standard = menuEntries(start -> null).get(5);
-    assertTrue(standard.isEnabled());
-
-    standard.doClick(0);
-    assertTrue(parsedClass().style.isStandard());
-  }
-
   /** The attributes entry is checked while they are shown, and switches them. */
   @Test
   void showAttributesEntry() throws ClassDiagramParseException {
     open(CLASS);
-    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(6);
+    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(5);
     assertTrue(shows.isSelected());
 
     shows.doClick(0);
 
     assertTrue(parsedClass().attributesHidden);
-    assertFalse(((JCheckBoxMenuItem) menuEntries(start -> null).get(6)).isSelected());
+    assertFalse(((JCheckBoxMenuItem) menuEntries(start -> null).get(5)).isSelected());
     assertFalse(menuEntries(start -> null).get(2).isEnabled());
   }
 }

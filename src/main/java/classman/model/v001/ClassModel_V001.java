@@ -20,8 +20,6 @@ public class ClassModel_V001 extends AbstractBoxModel_V001 {
     public ChangeModel_V001 stereotypeElementChange;
     public final List<TaggedValueModel_V001> taggedValues = new ArrayList<>();
     public final List<AttributeModel_V001> attributes = new ArrayList<>();
-    /** Colors, font and font size of the box. Never null, the standard look is a style without any part. */
-    public ClassStyleModel_V001 style = new ClassStyleModel_V001();
     /** True if the box doesn't show its attribute compartment, which keeps its attributes. */
     public boolean attributesHidden;
 

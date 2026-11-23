@@ -3,7 +3,7 @@ package classman.editor;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
-import classman.model.v001.ClassStyleModel_V001;
+import classman.model.v001.ElementStyleModel_V001;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -13,8 +13,7 @@ import java.util.function.UnaryOperator;
 
 /** The menu of a class: it adds the parts which a class can have, each typed into its place in the class right away,
  * shows and hides single attributes by a submenu of check items, which stays open while the user checks them. It
- * opens the dialog for the style of the box (colors, font, font size) or takes the style back to the standard one,
- * shows or hides its attribute compartment, and switches back to the width which follows the content. An entry which
+ * opens the dialog for the style of the box (colors, font, font size), shows or hides its attribute compartment, and switches back to the width which follows the content. An entry which
  * doesn't fit the class right now, like a second stereotype, is there but can't be chosen, and its tooltip says why. */
 class ClassContextMenu extends JPopupMenu {
 
@@ -22,7 +21,7 @@ class ClassContextMenu extends JPopupMenu {
    * doesn't choose one
    * @param showDiagram shows the diagram as the editing has it now */
   ClassContextMenu(DiagramEditing editing, ClassModel_V001 box, TextEditor textEditor, EditorTexts texts,
-                   UnaryOperator<ClassStyleModel_V001> stylePicker, Runnable showDiagram) {
+                   UnaryOperator<ElementStyleModel_V001> stylePicker, Runnable showDiagram) {
     boolean isEnum = box.kind == ClassKind_V001.ENUM;
     add(entry(texts.get("menu.class.add.stereotype"), editing.canAddStereotypeTo(box),
       () -> textEditor.startNewStereotype(box)));
@@ -32,13 +31,7 @@ class ClassContextMenu extends JPopupMenu {
       () -> textEditor.startNewAttribute(box)));
     add(visibleAttributesMenu(editing, box, texts, isEnum, showDiagram));
     addSeparator();
-    add(entry(texts.get("menu.class.style"), editing.canChangeStyle(box), () -> chooseStyle(editing, box, stylePicker,
-      showDiagram)));
-    Can hasOwnStyle = Can.IF(!box.style.isStandard(), texts.get("reason.style.standard"));
-    add(entry(texts.get("menu.class.style.standard"), editing.canChangeStyle(box).and(hasOwnStyle), () -> {
-      editing.setStyle(box, new ClassStyleModel_V001());
-      showDiagram.run();
-    }));
+    add(new StyleMenuEntry(editing, box, texts, stylePicker, showDiagram));
     JCheckBoxMenuItem showsAttributes = new JCheckBoxMenuItem(
       texts.get(isEnum ? "menu.class.show.values" : "menu.class.show.attributes"), box.showsAttributes());
     editing.canHideAttributesOf(box).applyTo(showsAttributes);
@@ -85,16 +78,6 @@ class ClassContextMenu extends JPopupMenu {
 
   private static Can canSwitch(DiagramEditing editing, ClassModel_V001 box, AttributeModel_V001 attribute) {
     return attribute.hidden ? editing.canShowAttribute(box, attribute) : editing.canHideAttribute(box, attribute);
-  }
-
-  private static void chooseStyle(DiagramEditing editing, ClassModel_V001 box,
-                                  UnaryOperator<ClassStyleModel_V001> stylePicker,
-                                  Runnable showDiagram) {
-    ClassStyleModel_V001 chosen = stylePicker.apply(box.style.copy());
-    if (chosen != null) {
-      editing.setStyle(box, chosen);
-      showDiagram.run();
-    }
   }
 
   private static JMenuItem entry(String label, Can can, Runnable action) {

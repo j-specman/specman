@@ -201,15 +201,18 @@ class ClassmanImageTest {
     assertTrue(text(pdf).contains("billed by"), text(pdf));
   }
 
-  /** Scenario: Classes with a font of their own are exported with these fonts, so the
-   * names which the SVG uses are the ones the PDF export knows. */
+  /** Scenario: A note and a relation with a font of their own are exported with these fonts, so the names which the
+   * SVG uses are the ones the PDF export knows. The classes keep the standard font, which proves that the fonts in the
+   * PDF are the ones of the note and the relation. */
   @Test
-  void testStyledClassesAreExportedWithTheirFonts(@TempDir Path directory) throws IOException {
+  void testStyledNoteAndRelationAreExportedWithTheirFonts(@TempDir Path directory) throws IOException {
     containerOfNewStep();
     addImage(classdiagramFile(directory, """
       classdiagram {
-          class Serif style(font=SitkaDisplay)
-          class Mono style(font=CourierPrime, fontsize=16)
+          class Hello (a0000001)
+          class World (b0000002)
+          association style(font=CourierPrime, textcolor="#ff0000") a0000001 -> b0000002 "typed"
+          note style(font=SitkaDisplay) "serif"
       }
       """));
     specman.layoutComponents();
@@ -221,6 +224,7 @@ class ClassmanImageTest {
     Set<String> fonts = fontNamesOfTexts(pdf);
     assertTrue(fonts.stream().anyMatch(name -> name.contains("SitkaDisplay")), fonts.toString());
     assertTrue(fonts.stream().anyMatch(name -> name.contains("CourierPrime")), fonts.toString());
+    assertTrue(fonts.stream().anyMatch(name -> name.contains("Roboto")), fonts.toString());
   }
 
   private static EditContainer containerOfNewStep() {

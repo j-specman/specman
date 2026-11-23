@@ -60,7 +60,6 @@ class CanReasonTest {
     assertFalse(stereotype.isEnabled());
     assertEquals("The class has a stereotype already.", stereotype.getToolTipText());
     assertNull(entry("Add tagged value").getToolTipText());
-    assertEquals("The class has the standard style already.", entry("Standard style").getToolTipText());
   }
 
   /** What a change set has removed offers nothing, and says so. */
@@ -93,7 +92,7 @@ class CanReasonTest {
     EditorTexts english = new EditorTexts(java.util.Locale.ENGLISH);
     EditorTexts german = new EditorTexts(java.util.Locale.GERMAN);
     for (String key : new String[] {"reason.class.removed", "reason.stereotype.exists", "reason.interface.noattributes",
-      "reason.attributes.hidden", "reason.attributes.marked", "reason.style.standard", "reason.width.automatic",
+      "reason.attributes.hidden", "reason.attributes.marked", "reason.note.removed", "reason.width.automatic",
       "reason.arrow.notpossible", "reason.arrow.enum", "reason.relation.removed", "reason.center.already"}) {
       assertFalse(german.get(key).isBlank(), key);
       assertFalse(german.get(key).equals(english.get(key)), key);

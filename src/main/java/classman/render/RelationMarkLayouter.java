@@ -32,9 +32,10 @@ public class RelationMarkLayouter {
         this.palette = palette;
     }
 
-    /** The color of the line and the marks at its ends. */
+    /** The color of the line and the marks at its ends: the own one, or the usual stroke color, veiled for a removed
+     * relation. */
     public String lineColor(AbstractRelationModel_V001 relation) {
-        return isRemoved(relation) ? VEILED_LINE : STROKE;
+        return new StyleColors(relation.style, null, STROKE, VEILED_LINE).line(isRemoved(relation));
     }
 
     /** The color inside the triangle of an inheritance or implementation: the strong color of the change set if it

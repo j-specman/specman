@@ -89,20 +89,23 @@ class ClassContextMenuTest {
     assertFalse(editing.hasSelection());
   }
 
-  /** A note has a menu which only switches back to the automatic width, that is not offered as long as it is on. */
+  /** A note has a menu with its style and the switch back to the automatic width, which is not offered as long as it
+   * is on. */
   @Test
-  void noteMenuHasAutomaticWidthOnly() throws Exception {
+  void noteMenuHasStyleAndAutomaticWidth() throws Exception {
     open(BARE);
 
     control.contextMenuRequested(new Point2D.Double(310, 70));
 
     assertNotNull(editing.selectedNote());
     assertEquals(1, menusRequestedAt.size());
-    NoteContextMenu menu = new NoteContextMenu(editing, editing.selectedNote(), texts, () -> { });
-    JMenuItem item = (JMenuItem) menu.getComponent(0);
-    assertEquals(1, menu.getComponentCount());
-    assertEquals("Automatic width", item.getText());
-    assertFalse(item.isEnabled());
+    NoteContextMenu menu = new NoteContextMenu(editing, editing.selectedNote(), texts, start -> null, () -> { });
+    assertEquals(2, menu.getComponentCount());
+    assertEquals("Style...", ((JMenuItem) menu.getComponent(0)).getText());
+    assertTrue(((JMenuItem) menu.getComponent(0)).isEnabled());
+    JMenuItem width = (JMenuItem) menu.getComponent(1);
+    assertEquals("Automatic width", width.getText());
+    assertFalse(width.isEnabled());
   }
 
   /** While the tool for relations is armed, a click on a class means something else. */
@@ -125,7 +128,7 @@ class ClassContextMenuTest {
 
     List<JMenuItem> entries = entries();
 
-    assertEquals(List.of("Add stereotype", "Add tagged value", "Add attribute", "Hide / show attribute", "Style...", "Standard style",
+    assertEquals(List.of("Add stereotype", "Add tagged value", "Add attribute", "Hide / show attribute", "Style...",
       "Show attributes", "Automatic width"),
       entries.stream().map(JMenuItem::getText).toList());
     assertTrue(entries.get(0).isEnabled());
@@ -151,13 +154,13 @@ class ClassContextMenuTest {
   void automaticWidthEntry() throws Exception {
     open(BARE);
     editing.selectAt(insideClass());
-    JMenuItem automatic = entries().get(7);
+    JMenuItem automatic = entries().get(6);
     assertTrue(((javax.swing.JCheckBoxMenuItem) automatic).isSelected());
     assertFalse(automatic.isEnabled());
 
     open("classdiagram {\n  class A (11111111) at(10, 60) width=200\n}");
     editing.selectAt(insideClass());
-    automatic = entries().get(7);
+    automatic = entries().get(6);
     assertFalse(((javax.swing.JCheckBoxMenuItem) automatic).isSelected());
     assertTrue(automatic.isEnabled());
 

@@ -12,7 +12,7 @@ import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassDiagram_V001Lexer;
 import classman.model.v001.ClassModel_V001;
-import classman.model.v001.ClassStyleModel_V001;
+import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.InfoModel_V001;
 import classman.model.v001.Multiplicity_V001;
 import classman.model.v001.NoteModel_V001;
@@ -201,6 +201,7 @@ public class ClassDiagramSerializer_V001 {
         out.append(INDENT).append(relation.type.name().toLowerCase(Locale.ROOT));
         appendId(out, relation.id);
         appendChange(out, relation.change);
+        appendStyle(out, relation.style);
         out.append(' ').append(relation.fromId);
         if (relation instanceof AssociationRelationModel_V001 association) {
             appendMultiplicity(out, association.fromMultiplicity, association.fromMultiplicityChange,
@@ -268,6 +269,7 @@ public class ClassDiagramSerializer_V001 {
         appendChange(out, note.change);
         appendPosition(out, note.position);
         appendWidth(out, note.width);
+        appendStyle(out, note.style);
         out.append(' ').append(quoted(note.text));
         appendTextChange(out, note.textChange);
         out.append('\n');
@@ -334,7 +336,7 @@ public class ClassDiagramSerializer_V001 {
         }
     }
 
-    private void appendStyle(StringBuilder out, ClassStyleModel_V001 style) {
+    private void appendStyle(StringBuilder out, ElementStyleModel_V001 style) {
         List<String> entries = new ArrayList<>();
         if (style.fill != null) {
             entries.add("fill=" + quoted(style.fill));

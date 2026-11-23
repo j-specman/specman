@@ -17,6 +17,16 @@ public class RelationTexts {
         this.labelLines = List.copyOf(labelLines);
     }
 
+    /** @return the same texts, laid out as they are, in the color and font */
+    public RelationTexts restyled(String color, TextFont font) {
+        return new RelationTexts(restyled(fromMultiplicity, color, font), restyled(toMultiplicity, color, font),
+            labelLines.stream().map(line -> line.restyled(color, font)).toList());
+    }
+
+    private static SceneText restyled(SceneText text, String color, TextFont font) {
+        return text == null ? null : text.restyled(color, font);
+    }
+
     /** All texts: source multiplicity, target multiplicity, label lines. */
     public List<SceneText> all() {
         List<SceneText> all = new ArrayList<>();

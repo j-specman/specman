@@ -55,6 +55,12 @@ class ColorChoice extends JPanel {
     return choose;
   }
 
+  /** Shows the standard color, without telling anyone: for the dialog which takes the whole style back to standard. */
+  void showStandard() {
+    color = null;
+    showColor();
+  }
+
   private void update(Consumer<String> changed) {
     showColor();
     changed.accept(color);

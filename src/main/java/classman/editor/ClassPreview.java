@@ -5,23 +5,40 @@ import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
-import classman.model.v001.ClassStyleModel_V001;
+import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.TextChangeModel_V001;
 import classman.model.v001.Visibility_V001;
+import classman.render.ClassBoxLayouter;
+import classman.render.DiagramRenderer;
+import classman.render.Scene;
 
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
-/** The diagram which the style dialog shows: one class with three attributes. With a change set, one attribute has a
- * changed type, one is added and one is removed. */
-final class StylePreviewModel {
+/** The diagram which the style dialog of a class shows: one class with three attributes. With a change set, one
+ * attribute has a changed type, one is added and one is removed. */
+final class ClassPreview {
 
-  private StylePreviewModel() {
+  private ClassPreview() {
+  }
+
+  /** @return the picture of the class in the style. With a change set it has the frame of an added class, and its
+   * attributes are marked, which a real diagram never shows together: the frame stands for everything in the class.
+   * Here both are shown, so that the user sees all marks next to the colors of the style. */
+  static Scene scene(DiagramRenderer renderer, ElementStyleModel_V001 style, String changeSet) {
+    Scene laidOut = renderer.layout(of(style, changeSet));
+    if (changeSet == null) {
+      return laidOut;
+    }
+    Rectangle2D.Double area = laidOut.elementAreas.get(0).area;
+    return FramedScene.of(laidOut,
+      ClassBoxLayouter.frameOf(area.width, area.height, renderer.strongColorOf(changeSet)), area);
   }
 
   /** @param changeSet the change set which marks the attributes, null for no marks
    * @return a diagram with the class Person, which has a copy of the style. Name and attributes are the same in every
    * language, so the preview needs no texts of its own. */
-  static ClassDiagramModel_V001 of(ClassStyleModel_V001 style, String changeSet) {
+  private static ClassDiagramModel_V001 of(ElementStyleModel_V001 style, String changeSet) {
     ClassModel_V001 box = new ClassModel_V001("Person");
     box.style = style.copy();
     AttributeModel_V001 changed = attribute("name", "String");

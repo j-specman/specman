@@ -1,10 +1,6 @@
 package classman.editor;
 
-import classman.model.v001.ClassStyleModel_V001;
-import classman.render.AbstractSceneElement;
-import classman.render.ClassBoxLayouter;
-import classman.render.DiagramRenderer;
-import classman.render.DiagramStyle;
+import classman.model.v001.ElementStyleModel_V001;
 import classman.render.Scene;
 import classman.render.SceneGraphicsPainter;
 import classman.render.SvgFrame;
@@ -14,31 +10,28 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.BiFunction;
 
-/** Shows a class in a style, as the diagram would draw it, or as if a change set had added the class and marked three
- * of its attributes. Both marks at once never occur in a diagram, because the frame of an added class stands for
- * everything in it. Here they are shown together so that the user sees all colors of a change set next to the
- * colors of the style. The picture is painted smaller if it doesn't fit. */
+/** Shows an element in a style, as the diagram would draw it, or as if a change set had marked it. The picture is
+ * painted smaller if it doesn't fit. What the picture is, is the business of the dialog which owns the preview. */
 class StylePreview extends JComponent {
   private static final Dimension SIZE = new Dimension(260, 170);
 
-  private final DiagramRenderer renderer;
+  private final BiFunction<ElementStyleModel_V001, String, Scene> scenes;
   private final SceneGraphicsPainter painter = new SceneGraphicsPainter();
-  private ClassStyleModel_V001 style = new ClassStyleModel_V001();
+  private ElementStyleModel_V001 style = new ElementStyleModel_V001();
   private String changeSet;
 
-  StylePreview(DiagramRenderer renderer) {
-    this.renderer = renderer;
+  /** @param scenes gives the picture for a style and a change set, null for the unmarked element */
+  StylePreview(BiFunction<ElementStyleModel_V001, String, Scene> scenes) {
+    this.scenes = scenes;
     setOpaque(true);
     setBackground(Color.WHITE);
     setPreferredSize(SIZE);
   }
 
-  /** @param changeSet the change set whose marks are shown, null for none */
-  void show(ClassStyleModel_V001 newStyle, String newChangeSet) {
+  /** @param newChangeSet the change set whose marks are shown, null for none */
+  void show(ElementStyleModel_V001 newStyle, String newChangeSet) {
     style = newStyle.copy();
     changeSet = newChangeSet;
     repaint();
@@ -46,18 +39,7 @@ class StylePreview extends JComponent {
 
   /** @return what the preview paints, without the margin */
   Scene scene() {
-    Scene laidOut = renderer.layout(StylePreviewModel.of(style, changeSet));
-    if (changeSet == null) {
-      return laidOut;
-    }
-    Rectangle2D.Double area = laidOut.elementAreas.get(0).area;
-    List<AbstractSceneElement> elements = new ArrayList<>();
-    elements.add(ClassBoxLayouter.frameOf(area.width, area.height, renderer.strongColorOf(changeSet))
-      .translated(area.x, area.y));
-    elements.addAll(laidOut.elements);
-    double reach = DiagramStyle.FRAME_STROKE_WIDTH / 2;
-    return new Scene(elements, laidOut.x - reach, laidOut.y - reach, laidOut.width + 2 * reach,
-      laidOut.height + 2 * reach);
+    return scenes.apply(style, changeSet);
   }
 
   @Override

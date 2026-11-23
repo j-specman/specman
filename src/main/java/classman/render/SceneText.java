@@ -36,6 +36,11 @@ public class SceneText extends AbstractSceneElement {
         this.font = font;
     }
 
+    /** @return the same text in another color and font, which must not change its width */
+    public SceneText restyled(String newFill, TextFont newFont) {
+        return new SceneText(this.x, y, text, bold, anchor, width, newFill, newFont);
+    }
+
     @Override
     public SceneText translated(double dx, double dy) {
         return new SceneText(x + dx, y + dy, text, bold, anchor, width, fill, font);

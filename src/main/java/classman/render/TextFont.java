@@ -1,6 +1,6 @@
 package classman.render;
 
-import classman.model.v001.ClassStyleModel_V001;
+import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.FontFamily_V001;
 
 import java.awt.Font;
@@ -21,7 +21,7 @@ public final class TextFont {
     }
 
     /** @return the font which the style asks for, parts which it leaves out are the default ones */
-    public static TextFont of(ClassStyleModel_V001 style) {
+    public static TextFont of(ElementStyleModel_V001 style) {
         return new TextFont(style.font != null ? style.font : DEFAULT.family,
             style.fontSize != null ? style.fontSize : DEFAULT.size);
     }
