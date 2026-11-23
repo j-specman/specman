@@ -6,7 +6,6 @@ import specman.link.resolver.LinkResolver;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,8 +39,8 @@ public class ResolveLinkCLO extends AbstractCLO {
     this.linksFromArguments = Arrays.asList(args).subList(1, args.length);
   }
 
+  @Override
   int run() {
-    PrintStream out = new PrintStream(System.out, false, StandardCharsets.UTF_8);
     LinkResolver resolver = new LinkResolver();
     boolean anyError = false;
     for (String link : requestedLinks()) {
@@ -49,7 +48,6 @@ public class ResolveLinkCLO extends AbstractCLO {
       out.print(resolution.toLine(FIELD_SEPARATOR) + LINE_END);
       anyError |= resolution.isError();
     }
-    out.flush();
     return anyError ? EXIT_ERROR : EXIT_SUCCESS;
   }
 

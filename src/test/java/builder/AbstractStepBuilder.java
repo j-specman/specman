@@ -4,6 +4,7 @@ import specman.editarea.markups.MarkupType;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.Markup_V002;
+import specman.model.v002.MetaTagModel_V002;
 import specman.model.v002.TextEditAreaModel_V002;
 
 /**
@@ -63,6 +64,16 @@ abstract public class AbstractStepBuilder<S extends AbstractStepModel_V002, B ex
     return withMarkup(fragment, MarkupType.Steplink, null);
   }
 
+
+  /** Assigns the meta tag of the specified configuration to the step. Without freetext if null. */
+  public B withTag(String configName, String freetext) {
+    step.tags.add(new MetaTagModel_V002(configName, freetext));
+    return self();
+  }
+
+  public B withTag(String configName) {
+    return withTag(configName, null);
+  }
 
   /** Overrides the plain text rendition of the primary text. By default it equals the text itself.
    *  Must be called after {@link #withText(String)}, which resets it. */
