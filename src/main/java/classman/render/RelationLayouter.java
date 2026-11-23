@@ -1,14 +1,12 @@
 package classman.render;
 
 import classman.model.v001.AbstractRelationModel_V001;
-import classman.model.v001.RelationType_V001;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /** Lays out one relation: the line along its path, the marks at its ends, its texts and its change marks. */
 public class RelationLayouter {
@@ -27,15 +25,16 @@ public class RelationLayouter {
         this.markLayouter = new RelationMarkLayouter(measurer, palette);
     }
 
-    /** @param boxAreas the areas of all boxes of the diagram, which the texts of the relation keep clear of */
-    public RelationLayout layout(AbstractRelationModel_V001 relation, Map<String, Rectangle2D.Double> classAreas,
+    /** @param targets the classes and attributes of the diagram which the relation can join
+     * @param boxAreas the areas of all boxes of the diagram, which the texts of the relation keep clear of */
+    public RelationLayout layout(AbstractRelationModel_V001 relation, AttachTargetIndex targets,
                                  Collection<Rectangle2D.Double> boxAreas) {
-        List<Point2D.Double> path = pathBuilder.pathOf(relation, classAreas);
+        List<Point2D.Double> path = pathBuilder.pathOf(relation, targets);
         RelationTexts texts = textLayouter.texts(relation, path, boxAreas);
         String lineColor = markLayouter.lineColor(relation);
         List<AbstractSceneElement> underlay = markLayouter.underlay(relation, path, texts);
         List<AbstractSceneElement> elements = new ArrayList<>();
-        ScenePolyline line = line(path, relation.type == RelationType_V001.IMPLEMENTS, lineColor);
+        ScenePolyline line = line(path, relation.type.isDashed(), lineColor);
         elements.add(line);
         List<AbstractSceneElement> decorations = decorator.decorations(relation, path, lineColor,
             markLayouter.triangleFill(relation));

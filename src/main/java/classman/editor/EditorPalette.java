@@ -40,6 +40,7 @@ class EditorPalette extends JToolBar {
   private final List<VariantButton<RelationType_V001>> relationButtons = new ArrayList<>();
   private final JToggleButton anchorToolButton = new JToggleButton();
   private final JToggleButton assocClassToolButton = new JToggleButton();
+  private final JToggleButton dependencyToolButton = new JToggleButton();
   private final JToggleButton formatPainterButton = new JToggleButton();
   private final JButton toggleButton = new JButton();
   private final Map<AbstractButton, String> labels = new HashMap<>();
@@ -54,6 +55,7 @@ class EditorPalette extends JToolBar {
    * @param relationTypeChosen is run with the type of the relation which the user chose in the menu of a button
    * @param anchorToolToggled is run when the button for drawing the anchor of a note is pressed
    * @param assocClassToolToggled is run when the button for drawing the link of an association class is pressed
+   * @param dependencyToolToggled is run when the button for drawing a dependency is pressed
    * @param formatPainterToggled is run when the button for the format painter is pressed
    * @param dragSourcePressed is run when the mouse is pressed on the button of a class or a note, which are dragged
    * and not switched on, so that a tool which is armed is put away
@@ -61,8 +63,8 @@ class EditorPalette extends JToolBar {
    * @param zoomedOut is run when the button for zooming out is pressed */
   EditorPalette(EditorTexts texts, BiConsumer<ClassKind_V001, Point> classDropped, Consumer<Point> noteDropped,
                 Consumer<RelationType_V001> relationToolToggled, Consumer<RelationType_V001> relationTypeChosen,
-                Runnable anchorToolToggled, Runnable assocClassToolToggled, Runnable formatPainterToggled,
-                Runnable dragSourcePressed, Runnable zoomedIn, Runnable zoomedOut) {
+                Runnable anchorToolToggled, Runnable assocClassToolToggled, Runnable dependencyToolToggled,
+                Runnable formatPainterToggled, Runnable dragSourcePressed, Runnable zoomedIn, Runnable zoomedOut) {
     super(JToolBar.VERTICAL);
     this.texts = texts;
     this.dragSourcePressed = dragSourcePressed;
@@ -84,6 +86,7 @@ class EditorPalette extends JToolBar {
     addDragButton("note", EditorIcons.NOTE, noteDropped);
     addToolButton("anchor", EditorIcons.ANCHOR, anchorToolButton, anchorToolToggled);
     addToolButton("assocclass", EditorIcons.ASSOC_CLASS, assocClassToolButton, assocClassToolToggled);
+    addToolButton("dependency", EditorIcons.DEPENDENCY, dependencyToolButton, dependencyToolToggled);
     addSeparator();
     addToolButton("formatpainter", EditorIcons.FORMAT_PAINTER, formatPainterButton, formatPainterToggled);
     formatPainterButton.setEnabled(false);
@@ -165,7 +168,8 @@ class EditorPalette extends JToolBar {
    * The format painter can be pressed while it is armed, or while an element which it can pick up is selected.
    * @param armedRelationType null if the tool for relations isn't armed */
   void showToolsArmed(RelationType_V001 armedRelationType, boolean isAnchorToolArmed,
-                      boolean isAssocClassToolArmed, boolean isFormatPainterArmed, boolean canPickUpFormat) {
+                      boolean isAssocClassToolArmed, boolean isDependencyToolArmed, boolean isFormatPainterArmed,
+                      boolean canPickUpFormat) {
     for (VariantButton<RelationType_V001> button : relationButtons) {
       boolean isArmed = armedRelationType != null && button.offers(armedRelationType);
       if (isArmed) {
@@ -175,6 +179,7 @@ class EditorPalette extends JToolBar {
     }
     anchorToolButton.setSelected(isAnchorToolArmed);
     assocClassToolButton.setSelected(isAssocClassToolArmed);
+    dependencyToolButton.setSelected(isDependencyToolArmed);
     formatPainterButton.setSelected(isFormatPainterArmed);
     formatPainterButton.setEnabled(isFormatPainterArmed || canPickUpFormat);
   }

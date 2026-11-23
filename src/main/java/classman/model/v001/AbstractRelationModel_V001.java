@@ -2,14 +2,17 @@ package classman.model.v001;
 
 import java.util.Set;
 
-/** Base of the relations between two classes. The classes are referred to by their IDs. */
+/** Base of the relations between two classes, or for a dependency between classes and attributes. The ends are
+ * referred to by their IDs. */
 public abstract class AbstractRelationModel_V001 extends AbstractDiagramElementModel_V001 {
     public final RelationType_V001 type;
-    /** The ID of the source class: the one with the diamond or the subclass. The editor changes it when the user hangs
-     * the start of the relation onto another class, outside of change tracking. */
+    /** The ID of the source class: the one with the diamond or the subclass. For a dependency it may be an attribute
+     * too. The editor changes it when the user hangs the start of the relation onto another class, outside of change
+     * tracking. */
     public String fromId;
-    /** The ID of the target class: the one with the arrowhead, or the superclass or interface. The editor changes it
-     * when the user hangs the end of the relation onto another class, outside of change tracking. */
+    /** The ID of the target class: the one with the arrowhead, or the superclass or interface. For a dependency it may
+     * be an attribute too. The editor changes it when the user hangs the end of the relation onto another class,
+     * outside of change tracking. */
     public String toId;
     /** Null if there is no label. Line breaks are real newline characters, not the two characters \n. */
     public String label;

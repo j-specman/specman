@@ -9,6 +9,8 @@ enum Tool {
   ANCHOR,
   /** Draws the link from a class to the relation it is the association class of. */
   ASSOC_CLASS,
+  /** Draws a dependency from a class or attribute to a class or attribute. */
+  DEPENDENCY,
   /** Gives the style of the element which was selected when it was armed to the element which is clicked next. */
   FORMAT_PAINTER
 }

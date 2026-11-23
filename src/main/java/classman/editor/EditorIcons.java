@@ -21,6 +21,7 @@ final class EditorIcons {
   static final String IMPLEMENTS = "classman/editor/icons/implements.svg";
   static final String ANCHOR = "classman/editor/icons/anchor.svg";
   static final String ASSOC_CLASS = "classman/editor/icons/assocclass.svg";
+  static final String DEPENDENCY = "classman/editor/icons/dependency.svg";
   static final String FORMAT_PAINTER = "images/svg/material/format_paint.svg";
   static final String ZOOM_IN = "images/svg/material/zoom_in.svg";
   static final String ZOOM_OUT = "images/svg/material/zoom_out.svg";

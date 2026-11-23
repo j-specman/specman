@@ -26,4 +26,18 @@ public class AttachTargetIndex {
         }
         return target;
     }
+
+    /** @param attributesToo true if an attribute is a valid end as well, as for a dependency
+     * @return the class, or if allowed the attribute, which a relation starts or ends at
+     * @throws IllegalArgumentException if the diagram has no such class or attribute with this ID */
+    public AttachTarget findEnd(String id, boolean attributesToo) {
+        AttachTarget target = targets.get(id);
+        boolean isClass = target instanceof ClassAttachTarget;
+        boolean isAttribute = target instanceof AttributeAttachTarget;
+        if (!isClass && !(attributesToo && isAttribute)) {
+            throw new IllegalArgumentException("The diagram has no class" + (attributesToo ? " or attribute" : "")
+                + " with the ID " + id);
+        }
+        return target;
+    }
 }

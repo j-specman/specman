@@ -13,6 +13,7 @@ import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.DependencyRelationModel_V001;
 import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.ExtendsRelationModel_V001;
 import classman.model.v001.ImplementsRelationModel_V001;
@@ -256,20 +257,16 @@ public class DiagramEditing {
     }
     else {
       AbstractRelationModel_V001 relation = ((SceneRelationLine) line).relation;
-      routeEditing.insertWaypoint(relation, line.points(), segment, onLine, classArea(relation.fromId),
-        classArea(relation.toId));
+      routeEditing.insertWaypoint(relation, line.points(), segment, onLine, endArea(relation.fromId),
+        endArea(relation.toId));
     }
     publish();
     return true;
   }
 
-  private Rectangle2D classArea(String classId) {
-    for (ClassModel_V001 box : model.classes()) {
-      if (classId.equals(box.id)) {
-        return scene.elementAreaOf(box).area;
-      }
-    }
-    throw new IllegalStateException("The diagram has no class with the ID " + classId);
+  /** @return where the class is, or for a dependency the attribute, which a relation starts or ends at */
+  private Rectangle2D endArea(String endId) {
+    return scene.attachTargets.findEnd(endId, true).box();
   }
 
   public void deselect() { selected = null; }
@@ -907,23 +904,50 @@ public class DiagramEditing {
     SceneRelationLine line = scene.relationLineOf(selected);
     AbstractRelationModel_V001 relation = line.relation;
     boolean isEnd = handle == 0 || handle == line.points().size() - 1;
-    return new HandleDrag(routeEditing, relation, line.points(), handle, at, classArea(relation.fromId),
-      classArea(relation.toId), isEnd ? classesAnEndMayHangOnto(relation, handle == 0) : Map.of());
+    return new HandleDrag(routeEditing, relation, line.points(), handle, at, endArea(relation.fromId),
+      endArea(relation.toId), isEnd ? classesAnEndMayHangOnto(relation, handle == 0) : Map.of());
   }
 
   /** The classes by ID in the order of drawing which an end of the relation may be hung onto: all of them, but while
    * changes are tracked only the class it hangs on, because hanging a relation onto another class is no change which
-   * the format can mark. The user deletes the relation and adds a new one then. */
+   * the format can mark. The user deletes the relation and adds a new one then. The end of a dependency may also be
+   * hung onto the attributes which the classes show, each after its class so that it wins where it is. */
   private Map<String, Rectangle2D> classesAnEndMayHangOnto(AbstractRelationModel_V001 relation, boolean start) {
-    Map<String, Rectangle2D> classes = new LinkedHashMap<>();
-    String ownClassId = start ? relation.fromId : relation.toId;
+    Map<String, Rectangle2D> ends = new LinkedHashMap<>();
+    String ownEndId = start ? relation.fromId : relation.toId;
+    String otherEndId = start ? relation.toId : relation.fromId;
+    boolean isDependency = relation.type == RelationType_V001.DEPENDENCY;
+    ClassModel_V001 otherOwner = isDependency ? ownerOfEnd(otherEndId) : null;
     for (ClassModel_V001 box : model.classes()) {
-      boolean allowed = host.trackedChangeSet() == null || ownClassId.equals(box.id);
-      if (box.id != null && allowed) {
-        classes.put(box.id, scene.elementAreaOf(box).area);
+      boolean isFree = host.trackedChangeSet() == null && box != otherOwner;
+      if (box.id != null && (isFree || ownEndId.equals(box.id))) {
+        ends.put(box.id, scene.elementAreaOf(box).area);
+      }
+      if (isDependency && box.showsAttributes()) {
+        for (AttributeModel_V001 attribute : box.attributes) {
+          boolean isShown = !attribute.hidden && !attribute.hiddenAttributesMarker && !isRemoved(attribute.change);
+          if (attribute.id != null && (ownEndId.equals(attribute.id) || isShown && isFree)) {
+            ends.put(attribute.id, endArea(attribute.id));
+          }
+        }
       }
     }
-    return classes;
+    return ends;
+  }
+
+  /** @return the class which is the end of a dependency, or owns the attribute which is, null if there is none */
+  private ClassModel_V001 ownerOfEnd(String endId) {
+    for (ClassModel_V001 box : model.classes()) {
+      boolean isEnd = endId.equals(box.id) || box.attributes.stream().anyMatch(attribute -> endId.equals(attribute.id));
+      if (isEnd) {
+        return box;
+      }
+    }
+    return null;
+  }
+
+  private static boolean isRemoved(ChangeModel_V001 change) {
+    return change != null && change.type == ChangeType_V001.REMOVED;
   }
 
   /** The classes by ID in the order of drawing which the end of the anchor line may be hung onto: all of them, but
@@ -1007,6 +1031,8 @@ public class DiagramEditing {
 
   public boolean isAssocClassToolArmed() { return armedTool == Tool.ASSOC_CLASS; }
 
+  public boolean isDependencyToolArmed() { return armedTool == Tool.DEPENDENCY; }
+
   public boolean isFormatPainterArmed() { return armedTool == Tool.FORMAT_PAINTER; }
 
   /** @return true if a class, note or relation is selected, whose style the format painter can pick up */
@@ -1085,6 +1111,11 @@ public class DiagramEditing {
     toggle(Tool.ASSOC_CLASS);
   }
 
+  /** Arms the tool which draws a dependency between classes and attributes, or disarms it if it is armed. */
+  public void toggleDependencyTool() {
+    toggle(Tool.DEPENDENCY);
+  }
+
   private void toggle(Tool tool) {
     armedTool = armedTool == tool ? Tool.NONE : tool;
     drawing = null;
@@ -1106,7 +1137,7 @@ public class DiagramEditing {
       if (from != null) {
         TargetFinder finder = (point, distance) -> targets.closestClass(point, distance,
           box -> RelationRules.canEnd(armedRelationType, from.box, box));
-        drawing = new ConnectionDrawing(from.box, from.frame(), finder, at);
+        drawing = new ConnectionDrawing(from, finder, at);
       }
     }
     else if (armedTool == Tool.ANCHOR) {
@@ -1119,7 +1150,7 @@ public class DiagramEditing {
       }
       NoteModel_V001 from = ClassPicker.closest(notes, at, tolerance);
       if (from != null) {
-        drawing = new ConnectionDrawing(from, notes.get(from), targets::closestForAnchor, at);
+        drawing = new ConnectionDrawing(new NoteTarget(from, notes.get(from)), targets::closestForAnchor, at);
       }
     }
     else if (armedTool == Tool.ASSOC_CLASS) {
@@ -1127,7 +1158,16 @@ public class DiagramEditing {
       if (from != null) {
         TargetFinder finder = (point, distance) -> targets.closestRelation(point, distance,
           relation -> AssocClassRules.canTake(model, relation, from.box));
-        drawing = new ConnectionDrawing(from.box, from.frame(), finder, at);
+        drawing = new ConnectionDrawing(from, finder, at);
+      }
+    }
+    else if (armedTool == Tool.DEPENDENCY) {
+      ConnectionTarget from = targets.closestForDependency(at, tolerance, DependencyRules::canStartAt);
+      if (from != null) {
+        ClassModel_V001 fromBox = from instanceof AttributeTarget attribute ? attribute.owner : ((ClassTarget) from).box;
+        TargetFinder finder = (point, distance) -> targets.closestForDependency(point, distance,
+          (box, attribute) -> DependencyRules.canEndAt(fromBox, box, attribute));
+        drawing = new ConnectionDrawing(from, finder, at);
       }
     }
   }
@@ -1146,6 +1186,9 @@ public class DiagramEditing {
     else if (armedTool == Tool.ANCHOR) {
       anchorNote(finished);
     }
+    else if (armedTool == Tool.DEPENDENCY) {
+      createDependency(finished);
+    }
     else {
       linkAssocClass(finished);
     }
@@ -1154,8 +1197,7 @@ public class DiagramEditing {
   /** Creates the relation of the armed type, a straight line without texts. An association is directed, the others
    * have their marks (diamond, triangle) and no arrowhead of their own. */
   private void createRelation(ConnectionDrawing finished) {
-    ClassModel_V001 from = (ClassModel_V001) finished.from();
-    String fromId = new ClassTarget(from, scene.elementAreaOf(from).area).ensureId(this::newId);
+    String fromId = finished.start().ensureId(this::newId);
     String toId = finished.target().ensureId(this::newId);
     AbstractRelationModel_V001 relation = switch (armedRelationType) {
       case EXTENDS -> new ExtendsRelationModel_V001(fromId, toId);
@@ -1174,19 +1216,34 @@ public class DiagramEditing {
     publish();
   }
 
+  /** Creates a dependency from the class or attribute where the drawing started to the one where the mouse was
+   * released, a straight line without a label. Both get an ID if they have none. The dependency is selected, and marked as
+   * added while changes are tracked. */
+  private void createDependency(ConnectionDrawing finished) {
+    String fromId = finished.start().ensureId(this::newId);
+    String toId = finished.target().ensureId(this::newId);
+    DependencyRelationModel_V001 dependency = new DependencyRelationModel_V001(fromId, toId);
+    dependency.id = newId();
+    markAsAdded(dependency);
+    model.elements.add(dependency);
+    selected = dependency;
+    armedTool = Tool.NONE;
+    publish();
+  }
+
   /** Attaches the note to the class, attribute or relation which the mouse was released on, with an anchor line. A
    * class or attribute which has no ID gets one, and so does the note. The note is selected. A note can have several
    * anchor lines, so lines it has already stay as they are. Nothing happens, and no operation is made, if it is
    * attached to that target already. The new line is marked as added while changes are tracked. */
   private void anchorNote(ConnectionDrawing finished) {
-    attach((NoteModel_V001) finished.from(), finished.target(), AnchorLineModel_V001::new);
+    attach((NoteModel_V001) finished.start().element(), finished.target(), AnchorLineModel_V001::new);
   }
 
   /** Makes the class the association class of the relation which the mouse was released on, with an association class
    * link. The class and the relation get an ID if they have none. The class is selected. The tool only starts at
    * a class which is no association class yet, see {@link AssocClassRules}. */
   private void linkAssocClass(ConnectionDrawing finished) {
-    ClassModel_V001 assocClass = (ClassModel_V001) finished.from();
+    ClassModel_V001 assocClass = (ClassModel_V001) finished.start().element();
     attach(assocClass, finished.target(), AssocClassLinkModel_V001::new);
   }
 
@@ -1335,13 +1392,17 @@ public class DiagramEditing {
     host.sourceChanged(source);
   }
 
-  /** Boxes and dashed lines which hang on hidden attributes only are not in the picture, so they can't stay selected. */
+  /** Boxes, dashed lines and dependencies which hang on hidden attributes only are not in the picture, so they can't
+   * stay selected. */
   private boolean isDrawn(AbstractDiagramElementModel_V001 element) {
     if (element instanceof AbstractBoxModel_V001) {
       return scene.elementAreaOf(element) != null;
     }
     if (element instanceof AttachLineModel_V001 attachLine) {
       return scene.attachLineOf(attachLine) != null;
+    }
+    if (element instanceof AbstractRelationModel_V001) {
+      return scene.relationLineOf(element) != null;
     }
     return true;
   }

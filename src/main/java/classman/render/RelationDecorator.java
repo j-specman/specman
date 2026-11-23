@@ -38,7 +38,7 @@ public class RelationDecorator {
         }
         if (relation.type == RelationType_V001.EXTENDS || relation.type == RelationType_V001.IMPLEMENTS) {
             decorations.add(triangle(end, endDirection, triangleFill, lineColor));
-        } else if (hasArrow(relation, RelationEnd_V001.TO)) {
+        } else if (relation.type == RelationType_V001.DEPENDENCY || hasArrow(relation, RelationEnd_V001.TO)) {
             decorations.add(arrow(end, endDirection, lineColor));
         }
         if (hasArrow(relation, RelationEnd_V001.FROM)) {

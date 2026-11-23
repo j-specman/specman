@@ -16,6 +16,8 @@ grammar ClassDiagram_V001;
 //   composition    like association plus a filled diamond at the source (so no <- or <->)
 //   extends    hollow triangle at the target (the superclass), always ->, no multiplicities
 //   implements     dashed line, hollow triangle at the target (the interface), always ->, no multiplicities
+//   dependency     dashed line, open arrowhead at the target, always ->, no multiplicities. Its ends can also be attributes
+//                  (enum values included), named by the ID of the attribute: dependency 04de91aa -> 0a0a0a0a "uses"
 // Only association, aggregation and composition take multiplicities and can have an association class.
 // A multiplicity is free text: written bare if it is a number, a range like 0..1 or 1..*, or *, else in double
 // quotes, for example "1..<maximum capacity>".
@@ -234,6 +236,7 @@ relation
     : associationRelation
     | extendsRelation
     | implementsRelation
+    | dependencyRelation
     ;
 
 associationRelation
@@ -248,6 +251,12 @@ extendsRelation
 
 implementsRelation
     : IMPLEMENTS ELEMENT_ID? changeMark? styleSpec? from=HEX_ID ARROW to=HEX_ID (label=QUOTED_STRING labelChange=textChange? labelPlace=labelPosition?)? route?
+    ;
+
+// A dependency joins two classes, interfaces, enums or attributes (enum values included), named by their IDs. Dashed
+// line with an arrowhead at the target, no multiplicities. Its route anchors are on the border of the class or attribute.
+dependencyRelation
+    : DEPENDENCY ELEMENT_ID? changeMark? styleSpec? from=HEX_ID ARROW to=HEX_ID (label=QUOTED_STRING labelChange=textChange? labelPlace=labelPosition?)? route?
     ;
 
 // A relation label which the user has moved: at(40%, -12) is 40 percent of the length of the route from its start, 12
@@ -340,7 +349,7 @@ linePoint
 word
     : NAME
     | HEX_ID
-    | CLASSDIAGRAM | CLASS | INTERFACE | ENUM | ASSOCCLASS | ASSOCIATION | AGGREGATION | COMPOSITION | EXTENDS | IMPLEMENTS
+    | CLASSDIAGRAM | CLASS | INTERFACE | ENUM | ASSOCCLASS | ASSOCIATION | AGGREGATION | COMPOSITION | EXTENDS | IMPLEMENTS | DEPENDENCY
     | NOTE | ROUTE | ANCHOR | CHANGE | WAS | AT | WIDTH | STYLE | FILL | TEXTCOLOR | LINECOLOR | FONT | FONTSIZE | HIDEATTRIBUTES | TOP | RIGHT | BOTTOM | LEFT | CENTER
     ;
 
@@ -358,6 +367,7 @@ AGGREGATION  : 'aggregation' ;
 COMPOSITION  : 'composition' ;
 EXTENDS      : 'extends' ;
 IMPLEMENTS   : 'implements' ;
+DEPENDENCY   : 'dependency' ;
 NOTE         : 'note' ;
 ROUTE        : 'route' ;
 ANCHOR       : 'anchor' ;

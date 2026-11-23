@@ -78,9 +78,12 @@ public class ClassDiagramLayouter {
                 textAreas.addAll(boxes.get(element).attributeTextAreasAt(classModel, area.x, area.y));
             }
         });
-        Map<String, Rectangle2D.Double> classAreas = classAreas(areas);
         for (AbstractRelationModel_V001 relation : model.relations()) {
-            RelationLayout relationLayout = relationLayouters.of(relation.style).layout(relation, classAreas, areas.values());
+            if (hidden.isRelationHidden(relation)) {
+                continue;
+            }
+            RelationLayout relationLayout = relationLayouters.of(relation.style).layout(relation, attachTargets,
+                areas.values());
             elements.addAll(relationLayout.elements);
             underlays.addAll(relationLayout.underlay);
             covered = BoxGeometry.union(covered, relationLayout.bounds);
@@ -192,15 +195,5 @@ public class ClassDiagramLayouter {
             waypoints.add(new Point2D.Double(waypoint.x, waypoint.y));
         }
         return waypoints;
-    }
-
-    private Map<String, Rectangle2D.Double> classAreas(Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas) {
-        Map<String, Rectangle2D.Double> classAreas = new LinkedHashMap<>();
-        for (Map.Entry<AbstractDiagramElementModel_V001, Rectangle2D.Double> area : areas.entrySet()) {
-            if (area.getKey() instanceof ClassModel_V001 classModel && classModel.id != null) {
-                classAreas.put(classModel.id, area.getValue());
-            }
-        }
-        return classAreas;
     }
 }

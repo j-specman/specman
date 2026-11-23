@@ -18,7 +18,8 @@ import java.util.Set;
 
 /**
  * Knows which elements go away when the marks of a change set are accepted or rejected: the marked ones, and
- * everything which hangs on them. A class takes its relations along, a note takes its anchor lines along, and so does
+ * everything which hangs on them. A class takes its relations along, and an attribute the dependencies which start
+ * or end at it, a note takes its anchor lines along, and so does
  * the class, attribute or relation an anchor line leads to. A note goes along with what it is attached to only if that
  * is all it is attached to: a note which hangs on other elements as well stays and loses just the line to what goes.
  * An association class link goes with its class and with its relation, the class
@@ -49,7 +50,12 @@ class VanishingElements_V001 {
     }
 
     boolean relationVanishes(AbstractRelationModel_V001 relation) {
-        return vanishes(relation.change) || classIds.contains(relation.fromId) || classIds.contains(relation.toId);
+        return vanishes(relation.change) || endVanishes(relation.fromId) || endVanishes(relation.toId);
+    }
+
+    /** An end of a relation is a class, or for a dependency an attribute. */
+    private boolean endVanishes(String endId) {
+        return classIds.contains(endId) || attributeIds.contains(endId);
     }
 
     boolean noteVanishes(NoteModel_V001 note) {

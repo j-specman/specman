@@ -22,6 +22,16 @@ public class AttributeAttachTarget extends AttachTarget {
     }
 
     @Override
+    public Point2D.Double center() {
+        return BoxGeometry.center(attributeArea);
+    }
+
+    @Override
+    public Rectangle2D.Double box() {
+        return attributeArea;
+    }
+
+    @Override
     public Double alignmentY() {
         return attributeArea.getCenterY();
     }

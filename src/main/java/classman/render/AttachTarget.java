@@ -4,12 +4,21 @@ import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.Side_V001;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 /** Something a note can be attached to: where the dashed line to it ends. */
 public abstract class AttachTarget {
 
     /** The point on the target where the line ends which comes from the given point, the note or its last waypoint. */
     public abstract Point2D.Double endFacing(Point2D.Double from);
+
+    /** @return the middle of the target: for a relation the point where a line to it ends */
+    public abstract Point2D.Double center();
+
+    /** @return the area of a class or attribute, null for a relation */
+    public Rectangle2D.Double box() {
+        return null;
+    }
 
     /** @return the point on the border of the target which is a given distance from the start of a side, null if the
      * target has no sides to fix a line to */

@@ -21,6 +21,11 @@ public class RelationAttachTarget extends AttachTarget {
     }
 
     @Override
+    public Point2D.Double center() {
+        return PathGeometry.attachPoint(path);
+    }
+
+    @Override
     public Double alignmentX() {
         return PathGeometry.attachPoint(path).x;
     }

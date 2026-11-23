@@ -20,6 +20,16 @@ public class ClassAttachTarget extends AttachTarget {
     }
 
     @Override
+    public Point2D.Double center() {
+        return BoxGeometry.center(classArea);
+    }
+
+    @Override
+    public Rectangle2D.Double box() {
+        return classArea;
+    }
+
+    @Override
     public Double alignmentX() {
         return classArea.getCenterX();
     }

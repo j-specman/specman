@@ -62,7 +62,8 @@ public class ClassDiagramEditorWindow extends JDialog {
 
     palette = new EditorPalette(texts, this::classDropped,
       screenPoint -> boxDropped(screenPoint, textEditor::startNewNote), this::relationToolToggled,
-      this::relationTypeChosen, this::anchorToolToggled, this::assocClassToolToggled, this::formatPainterToggled,
+      this::relationTypeChosen, this::anchorToolToggled, this::assocClassToolToggled, this::dependencyToolToggled,
+      this::formatPainterToggled,
       this::dragSourcePressed, canvas::zoomIn, canvas::zoomOut);
     getContentPane().add(palette, BorderLayout.WEST);
     getContentPane().add(scrollPane, BorderLayout.CENTER);
@@ -139,8 +140,8 @@ public class ClassDiagramEditorWindow extends JDialog {
     canvas.setScene(editing.scene());
     canvas.setSelection(editing.selectionMarks());
     palette.showToolsArmed(editing.isRelationToolArmed() ? editing.armedRelationType() : null,
-      editing.isAnchorToolArmed(), editing.isAssocClassToolArmed(), editing.isFormatPainterArmed(),
-      editing.canPickUpFormat());
+      editing.isAnchorToolArmed(), editing.isAssocClassToolArmed(), editing.isDependencyToolArmed(),
+      editing.isFormatPainterArmed(), editing.canPickUpFormat());
     canvas.refreshCursor();
   }
 
@@ -211,6 +212,11 @@ public class ClassDiagramEditorWindow extends JDialog {
 
   private void assocClassToolToggled() {
     editing.toggleAssocClassTool();
+    showDiagram();
+  }
+
+  private void dependencyToolToggled() {
+    editing.toggleDependencyTool();
     showDiagram();
   }
 

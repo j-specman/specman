@@ -25,6 +25,7 @@ import classman.model.v001.ClassDiagram_V001Parser.ClassDeclContext;
 import classman.model.v001.ClassDiagram_V001Parser.RouteAnchorContext;
 import classman.model.v001.ClassDiagram_V001Parser.ClassDiagramContext;
 import classman.model.v001.ClassDiagram_V001Parser.ClassHeadContext;
+import classman.model.v001.ClassDiagram_V001Parser.DependencyRelationContext;
 import classman.model.v001.ClassDiagram_V001Parser.DiagramNameContext;
 import classman.model.v001.ClassDiagram_V001Parser.ElementContext;
 import classman.model.v001.ClassDiagram_V001Parser.ExtendsRelationContext;
@@ -50,6 +51,7 @@ import classman.model.v001.ClassDiagram_V001Parser.WaypointContext;
 import classman.model.v001.ClassDiagram_V001Parser.WidthSpecContext;
 import classman.model.v001.ClassDiagram_V001Parser.WordOrStringContext;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.DependencyRelationModel_V001;
 import classman.model.v001.ExtendsRelationModel_V001;
 import classman.model.v001.ImplementsRelationModel_V001;
 import classman.model.v001.InfoModel_V001;
@@ -262,7 +264,18 @@ public class ClassDiagramParser_V001 {
         if (relation.extendsRelation() != null) {
             return buildExtends(relation.extendsRelation());
         }
+        if (relation.dependencyRelation() != null) {
+            return buildDependency(relation.dependencyRelation());
+        }
         return buildImplements(relation.implementsRelation());
+    }
+
+    private DependencyRelationModel_V001 buildDependency(DependencyRelationContext ctx)
+            throws ClassDiagramParseException {
+        DependencyRelationModel_V001 model = new DependencyRelationModel_V001(ctx.from.getText(), ctx.to.getText());
+        fillCommon(model, ctx.ELEMENT_ID(), ctx.changeMark(), ctx.styleSpec(), ctx.label, ctx.labelChange,
+            ctx.labelPlace, ctx.route());
+        return model;
     }
 
     private AssociationRelationModel_V001 buildAssociation(AssociationRelationContext ctx) throws ClassDiagramParseException {

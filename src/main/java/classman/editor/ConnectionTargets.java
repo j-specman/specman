@@ -1,6 +1,7 @@
 package classman.editor;
 
 import classman.model.v001.AbstractRelationModel_V001;
+import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
@@ -13,6 +14,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 /** The things a connection can end at in a diagram as it is shown now. */
@@ -58,6 +60,19 @@ class ConnectionTargets {
     return closestClass(point, tolerance);
   }
 
+  /** @param allowed tells for a class, and for an attribute with its class, whether a dependency may start or end
+   * there; for a class the attribute is null
+   * @return the attribute whose line the point is on, else the class like {@link #closestClass} finds it, as far as
+   * allowed; null if there is none. The attribute wins over its class, as for the anchor. */
+  ConnectionTarget closestForDependency(Point2D point, double tolerance,
+                                        BiPredicate<ClassModel_V001, AttributeModel_V001> allowed) {
+    AttributeTarget attribute = attributeAt(point);
+    if (attribute != null && allowed.test(attribute.owner, attribute.attribute)) {
+      return attribute;
+    }
+    return closestClass(point, tolerance, box -> allowed.test(box, null));
+  }
+
   /** Only the attributes of the classes of the diagram, which are not removed, count: a note can't be attached to the
    * others. */
   private AttributeTarget attributeAt(Point2D point) {
@@ -65,7 +80,7 @@ class ConnectionTargets {
       SceneTextArea text = scene.textAreas.get(i);
       if (isAttributeLineOfClass(text) && text.area.contains(point)
         && (text.attribute.change == null || text.attribute.change.type != ChangeType_V001.REMOVED)) {
-        return new AttributeTarget(text.attribute, text.area);
+        return new AttributeTarget((ClassModel_V001) text.element, text.attribute, text.area);
       }
     }
     return null;

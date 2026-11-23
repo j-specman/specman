@@ -1,28 +1,26 @@
 package classman.editor;
 
-import classman.model.v001.AbstractBoxModel_V001;
 import classman.render.SceneRelationLine;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
-/** A connection which the user is drawing from a box to a class, an attribute or a relation, before it is created: a
- * relation from a class, an anchor from a note. It changes nothing in the model: it knows the line which is shown while
- * the mouse is dragged, and the target which the mouse is on or close to, which the connection will end at. */
+/** A connection which the user is drawing from a note, a class or an attribute to a class, an attribute or a
+ * relation, before it is created: a relation from a class, an anchor from a note, a dependency from a class or attribute.
+ * It changes nothing in the model: it knows the line which is shown while the mouse is dragged, and the target which the
+ * mouse is on or close to, which the connection will end at. */
 class ConnectionDrawing {
-  private final AbstractBoxModel_V001 from;
-  private final Rectangle2D fromArea;
+  private final ConnectionTarget start;
   private final TargetFinder finder;
   private Point2D mouse;
   private ConnectionTarget target;
   private boolean hasLeftStart;
 
-  /** @param fromArea where the box is which the connection starts at
+  /** @param start what the connection starts at, framed by the area where it is
    * @param finder finds what the connection may end at */
-  ConnectionDrawing(AbstractBoxModel_V001 from, Rectangle2D fromArea, TargetFinder finder, Point2D pressedAt) {
-    this.from = from;
-    this.fromArea = fromArea;
+  ConnectionDrawing(ConnectionTarget start, TargetFinder finder, Point2D pressedAt) {
+    this.start = start;
     this.finder = finder;
     this.mouse = pressedAt;
   }
@@ -33,12 +31,13 @@ class ConnectionDrawing {
   void to(Point2D at, double tolerance) {
     mouse = at;
     ConnectionTarget picked = finder.closestTo(at, tolerance);
-    boolean onStart = picked != null && picked.element() == from;
+    boolean onStart = picked != null && picked.element() == start.element();
     hasLeftStart = hasLeftStart || !onStart;
     target = onStart && !hasLeftStart ? null : picked;
   }
 
-  AbstractBoxModel_V001 from() { return from; }
+  /** @return what the connection starts at */
+  ConnectionTarget start() { return start; }
 
   /** @return what the connection would end at, null if the mouse is on nothing */
   ConnectionTarget target() { return target; }
@@ -50,10 +49,11 @@ class ConnectionDrawing {
   /** @return the line of the relation which the connection would end at, null if it would end at none */
   SceneRelationLine targetLine() { return target != null ? target.thickLine() : null; }
 
-  /** @return the line which is shown: from the center of the first box to the center of the class or attribute which
+  /** @return the line which is shown: from the center of the start to the center of the class or attribute which
    * the connection would end at, to the relation at the point closest to the mouse, or to the mouse if it is on none */
   Line2D line() {
     Point2D end = target != null ? target.lineEnd(mouse) : mouse;
+    Rectangle2D fromArea = start.frame();
     return new Line2D.Double(fromArea.getCenterX(), fromArea.getCenterY(), end.getX(), end.getY());
   }
 }
