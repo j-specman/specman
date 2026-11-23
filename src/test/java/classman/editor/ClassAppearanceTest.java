@@ -17,6 +17,7 @@ import java.util.function.UnaryOperator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -129,13 +130,34 @@ class ClassAppearanceTest {
     assertTrue(editing.canChangeFill(editing.selectedClass()).can());
   }
 
-  /** What is attached to a hidden attribute is attached to the class. */
+  /** A note which hangs on an attribute of a hidden compartment only is hidden with it, with its line. */
   @Test
-  void anchorToHiddenAttributeStaysDrawable() throws ClassDiagramParseException {
+  void noteOnHiddenAttributeIsHidden() throws ClassDiagramParseException {
     open("classdiagram {\n  class A (11111111) at(10, 20) hideattributes {\n    -x (22222222)\n  }\n"
       + "  note (33333333) at(300, 20) \"n\"\n  anchor 33333333 -- 22222222\n}");
 
-    assertEquals(1, editing.scene().attachLines.size());
+    assertTrue(editing.scene().attachLines.isEmpty());
+    assertEquals(1, editing.scene().elementAreas.size());
+  }
+
+  /** A selected note which goes away with the compartment is not selected any more, and the anchor tool copes with
+   * the note which isn't there. */
+  @Test
+  void hiddenNoteIsDeselected() throws ClassDiagramParseException {
+    open("classdiagram {\n  class A (11111111) at(10, 20) {\n    -x (22222222)\n  }\n"
+      + "  note (33333333) at(300, 20) \"n\"\n  anchor 33333333 -- 22222222\n}");
+    ClassModel_V001 box = editing.selectedClass();
+    Rectangle2D noteArea = editing.scene().elementAreas.get(1).area;
+    editing.selectAt(new Point2D.Double(noteArea.getCenterX(), noteArea.getCenterY()));
+    assertNotNull(editing.selectedNote());
+
+    editing.setAttributesHidden(box, true);
+    editing.toggleAnchorTool();
+    new PointerControl(editing, () -> { }, text -> { }, at -> { }, pixels -> pixels)
+      .pressed(new Point2D.Double(noteArea.getCenterX(), noteArea.getCenterY()));
+
+    assertNull(editing.selectedNote());
+    assertEquals(1, editing.scene().elementAreas.size());
   }
 
   /** The color entry asks for a color and gives the class the one which was chosen, nothing happens when the user

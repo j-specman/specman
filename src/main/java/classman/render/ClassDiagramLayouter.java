@@ -4,7 +4,6 @@ import classman.model.v001.AbstractBoxModel_V001;
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AttachLineModel_V001;
-import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.NoteModel_V001;
@@ -46,7 +45,8 @@ public class ClassDiagramLayouter {
 
     /** @throws IllegalArgumentException if a relation refers to a class ID which isn't in the diagram, or a note to an unknown ID */
     public Scene layout(ClassDiagramModel_V001 model) {
-        Map<AbstractDiagramElementModel_V001, BoxLayout> boxes = layoutBoxes(model);
+        HiddenElements hidden = new HiddenElements(model);
+        Map<AbstractDiagramElementModel_V001, BoxLayout> boxes = layoutBoxes(model, hidden);
         Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas = placeBoxes(boxes);
         AttachTargetIndex attachTargets = new AttachTargetIndex();
 
@@ -83,7 +83,7 @@ public class ClassDiagramLayouter {
             relationLines.add(new SceneRelationLine(relation, relationLayout.line, relationLayout.decorations));
             attachTargets.add(relation.id, new RelationAttachTarget(relationLayout.path));
         }
-        List<SceneAttachLine> attachLines = attachLines(model, areas, attachTargets);
+        List<SceneAttachLine> attachLines = attachLines(model, areas, attachTargets, hidden);
         for (SceneAttachLine attachLine : attachLines) {
             underlays.addAll(attachLineMarkLayouter.underlay(attachLine.attachLine, attachLine.line));
             elements.add(attachLine.line);
@@ -103,27 +103,19 @@ public class ClassDiagramLayouter {
                                   Rectangle2D.Double classArea, BoxLayout box) {
         attachTargets.add(classModel.id, new ClassAttachTarget(classArea));
         if (!classModel.showsAttributes()) {
-            hiddenAttributesLeadToClass(attachTargets, classModel, classArea);
             return;
         }
         box.attributeAreasAt(classArea.x, classArea.y).forEach((id, attributeArea) ->
             attachTargets.add(id, new AttributeAttachTarget(attributeArea)));
     }
 
-    /** While the whole compartment is hidden, what is attached to an attribute is attached to the class instead. */
-    private void hiddenAttributesLeadToClass(AttachTargetIndex attachTargets, ClassModel_V001 classModel,
-                                             Rectangle2D.Double classArea) {
-        for (AttributeModel_V001 attribute : classModel.attributes) {
-            attachTargets.add(attribute.id, new ClassAttachTarget(classArea));
-        }
-    }
-
-    private Map<AbstractDiagramElementModel_V001, BoxLayout> layoutBoxes(ClassDiagramModel_V001 model) {
+    private Map<AbstractDiagramElementModel_V001, BoxLayout> layoutBoxes(ClassDiagramModel_V001 model,
+                                                                         HiddenElements hidden) {
         Map<AbstractDiagramElementModel_V001, BoxLayout> boxes = new LinkedHashMap<>();
         for (AbstractDiagramElementModel_V001 element : model.elements) {
             if (element instanceof ClassModel_V001 classModel) {
                 boxes.put(classModel, classLayouter.layout(classModel));
-            } else if (element instanceof NoteModel_V001 note) {
+            } else if (element instanceof NoteModel_V001 note && !hidden.isNoteHidden(note)) {
                 boxes.put(note, noteLayouter.layout(note));
             }
         }
@@ -163,13 +155,18 @@ public class ClassDiagramLayouter {
         return widest;
     }
 
-    /** The dashed lines from the notes and classes to the elements they are attached to.
+    /** The dashed lines from the notes and classes to the elements they are attached to, except those which lead to
+     * attributes in a hidden compartment.
      * @throws IllegalArgumentException if a dashed line starts at a box which the diagram doesn't have, or leads to an
      * element which it doesn't have */
     private List<SceneAttachLine> attachLines(ClassDiagramModel_V001 model,
-            Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas, AttachTargetIndex attachTargets) {
+            Map<AbstractDiagramElementModel_V001, Rectangle2D.Double> areas, AttachTargetIndex attachTargets,
+            HiddenElements hidden) {
         List<SceneAttachLine> lines = new ArrayList<>();
         for (AttachLineModel_V001 attachLine : model.attachLines()) {
+            if (hidden.isTargetHidden(attachLine.targetId)) {
+                continue;
+            }
             AbstractBoxModel_V001 box = model.boxWithId(attachLine.startId);
             if (box == null) {
                 throw new IllegalArgumentException("The diagram has no box with the ID " + attachLine.startId

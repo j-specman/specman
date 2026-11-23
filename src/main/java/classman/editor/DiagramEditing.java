@@ -1050,7 +1050,10 @@ public class DiagramEditing {
     else if (armedTool == Tool.ANCHOR) {
       Map<NoteModel_V001, Rectangle2D> notes = new LinkedHashMap<>();
       for (NoteModel_V001 note : model.notes()) {
-        notes.put(note, scene.elementAreaOf(note).area);
+        SceneElementArea noteArea = scene.elementAreaOf(note);
+        if (noteArea != null) {
+          notes.put(note, noteArea.area);
+        }
       }
       NoteModel_V001 from = ClassPicker.closest(notes, at, tolerance);
       if (from != null) {
@@ -1259,11 +1262,25 @@ public class DiagramEditing {
     discardPendingParts();
     String newSource = serializer.serialize(model);
     scene = host.renderer().layout(model);
+    if (selected != null && !isDrawn(selected)) {
+      selected = null;
+    }
     if (!newSource.equals(source)) {
       undoableSteps++;
       redoableSteps = 0;
     }
     source = newSource;
     host.sourceChanged(source);
+  }
+
+  /** Boxes and dashed lines which hang on hidden attributes only are not in the picture, so they can't stay selected. */
+  private boolean isDrawn(AbstractDiagramElementModel_V001 element) {
+    if (element instanceof AbstractBoxModel_V001) {
+      return scene.elementAreaOf(element) != null;
+    }
+    if (element instanceof AttachLineModel_V001 attachLine) {
+      return scene.attachLineOf(attachLine) != null;
+    }
+    return true;
   }
 }
