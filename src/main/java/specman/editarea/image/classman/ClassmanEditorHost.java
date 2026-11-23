@@ -2,7 +2,9 @@ package specman.editarea.image.classman;
 
 import classman.editor.EditorHost;
 import classman.render.DiagramRenderer;
+import specman.ChangeSet;
 
+import java.util.List;
 import java.util.Locale;
 
 import static specman.ChangeSet.changeset;
@@ -45,6 +47,11 @@ public class ClassmanEditorHost implements EditorHost {
   @Override
   public String trackedChangeSet() {
     return editor().aenderungenVerfolgen() ? changeset().name : null;
+  }
+
+  @Override
+  public List<String> changeSets() {
+    return List.copyOf(ChangeSet.ALL.keySet());
   }
 
   @Override

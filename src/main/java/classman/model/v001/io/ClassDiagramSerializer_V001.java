@@ -12,6 +12,7 @@ import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassDiagram_V001Lexer;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.ClassStyleModel_V001;
 import classman.model.v001.InfoModel_V001;
 import classman.model.v001.Multiplicity_V001;
 import classman.model.v001.NoteModel_V001;
@@ -95,9 +96,7 @@ public class ClassDiagramSerializer_V001 {
         appendChange(out, classModel.change);
         appendPosition(out, classModel.position);
         appendWidth(out, classModel.width);
-        if (classModel.fill != null) {
-            out.append(" fill=").append(quoted(classModel.fill));
-        }
+        appendStyle(out, classModel.style);
         if (classModel.attributesHidden) {
             out.append(" hideattributes");
         }
@@ -332,6 +331,28 @@ public class ClassDiagramSerializer_V001 {
     private void appendWidth(StringBuilder out, Integer width) {
         if (width != null) {
             out.append(" width=").append(width);
+        }
+    }
+
+    private void appendStyle(StringBuilder out, ClassStyleModel_V001 style) {
+        List<String> entries = new ArrayList<>();
+        if (style.fill != null) {
+            entries.add("fill=" + quoted(style.fill));
+        }
+        if (style.textColor != null) {
+            entries.add("textcolor=" + quoted(style.textColor));
+        }
+        if (style.lineColor != null) {
+            entries.add("linecolor=" + quoted(style.lineColor));
+        }
+        if (style.font != null) {
+            entries.add("font=" + style.font.sourceName);
+        }
+        if (style.fontSize != null) {
+            entries.add("fontsize=" + style.fontSize);
+        }
+        if (!entries.isEmpty()) {
+            out.append(" style(").append(String.join(", ", entries)).append(')');
         }
     }
 

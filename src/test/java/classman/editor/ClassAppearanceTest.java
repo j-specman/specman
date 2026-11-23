@@ -1,13 +1,14 @@
 package classman.editor;
 
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.ClassStyleModel_V001;
+import classman.model.v001.FontFamily_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -45,7 +46,7 @@ class ClassAppearanceTest {
     return new ClassDiagramParser_V001().parse(editing.source()).classes().get(0);
   }
 
-  private List<JMenuItem> menuEntries(UnaryOperator<Color> picker) {
+  private List<JMenuItem> menuEntries(UnaryOperator<ClassStyleModel_V001> picker) {
     ClassContextMenu menu = new ClassContextMenu(editing, editing.selectedClass(), null, new EditorTexts(host.locale()),
       picker, () -> { });
     List<JMenuItem> items = new ArrayList<>();
@@ -57,33 +58,56 @@ class ClassAppearanceTest {
     return items;
   }
 
-  /** The color is one operation, written in the head of the class, and the standard color takes it away again. */
+  private static ClassStyleModel_V001 style(String fill, String textColor, FontFamily_V001 font, Integer fontSize) {
+    ClassStyleModel_V001 style = new ClassStyleModel_V001();
+    style.fill = fill;
+    style.textColor = textColor;
+    style.font = font;
+    style.fontSize = fontSize;
+    return style;
+  }
+
+  /** The style is one operation, written in the head of the class, and the standard style takes it away again. */
   @Test
-  void fillSetAndReset() throws ClassDiagramParseException {
+  void styleSetAndReset() throws ClassDiagramParseException {
     open(CLASS);
 
-    editing.setFill(editing.selectedClass(), "#CCE5FF");
+    editing.setStyle(editing.selectedClass(), style("#cce5ff", "#112233", FontFamily_V001.COURIER, 16));
 
-    assertEquals("#cce5ff", parsedClass().fill);
+    ClassStyleModel_V001 written = parsedClass().style;
+    assertEquals("#cce5ff", written.fill);
+    assertEquals("#112233", written.textColor);
+    assertEquals(FontFamily_V001.COURIER, written.font);
+    assertEquals(16, written.fontSize);
     assertEquals(1, host.reportedSources.size());
     assertTrue(editing.canUndo());
 
-    editing.setFill(editing.selectedClass(), null);
+    editing.setStyle(editing.selectedClass(), new ClassStyleModel_V001());
 
-    assertNull(parsedClass().fill);
-    assertFalse(editing.source().contains("fill"), editing.source());
+    assertTrue(parsedClass().style.isStandard());
+    assertFalse(editing.source().contains("style"), editing.source());
   }
 
-  /** The color is no change: it needs no mark while changes are tracked. */
+  /** The style is no change: it needs no mark while changes are tracked. */
   @Test
-  void fillIsNotMarked() throws ClassDiagramParseException {
+  void styleIsNotMarked() throws ClassDiagramParseException {
     host.trackedChangeSet = "yellow";
     open(CLASS);
 
-    editing.setFill(editing.selectedClass(), "#cce5ff");
+    editing.setStyle(editing.selectedClass(), style("#cce5ff", null, null, null));
 
     assertFalse(editing.source().contains("change("), editing.source());
     assertFalse(editing.source().contains("was("), editing.source());
+  }
+
+  /** The same style again is no operation. */
+  @Test
+  void sameStyleChangesNothing() throws ClassDiagramParseException {
+    open(CLASS);
+
+    editing.setStyle(editing.selectedClass(), new ClassStyleModel_V001());
+
+    assertTrue(host.reportedSources.isEmpty());
   }
 
   /** The class which hides its attributes is as high as its head, and shows them again after the entry is chosen. */
@@ -121,13 +145,13 @@ class ClassAppearanceTest {
     assertFalse(shows.isEnabled());
   }
 
-  /** An interface has no attribute compartment to hide, but can have a color. */
+  /** An interface has no attribute compartment to hide, but can have a style. */
   @Test
   void interfaceCannotHideAttributes() throws ClassDiagramParseException {
     open("classdiagram {\n  interface I (11111111) at(10, 20)\n}");
 
     assertFalse(editing.canHideAttributesOf(editing.selectedClass()).can());
-    assertTrue(editing.canChangeFill(editing.selectedClass()).can());
+    assertTrue(editing.canChangeStyle(editing.selectedClass()).can());
   }
 
   /** A note which hangs on an attribute of a hidden compartment only is hidden with it, with its line. */
@@ -160,31 +184,45 @@ class ClassAppearanceTest {
     assertEquals(1, editing.scene().elementAreas.size());
   }
 
-  /** The color entry asks for a color and gives the class the one which was chosen, nothing happens when the user
+  /** The style entry asks for a style and gives the class the one which was chosen, nothing happens when the user
    * doesn't choose one. */
   @Test
-  void colorEntry() throws ClassDiagramParseException {
+  void styleEntry() throws ClassDiagramParseException {
     open(CLASS);
 
     menuEntries(start -> null).get(4).doClick(0);
-    assertNull(parsedClass().fill);
+    assertTrue(parsedClass().style.isStandard());
 
-    menuEntries(start -> new Color(0xCC, 0xE5, 0xFF)).get(4).doClick(0);
-    assertEquals("#cce5ff", parsedClass().fill);
+    menuEntries(start -> style("#cce5ff", null, FontFamily_V001.SITKA, null)).get(4).doClick(0);
+    assertEquals("#cce5ff", parsedClass().style.fill);
+    assertEquals(FontFamily_V001.SITKA, parsedClass().style.font);
   }
 
-  /** The standard color entry can only be chosen while the class has a color of its own. */
+  /** The picker gets a copy of the style of the class, so cancelling can't change the class. */
   @Test
-  void standardColorEntry() throws ClassDiagramParseException {
+  void stylePickerGetsCopy() throws ClassDiagramParseException {
+    open(CLASS);
+
+    menuEntries(start -> {
+      start.fill = "#cce5ff";
+      return null;
+    }).get(4).doClick(0);
+
+    assertTrue(parsedClass().style.isStandard());
+  }
+
+  /** The standard style entry can only be chosen while the class has a style of its own. */
+  @Test
+  void standardStyleEntry() throws ClassDiagramParseException {
     open(CLASS);
     assertFalse(menuEntries(start -> null).get(5).isEnabled());
 
-    editing.setFill(editing.selectedClass(), "#cce5ff");
+    editing.setStyle(editing.selectedClass(), style("#cce5ff", null, null, null));
     JMenuItem standard = menuEntries(start -> null).get(5);
     assertTrue(standard.isEnabled());
 
     standard.doClick(0);
-    assertNull(parsedClass().fill);
+    assertTrue(parsedClass().style.isStandard());
   }
 
   /** The attributes entry is checked while they are shown, and switches them. */

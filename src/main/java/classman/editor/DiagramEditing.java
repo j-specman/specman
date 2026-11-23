@@ -13,6 +13,7 @@ import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.ClassStyleModel_V001;
 import classman.model.v001.ExtendsRelationModel_V001;
 import classman.model.v001.ImplementsRelationModel_V001;
 import classman.model.v001.NoteModel_V001;
@@ -46,9 +47,7 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -737,17 +736,16 @@ public class DiagramEditing {
     }
   }
 
-  /** @return whether the box can get a background color of its own: no change set has removed it */
-  public Can canChangeFill(ClassModel_V001 box) {
+  /** @return whether the box can get a style of its own: no change set has removed it */
+  public Can canChangeStyle(ClassModel_V001 box) {
     return canAddPartsTo(box);
   }
 
-  /** Gives the class the background color, written #rrggbb, or the standard color of classes if it is null. Not
-   * marked as a change, like the width. One operation. */
-  public void setFill(ClassModel_V001 box, String color) {
-    String normalized = color == null ? null : color.toLowerCase(Locale.ROOT);
-    if (canChangeFill(box).can() && !Objects.equals(box.fill, normalized)) {
-      box.fill = normalized;
+  /** Gives the class the style, a style without any part gives it the standard look of classes. Not marked as a
+   * change, like the width. One operation. The box keeps a copy, so the style can't be changed from outside. */
+  public void setStyle(ClassModel_V001 box, ClassStyleModel_V001 style) {
+    if (canChangeStyle(box).can() && !box.style.equals(style)) {
+      box.style = style.copy();
       publish();
     }
   }

@@ -4,13 +4,23 @@ import java.awt.Font;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 
-/** Measures text with Java2D, with the shipped font of the diagram. */
+/** Measures text with Java2D, with the shipped fonts of the diagram. Without a font it measures the default one. */
 public class AwtTextMeasurer implements TextMeasurer {
     private static final FontRenderContext CONTEXT = new FontRenderContext(null, true, true);
 
-    private final Font plain = DiagramFonts.plain(DiagramStyle.FONT_SIZE);
-    private final Font bold = DiagramFonts.bold(DiagramStyle.FONT_SIZE);
-    private final LineMetrics lineMetrics = plain.getLineMetrics("Ag", CONTEXT);
+    private final Font plain;
+    private final Font bold;
+    private final LineMetrics lineMetrics;
+
+    public AwtTextMeasurer() {
+        this(TextFont.DEFAULT);
+    }
+
+    private AwtTextMeasurer(TextFont font) {
+        plain = font.awtFont(false);
+        bold = font.awtFont(true);
+        lineMetrics = plain.getLineMetrics("Ag", CONTEXT);
+    }
 
     @Override
     public double width(String text, boolean isBold) {
@@ -25,5 +35,10 @@ public class AwtTextMeasurer implements TextMeasurer {
     @Override
     public double ascent() {
         return lineMetrics.getAscent();
+    }
+
+    @Override
+    public TextMeasurer forFont(TextFont font) {
+        return new AwtTextMeasurer(font);
     }
 }

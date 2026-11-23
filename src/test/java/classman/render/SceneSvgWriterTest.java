@@ -53,7 +53,7 @@ class SceneSvgWriterTest {
     assertTrue(svg.contains("<text x=\"30\" y=\"6\""), svg);
     assertFalse(svg.contains("text-anchor"), svg);
     assertTrue(svg.contains("font-weight=\"bold\""), svg);
-    assertTrue(svg.contains("font-family=\"" + DiagramStyle.SVG_FONT_FAMILIES + "\""), svg);
+    assertTrue(svg.contains("font-family=\"Roboto, Arial, sans-serif\" font-size=\"12\""), svg);
     assertTrue(svg.contains(">a&lt;b &amp; &quot;c&quot;</text>"), svg);
   }
 

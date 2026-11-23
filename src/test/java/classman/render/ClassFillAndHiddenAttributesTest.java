@@ -20,7 +20,7 @@ class ClassFillAndHiddenAttributesTest {
   /** The class box has the color of its own, other classes keep the standard one. */
   @Test
   void ownFill() throws ClassDiagramParseException {
-    Scene scene = layout("class A (aaaaaaaa)\nclass B (bbbbbbbb) fill=\"#cce5ff\"");
+    Scene scene = layout("class A (aaaaaaaa)\nclass B (bbbbbbbb) style(fill=\"#cce5ff\")");
     assertEquals(DiagramStyle.CLASS_FILL, all(scene, SceneRectangle.class).get(0).fill);
     assertEquals("#cce5ff", all(scene, SceneRectangle.class).get(1).fill);
   }
@@ -51,19 +51,19 @@ class ClassFillAndHiddenAttributesTest {
   /** The source keeps both settings, the color in lower case. */
   @Test
   void roundTrip() throws ClassDiagramParseException {
-    String source = "classdiagram {\n  class A (aaaaaaaa) at(10, 20) width=100 fill=\"#cce5ff\" hideattributes\n}";
+    String source = "classdiagram {\n  class A (aaaaaaaa) at(10, 20) width=100 style(fill=\"#cce5ff\") hideattributes\n}";
 
     String written = new ClassDiagramSerializer_V001().serialize(
       new ClassDiagramParser_V001().parse(source.replace("#cce5ff", "#CCE5FF")));
 
-    assertTrue(written.contains("class A (aaaaaaaa) at(10, 20) width=100 fill=\"#cce5ff\" hideattributes\n"), written);
+    assertTrue(written.contains("class A (aaaaaaaa) at(10, 20) width=100 style(fill=\"#cce5ff\") hideattributes\n"), written);
   }
 
   /** A color which isn't written #rrggbb is rejected with the line. */
   @Test
   void wrongColorRejected() {
     ClassDiagramParseException e = assertThrows(ClassDiagramParseException.class,
-      () -> new ClassDiagramParser_V001().parse("classdiagram {\n  class A fill=\"red\"\n}"));
+      () -> new ClassDiagramParser_V001().parse("classdiagram {\n  class A style(fill=\"red\")\n}"));
     assertTrue(e.getMessage().startsWith("line 2"), e.getMessage());
   }
 }

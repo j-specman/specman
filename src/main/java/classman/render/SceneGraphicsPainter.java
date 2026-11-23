@@ -14,10 +14,10 @@ import java.awt.geom.Rectangle2D;
 
 import static classman.render.DiagramStyle.DASH_GAP;
 import static classman.render.DiagramStyle.DASH_LENGTH;
-import static classman.render.DiagramStyle.FONT_SIZE;
 import static classman.render.DiagramStyle.MIN_VISIBLE_HIGHLIGHT;
 import static classman.render.DiagramStyle.MIN_VISIBLE_STROKE;
 import static classman.render.DiagramStyle.MITER_LIMIT;
+import static classman.render.DiagramStyle.TEXT_COLOR;
 
 /**
  * Paints a scene on a Graphics2D, so that the editor shows what the SVG shows. It paints in the coordinates of the scene,
@@ -27,8 +27,6 @@ import static classman.render.DiagramStyle.MITER_LIMIT;
  * and text uses fractional metrics, so everything scales smoothly.
  */
 public class SceneGraphicsPainter {
-    private final Font plainFont = DiagramFonts.plain(FONT_SIZE);
-    private final Font boldFont = DiagramFonts.bold(FONT_SIZE);
 
     /** Leaves the rendering hints of the Graphics2D as they were. */
     public void paint(Scene scene, Graphics2D g) {
@@ -138,8 +136,8 @@ public class SceneGraphicsPainter {
      * which would change their shape at each zoom level.
      */
     private void paintText(Graphics2D g, SceneText text) {
-        g.setFont(text.bold ? boldFont : plainFont);
-        g.setColor(text.fill == null ? Color.BLACK : Color.decode(text.fill));
+        g.setFont(text.font.awtFont(text.bold));
+        g.setColor(Color.decode(text.fill == null ? TEXT_COLOR : text.fill));
         g.fill(g.getFont().createGlyphVector(g.getFontRenderContext(), text.text)
             .getOutline((float) text.left(), (float) text.y));
     }

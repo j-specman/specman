@@ -1,12 +1,12 @@
 package classman.editor;
 
 import classman.model.v001.ClassKind_V001;
+import classman.model.v001.ClassStyleModel_V001;
 import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.render.SceneTextArea;
 
-import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPopupMenu;
@@ -15,7 +15,6 @@ import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
@@ -37,6 +36,7 @@ public class ClassDiagramEditorWindow extends JDialog {
   private static final int MIN_WIDTH = 900;
   private static final int MIN_HEIGHT = 650;
 
+  private final EditorHost host;
   private final DiagramEditing editing;
   private final EditorTexts texts;
   private final DiagramCanvas canvas;
@@ -48,6 +48,7 @@ public class ClassDiagramEditorWindow extends JDialog {
    * @throws IllegalArgumentException if the diagram refers to an element which it doesn't have */
   public ClassDiagramEditorWindow(Component owner, String source, EditorHost host) throws ClassDiagramParseException {
     super(SwingUtilities.getWindowAncestor(owner), ModalityType.APPLICATION_MODAL);
+    this.host = host;
     texts = new EditorTexts(host.locale());
     setTitle(texts.get("window.title"));
     editing = new DiagramEditing(source, host);
@@ -162,7 +163,7 @@ public class ClassDiagramEditorWindow extends JDialog {
       menu = new TextContextMenu(editing, text, texts, this::showDiagram);
     }
     else if (editing.selectedClass() != null) {
-      menu = new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, this::pickColor,
+      menu = new ClassContextMenu(editing, editing.selectedClass(), textEditor, texts, this::chooseStyle,
         this::showDiagram);
     }
     else {
@@ -171,8 +172,8 @@ public class ClassDiagramEditorWindow extends JDialog {
     menu.show(canvas, where.x, where.y);
   }
 
-  private Color pickColor(Color start) {
-    return JColorChooser.showDialog(this, texts.get("menu.class.color.title"), start);
+  private ClassStyleModel_V001 chooseStyle(ClassStyleModel_V001 start) {
+    return ClassStyleDialog.choose(this, start, host.renderer(), host.changeSets(), texts);
   }
 
   private void relationToolToggled(RelationType_V001 type) {

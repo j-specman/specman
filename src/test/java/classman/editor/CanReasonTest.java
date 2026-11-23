@@ -4,7 +4,6 @@ import classman.model.v001.io.ClassDiagramParseException;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.JMenuItem;
-import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
 
@@ -30,7 +29,7 @@ class CanReasonTest {
 
   private JMenuItem entry(String text) {
     ClassContextMenu menu = new ClassContextMenu(editing, editing.selectedClass(), null,
-      new EditorTexts(host.locale()), start -> (Color) null, () -> { });
+      new EditorTexts(host.locale()), start -> null, () -> { });
     return Arrays.stream(menu.getComponents()).filter(c -> c instanceof JMenuItem item && text.equals(item.getText()))
       .map(c -> (JMenuItem) c).findFirst().orElseThrow();
   }
@@ -61,7 +60,7 @@ class CanReasonTest {
     assertFalse(stereotype.isEnabled());
     assertEquals("The class has a stereotype already.", stereotype.getToolTipText());
     assertNull(entry("Add tagged value").getToolTipText());
-    assertEquals("The class has the standard color already.", entry("Standard color").getToolTipText());
+    assertEquals("The class has the standard style already.", entry("Standard style").getToolTipText());
   }
 
   /** What a change set has removed offers nothing, and says so. */
@@ -70,7 +69,7 @@ class CanReasonTest {
     open("classdiagram {\n  class A (11111111) change(removed, yellow) at(10, 20)\n}");
 
     assertEquals("A change set has removed the class.", entry("Add stereotype").getToolTipText());
-    assertEquals("A change set has removed the class.", entry("Background color...").getToolTipText());
+    assertEquals("A change set has removed the class.", entry("Style...").getToolTipText());
   }
 
   /** The reason of an attribute which can't be added follows the cause: an interface, hidden attributes. */
@@ -94,7 +93,7 @@ class CanReasonTest {
     EditorTexts english = new EditorTexts(java.util.Locale.ENGLISH);
     EditorTexts german = new EditorTexts(java.util.Locale.GERMAN);
     for (String key : new String[] {"reason.class.removed", "reason.stereotype.exists", "reason.interface.noattributes",
-      "reason.attributes.hidden", "reason.attributes.marked", "reason.fill.standard", "reason.width.automatic",
+      "reason.attributes.hidden", "reason.attributes.marked", "reason.style.standard", "reason.width.automatic",
       "reason.arrow.notpossible", "reason.arrow.enum", "reason.relation.removed", "reason.center.already"}) {
       assertFalse(german.get(key).isBlank(), key);
       assertFalse(german.get(key).equals(english.get(key)), key);

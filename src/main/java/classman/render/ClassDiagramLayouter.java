@@ -12,6 +12,7 @@ import classman.model.v001.PositionModel_V001;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,10 @@ import static classman.render.DiagramStyle.STACK_GAP;
  * stack are straight vertical lines. The relations are drawn above the boxes.
  */
 public class ClassDiagramLayouter {
-    private final ClassBoxLayouter classLayouter;
+    private final TextMeasurer measurer;
+    private final ChangePalette palette;
+    /** One layouter for each font which the classes use, because it measures texts in its font. */
+    private final Map<TextFont, ClassBoxLayouter> classLayouters = new HashMap<>();
     private final NoteBoxLayouter noteLayouter;
     private final AttachLineLayouter attachLineLayouter = new AttachLineLayouter();
     private final AttachLineMarkLayouter attachLineMarkLayouter;
@@ -36,11 +40,16 @@ public class ClassDiagramLayouter {
     }
 
     public ClassDiagramLayouter(TextMeasurer measurer, ChangeColors changeColors) {
-        ChangePalette palette = new ChangePalette(changeColors);
-        this.classLayouter = new ClassBoxLayouter(measurer, palette);
+        this.measurer = measurer;
+        this.palette = new ChangePalette(changeColors);
         this.noteLayouter = new NoteBoxLayouter(measurer, palette);
         this.attachLineMarkLayouter = new AttachLineMarkLayouter(palette);
         this.relationLayouter = new RelationLayouter(measurer, palette);
+    }
+
+    private ClassBoxLayouter classLayouterFor(ClassModel_V001 classModel) {
+        return classLayouters.computeIfAbsent(TextFont.of(classModel.style),
+            font -> new ClassBoxLayouter(measurer.forFont(font), palette, font));
     }
 
     /** @throws IllegalArgumentException if a relation refers to a class ID which isn't in the diagram, or a note to an unknown ID */
@@ -114,7 +123,7 @@ public class ClassDiagramLayouter {
         Map<AbstractDiagramElementModel_V001, BoxLayout> boxes = new LinkedHashMap<>();
         for (AbstractDiagramElementModel_V001 element : model.elements) {
             if (element instanceof ClassModel_V001 classModel) {
-                boxes.put(classModel, classLayouter.layout(classModel));
+                boxes.put(classModel, classLayouterFor(classModel).layout(classModel));
             } else if (element instanceof NoteModel_V001 note && !hidden.isNoteHidden(note)) {
                 boxes.put(note, noteLayouter.layout(note));
             }

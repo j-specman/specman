@@ -17,8 +17,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 import static headless.HeadlessExtension.specman;
+import static headless.pdf.PdfReader.fontNamesOfTexts;
 import static headless.pdf.PdfReader.text;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -197,6 +199,28 @@ class ClassmanImageTest {
       "The marked diagram must be rendered");
     assertEquals(List.of(), specman.shownMessages());
     assertTrue(text(pdf).contains("billed by"), text(pdf));
+  }
+
+  /** Scenario: Classes with a font of their own are exported with these fonts, so the
+   * names which the SVG uses are the ones the PDF export knows. */
+  @Test
+  void testStyledClassesAreExportedWithTheirFonts(@TempDir Path directory) throws IOException {
+    containerOfNewStep();
+    addImage(classdiagramFile(directory, """
+      classdiagram {
+          class Serif style(font=SitkaDisplay)
+          class Mono style(font=CourierPrime, fontsize=16)
+      }
+      """));
+    specman.layoutComponents();
+    File pdf = directory.resolve("classman-styled.pdf").toFile();
+
+    specman.exportPdf(pdf, "A4", true, false);
+
+    assertEquals(List.of(), specman.shownMessages());
+    Set<String> fonts = fontNamesOfTexts(pdf);
+    assertTrue(fonts.stream().anyMatch(name -> name.contains("SitkaDisplay")), fonts.toString());
+    assertTrue(fonts.stream().anyMatch(name -> name.contains("CourierPrime")), fonts.toString());
   }
 
   private static EditContainer containerOfNewStep() {

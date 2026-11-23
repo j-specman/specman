@@ -4,6 +4,7 @@ import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.ClassStyleModel_V001;
 import classman.model.v001.TaggedValueModel_V001;
 
 import java.awt.geom.Rectangle2D;
@@ -39,20 +40,25 @@ public class ClassBoxLayouter {
     private final TextWrapper wrapper;
     private final ChangePalette palette;
     private final TextHighlighter highlighter;
+    private final TextFont font;
     private final AttributeTextBuilder attributeTextBuilder = new AttributeTextBuilder();
 
-    public ClassBoxLayouter(TextMeasurer measurer, ChangePalette palette) {
+    /** @param measurer measures texts in the font */
+    public ClassBoxLayouter(TextMeasurer measurer, ChangePalette palette, TextFont font) {
         this.measurer = measurer;
         this.wrapper = new TextWrapper(measurer);
         this.palette = palette;
         this.highlighter = new TextHighlighter(measurer, palette);
+        this.font = font;
     }
 
     public BoxLayout layout(ClassModel_V001 model) {
         ChangeModel_V001 change = model.change;
         boolean isRemoved = change != null && change.type == ChangeType_V001.REMOVED;
-        String textColor = isRemoved ? VEILED_TEXT : null;
-        String lineColor = isRemoved ? VEILED_STROKE : STROKE;
+        ClassStyleModel_V001 style = model.style;
+        String textColor = isRemoved ? veiledText(style) : style.textColor;
+        String nameColor = isRemoved ? markedNameText(style) : style.textColor;
+        String lineColor = lineColor(style, isRemoved);
         boolean showsDerivedStereotype = model.kind.derivedStereotype != null && model.stereotype == null;
         String derivedStereotype = showsDerivedStereotype ? stereotypeText(model.kind.derivedStereotype) : null;
         String stereotype = model.stereotype == null ? null : stereotypeText(model.stereotype);
@@ -60,7 +66,7 @@ public class ClassBoxLayouter {
         boolean showsAttributes = model.showsAttributes();
         List<AttributeModel_V001> shownAttributes = showsAttributes ? shownAttributes(model) : List.of();
         List<MarkedText> attributes = attributeTexts(shownAttributes);
-        String fill = model.fill != null ? model.fill : CLASS_FILL;
+        String fill = style.fill != null ? style.fill : CLASS_FILL;
         double contentWidth = contentWidth(model, derivedStereotype, stereotype, taggedValues, attributes);
         double width = contentWidth + 2 * PADDING_X;
 
@@ -74,8 +80,7 @@ public class ClassBoxLayouter {
         y = addClippedCenteredText(elements, stereotypeLines, stereotype, contentWidth, width, y, textColor);
         double nameTop = y;
         List<SceneText> nameLines = new ArrayList<>();
-        y = addCenteredText(elements, nameLines, model.name, true, contentWidth, width, y,
-            isRemoved ? VEILED_MARKED_TEXT : null);
+        y = addCenteredText(elements, nameLines, model.name, true, contentWidth, width, y, nameColor);
         double nameBottom = y;
         List<List<SceneText>> taggedLines = new ArrayList<>();
         Map<TaggedValueModel_V001, Rectangle2D.Double> taggedAreas = new LinkedHashMap<>();
@@ -125,12 +130,34 @@ public class ClassBoxLayouter {
     }
 
     private SceneRectangle frame(double width, double height, ChangeModel_V001 change) {
-        return new SceneRectangle(0, 0, width, height, null, palette.strong(change.changeSet), FRAME_STROKE_WIDTH)
-            .keepingVisible();
+        return frameOf(width, height, palette.strong(change.changeSet));
+    }
+
+    /** The frame of an added or removed class, in the strong color of its change set. */
+    public static SceneRectangle frameOf(double width, double height, String strongColor) {
+        return new SceneRectangle(0, 0, width, height, null, strongColor, FRAME_STROKE_WIDTH).keepingVisible();
     }
 
     private String veiled(String fill) {
         return ColorMix.blend(fill, WHITE, VEIL_SHARE);
+    }
+
+    /** The color of the texts of a removed class: its own text color veiled, the grey of veiled texts without one. */
+    private String veiledText(ClassStyleModel_V001 style) {
+        return style.textColor == null ? VEILED_TEXT : veiled(style.textColor);
+    }
+
+    /** The name of a removed class lies on the strong color of its change set, a veil would hardly show on it, so it
+     * keeps the own text color, or has the darker grey without one. */
+    private String markedNameText(ClassStyleModel_V001 style) {
+        return style.textColor == null ? VEILED_MARKED_TEXT : style.textColor;
+    }
+
+    private String lineColor(ClassStyleModel_V001 style, boolean isRemoved) {
+        if (isRemoved) {
+            return style.lineColor == null ? VEILED_STROKE : veiled(style.lineColor);
+        }
+        return style.lineColor == null ? STROKE : style.lineColor;
     }
 
     private void addHeaderMarks(List<AbstractSceneElement> backgrounds, List<AbstractSceneElement> overlays,
@@ -284,7 +311,7 @@ public class ClassBoxLayouter {
         double lineY = y;
         for (String line : lines) {
             SceneText sceneText = new SceneText(boxWidth / 2, lineY + measurer.ascent(), line, bold, TextAnchor.MIDDLE,
-                measurer.width(line, bold), textColor);
+                measurer.width(line, bold), textColor, font);
             elements.add(sceneText);
             placed.add(sceneText);
             lineY += measurer.lineHeight();
@@ -313,7 +340,7 @@ public class ClassBoxLayouter {
             String line = wrapper.clip(attributes.get(i).text(), contentWidth, false);
             double lineWidth = measurer.width(line, false);
             SceneText sceneText = new SceneText(PADDING_X, lineY + measurer.ascent(), line, false, TextAnchor.START,
-                lineWidth, textColor);
+                lineWidth, textColor, font);
             elements.add(sceneText);
             List<SceneText> lines = List.of(sceneText);
             double textRight = PADDING_X + lineWidth;

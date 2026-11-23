@@ -3,27 +3,26 @@ package classman.editor;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
-import classman.render.DiagramStyle;
+import classman.model.v001.ClassStyleModel_V001;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import java.awt.Color;
 import java.util.function.UnaryOperator;
 
 /** The menu of a class: it adds the parts which a class can have, each typed into its place in the class right away,
  * shows and hides single attributes by a submenu of check items, which stays open while the user checks them. It
- * gives the box a color of its own, shows or hides its attribute compartment, and switches back to the width which
- * follows the content. An entry which doesn't fit the class right now, like a second stereotype, is there but can't
- * be chosen, and its tooltip says why. */
+ * opens the dialog for the style of the box (colors, font, font size) or takes the style back to the standard one,
+ * shows or hides its attribute compartment, and switches back to the width which follows the content. An entry which
+ * doesn't fit the class right now, like a second stereotype, is there but can't be chosen, and its tooltip says why. */
 class ClassContextMenu extends JPopupMenu {
 
-  /** @param colorPicker asks the user for a color, given the one to start from, and gives null if the user doesn't
-   * choose one
+  /** @param stylePicker asks the user for a style, given a copy of the one to start from, and gives null if the user
+   * doesn't choose one
    * @param showDiagram shows the diagram as the editing has it now */
   ClassContextMenu(DiagramEditing editing, ClassModel_V001 box, TextEditor textEditor, EditorTexts texts,
-                   UnaryOperator<Color> colorPicker, Runnable showDiagram) {
+                   UnaryOperator<ClassStyleModel_V001> stylePicker, Runnable showDiagram) {
     boolean isEnum = box.kind == ClassKind_V001.ENUM;
     add(entry(texts.get("menu.class.add.stereotype"), editing.canAddStereotypeTo(box),
       () -> textEditor.startNewStereotype(box)));
@@ -33,11 +32,11 @@ class ClassContextMenu extends JPopupMenu {
       () -> textEditor.startNewAttribute(box)));
     add(visibleAttributesMenu(editing, box, texts, isEnum, showDiagram));
     addSeparator();
-    add(entry(texts.get("menu.class.color"), editing.canChangeFill(box), () -> chooseColor(editing, box, colorPicker,
+    add(entry(texts.get("menu.class.style"), editing.canChangeStyle(box), () -> chooseStyle(editing, box, stylePicker,
       showDiagram)));
-    Can hasOwnColor = Can.IF(box.fill != null, texts.get("reason.fill.standard"));
-    add(entry(texts.get("menu.class.color.standard"), editing.canChangeFill(box).and(hasOwnColor), () -> {
-      editing.setFill(box, null);
+    Can hasOwnStyle = Can.IF(!box.style.isStandard(), texts.get("reason.style.standard"));
+    add(entry(texts.get("menu.class.style.standard"), editing.canChangeStyle(box).and(hasOwnStyle), () -> {
+      editing.setStyle(box, new ClassStyleModel_V001());
       showDiagram.run();
     }));
     JCheckBoxMenuItem showsAttributes = new JCheckBoxMenuItem(
@@ -88,12 +87,12 @@ class ClassContextMenu extends JPopupMenu {
     return attribute.hidden ? editing.canShowAttribute(box, attribute) : editing.canHideAttribute(box, attribute);
   }
 
-  private static void chooseColor(DiagramEditing editing, ClassModel_V001 box, UnaryOperator<Color> colorPicker,
+  private static void chooseStyle(DiagramEditing editing, ClassModel_V001 box,
+                                  UnaryOperator<ClassStyleModel_V001> stylePicker,
                                   Runnable showDiagram) {
-    Color start = Color.decode(box.fill != null ? box.fill : DiagramStyle.CLASS_FILL);
-    Color chosen = colorPicker.apply(start);
+    ClassStyleModel_V001 chosen = stylePicker.apply(box.style.copy());
     if (chosen != null) {
-      editing.setFill(box, String.format("#%02x%02x%02x", chosen.getRed(), chosen.getGreen(), chosen.getBlue()));
+      editing.setStyle(box, chosen);
       showDiagram.run();
     }
   }

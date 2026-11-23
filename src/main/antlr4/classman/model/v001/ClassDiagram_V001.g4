@@ -28,8 +28,10 @@ grammar ClassDiagram_V001;
 //     centered on a common axis, default gap between them. Mixing placed and stacked elements is allowed,
 //     collisions are not resolved.
 //   * A class with width=N is N pixels wide; text wraps at spaces. Without width the content decides.
-//   * fill="#rrggbb" in the head gives the class box a background color of its own, the word hideattributes behind it
-//     hides the attribute compartment (the values of an enum); the attributes stay in the source.
+//   * style(fill="#rrggbb", textcolor="#rrggbb", linecolor="#rrggbb", font=Roboto, fontsize=14) in the head gives the
+//     class box a look of its own: background, text and line color, font (SitkaDisplay, Roboto or CourierPrime) and
+//     font size. The entries come in any order, each is optional and may stand once. The word hideattributes behind
+//     the style hides the attribute compartment (the values of an enum); the attributes stay in the source.
 //     The height is always computed.
 //   * An attribute which ends with (hidden) is not shown: the attribute compartment ends with a line "..." instead,
 //     in the color of the first change set which marked one of the hidden attributes.
@@ -119,7 +121,7 @@ classDecl
 // stereotype. Like an info of an attribute, a stereotype is a list entry which can be added or removed as a whole,
 // change(removed, yellow), and keeps its text then; or its text can be changed, was(yellow, Old).
 classHead
-    : name nameChange=textChange? classId=ELEMENT_ID? classMark=changeMark? position? widthSpec? fillSpec? hideSpec?
+    : name nameChange=textChange? classId=ELEMENT_ID? classMark=changeMark? position? widthSpec? styleSpec? hideSpec?
       (STEREOTYPE stereotypeChange=textChange? stereotypeId=ELEMENT_ID? stereotypeMark=changeMark?)? taggedValues?
     ;
 
@@ -189,9 +191,16 @@ widthSpec
     : WIDTH EQUALS NUMBER
     ;
 
-// A background color of the class box of its own, as a string "#rrggbb", which the parser checks.
-fillSpec
-    : FILL EQUALS QUOTED_STRING
+// The look of the class box. A color is a string "#rrggbb", the font a word, the font size a number, which the parser
+// checks. Each entry may stand once, which the parser checks too.
+styleSpec
+    : STYLE LPAREN styleEntry (COMMA styleEntry)* RPAREN
+    ;
+
+styleEntry
+    : colorKey=(FILL | TEXTCOLOR | LINECOLOR) EQUALS QUOTED_STRING
+    | FONT EQUALS word
+    | FONTSIZE EQUALS NUMBER
     ;
 
 // The class box doesn't show its attribute compartment (the values of an enum). The attributes stay in the model.
@@ -330,7 +339,7 @@ word
     : NAME
     | HEX_ID
     | CLASSDIAGRAM | CLASS | INTERFACE | ENUM | ASSOCCLASS | ASSOCIATION | AGGREGATION | COMPOSITION | EXTENDS | IMPLEMENTS
-    | NOTE | ROUTE | ANCHOR | CHANGE | WAS | AT | WIDTH | FILL | HIDEATTRIBUTES | TOP | RIGHT | BOTTOM | LEFT | CENTER
+    | NOTE | ROUTE | ANCHOR | CHANGE | WAS | AT | WIDTH | STYLE | FILL | TEXTCOLOR | LINECOLOR | FONT | FONTSIZE | HIDEATTRIBUTES | TOP | RIGHT | BOTTOM | LEFT | CENTER
     ;
 
 // ============================================================
@@ -354,7 +363,12 @@ WAS          : 'was' ;
 CHANGE       : 'change' ;
 AT           : 'at' ;
 WIDTH        : 'width' ;
+STYLE        : 'style' ;
 FILL         : 'fill' ;
+TEXTCOLOR    : 'textcolor' ;
+LINECOLOR    : 'linecolor' ;
+FONT         : 'font' ;
+FONTSIZE     : 'fontsize' ;
 HIDEATTRIBUTES : 'hideattributes' ;
 TOP          : 'top' ;
 RIGHT        : 'right' ;

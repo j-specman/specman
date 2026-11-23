@@ -11,4 +11,7 @@ public interface TextMeasurer {
 
     /** The distance from the top of a line to its baseline. */
     double ascent();
+
+    /** @return a measurer for texts in the font, which measures like this one in every other respect */
+    TextMeasurer forFont(TextFont font);
 }

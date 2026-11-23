@@ -37,6 +37,11 @@ public final class DiagramRenderer {
     return changeColors.selectionColorOf(changeSet);
   }
 
+  /** @return the strong variant of the color of the change set as #rrggbb, for marks */
+  public String strongColorOf(String changeSet) {
+    return new ChangePalette(changeColors).strong(changeSet);
+  }
+
   /** @return the pale variant of the color of the change set as #rrggbb, for backgrounds */
   public String paleColorOf(String changeSet) {
     return new ChangePalette(changeColors).pale(changeSet);

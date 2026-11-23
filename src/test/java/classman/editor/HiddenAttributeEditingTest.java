@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +44,7 @@ class HiddenAttributeEditingTest {
 
   private JMenu submenu(String text) {
     ClassContextMenu menu = new ClassContextMenu(editing, editing.selectedClass(), null,
-      new EditorTexts(host.locale()), start -> (Color) null, () -> { });
+      new EditorTexts(host.locale()), start -> null, () -> { });
     return Arrays.stream(menu.getComponents()).filter(c -> c instanceof JMenu item && text.equals(item.getText()))
       .map(c -> (JMenu) c).findFirst().orElse(null);
   }

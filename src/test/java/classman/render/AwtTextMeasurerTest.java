@@ -1,5 +1,6 @@
 package classman.render;
 
+import classman.model.v001.FontFamily_V001;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +47,7 @@ class AwtTextMeasurerTest {
   /** The shipped font is found on the class path, and the SVG names it by the family which the renderers look up. */
   @Test
   void shippedFontLoaded() {
-    assertEquals(DiagramStyle.FONT_FAMILY, DiagramFonts.plain(11).getFamily());
-    assertEquals(DiagramStyle.FONT_FAMILY, DiagramFonts.bold(11).getFamily());
+    assertEquals(FontFamily_V001.ROBOTO.sourceName, DiagramFonts.plain(11).getFamily());
+    assertEquals(FontFamily_V001.ROBOTO.sourceName, DiagramFonts.bold(11).getFamily());
   }
 }

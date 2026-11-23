@@ -2,6 +2,7 @@ package classman.editor;
 
 import classman.render.DiagramRenderer;
 
+import java.util.List;
 import java.util.Locale;
 
 /** What the diagram editor needs from the application it runs in, and the way it reports its work. The editor is
@@ -26,6 +27,10 @@ public interface EditorHost {
 
   /** @return the name of the change set whose marks the editor writes, null if the host doesn't track changes */
   String trackedChangeSet();
+
+  /** @return the names of all change sets which the host knows, so that the editor can show what their colors look
+   * like */
+  List<String> changeSets();
 
   /** @return the language of the editor's texts */
   Locale locale();

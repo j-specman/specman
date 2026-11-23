@@ -3,7 +3,7 @@ package classman.editor;
 import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.render.DiagramFonts;
-import classman.render.DiagramStyle;
+import classman.render.TextFont;
 import classman.render.SceneTextArea;
 import classman.render.TextKind;
 
@@ -77,8 +77,10 @@ class TextEditor {
 
   private JTextComponent newField(SceneTextArea text, String content, Color trackedColor) {
     JTextComponent component = text.kind.wrapped ? wrappingArea(content) : textPane(content, text.kind.centered);
-    float size = (float) (DiagramStyle.FONT_SIZE * canvas.zoom());
-    component.setFont(text.kind.bold ? DiagramFonts.bold(size) : DiagramFonts.plain(size));
+    TextFont textFont = text.element instanceof ClassModel_V001 box ? TextFont.of(box.style) : TextFont.DEFAULT;
+    float size = (float) (textFont.size * canvas.zoom());
+    component.setFont(text.kind.bold ? DiagramFonts.bold(textFont.family, size)
+      : DiagramFonts.plain(textFont.family, size));
     component.setBorder(border(BORDER_COLOR));
     component.setBackground(trackedColor != null ? trackedColor : Color.WHITE);
     component.getDocument().addDocumentListener(new DocumentChangeAdapter(() -> {

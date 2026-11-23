@@ -1,12 +1,12 @@
 package classman.render;
 
+import classman.model.v001.FontFamily_V001;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import static classman.render.DiagramStyle.DASH_GAP;
 import static classman.render.DiagramStyle.DASH_LENGTH;
-import static classman.render.DiagramStyle.SVG_FONT_FAMILIES;
-import static classman.render.DiagramStyle.FONT_SIZE;
 import static classman.render.DiagramStyle.STROKE_WIDTH;
 
 /**
@@ -73,10 +73,22 @@ public class SceneSvgWriter {
     /** The text is anchored at its start, at the x where the layout puts its left end, whatever its anchor is. */
     private String text(SceneText text) {
         return "<text x=\"" + number(text.left()) + "\" y=\"" + number(text.y)
-            + "\" font-family=\"" + SVG_FONT_FAMILIES
-            + "\" font-size=\"" + FONT_SIZE + "\"" + (text.bold ? " font-weight=\"bold\"" : "")
+            + "\" font-family=\"" + fontFamilies(text.font.family)
+            + "\" font-size=\"" + text.font.size + "\"" + (text.bold ? " font-weight=\"bold\"" : "")
             + (text.fill == null ? "" : " fill=\"" + text.fill + "\"") + ">"
             + escaped(text.text) + "</text>";
+    }
+
+    /** The shipped font, then what a viewer without it falls back to. */
+    private String fontFamilies(FontFamily_V001 family) {
+        switch (family) {
+            case SITKA:
+                return family.sourceName + ", serif";
+            case COURIER:
+                return family.sourceName + ", monospace";
+            default:
+                return family.sourceName + ", Arial, sans-serif";
+        }
     }
 
     /** Only a stroke which isn't the usual one says its width. */

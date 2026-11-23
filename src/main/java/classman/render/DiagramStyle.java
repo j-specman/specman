@@ -42,15 +42,15 @@ public final class DiagramStyle {
     /** How far the loop of a relation from a class to itself reaches out of the class. */
     public static final double LOOP_SIZE = 20;
 
-    /** The shipped font. A viewer without it falls back to the following families. */
-    public static final String FONT_FAMILY = "Roboto";
-    public static final String SVG_FONT_FAMILIES = FONT_FAMILY + ", Arial, sans-serif";
+    /** The font size of the texts, unless a class asks for another. */
     public static final int FONT_SIZE = 12;
     /** The empty space around the scene in an SVG. */
     public static final double SVG_MARGIN = 10;
 
     public static final String CLASS_FILL = "#f2e9c4";
     public static final String NOTE_FILL = "#c0e8f9";
+    /** The color of a text which has none of its own. */
+    public static final String TEXT_COLOR = "#000000";
     public static final String STROKE = "#000000";
     public static final String WHITE = "#ffffff";
     public static final double STROKE_WIDTH = 1;

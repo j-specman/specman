@@ -125,7 +125,7 @@ class ClassContextMenuTest {
 
     List<JMenuItem> entries = entries();
 
-    assertEquals(List.of("Add stereotype", "Add tagged value", "Add attribute", "Hide / show attribute", "Background color...", "Standard color",
+    assertEquals(List.of("Add stereotype", "Add tagged value", "Add attribute", "Hide / show attribute", "Style...", "Standard style",
       "Show attributes", "Automatic width"),
       entries.stream().map(JMenuItem::getText).toList());
     assertTrue(entries.get(0).isEnabled());

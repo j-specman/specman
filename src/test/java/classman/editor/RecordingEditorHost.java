@@ -44,6 +44,11 @@ class RecordingEditorHost implements EditorHost {
   }
 
   @Override
+  public List<String> changeSets() {
+    return List.copyOf(changeColors.strongColors.keySet());
+  }
+
+  @Override
   public Locale locale() {
     return Locale.ENGLISH;
   }
