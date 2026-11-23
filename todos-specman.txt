@@ -1,6 +1,7 @@
-Release notes Specman 1.4.2
-- line color glitch in PDF export fixed
-- removal of empty text area by BACKSPACE
+Release notes Specman 1.x.x
+- Hier ein tragen, was sich gegenüber letztem Release geändert hat. Dient als Hilfe für Release Notes
+- Tabellen: Klick in den unteren Rand legt einen Absatz hinter der Tabelle an bzw. setzt den Cursor in den folgenden Text
+- Tabellen Operation Cursors re-designed
 
 Aus aktueller Anwendung
 - Hat man 5 Sekunden Autosave-Intervall eingestellt, dann wird es auffällig, dass ein abhängendes Leerzeichen wegbereinigt wird.
