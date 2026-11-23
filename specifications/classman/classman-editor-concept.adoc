@@ -583,6 +583,13 @@ An info which is removed with the element mark, which is what the editor writes,
 ### Marks in Small Diagrams
 When the diagram is shown small, marks must not disappear. Strokes of frames and bands keep a width of at least 6 pixels on the screen, strong highlights of texts a height and width of at least 8 pixels, whatever the zoom is (`DiagramStyle.MIN_VISIBLE_STROKE` and `MIN_VISIBLE_HIGHLIGHT`). A highlight which is made larger this way may reach over its neighbors.
 
+## Copy and Export
+
+Two buttons below the zoom buttons of the palette take the diagram out of the editor. Both give the diagram as it is drawn, without the marks of the editing (selection frames, handles, thicker selected line).
+
+* *Copy:* puts the diagram on the clipboard as a picture, white background, in the zoom which is set now: one unit of the diagram is as many pixels as the zoom says, so a picture at 150 % is one and a half times as large as at 100 %. The marks of changes have the minimum size which they have on the screen at this zoom. Ctrl+C is deliberately not bound, it stays free for copying elements later.
+* *Export:* asks for a file in a save dialog. The file type selector chooses the format: *PNG* (pixels, like Copy, lossless), *JPEG* (pixels, like Copy, compact, quality 0.92, no transparency), *SVG* (the same SVG which the PDF export places, independent of the zoom), and *Classman diagram* (`.cld`, the source of the diagram as it is). If the typed name has the extension of a format, that format wins, otherwise the extension of the selected format is appended. The dialog asks before it overwrites a file, and remembers directory and format until Specman ends.
+
 ## Undo and Redo
 * The history is Specman's. After each operation the editor reports the whole new source, and Specman makes one undo step of it. Reason: this is simple, and a growing grammar needs no change of the undo.
 * The editor counts the steps it has reported itself. Ctrl+Z undoes only those, so never reaches back to what happened before the window was opened; Ctrl+Y and Ctrl+Shift+Z redo them. After undo or redo the editor reads the source anew: nothing is selected.

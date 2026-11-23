@@ -119,6 +119,9 @@ public class DiagramEditing {
     return shown;
   }
 
+  /** @return the picture of the diagram as it is now, without any mark of the editing, for what leaves the editor */
+  public Scene plainScene() { return scene; }
+
   public boolean canUndo() { return undoableSteps > 0; }
 
   public boolean canRedo() { return redoableSteps > 0; }

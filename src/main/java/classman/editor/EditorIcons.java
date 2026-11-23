@@ -25,6 +25,8 @@ final class EditorIcons {
   static final String FORMAT_PAINTER = "images/svg/material/format_paint.svg";
   static final String ZOOM_IN = "images/svg/material/zoom_in.svg";
   static final String ZOOM_OUT = "images/svg/material/zoom_out.svg";
+  static final String COPY = "images/svg/material/photo_library.svg";
+  static final String EXPORT = "images/svg/specman/file-export.svg";
   static final String HIDE_TEXT = "images/svg/material/left_panel_close.svg";
   static final String SHOW_TEXT = "images/svg/material/left_panel_open.svg";
 

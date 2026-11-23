@@ -6,10 +6,12 @@ import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.io.ClassDiagramParseException;
+import classman.render.SceneBitmap;
 import classman.render.SceneTextArea;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
@@ -27,6 +29,8 @@ import java.awt.Point;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
+import java.io.File;
+import java.io.IOException;
 import java.util.function.BiConsumer;
 import java.util.function.UnaryOperator;
 import java.awt.geom.Rectangle2D;
@@ -64,7 +68,8 @@ public class ClassDiagramEditorWindow extends JDialog {
       screenPoint -> boxDropped(screenPoint, textEditor::startNewNote), this::relationToolToggled,
       this::relationTypeChosen, this::anchorToolToggled, this::assocClassToolToggled, this::dependencyToolToggled,
       this::formatPainterToggled,
-      this::dragSourcePressed, canvas::zoomIn, canvas::zoomOut);
+      this::dragSourcePressed, canvas::zoomIn, canvas::zoomOut, this::copyToClipboard,
+      this::exportToFile);
     getContentPane().add(palette, BorderLayout.WEST);
     getContentPane().add(scrollPane, BorderLayout.CENTER);
 
@@ -203,6 +208,34 @@ public class ClassDiagramEditorWindow extends JDialog {
   private void dragSourcePressed() {
     editing.disarmTool();
     showDiagram();
+  }
+
+  /** Asks for a file and writes the diagram to it in the zoom which is set now, without the marks of the editing. */
+  private void exportToFile() {
+    ExportFileChooser chooser = new ExportFileChooser(texts);
+    File file = chooser.choose(this);
+    if (file == null) {
+      return;
+    }
+    try {
+      new DiagramExporter(editing.plainScene(), canvas.zoom(), editing.source()).write(chooser.format(), file);
+    }
+    catch (IOException problem) {
+      JOptionPane.showMessageDialog(this, texts.get("export.failed") + "\n" + problem.getMessage(),
+        texts.get("export.title"), JOptionPane.ERROR_MESSAGE);
+    }
+  }
+
+  /** Puts the diagram on the clipboard as a picture in the zoom which is set now, without the marks of the editing. */
+  private void copyToClipboard() {
+    try {
+      Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
+        new ImageTransferable(SceneBitmap.of(editing.plainScene(), canvas.zoom())), null);
+    }
+    catch (IllegalStateException clipboardIsBusy) {
+      JOptionPane.showMessageDialog(this, texts.get("copy.failed"), texts.get("window.title"),
+        JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   private void anchorToolToggled() {
