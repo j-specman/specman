@@ -43,6 +43,10 @@ public class BuilderFactory {
     return simple().withText(text);
   }
 
+  public static SourceStepBuilder source() {
+    return new SourceStepBuilder();
+  }
+
   public static BreakStepBuilder breakStep() {
     return new BreakStepBuilder();
   }

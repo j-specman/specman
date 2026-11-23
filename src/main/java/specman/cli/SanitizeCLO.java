@@ -4,6 +4,7 @@ import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.io.ModelFileReader_V002;
 import specman.model.v002.io.ModelParseException;
 import specman.model.v002.io.ModelRenumberer_V002;
+import specman.model.v002.io.ParseOutcome;
 import specman.model.v002.io.ModelSerializer_V002;
 import specman.model.v002.io.ModelStepnumberRewriter_V002;
 import specman.model.v002.io.PlainTextSynchronizer_V002;
@@ -56,7 +57,8 @@ public class SanitizeCLO extends AbstractCLO {
   }
 
   private static SanitizeResult sanitize(File file) throws CLIException {
-    DiagramModel_V002 model = readModel(file);
+    ParseOutcome outcome = readModel(file);
+    DiagramModel_V002 model = outcome.model();
     SanitizeModelValidator.assertNoDuplicateIds(model);
     SanitizeModelValidator.assertValidMetaTags(model);
 
@@ -67,14 +69,15 @@ public class SanitizeCLO extends AbstractCLO {
     result.stepNumberChanges = ModelRenumberer_V002.buildStepNumberChanges(
       model.mainSequence, renumbering.savedNumbers, renumbering.computedNumbers);
     result.plainTextUpdates = PlainTextSynchronizer_V002.updateAllPlainTexts(model);
+    SanitizeChangeTrackingValidator.assertValidChangeTracking(outcome);
 
     writeIfChanged(file, model, result);
     return result;
   }
 
-  private static DiagramModel_V002 readModel(File file) throws CLIException {
+  private static ParseOutcome readModel(File file) throws CLIException {
     try {
-      return ModelFileReader_V002.read(file);
+      return ModelFileReader_V002.readWithDiagnostics(file);
     }
     catch (IOException | ModelParseException e) {
       throw error(e.getMessage());
