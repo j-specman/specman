@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.ChangeSet;
+import specman.Specman;
 import specman.editarea.markups.MarkupType;
 import specman.graphics.ReadWriteColor;
 import specman.model.v002.AbstractEditAreaModel_V002;
@@ -57,9 +58,21 @@ import java.util.regex.Pattern;
 /** Parses a SpecmanModel_V002 text file into a {@link DiagramModel_V002}. */
 public class ModelParser_V002 {
 
+    private ModelSourcePositions positions = new ModelSourcePositions();
+    private List<String> diagnostics = new ArrayList<>();
+
     /** Parses SpecmanModel_V002 text content and returns the diagram model.
      *  @throws ModelParseException if the content contains syntax errors. */
     public DiagramModel_V002 parse(String content) throws ModelParseException {
+        return parseWithDiagnostics(content).model();
+    }
+
+    /** Like {@link #parse(String)}, but also reports where the elements of the model have been written and which
+     *  problems the model itself doesn't show any longer, e.g. references to change sets which don't exist.
+     *  @throws ModelParseException if the content contains syntax errors. */
+    public ParseOutcome parseWithDiagnostics(String content) throws ModelParseException {
+        positions = new ModelSourcePositions();
+        diagnostics = new ArrayList<>();
         String name = extractName(content);
 
         SpecmanModel_V002Lexer lexer = new SpecmanModel_V002Lexer(CharStreams.fromString(content));
@@ -81,7 +94,8 @@ public class ModelParser_V002 {
         if (!errors.isEmpty()) {
             throw new ModelParseException(errors.get(0));
         }
-        return buildDiagram(ctx, name);
+        DiagramModel_V002 model = buildDiagram(ctx, name);
+        return new ParseOutcome(model, positions, diagnostics);
     }
 
     /** Parses a clipboard fragment (one or more steps without diagram envelope).
@@ -440,6 +454,13 @@ public class ModelParser_V002 {
 
     private AbstractStepModel_V002 buildStep(SpecmanModel_V002Parser.StepContext ctx,
                                               Map<String, String> breakStepIds) {
+        AbstractStepModel_V002 step = buildStepOfType(ctx, breakStepIds);
+        positions.put(step, ctx.getStart());
+        return step;
+    }
+
+    private AbstractStepModel_V002 buildStepOfType(SpecmanModel_V002Parser.StepContext ctx,
+                                                   Map<String, String> breakStepIds) {
         if (ctx.simpleStep() != null)     { return buildSimpleStep(ctx.simpleStep()); }
         if (ctx.breakStep() != null)      { return buildBreakStep(ctx.breakStep(), breakStepIds); }
         if (ctx.sourceStep() != null)     { return buildSourceStep(ctx.sourceStep()); }
@@ -487,21 +508,13 @@ public class ModelParser_V002 {
                                                             EditorContentModel_V002 content,
                                                             SpecmanModel_V002Parser.ChangeParamContext cp,
                                                             List<MetaTagModel_V002> tags) {
-        String changesetName = cp.ID().getText();
-        ChangeSet cs = ChangeSet.fromName(changesetName);
-        if (cs == null) {
-            cs = ChangeSet.changeset();
-        }
+        ChangeSet cs = resolveChangeSet(cp.ID(), "change=(source, ...)");
         return new SourceStepModel_V002(id, stepNum, content, null,
             new ChangeInfo(Aenderungsart.Quellschritt, cs), null, RoundedBorderDecorationStyle.None, tags);
     }
 
     private SourceStepModel_V002 buildSourceStep(SpecmanModel_V002Parser.SourceStepContext ctx) {
-        String changesetName = ctx.ID().getText();
-        ChangeSet cs = ChangeSet.fromName(changesetName);
-        if (cs == null) {
-            cs = ChangeSet.changeset();
-        }
+        ChangeSet cs = resolveChangeSet(ctx.ID(), "source(...)");
         String targetStepId = ctx.STEP_ID() != null ? ctx.STEP_ID().getText() : null;
         return new SourceStepModel_V002(
             ctx.stepId().getText(),
@@ -751,7 +764,9 @@ public class ModelParser_V002 {
             int to = Integer.parseInt(m.INT(1).getText());
             MarkupType type = MarkupType.valueOf(m.markupType().getText());
             String changeset = m.ID() != null ? m.ID().getText() : null;
-            result.add(new Markup_V002(from, to, type, changeset));
+            Markup_V002 markup = new Markup_V002(from, to, type, changeset);
+            positions.put(markup, m.getStart());
+            result.add(markup);
         }
         return result;
     }
@@ -803,6 +818,7 @@ public class ModelParser_V002 {
             if (backup == null) {
                 return new PlantUmlImageEditAreaModel_V002(source, null, null, scale, changeInfo);
             }
+            resolveChangeSet(backup.ID(), "backup=(...)");
             return new PlantUmlImageEditAreaModel_V002(source, stripBackticks(backup.BACKTICK_STRING().getText()),
                 backup.ID().getText(), scale, changeInfo);
         }
@@ -826,7 +842,6 @@ public class ModelParser_V002 {
             return ChangeInfo.untracked();
         }
         String type = ctx.changeType().getText();
-        String changesetName = ctx.ID().getText();
         Aenderungsart art = switch (type) {
             case "added"   -> Aenderungsart.Hinzugefuegt;
             case "removed" -> Aenderungsart.Geloescht;
@@ -837,11 +852,21 @@ public class ModelParser_V002 {
         if (art == Aenderungsart.Untracked) {
             return ChangeInfo.untracked();
         }
-        ChangeSet cs = ChangeSet.fromName(changesetName);
-        if (cs == null) {
-            cs = ChangeSet.changeset();
-        }
+        ChangeSet cs = resolveChangeSet(ctx.ID(), "change=(" + type + ", ...)");
         return new ChangeInfo(art, cs);
+    }
+
+    /** @return the change set of the specified name. If there is none of that name, the problem is noted as diagnostic
+     *  and the change set being current in the editor is returned, or the default if there is no editor, as it is the
+     *  case in the command line tools. Loading a file in the editor therefore tolerates the unknown name, as it always did. */
+    private ChangeSet resolveChangeSet(TerminalNode name, String usedIn) {
+        ChangeSet changeSet = ChangeSet.fromName(name.getText());
+        if (changeSet != null) {
+            return changeSet;
+        }
+        diagnostics.add(ModelSourcePositions.describe(name.getSymbol()) + " Unknown changeset '" + name.getText()
+            + "' in " + usedIn + ". Known changesets: " + String.join(", ", ChangeSet.ALL.keySet()));
+        return Specman.editor() != null ? ChangeSet.changeset() : ChangeSet.DEFAULT;
     }
 
     private String buildSourceStepId(SpecmanModel_V002Parser.ChangeParamContext ctx) {

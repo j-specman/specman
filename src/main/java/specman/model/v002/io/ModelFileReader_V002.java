@@ -19,15 +19,23 @@ public class ModelFileReader_V002 {
   /** @throws IOException if the file can't be read or doesn't hold a V2 model
    * @throws ModelParseException if the text format of the file is broken */
   public static DiagramModel_V002 read(File file) throws IOException, ModelParseException {
+    return readWithDiagnostics(file).model();
+  }
+
+  /** Like {@link #read(File)}, but also tells where the model's elements are in the file and what else is wrong
+   * with it beyond the model, see {@link ParseOutcome}.
+   * @throws IOException if the file can't be read or doesn't hold a V2 model
+   * @throws ModelParseException if the text format of the file is broken */
+  public static ParseOutcome readWithDiagnostics(File file) throws IOException, ModelParseException {
     byte[] data = Files.readAllBytes(file.toPath());
     if (isTextFormat(data)) {
-      return new ModelParser_V002().parse(new String(data, StandardCharsets.UTF_8));
+      return new ModelParser_V002().parseWithDiagnostics(new String(data, StandardCharsets.UTF_8));
     }
     ModelEnvelope envelope = buildMapper().readValue(data, ModelEnvelope.class);
     if (!(envelope.model instanceof DiagramModel_V002)) {
       throw new IOException("Unsupported model type — only the V2 format can be read headlessly");
     }
-    return (DiagramModel_V002) envelope.model;
+    return ParseOutcome.withoutPositions((DiagramModel_V002) envelope.model);
   }
 
   private static ObjectMapper buildMapper() {
