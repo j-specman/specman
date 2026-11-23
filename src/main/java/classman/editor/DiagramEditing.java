@@ -15,6 +15,7 @@ import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.DependencyRelationModel_V001;
 import classman.model.v001.ElementStyleModel_V001;
+import classman.model.v001.EndType_V001;
 import classman.model.v001.ExtendsRelationModel_V001;
 import classman.model.v001.ImplementsRelationModel_V001;
 import classman.model.v001.NoteModel_V001;
@@ -23,6 +24,7 @@ import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.TaggedValueModel_V001;
 import classman.model.v001.change.ElementTextChanger_V001;
+import classman.model.v001.change.RelationEndTypeChanger_V001;
 import classman.model.v001.change.ElementDeleter_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
@@ -63,6 +65,7 @@ public class DiagramEditing {
   private final ClassDiagramSerializer_V001 serializer = new ClassDiagramSerializer_V001();
   private final ElementDeleter_V001 deleter = new ElementDeleter_V001();
   private final ElementTextChanger_V001 textChanger = new ElementTextChanger_V001();
+  private final RelationEndTypeChanger_V001 endTypeChanger = new RelationEndTypeChanger_V001();
   private final RouteEditing routeEditing = new RouteEditing();
   private final ElementIds ids = new ElementIds(new SecureRandom());
   private ClassDiagramModel_V001 model;
@@ -504,29 +507,49 @@ public class DiagramEditing {
     return handle == selectedHandles().size() - 1 ? RelationEnd_V001.TO : null;
   }
 
-  /** @return true if the selected relation has an arrowhead at the end */
-  public boolean hasArrowAt(RelationEnd_V001 end) {
-    return selected instanceof AssociationRelationModel_V001 association
-      && (end == RelationEnd_V001.FROM ? association.fromArrow : association.toArrow);
+  /** @return true if the end handle menu of the selected relation offers the types of its ends: for an association,
+   * aggregation or composition, but not if it runs to or from an enum, which doesn't know who uses it, so it is
+   * only ever the target of a directed association and nothing can be chosen */
+  public boolean offersEndTypes() {
+    return selected instanceof AssociationRelationModel_V001 relation && !involvesEnum(relation);
   }
 
-  /** @return whether the user may switch the arrowhead of the selected relation at the end. The relation must be one
-   * which can have an arrowhead there (an association at both ends, an aggregation or composition at the target), and
-   * must not run to or from an enum, which doesn't know who uses it and so is only ever the target of a directed
-   * association. A removed relation can't be switched. The switching is no change which a change set tracks, so it is
+  /** @return what the selected relation has at its end, see {@link #offersEndTypes} */
+  public EndType_V001 endTypeAt(RelationEnd_V001 end) {
+    return endTypeChanger.typeAt((AssociationRelationModel_V001) selected, end);
+  }
+
+  /** @return whether the user may give the end of the selected relation the type. Not the type which it has already,
+   * and not a diamond if the other end has one: a relation has one diamond at most, so the user takes it away at the
+   * other end first. A removed relation can't be changed. The change is no change which a change set tracks, so it is
    * possible with and without change tracking, and marks nothing. */
-  public Can canSwitchArrowAt(RelationEnd_V001 end) {
-    if (!(selected instanceof AssociationRelationModel_V001 relation)) {
+  public Can canSetEndType(RelationEnd_V001 end, EndType_V001 type) {
+    if (!offersEndTypes()) {
       return Can.NOT;
     }
-    if (!relation.type.canHaveArrowAt(end)) {
-      return Can.not(texts.get("reason.arrow.notpossible"));
-    }
-    if (involvesEnum(relation)) {
-      return Can.not(texts.get("reason.arrow.enum"));
+    AssociationRelationModel_V001 relation = (AssociationRelationModel_V001) selected;
+    EndType_V001 current = endTypeChanger.typeAt(relation, end);
+    if (current == type) {
+      return Can.NOT;
     }
     boolean isRemoved = relation.change != null && relation.change.type == ChangeType_V001.REMOVED;
-    return Can.IF(!isRemoved, texts.get("reason.relation.removed"));
+    if (isRemoved) {
+      return Can.not(texts.get("reason.relation.removed"));
+    }
+    RelationEnd_V001 otherEnd = end == RelationEnd_V001.FROM ? RelationEnd_V001.TO : RelationEnd_V001.FROM;
+    if (type.isDiamond() && endTypeChanger.typeAt(relation, otherEnd).isDiamond()) {
+      return Can.not(texts.get("reason.endtype.otherdiamond"));
+    }
+    return Can.YES;
+  }
+
+  /** Gives the end of the selected relation the type. One operation. Nothing happens if the user may not. */
+  public void setEndType(RelationEnd_V001 end, EndType_V001 type) {
+    if (!canSetEndType(end, type).can()) {
+      return;
+    }
+    endTypeChanger.set(model, (AssociationRelationModel_V001) selected, end, type);
+    publish();
   }
 
   private boolean involvesEnum(AbstractRelationModel_V001 relation) {
@@ -537,22 +560,6 @@ public class DiagramEditing {
       }
     }
     return false;
-  }
-
-  /** Switches the arrowhead of the selected relation at the end on if it is off and off if it is on. Not marked as a
-   * change, see {@link #canSwitchArrowAt}. One operation. Nothing happens if the user may not switch it. */
-  public void toggleArrowAt(RelationEnd_V001 end) {
-    if (!canSwitchArrowAt(end).can()) {
-      return;
-    }
-    AssociationRelationModel_V001 association = (AssociationRelationModel_V001) selected;
-    if (end == RelationEnd_V001.FROM) {
-      association.fromArrow = !association.fromArrow;
-    }
-    else {
-      association.toArrow = !association.toArrow;
-    }
-    publish();
   }
 
   /** @return whether the end of the selected relation or anchor line is fixed at a point of the border of its box (a

@@ -93,7 +93,7 @@ class CanReasonTest {
     EditorTexts german = new EditorTexts(java.util.Locale.GERMAN);
     for (String key : new String[] {"reason.class.removed", "reason.stereotype.exists", "reason.interface.noattributes",
       "reason.attributes.hidden", "reason.attributes.marked", "reason.note.removed", "reason.width.automatic",
-      "reason.arrow.notpossible", "reason.arrow.enum", "reason.relation.removed", "reason.center.already"}) {
+      "reason.endtype.otherdiamond", "reason.relation.removed", "reason.center.already"}) {
       assertFalse(german.get(key).isBlank(), key);
       assertFalse(german.get(key).equals(english.get(key)), key);
     }

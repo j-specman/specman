@@ -5,7 +5,7 @@ import java.util.Set;
 /** Base of the relations between two classes, or for a dependency between classes and attributes. The ends are
  * referred to by their IDs. */
 public abstract class AbstractRelationModel_V001 extends AbstractDiagramElementModel_V001 {
-    public final RelationType_V001 type;
+    public RelationType_V001 type;
     /** The ID of the source class: the one with the diamond or the subclass. For a dependency it may be an attribute
      * too. The editor changes it when the user hangs the start of the relation onto another class, outside of change
      * tracking. */

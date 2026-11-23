@@ -115,7 +115,7 @@ class NoteAndRelationAppearanceTest {
         entries.add(item.getText());
       }
     }
-    assertEquals(List.of("Navigable", "Link to center", "Style..."), entries);
+    assertEquals(List.of("Type", "Link to center", "Style..."), entries);
   }
 
   /** A right click on the line of a relation, away from its handles, opens no menu: the relation has none. */
