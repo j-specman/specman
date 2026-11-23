@@ -102,7 +102,8 @@ final class SanitizeModelValidator {
     return stepLabel + ": tag '" + tag.configName + "' " + problem;
   }
 
-  private static String describe(AbstractStepModel_V002 step) {
+  /** @return e.g. "Step 1.2 (a1b2c3d4)" */
+  static String describe(AbstractStepModel_V002 step) {
     return "Step " + displayedStepNumber(step) + " (" + step.id + ")";
   }
 

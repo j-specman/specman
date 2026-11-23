@@ -646,5 +646,13 @@ Spell out the procedure of the round trip as well, because an agent doesn't find
 TIP: For small edits like rewording a step, switch off the extended thinking mode of the agent if it has one. The answer comes much faster, and so do the changes in your window.
 
 ### Change mode and agents
-The format can express change marks, so an agent can record its edits as changes, just like you would in change mode, see <<changetracking,Change Tracking>>. It often works, but it requires some care: the agent has to write the marks itself, and the sanitizer doesn't check them. If the result looks odd, have a look at the marks in the diagram and ask the agent to correct them, before accepting or rejecting anything.
+The format can express change marks, so an agent can record its edits as changes, just like you would in change mode, see <<changetracking,Change Tracking>>. The agent has to write the marks itself, and the sanitizer checks them, because a wrong mark is hard to spot in the diagram. It reports each problem as `ERROR` with line and column, and does not change the file then, so the agent can fix it and run the sanitizer again. These rules are checked:
+
+* A markup `(from,to,...)` of a text marks the characters from `from` to `to` _including_ `to`, counted in the plain text, which the sanitizer has just regenerated. So `0 <= from <= to < length of the plain text`, and the markups of a text are in ascending order without overlapping. The error message includes the plain text with its length, because the agent needs it to find the right offsets.
+* A markup of a change names a change set which exists. The change sets are yellow, lilac, blue, orange and pink.
+* Every `change=(..., <changeset>)`, `source(..., <changeset>)` and `backup=(<changeset>, ...)` names a change set which exists.
+* The change type of `change=(...)` is one of `added`, `removed`, `source` and `target`.
+* A moved step is a pair: the target step `change=(target, <changeset>, sourceStep=<id>)` refers to the ID of its source step, and the `source(...)` step refers back to the target step with `sourceStep=<id>`. Both steps exist and have the same change set. `sourceStep=` is not allowed anywhere else.
+
+If the sanitizer has nothing to complain about, it is still worth a look at the marks in the diagram before accepting or rejecting anything, because the sanitizer can check that the marks are valid, but not that they mean what you asked for.
 

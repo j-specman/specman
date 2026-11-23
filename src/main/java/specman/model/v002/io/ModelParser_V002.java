@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import specman.Aenderungsart;
 import specman.ChangeInfo;
 import specman.ChangeSet;
+import specman.Specman;
 import specman.editarea.markups.MarkupType;
 import specman.graphics.ReadWriteColor;
 import specman.model.v002.AbstractEditAreaModel_V002;
@@ -828,7 +829,6 @@ public class ModelParser_V002 {
             return ChangeInfo.untracked();
         }
         String type = ctx.changeType().getText();
-        String changesetName = ctx.ID().getText();
         Aenderungsart art = switch (type) {
             case "added"   -> Aenderungsart.Hinzugefuegt;
             case "removed" -> Aenderungsart.Geloescht;
@@ -839,11 +839,21 @@ public class ModelParser_V002 {
         if (art == Aenderungsart.Untracked) {
             return ChangeInfo.untracked();
         }
-        ChangeSet cs = ChangeSet.fromName(changesetName);
-        if (cs == null) {
-            cs = ChangeSet.changeset();
-        }
+        ChangeSet cs = resolveChangeSet(ctx.ID(), "change=(" + type + ", ...)");
         return new ChangeInfo(art, cs);
+    }
+
+    /** @return the change set of the specified name. If there is none of that name, the problem is noted as diagnostic
+     *  and the change set being current in the editor is returned, or the default if there is no editor, as it is the
+     *  case in the command line tools. Loading a file in the editor therefore tolerates the unknown name, as it always did. */
+    private ChangeSet resolveChangeSet(TerminalNode name, String usedIn) {
+        ChangeSet changeSet = ChangeSet.fromName(name.getText());
+        if (changeSet != null) {
+            return changeSet;
+        }
+        diagnostics.add(ModelSourcePositions.describe(name.getSymbol()) + " Unknown changeset '" + name.getText()
+            + "' in " + usedIn + ". Known changesets: " + String.join(", ", ChangeSet.ALL.keySet()));
+        return Specman.editor() != null ? ChangeSet.changeset() : ChangeSet.DEFAULT;
     }
 
     private String buildSourceStepId(SpecmanModel_V002Parser.ChangeParamContext ctx) {
