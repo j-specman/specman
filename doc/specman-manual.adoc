@@ -601,6 +601,8 @@ There are three possible results:
 
 If the sanitizer changed the file, Specman loads it a second time, and the diagram may update twice.
 
+Specman CLI knows two more operations besides `--sanitize`: `--resolve-link` (see above) and `--version`. `specman --version` prints the version number of the installed Specman, e.g. `1.4.1`, in one line and exits with code 0, without opening a window. This is more reliable than deriving the version from the name of the jar file. An unknown option such as `specman --foo` is an error: Specman prints `ERROR` and the valid options to the error stream, exits with code 1, and does not start the window.
+
 ### Rules of the game
 * The last writer wins. There is no merging. While the agent is working, you had better not type in the diagram, otherwise your text is replaced when the agent's changes arrive.
 * Auto-save does not overwrite a working copy which was changed from outside and has not been loaded yet. That's what makes it safe if the agent writes at the very moment auto-save is due.
