@@ -1,5 +1,7 @@
 package classman.model.v001;
 
+import java.util.Set;
+
 /** Base of the relations between two classes. The classes are referred to by their IDs. */
 public abstract class AbstractRelationModel_V001 extends AbstractDiagramElementModel_V001 {
     public final RelationType_V001 type;
@@ -17,6 +19,11 @@ public abstract class AbstractRelationModel_V001 extends AbstractDiagramElementM
     public TextPlaceModel_V001 labelPlace;
     /** Null if the relation is a straight line from center to center. */
     public RouteModel_V001 route;
+
+    @Override
+    public Set<StyleProperty_V001> styleProperties() {
+        return StyleProperty_V001.WITHOUT_FILL;
+    }
 
     protected AbstractRelationModel_V001(RelationType_V001 type, String fromId, String toId) {
         this.type = type;

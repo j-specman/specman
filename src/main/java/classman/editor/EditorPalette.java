@@ -25,7 +25,8 @@ import java.util.function.Consumer;
 /** The vertical tool bar at the left edge of the editor window. Buttons show an icon and a text, or an icon only,
  * which the button at the bottom switches, and which is remembered while the application runs. The most important element comes first, at the top. A class or a note is
  * dragged from its button onto the diagram, the button of a tool for relations is switched on and then used on the
- * diagram. The relation buttons have variants, see {@link VariantButton}. */
+ * diagram. The relation buttons have variants, see {@link VariantButton}. Below a separator come the buttons
+ * which work on what is there already, like the format painter, so that more of them fit in later. */
 class EditorPalette extends JToolBar {
   private static final float TEXT_SCALE = 1.2f;
   private static final int ICON_TEXT_GAP = 8;
@@ -38,6 +39,7 @@ class EditorPalette extends JToolBar {
   private final List<VariantButton<RelationType_V001>> relationButtons = new ArrayList<>();
   private final JToggleButton anchorToolButton = new JToggleButton();
   private final JToggleButton assocClassToolButton = new JToggleButton();
+  private final JToggleButton formatPainterButton = new JToggleButton();
   private final JButton toggleButton = new JButton();
   private final Map<AbstractButton, String> labels = new HashMap<>();
   private final Map<AbstractButton, String> tooltips = new HashMap<>();
@@ -49,10 +51,11 @@ class EditorPalette extends JToolBar {
    * @param relationToolToggled is run with the type of the relation when the button for drawing relations is pressed
    * @param relationTypeChosen is run with the type of the relation which the user chose in the menu of a button
    * @param anchorToolToggled is run when the button for drawing the anchor of a note is pressed
-   * @param assocClassToolToggled is run when the button for drawing the link of an association class is pressed */
+   * @param assocClassToolToggled is run when the button for drawing the link of an association class is pressed
+   * @param formatPainterToggled is run when the button for the format painter is pressed */
   EditorPalette(EditorTexts texts, BiConsumer<ClassKind_V001, Point> classDropped, Consumer<Point> noteDropped,
                 Consumer<RelationType_V001> relationToolToggled, Consumer<RelationType_V001> relationTypeChosen,
-                Runnable anchorToolToggled, Runnable assocClassToolToggled) {
+                Runnable anchorToolToggled, Runnable assocClassToolToggled, Runnable formatPainterToggled) {
     super(JToolBar.VERTICAL);
     this.texts = texts;
     this.showText = showTextInNewPalettes;
@@ -73,6 +76,9 @@ class EditorPalette extends JToolBar {
       new PaletteVariant<>("implements", RelationType_V001.IMPLEMENTS, EditorIcons.IMPLEMENTS));
     addToolButton("anchor", EditorIcons.ANCHOR, anchorToolButton, anchorToolToggled);
     addToolButton("assocclass", EditorIcons.ASSOC_CLASS, assocClassToolButton, assocClassToolToggled);
+    addSeparator();
+    addToolButton("formatpainter", EditorIcons.FORMAT_PAINTER, formatPainterButton, formatPainterToggled);
+    formatPainterButton.setEnabled(false);
 
     add(Box.createVerticalGlue());
     addSeparator();
@@ -138,9 +144,10 @@ class EditorPalette extends JToolBar {
   }
 
   /** Shows which tool is armed, if one is, as a pressed button. The button of a relation shows the type which is armed.
+   * The format painter can be pressed while it is armed, or while an element which it can pick up is selected.
    * @param armedRelationType null if the tool for relations isn't armed */
   void showToolsArmed(RelationType_V001 armedRelationType, boolean isAnchorToolArmed,
-                      boolean isAssocClassToolArmed) {
+                      boolean isAssocClassToolArmed, boolean isFormatPainterArmed, boolean canPickUpFormat) {
     for (VariantButton<RelationType_V001> button : relationButtons) {
       boolean isArmed = armedRelationType != null && button.offers(armedRelationType);
       if (isArmed) {
@@ -150,6 +157,8 @@ class EditorPalette extends JToolBar {
     }
     anchorToolButton.setSelected(isAnchorToolArmed);
     assocClassToolButton.setSelected(isAssocClassToolArmed);
+    formatPainterButton.setSelected(isFormatPainterArmed);
+    formatPainterButton.setEnabled(isFormatPainterArmed || canPickUpFormat);
   }
 
   private void toggleShowText() {

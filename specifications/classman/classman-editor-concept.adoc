@@ -77,6 +77,7 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Width of a class or note by dragging its side |built |At the left and right side of the box, shown by the cursor, see <<Width of a Class Box>> and <<Width of a Note>>.
 |Style of a class (colors, font, font size), hide the attribute compartment |built |Context menu of the class, see <<Style and Hidden Attributes of a Class>>.
 |Style of a note or a relation |built |Context menu of the note, menu of the end handles of the relation, see <<Style of Notes and Relations>>.
+|Give the style of one element to another (format painter) |built |Button *Painter* in the palette, see <<Format Painter>>.
 |Hide single attributes, show them again |built |Context menu of the class, see <<Hiding Single Attributes>>.
 |Automatic width again |built |Context menu of the class or note, see <<The Context Menu of a Class>> and <<Width of a Note>>.
 |===
@@ -379,6 +380,15 @@ Built, 2026-11-23. The same style as for classes, with the same dialog: one abst
 * *Menus:* the note menu has *Style...* above *Automatic width*. For a relation, *Style...* is in the menu of the handles at its ends (it is selected, so its handles show), not in a menu of its own. Both open the dialog for their kind, the style is one operation without a mark, and an element which a change set has removed can't be styled (the entry says why).
 * *Previews:* class: one class with three marked attributes; note: one note; relation: two classes A and B with an association with an arrowhead, the label `label` and the multiplicities 1 and 0..*, which a change set marks as added (thick line and marked label, which is exactly what a real diagram shows). All texts of the previews are language neutral, so they need no entries in the bundles.
 * *One style field:* `style` is a field of every diagram element (`AbstractDiagramElementModel_V001`), standard for the kinds which have no style yet. The parser, the serializer and the layouters take what the kind has.
+
+## Format Painter
+Built, 2026-11-23, like the format painter of PowerPoint and Visual Paradigm. The user selects a class, note or relation and presses the button *Painter* of the palette, which can only be pressed while such an element is selected. The tool is armed then (the button is pressed, the cursor is a hand) and has picked up the style of the selected element. The next press on a class, a note, a relation line or the label of a relation gives that element the style, selects it and puts the tool away. Esc or the button again puts it away without painting.
+
+* *Which parts are given:* the parts both elements have (`StyleProperty_V001`): between classes and notes all five, from or to a relation the four without the fill, which is neither taken nor given. A part which is standard in the picked up element takes a style back from the target, as in PowerPoint. Width and hidden attributes are no format and stay as they are.
+* *One operation:* the painting is `setStyle` of the target, so one undo step, no change mark (the style is no change), and none at all if the target looks like that already. A target which a change set has removed can't be painted: nothing happens and the tool stays armed, as it does when the press is on nothing.
+* *Only once:* the tool is put away after one target. Staying armed for several targets (a double click on the button in PowerPoint) is not built; it would go well with the rubber band selection, which could paint several elements at once.
+* *Anchor lines* can't be picked up or painted, they have no style yet.
+* *In the code:* the tool is `Tool.FORMAT_PAINTER`, what it has picked up is kept by `FormatPainter`, the target at a point is found by `DiagramEditing.paintFormatAt`, the press is routed in `PointerControl.pressed`.
 
 ## Attributes
 An attribute is edited as a whole line, in the form in which the diagram shows it: `+name : type [info, info]`. The user types it as text, the editor splits it into its parts when the line is committed. Reason: it is one gesture for everything, including adding a type or an info which the attribute doesn't have yet, and it is how UML tools are used. The alternative, a field for each part, needs many small click areas in one short line, and has none for parts which are missing.

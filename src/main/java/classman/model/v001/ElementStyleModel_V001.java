@@ -2,6 +2,7 @@ package classman.model.v001;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /** What a class, note or relation looks like beyond its content. Every part which is null has the standard look of
  * the element. Which parts an element can have is told by {@link StyleProperty_V001}. */
@@ -32,6 +33,27 @@ public class ElementStyleModel_V001 {
         copy.lineColor = lineColor;
         copy.font = font;
         copy.fontSize = fontSize;
+        return copy;
+    }
+
+    /** @return a copy of this style in which the given parts are those of the source style */
+    public ElementStyleModel_V001 with(ElementStyleModel_V001 source, Set<StyleProperty_V001> properties) {
+        ElementStyleModel_V001 copy = copy();
+        if (properties.contains(StyleProperty_V001.FILL)) {
+            copy.fill = source.fill;
+        }
+        if (properties.contains(StyleProperty_V001.TEXT_COLOR)) {
+            copy.textColor = source.textColor;
+        }
+        if (properties.contains(StyleProperty_V001.LINE_COLOR)) {
+            copy.lineColor = source.lineColor;
+        }
+        if (properties.contains(StyleProperty_V001.FONT)) {
+            copy.font = source.font;
+        }
+        if (properties.contains(StyleProperty_V001.FONT_SIZE)) {
+            copy.fontSize = source.fontSize;
+        }
         return copy;
     }
 

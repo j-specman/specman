@@ -74,6 +74,7 @@ public class DiagramEditing {
   private Drag drag;
   private ConnectionDrawing drawing;
   private Tool armedTool = Tool.NONE;
+  private final FormatPainter formatPainter = new FormatPainter();
   private RelationType_V001 armedRelationType = RelationType_V001.ASSOCIATION;
   private int undoableSteps;
   private int redoableSteps;
@@ -1005,6 +1006,53 @@ public class DiagramEditing {
   public boolean isAnchorToolArmed() { return armedTool == Tool.ANCHOR; }
 
   public boolean isAssocClassToolArmed() { return armedTool == Tool.ASSOC_CLASS; }
+
+  public boolean isFormatPainterArmed() { return armedTool == Tool.FORMAT_PAINTER; }
+
+  /** @return true if a class, note or relation is selected, whose style the format painter can pick up */
+  public boolean canPickUpFormat() {
+    return selected != null && !selected.styleProperties().isEmpty();
+  }
+
+  /** Arms the format painter with the style of the selected element, or disarms it if it is armed. Nothing happens if
+   * no element which has a style is selected. */
+  public void toggleFormatPainter() {
+    if (armedTool == Tool.FORMAT_PAINTER) {
+      disarmTool();
+    }
+    else if (canPickUpFormat()) {
+      formatPainter.pickUp(selected);
+      armedTool = Tool.FORMAT_PAINTER;
+      drawing = null;
+    }
+  }
+
+  /** Gives the class, note or relation at the point, or the label of the relation, the style which the format painter
+   * has picked up, as far as it has the same parts, and leaves the tool. The target is selected. One operation, which
+   * is none if the target looks like that already. Nothing happens, and the tool stays armed so that the user can try
+   * again, if there is no such element at the point or a change set has removed it. */
+  public void paintFormatAt(Point2D at, double tolerance) {
+    AbstractDiagramElementModel_V001 target = formatTargetAt(at, tolerance);
+    if (target == null || !canChangeStyle(target).can()) {
+      return;
+    }
+    setStyle(target, formatPainter.styleFor(target));
+    selected = target;
+    armedTool = Tool.NONE;
+  }
+
+  private AbstractDiagramElementModel_V001 formatTargetAt(Point2D at, double tolerance) {
+    SceneElementArea box = scene.elementAreaAt(at);
+    if (box != null) {
+      return box.element;
+    }
+    SceneTextArea text = scene.textAreaAt(at);
+    if (text != null && text.element instanceof AbstractRelationModel_V001 relation) {
+      return relation;
+    }
+    SceneConnectionLine line = scene.connectionLineAt(at, tolerance);
+    return line instanceof SceneRelationLine relationLine ? relationLine.relation : null;
+  }
 
   /** @return true if a tool of the palette is armed, which takes the presses on the diagram for itself */
   public boolean isToolArmed() { return armedTool != Tool.NONE; }

@@ -40,6 +40,9 @@ class PointerControl implements PointerListener {
    * moves the handle. */
   @Override
   public Cursor cursorAt(Point2D at) {
+    if (editing.isFormatPainterArmed()) {
+      return Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+    }
     if (editing.isToolArmed()) {
       return Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
     }
@@ -54,10 +57,16 @@ class PointerControl implements PointerListener {
   /** A press selects what is below it. Dragging moves a handle of the selected relation if the press was on one,
    * a side of a class changes its width, otherwise the selected box is moved. While a tool is armed, a
    * press on a class (or a note, for the anchor) starts a connection instead, which is drawn by dragging to a class, and
-   * nothing is selected. */
+   * nothing is selected. A press while the format painter is armed gives the element below it the style which was
+   * picked up. */
   @Override
   public void pressed(Point2D at) {
     double tolerance = toDiagramLength.applyAsDouble(HIT_PIXELS);
+    if (editing.isFormatPainterArmed()) {
+      editing.paintFormatAt(at, tolerance);
+      showDiagram.run();
+      return;
+    }
     if (editing.isToolArmed()) {
       editing.startDrawing(at, tolerance);
       showDiagram.run();

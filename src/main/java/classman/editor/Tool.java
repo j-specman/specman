@@ -8,5 +8,7 @@ enum Tool {
   /** Draws the anchor of a note to the element which the note is attached to. */
   ANCHOR,
   /** Draws the link from a class to the relation it is the association class of. */
-  ASSOC_CLASS
+  ASSOC_CLASS,
+  /** Gives the style of the element which was selected when it was armed to the element which is clicked next. */
+  FORMAT_PAINTER
 }
