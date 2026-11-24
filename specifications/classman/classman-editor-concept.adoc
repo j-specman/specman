@@ -2,7 +2,7 @@
 
 # Classman Diagram Editor: Concept and Functional Description
 
-*Status: updated 2026-11-22. Describes what is built, what was decided and why, and what is open. It is kept up to date with every step of the editor, because it is the source for the Specman system use cases which will be derived from it later: the behavior is hard to read back from the code. Where something is planned and not built, it says so.*
+*Status: updated 2026-11-24. Describes what is built, what was decided and why, and what is open. It is kept up to date with every step of the editor, because it is the source for the Specman system use cases which will be derived from it later: the behavior is hard to read back from the code. Where something is planned and not built, it says so.*
 
 ## Goal
 Class diagrams are shown in the Aktogramm, painted with Graphics2D, and are edited in a window of their own: creating, moving, renaming and deleting every kind of element, without editing the diagram source by hand. The editor is later the core of Classman itself. It must not depend on Specman, and the interface between the two stays narrow.
@@ -75,6 +75,7 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Move the points of a route |built |Waypoints freely, the ends along the border of their class or hung onto another class (not while changes are tracked), see <<Selecting>>. Adding a waypoint and deleting one (double click on the line and on a handle) too.
 |Create a text which an element doesn't have yet (relation label, multiplicity) |built |Dashed places on the selected relation, see <<Texts Which a Relation Doesn't Have Yet>>. Tagged values are created with the context menu of the class. Not yet for the diagram name.
 |Reorder attributes, attribute selection |open |
+|Methods of classes, enums and interfaces |built |A compartment of its own below the attributes, edited by lines like the attributes, see <<Methods>>.
 |Width of a class or note by dragging its side |built |At the left and right side of the box, shown by the cursor, see <<Width of a Class Box>> and <<Width of a Note>>.
 |Style of a class (colors, font, font size), hide the attribute compartment |built |Context menu of the class, see <<Style and Hidden Attributes of a Class>>.
 |Style of a note or a relation |built |Context menu of the note, menu of the end handles of the relation, see <<Style of Notes and Relations>>.
@@ -113,12 +114,12 @@ Variants are grouped if they are used with the same gesture and differ in one pr
 |Inheritance |extends, implements |tool (built)
 |===
 
-Interface and enum are keywords of their own, because their content differs from a class: A class has attributes, an enum holds only its values, which are entered like attributes without a type, and an interface has no attributes. See <<Consequences for the Format>>.
+Interface and enum are keywords of their own, because their content differs from a class: A class has attributes, an enum holds only its values, which are entered like attributes without a type, and an interface has no attributes. All three have methods, see <<Methods>>. See <<Consequences for the Format>>.
 
 ### Interfaces
 An interface is a box like a class, with a part less. It is created by the class button, whose variant menu offers *Interface*; it is dragged onto the canvas and named like a class (the field opens at once, an empty name takes it back). Everything about a new class holds: ID, position, `change(added, ...)` while changes are tracked, one undo step.
 
-* *Look:* the line `<<interface>>` stands above the name, in the style of a stereotype. It is not a stereotype of the box: it is derived from the kind when the box is drawn, is not in the source and can't be edited. It is shown in place of a stereotype: as soon as the interface has a stereotype of its own, which the user adds with the context menu, the derived line is hidden, also while the own one is marked as removed, so there are never two to see. It comes back when the own one is gone. The assumption is that a stereotype is a domain specific specialization, so the basic kind needn't be shown as well. Tagged values are possible, attributes are not: an interface has no part with attributes and no separating line.
+* *Look:* the line `<<interface>>` stands above the name, in the style of a stereotype. It is not a stereotype of the box: it is derived from the kind when the box is drawn, is not in the source and can't be edited. It is shown in place of a stereotype: as soon as the interface has a stereotype of its own, which the user adds with the context menu, the derived line is hidden, also while the own one is marked as removed, so there are never two to see. It comes back when the own one is gone. The assumption is that a stereotype is a domain specific specialization, so the basic kind needn't be shown as well. Tagged values are possible, attributes are not: an interface has no part with attributes, so the box has the method compartment only (shown from the start, see <<Methods>>).
 * *Context menu:* *Add attribute* can't be chosen.
 * *Implementation:* the tool for implementations starts at a class or an enum (not at an interface) and ends at an interface only; the mouse on any other box is not a target.
 * *Inheritance:* the tool for inheritance connects two classes or two interfaces: a class extends a class, an interface extends an interface. A class can't extend an interface, and an interface can't implement anything. An enum neither extends nor is extended.
@@ -134,7 +135,7 @@ An enum is created like an interface, by the class button with the variant *Enum
 ### Dependencies
 A dependency says that one element needs another: a dashed line with an open arrowhead at the target and an optional label, no multiplicities. It is a relation like the others (the source keyword is `dependency`, see <<Consequences for the Format>>), with an ID, a label, a route, a style and change marks, and it is selected, bent, styled and deleted like them. Decided 2026-11-23.
 
-* *Ends:* each end is a class, an interface, an enum, an attribute or an enum value. No notes, and no relations. Both ends are named by their IDs; a class or attribute without an ID gets one when the dependency is drawn (an attribute needs it only for this, like for the anchor of a note).
+* *Ends:* each end is a class, an interface, an enum, an attribute, a method or an enum value. No notes, and no relations. Both ends are named by their IDs; a class, attribute or method without an ID gets one when the dependency is drawn (an attribute or method needs it only for this, like for the anchor of a note).
 * *Drawing* is done with a tool and a button of its own, *Dependency* (an icon like the anchor with an arrowhead), no variants: click the button, press on a class or attribute and drag to another one. Like for the anchor, the attribute wins over its class where the mouse is on its row, so the user takes the class by its name or the space around the attributes. The marker `...` for hidden attributes, the blank line of a class without attributes and the notes are no start and no target. While the mouse is dragged the target is framed (class or attribute row) and the line runs from the center of the start to its center. One-shot, Esc as for the other tools; the tools exclude each other.
 * *Rules (`DependencyRules`):* neither end belongs to a class which a change set has removed, and no end is an attribute which a change set has removed. The two ends belong to different classes: a class and its own attributes, or two attributes of one class, are not offered (a line inside one box would only run over its text). The same holds for the target of an end which is hung onto another element later.
 * *The look:* a dashed line, in the color of its style, with an open arrowhead (like that of a directed association) at the target. The end on a class is placed like for a relation, where a line from the center towards the other end crosses the border. The end on an attribute is at the side of the box around the attribute text which faces the other end (left or right, half the height), like the end of an anchor line on an attribute, so the line never leaves the attribute through the class. A fixed end of the route on an attribute is a point of the border of that text box (`<attribute ID>.side@offset`). The label is placed and moved like that of any relation; the places for texts on the selected dependency offer a label only.
@@ -378,7 +379,8 @@ The right mouse button on a class selects it, like a press, and opens a menu wit
 
 * *Add stereotype:* see <<The Stereotype of a Class>>. Offered (can be chosen) only if the class has no stereotype, or one which a change set has removed.
 * *Add attribute:* puts a blank line at the end of the attributes and starts typing into it, see <<Adding Attributes>>. Return in that line goes on with the next one.
-* *Hide / show attribute* (*Hide / show value* for an enum): a submenu of check items, see <<Hiding Single Attributes>>.
+* *Add method:* the same for the methods, see <<Methods>>.
+* *Hide / show attribute* (*Hide / show value* for an enum): a submenu of check items, see <<Hiding Single Attributes>>. *Hide / show method* is the same for the methods.
 * *Style...:* see <<Style and Hidden Attributes of a Class>>. There is no *Standard style* entry, to keep the menu short: the dialog has a button for it.
 * *Show attributes* (*Show values* for an enum): a check item, see <<Style and Hidden Attributes of a Class>>.
 * *Automatic width:* see <<Width of a Class Box>>. A check item, separated from the entries which add parts.
@@ -465,6 +467,35 @@ Built, 2026-11-22. Every attribute (every value of an enum) can be hidden on its
 ### Not Built
 Moving an attribute within its class (by dragging, or with Alt+Up and Alt+Down), editing the `...` marker, selecting an attribute.
 
+## Methods
+Built 2026-11-24. Classes, enums and interfaces have methods. They are shown in a compartment of their own below the attributes and are edited, hidden, noted, linked and marked in the same way as the attributes, which is why this section only says what is different. Methods are marginal in the diagrams of data models, so everything is kept as small as the attributes are.
+
+### The Line
+A method is edited as a whole line, in the form in which the diagram shows it: `+name(parameter, parameter) : return type [info, info]`.
+
+* *Visibility, infos:* as for an attribute, see <<The Line>>.
+* *Name:* what stands before the first parenthesis, colon or ` [`. It is mandatory and can't contain these.
+* *Parentheses:* the diagram always shows them, also without parameters. The user may leave them out for a method without parameters and the editor puts them in: the input `eins` becomes `eins()`, `eins: zwei` becomes `eins() : zwei`.
+* *Parameters:* none to many, separated by commas. A parameter is `name: Type` or only `Type`, the name is optional. It is one free text, which is shown as typed, only the blanks around its colon are made one behind it and none before it (`file :File` is `file: File`, a colon with nothing behind it or in front of it is left out). A comma inside brackets, as in a generic type (`Map<String, int>`), doesn't separate parameters. Any other parameter with a comma or a quote in it is typed and shown in double quotes, like an info. Empty parameters are dropped.
+* *Return type:* what follows the colon behind the parentheses, optional like the type of an attribute. The diagram shows the colon only if there is a return type.
+* *Invalid lines:* no name; parentheses or brackets which aren't closed; something else than a colon between the closing parenthesis and the return type; a line break; the line `...`. The field is red then, as for an attribute.
+* A line which is committed unchanged is no operation: the field shows the method as the diagram does.
+
+### The Compartment
+* *Place:* the methods stand below the attributes, divided from them by a line, like the attributes are divided from the header. An interface has no attributes, so its box has the header and the method compartment.
+* *Visibility (decided 2026-11-24):* the method compartment is shown if the class has methods, which is the *automatic* state of a class whose source says nothing about it. A class without methods has no method compartment then, so every diagram which was made before methods came looks as it did. The user can force the state: *Show methods* shows the compartment although there is no method, as one blank line which stands for the first method (`showmethods` in the head of the class), and the same entry unchecked hides it although there are methods (`hidemethods`). The editor writes the word when the user makes the choice, the automatic state has none. Which state a new box gets: a new class and a new enum the automatic one, so they show the name and the attribute compartment and no method compartment, a new interface `showmethods`, so it shows its name and one compartment, like the others. Later the user shall be able to change this default, and other defaults, for a single diagram, for a whole model, or for the application (Specman or Classman). That is an open point, see <<Open Points>>.
+* *Hiding:* the compartment can be hidden and shown like the attribute compartment, see above for how the source says it, also for an interface; the methods stay in the source. Single methods can be hidden and shown (`(hidden)` at the end of the line, the submenu *Hide / show method*), which leads to the line `. . .` at the foot of the compartment. Nothing in a hidden compartment can be edited, no method can be added: the user chooses *Show methods* first. Methods which carry marks of a change set can't be hidden and keep the compartment shown, whatever the source says. The attribute compartment and the method compartment are hidden independently of each other.
+* *Adding:* the entry *Add method* of the context menu puts a blank line at the end of the methods and starts typing into it. Return goes on with the next blank line, as for attributes. A new method gets no ID.
+* *Deleting:* the empty text deletes the method, under change tracking by the rules of <<Deleting>>.
+* *Notes and dependencies:* a note can be attached to a method (anchor tool) and a dependency can start or end at it, like for an attribute: the box around the text of the method is the target, a method which has no ID gets one then, the method wins over its class where the mouse is on its line, a removed method is no target. Everything which hangs on a method of a hidden compartment is hidden with it (see <<Hiding Single Attributes>>), and a method which is deleted takes its notes and dependencies along.
+* *Style:* the text color and the font of the class apply to the methods too.
+
+### Change Tracking
+* A method is marked like an attribute: `change(added|removed, <change set>)` behind its ID, text marks `was(<change set>, <old text>)` behind its name, its visibility sign and its return type. A new method is marked as added. A visibility sign which was there can't be removed, as for an attribute.
+* *Parameters are list entries like the infos:* a parameter which is added is marked `change(added, ...)`, one which is removed keeps its text and is marked `change(removed, ...)`, one whose text changes gets a text mark with the old text. The same parameters stay, as the same infos do, so the user changes one parameter and not the whole list: `save(file: File, count)` typed as `save(file: Path, count, force: boolean)` is a changed first parameter, the same second one and an added third one. A parameter which a change set has added is simply gone if it is removed, and one which the change set has removed and which is typed again is not removed any more.
+* *Display:* an added or removed method has the pale row and the strong color behind its text, a removed one a line through it; an added parameter has the strong color behind it, a removed parameter keeps its text with the color and a line through it, a changed parameter or return type has the color behind the changed part. Accepting and rejecting work as for the attributes and their infos.
+* In a class which a change set has added or removed, and in a method of that kind, methods are changed without marks.
+
 ## Change Tracking in the Editor
 If the host says that changes are tracked, the editor writes the marks: the user never writes them by hand. Accepting, rejecting and merging change sets is done by the host on the source, see `ChangeResolver_V001`, outside of the editor.
 
@@ -500,7 +531,7 @@ A diagram is changed by change sets, as the steps of an Aktogramm are, and the m
 How the editor writes the marks for each operation is described with the operation. The rules for texts are collected below.
 
 ### Marks of Elements
-`change(added, <change set>)` and `change(removed, <change set>)` follow the ID of a class, attribute, relation, note, anchor line or association class link, and the text of an info of an attribute (`[a, b change(removed, yellow)]`), of a stereotype (`<<Entity>> change(removed, yellow)`) or of a tagged value (`{a=1 change(removed, yellow), b=2}`). Moving an element is never marked. Rules for deleting: <<Deleting>>.
+`change(added, <change set>)` and `change(removed, <change set>)` follow the ID of a class, attribute, method, relation, note, anchor line or association class link, and the text of an info of an attribute or method, of a parameter of a method (`[a, b change(removed, yellow)]`), of a stereotype (`<<Entity>> change(removed, yellow)`) or of a tagged value (`{a=1 change(removed, yellow), b=2}`). Moving an element is never marked. Rules for deleting: <<Deleting>>.
 
 ### Marks of Texts
 `was(<change set>, <old text>)` follows the text which a change set has changed, which always stands for the new state. Every text of the diagram can carry one: the diagram name, class name, stereotype, key and value of a tagged value, the visibility sign, name and type of an attribute, an info, a multiplicity, a relation label, a note text.
@@ -552,6 +583,7 @@ This section collects, for every input which the user completes, what is colored
 |*Attribute,* new (Return in a blank line) |none |The whole row has the pale color, and the text the strong color behind it. |none
 |Attribute changed |none |What differs has the strong color behind it: the visibility sign, the name, the type, each info on its own. An info which is new has the color, a removed info stays with the color and a line through it, a changed info has the color. Parts which stay the same have none. |none
 |Attribute removed (empty text) |gone |The row stays with the pale color, the text with the strong color behind it and a line through it. If the change set has added it itself, it is gone without a trace. |gone
+|*Method,* new, changed or removed (empty text) |as for the attribute |As for the attribute. A parameter is colored like an info: a new one has the strong color behind it, a removed one keeps its text, with the color and a line through it, a changed one has the color behind the changed part. |as for the attribute
 |Type removed from an attribute |gone |The last character of the name has the strong color behind it, the type is not shown. |gone
 |Visibility sign removed |gone |Not possible: the line is invalid (red border), because there would be nothing left to color. |gone
 |===
@@ -572,6 +604,7 @@ These rules decide how a diagram with marks looks, also in the Aktogramm and in 
 * *Colors:* every change set has a strong color and a pale one (60 % white). The host maps the name of a change set to the colors.
 * *Added or removed class or note:* a frame in the strong color around the box, 12 units wide, of which 6 show outside the border. Removed ones are also veiled (half white), their texts grey, their name has the strong color behind it and a line through it. The marks of the texts inside are not shown.
 * *Added or removed attribute:* the row has the pale color, its text the strong color behind it; removed attributes have a line through the text.
+* *Added or removed method:* the same as for an attribute. *Added or removed parameter:* the same as for an info.
 * *Added or removed info of an attribute:* the same for the info only: its text has the strong color behind it, and a removed info keeps its text and has a line through it. The line keeps its length: a removed info was there before, so nothing grows.
 * *Added or removed stereotype:* the same as for an info: the text has the strong color behind it, a removed one keeps its text and has a line through it.
 * *Added or removed relation:* a band of 9 units in the strong color below the line. A removed relation has a grey line, a cross at a quarter of its longest part and a label which has the strong color behind it and a line through it. The triangle of an inheritance or implementation is filled with the strong color too, because it would otherwise hide the band below it.
@@ -629,9 +662,10 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 * An attribute whose line ends with `(hidden)` is not shown, see <<Hiding Single Attributes>>. The mark is presentation like the hidden compartment and is not marked by change sets.
 * A note and a relation may carry the same `style(...)` (see <<Style of Notes and Relations>>), a relation without `fill`.
 * The head of a class may carry `style(fill="#rrggbb", textcolor="#rrggbb", linecolor="#rrggbb", font=Roboto, fontsize=14)` (behind `width=`) and the word `hideattributes` (behind that): the look of the box and the hidden attribute compartment, see <<Style and Hidden Attributes of a Class>>. Both are presentation like `at(...)` and `width=`, not marked by change sets.
-* Elements created by the editor get an ID (classes) and a position `at(x, y)`. Attributes get an ID only if a note is attached. Anchor lines get no ID: nothing refers to them.
+* Elements created by the editor get an ID (classes) and a position `at(x, y)`. Attributes and methods get an ID only if a note is attached or a dependency starts or ends at them. Anchor lines get no ID: nothing refers to them.
 * Built: the keyword `interface`, `interface Runnable (aaaaaaaa) at(10, 20) <<Service>> {A=1}`: the head of a class and no body. In the model it is a `ClassModel_V001` with `kind = INTERFACE`, so selecting, moving, naming, change marks and relations work as for a class.
 * Built: the keyword `enum`, `enum Color (aaaaaaaa) at(10, 20) { RED [primary] GREEN }`: the head of a class and a body with the values. A value is an attribute without a type; the parser refuses a colon in it.
+* Built: methods are lines of the body of a class, an enum or an interface, told from the attributes by the parentheses behind their name: `+save(file: File, count) was(yellow, store) (0a0a0a0a) change(added, blue) : boolean was(yellow, void) [final] (hidden)`. The parts come in this order: visibility (with its mark), name, parameters, the text mark of the name, ID, element mark, return type (with its mark), infos, `(hidden)`. A parameter is a list entry like an info, with its own `change(...)` or `was(...)` behind it; a parameter with characters which the grammar doesn't know (`<`, `>`, a comma which isn't to separate) is in double quotes, so is a single parameter which would read as an ID or as `(hidden)`, and the name of a method called `change` or `was`. The attributes and methods of a body may come in any order, the model keeps two lists, and the serializer writes the attributes first. The words `hideattributes`, `hidemethods` and `showmethods` in the head say what is shown, see <<Methods>>.
 
 ## Tests
 * Tool state and every operation on the model are plain logic and are tested without a window; the field and its keys are tested headless on the event dispatch thread.
@@ -648,6 +682,9 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 . Moving a box should move its waypoints or re-route them. Left to the user for now.
 . The diagram name as an editable text.
 . Reordering attributes, selecting attributes.
+. *Defaults for new boxes.* Today a new class and a new enum are created in the automatic state of the method compartment (shown if there are methods) and a new interface with it shown (see <<Methods>>), and the attribute compartment is always shown. The user shall be able to change these defaults, and others, for a single diagram, for a whole model, or for the application (Specman or Classman); where the setting lives, and in which order the levels override each other, is open.
+. Parameters of methods are free texts. Open: whether they should be structured (name and type of their own, with their own marks) once types are taken from a model, and whether the editor should split a parameter list at the commas of generic types by itself in more cases than brackets.
+. Reordering methods, like attributes.
 . A removed label or multiplicity is not shown and not marked at all, there is nothing to mark next to. Where could the place be shown, for example by the line of the relation?
 . Is the restriction on removing a visibility sign under change tracking a nuisance in practice? Alternatives: let the sign stay, or give the removal a mark of its own in the format.
 . A long changed text is marked by a diff now. Is the rule good for texts with many changes, and for the mark of a deletion? See the knobs under <<Which Part of a Changed Text is Marked>>.
@@ -657,4 +694,5 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 . Does the window remember its position and size?
 . The marks in the PDF: which rule at which scale, see <<Display>>.
 . A white halo around the enlarged highlight of an attribute text, which sits on the colored class fill and contrasts less than frames on white.
+. *Icon for classes, enums and interfaces.* Optionally, a class, an enum or an interface can carry an icon (a small image in its header, next to the name). Open: where the icon comes from (a built-in set, an image the user imports, or an icon defined by the model in the model-bound mode), how it is stored in the source and format (an optional attribute of the element, or a reference to an image), where exactly it sits in the header and how it scales, how it is chosen in the editor (context menu of the class), how it is exported (PNG, JPEG, SVG, PDF) and shown in changes (added, changed or removed icon).
 . Model-bound mode of Classman (only stereotypes and tags defined in the model can be chosen) is a separate topic and not part of this concept. The infos of an attribute are meant to follow the same path as stereotypes and tagged values: in the free mode of Specman they are free texts, in Classman they are chosen from a set of tags which the model defines for attributes, and refer to the definition by an ID. The format leaves room for it: an info is a list entry of its own, and an optional ID can be added behind its text, like the ID of a stereotype, without changing the rest.

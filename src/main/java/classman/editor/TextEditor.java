@@ -2,6 +2,7 @@ package classman.editor;
 
 import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.Compartment_V001;
 import classman.render.DiagramFonts;
 import classman.render.TextFont;
 import classman.render.SceneTextArea;
@@ -94,7 +95,7 @@ class TextEditor {
     }));
     component.registerKeyboardAction(e -> commit(true), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
       JComponent.WHEN_FOCUSED);
-    if (text.kind == TextKind.ATTRIBUTE_LINE || text.kind == TextKind.TAGGED_VALUE) {
+    if (text.kind.compartment() != null || text.kind == TextKind.TAGGED_VALUE) {
       ((AbstractDocument) component.getDocument()).setDocumentFilter(new SingleLineFilter());
     }
     else {
@@ -206,8 +207,8 @@ class TextEditor {
 
   /** An empty text is no text: a mandatory text keeps its old content, an optional one is removed. Tabs which were
    * typed or pasted become spaces. A content which the text can't have keeps the field open with a red border if the
-   * user pressed Return, and is dropped if the field lost the focus. Return in the last line of the attributes of a
-   * class goes on with a blank line below it for the next attribute, an empty line, Esc or leaving the field ends that.
+   * user pressed Return, and is dropped if the field lost the focus. Return in the last line of the attributes or methods of a
+   * class goes on with a blank line below it for the next one, an empty line, Esc or leaving the field ends that.
    * @param returnPressed true if the user pressed Return */
   private void commit(boolean returnPressed) {
     if (field == null) {
@@ -222,14 +223,14 @@ class TextEditor {
       field.setBorder(border(REJECTED_BORDER_COLOR));
       return;
     }
-    boolean goOn = returnPressed && accepted && !content.isEmpty() && editing.isLastAttributeLine(text);
+    boolean goOn = returnPressed && accepted && !content.isEmpty() && editing.isLastMemberLine(text);
     close();
     if (accepted && !unchanged) {
       editing.setText(text, content);
     }
     editing.discardNewPart();
     if (goOn) {
-      startNewAttribute((ClassModel_V001) text.element);
+      startNewMember((ClassModel_V001) text.element, text.kind.compartment());
       return;
     }
     showDiagram.run();
@@ -266,9 +267,10 @@ class TextEditor {
     start(row);
   }
 
-  /** Puts a blank line at the end of the class and starts to type a new attribute into it. */
-  void startNewAttribute(ClassModel_V001 box) {
-    SceneTextArea line = editing.newAttributeAtEnd(box);
+  /** Puts a blank line at the end of the compartment of the class and starts to type a new attribute or method into
+   * it. */
+  void startNewMember(ClassModel_V001 box, Compartment_V001 compartment) {
+    SceneTextArea line = editing.newMemberAtEnd(box, compartment);
     showDiagram.run();
     start(line);
   }

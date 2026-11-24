@@ -32,13 +32,16 @@ grammar ClassDiagram_V001;
 //   * A class with width=N is N pixels wide; text wraps at spaces. Without width the content decides.
 //   * style(fill="#rrggbb", textcolor="#rrggbb", linecolor="#rrggbb", font=Roboto, fontsize=14) in the head gives the
 //     class box a look of its own: background, text and line color, font (SitkaDisplay, Roboto or CourierPrime) and
-//     font size. The entries come in any order, each is optional and may stand once. The word hideattributes behind
-//     the style hides the attribute compartment (the values of an enum); the attributes stay in the source.
+//     font size. The entries come in any order, each is optional and may stand once. The words hideattributes and
+//     hidemethods behind the style hide the attribute compartment (the values of an enum) and the method compartment;
+//     showmethods shows the method compartment of a class which has no methods. The attributes and methods stay in the
+//     source. Without a word the attribute compartment is shown, the method compartment if the class has methods.
 //     The height is always computed.
 //   * A note has the same style(...), behind width= and before its text. A relation has it behind its change mark,
 //     before the classes it joins, and no fill: association style(linecolor="#cc0000") 04de91aa -> b7c20f13.
 //   * An attribute which ends with (hidden) is not shown: the attribute compartment ends with a line "..." instead,
-//     in the color of the first change set which marked one of the hidden attributes.
+//     in the color of the first change set which marked one of the hidden attributes. The same holds for a method.
+//     A method is a line of the body with parentheses behind its name: +save(file: File, "Map<A, B>") : boolean [info].
 //   * A relation without route is a straight line from center to center, clipped at the box borders.
 //   * The label and the multiplicities of a relation stand where the layout puts them, unless a position is given:
 //     label "owns" at(40%, -12) and composition 04de91aa 1 at(14, -8) -> * b7c20f13. The label is at 40 percent of the
@@ -113,11 +116,11 @@ element
 
 // ------------------------------------------------------------ classes
 
-// The body is optional, class Hello is a complete class. An interface has no attributes and so no body. The body of
-// an enum holds its values, which are attributes without a type.
+// The body is optional, class Hello is a complete class. An interface has no attributes, its body holds methods only.
+// The body of an enum holds its values, which are attributes without a type, and methods.
 classDecl
     : CLASS classHead classBody?
-    | INTERFACE classHead
+    | INTERFACE classHead classBody?
     | ENUM classHead classBody?
     ;
 
@@ -125,7 +128,7 @@ classDecl
 // stereotype. Like an info of an attribute, a stereotype is a list entry which can be added or removed as a whole,
 // change(removed, yellow), and keeps its text then; or its text can be changed, was(yellow, Old).
 classHead
-    : name nameChange=textChange? classId=ELEMENT_ID? classMark=changeMark? position? widthSpec? styleSpec? hideSpec?
+    : name nameChange=textChange? classId=ELEMENT_ID? classMark=changeMark? position? widthSpec? styleSpec? compartmentSpec?
       (STEREOTYPE stereotypeChange=textChange? stereotypeId=ELEMENT_ID? stereotypeMark=changeMark?)? taggedValues?
     ;
 
@@ -142,7 +145,14 @@ taggedValue
     ;
 
 classBody
-    : LBRACE attribute* RBRACE
+    : LBRACE member* RBRACE
+    ;
+
+// The attributes and the methods of a class stand in one body, a method is told from an attribute by the parameters in
+// parentheses after its name. The attributes are shown in their compartment, the methods in theirs.
+member
+    : attribute
+    | method
     ;
 
 // One attribute: [visibility] name [(id)] [: type] [[info, info, ...]] [(hidden)]. A name or type is one word or a
@@ -151,6 +161,34 @@ attribute
     : ELLIPSIS
     | (visibility visibilityChange=textChange?)? wordOrString nameChange=textChange? ELEMENT_ID? changeMark?
       (COLON wordOrString typeChange=textChange?)? infos? HIDDEN_MARK?
+    ;
+
+// One method: [visibility] name(parameter, ...) [was(...)] [(id)] [: return type] [[info, ...]] [(hidden)]. The parentheses
+// stand even if there are no parameters. A parameter is a list entry like an info: its text is written as it is shown,
+// name: Type or just Type, a text with characters which the grammar doesn't know (a generic type, for example) is in
+// double quotes, and it can carry the mark of a change set. A method with a single parameter which is written as the
+// ID of an element or as (hidden) has that parameter in double quotes, else it would be taken for an ID or the mark. A
+// method called change or was has its name in double quotes, else its parentheses would be taken for a mark.
+method
+    : (visibility visibilityChange=textChange?)? methodName parameters nameChange=textChange? ELEMENT_ID? changeMark?
+      (COLON wordOrString typeChange=textChange?)? infos? HIDDEN_MARK?
+    ;
+
+methodName
+    : plainWord
+    | QUOTED_STRING
+    ;
+
+parameters
+    : LPAREN (parameter (COMMA parameter)*)? RPAREN
+    ;
+
+parameter
+    : parameterText (changeMark | textChange)?
+    ;
+
+parameterText
+    : (word | NUMBER | DOTDOT | STAR | EQUALS | COLON | QUOTED_STRING)+
     ;
 
 visibility
@@ -207,9 +245,12 @@ styleEntry
     | FONTSIZE EQUALS NUMBER
     ;
 
-// The class box doesn't show its attribute compartment (the values of an enum). The attributes stay in the model.
-hideSpec
-    : HIDEATTRIBUTES
+// The class box doesn't show its attribute compartment (the values of an enum) or its method compartment, or shows the
+// method compartment although it has no methods. The attributes and methods stay in the model. Each word may stand
+// once, and hidemethods and showmethods exclude each other. Without any of them the method compartment is shown if
+// the class has methods.
+compartmentSpec
+    : (HIDEATTRIBUTES | HIDEMETHODS | SHOWMETHODS)+
     ;
 
 // change(added, yellow): a change set added the element, or change(removed, blue): it removed the element, which
@@ -347,10 +388,18 @@ linePoint
 
 // A plain word, including the keywords: they are only reserved where a class name is expected.
 word
+    : plainWord
+    | CHANGE
+    | WAS
+    ;
+
+// A word which can't be taken for the start of a mark: the name of a method is followed by parentheses, which change(...)
+// and was(...) also have, so a method with one of these names has it in double quotes.
+plainWord
     : NAME
     | HEX_ID
     | CLASSDIAGRAM | CLASS | INTERFACE | ENUM | ASSOCCLASS | ASSOCIATION | AGGREGATION | COMPOSITION | EXTENDS | IMPLEMENTS | DEPENDENCY
-    | NOTE | ROUTE | ANCHOR | CHANGE | WAS | AT | WIDTH | STYLE | FILL | TEXTCOLOR | LINECOLOR | FONT | FONTSIZE | HIDEATTRIBUTES | TOP | RIGHT | BOTTOM | LEFT | CENTER
+    | NOTE | ROUTE | ANCHOR | AT | WIDTH | STYLE | FILL | TEXTCOLOR | LINECOLOR | FONT | FONTSIZE | HIDEATTRIBUTES | HIDEMETHODS | SHOWMETHODS | TOP | RIGHT | BOTTOM | LEFT | CENTER
     ;
 
 // ============================================================
@@ -382,6 +431,8 @@ LINECOLOR    : 'linecolor' ;
 FONT         : 'font' ;
 FONTSIZE     : 'fontsize' ;
 HIDEATTRIBUTES : 'hideattributes' ;
+HIDEMETHODS : 'hidemethods' ;
+SHOWMETHODS : 'showmethods' ;
 TOP          : 'top' ;
 RIGHT        : 'right' ;
 BOTTOM       : 'bottom' ;

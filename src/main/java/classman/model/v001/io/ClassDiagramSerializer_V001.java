@@ -7,13 +7,16 @@ import classman.model.v001.AssocClassLinkModel_V001;
 import classman.model.v001.AttachLineModel_V001;
 import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
+import classman.model.v001.AbstractMemberModel_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassDiagram_V001Lexer;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.CompartmentVisibility_V001;
 import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.InfoModel_V001;
+import classman.model.v001.MethodModel_V001;
 import classman.model.v001.Multiplicity_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
@@ -100,6 +103,12 @@ public class ClassDiagramSerializer_V001 {
         if (classModel.attributesHidden) {
             out.append(" hideattributes");
         }
+        if (classModel.methodsVisibility == CompartmentVisibility_V001.HIDDEN) {
+            out.append(" hidemethods");
+        }
+        else if (classModel.methodsVisibility == CompartmentVisibility_V001.SHOWN) {
+            out.append(" showmethods");
+        }
         if (classModel.stereotype != null) {
             out.append(" <<").append(classModel.stereotype).append(">>");
             appendTextChange(out, classModel.stereotypeChange);
@@ -107,10 +116,13 @@ public class ClassDiagramSerializer_V001 {
             appendChange(out, classModel.stereotypeElementChange);
         }
         appendTaggedValues(out, classModel.taggedValues);
-        if (!classModel.attributes.isEmpty()) {
+        if (!classModel.attributes.isEmpty() || !classModel.methods.isEmpty()) {
             out.append(" {\n");
             for (AttributeModel_V001 attribute : classModel.attributes) {
                 out.append(indent).append(INDENT).append(attribute(attribute)).append('\n');
+            }
+            for (MethodModel_V001 method : classModel.methods) {
+                out.append(indent).append(INDENT).append(method(method)).append('\n');
             }
             out.append(indent).append('}');
         }
@@ -149,43 +161,73 @@ public class ClassDiagramSerializer_V001 {
     }
 
     private String attribute(AttributeModel_V001 attribute) {
-        if (attribute.hiddenAttributesMarker) {
+        if (attribute.hiddenMarker) {
             return "...";
         }
+        return memberLine(attribute, name(attribute.name, false), "");
+    }
+
+    private String method(MethodModel_V001 method) {
+        return memberLine(method, name(method.name, true), parameters(method.parameters));
+    }
+
+    /** A name which the grammar takes for the start of a mark if parentheses follow it is quoted for a method. */
+    private String name(String name, boolean isMethod) {
+        boolean isMarkWord = isMethod && (name.equals("change") || name.equals("was"));
+        return isMarkWord ? quoted(name) : word(name);
+    }
+
+    /** @param parameters the parentheses with the parameters, empty for an attribute */
+    private String memberLine(AbstractMemberModel_V001 member, String nameText, String parameters) {
         StringBuilder line = new StringBuilder();
-        if (attribute.visibility != null) {
-            line.append(attribute.visibility.sign);
-            if (attribute.visibilityChange != null) {
-                appendTextChange(line, attribute.visibilityChange);
+        if (member.visibility != null) {
+            line.append(member.visibility.sign);
+            if (member.visibilityChange != null) {
+                appendTextChange(line, member.visibilityChange);
                 line.append(' ');
             }
         }
-        line.append(word(attribute.name));
-        appendTextChange(line, attribute.nameChange);
-        appendId(line, attribute.id);
-        appendChange(line, attribute.change);
-        if (attribute.type != null) {
-            line.append(" : ").append(word(attribute.type));
-            appendTextChange(line, attribute.typeChange);
+        line.append(nameText).append(parameters);
+        appendTextChange(line, member.nameChange);
+        appendId(line, member.id);
+        appendChange(line, member.change);
+        if (member.type != null) {
+            line.append(" : ").append(word(member.type));
+            appendTextChange(line, member.typeChange);
         }
-        if (!attribute.infos.isEmpty()) {
-            List<String> infos = new ArrayList<>();
-            for (InfoModel_V001 info : attribute.infos) {
-                StringBuilder item = new StringBuilder(isBareInfo(info.text) ? info.text : quoted(info.text));
-                if (info.change != null) {
-                    appendChange(item, info.change);
-                }
-                else {
-                    appendTextChange(item, info.textChange);
-                }
-                infos.add(item.toString());
-            }
-            line.append(" [").append(String.join(", ", infos)).append(']');
+        if (!member.infos.isEmpty()) {
+            line.append(" [").append(String.join(", ", entries(member.infos, false))).append(']');
         }
-        if (attribute.hidden) {
+        if (member.hidden) {
             line.append(" (hidden)");
         }
         return line.toString();
+    }
+
+    /** The parameters in parentheses. A single one which would read as the ID of an element or as (hidden) is quoted. */
+    private String parameters(List<InfoModel_V001> parameters) {
+        String text = "(" + String.join(", ", entries(parameters, true)) + ")";
+        if (text.matches("[(][0-9a-f]{8}[)]") || text.equals("(hidden)")) {
+            return "(" + quoted(parameters.get(0).text) + ")";
+        }
+        return text;
+    }
+
+    /** The texts of the list entries, each bare if it reads back as itself, else in quotes, with its mark.
+     * @param colonAllowed true for the parameters of a method, which have a colon between name and type */
+    private List<String> entries(List<InfoModel_V001> entries, boolean colonAllowed) {
+        List<String> items = new ArrayList<>();
+        for (InfoModel_V001 entry : entries) {
+            StringBuilder item = new StringBuilder(isBareEntry(entry.text, colonAllowed) ? entry.text : quoted(entry.text));
+            if (entry.change != null) {
+                appendChange(item, entry.change);
+            }
+            else {
+                appendTextChange(item, entry.textChange);
+            }
+            items.add(item.toString());
+        }
+        return items;
     }
 
     // ---- relations ----
@@ -396,8 +438,8 @@ public class ClassDiagramSerializer_V001 {
         return quoted.append('"').toString();
     }
 
-    /** True if the info reads back as itself when written without quotes. */
-    private boolean isBareInfo(String info) {
+    /** True if the info or parameter reads back as itself when written without quotes. */
+    private boolean isBareEntry(String info, boolean colonAllowed) {
         if (info.isBlank() || !info.equals(info.strip())) {
             return false;
         }
@@ -407,7 +449,7 @@ public class ClassDiagramSerializer_V001 {
         lexer.addErrorListener(errors);
         StringBuilder tokenTexts = new StringBuilder();
         for (Token token = lexer.nextToken(); token.getType() != Token.EOF; token = lexer.nextToken()) {
-            if (!isInfoToken(token.getType())) {
+            if (!isEntryToken(token.getType(), colonAllowed)) {
                 return false;
             }
             tokenTexts.append(token.getText());
@@ -415,7 +457,10 @@ public class ClassDiagramSerializer_V001 {
         return !errors.hasError() && withoutSpaces(tokenTexts.toString()).equals(withoutSpaces(info));
     }
 
-    private boolean isInfoToken(int type) {
+    private boolean isEntryToken(int type, boolean colonAllowed) {
+        if (type == ClassDiagram_V001Lexer.COLON) {
+            return colonAllowed;
+        }
         return type == ClassDiagram_V001Lexer.NAME || type == ClassDiagram_V001Lexer.HEX_ID || type == ClassDiagram_V001Lexer.NUMBER
             || type == ClassDiagram_V001Lexer.DOTDOT || type == ClassDiagram_V001Lexer.STAR
             || type == ClassDiagram_V001Lexer.EQUALS || type == ClassDiagram_V001Lexer.QUOTED_STRING

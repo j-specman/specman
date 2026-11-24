@@ -68,7 +68,7 @@ class ClassDiagramParser_V001Test {
     assertEquals("Name", name.name);
     assertEquals("String", name.type);
     assertEquals(List.of("Pflicht", "2..50", "TN=key"), infoTexts(name));
-    assertTrue(c.attributes.get(1).hiddenAttributesMarker);
+    assertTrue(c.attributes.get(1).hiddenMarker);
   }
 
   /** Whatever the source leaves out is null or empty in the model, never a default. */

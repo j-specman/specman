@@ -1,5 +1,7 @@
 package classman.render;
 
+import classman.model.v001.Compartment_V001;
+
 /** The kinds of text which the editor lets the user change in place, and how each is drawn and typed. */
 public enum TextKind {
     CLASS_NAME(true, true, false, false, 120, 0),
@@ -12,7 +14,9 @@ public enum TextKind {
     FROM_MULTIPLICITY(false, false, false, true, 40, DiagramStyle.TEXT_HIT_PADDING),
     TO_MULTIPLICITY(false, false, false, true, 40, DiagramStyle.TEXT_HIT_PADDING),
     /** A whole line of an attribute, like +name : type [info]. The empty text deletes the attribute. */
-    ATTRIBUTE_LINE(false, false, true, true, 120, 0);
+    ATTRIBUTE_LINE(false, false, true, true, 120, 0),
+    /** A whole line of a method, like +name(parameter) : type [info]. The empty text deletes the method. */
+    METHOD_LINE(false, false, true, true, 120, 0);
 
     public final boolean bold;
     public final boolean centered;
@@ -42,5 +46,19 @@ public enum TextKind {
         this.hitPadding = hitPadding;
         this.prefix = prefix;
         this.suffix = suffix;
+    }
+
+    /** @return the compartment whose lines the text is, null for any other text */
+    public Compartment_V001 compartment() {
+        return switch (this) {
+            case ATTRIBUTE_LINE -> Compartment_V001.ATTRIBUTES;
+            case METHOD_LINE -> Compartment_V001.METHODS;
+            default -> null;
+        };
+    }
+
+    /** @return the kind of text of the lines of the compartment */
+    public static TextKind lineOf(Compartment_V001 compartment) {
+        return compartment == Compartment_V001.ATTRIBUTES ? ATTRIBUTE_LINE : METHOD_LINE;
     }
 }

@@ -3,7 +3,7 @@ package classman.model.v001.change;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AnchorLineModel_V001;
 import classman.model.v001.AttachLineModel_V001;
-import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.AbstractMemberModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
@@ -31,7 +31,7 @@ class VanishingElements_V001 {
     private final String changeSet;
     private final ChangeResolution_V001 resolution;
     private final Set<String> classIds = new HashSet<>();
-    private final Set<String> attributeIds = new HashSet<>();
+    private final Set<String> memberIds = new HashSet<>();
     private final Set<String> relationIds = new HashSet<>();
     private final Set<NoteModel_V001> notes = Collections.newSetFromMap(new IdentityHashMap<>());
     private final Set<String> noteIds = new HashSet<>();
@@ -39,7 +39,7 @@ class VanishingElements_V001 {
     VanishingElements_V001(ClassDiagramModel_V001 model, String changeSet, ChangeResolution_V001 resolution) {
         this.changeSet = changeSet;
         this.resolution = resolution;
-        collectClassAndAttributeIds(model);
+        collectClassAndMemberIds(model);
         collectRelationIds(model);
         collectNotes(model);
     }
@@ -55,7 +55,7 @@ class VanishingElements_V001 {
 
     /** An end of a relation is a class, or for a dependency an attribute. */
     private boolean endVanishes(String endId) {
-        return classIds.contains(endId) || attributeIds.contains(endId);
+        return classIds.contains(endId) || memberIds.contains(endId);
     }
 
     boolean noteVanishes(NoteModel_V001 note) {
@@ -69,23 +69,23 @@ class VanishingElements_V001 {
 
     private boolean leadsToVanishing(AttachLineModel_V001 line) {
         String target = line.targetId;
-        return classIds.contains(target) || attributeIds.contains(target) || relationIds.contains(target);
+        return classIds.contains(target) || memberIds.contains(target) || relationIds.contains(target);
     }
 
-    private void collectClassAndAttributeIds(ClassDiagramModel_V001 model) {
+    private void collectClassAndMemberIds(ClassDiagramModel_V001 model) {
         for (ClassModel_V001 classModel : model.classes()) {
             boolean classVanishes = vanishes(classModel.change);
             if (classVanishes && classModel.id != null) {
                 classIds.add(classModel.id);
             }
-            collectAttributeIds(classModel, classVanishes);
+            collectMemberIds(classModel, classVanishes);
         }
     }
 
-    private void collectAttributeIds(ClassModel_V001 classModel, boolean classVanishes) {
-        for (AttributeModel_V001 attribute : classModel.attributes) {
-            if (attribute.id != null && (classVanishes || vanishes(attribute.change))) {
-                attributeIds.add(attribute.id);
+    private void collectMemberIds(ClassModel_V001 classModel, boolean classVanishes) {
+        for (AbstractMemberModel_V001 member : classModel.allMembers()) {
+            if (member.id != null && (classVanishes || vanishes(member.change))) {
+                memberIds.add(member.id);
             }
         }
     }

@@ -2,10 +2,13 @@ package classman.model.v001.change;
 
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AttachLineModel_V001;
-import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.AbstractMemberModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.InfoModel_V001;
 import classman.model.v001.NoteModel_V001;
+
+import java.util.List;
 
 /** Removes the elements and attributes which go away, the survivors keep their order. */
 class ElementRemover_V001 {
@@ -23,8 +26,11 @@ class ElementRemover_V001 {
             }
             classModel.taggedValues.removeIf(tag -> vanishing.vanishes(tag.change));
             classModel.attributes.removeIf(attribute -> vanishing.vanishes(attribute.change));
-            for (AttributeModel_V001 attribute : classModel.attributes) {
-                attribute.infos.removeIf(info -> vanishing.vanishes(info.change));
+            classModel.methods.removeIf(method -> vanishing.vanishes(method.change));
+            for (AbstractMemberModel_V001 member : classModel.allMembers()) {
+                for (List<InfoModel_V001> entries : member.entryLists()) {
+                    entries.removeIf(entry -> vanishing.vanishes(entry.change));
+                }
             }
         }
     }

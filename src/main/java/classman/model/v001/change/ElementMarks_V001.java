@@ -1,13 +1,14 @@
 package classman.model.v001.change;
 
 import classman.model.v001.AbstractDiagramElementModel_V001;
-import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.AbstractMemberModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.InfoModel_V001;
 import classman.model.v001.TaggedValueModel_V001;
 
+import java.util.List;
 import java.util.function.UnaryOperator;
 
 /** Knows every element mark (added or removed) of a diagram, so that nobody else has to. */
@@ -27,10 +28,12 @@ final class ElementMarks_V001 {
             for (TaggedValueModel_V001 tag : classModel.taggedValues) {
                 tag.change = replacement.apply(tag.change);
             }
-            for (AttributeModel_V001 attribute : classModel.attributes) {
-                attribute.change = replacement.apply(attribute.change);
-                for (InfoModel_V001 info : attribute.infos) {
-                    info.change = replacement.apply(info.change);
+            for (AbstractMemberModel_V001 member : classModel.allMembers()) {
+                member.change = replacement.apply(member.change);
+                for (List<InfoModel_V001> entries : member.entryLists()) {
+                    for (InfoModel_V001 entry : entries) {
+                        entry.change = replacement.apply(entry.change);
+                    }
                 }
             }
         }

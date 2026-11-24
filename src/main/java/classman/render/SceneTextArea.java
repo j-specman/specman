@@ -1,7 +1,7 @@
 package classman.render;
 
 import classman.model.v001.AbstractDiagramElementModel_V001;
-import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.AbstractMemberModel_V001;
 import classman.model.v001.TaggedValueModel_V001;
 
 import java.awt.geom.Rectangle2D;
@@ -12,9 +12,9 @@ public class SceneTextArea {
     public final TextKind kind;
     /** Exactly where the text is. For a placeholder where the text would be. */
     public final Rectangle2D.Double area;
-    /** The attribute of the class if the text is an attribute line, null for the blank line of a class without
-     * attributes and for all other texts. */
-    public final AttributeModel_V001 attribute;
+    /** The attribute or method of the class if the text is a line of one, null for the blank line of a class without
+     * members of the kind and for all other texts. */
+    public final AbstractMemberModel_V001 member;
     /** The tagged value of the class if the text is a tagged value, null for all other texts. */
     public final TaggedValueModel_V001 taggedValue;
     /** True if the element doesn't have the text yet: the area is where it would stand, so that the user can create it. */
@@ -25,8 +25,8 @@ public class SceneTextArea {
     }
 
     public SceneTextArea(AbstractDiagramElementModel_V001 element, TextKind kind, Rectangle2D.Double area,
-                         AttributeModel_V001 attribute) {
-        this(element, kind, area, attribute, null, false);
+                         AbstractMemberModel_V001 member) {
+        this(element, kind, area, member, null, false);
     }
 
     public SceneTextArea(AbstractDiagramElementModel_V001 element, TextKind kind, Rectangle2D.Double area,
@@ -35,11 +35,11 @@ public class SceneTextArea {
     }
 
     private SceneTextArea(AbstractDiagramElementModel_V001 element, TextKind kind, Rectangle2D.Double area,
-                          AttributeModel_V001 attribute, TaggedValueModel_V001 taggedValue, boolean placeholder) {
+                          AbstractMemberModel_V001 member, TaggedValueModel_V001 taggedValue, boolean placeholder) {
         this.element = element;
         this.kind = kind;
         this.area = area;
-        this.attribute = attribute;
+        this.member = member;
         this.taggedValue = taggedValue;
         this.placeholder = placeholder;
     }

@@ -20,8 +20,11 @@ public class ClassModel_V001 extends AbstractBoxModel_V001 {
     public ChangeModel_V001 stereotypeElementChange;
     public final List<TaggedValueModel_V001> taggedValues = new ArrayList<>();
     public final List<AttributeModel_V001> attributes = new ArrayList<>();
+    public final List<MethodModel_V001> methods = new ArrayList<>();
     /** True if the box doesn't show its attribute compartment, which keeps its attributes. */
     public boolean attributesHidden;
+    /** Whether the box shows its method compartment: by default if it has methods. It keeps its methods when hidden. */
+    public CompartmentVisibility_V001 methodsVisibility = CompartmentVisibility_V001.AUTOMATIC;
 
     /** @return true if a change set added or removed an attribute or one of its infos, or changed one of their texts */
     public boolean hasMarkedAttributes() {
@@ -37,6 +40,40 @@ public class ClassModel_V001 extends AbstractBoxModel_V001 {
      * marks of a change set must stay visible, so attributes with marks are shown whatever the source says. */
     public boolean showsAttributes() {
         return kind.hasAttributes() && (!attributesHidden || hasMarkedAttributes());
+    }
+
+    /** @return true if a change set added or removed a method, one of its parameters or infos, or changed one of their
+     * texts */
+    public boolean hasMarkedMethods() {
+        for (MethodModel_V001 method : methods) {
+            if (method.hasMarks()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** @return true if the box shows its method compartment: it has methods and the source doesn't hide it, or the
+     * source shows it. The marks of a change set must stay visible, so methods with marks are shown whatever the
+     * source says. */
+    public boolean showsMethods() {
+        return switch (methodsVisibility) {
+            case SHOWN -> true;
+            case HIDDEN -> hasMarkedMethods();
+            case AUTOMATIC -> !methods.isEmpty();
+        };
+    }
+
+    /** @return the attributes or the methods of the box */
+    public List<? extends AbstractMemberModel_V001> members(Compartment_V001 compartment) {
+        return compartment == Compartment_V001.ATTRIBUTES ? attributes : methods;
+    }
+
+    /** @return the attributes and the methods of the box, in this order, each in the order of the source */
+    public List<AbstractMemberModel_V001> allMembers() {
+        List<AbstractMemberModel_V001> all = new ArrayList<>(attributes);
+        all.addAll(methods);
+        return all;
     }
 
     public ClassModel_V001(String name) {

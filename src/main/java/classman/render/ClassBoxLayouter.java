@@ -1,9 +1,10 @@
 package classman.render;
 
-import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.AbstractMemberModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.Compartment_V001;
 import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.TaggedValueModel_V001;
 
@@ -39,7 +40,7 @@ public class ClassBoxLayouter {
     private final ChangePalette palette;
     private final TextHighlighter highlighter;
     private final TextFont font;
-    private final AttributeTextBuilder attributeTextBuilder = new AttributeTextBuilder();
+    private final MemberTextBuilder memberTextBuilder = new MemberTextBuilder();
 
     /** @param measurer measures texts in the font */
     public ClassBoxLayouter(TextMeasurer measurer, ChangePalette palette, TextFont font) {
@@ -62,10 +63,9 @@ public class ClassBoxLayouter {
         String derivedStereotype = showsDerivedStereotype ? stereotypeText(model.kind.derivedStereotype) : null;
         String stereotype = model.stereotype == null ? null : stereotypeText(model.stereotype);
         List<MarkedText> taggedValues = taggedValueTexts(model);
-        boolean showsAttributes = model.showsAttributes();
-        List<AttributeModel_V001> shownAttributes = showsAttributes ? shownAttributes(model) : List.of();
-        List<MarkedText> attributes = attributeTexts(shownAttributes);
-        double contentWidth = contentWidth(model, derivedStereotype, stereotype, taggedValues, attributes);
+        CompartmentLines attributes = CompartmentLines.of(model, Compartment_V001.ATTRIBUTES, memberTextBuilder);
+        CompartmentLines methods = CompartmentLines.of(model, Compartment_V001.METHODS, memberTextBuilder);
+        double contentWidth = contentWidth(model, derivedStereotype, stereotype, taggedValues, attributes, methods);
         double width = contentWidth + 2 * PADDING_X;
 
         List<AbstractSceneElement> backgrounds = new ArrayList<>();
@@ -93,14 +93,17 @@ public class ClassBoxLayouter {
             }
         }
         y += PADDING_Y;
-        Map<String, Rectangle2D.Double> attributeAreas = new LinkedHashMap<>();
-        Map<AttributeModel_V001, Rectangle2D.Double> lineAreas = new LinkedHashMap<>();
-        if (showsAttributes) {
-            elements.add(new SceneLine(0, y, width, y, false, lineColor, STROKE_WIDTH));
-            y += PADDING_Y;
-            y = addAttributes(elements, backgrounds, overlays, model, shownAttributes, attributes, width, y,
-                attributeAreas, lineAreas, textColor);
-            y += PADDING_Y;
+        Map<String, Rectangle2D.Double> memberAreas = new LinkedHashMap<>();
+        Map<AbstractMemberModel_V001, Rectangle2D.Double> attributeLineAreas = new LinkedHashMap<>();
+        Map<AbstractMemberModel_V001, Rectangle2D.Double> methodLineAreas = new LinkedHashMap<>();
+        for (CompartmentLines compartment : List.of(attributes, methods)) {
+            if (compartment.isShown) {
+                elements.add(new SceneLine(0, y, width, y, false, lineColor, STROKE_WIDTH));
+                y += PADDING_Y;
+                y = addMembers(elements, backgrounds, overlays, model, compartment, width, y, memberAreas,
+                    compartment == attributes ? attributeLineAreas : methodLineAreas, textColor);
+                y += PADDING_Y;
+            }
         }
 
         if (change == null) {
@@ -123,8 +126,9 @@ public class ClassBoxLayouter {
                 new Rectangle2D.Double(PADDING_X, stereotypeTop, contentWidth, nameTop - stereotypeTop));
         }
         textAreas.put(TextKind.CLASS_NAME, new Rectangle2D.Double(PADDING_X, nameTop, contentWidth, nameBottom - nameTop));
-        return new BoxLayout(width, y, all, attributeAreas, change == null ? 0 : FRAME_STROKE_WIDTH / 2, textAreas,
-            new AttributeLineAreas(lineAreas), new TaggedValueAreas(taggedAreas));
+        return new BoxLayout(width, y, all, memberAreas, change == null ? 0 : FRAME_STROKE_WIDTH / 2, textAreas,
+            new MemberLineAreas(TextKind.ATTRIBUTE_LINE, attributeLineAreas),
+            new MemberLineAreas(TextKind.METHOD_LINE, methodLineAreas), new TaggedValueAreas(taggedAreas));
     }
 
     private SceneRectangle frame(double width, double height, ChangeModel_V001 change) {
@@ -195,49 +199,19 @@ public class ClassBoxLayouter {
         return texts;
     }
 
-    /** The attributes which are not hidden. If any is hidden, and the class has no line "..." of its own, a line "..."
-     * follows them, marked with the change set of the first mark of the hidden attributes. */
-    private List<AttributeModel_V001> shownAttributes(ClassModel_V001 model) {
-        List<AttributeModel_V001> shown = new ArrayList<>();
-        String hiddenMarkChangeSet = null;
-        boolean hasHidden = false;
-        boolean hasMarker = false;
-        for (AttributeModel_V001 attribute : model.attributes) {
-            if (attribute.hidden) {
-                hasHidden = true;
-                hiddenMarkChangeSet = hiddenMarkChangeSet == null ? attribute.firstChangeSet() : hiddenMarkChangeSet;
-            }
-            else {
-                shown.add(attribute);
-                hasMarker = hasMarker || attribute.hiddenAttributesMarker;
-            }
-        }
-        if (hasHidden && !hasMarker) {
-            shown.add(AttributeModel_V001.hiddenAttributesMarker(hiddenMarkChangeSet));
-        }
-        return shown;
-    }
-
-    private List<MarkedText> attributeTexts(List<AttributeModel_V001> attributes) {
-        List<MarkedText> texts = new ArrayList<>();
-        for (AttributeModel_V001 attribute : attributes) {
-            texts.add(attributeTextBuilder.build(attribute));
-        }
-        return texts;
-    }
-
     // ---- width ----
 
     private double contentWidth(ClassModel_V001 model, String derivedStereotype, String stereotype,
-                                List<MarkedText> taggedValues, List<MarkedText> attributes) {
+                                List<MarkedText> taggedValues, CompartmentLines... compartments) {
         if (model.width == null) {
-            return Math.max(naturalWidth(model, derivedStereotype, stereotype, taggedValues, attributes), MIN_BOX_WIDTH - 2 * PADDING_X);
+            return Math.max(naturalWidth(model, derivedStereotype, stereotype, taggedValues, compartments),
+                MIN_BOX_WIDTH - 2 * PADDING_X);
         }
         return Math.max(model.width - 2 * PADDING_X, wrapper.longestWord(model.name, true));
     }
 
     private double naturalWidth(ClassModel_V001 model, String derivedStereotype, String stereotype,
-                                List<MarkedText> taggedValues, List<MarkedText> attributes) {
+                                List<MarkedText> taggedValues, CompartmentLines... compartments) {
         double widest = measurer.width(model.name, true);
         if (derivedStereotype != null) {
             widest = Math.max(widest, measurer.width(derivedStereotype, false));
@@ -248,8 +222,10 @@ public class ClassBoxLayouter {
         for (MarkedText tag : taggedValues) {
             widest = Math.max(widest, measurer.width(TextWrapper.oneLine(tag.text()), false));
         }
-        for (MarkedText attribute : attributes) {
-            widest = Math.max(widest, measurer.width(TextWrapper.oneLine(attribute.text()), false));
+        for (CompartmentLines compartment : compartments) {
+            for (MarkedText line : compartment.texts) {
+                widest = Math.max(widest, measurer.width(TextWrapper.oneLine(line.text()), false));
+            }
         }
         return widest;
     }
@@ -296,24 +272,24 @@ public class ClassBoxLayouter {
     }
 
     /**
-     * An empty class still gets one blank attribute line. The box around the text of each attribute with an ID is
-     * noted in attributeAreas (the box of the line "..." also for the hidden attributes with an ID), the whole line of each attribute which can be changed in lineAreas, the blank line of
-     * an empty class under the key null. The attributes are marked unless the class as a whole is added or removed.
-     * Returns the y below the last line.
+     * An empty compartment still gets one blank line. The box around the text of each member with an ID is noted in
+     * memberAreas (the box of the line "..." also for the hidden members with an ID), the whole line of each member
+     * which can be changed in lineAreas, the blank line of an empty compartment under the key null. The members are
+     * marked unless the class as a whole is added or removed. Returns the y below the last line.
      */
-    private double addAttributes(List<AbstractSceneElement> elements, List<AbstractSceneElement> backgrounds,
-                                 List<AbstractSceneElement> overlays, ClassModel_V001 model,
-                                 List<AttributeModel_V001> shownAttributes, List<MarkedText> attributes, double boxWidth, double y, Map<String, Rectangle2D.Double> attributeAreas,
-                                 Map<AttributeModel_V001, Rectangle2D.Double> lineAreas, String textColor) {
+    private double addMembers(List<AbstractSceneElement> elements, List<AbstractSceneElement> backgrounds,
+                              List<AbstractSceneElement> overlays, ClassModel_V001 model, CompartmentLines compartment,
+                              double boxWidth, double y, Map<String, Rectangle2D.Double> memberAreas,
+                              Map<AbstractMemberModel_V001, Rectangle2D.Double> lineAreas, String textColor) {
         double contentWidth = boxWidth - 2 * PADDING_X;
-        if (attributes.isEmpty()) {
+        if (compartment.members.isEmpty()) {
             lineAreas.put(null, new Rectangle2D.Double(PADDING_X, y, contentWidth, measurer.lineHeight()));
             return y + measurer.lineHeight();
         }
         double lineY = y;
-        for (int i = 0; i < attributes.size(); i++) {
+        for (int i = 0; i < compartment.members.size(); i++) {
             double top = lineY;
-            String line = wrapper.clip(attributes.get(i).text(), contentWidth, false);
+            String line = wrapper.clip(compartment.texts.get(i).text(), contentWidth, false);
             double lineWidth = measurer.width(line, false);
             SceneText sceneText = new SceneText(PADDING_X, lineY + measurer.ascent(), line, false, TextAnchor.START,
                 lineWidth, textColor, font);
@@ -321,49 +297,49 @@ public class ClassBoxLayouter {
             List<SceneText> lines = List.of(sceneText);
             double textRight = PADDING_X + lineWidth;
             lineY += measurer.lineHeight();
-            AttributeModel_V001 attribute = shownAttributes.get(i);
+            AbstractMemberModel_V001 member = compartment.members.get(i);
             if (model.change == null) {
-                markAttribute(backgrounds, overlays, attribute, attributes.get(i), lines, boxWidth, top, lineY);
+                markMember(backgrounds, overlays, member, compartment.texts.get(i), lines, boxWidth, top, lineY);
             }
             Rectangle2D.Double textBox = new Rectangle2D.Double(PADDING_X - ATTRIBUTE_ATTACH_GAP, top,
                 textRight - PADDING_X + 2 * ATTRIBUTE_ATTACH_GAP, lineY - top);
-            if (attribute.id != null) {
-                attributeAreas.put(attribute.id, textBox);
+            if (member.id != null) {
+                memberAreas.put(member.id, textBox);
             }
-            if (attribute.hiddenAttributesMarker) {
-                hiddenAttributesLeadToMarker(model, textBox, attributeAreas);
+            if (member.hiddenMarker) {
+                hiddenMembersLeadToMarker(model, compartment, textBox, memberAreas);
             }
-            if (!attribute.hiddenAttributesMarker) {
-                lineAreas.put(attribute, new Rectangle2D.Double(PADDING_X, top, contentWidth, lineY - top));
+            else {
+                lineAreas.put(member, new Rectangle2D.Double(PADDING_X, top, contentWidth, lineY - top));
             }
         }
         return lineY;
     }
 
-    /** What is attached to a hidden attribute is attached to the box of the line "...". */
-    private void hiddenAttributesLeadToMarker(ClassModel_V001 model, Rectangle2D.Double markerBox,
-                                              Map<String, Rectangle2D.Double> attributeAreas) {
-        for (AttributeModel_V001 attribute : model.attributes) {
-            if (attribute.hidden && attribute.id != null) {
-                attributeAreas.put(attribute.id, markerBox);
+    /** What is attached to a hidden member is attached to the box of the line "...". */
+    private void hiddenMembersLeadToMarker(ClassModel_V001 model, CompartmentLines compartment,
+                                           Rectangle2D.Double markerBox, Map<String, Rectangle2D.Double> memberAreas) {
+        for (AbstractMemberModel_V001 member : model.members(compartment.compartment)) {
+            if (member.hidden && member.id != null) {
+                memberAreas.put(member.id, markerBox);
             }
         }
     }
 
-    /** An added or removed attribute gets a colored row, the other attributes the backgrounds of their changed texts. */
-    private void markAttribute(List<AbstractSceneElement> backgrounds, List<AbstractSceneElement> overlays,
-                               AttributeModel_V001 attribute, MarkedText text, List<SceneText> lines, double boxWidth,
-                               double top, double bottom) {
-        if (attribute.change == null) {
+    /** An added or removed member gets a colored row, the other members the backgrounds of their changed texts. */
+    private void markMember(List<AbstractSceneElement> backgrounds, List<AbstractSceneElement> overlays,
+                            AbstractMemberModel_V001 member, MarkedText text, List<SceneText> lines, double boxWidth,
+                            double top, double bottom) {
+        if (member.change == null) {
             backgrounds.addAll(highlighter.highlights(text, lines));
             overlays.addAll(highlighter.strikes(text, lines));
             return;
         }
-        String changeSet = attribute.change.changeSet;
+        String changeSet = member.change.changeSet;
         backgrounds.add(new SceneRectangle(STROKE_WIDTH, top, boxWidth - 2 * STROKE_WIDTH, bottom - top,
             palette.pale(changeSet), null));
         backgrounds.addAll(highlighter.wholeHighlights(changeSet, lines));
-        if (attribute.change.type == ChangeType_V001.REMOVED) {
+        if (member.change.type == ChangeType_V001.REMOVED) {
             overlays.addAll(highlighter.strikes(lines));
         }
     }

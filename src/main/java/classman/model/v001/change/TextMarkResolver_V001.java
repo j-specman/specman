@@ -1,13 +1,16 @@
 package classman.model.v001.change;
 
-import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.AbstractMemberModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.InfoModel_V001;
 import classman.model.v001.TextChangeModel_V001;
+
+import java.util.List;
 
 /**
  * Resolves the text marks of a change set. Accepting keeps the new text, rejecting brings back the backup. An
- * optional text, which is empty or has no backup after that, is gone: the label, type, stereotype, multiplicity or info
+ * optional text, which is empty or has no backup after that, is gone: the label, type, stereotype, multiplicity, parameter or info
  * item disappears, a tagged value is left with its key.
  */
 class TextMarkResolver_V001 {
@@ -54,8 +57,10 @@ class TextMarkResolver_V001 {
             if (classModel.stereotype == null) {
                 StereotypeChanger_V001.clear(classModel);
             }
-            for (AttributeModel_V001 attribute : classModel.attributes) {
-                attribute.infos.removeIf(info -> info.text == null);
+            for (AbstractMemberModel_V001 member : classModel.allMembers()) {
+                for (List<InfoModel_V001> entries : member.entryLists()) {
+                    entries.removeIf(entry -> entry.text == null);
+                }
             }
         }
     }

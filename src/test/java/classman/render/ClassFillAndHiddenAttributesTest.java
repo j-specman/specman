@@ -36,7 +36,7 @@ class ClassFillAndHiddenAttributesTest {
     assertTrue(texts(shown).stream().anyMatch(text -> text.contains("first")));
     assertTrue(texts(hidden).stream().noneMatch(text -> text.contains("first")));
     assertTrue(all(hidden, SceneLine.class).isEmpty());
-    assertTrue(hidden.textAreas.stream().noneMatch(text -> text.attribute != null));
+    assertTrue(hidden.textAreas.stream().noneMatch(text -> text.member != null));
   }
 
   /** Attributes with a mark of a change set are shown whatever the source says, so that a change doesn't go unnoticed. */

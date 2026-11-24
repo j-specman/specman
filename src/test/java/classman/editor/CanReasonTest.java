@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.Compartment_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import org.junit.jupiter.api.Test;
 
@@ -75,15 +76,15 @@ class CanReasonTest {
   @Test
   void attributeReasons() throws ClassDiagramParseException {
     open("classdiagram {\n  interface I (11111111) at(10, 20)\n}");
-    assertEquals("An interface has no attributes.", editing.canAddAttributeTo(editing.selectedClass()).whyNot());
+    assertEquals("An interface has no attributes.", editing.canAddMemberTo(editing.selectedClass(), Compartment_V001.ATTRIBUTES).whyNot());
 
     open("classdiagram {\n  class A (11111111) at(10, 20) hideattributes {\n    -x\n  }\n}");
     assertEquals("The attributes of the class are hidden.",
-      editing.canAddAttributeTo(editing.selectedClass()).whyNot());
+      editing.canAddMemberTo(editing.selectedClass(), Compartment_V001.ATTRIBUTES).whyNot());
 
     open("classdiagram {\n  class A (11111111) at(10, 20) {\n    -x change(added, yellow)\n  }\n}");
     assertEquals("Attributes with marks of a change set can't be hidden.",
-      editing.canHideAttributesOf(editing.selectedClass()).whyNot());
+      editing.canHideCompartmentOf(editing.selectedClass(), Compartment_V001.ATTRIBUTES).whyNot());
   }
 
   /** The German texts exist for every reason. */

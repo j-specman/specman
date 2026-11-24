@@ -56,7 +56,7 @@ class HiddenAttributeEditingTest {
     open(CLASS);
     double heightWith = editing.selectedArea().getHeight();
 
-    editing.hideAttribute(editing.selectedClass(), attribute("y"));
+    editing.hideMember(editing.selectedClass(), attribute("y"));
 
     assertTrue(parsedClass().attributes.get(1).hidden);
     assertFalse(parsedClass().attributes.get(0).hidden);
@@ -64,7 +64,7 @@ class HiddenAttributeEditingTest {
     assertEquals(1, host.reportedSources.size());
     assertTrue(editing.canUndo());
     assertEquals(heightWith, editing.selectedArea().getHeight(), 0.001);
-    assertTrue(editing.scene().textAreas.stream().noneMatch(text -> text.attribute != null && "y".equals(text.attribute.name)));
+    assertTrue(editing.scene().textAreas.stream().noneMatch(text -> text.member != null && "y".equals(text.member.name)));
   }
 
   /** Hiding is no change: nothing is marked while changes are tracked, and an attribute which carries marks can be
@@ -74,8 +74,8 @@ class HiddenAttributeEditingTest {
     host.trackedChangeSet = "yellow";
     open("classdiagram {\n  class A (11111111) at(10, 20) {\n    -x change(added, blue)\n    -y\n  }\n}");
 
-    editing.hideAttribute(editing.selectedClass(), attribute("x"));
-    editing.hideAttribute(editing.selectedClass(), attribute("y"));
+    editing.hideMember(editing.selectedClass(), attribute("x"));
+    editing.hideMember(editing.selectedClass(), attribute("y"));
 
     assertTrue(parsedClass().attributes.get(0).hidden);
     assertEquals("blue", parsedClass().attributes.get(0).change.changeSet);
@@ -87,25 +87,25 @@ class HiddenAttributeEditingTest {
   void whatCannotBeHidden() throws ClassDiagramParseException {
     open("classdiagram {\n  class A (11111111) at(10, 20) {\n    -x (hidden)\n    ...\n  }\n}");
 
-    assertFalse(editing.canHideAttribute(editing.selectedClass(), attribute("x")).can());
-    assertFalse(editing.canHideAttribute(editing.selectedClass(), editing.selectedClass().attributes.get(1)).can());
-    assertFalse(editing.canHideAttribute(editing.selectedClass(), null).can());
+    assertFalse(editing.canHideMember(editing.selectedClass(), attribute("x")).can());
+    assertFalse(editing.canHideMember(editing.selectedClass(), editing.selectedClass().attributes.get(1)).can());
+    assertFalse(editing.canHideMember(editing.selectedClass(), null).can());
 
     open("classdiagram {\n  class A (11111111) change(removed, yellow) at(10, 20) {\n    -x\n  }\n}");
 
-    assertFalse(editing.canHideAttribute(editing.selectedClass(), attribute("x")).can());
+    assertFalse(editing.canHideMember(editing.selectedClass(), attribute("x")).can());
   }
 
   /** Showing takes the mark away, the attribute is back in its place. */
   @Test
   void showAgain() throws ClassDiagramParseException {
     open(CLASS);
-    editing.hideAttribute(editing.selectedClass(), attribute("y"));
+    editing.hideMember(editing.selectedClass(), attribute("y"));
 
-    editing.showAttribute(editing.selectedClass(), attribute("y"));
+    editing.showMember(editing.selectedClass(), attribute("y"));
 
     assertFalse(editing.source().contains("hidden"), editing.source());
-    assertTrue(editing.scene().textAreas.stream().anyMatch(text -> text.attribute == attribute("y")));
+    assertTrue(editing.scene().textAreas.stream().anyMatch(text -> text.member == attribute("y")));
   }
 
   private static List<String> checked(JMenu menu) {

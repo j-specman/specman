@@ -28,10 +28,16 @@ import classman.model.v001.ClassDiagram_V001Parser.ClassHeadContext;
 import classman.model.v001.ClassDiagram_V001Parser.DependencyRelationContext;
 import classman.model.v001.ClassDiagram_V001Parser.DiagramNameContext;
 import classman.model.v001.ClassDiagram_V001Parser.ElementContext;
+import classman.model.v001.ClassDiagram_V001Parser.CompartmentSpecContext;
+import classman.model.v001.ClassDiagram_V001Parser.MemberContext;
+import classman.model.v001.ClassDiagram_V001Parser.MethodContext;
+import classman.model.v001.ClassDiagram_V001Parser.MethodNameContext;
+import classman.model.v001.ClassDiagram_V001Parser.ParameterContext;
+import classman.model.v001.ClassDiagram_V001Parser.ParametersContext;
 import classman.model.v001.ClassDiagram_V001Parser.ExtendsRelationContext;
 import classman.model.v001.ClassDiagram_V001Parser.ImplementsRelationContext;
 import classman.model.v001.ClassDiagram_V001Parser.InfoContext;
-import classman.model.v001.ClassDiagram_V001Parser.InfoTextContext;
+import classman.model.v001.ClassDiagram_V001Parser.VisibilityContext;
 import classman.model.v001.ClassDiagram_V001Parser.InfosContext;
 import classman.model.v001.ClassDiagram_V001Parser.LinePointContext;
 import classman.model.v001.ClassDiagram_V001Parser.LabelPositionContext;
@@ -51,10 +57,12 @@ import classman.model.v001.ClassDiagram_V001Parser.WaypointContext;
 import classman.model.v001.ClassDiagram_V001Parser.WidthSpecContext;
 import classman.model.v001.ClassDiagram_V001Parser.WordOrStringContext;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.CompartmentVisibility_V001;
 import classman.model.v001.DependencyRelationModel_V001;
 import classman.model.v001.ExtendsRelationModel_V001;
 import classman.model.v001.ImplementsRelationModel_V001;
 import classman.model.v001.InfoModel_V001;
+import classman.model.v001.MethodModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.model.v001.TextPlaceModel_V001;
@@ -68,6 +76,7 @@ import classman.model.v001.TextChangeModel_V001;
 import classman.model.v001.Visibility_V001;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -137,7 +146,7 @@ public class ClassDiagramParser_V001 {
         model.position = position(head.position());
         model.width = width(head.widthSpec());
         model.style = classStyleReader.read(head.styleSpec());
-        model.attributesHidden = head.hideSpec() != null;
+        readCompartmentSpec(model, head.compartmentSpec());
         model.stereotype = stereotype(head.STEREOTYPE());
         model.stereotypeId = id(head.stereotypeId);
         model.stereotypeChange = textChange(head.stereotypeChange);
@@ -148,13 +157,41 @@ public class ClassDiagramParser_V001 {
             }
         }
         if (body != null) {
-            checkOneAttributePerLine(body);
-            for (AttributeContext attribute : body.attribute()) {
-                checkTypeAllowed(kind, attribute);
-                model.attributes.add(buildAttribute(attribute));
+            checkOneMemberPerLine(body);
+            for (MemberContext member : body.member()) {
+                if (member.method() != null) {
+                    model.methods.add(buildMethod(member.method()));
+                }
+                else {
+                    checkAttributeAllowed(kind, member.attribute());
+                    model.attributes.add(buildAttribute(member.attribute()));
+                }
             }
         }
         return model;
+    }
+
+    /** Each word of the compartment spec may stand once, and the method compartment is hidden or shown, not both. */
+    private void readCompartmentSpec(ClassModel_V001 model, CompartmentSpecContext spec)
+            throws ClassDiagramParseException {
+        if (spec == null) {
+            return;
+        }
+        int hideMethods = spec.HIDEMETHODS().size();
+        int showMethods = spec.SHOWMETHODS().size();
+        if (spec.HIDEATTRIBUTES().size() > 1 || hideMethods > 1 || showMethods > 1) {
+            throw problem(spec.getStart(), "hideattributes, hidemethods and showmethods may stand once each.");
+        }
+        if (hideMethods > 0 && showMethods > 0) {
+            throw problem(spec.getStart(), "hidemethods and showmethods exclude each other.");
+        }
+        model.attributesHidden = !spec.HIDEATTRIBUTES().isEmpty();
+        if (hideMethods > 0) {
+            model.methodsVisibility = CompartmentVisibility_V001.HIDDEN;
+        }
+        else if (showMethods > 0) {
+            model.methodsVisibility = CompartmentVisibility_V001.SHOWN;
+        }
     }
 
     private ClassKind_V001 kindOf(ClassDeclContext declaration) {
@@ -190,26 +227,28 @@ public class ClassDiagramParser_V001 {
         return tag.QUOTED_STRING() != null ? unquote(tag.QUOTED_STRING().getText()) : null;
     }
 
-    // ---- attributes ----
+    // ---- attributes and methods ----
 
-    /** Names and types with spaces must be in double quotes, else one attribute would silently become several. */
-    private void checkTypeAllowed(ClassKind_V001 kind, AttributeContext attribute) throws ClassDiagramParseException {
+    /** An enum value has no type, and an interface has no attributes. */
+    private void checkAttributeAllowed(ClassKind_V001 kind, AttributeContext attribute)
+            throws ClassDiagramParseException {
+        if (!kind.hasAttributes()) {
+            throw problem(attribute.getStart(), "An interface has no attributes.");
+        }
         if (!kind.hasTypedAttributes() && attribute.COLON() != null) {
-            Token start = attribute.getStart();
-            throw new ClassDiagramParseException("line " + start.getLine() + ":" + start.getCharPositionInLine()
-                + " The value of an enum has no type.");
+            throw problem(attribute.getStart(), "The value of an enum has no type.");
         }
     }
 
-    private void checkOneAttributePerLine(ClassBodyContext body) throws ClassDiagramParseException {
-        List<AttributeContext> attributes = body.attribute();
-        for (int i = 1; i < attributes.size(); i++) {
-            Token previousEnd = attributes.get(i - 1).getStop();
-            Token start = attributes.get(i).getStart();
+    /** Names and types with spaces must be in double quotes, else one member would silently become several. */
+    private void checkOneMemberPerLine(ClassBodyContext body) throws ClassDiagramParseException {
+        List<MemberContext> members = body.member();
+        for (int i = 1; i < members.size(); i++) {
+            Token previousEnd = members.get(i - 1).getStop();
+            Token start = members.get(i).getStart();
             if (start.getLine() == previousEnd.getLine()) {
-                throw new ClassDiagramParseException("line " + start.getLine() + ":" + start.getCharPositionInLine()
-                    + " Two attributes start in one line. Attribute names and types with spaces need double quotes,"
-                    + " for example \"In Baum anzeigen\".");
+                throw problem(start, "Two attributes or methods start in one line. Names and types with spaces need"
+                    + " double quotes, for example \"In Baum anzeigen\".");
             }
         }
     }
@@ -218,12 +257,10 @@ public class ClassDiagramParser_V001 {
         if (attribute.ELLIPSIS() != null) {
             return AttributeModel_V001.hiddenAttributesMarker();
         }
-        Visibility_V001 visibility = attribute.visibility() == null ? null
-            : Visibility_V001.fromSign(attribute.visibility().getText().charAt(0));
         List<WordOrStringContext> nameAndType = attribute.wordOrString();
-        String name = text(nameAndType.get(0));
         String type = attribute.COLON() == null ? null : text(nameAndType.get(1));
-        AttributeModel_V001 model = new AttributeModel_V001(visibility, name, type, infos(attribute.infos()));
+        AttributeModel_V001 model = new AttributeModel_V001(visibility(attribute.visibility()),
+            text(nameAndType.get(0)), type, infos(attribute.infos()));
         model.id = id(attribute.ELEMENT_ID());
         model.visibilityChange = textChange(attribute.visibilityChange);
         model.nameChange = textChange(attribute.nameChange);
@@ -233,26 +270,60 @@ public class ClassDiagramParser_V001 {
         return model;
     }
 
+    private MethodModel_V001 buildMethod(MethodContext method) throws ClassDiagramParseException {
+        String returnType = method.COLON() == null ? null : text(method.wordOrString());
+        MethodModel_V001 model = new MethodModel_V001(visibility(method.visibility()), text(method.methodName()),
+            parameters(method.parameters()), returnType, infos(method.infos()));
+        model.id = id(method.ELEMENT_ID());
+        model.visibilityChange = textChange(method.visibilityChange);
+        model.nameChange = textChange(method.nameChange);
+        model.typeChange = textChange(method.typeChange);
+        model.change = change(method.changeMark());
+        model.hidden = method.HIDDEN_MARK() != null;
+        return model;
+    }
+
+    private Visibility_V001 visibility(VisibilityContext visibility) {
+        return visibility == null ? null : Visibility_V001.fromSign(visibility.getText().charAt(0));
+    }
+
     private List<InfoModel_V001> infos(InfosContext infos) throws ClassDiagramParseException {
         List<InfoModel_V001> result = new ArrayList<>();
         if (infos != null) {
             for (InfoContext info : infos.info()) {
-                InfoModel_V001 model = new InfoModel_V001(infoText(info.infoText()));
-                model.change = change(info.changeMark());
-                model.textChange = textChange(info.textChange());
-                result.add(model);
+                result.add(listEntry(info.infoText(), info.changeMark(), info.textChange()));
             }
         }
         return result;
     }
 
-    /** The info as written, except that a single quoted string loses its quotes. */
-    private String infoText(InfoTextContext info) {
-        if (info.getChildCount() == 1 && info.QUOTED_STRING().size() == 1) {
-            return unquote(info.getText());
+    private List<InfoModel_V001> parameters(ParametersContext parameters) throws ClassDiagramParseException {
+        List<InfoModel_V001> result = new ArrayList<>();
+        for (ParameterContext parameter : parameters.parameter()) {
+            result.add(listEntry(parameter.parameterText(), parameter.changeMark(), parameter.textChange()));
         }
-        return info.getStart().getInputStream().getText(
-            Interval.of(info.getStart().getStartIndex(), info.getStop().getStopIndex()));
+        return result;
+    }
+
+    private InfoModel_V001 listEntry(ParserRuleContext text, ChangeMarkContext changeMark,
+                                     TextChangeContext textChange) throws ClassDiagramParseException {
+        InfoModel_V001 model = new InfoModel_V001(entryText(text));
+        model.change = change(changeMark);
+        model.textChange = textChange(textChange);
+        return model;
+    }
+
+    /** The text of an info or parameter as written, except that a single quoted string loses its quotes. */
+    private String entryText(ParserRuleContext entry) {
+        if (entry.getChildCount() == 1 && entry.getStart().getType() == ClassDiagram_V001Lexer.QUOTED_STRING) {
+            return unquote(entry.getText());
+        }
+        return entry.getStart().getInputStream().getText(
+            Interval.of(entry.getStart().getStartIndex(), entry.getStop().getStopIndex()));
+    }
+
+    private ClassDiagramParseException problem(Token at, String message) {
+        return new ClassDiagramParseException("line " + at.getLine() + ":" + at.getCharPositionInLine() + " " + message);
     }
 
     // ---- relations ----
@@ -477,6 +548,10 @@ public class ClassDiagramParser_V001 {
 
     private String text(DiagramNameContext name) {
         return name.QUOTED_STRING() != null ? unquote(name.QUOTED_STRING().getText()) : name.getText();
+    }
+
+    private String text(MethodNameContext name) {
+        return name.plainWord() != null ? name.plainWord().getText() : unquote(name.QUOTED_STRING().getText());
     }
 
     private String text(WordOrStringContext wordOrString) {

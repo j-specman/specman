@@ -2,8 +2,9 @@ package classman.render;
 
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AnchorLineModel_V001;
-import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.AbstractMemberModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
+import classman.model.v001.Compartment_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.RelationType_V001;
@@ -15,9 +16,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Knows what is not drawn because the attribute compartment of a class is hidden: the attributes in it, the
+ * Knows what is not drawn because a compartment of a class is hidden: the attributes or methods in it, the
  * dependencies which start or end at them, the anchor lines which lead to them or to such a dependency, and the notes
- * which hang on nothing else which is shown. A note which has no anchor line is always shown. An attribute which is
+ * which hang on nothing else which is shown. A note which has no anchor line is always shown. A member which is
  * hidden on its own is not part of this, it is stood for by the line ". . .".
  */
 class HiddenElements {
@@ -28,16 +29,18 @@ class HiddenElements {
     HiddenElements(ClassDiagramModel_V001 model) {
         this.model = model;
         for (ClassModel_V001 classModel : model.classes()) {
-            if (!classModel.showsAttributes()) {
-                for (AttributeModel_V001 attribute : classModel.attributes) {
-                    addIfGiven(attribute.id);
+            for (Compartment_V001 compartment : Compartment_V001.values()) {
+                if (!compartment.isShownIn(classModel)) {
+                    for (AbstractMemberModel_V001 member : classModel.members(compartment)) {
+                        addIfGiven(member.id);
+                    }
                 }
             }
         }
-        Set<String> hiddenAttributeIds = new HashSet<>(hiddenTargetIds);
+        Set<String> hiddenMemberIds = new HashSet<>(hiddenTargetIds);
         for (AbstractRelationModel_V001 relation : model.relations()) {
             boolean isHiddenDependency = relation.type == RelationType_V001.DEPENDENCY
-                && (hiddenAttributeIds.contains(relation.fromId) || hiddenAttributeIds.contains(relation.toId));
+                && (hiddenMemberIds.contains(relation.fromId) || hiddenMemberIds.contains(relation.toId));
             if (isHiddenDependency) {
                 hiddenDependencies.add(relation);
                 addIfGiven(relation.id);

@@ -7,12 +7,13 @@ import classman.model.v001.AnchorLineModel_V001;
 import classman.model.v001.AssocClassLinkModel_V001;
 import classman.model.v001.AttachLineModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
-import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.AbstractMemberModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.Compartment_V001;
 import classman.model.v001.DependencyRelationModel_V001;
 import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.EndType_V001;
@@ -69,7 +70,7 @@ public class DiagramEditing {
   private final RouteEditing routeEditing = new RouteEditing();
   private final ElementIds ids = new ElementIds(new SecureRandom());
   private ClassDiagramModel_V001 model;
-  private AttributeEditing attributeEditing;
+  private final Map<Compartment_V001, MemberEditing<?, ?>> memberEditings = new EnumMap<>(Compartment_V001.class);
   private TaggedValueEditing taggedValueEditing;
   private PendingStereotype pendingStereotype;
   private AbstractBoxModel_V001 pendingBox;
@@ -97,7 +98,8 @@ public class DiagramEditing {
 
   private void load(String newSource) throws ClassDiagramParseException {
     model = new ClassDiagramParser_V001().parse(newSource);
-    attributeEditing = new AttributeEditing(model);
+    memberEditings.put(Compartment_V001.ATTRIBUTES, new AttributeEditing(model));
+    memberEditings.put(Compartment_V001.METHODS, new MethodEditing(model));
     taggedValueEditing = new TaggedValueEditing();
     pendingStereotype = new PendingStereotype();
     pendingBox = null;
@@ -638,7 +640,7 @@ public class DiagramEditing {
       case RELATION_LABEL -> orEmpty(((AbstractRelationModel_V001) text.element).label);
       case FROM_MULTIPLICITY -> orEmpty(((AssociationRelationModel_V001) text.element).fromMultiplicity);
       case TO_MULTIPLICITY -> orEmpty(((AssociationRelationModel_V001) text.element).toMultiplicity);
-      case ATTRIBUTE_LINE -> attributeEditing.textOf(text);
+      case ATTRIBUTE_LINE, METHOD_LINE -> memberEditings.get(text.kind.compartment()).textOf(text);
       case TAGGED_VALUE -> taggedValueEditing.textOf(text);
     };
   }
@@ -667,7 +669,8 @@ public class DiagramEditing {
     return switch (text.kind) {
       case FROM_MULTIPLICITY, TO_MULTIPLICITY -> !newText.contains("\n");
       case STEREOTYPE -> !newText.contains("\n") && !newText.contains(">");
-      case ATTRIBUTE_LINE -> attributeEditing.accepts(text, newText, host.trackedChangeSet());
+      case ATTRIBUTE_LINE, METHOD_LINE ->
+        memberEditings.get(text.kind.compartment()).accepts(text, newText, host.trackedChangeSet());
       case TAGGED_VALUE -> taggedValueEditing.accepts(newText);
       default -> true;
     };
@@ -686,8 +689,8 @@ public class DiagramEditing {
       throw new IllegalArgumentException("The text can't have the content: " + newText);
     }
     String changeSet = host.trackedChangeSet();
-    if (text.kind == TextKind.ATTRIBUTE_LINE) {
-      if (attributeEditing.setText(text, newText, changeSet)) {
+    if (text.kind.compartment() != null) {
+      if (memberEditings.get(text.kind.compartment()).setText(text, newText, changeSet)) {
         publish();
       }
       else {
@@ -755,19 +758,20 @@ public class DiagramEditing {
     }
   }
 
-  /** @return true if the text is the last attribute line of its class, or the blank line of a class without
-   * attributes: a new attribute can be typed right after it */
-  public boolean isLastAttributeLine(SceneTextArea text) {
-    return text.kind == TextKind.ATTRIBUTE_LINE && attributeEditing.isLastLine(text);
+  /** @return true if the text is the last line of its compartment, or the blank line of a class without members of
+   * the kind: a new member can be typed right after it */
+  public boolean isLastMemberLine(SceneTextArea text) {
+    Compartment_V001 compartment = text.kind.compartment();
+    return compartment != null && memberEditings.get(compartment).isLastLine(text);
   }
 
-  /** Puts a blank line at the end of the class, for a new attribute to be typed into. It is part of the picture, but
-   * not of the diagram, until it is given a text with {@link #setText}.
+  /** Puts a blank line at the end of the compartment of the class, for a new attribute or method to be typed into. It
+   * is part of the picture, but not of the diagram, until it is given a text with {@link #setText}.
    * @return the area of the blank line */
-  public SceneTextArea newAttributeAtEnd(ClassModel_V001 box) {
-    AttributeModel_V001 placeholder = attributeEditing.beginAtEnd(box);
+  public SceneTextArea newMemberAtEnd(ClassModel_V001 box, Compartment_V001 compartment) {
+    AbstractMemberModel_V001 placeholder = memberEditings.get(compartment).beginAtEnd(box);
     scene = host.renderer().layout(model);
-    return scene.textAreas.stream().filter(text -> text.attribute == placeholder).findFirst().orElseThrow();
+    return scene.textAreas.stream().filter(text -> text.member == placeholder).findFirst().orElseThrow();
   }
 
   /** @return whether the class can get parts: no change set has removed it */
@@ -779,72 +783,87 @@ public class DiagramEditing {
     return Can.IF(!isRemoved, texts.get("reason.class.removed"));
   }
 
-  /** @return whether the class can get an attribute or, for an enum, a value: it can get parts, is not an interface
-   * and shows its attributes */
-  public Can canAddAttributeTo(ClassModel_V001 box) {
+  /** @return whether the class can get an attribute (a value, for an enum) or a method: it can get parts, has the
+   * compartment and shows it */
+  public Can canAddMemberTo(ClassModel_V001 box, Compartment_V001 compartment) {
     Can parts = canAddPartsTo(box);
     if (!parts.can()) {
       return parts;
     }
-    if (!box.kind.hasAttributes()) {
+    if (!compartment.existsIn(box.kind)) {
       return Can.not(texts.get("reason.interface.noattributes"));
     }
-    return Can.IF(box.showsAttributes(), texts.get("reason.attributes.hidden"));
+    return Can.IF(compartment.isShownIn(box), texts.get(reasonKey(compartment, "hidden")));
   }
 
-  /** @return whether the class has an attribute compartment which can be hidden or shown: it is no interface, no
-   * change set has removed it, and its attributes carry no marks of a change set, which must not be hidden */
-  public Can canHideAttributesOf(ClassModel_V001 box) {
+  /** @return whether the class has the compartment, which can be hidden or shown: an interface has no attributes, no
+   * change set has removed the class, and the members carry no marks of a change set, which must not be hidden */
+  public Can canHideCompartmentOf(ClassModel_V001 box, Compartment_V001 compartment) {
     Can parts = canAddPartsTo(box);
     if (!parts.can()) {
       return parts;
     }
-    if (!box.kind.hasAttributes()) {
+    if (!compartment.existsIn(box.kind)) {
       return Can.not(texts.get("reason.interface.noattributes"));
     }
-    return Can.IF(!box.hasMarkedAttributes(), texts.get("reason.attributes.marked"));
+    return Can.IF(!compartment.hasMarkedMembersIn(box), texts.get(reasonKey(compartment, "marked")));
   }
 
-  /** @return whether the attribute can be hidden: the class shows it, no change set has removed the class, and it
-   * is not the line ". . ." */
-  public Can canHideAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
-    if (attribute == null || attribute.hidden || attribute.hiddenAttributesMarker
-      || !box.attributes.contains(attribute)) {
+  private static String reasonKey(Compartment_V001 compartment, String reason) {
+    return "reason." + (compartment == Compartment_V001.ATTRIBUTES ? "attributes" : "methods") + "." + reason;
+  }
+
+  /** @return the compartment of the class which has the member, null if the class hasn't */
+  private static Compartment_V001 compartmentOf(ClassModel_V001 box, AbstractMemberModel_V001 member) {
+    for (Compartment_V001 compartment : Compartment_V001.values()) {
+      if (box.members(compartment).contains(member)) {
+        return compartment;
+      }
+    }
+    return null;
+  }
+
+  /** @return whether the attribute or method can be hidden: the class shows it, no change set has removed the class,
+   * and it is not the line ". . ." */
+  public Can canHideMember(ClassModel_V001 box, AbstractMemberModel_V001 member) {
+    Compartment_V001 compartment = member == null ? null : compartmentOf(box, member);
+    if (compartment == null || member.hidden || member.hiddenMarker) {
       return Can.NOT;
     }
-    return canAddAttributeTo(box);
+    return canAddMemberTo(box, compartment);
   }
 
-  /** Hides the attribute, which stays in the diagram. Marks of change sets on it are not lost, the line ". . ." shows
-   * their color. Not marked as a change, like the width. One operation. */
-  public void hideAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
-    if (canHideAttribute(box, attribute).can()) {
-      attribute.hidden = true;
+  /** Hides the attribute or method, which stays in the diagram. Marks of change sets on it are not lost, the line
+   * ". . ." shows their color. Not marked as a change, like the width. One operation. */
+  public void hideMember(ClassModel_V001 box, AbstractMemberModel_V001 member) {
+    if (canHideMember(box, member).can()) {
+      member.hidden = true;
       publish();
     }
   }
 
-  /** @return whether the hidden attribute of the class can be shown again: no change set has removed the class */
-  public Can canShowAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
-    if (!attribute.hidden || !box.attributes.contains(attribute)) {
+  /** @return whether the hidden attribute or method of the class can be shown again: no change set has removed the
+   * class */
+  public Can canShowMember(ClassModel_V001 box, AbstractMemberModel_V001 member) {
+    if (!member.hidden || compartmentOf(box, member) == null) {
       return Can.NOT;
     }
     return canAddPartsTo(box);
   }
 
-  /** Shows the hidden attribute again. Not marked as a change. One operation. */
-  public void showAttribute(ClassModel_V001 box, AttributeModel_V001 attribute) {
-    if (canShowAttribute(box, attribute).can()) {
-      attribute.hidden = false;
+  /** Shows the hidden attribute or method again. Not marked as a change. One operation. */
+  public void showMember(ClassModel_V001 box, AbstractMemberModel_V001 member) {
+    if (canShowMember(box, member).can()) {
+      member.hidden = false;
       publish();
     }
   }
 
-  /** Hides or shows the attribute compartment of the class. The attributes stay in the diagram. Not marked as a
-   * change, like the width. One operation. */
-  public void setAttributesHidden(ClassModel_V001 box, boolean hidden) {
-    if (box.attributesHidden != hidden && canAddPartsTo(box).can() && (!hidden || canHideAttributesOf(box).can())) {
-      box.attributesHidden = hidden;
+  /** Hides or shows the compartment of the class. Its members stay in the diagram. Not marked as a change, like the
+   * width. One operation. */
+  public void setCompartmentHidden(ClassModel_V001 box, Compartment_V001 compartment, boolean hidden) {
+    boolean allowed = canAddPartsTo(box).can() && (!hidden || canHideCompartmentOf(box, compartment).can());
+    if (allowed && compartment.setHidden(box, hidden)) {
       publish();
     }
   }
@@ -927,11 +946,11 @@ public class DiagramEditing {
   }
 
   private boolean discardPendingParts() {
-    boolean attributeGone = attributeEditing.discardPending();
+    boolean memberGone = discardPendingMembers();
     boolean stereotypeGone = pendingStereotype.discard();
     boolean taggedValueGone = taggedValueEditing.discardPending();
     boolean boxGone = discardPendingBox();
-    return attributeGone || stereotypeGone || taggedValueGone || boxGone;
+    return memberGone || stereotypeGone || taggedValueGone || boxGone;
   }
 
   /** Starts to drag, from the point where the mouse was pressed: a handle of the selected relation if the point is at
@@ -1047,22 +1066,43 @@ public class DiagramEditing {
       if (box.id != null && (isFree || ownEndId.equals(box.id))) {
         ends.put(box.id, scene.elementAreaOf(box).area);
       }
-      if (isDependency && box.showsAttributes()) {
-        for (AttributeModel_V001 attribute : box.attributes) {
-          boolean isShown = !attribute.hidden && !attribute.hiddenAttributesMarker && !isRemoved(attribute.change);
-          if (attribute.id != null && (ownEndId.equals(attribute.id) || isShown && isFree)) {
-            ends.put(attribute.id, endArea(attribute.id));
-          }
-        }
+      if (isDependency) {
+        addMemberEnds(ends, box, ownEndId, isFree);
       }
     }
     return ends;
   }
 
-  /** @return the class which is the end of a dependency, or owns the attribute which is, null if there is none */
+  /** Adds the attributes and methods which the class shows and which an end of a dependency may hang on, the one it
+   * hangs on already in any case. */
+  private void addMemberEnds(Map<String, Rectangle2D> ends, ClassModel_V001 box, String ownEndId, boolean isFree) {
+    for (Compartment_V001 compartment : Compartment_V001.values()) {
+      if (!compartment.isShownIn(box)) {
+        continue;
+      }
+      for (AbstractMemberModel_V001 member : box.members(compartment)) {
+        boolean isShown = !member.hidden && !member.hiddenMarker && !isRemoved(member.change);
+        if (member.id != null && (ownEndId.equals(member.id) || isShown && isFree)) {
+          ends.put(member.id, endArea(member.id));
+        }
+      }
+    }
+  }
+
+  /** Takes away the blank lines for new attributes and methods.
+   * @return true if there was one */
+  private boolean discardPendingMembers() {
+    boolean gone = false;
+    for (MemberEditing<?, ?> editing : memberEditings.values()) {
+      gone = editing.discardPending() || gone;
+    }
+    return gone;
+  }
+
+  /** @return the class which is the end of a dependency, or owns the attribute or method which is, null if there is none */
   private ClassModel_V001 ownerOfEnd(String endId) {
     for (ClassModel_V001 box : model.classes()) {
-      boolean isEnd = endId.equals(box.id) || box.attributes.stream().anyMatch(attribute -> endId.equals(attribute.id));
+      boolean isEnd = endId.equals(box.id) || box.allMembers().stream().anyMatch(member -> endId.equals(member.id));
       if (isEnd) {
         return box;
       }
@@ -1341,7 +1381,7 @@ public class DiagramEditing {
     else if (armedTool == Tool.DEPENDENCY) {
       ConnectionTarget from = targets.closestForDependency(at, tolerance, DependencyRules::canStartAt);
       if (from != null) {
-        ClassModel_V001 fromBox = from instanceof AttributeTarget attribute ? attribute.owner : ((ClassTarget) from).box;
+        ClassModel_V001 fromBox = from instanceof MemberTarget attribute ? attribute.owner : ((ClassTarget) from).box;
         TargetFinder finder = (point, distance) -> targets.closestForDependency(point, distance,
           (box, attribute) -> DependencyRules.canEndAt(fromBox, box, attribute));
         drawing = new ConnectionDrawing(from, finder, at);
@@ -1491,9 +1531,12 @@ public class DiagramEditing {
   }
 
   /** Puts a box of the kind (class, interface, enum) without a name into the picture, see {@link #newClass(int, int)}.
+   * Its method compartment is hidden for a class and an enum, shown for an interface.
    * @return the area of the name */
   public SceneTextArea newClass(int x, int y, ClassKind_V001 kind) {
-    return putPendingBox(new ClassModel_V001("", kind), x, y, TextKind.CLASS_NAME);
+    ClassModel_V001 box = new ClassModel_V001("", kind);
+    box.methodsVisibility = kind.initialMethodsVisibility();
+    return putPendingBox(box, x, y, TextKind.CLASS_NAME);
   }
 
   /** Puts a note without a text into the picture, in the same way as {@link #newClass} does with a class: the text is
@@ -1537,7 +1580,7 @@ public class DiagramEditing {
     return true;
   }
 
-  /** The IDs of the elements of the diagram including its attributes, which notes attach to. */
+  /** The IDs of the elements of the diagram including its attributes and methods, which notes attach to. */
   private Set<String> usedIds() {
     Set<String> used = new HashSet<>();
     for (AbstractDiagramElementModel_V001 element : model.elements) {
@@ -1551,9 +1594,9 @@ public class DiagramEditing {
       used.add(element.id);
     }
     if (element instanceof ClassModel_V001 box) {
-      for (AttributeModel_V001 attribute : box.attributes) {
-        if (attribute.id != null) {
-          used.add(attribute.id);
+      for (AbstractMemberModel_V001 member : box.allMembers()) {
+        if (member.id != null) {
+          used.add(member.id);
         }
       }
     }

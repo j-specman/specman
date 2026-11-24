@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.Compartment_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.FontFamily_V001;
@@ -116,15 +117,15 @@ class ClassAppearanceTest {
     open(CLASS);
     double heightWith = editing.selectedArea().getHeight();
 
-    editing.setAttributesHidden(editing.selectedClass(), true);
+    editing.setCompartmentHidden(editing.selectedClass(), Compartment_V001.ATTRIBUTES, true);
 
     assertTrue(parsedClass().attributesHidden);
     assertEquals(2, parsedClass().attributes.size());
     assertTrue(editing.selectedArea().getHeight() < heightWith);
-    assertFalse(editing.canAddAttributeTo(editing.selectedClass()).can());
-    assertTrue(editing.scene().textAreas.stream().noneMatch(text -> text.attribute != null));
+    assertFalse(editing.canAddMemberTo(editing.selectedClass(), Compartment_V001.ATTRIBUTES).can());
+    assertTrue(editing.scene().textAreas.stream().noneMatch(text -> text.member != null));
 
-    editing.setAttributesHidden(editing.selectedClass(), false);
+    editing.setCompartmentHidden(editing.selectedClass(), Compartment_V001.ATTRIBUTES, false);
 
     assertEquals(heightWith, editing.selectedArea().getHeight(), 0.001);
     assertFalse(editing.source().contains("hideattributes"), editing.source());
@@ -135,12 +136,12 @@ class ClassAppearanceTest {
   void markedAttributesCannotBeHidden() throws ClassDiagramParseException {
     open("classdiagram {\n  class A (11111111) at(10, 20) {\n    -x change(added, yellow)\n    -y\n  }\n}");
 
-    assertFalse(editing.canHideAttributesOf(editing.selectedClass()).can());
-    editing.setAttributesHidden(editing.selectedClass(), true);
+    assertFalse(editing.canHideCompartmentOf(editing.selectedClass(), Compartment_V001.ATTRIBUTES).can());
+    editing.setCompartmentHidden(editing.selectedClass(), Compartment_V001.ATTRIBUTES, true);
 
     assertFalse(parsedClass().attributesHidden);
     assertTrue(host.reportedSources.isEmpty());
-    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(5);
+    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(7);
     assertTrue(shows.isSelected());
     assertFalse(shows.isEnabled());
   }
@@ -150,7 +151,7 @@ class ClassAppearanceTest {
   void interfaceCannotHideAttributes() throws ClassDiagramParseException {
     open("classdiagram {\n  interface I (11111111) at(10, 20)\n}");
 
-    assertFalse(editing.canHideAttributesOf(editing.selectedClass()).can());
+    assertFalse(editing.canHideCompartmentOf(editing.selectedClass(), Compartment_V001.ATTRIBUTES).can());
     assertTrue(editing.canChangeStyle(editing.selectedClass()).can());
   }
 
@@ -175,7 +176,7 @@ class ClassAppearanceTest {
     editing.selectAt(new Point2D.Double(noteArea.getCenterX(), noteArea.getCenterY()));
     assertNotNull(editing.selectedNote());
 
-    editing.setAttributesHidden(box, true);
+    editing.setCompartmentHidden(box, Compartment_V001.ATTRIBUTES, true);
     editing.toggleAnchorTool();
     new PointerControl(editing, () -> { }, text -> { }, at -> { }, pixels -> pixels)
       .pressed(new Point2D.Double(noteArea.getCenterX(), noteArea.getCenterY()));
@@ -190,10 +191,10 @@ class ClassAppearanceTest {
   void styleEntry() throws ClassDiagramParseException {
     open(CLASS);
 
-    menuEntries(start -> null).get(4).doClick(0);
+    menuEntries(start -> null).get(6).doClick(0);
     assertTrue(parsedClass().style.isStandard());
 
-    menuEntries(start -> style("#cce5ff", null, FontFamily_V001.SITKA, null)).get(4).doClick(0);
+    menuEntries(start -> style("#cce5ff", null, FontFamily_V001.SITKA, null)).get(6).doClick(0);
     assertEquals("#cce5ff", parsedClass().style.fill);
     assertEquals(FontFamily_V001.SITKA, parsedClass().style.font);
   }
@@ -206,7 +207,7 @@ class ClassAppearanceTest {
     menuEntries(start -> {
       start.fill = "#cce5ff";
       return null;
-    }).get(4).doClick(0);
+    }).get(6).doClick(0);
 
     assertTrue(parsedClass().style.isStandard());
   }
@@ -215,13 +216,13 @@ class ClassAppearanceTest {
   @Test
   void showAttributesEntry() throws ClassDiagramParseException {
     open(CLASS);
-    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(5);
+    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(7);
     assertTrue(shows.isSelected());
 
     shows.doClick(0);
 
     assertTrue(parsedClass().attributesHidden);
-    assertFalse(((JCheckBoxMenuItem) menuEntries(start -> null).get(5)).isSelected());
+    assertFalse(((JCheckBoxMenuItem) menuEntries(start -> null).get(7)).isSelected());
     assertFalse(menuEntries(start -> null).get(2).isEnabled());
   }
 }

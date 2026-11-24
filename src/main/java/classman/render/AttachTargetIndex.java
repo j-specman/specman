@@ -17,25 +17,25 @@ public class AttachTargetIndex {
         }
     }
 
-    /** @throws IllegalArgumentException if no class, attribute or relation of the diagram has this ID */
+    /** @throws IllegalArgumentException if no class, attribute, method or relation of the diagram has this ID */
     public AttachTarget find(String id) {
         AttachTarget target = targets.get(id);
         if (target == null) {
-            throw new IllegalArgumentException("The diagram has no class, attribute or relation with the ID " + id
+            throw new IllegalArgumentException("The diagram has no class, attribute, method or relation with the ID " + id
                 + ", a note is attached to it");
         }
         return target;
     }
 
-    /** @param attributesToo true if an attribute is a valid end as well, as for a dependency
-     * @return the class, or if allowed the attribute, which a relation starts or ends at
-     * @throws IllegalArgumentException if the diagram has no such class or attribute with this ID */
-    public AttachTarget findEnd(String id, boolean attributesToo) {
+    /** @param membersToo true if an attribute or method is a valid end as well, as for a dependency
+     * @return the class, or if allowed the attribute or method, which a relation starts or ends at
+     * @throws IllegalArgumentException if the diagram has no such class, attribute or method with this ID */
+    public AttachTarget findEnd(String id, boolean membersToo) {
         AttachTarget target = targets.get(id);
         boolean isClass = target instanceof ClassAttachTarget;
-        boolean isAttribute = target instanceof AttributeAttachTarget;
-        if (!isClass && !(attributesToo && isAttribute)) {
-            throw new IllegalArgumentException("The diagram has no class" + (attributesToo ? " or attribute" : "")
+        boolean isMember = target instanceof MemberAttachTarget;
+        if (!isClass && !(membersToo && isMember)) {
+            throw new IllegalArgumentException("The diagram has no class" + (membersToo ? ", attribute or method" : "")
                 + " with the ID " + id);
         }
         return target;

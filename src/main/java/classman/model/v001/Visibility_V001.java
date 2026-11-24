@@ -1,6 +1,6 @@
 package classman.model.v001;
 
-/** The visibility sign in front of an attribute. */
+/** The visibility sign in front of an attribute or method. */
 public enum Visibility_V001 {
     PUBLIC('+'),
     PRIVATE('-'),

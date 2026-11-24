@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.Compartment_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
@@ -70,7 +71,7 @@ class DependencyToolTest {
 
   private Point2D onAttribute(String name) {
     return center(editing.scene().textAreas.stream()
-      .filter(text -> text.kind == TextKind.ATTRIBUTE_LINE && text.attribute != null && name.equals(text.attribute.name))
+      .filter(text -> text.kind == TextKind.ATTRIBUTE_LINE && text.member != null && name.equals(text.member.name))
       .findFirst().orElseThrow().area);
   }
 
@@ -108,6 +109,22 @@ class DependencyToolTest {
     assertFalse(editing.isToolArmed());
     assertEquals(dependency.id, editing.selectedRelation().id);
     assertEquals(1, host.reportedSources.size());
+  }
+
+  /** A method is a start or an end like an attribute. */
+  @Test
+  void methodToClass() throws ClassDiagramParseException {
+    open(DIAGRAM.replace("class C (33333333) at(400, 300)", "class C (33333333) at(400, 300) {\n    run() (0c0c0c0c)\n  }"), "");
+    editing.toggleDependencyTool();
+    Point2D onMethod = center(editing.scene().textAreas.stream()
+      .filter(text -> text.kind == TextKind.METHOD_LINE && text.member != null && "run".equals(text.member.name))
+      .findFirst().orElseThrow().area);
+
+    draw(onMethod, aboveAttributes("B"));
+
+    DependencyRelationModel_V001 dependency = onlyDependency();
+    assertEquals("0c0c0c0c", dependency.fromId);
+    assertEquals("22222222", dependency.toId);
   }
 
   /** An attribute which has an ID is the start, a class the end. */
@@ -322,7 +339,7 @@ class DependencyToolTest {
     select(middleOfLine());
     assertNotNull(editing.selectedRelation());
 
-    editing.setAttributesHidden(a, true);
+    editing.setCompartmentHidden(a, Compartment_V001.ATTRIBUTES, true);
 
     assertNull(editing.selectedRelation());
     assertTrue(editing.scene().relationLines.isEmpty());

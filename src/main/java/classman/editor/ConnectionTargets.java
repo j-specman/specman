@@ -1,7 +1,7 @@
 package classman.editor;
 
 import classman.model.v001.AbstractRelationModel_V001;
-import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.AbstractMemberModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
@@ -45,13 +45,13 @@ class ConnectionTargets {
     return closest != null ? new ClassTarget(closest, areas.get(closest)) : null;
   }
 
-  /** @return what the anchor of a note can end at below the point: the attribute whose line the point is on, else a
+  /** @return what the anchor of a note can end at below the point: the attribute or method whose line the point is on, else a
    * relation whose line is at most the tolerance away, else a class like {@link #closestClass} finds it. The attribute
    * wins over its class, so the user takes the class by its name or by the space around the attributes. */
   ConnectionTarget closestForAnchor(Point2D point, double tolerance) {
-    AttributeTarget attribute = attributeAt(point);
-    if (attribute != null) {
-      return attribute;
+    MemberTarget member = memberAt(point);
+    if (member != null) {
+      return member;
     }
     RelationTarget relation = closestRelation(point, tolerance, candidate -> true);
     if (relation != null) {
@@ -62,32 +62,32 @@ class ConnectionTargets {
 
   /** @param allowed tells for a class, and for an attribute with its class, whether a dependency may start or end
    * there; for a class the attribute is null
-   * @return the attribute whose line the point is on, else the class like {@link #closestClass} finds it, as far as
+   * @return the attribute or method whose line the point is on, else the class like {@link #closestClass} finds it, as far as
    * allowed; null if there is none. The attribute wins over its class, as for the anchor. */
   ConnectionTarget closestForDependency(Point2D point, double tolerance,
-                                        BiPredicate<ClassModel_V001, AttributeModel_V001> allowed) {
-    AttributeTarget attribute = attributeAt(point);
-    if (attribute != null && allowed.test(attribute.owner, attribute.attribute)) {
-      return attribute;
+                                        BiPredicate<ClassModel_V001, AbstractMemberModel_V001> allowed) {
+    MemberTarget member = memberAt(point);
+    if (member != null && allowed.test(member.owner, member.member)) {
+      return member;
     }
     return closestClass(point, tolerance, box -> allowed.test(box, null));
   }
 
-  /** Only the attributes of the classes of the diagram, which are not removed, count: a note can't be attached to the
+  /** Only the attributes and methods of the classes of the diagram, which are not removed, count: a note can't be attached to the
    * others. */
-  private AttributeTarget attributeAt(Point2D point) {
+  private MemberTarget memberAt(Point2D point) {
     for (int i = scene.textAreas.size() - 1; i >= 0; i--) {
       SceneTextArea text = scene.textAreas.get(i);
-      if (isAttributeLineOfClass(text) && text.area.contains(point)
-        && (text.attribute.change == null || text.attribute.change.type != ChangeType_V001.REMOVED)) {
-        return new AttributeTarget((ClassModel_V001) text.element, text.attribute, text.area);
+      if (isMemberLineOfClass(text) && text.area.contains(point)
+        && (text.member.change == null || text.member.change.type != ChangeType_V001.REMOVED)) {
+        return new MemberTarget((ClassModel_V001) text.element, text.member, text.area);
       }
     }
     return null;
   }
 
-  private boolean isAttributeLineOfClass(SceneTextArea text) {
-    return text.kind == TextKind.ATTRIBUTE_LINE && text.attribute != null
+  private boolean isMemberLineOfClass(SceneTextArea text) {
+    return text.kind.compartment() != null && text.member != null
       && text.element instanceof ClassModel_V001 owner && model.classes().contains(owner);
   }
 

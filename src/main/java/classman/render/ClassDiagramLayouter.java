@@ -76,6 +76,7 @@ public class ClassDiagramLayouter {
             if (element instanceof ClassModel_V001 classModel) {
                 textAreas.addAll(boxes.get(element).taggedValueTextAreasAt(classModel, area.x, area.y));
                 textAreas.addAll(boxes.get(element).attributeTextAreasAt(classModel, area.x, area.y));
+                textAreas.addAll(boxes.get(element).methodTextAreasAt(classModel, area.x, area.y));
             }
         });
         for (AbstractRelationModel_V001 relation : model.relations()) {
@@ -112,11 +113,8 @@ public class ClassDiagramLayouter {
     private void addAttachTargets(AttachTargetIndex attachTargets, ClassModel_V001 classModel,
                                   Rectangle2D.Double classArea, BoxLayout box) {
         attachTargets.add(classModel.id, new ClassAttachTarget(classArea));
-        if (!classModel.showsAttributes()) {
-            return;
-        }
-        box.attributeAreasAt(classArea.x, classArea.y).forEach((id, attributeArea) ->
-            attachTargets.add(id, new AttributeAttachTarget(attributeArea)));
+        box.memberAreasAt(classArea.x, classArea.y).forEach((id, memberArea) ->
+            attachTargets.add(id, new MemberAttachTarget(memberArea)));
     }
 
     private Map<AbstractDiagramElementModel_V001, BoxLayout> layoutBoxes(ClassDiagramModel_V001 model,

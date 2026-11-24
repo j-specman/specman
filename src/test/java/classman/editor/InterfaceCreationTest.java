@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.Compartment_V001;
 import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.io.ClassDiagramParseException;
@@ -77,8 +78,8 @@ class InterfaceCreationTest {
     editing.selectAt(centerOf(editing, 1));
     ClassModel_V001 aClass = editing.selectedClass();
 
-    assertFalse(editing.canAddAttributeTo(anInterface).can());
-    assertTrue(editing.canAddAttributeTo(aClass).can());
+    assertFalse(editing.canAddMemberTo(anInterface, Compartment_V001.ATTRIBUTES).can());
+    assertTrue(editing.canAddMemberTo(aClass, Compartment_V001.ATTRIBUTES).can());
   }
 
   /** An enum is created like a class. Its values are lines without a type: a colon is not allowed, an info is. */
@@ -88,9 +89,9 @@ class InterfaceCreationTest {
     editing.setText(editing.newClass(300, 40, ClassKind_V001.ENUM), "Color");
     editing.selectAt(centerOf(editing, 0));
     ClassModel_V001 box = editing.selectedClass();
-    assertTrue(editing.canAddAttributeTo(box).can());
+    assertTrue(editing.canAddMemberTo(box, Compartment_V001.ATTRIBUTES).can());
 
-    SceneTextArea line = editing.newAttributeAtEnd(box);
+    SceneTextArea line = editing.newMemberAtEnd(box, Compartment_V001.ATTRIBUTES);
 
     assertFalse(editing.accepts(line, "RED : int"));
     assertTrue(editing.accepts(line, "RED [primary]"));

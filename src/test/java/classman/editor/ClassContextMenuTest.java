@@ -128,8 +128,8 @@ class ClassContextMenuTest {
 
     List<JMenuItem> entries = entries();
 
-    assertEquals(List.of("Add stereotype", "Add tagged value", "Add attribute", "Hide / show attribute", "Style...",
-      "Show attributes", "Automatic width"),
+    assertEquals(List.of("Add stereotype", "Add tagged value", "Add attribute", "Add method", "Hide / show attribute",
+      "Hide / show method", "Style...", "Show attributes", "Show methods", "Automatic width"),
       entries.stream().map(JMenuItem::getText).toList());
     assertTrue(entries.get(0).isEnabled());
     assertTrue(entries.get(1).isEnabled());
@@ -154,13 +154,13 @@ class ClassContextMenuTest {
   void automaticWidthEntry() throws Exception {
     open(BARE);
     editing.selectAt(insideClass());
-    JMenuItem automatic = entries().get(6);
+    JMenuItem automatic = entries().get(9);
     assertTrue(((javax.swing.JCheckBoxMenuItem) automatic).isSelected());
     assertFalse(automatic.isEnabled());
 
     open("classdiagram {\n  class A (11111111) at(10, 60) width=200\n}");
     editing.selectAt(insideClass());
-    automatic = entries().get(6);
+    automatic = entries().get(9);
     assertFalse(((javax.swing.JCheckBoxMenuItem) automatic).isSelected());
     assertTrue(automatic.isEnabled());
 
@@ -207,5 +207,22 @@ class ClassContextMenuTest {
     assertTrue(textEditor.isEditing());
     ClassModel_V001 box = editing.selectedClass();
     assertEquals(1, box.attributes.size());
+  }
+
+  /** The method entry opens a field in a new line at the end of the methods of the class, which can be chosen once the
+   * class shows its methods. */
+  @Test
+  void methodEntryStartsField() throws Exception {
+    open("classdiagram {\n  class A (11111111) at(10, 60)\n}");
+    editing.selectAt(insideClass());
+    assertFalse(entries().get(3).isEnabled());
+
+    open("classdiagram {\n  class A (11111111) at(10, 60) showmethods\n}");
+    editing.selectAt(insideClass());
+    SwingUtilities.invokeAndWait(() -> entries().get(3).doClick(0));
+
+    assertTrue(textEditor.isEditing());
+    assertEquals(1, editing.selectedClass().methods.size());
+    assertTrue(editing.scene().textAreas.stream().anyMatch(text -> text.kind == TextKind.METHOD_LINE && text.member != null));
   }
 }

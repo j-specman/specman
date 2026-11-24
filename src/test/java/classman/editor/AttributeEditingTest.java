@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.model.v001.Compartment_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.io.ClassDiagramParseException;
@@ -169,9 +170,9 @@ class AttributeEditingTest {
     List<SceneTextArea> lines = lines(editing);
 
     assertEquals(1, lines.size());
-    assertNull(lines.get(0).attribute);
+    assertNull(lines.get(0).member);
     assertEquals("", editing.textOf(lines.get(0)));
-    assertTrue(editing.isLastAttributeLine(lines.get(0)));
+    assertTrue(editing.isLastMemberLine(lines.get(0)));
 
     editing.setText(lines.get(0), "name : String");
 
@@ -185,8 +186,8 @@ class AttributeEditingTest {
   void lastLine() throws ClassDiagramParseException {
     DiagramEditing editing = open(BOOK);
 
-    assertFalse(editing.isLastAttributeLine(lines(editing).get(0)));
-    assertTrue(editing.isLastAttributeLine(lines(editing).get(1)));
+    assertFalse(editing.isLastMemberLine(lines(editing).get(0)));
+    assertTrue(editing.isLastMemberLine(lines(editing).get(1)));
   }
 
   /** The blank line for a new attribute is in the picture, but not in the diagram, until it gets a text. */
@@ -196,9 +197,9 @@ class AttributeEditingTest {
     double heightBefore = editing.scene().height;
     ClassModel_V001 book = (ClassModel_V001) editing.scene().textAreas.get(0).element;
 
-    SceneTextArea blank = editing.newAttributeAtEnd(book);
+    SceneTextArea blank = editing.newMemberAtEnd(book, Compartment_V001.ATTRIBUTES);
 
-    assertNotNull(blank.attribute);
+    assertNotNull(blank.member);
     assertEquals("", editing.textOf(blank));
     assertTrue(editing.scene().height > heightBefore);
     assertTrue(blank.area.getMinY() >= lines(editing).get(1).area.getMaxY());
@@ -219,17 +220,17 @@ class AttributeEditingTest {
     double heightBefore = editing.scene().height;
     ClassModel_V001 book = (ClassModel_V001) editing.scene().textAreas.get(0).element;
 
-    editing.newAttributeAtEnd(book);
+    editing.newMemberAtEnd(book, Compartment_V001.ATTRIBUTES);
     editing.discardNewPart();
 
     assertEquals(heightBefore, editing.scene().height);
     assertEquals(2, lines(editing).size());
 
-    SceneTextArea blank = editing.newAttributeAtEnd(book);
+    SceneTextArea blank = editing.newMemberAtEnd(book, Compartment_V001.ATTRIBUTES);
     editing.setText(blank, "x");
     assertEquals(3, bookOf(editing.source()).attributes.size());
 
-    SceneTextArea another = editing.newAttributeAtEnd(book);
+    SceneTextArea another = editing.newMemberAtEnd(book, Compartment_V001.ATTRIBUTES);
     editing.setText(another, "");
 
     assertEquals(3, lines(editing).size());

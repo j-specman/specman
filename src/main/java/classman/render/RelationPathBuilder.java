@@ -21,9 +21,9 @@ public class RelationPathBuilder {
      * attribute, which only a dependency may do
      */
     public List<Point2D.Double> pathOf(AbstractRelationModel_V001 relation, AttachTargetIndex targets) {
-        boolean attributesToo = relation.type == RelationType_V001.DEPENDENCY;
-        AttachTarget from = targets.findEnd(relation.fromId, attributesToo);
-        AttachTarget to = targets.findEnd(relation.toId, attributesToo);
+        boolean membersToo = relation.type == RelationType_V001.DEPENDENCY;
+        AttachTarget from = targets.findEnd(relation.fromId, membersToo);
+        AttachTarget to = targets.findEnd(relation.toId, membersToo);
         if (relation.route != null) {
             return routedPath(relation.route, from, to);
         }

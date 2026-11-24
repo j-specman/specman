@@ -1,8 +1,8 @@
 package classman.model.v001.change;
 
+import classman.model.v001.AbstractMemberModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
 import classman.model.v001.AssociationRelationModel_V001;
-import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.InfoModel_V001;
@@ -75,8 +75,8 @@ final class TextSlots_V001 {
             slots.add(keyOf(tag));
             slots.add(valueOf(tag));
         }
-        for (AttributeModel_V001 attribute : classModel.attributes) {
-            addAttribute(slots, attribute);
+        for (AbstractMemberModel_V001 member : classModel.allMembers()) {
+            addMember(slots, member);
         }
     }
 
@@ -88,30 +88,32 @@ final class TextSlots_V001 {
         return optional(() -> tag.value, text -> tag.value = text, () -> tag.valueChange, mark -> tag.valueChange = mark);
     }
 
-    private static void addAttribute(List<TextSlot_V001> slots, AttributeModel_V001 attribute) {
-        slots.add(visibilityOf(attribute));
-        slots.add(nameOf(attribute));
-        slots.add(typeOf(attribute));
-        for (InfoModel_V001 info : attribute.infos) {
-            slots.add(infoOf(info));
+    private static void addMember(List<TextSlot_V001> slots, AbstractMemberModel_V001 member) {
+        slots.add(visibilityOf(member));
+        slots.add(nameOf(member));
+        slots.add(typeOf(member));
+        for (List<InfoModel_V001> entries : member.entryLists()) {
+            for (InfoModel_V001 entry : entries) {
+                slots.add(infoOf(entry));
+            }
         }
     }
 
     /** The sign of the visibility is the text, none is no text. */
-    static TextSlot_V001 visibilityOf(AttributeModel_V001 attribute) {
-        return optional(() -> attribute.visibility == null ? null : String.valueOf(attribute.visibility.sign),
-            text -> attribute.visibility = Visibility_V001.ofSign(text),
-            () -> attribute.visibilityChange, mark -> attribute.visibilityChange = mark);
+    static TextSlot_V001 visibilityOf(AbstractMemberModel_V001 member) {
+        return optional(() -> member.visibility == null ? null : String.valueOf(member.visibility.sign),
+            text -> member.visibility = Visibility_V001.ofSign(text),
+            () -> member.visibilityChange, mark -> member.visibilityChange = mark);
     }
 
-    static TextSlot_V001 nameOf(AttributeModel_V001 attribute) {
-        return mandatory(() -> attribute.name, text -> attribute.name = text,
-            () -> attribute.nameChange, mark -> attribute.nameChange = mark);
+    static TextSlot_V001 nameOf(AbstractMemberModel_V001 member) {
+        return mandatory(() -> member.name, text -> member.name = text,
+            () -> member.nameChange, mark -> member.nameChange = mark);
     }
 
-    static TextSlot_V001 typeOf(AttributeModel_V001 attribute) {
-        return optional(() -> attribute.type, text -> attribute.type = text,
-            () -> attribute.typeChange, mark -> attribute.typeChange = mark);
+    static TextSlot_V001 typeOf(AbstractMemberModel_V001 member) {
+        return optional(() -> member.type, text -> member.type = text,
+            () -> member.typeChange, mark -> member.typeChange = mark);
     }
 
     static TextSlot_V001 infoOf(InfoModel_V001 info) {

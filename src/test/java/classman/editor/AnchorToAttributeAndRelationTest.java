@@ -3,6 +3,7 @@ package classman.editor;
 import classman.model.v001.AnchorLineModel_V001;
 import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ClassModel_V001;
+import classman.model.v001.MethodModel_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
@@ -46,7 +47,7 @@ class AnchorToAttributeAndRelationTest {
 
   private Rectangle2D lineOfAttribute(String name) {
     return editing.scene().textAreas.stream()
-      .filter(text -> text.kind == TextKind.ATTRIBUTE_LINE && text.attribute != null && name.equals(text.attribute.name))
+      .filter(text -> text.kind == TextKind.ATTRIBUTE_LINE && text.member != null && name.equals(text.member.name))
       .map(text -> text.area).findFirst().orElseThrow();
   }
 
@@ -92,6 +93,22 @@ class AnchorToAttributeAndRelationTest {
     assertEquals(1, host.reportedSources.size());
     assertNotNull(editing.selectedNote());
   }
+
+  /** A method is a target like an attribute: a method without an ID gets one when the note is attached to it. */
+  @Test
+  void noteAnchoredToMethod() throws ClassDiagramParseException {
+    open("classdiagram {\n  class A (11111111) at(10, 20) {\n    run()\n  }\n  note (33333333) at(10, 300) \"n\"\n}");
+    Rectangle2D line = editing.scene().textAreas.stream()
+      .filter(text -> text.kind == TextKind.METHOD_LINE && text.member != null).map(text -> text.area).findFirst()
+      .orElseThrow();
+
+    draw(noteCenter(), center(line));
+
+    MethodModel_V001 method = classA().methods.get(0);
+    assertNotNull(method.id);
+    assertEquals(method.id, attachedTo());
+  }
+
 
   /** An attribute which has no ID gets one, in the same operation which attaches the note, and the dashed line leads to it. */
   @Test

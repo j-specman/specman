@@ -2,7 +2,7 @@ package classman.editor;
 
 import classman.model.v001.AbstractBoxModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
-import classman.model.v001.AttributeModel_V001;
+import classman.model.v001.AbstractMemberModel_V001;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.ClassModel_V001;
 
@@ -14,15 +14,15 @@ class ElementOwners {
     this.model = model;
   }
 
-  /** @return the box with the ID, or the class which has the attribute with the ID, null if there is none */
+  /** @return the box with the ID, or the class which has the attribute or method with the ID, null if there is none */
   AbstractBoxModel_V001 boxOf(String id) {
     AbstractBoxModel_V001 box = model.boxWithId(id);
     if (box != null) {
       return box;
     }
     for (ClassModel_V001 classModel : model.classes()) {
-      for (AttributeModel_V001 attribute : classModel.attributes) {
-        if (id.equals(attribute.id)) {
+      for (AbstractMemberModel_V001 member : classModel.allMembers()) {
+        if (id.equals(member.id)) {
           return classModel;
         }
       }

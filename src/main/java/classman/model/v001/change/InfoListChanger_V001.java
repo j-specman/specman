@@ -1,6 +1,5 @@
 package classman.model.v001.change;
 
-import classman.model.v001.AttributeModel_V001;
 import classman.model.v001.ChangeModel_V001;
 import classman.model.v001.ChangeType_V001;
 import classman.model.v001.InfoModel_V001;
@@ -9,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Gives an attribute new infos. The infos which stay the same stay, in the gaps between them the old infos are
+ * Gives a list of entries new texts: the infos of an attribute or method, or the parameters of a method. The entries
+ * which stay the same stay, in the gaps between them the old entries are
  * changed into the new ones one by one, and what is left over is removed, or added after the last info of the gap.
  * <p>
  * With a change set the changes get their marks, like list entries elsewhere: an info which is added is marked as
@@ -17,33 +17,33 @@ import java.util.List;
  * old text. An info which a change set has added is simply gone if it is removed; one which the change set has removed
  * and which is typed again is not removed any more.
  */
-class AttributeInfosChanger_V001 {
+class InfoListChanger_V001 {
 
     /** @param changeSet null if changes are not tracked
-     * @param markable false if the marks inside the attribute are ignored in the display, then there are no marks */
-    void apply(AttributeModel_V001 attribute, List<String> newInfos, String changeSet, boolean markable) {
-        List<InfoModel_V001> current = currentInfos(attribute);
+     * @param markable false if the marks inside the member are ignored in the display, then there are no marks */
+    void apply(List<InfoModel_V001> list, List<String> newInfos, String changeSet, boolean markable) {
+        List<InfoModel_V001> current = currentEntries(list);
         int[][] matches = longestCommonSubsequence(current, newInfos);
         int oldStart = 0;
         int newStart = 0;
         InfoModel_V001 previous = null;
         for (int[] match : matches) {
-            previous = changeGap(attribute, current.subList(oldStart, match[0]), newInfos.subList(newStart, match[1]),
+            previous = changeGap(list, current.subList(oldStart, match[0]), newInfos.subList(newStart, match[1]),
                 previous, changeSet, markable);
             previous = current.get(match[0]);
             oldStart = match[0] + 1;
             newStart = match[1] + 1;
         }
-        changeGap(attribute, current.subList(oldStart, current.size()), newInfos.subList(newStart, newInfos.size()),
+        changeGap(list, current.subList(oldStart, current.size()), newInfos.subList(newStart, newInfos.size()),
             previous, changeSet, markable);
-        attribute.infos.removeIf(info -> info.text == null
+        list.removeIf(info -> info.text == null
             || (info.text.isEmpty() && info.change == null && info.textChange == null));
     }
 
     /** The infos as the user sees them: those which have a text and aren't removed. */
-    static List<InfoModel_V001> currentInfos(AttributeModel_V001 attribute) {
+    static List<InfoModel_V001> currentEntries(List<InfoModel_V001> list) {
         List<InfoModel_V001> current = new ArrayList<>();
-        for (InfoModel_V001 info : attribute.infos) {
+        for (InfoModel_V001 info : list) {
             if (info.text != null && !info.text.isEmpty() && !isRemoved(info)) {
                 current.add(info);
             }
@@ -56,7 +56,7 @@ class AttributeInfosChanger_V001 {
     }
 
     /** @return the last info of the gap, or the info which came before the gap if the gap has none */
-    private InfoModel_V001 changeGap(AttributeModel_V001 attribute, List<InfoModel_V001> olds, List<String> news,
+    private InfoModel_V001 changeGap(List<InfoModel_V001> list, List<InfoModel_V001> olds, List<String> news,
                                      InfoModel_V001 previous, String changeSet, boolean markable) {
         InfoModel_V001 last = olds.isEmpty() ? previous : olds.get(olds.size() - 1);
         int common = Math.min(olds.size(), news.size());
@@ -65,17 +65,17 @@ class AttributeInfosChanger_V001 {
             TextTracking_V001.set(TextSlots_V001.infoOf(old), news.get(i), changeSet, markable && old.change == null);
         }
         for (int i = common; i < olds.size(); i++) {
-            remove(attribute, olds.get(i), changeSet, markable);
+            remove(list, olds.get(i), changeSet, markable);
         }
         for (int i = common; i < news.size(); i++) {
-            last = add(attribute, news.get(i), last, changeSet, markable);
+            last = add(list, news.get(i), last, changeSet, markable);
         }
         return last;
     }
 
-    private void remove(AttributeModel_V001 attribute, InfoModel_V001 info, String changeSet, boolean markable) {
+    private void remove(List<InfoModel_V001> list, InfoModel_V001 info, String changeSet, boolean markable) {
         if (changeSet == null || !markable || (info.change != null && info.change.type == ChangeType_V001.ADDED)) {
-            attribute.infos.remove(info);
+            list.remove(info);
         }
         else {
             info.change = new ChangeModel_V001(ChangeType_V001.REMOVED, changeSet);
@@ -83,9 +83,9 @@ class AttributeInfosChanger_V001 {
     }
 
     /** @return the info which is there for the text now, to insert the next one after it */
-    private InfoModel_V001 add(AttributeModel_V001 attribute, String text, InfoModel_V001 after, String changeSet,
+    private InfoModel_V001 add(List<InfoModel_V001> list, String text, InfoModel_V001 after, String changeSet,
                                boolean markable) {
-        InfoModel_V001 removedBefore = removedByChangeSet(attribute, text, changeSet);
+        InfoModel_V001 removedBefore = removedByChangeSet(list, text, changeSet);
         if (removedBefore != null) {
             removedBefore.change = null;
             return removedBefore;
@@ -94,15 +94,15 @@ class AttributeInfosChanger_V001 {
         if (changeSet != null && markable) {
             added.change = new ChangeModel_V001(ChangeType_V001.ADDED, changeSet);
         }
-        attribute.infos.add(after == null ? 0 : attribute.infos.indexOf(after) + 1, added);
+        list.add(after == null ? 0 : list.indexOf(after) + 1, added);
         return added;
     }
 
-    private InfoModel_V001 removedByChangeSet(AttributeModel_V001 attribute, String text, String changeSet) {
+    private InfoModel_V001 removedByChangeSet(List<InfoModel_V001> list, String text, String changeSet) {
         if (changeSet == null) {
             return null;
         }
-        for (InfoModel_V001 info : attribute.infos) {
+        for (InfoModel_V001 info : list) {
             if (isRemoved(info) && info.change.changeSet.equals(changeSet) && text.equals(info.text)) {
                 return info;
             }

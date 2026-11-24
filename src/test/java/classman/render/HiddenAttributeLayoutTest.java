@@ -34,7 +34,7 @@ class HiddenAttributeLayoutTest {
     Scene scene = layout("class A (aaaaaaaa) {\n  -first\n  -second (hidden)\n  -third\n}");
 
     assertEquals(List.of("A", "-first", "-third", ". . ."), texts(scene));
-    assertEquals(2, scene.textAreas.stream().filter(text -> text.attribute != null).count());
+    assertEquals(2, scene.textAreas.stream().filter(text -> text.member != null).count());
   }
 
   /** The line "..." is there once, however many attributes are hidden, and is the only one if all are. */
