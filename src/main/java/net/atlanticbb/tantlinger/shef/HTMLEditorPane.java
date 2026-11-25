@@ -210,7 +210,7 @@ public class HTMLEditorPane extends JPanel
     formatMenu.addSeparator();
     paraActions.addAll(lst);
 
-    lst = HTMLEditorActionFactory.createAlignActionList();
+    lst = SpecmanAlignActionFactory.createAlignActionList(this::updateState);
     actionList.addAll(lst);
     formatMenu.add(createMenu(lst, i18n.str("align")));
 
@@ -346,7 +346,7 @@ public class HTMLEditorPane extends JPanel
     actionList.add(act);
     addToToolBar(textGroupComponents, act);
 
-    List alst = HTMLEditorActionFactory.createAlignActionList();
+    List alst = SpecmanAlignActionFactory.createAlignActionList(this::updateState);
     for(Iterator it = alst.iterator(); it.hasNext();)
     {
       act = (Action)it.next();
