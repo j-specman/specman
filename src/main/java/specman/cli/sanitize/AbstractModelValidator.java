@@ -3,6 +3,7 @@ package specman.cli.sanitize;
 import specman.cli.AbstractCLO;
 import specman.cli.CLIException;
 import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.io.TextAreaTraversal_V002.Site;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,11 @@ public abstract class AbstractModelValidator {
   /** @return e.g. "Step 1.2 (a1b2c3d4)" */
   protected static String describe(AbstractStepModel_V002 step) {
     return "Step " + displayedStepNumber(step) + " (" + step.id + ")";
+  }
+
+  /** @return e.g. "Step 1.2 (a1b2c3d4) text", or "intro" */
+  protected static String describe(Site site) {
+    return site.step() != null ? describe(site.step()) + " " + site.part() : site.part();
   }
 
   protected static String displayedStepNumber(AbstractStepModel_V002 step) {

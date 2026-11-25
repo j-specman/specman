@@ -17,6 +17,7 @@ import specman.model.v002.io.SteplinkUpdate;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -65,8 +66,8 @@ public class SanitizeCLO extends AbstractCLO {
   private static SanitizeResult sanitize(File file) throws CLIException {
     ParseOutcome outcome = readModel(file);
     DiagramModel_V002 model = outcome.model();
-    SanitizeModelValidator.assertNoDuplicateIds(model);
-    SanitizeModelValidator.assertValidMetaTags(model);
+    new DuplicateIdValidator(model).validate();
+    new MetaTagValidator(model).validate();
 
     Renumbering renumbering = renumberSteps(model);
     SanitizeResult result = ModelStepnumberRewriter_V002.rewrite(model, renumbering.toNumberMapping());
@@ -75,7 +76,7 @@ public class SanitizeCLO extends AbstractCLO {
     result.stepNumberChanges = ModelRenumberer_V002.buildStepNumberChanges(
       model.mainSequence, renumbering.savedNumbers, renumbering.computedNumbers);
     result.plainTextUpdates = PlainTextSynchronizer_V002.updateAllPlainTexts(model);
-    SanitizeChangeTrackingValidator.assertValidChangeTracking(outcome);
+    new ChangeTrackingValidator(outcome).validate();
 
     writeIfChanged(file, model, result);
     return result;

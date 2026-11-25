@@ -1,9 +1,14 @@
 package specman.cli.sanitize;
 
+import classman.model.v001.change.StereotypeReferences_V001;
+import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.MetaTagConfigModel_V002;
 import specman.model.v002.MetaTagModel_V002;
+import specman.model.v002.io.TextAreaTraversal_V002;
+import specman.model.v002.io.TextAreaTraversal_V002.Site;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -13,6 +18,8 @@ import java.util.Set;
 
 /** Checks the meta tag configurations of a model and the tags the steps have been assigned. */
 public class MetaTagValidator extends AbstractModelValidator {
+
+  private static final StereotypeReferences_V001 STEREOTYPES = new StereotypeReferences_V001();
 
   private final DiagramModel_V002 model;
 
@@ -27,6 +34,7 @@ public class MetaTagValidator extends AbstractModelValidator {
     for (AbstractStepModel_V002 step : model.queryAllSteps()) {
       checkTagsOfStep(step, configsByName, errors);
     }
+    checkStereotypesOfDiagrams(configsByName.keySet(), errors);
   }
 
   /** @return the configurations by their name, the errors of the configurations are added to the specified list. */
@@ -71,6 +79,29 @@ public class MetaTagValidator extends AbstractModelValidator {
     }
     else if (hasUnallowedFreetext(tag, config)) {
       errors.add(tagError(stepLabel, tag, "has freetext but its configuration does not allow freetext"));
+    }
+  }
+
+  /** The stereotype of a class in a class diagram may refer to a configuration, like a tag at a step does. The old text
+   * of a change mark is no use of it, it may refer to a configuration which has gone. */
+  private void checkStereotypesOfDiagrams(Set<String> configNames, List<String> errors) {
+    TextAreaTraversal_V002.forEachContent(model, (content, site) -> {
+      for (AbstractEditAreaModel_V002 area : content.areas) {
+        if (area instanceof ClassmanImageEditAreaModel_V002 diagram) {
+          checkStereotypesOfDiagram(diagram.source, site, configNames, errors);
+        }
+      }
+    });
+  }
+
+  private static void checkStereotypesOfDiagram(String source, Site site, Set<String> configNames, List<String> errors) {
+    for (String configName : STEREOTYPES.configsUsedIn(source)) {
+      if (!configNames.contains(configName)) {
+        for (String className : STEREOTYPES.classesUsing(source, configName)) {
+          errors.add(describe(site) + ": class '" + className + "' has a stereotype of the tag '" + configName
+            + "' which has no configuration");
+        }
+      }
     }
   }
 
