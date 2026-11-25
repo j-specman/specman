@@ -1,5 +1,6 @@
 package net.atlanticbb.tantlinger.shef;
 
+import specman.ToolbarToggleButton;
 import specman.graphics.IconReader;
 import specman.graphics.SpecmanIcons;
 
@@ -25,6 +26,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JToggleButton;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.Document;
@@ -275,6 +277,8 @@ public class HTMLEditorPane extends JPanel
             .map(AbstractButton.class::cast)
             .forEach(toolbarButtons::add);
     ShefIconInstaller.install(actionList, toolbarButtons);
+    // after the icons are set, because the look recolors them
+    toolbarButtons.stream().filter(JToggleButton.class::isInstance).forEach(ToolbarToggleButton::applyToolbarToggleLook);
   }
 
   private void createToolbarComponents(ActionList blockActs, ActionList fontSizeActs)
