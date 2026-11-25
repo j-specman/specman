@@ -1,8 +1,6 @@
-package specman.cli.sanitize;
+package specman.cli;
 
 import specman.ChangeSet;
-import specman.cli.AbstractCLO;
-import specman.cli.CLIException;
 import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.DiagramModel_V002;
@@ -32,20 +30,20 @@ import java.util.regex.Pattern;
  * The markups have to be checked against the plain texts as the sanitizer regenerates them, because their offsets refer
  * to the visible text, which the plain text is the rendition of.
  */
-final class ChangeTrackingValidator {
+final class SanitizerChangeTrackingValidator {
 
   private static final Pattern POSITION_PREFIX = Pattern.compile("^line (\\d+):(\\d+)");
   private static final long COLUMNS_PER_LINE = 1_000_000L;
   private static final String KNOWN_CHANGESETS = String.join(", ", ChangeSet.ALL.keySet());
 
-  private ChangeTrackingValidator() {
+  private SanitizerChangeTrackingValidator() {
   }
 
   static void assertValidChangeTracking(ParseOutcome outcome) throws CLIException {
     List<String> errors = new ArrayList<>(outcome.diagnostics());
     checkMarkups(outcome.model(), outcome.positions(), errors);
     checkMovedSteps(outcome.model(), outcome.positions(), errors);
-    errors.sort(Comparator.comparing(ChangeTrackingValidator::positionOf));
+    errors.sort(Comparator.comparing(SanitizerChangeTrackingValidator::positionOf));
     AbstractCLO.assertNoErrors("Invalid change tracking", errors);
   }
 

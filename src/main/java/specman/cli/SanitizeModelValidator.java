@@ -1,8 +1,6 @@
-package specman.cli.sanitize;
+package specman.cli;
 
 import classman.model.v001.change.StereotypeReferences_V001;
-import specman.cli.AbstractCLO;
-import specman.cli.CLIException;
 import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.ClassmanImageEditAreaModel_V002;
