@@ -1,7 +1,6 @@
 package builder;
 
 import specman.model.v002.DiagramModel_V002;
-import specman.model.v002.MetaTagConfigModel_V002;
 import specman.model.v002.io.ModelRenumberer_V002;
 import specman.model.v002.io.ModelSerializer_V002;
 
@@ -19,7 +18,6 @@ public class DiagrammBuilder {
   private static final int DEFAULT_WIDTH = 700;
   private static final int DEFAULT_ZOOM = 100;
   private static final String DEFAULT_CHANGESET = "yellow";
-  private static final int WHITE_ARGB = 0xFFFFFFFF;
 
   private static int nsdCounter = 0;
 
@@ -61,6 +59,23 @@ public class DiagrammBuilder {
 
   public DiagrammBuilder withMainSequence(StepSequenceBuilder mainSequence) {
     this.mainSequence = mainSequence;
+    return this;
+  }
+
+  /** Adds a configuration of a meta tag with a white background, no border and no icon. */
+  public DiagrammBuilder withMetaTagConfig(String name, String label, boolean freetextAllowed) {
+    return withMetaTagConfig(new MetaTagConfigModel_V002(name, label, null, WHITE_ARGB, null, null, freetextAllowed));
+  }
+
+  public DiagrammBuilder withMetaTagConfig(MetaTagConfigModel_V002 config) {
+    diagramm.metaTagConfigs.add(config);
+    return this;
+  }
+
+  /** Puts a text and a Classman diagram with the given source into the intro. */
+  public DiagrammBuilder withIntroDiagram(String source) {
+    diagramm.intro = new EditorContentModel_V002("intro", null);
+    diagramm.intro.addArea(new ClassmanImageEditAreaModel_V002(source, 1f, null));
     return this;
   }
 

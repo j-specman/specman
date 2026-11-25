@@ -1,0 +1,22 @@
+// {"classmanVersion":"0.1","modelType":"classman.model.v001.ClassDiagramModel_V001"}
+// Every kind of text marked as changed by a change set, with and without backup.
+classdiagram "Texts" was(yellow, "Old title") {
+
+    class Order was(yellow, Bestellung) (aaaaaaaa) <<Entity>> was(blue, Table) (e3a1d7c2) {TABLE was(yellow, T_OLD)=orders was(yellow, orders_v1), B=2} {
+        -number was(yellow, nr) (a1a1a1a1) : String was(blue, "Zeichen\nkette") [Pflicht was(yellow, optional), 2..50, was, was was(blue)]
+        -was
+        -added : "" was(yellow, Integer)
+    }
+    class Line (bbbbbbbb) at(300, 20)
+
+    association (dddddddd) aaaaaaaa 1 was(yellow, "0..1") -> * was(yellow, 1..*) bbbbbbbb "gehört zu" was(yellow, "enthält")
+    association (ffffffff) aaaaaaaa -- bbbbbbbb "" was(yellow, "alt")
+    class since was(yellow, seit) (99999999) at(600, 100) {
+        -date
+    }
+    assocclass 99999999 -- ffffffff
+    association aaaaaaaa -- bbbbbbbb "neu" was(yellow)
+    note "Neu" was(yellow, "Alt\nText")
+    note (eeeeeeee) "x" was(blue, "")
+    anchor eeeeeeee -- aaaaaaaa
+}

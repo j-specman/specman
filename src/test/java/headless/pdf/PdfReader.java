@@ -67,6 +67,18 @@ public class PdfReader {
     return colors;
   }
 
+  /** The names of the fonts of everything drawn as text on the first page, without blanks. */
+  public static Set<String> fontNamesOfTexts(File pdf) throws IOException {
+    Set<String> names = new java.util.LinkedHashSet<>();
+    onFirstPage(pdf, EventType.RENDER_TEXT, data -> {
+      TextRenderInfo info = (TextRenderInfo) data;
+      if (!info.getText().isBlank()) {
+        names.add(info.getFont().getFontProgram().getFontNames().getFontName());
+      }
+    });
+    return names;
+  }
+
   /** The stroke colors on the first page of everything which is stroked as a line or path, e.g. underlines, in drawing order. */
   public static List<Color> strokeColorsOfPaths(File pdf) throws IOException {
     List<Color> colors = new ArrayList<>();

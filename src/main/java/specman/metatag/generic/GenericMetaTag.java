@@ -44,6 +44,7 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
   private static final int LABEL_EXTRA_PADDING = 2;
   private static final int TOOLTIP_WIDTH = 250;
   private static final int FEEDBACK_DURATION_MS = 3000;
+  private static final Color DEFAULT_BACKGROUND = new Color(0xE0E0E0);
   private static final Color DELETED_BACKGROUND = Color.BLACK;
 
   private final Color defaultForeground = getForeground();
@@ -114,11 +115,14 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     alignTextVertically(getHeight());
   }
 
-  /** The tag of a deleted step is shown as the step number is: gray on black, with a gray border
+  /** Colors the configuration leaves at the default are shown in the defaults of a tag: a gray
+   * background, no border, and the usual text color.
+   * <p>
+   * The tag of a deleted step is shown as the step number is: gray on black, with a gray border
    * even if the configuration has none (black on black would be hard to see), and a gray scale icon. */
   private void applyAppearance() {
-    setBackground(deleted ? DELETED_BACKGROUND : config.getBackgroundColor());
-    setForeground(deleted ? Schriftfarbe_Geloescht : defaultForeground);
+    setBackground(deleted ? DELETED_BACKGROUND : orDefault(config.getBackgroundColor(), DEFAULT_BACKGROUND));
+    setForeground(deleted ? Schriftfarbe_Geloescht : orDefault(config.getForegroundColor(), defaultForeground));
     setBorderColor(deleted ? DELETED_BORDER_COLOR : config.getBorderColor());
     if (icon != null) {
       icon.setGrayedOut(deleted);
@@ -126,6 +130,10 @@ public class GenericMetaTag extends AbstractMetaTag implements InteractiveStepFr
     scale();
     revalidate();
     repaint();
+  }
+
+  private static Color orDefault(Color color, Color defaultColor) {
+    return color != null ? color : defaultColor;
   }
 
   void editFreetext() {

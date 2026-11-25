@@ -92,6 +92,14 @@
             <version>${flatlaf.version}</version>
         </dependency>
 
+        <!-- The SVG renderer behind flatlaf-extras, used directly by Classman to paint the icon of a stereotype at the
+             size of the diagram, whatever the display scaling is. Same version as flatlaf-extras brings along. -->
+        <dependency>
+            <groupId>com.github.weisj</groupId>
+            <artifactId>jsvg</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+
         <!-- always needed -->
         <dependency>
             <groupId>com.itextpdf</groupId>

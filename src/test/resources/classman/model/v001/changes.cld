@@ -1,0 +1,26 @@
+// {"classmanVersion":"0.1","modelType":"classman.model.v001.ClassDiagramModel_V001"}
+// Every kind of element marked as added or removed.
+classdiagram "Changes" {
+
+    class Order (aaaaaaaa) {
+        -number (a1a1a1a1) change(added, yellow) : String
+        -total (a2a2a2a2) change(removed, blue)
+        -note change(added, lilac)
+        -plain
+    }
+    class OrderLine (bbbbbbbb) change(added, yellow) at(300, 20) {
+        -quantity : Integer
+    }
+    class Legacy (cccccccc) change(removed, blue) at(300, 200)
+
+    composition (dddddddd) change(added, yellow) aaaaaaaa 1 -> * bbbbbbbb "consists of"
+        route aaaaaaaa.right@10 bbbbbbbb.left@10
+    association (ffffffff) change(removed, blue) aaaaaaaa -- cccccccc
+    class since (99999999) change(added, yellow) at(600, 100) {
+        -date
+    }
+    assocclass change(added, yellow) 99999999 -- ffffffff
+    extends change(added, yellow) bbbbbbbb -> aaaaaaaa
+    note (eeeeeeee) change(added, yellow) "A new note"
+    anchor change(added, yellow) eeeeeeee -- aaaaaaaa
+}

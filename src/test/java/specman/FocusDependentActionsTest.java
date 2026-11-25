@@ -115,8 +115,8 @@ class FocusDependentActionsTest {
     specman.setLastFocusedTextArea(null);
     List<AbstractButton> needFocus = insertButtons().stream()
       .filter(button -> !button.getAction().getClass().getSimpleName().equals("HTMLLinkAction")).toList();
-    // lists (2), image, PlantUML, table and step number link
-    assertEquals(6, needFocus.size());
+    // lists (2), image, PlantUML, Classman, table and step number link
+    assertEquals(7, needFocus.size());
 
     // SHEF only changes the button if its action actually flips, so start from a disabled action
     needFocus.forEach(button -> button.getAction().setEnabled(false));

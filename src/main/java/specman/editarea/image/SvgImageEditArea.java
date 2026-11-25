@@ -2,15 +2,13 @@ package specman.editarea.image;
 
 import specman.ChangeInfo;
 import specman.model.v002.SvgImageEditAreaModel_V002;
-import specman.pdf.ShapeImage;
 
 import java.nio.charset.StandardCharsets;
 
 /** An edit area showing an imported SVG graphic. The graphic isn't edited in Specman, so the model persists
  * its source as it was imported. */
-public class SvgImageEditArea extends AbstractSvgImageEditArea {
+public class SvgImageEditArea extends AbstractVectorImageEditArea {
   private final String source;
-  private final byte[] svg;
 
   public SvgImageEditArea(String source, ChangeInfo changeInfo) {
     this(source, 1, changeInfo);
@@ -24,12 +22,8 @@ public class SvgImageEditArea extends AbstractSvgImageEditArea {
   private SvgImageEditArea(String source, float individualScalePercent, ChangeInfo changeInfo) {
     super(changeInfo, individualScalePercent);
     this.source = source;
-    this.svg = source.getBytes(StandardCharsets.UTF_8);
-    showSvg(svg);
+    showPicture(new SvgPicture(source.getBytes(StandardCharsets.UTF_8)));
   }
-
-  @Override
-  protected ShapeImage createShapeImage() { return vectorShapeImage(svg); }
 
   @Override
   public SvgImageEditAreaModel_V002 toModel(boolean formatierterText) {

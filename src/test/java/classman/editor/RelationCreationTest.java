@@ -1,0 +1,332 @@
+package classman.editor;
+
+import classman.model.v001.AbstractRelationModel_V001;
+import classman.model.v001.AssociationRelationModel_V001;
+import classman.model.v001.ChangeType_V001;
+import classman.model.v001.RelationType_V001;
+import classman.model.v001.io.ClassDiagramParseException;
+import classman.model.v001.io.ClassDiagramParser_V001;
+import org.junit.jupiter.api.Test;
+
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class RelationCreationTest {
+  static {
+    System.setProperty("java.awt.headless", "true");
+  }
+
+  private static final String TWO_CLASSES = "classdiagram {\n  class A (11111111) at(10, 20)\n"
+    + "  class B (22222222) at(300, 20)\n}";
+
+  private static final String CLASS_AND_INTERFACE = "classdiagram {\n  class A (11111111) at(10, 20)\n"
+    + "  interface B (22222222) at(300, 20)\n}";
+
+  private final RecordingEditorHost host = new RecordingEditorHost();
+  private DiagramEditing editing;
+  private PointerControl control;
+
+  private void open(String source) throws ClassDiagramParseException {
+    editing = new DiagramEditing(source, host);
+    control = new PointerControl(editing, () -> { }, text -> { }, at -> { }, pixels -> pixels);
+  }
+
+  private Point2D inClass(int index) {
+    Rectangle2D area = editing.scene().elementAreas.get(index).area;
+    return new Point2D.Double(area.getCenterX(), area.getCenterY());
+  }
+
+  private void draw(Point2D from, Point2D to) {
+    control.pressed(from);
+    control.dragged(to);
+    control.released(to);
+  }
+
+  private AbstractRelationModel_V001 relationOf(String source) throws ClassDiagramParseException {
+    return new ClassDiagramParser_V001().parse(source).relations().get(0);
+  }
+
+  /** While the line is drawn it runs from where the mouse was pressed to the mouse, also over a class which it would
+   * end at. The class is marked by its frame, the line only jumps to its place when the mouse is released. */
+  @Test
+  void drawnLineFollowsTheMouse() throws ClassDiagramParseException {
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
+    Point2D pressedAt = new Point2D.Double(inClass(0).getX() + 5, inClass(0).getY() - 3);
+    Point2D overB = new Point2D.Double(inClass(1).getX() - 7, inClass(1).getY() + 4);
+
+    control.pressed(pressedAt);
+    assertEquals(pressedAt, editing.selectionMarks().connectionLine.getP1());
+    assertEquals(pressedAt, editing.selectionMarks().connectionLine.getP2());
+    control.dragged(overB);
+
+    assertEquals(pressedAt, editing.selectionMarks().connectionLine.getP1());
+    assertEquals(overB, editing.selectionMarks().connectionLine.getP2());
+    assertNotNull(editing.connectionTargetArea());
+
+    control.released(overB);
+
+    assertNull(editing.selectionMarks().connectionLine);
+    assertEquals(1, new ClassDiagramParser_V001().parse(editing.source()).relations().size());
+  }
+
+  /** A press on a class and a drag to another one creates a directed association, and the tool is left. */
+  @Test
+  void associationDrawn() throws ClassDiagramParseException {
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
+
+    draw(inClass(0), inClass(1));
+
+    AssociationRelationModel_V001 relation = (AssociationRelationModel_V001) relationOf(editing.source());
+    assertEquals(RelationType_V001.ASSOCIATION, relation.type);
+    assertEquals("11111111", relation.fromId);
+    assertEquals("22222222", relation.toId);
+    assertTrue(relation.toArrow);
+    assertNotNull(relation.id);
+    assertNull(relation.change);
+    assertFalse(editing.isRelationToolArmed());
+    assertEquals(relation.id, editing.scene().relationLines.get(0).relation.id);
+    assertEquals(2, editing.selectedHandles().size());
+    assertTrue(editing.canUndo());
+  }
+
+  /** While the mouse is on a class, it is framed and the line ends at its center. */
+  @Test
+  void targetFramedWhileDrawing() throws ClassDiagramParseException {
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
+    control.pressed(inClass(0));
+
+    control.dragged(new Point2D.Double(200, 200));
+    assertNull(editing.connectionTargetArea());
+    assertEquals(200, editing.selectionMarks().connectionLine.getX2());
+
+    control.dragged(inClass(1));
+    assertEquals(editing.scene().elementAreas.get(1).area, editing.connectionTargetArea());
+    assertEquals(inClass(1).getX(), editing.selectionMarks().connectionLine.getX2());
+  }
+
+  /** Released on no class, nothing is created and the tool stays armed; Esc takes back a drawing which is going on. */
+  @Test
+  void cancelledDrawing() throws ClassDiagramParseException {
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
+
+    draw(inClass(0), new Point2D.Double(200, 200));
+    assertTrue(editing.isRelationToolArmed());
+    assertFalse(editing.canUndo());
+
+    control.pressed(inClass(0));
+    control.dragged(inClass(1));
+    assertTrue(editing.cancelDrag());
+    control.released(inClass(1));
+
+    assertTrue(new ClassDiagramParser_V001().parse(editing.source()).relations().isEmpty());
+    assertFalse(editing.canUndo());
+  }
+
+  /** A press beside the classes starts nothing, and a click on a class without a drag creates nothing. */
+  @Test
+  void pressOutsideOrWithoutDrag() throws ClassDiagramParseException {
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
+
+    draw(new Point2D.Double(200, 200), inClass(1));
+    control.pressed(inClass(0));
+    control.released(inClass(0));
+
+    assertFalse(editing.canUndo());
+    assertTrue(editing.isRelationToolArmed());
+  }
+
+  /** A relation from a class to itself needs the mouse to leave the class and come back; a shaky click makes none. */
+  @Test
+  void loopOnlyAfterLeavingTheClass() throws ClassDiagramParseException {
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
+    Point2D inA = inClass(0);
+
+    draw(inA, new Point2D.Double(inA.getX() + 2, inA.getY()));
+    assertFalse(editing.canUndo());
+
+    control.pressed(inA);
+    control.dragged(new Point2D.Double(200, 200));
+    control.dragged(inA);
+    control.released(inA);
+
+    assertEquals("11111111", relationOf(editing.source()).fromId);
+    assertEquals("11111111", relationOf(editing.source()).toId);
+  }
+
+  /** While changes are tracked the new relation is marked as added. */
+  @Test
+  void drawnRelationTracked() throws ClassDiagramParseException {
+    host.trackedChangeSet = "yellow";
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
+
+    draw(inClass(0), inClass(1));
+
+    assertEquals(ChangeType_V001.ADDED, relationOf(editing.source()).change.type);
+    assertEquals("yellow", relationOf(editing.source()).change.changeSet);
+  }
+
+  /** A class without an ID gets one, because a relation refers to its classes by ID. */
+  @Test
+  void classWithoutIdGetsOne() throws ClassDiagramParseException {
+    open("classdiagram {\n  class A at(10, 20)\n  class B (22222222) at(300, 20)\n}");
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
+
+    draw(inClass(0), inClass(1));
+
+    assertNotNull(new ClassDiagramParser_V001().parse(editing.source()).classes().get(0).id);
+    assertEquals(new ClassDiagramParser_V001().parse(editing.source()).classes().get(0).id,
+      relationOf(editing.source()).fromId);
+  }
+
+  /** While the tool is armed, a press doesn't select and a drag doesn't move the class. */
+  @Test
+  void armedToolDoesNotMoveClasses() throws ClassDiagramParseException {
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.ASSOCIATION);
+    Rectangle2D before = editing.scene().elementAreas.get(0).area;
+
+    draw(inClass(0), new Point2D.Double(200, 200));
+
+    assertEquals(before, editing.scene().elementAreas.get(0).area);
+    assertFalse(editing.hasSelection());
+  }
+
+  /** Aggregation and composition are drawn like the association, without an arrowhead: the diamond is their mark. */
+  @Test
+  void diamondRelationsAreUndirected() throws ClassDiagramParseException {
+    for (RelationType_V001 type : new RelationType_V001[] {RelationType_V001.AGGREGATION, RelationType_V001.COMPOSITION}) {
+      open(TWO_CLASSES);
+      editing.toggleRelationTool(type);
+
+      draw(inClass(0), inClass(1));
+
+      AssociationRelationModel_V001 relation = (AssociationRelationModel_V001) relationOf(editing.source());
+      assertEquals(type, relation.type);
+      assertEquals("11111111", relation.fromId);
+      assertEquals("22222222", relation.toId);
+      assertFalse(relation.toArrow);
+      assertFalse(editing.isRelationToolArmed());
+    }
+  }
+
+  /** Inheritance and implementation run from the subclass, or the implementing class, to the one they refer to. */
+  @Test
+  void inheritanceRelations() throws ClassDiagramParseException {
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.EXTENDS);
+    draw(inClass(0), inClass(1));
+    AbstractRelationModel_V001 extendsRelation = relationOf(editing.source());
+    assertEquals(RelationType_V001.EXTENDS, extendsRelation.type);
+    assertEquals("11111111", extendsRelation.fromId);
+    assertEquals("22222222", extendsRelation.toId);
+
+    open(CLASS_AND_INTERFACE);
+    editing.toggleRelationTool(RelationType_V001.IMPLEMENTS);
+    draw(inClass(0), inClass(1));
+    assertEquals(RelationType_V001.IMPLEMENTS, relationOf(editing.source()).type);
+  }
+
+  /** An implementation starts at a class and ends at an interface, nothing else: not between two classes, and not
+   * from an interface. */
+  @Test
+  void implementationOnlyFromClassToInterface() throws ClassDiagramParseException {
+    open(CLASS_AND_INTERFACE);
+    editing.toggleRelationTool(RelationType_V001.IMPLEMENTS);
+    draw(inClass(1), inClass(0));
+    assertTrue(new ClassDiagramParser_V001().parse(editing.source()).relations().isEmpty());
+
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.IMPLEMENTS);
+    draw(inClass(0), inClass(1));
+    assertTrue(new ClassDiagramParser_V001().parse(editing.source()).relations().isEmpty());
+    assertTrue(editing.isRelationToolArmed());
+  }
+
+  /** A class extends a class and an interface an interface, but a class can't extend an interface or the other way
+   * round. */
+  @Test
+  void inheritanceOnlyBetweenBoxesOfTheSameKind() throws ClassDiagramParseException {
+    open(CLASS_AND_INTERFACE);
+    editing.toggleRelationTool(RelationType_V001.EXTENDS);
+    draw(inClass(0), inClass(1));
+    draw(inClass(1), inClass(0));
+    assertTrue(new ClassDiagramParser_V001().parse(editing.source()).relations().isEmpty());
+
+    open("classdiagram {\n  interface A (11111111) at(10, 20)\n  interface B (22222222) at(300, 20)\n}");
+    editing.toggleRelationTool(RelationType_V001.EXTENDS);
+    draw(inClass(0), inClass(1));
+    assertEquals(RelationType_V001.EXTENDS, relationOf(editing.source()).type);
+  }
+
+  private static final String CLASS_AND_ENUM = "classdiagram {\n  class A (11111111) at(10, 20)\n"
+    + "  enum E (22222222) at(300, 20)\n}";
+
+  private boolean drawn(String source, RelationType_V001 type, int from, int to) throws ClassDiagramParseException {
+    open(source);
+    editing.toggleRelationTool(type);
+    draw(inClass(from), inClass(to));
+    return !new ClassDiagramParser_V001().parse(editing.source()).relations().isEmpty();
+  }
+
+  /** An association, aggregation or composition may end at an enum but not start at one. */
+  @Test
+  void enumOnlyAsTargetOfAssociations() throws ClassDiagramParseException {
+    for (RelationType_V001 type : new RelationType_V001[] {RelationType_V001.ASSOCIATION, RelationType_V001.AGGREGATION,
+      RelationType_V001.COMPOSITION}) {
+      assertTrue(drawn(CLASS_AND_ENUM, type, 0, 1), type + " class to enum");
+      assertFalse(drawn(CLASS_AND_ENUM, type, 1, 0), type + " enum to class");
+    }
+    assertTrue(drawn(CLASS_AND_ENUM, RelationType_V001.ASSOCIATION, 0, 1));
+    assertTrue(((AssociationRelationModel_V001) relationOf(editing.source())).toArrow);
+  }
+
+  /** An enum neither extends nor is extended, but it may implement an interface. */
+  @Test
+  void enumInheritance() throws ClassDiagramParseException {
+    String twoEnums = "classdiagram {\n  enum A (11111111) at(10, 20)\n  enum B (22222222) at(300, 20)\n}";
+    assertFalse(drawn(twoEnums, RelationType_V001.EXTENDS, 0, 1));
+    assertFalse(drawn(CLASS_AND_ENUM, RelationType_V001.EXTENDS, 0, 1));
+    assertFalse(drawn(CLASS_AND_ENUM, RelationType_V001.EXTENDS, 1, 0));
+    String enumAndInterface = "classdiagram {\n  enum E (11111111) at(10, 20)\n  interface I (22222222) at(300, 20)\n}";
+    assertTrue(drawn(enumAndInterface, RelationType_V001.IMPLEMENTS, 0, 1));
+  }
+
+  /** The button of another type changes what is drawn; the button of the type which is armed puts the tool away. */
+  @Test
+  void switchingTheRelationType() throws ClassDiagramParseException {
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.AGGREGATION);
+
+    editing.toggleRelationTool(RelationType_V001.EXTENDS);
+    assertTrue(editing.isRelationToolArmed());
+    assertEquals(RelationType_V001.EXTENDS, editing.armedRelationType());
+
+    editing.toggleRelationTool(RelationType_V001.EXTENDS);
+    assertFalse(editing.isRelationToolArmed());
+  }
+
+  /** The new relation is marked as added while changes are tracked, whatever its type is. */
+  @Test
+  void inheritanceTracked() throws ClassDiagramParseException {
+    host.trackedChangeSet = "yellow";
+    open(TWO_CLASSES);
+    editing.toggleRelationTool(RelationType_V001.EXTENDS);
+
+    draw(inClass(0), inClass(1));
+
+    assertEquals(ChangeType_V001.ADDED, relationOf(editing.source()).change.type);
+  }
+}

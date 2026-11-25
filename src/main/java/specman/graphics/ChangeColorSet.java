@@ -10,15 +10,19 @@ public class ChangeColorSet {
   public final Color panelColor;
   public final ReadWriteColor stepnumberLink;
   public final Color menuColor;
+  /** The color of the frame around a selected diagram element which is marked with this change set, null if the
+   * usual selection color can be told from the change set's color. */
+  public final Color selectColor;
 
   public ChangeColorSet(Color color, Color stepnumberLinkBaseColor) {
-    this(color, stepnumberLinkBaseColor, saturate(color));
+    this(color, stepnumberLinkBaseColor, null);
   }
 
-  public ChangeColorSet(Color color, Color stepnumberLinkBaseColor, Color menuColor) {
+  public ChangeColorSet(Color color, Color stepnumberLinkBaseColor, Color selectColor) {
     this.text = new ReadWriteColor(color);
     this.panelColor = mixWithWhite(color, 0.8f);
-    this.menuColor = menuColor;
+    this.menuColor = saturate(color);
+    this.selectColor = selectColor;
     this.stepnumberLink = new ReadWriteColor(combineColors(stepnumberLinkBaseColor, color));
   }
 

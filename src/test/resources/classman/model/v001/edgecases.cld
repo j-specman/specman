@@ -1,0 +1,33 @@
+// {"classmanVersion":"0.1","modelType":"classman.model.v001.ClassDiagramModel_V001"}
+// Edge cases of the draft grammar.
+classdiagram {
+    class "Hilfe Eintrag" (9a31c4e0) at(-20, 30) width=140 <<Entity>> {
+        // a comment line
+        -"Weiterleitung zu Position" : String [Pflicht, 2..50, TN=positionkey]
+        +width : Zahl
+        #"List<String>" : "J/N"
+        ...
+    }
+    class Über (0b1c2d3e) { Name (12ab34cd) }
+    class Leer (1ee50001) { }
+    class Hello (4e110002)
+    class Tagged {A=1, B=2} {
+        x
+    }
+    class TaggedOnly {TABLENAME=helpversion}
+    class deadbeef (12345678) {KEY=12345678} {
+        deadbeef : deadbeef [deadbeef, 12345678]
+    }
+
+    association (0123abcd) 9a31c4e0 0..1 -> * 0b1c2d3e
+    aggregation 0b1c2d3e 1 -- * 9a31c4e0 "owns"
+    composition 0b1c2d3e -> 9a31c4e0 "has"
+    association 4e110002 -- 1ee50001
+    extends 0b1c2d3e -> 4e110002
+    association 12345678 -- 12345678
+    implements 9a31c4e0 -> 1ee50001 "implements something"
+    note (ed9e0003) "just a note"
+    note (ed9e0004) at(0, 0) "routed"
+    anchor ed9e0003 -- 12ab34cd
+    anchor ed9e0004 -- 12ab34cd route (10, 20) (30, 40)
+}

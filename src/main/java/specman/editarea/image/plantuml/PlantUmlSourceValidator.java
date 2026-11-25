@@ -1,6 +1,7 @@
 package specman.editarea.image.plantuml;
 
 import net.sourceforge.plantuml.syntax.SyntaxChecker;
+import specman.editarea.image.SourceValidator;
 import net.sourceforge.plantuml.syntax.SyntaxResult;
 
 import java.util.regex.Pattern;
@@ -8,7 +9,7 @@ import java.util.regex.Pattern;
 import static specman.i18n.Messages.i18n;
 
 /** The rules PlantUML source must follow to be accepted by Specman. */
-public class PlantUmlSourceValidator {
+public class PlantUmlSourceValidator implements SourceValidator {
   public static final String BACKTICK_MESSAGE_KEY = "msg.plantuml.backtick";
   public static final String PRAGMA_MESSAGE_KEY = "msg.plantuml.pragma";
   public static final String EMPTY_MESSAGE_KEY = "msg.plantuml.empty";
@@ -20,6 +21,7 @@ public class PlantUmlSourceValidator {
   private static final Pattern START_OR_END_MARKER = Pattern.compile("@(startuml|enduml)\\b.*", Pattern.CASE_INSENSITIVE);
 
   /** @return a message telling the user what is wrong with the source, or null if it is fine */
+  @Override
   public String problemOf(String source) {
     String violationKey = violationMessageKey(source);
     return violationKey != null ? i18n(violationKey) : syntaxProblem(source);

@@ -17,7 +17,10 @@ import specman.editarea.EditArea;
 import specman.ops.*;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
+import specman.metatag.generic.config.MetaTagConfigEditDialog;
+import specman.metatag.generic.config.MetaTagConfigsEditor;
 import specman.metatag.generic.config.MetaTagConfigListener;
+import specman.visitor.MetaTagConfigUseCollector;
 import specman.metatag.generic.config.MetaTagConfigRegistry;
 import specman.metatag.generic.config.MetaTagConfigsDialog;
 import specman.settings.SettingsDialog;
@@ -27,8 +30,10 @@ import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.editarea.EditContainer;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
-import specman.editarea.image.plantuml.PlantUmlFileChoice;
-import specman.editarea.image.plantuml.PlantUmlFileChooser;
+import specman.editarea.image.classman.ClassmanImageEditArea;
+import specman.editarea.image.SourceFileChoice;
+import specman.editarea.image.SourceFileKind;
+import specman.editarea.image.SourceFileChooser;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.undo.UndoableSchrittHinzugefuegt;
 import specman.undo.manager.SpecmanUndoManager;
@@ -58,6 +63,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
 import static specman.i18n.Messages.i18n;
@@ -394,8 +400,18 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	@Override
+	public void addClassmanImage() {
+		new AddImageSpecmanOp(this).addClassman();
+	}
+
+	@Override
 	public void importPlantUmlSource(PlantUmlImageEditArea diagram) {
 		new AddImageSpecmanOp(this).importPlantUml(diagram);
+	}
+
+	@Override
+	public void importClassmanSource(ClassmanImageEditArea diagram) {
+		new AddImageSpecmanOp(this).importClassman(diagram);
 	}
 
 	@Override
@@ -753,9 +769,9 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	@Override
-	public PlantUmlFileChoice choosePlantUmlFile(boolean emptyDiagramOffered) {
+	public SourceFileChoice chooseSourceFile(SourceFileKind kind, boolean emptyDiagramOffered) {
 		File directory = diagrammDatei != null ? diagrammDatei.getParentFile() : null;
-		return new PlantUmlFileChooser(directory, emptyDiagramOffered).choose(scrollPane);
+		return new SourceFileChooser(kind, directory, emptyDiagramOffered).choose(scrollPane);
 	}
 
 	/** Called while Specman is being constructed. Overrides must not depend on their own fields. */
@@ -787,8 +803,20 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
   }
 
   @Override
-  public void openMetaTagConfigs() {
-    new MetaTagConfigsDialog(frame, metaTagConfigs, queryMetaTagConfigsInUse()).setVisible(true);
+  public MetaTagConfigsEditor openMetaTagConfigs() {
+    MetaTagConfigsEditor metaTagConfigsEditor = newMetaTagConfigsEditor();
+    new MetaTagConfigsDialog(frame, metaTagConfigsEditor);
+    return metaTagConfigsEditor;
+  }
+
+  /** The editor for the configurations as they are used now, without a window around it. */
+  protected MetaTagConfigsEditor newMetaTagConfigsEditor() {
+    return new MetaTagConfigsEditor(metaTagConfigs, queryMetaTagConfigsInUse());
+  }
+
+  @Override
+  public MetaTagConfig editMetaTagConfig(MetaTagConfig existing, boolean nameEditable, Predicate<String> isNameTaken) {
+    return new MetaTagConfigEditDialog(frame, existing, nameEditable, isNameTaken).showAndGet();
   }
 
   @Override
@@ -811,6 +839,9 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
     for (AbstractSchrittView step : listAllSteps()) {
       names.addAll(step.getTagConfigNames());
     }
+    MetaTagConfigUseCollector diagrams = new MetaTagConfigUseCollector();
+    traverseDiagram(diagrams);
+    names.addAll(diagrams.configNames());
     return names;
   }
 

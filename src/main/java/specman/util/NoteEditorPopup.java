@@ -50,6 +50,7 @@ public class NoteEditorPopup extends JPopupMenu {
   private static final Color NOTE_BORDER = Color.DARK_GRAY;
 
   private final JTextArea textArea = new JTextArea();
+  private final AltKeyShield altKeyShield = new AltKeyShield(textArea);
   private final JScrollPane scrollPane = new JScrollPane(textArea);
   private final JPanel contentPanel = new JPanel(new BorderLayout());
   private int columns = DEFAULT_COLUMNS;
@@ -96,10 +97,12 @@ public class NoteEditorPopup extends JPopupMenu {
     addPopupMenuListener(new PopupMenuListener() {
       @Override
       public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+        altKeyShield.install();
       }
 
       @Override
       public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+        altKeyShield.uninstall();
         if (!cancelled && !canCommit()) {
           SwingUtilities.invokeLater(NoteEditorPopup.this::reappear);
           return;

@@ -8,16 +8,19 @@ import specman.EditException;
 import specman.SpecmanVersion;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.MetaTagConfigModel_V002;
+import specman.model.v002.MetaTagModel_V002;
 import specman.model.ModelEnvelope;
 import specman.model.ModelConverterV001V002;
 import specman.model.v001.StruktogrammModel_V001;
 import specman.model.v002.DiagramModel_V002;
+import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.io.ModelParser_V002;
 import specman.model.v002.io.ModelParseException;
 import specman.model.v002.io.ModelRenumberer_V002;
 import specman.model.v002.io.ModelSerializer_V002;
 import specman.view.QuellSchrittView;
 import specman.visitor.DiagramPostInitializer;
+import specman.visitor.UnknownMetaTagConfigDropper;
 import specman.visitor.StepNumberIndexCollector;
 import specman.visitor.TextAreaCollector;
 import specman.view.SchrittSequenzView;
@@ -33,9 +36,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import specman.editarea.StepnumberLink;
 import specman.editarea.TextEditArea;
 import specman.editarea.document.WrappedElement;
@@ -160,8 +166,8 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     setZoomFaktor(model.zoomFactor);
     zoomFaktorAnzeigeAktualisieren(model.zoomFactor);
     setDiagrammbreite(model.width);
-    getIntro().setEditorContent(model.intro);
-    getOutro().setEditorContent(model.outro);
+    getIntro().setEditorContent(contentOrEmpty(model.intro));
+    getOutro().setEditorContent(contentOrEmpty(model.outro));
     setPdfExportOptions(model.pdfExportOptions);
     setDiagrammName(model.name);
     setHauptSequenz(new SchrittSequenzView(null, model.mainSequence));
@@ -171,11 +177,40 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     rewriteStaleStepNumberLinks(model);
     quellZielZuweisungV002(model);
     DiagramPostInitializer.initialize(context()::traverseDiagram);
+    Set<String> skippedMetaTags = namesOfUnknownTagConfigs(model);
+    UnknownMetaTagConfigDropper dropper = new UnknownMetaTagConfigDropper();
+    context().traverseDiagram(dropper);
+    skippedMetaTags.addAll(dropper.droppedConfigNames());
     getIntro().registerAllExistingStepnumbers();
     getOutro().registerAllExistingStepnumbers();
     setChangeModeEnabled(model.changeModeEnabled);
     discardAllUndoEdits();
     diagrammAktualisieren(null);
+    toastSkippedMetaTags(skippedMetaTags);
+  }
+
+  /** The format allows a file without intro or outro, e.g. one which an agent wrote. */
+  private static EditorContentModel_V002 contentOrEmpty(EditorContentModel_V002 content) {
+    return content != null ? content : EditorContentModel_V002.empty();
+  }
+
+  /** Tags at steps whose meta tag configuration the file doesn't have are not loaded, see AbstractSchrittView. The
+   * stereotypes in diagrams are dropped by {@link UnknownMetaTagConfigDropper}.
+   * @return the names of the configurations which are missing */
+  private static Set<String> namesOfUnknownTagConfigs(DiagramModel_V002 model) {
+    Set<String> configNames = new HashSet<>();
+    for (MetaTagConfigModel_V002 config : model.metaTagConfigs) {
+      configNames.add(config.name);
+    }
+    Set<String> unknown = new LinkedHashSet<>();
+    for (AbstractStepModel_V002 step : model.queryAllSteps()) {
+      for (MetaTagModel_V002 tag : step.tags) {
+        if (!configNames.contains(tag.configName)) {
+          unknown.add(tag.configName);
+        }
+      }
+    }
+    return unknown;
   }
 
   private List<MetaTagConfig> toConfigs(List<MetaTagConfigModel_V002> configModels) {

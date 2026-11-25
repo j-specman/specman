@@ -42,6 +42,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.util.List;
+import java.util.Set;
 
 import static specman.ChangeSet.changeset;
 import static specman.Specman.editor;
@@ -98,6 +100,7 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
     this.add(new SpaltenResizer(this, IRRELEVANT_COLUMNRESIZE_INDEX), CC.xy(2, 1));
     setBackground(panelColor());
     image.setBorder(changetype2border());
+    updatePictureBackground();
     addComponentListener(this);
     updateListenersByChangeInfo();
   }
@@ -295,11 +298,28 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
     setEditBackgroundUDBL(null);
   }
 
+  /** @return the names of the meta tag configurations which the picture uses, none for a picture which doesn't use
+   * any */
+  public Set<String> metaTagConfigNamesInUse() { return Set.of(); }
+
+  /** @return the names of the elements of the picture, e.g. classes of a diagram, which use the meta tag
+   * configuration, in the order of the picture */
+  public List<String> metaTagConfigUserNames(String configName) { return List.of(); }
+
+  /** Takes away what the picture uses of the meta tag configuration, as an undoable edit. */
+  public void removeMetaTagConfigUseUDBL(String configName) {}
+
+  /** Takes away what the picture uses of meta tag configurations which the document doesn't have, as part of what
+   * created the picture, so not as an edit of its own.
+   * @param dropped collects the names of the configurations which were missing */
+  public void dropUnknownMetaTagConfigs(Set<String> dropped) {}
+
   public ChangeInfo getChangeInfo() { return changeInfo; }
 
 
   public void setChangeInfo(ChangeInfo changeInfo) {
     this.changeInfo = changeInfo;
+    updatePictureBackground();
     updateListenersByChangeInfo();
     if (changeInfo.isDeleted()) {
       addGlassPanel();
@@ -360,6 +380,25 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
   @Override
   public void setEditBackgroundUDBL(Color bg) {
     setBackgroundUDBL(panelColor());
+  }
+
+  /** The background of the picture inside the border of the image, null if it has none, so that the background of the
+   * area shows through. Note that it is also asked while the base class is being constructed. */
+  protected Color pictureBackground() {
+    return null;
+  }
+
+  /** @return the background of the picture inside the border of the image, null if it has none */
+  public Color getPictureBackground() {
+    return image.isOpaque() ? image.getBackground() : null;
+  }
+
+  private void updatePictureBackground() {
+    Color background = pictureBackground();
+    image.setOpaque(background != null);
+    if (background != null) {
+      image.setBackground(background);
+    }
   }
 
   /** The background of the area, which marks its changes. Subclasses with changes of their own content

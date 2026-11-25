@@ -12,10 +12,15 @@ import specman.Specman;
 import specman.editarea.EditArea;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
-import specman.editarea.image.plantuml.PlantUmlContextMenu;
-import specman.editarea.image.plantuml.PlantUmlFileChoice;
+import specman.editarea.image.SourceImageContextMenu;
+import specman.editarea.image.SourceFileChoice;
+import specman.editarea.image.SourceFileKind;
+import specman.editarea.image.classman.ClassmanImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
+import specman.editarea.image.AbstractSourceImageEditArea;
 import specman.link.AliasListPanel;
+import specman.metatag.generic.config.MetaTagConfig;
+import specman.metatag.generic.config.MetaTagConfigsEditor;
 import specman.metatag.stepnumberlabel.StepnumberContextMenu;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.PdfExportOptionsModel_V002;
@@ -53,7 +58,10 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -88,10 +96,12 @@ public class SpecmanFT extends Specman {
   private final List<String> shownMessages = new ArrayList<>();
   private final Clipboard clipboard = new Clipboard("specman-test");
   private int confirmDialogAnswer = JOptionPane.YES_OPTION;
+  private MetaTagConfig metaTagConfigEditAnswer;
+  private boolean metaTagConfigNameEditable;
   private File fileChoiceAnswer;
   private File imageFileChoiceAnswer;
-  private PlantUmlFileChoice plantUmlFileChoiceAnswer = PlantUmlFileChoice.emptyDiagram();
-  private boolean plantUmlEmptyDiagramOffered;
+  private final Map<SourceFileKind, SourceFileChoice> sourceFileChoiceAnswers = new HashMap<>();
+  private final Map<SourceFileKind, Boolean> emptyDiagramOffered = new HashMap<>();
   private AliasListPanel openedAliasListPanel;
   private final List<String> aliasesAskedFor = new ArrayList<>();
   private final List<File> fileSuggestionsOffered = new ArrayList<>();
@@ -351,13 +361,13 @@ public class SpecmanFT extends Specman {
     throw new IllegalStateException("No context menu item of type " + itemType.getSimpleName());
   }
 
-  /** Right-clicks the given PlantUML diagram and returns the item of its context menu with the given message key,
+  /** Right-clicks the given diagram, which is shown from its source, and returns the item of its context menu with the given message key,
    * without clicking it. Allows tests to check visibility and enablement. */
-  public JMenuItem contextMenuItem(PlantUmlImageEditArea diagram, String itemMessageKey) {
+  public JMenuItem contextMenuItem(AbstractSourceImageEditArea diagram, String itemMessageKey) {
     layoutComponents();
     rightClick(diagram);
     String itemText = i18n(itemMessageKey);
-    for (Component component : PlantUmlContextMenu.popupMenu().getComponents()) {
+    for (Component component : SourceImageContextMenu.popupMenu().getComponents()) {
       if (component instanceof JMenuItem item && itemText.equals(item.getText())) {
         return item;
       }
@@ -365,9 +375,9 @@ public class SpecmanFT extends Specman {
     throw new IllegalStateException("No context menu item '" + itemText + "'");
   }
 
-  /** Right-clicks the given PlantUML diagram and clicks the item of its context menu with the given message key,
+  /** Right-clicks the given diagram, which is shown from its source, and clicks the item of its context menu with the given message key,
    * if the user could do so, i.e. if it is visible and enabled. */
-  public void clickContextMenuItem(PlantUmlImageEditArea diagram, String itemMessageKey) {
+  public void clickContextMenuItem(AbstractSourceImageEditArea diagram, String itemMessageKey) {
     JMenuItem item = contextMenuItem(diagram, itemMessageKey);
     assertTrue(item.isVisible() && item.isEnabled(), "context menu item '" + item.getText() + "' must be available");
     item.doClick(0);
@@ -597,19 +607,29 @@ public class SpecmanFT extends Specman {
 
   /** Defines what the user chooses when asked for a file with PlantUML source, either for a new diagram or to
    * import into an existing one. Without an answer, the user starts with an empty diagram. */
-  public void answerPlantUmlFileChoiceWith(PlantUmlFileChoice choice) {
-    plantUmlFileChoiceAnswer = choice;
+  public void answerPlantUmlFileChoiceWith(SourceFileChoice choice) {
+    sourceFileChoiceAnswers.put(PlantUmlImageEditArea.FILE_KIND, choice);
+  }
+
+  /** Like {@link #answerPlantUmlFileChoiceWith(SourceFileChoice)}, but for a Classman diagram. */
+  public void answerClassmanFileChoiceWith(SourceFileChoice choice) {
+    sourceFileChoiceAnswers.put(ClassmanImageEditArea.FILE_KIND, choice);
   }
 
   /** Whether the user was offered to start with an empty diagram when asked for a PlantUML file the last time. */
   public boolean plantUmlEmptyDiagramWasOffered() {
-    return plantUmlEmptyDiagramOffered;
+    return emptyDiagramOffered.get(PlantUmlImageEditArea.FILE_KIND);
+  }
+
+  /** Whether the user was offered to start with an empty diagram when asked for a Classman file the last time. */
+  public boolean classmanEmptyDiagramWasOffered() {
+    return emptyDiagramOffered.get(ClassmanImageEditArea.FILE_KIND);
   }
 
   @Override
-  public PlantUmlFileChoice choosePlantUmlFile(boolean emptyDiagramOffered) {
-    plantUmlEmptyDiagramOffered = emptyDiagramOffered;
-    return plantUmlFileChoiceAnswer;
+  public SourceFileChoice chooseSourceFile(SourceFileKind kind, boolean emptyDiagramOffered) {
+    this.emptyDiagramOffered.put(kind, emptyDiagramOffered);
+    return sourceFileChoiceAnswers.getOrDefault(kind, SourceFileChoice.emptyDiagram());
   }
 
   /** Defines the file the user picks when asked for an image file, null for cancelling the choice. */
@@ -686,7 +706,25 @@ public class SpecmanFT extends Specman {
     return openedAliasListPanel;
   }
   @Override public void addRecentFile(File file) {}
-  @Override public void openMetaTagConfigs() {}
+  /** The editor for the meta tag configurations, without a dialog around it, so that the test can operate it. */
+  @Override public MetaTagConfigsEditor openMetaTagConfigs() { return newMetaTagConfigsEditor(); }
+
+  /** Defines what the user enters the next time the dialog for a meta tag configuration is shown, null for cancelling
+   * it. */
+  public void answerMetaTagConfigEditWith(MetaTagConfig config) {
+    metaTagConfigEditAnswer = config;
+  }
+
+  /** Whether the user was allowed to change the name of the configuration when asked the last time. */
+  public boolean metaTagConfigNameWasEditable() {
+    return metaTagConfigNameEditable;
+  }
+
+  @Override
+  public MetaTagConfig editMetaTagConfig(MetaTagConfig existing, boolean nameEditable, Predicate<String> isNameTaken) {
+    metaTagConfigNameEditable = nameEditable;
+    return metaTagConfigEditAnswer;
+  }
   @Override public void copyTableToClipboard(TableEditArea table) {}
   @Override public void cutTableToClipboard(TableEditArea table) {}
   @Override public void pasteTableInto(TextEditArea initiatingTextArea) {}

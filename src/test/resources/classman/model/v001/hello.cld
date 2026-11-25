@@ -1,0 +1,14 @@
+// {"classmanVersion":"0.1","modelType":"classman.model.v001.ClassDiagramModel_V001"}
+classdiagram {
+
+    class Hilfeversion (04de91aa) {
+        Versionsnummer
+    }
+
+    class HilfeversionMarkup (b7c20f13) {
+        Sprache
+        Beschreibung
+    }
+
+    composition 04de91aa 1 -> * b7c20f13 "sprachabh. Beschreibung"
+}

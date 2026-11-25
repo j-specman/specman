@@ -6,10 +6,13 @@ import specman.editarea.EditContainer;
 import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
+import specman.editarea.image.classman.ClassmanImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigListener;
+import specman.metatag.generic.config.MetaTagConfigsEditor;
+import specman.undo.manager.SpecmanUndoManager;
 import specman.undo.manager.UndoRecording;
 import specman.view.AbstractSchrittView;
 import specman.visitor.DiagramVisitor;
@@ -23,6 +26,7 @@ import java.awt.event.FocusListener;
 import java.io.File;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /** This interface represents the current actogramm editor and is supposed to
  * substitute the older direct access of the {@link Specman} class. This may
@@ -55,9 +59,14 @@ public interface EditorI extends FocusListener {
 	double scale(double length);
 	void addImageViaFileChooser();
 	void addPlantUmlImage();
+	/** Asks the user for a file with the source of a new Classman diagram, or to start with an empty diagram. */
+	void addClassmanImage();
 	/** Asks the user for a file and replaces the source of the diagram by its content. */
 	void importPlantUmlSource(PlantUmlImageEditArea diagram);
+	/** Asks the user for a file and replaces the source of the diagram by its content. */
+	void importClassmanSource(ClassmanImageEditArea diagram);
 	void undoLastEditAndForget();
+	SpecmanUndoManager getUndoManager();
 	List<AbstractSchrittView> listAllSteps();
 	void addTable(int numColumns, int numRows);
 	void toggleListItem(boolean ordered);
@@ -72,6 +81,8 @@ public interface EditorI extends FocusListener {
   void scrollBackwardInEditHistory();
   void scrollForwardInEditHistory();
   void appendToEditHistory(EditContainer editContainer);
+  EditContainer getIntro();
+  EditContainer getOutro();
   void resyncStepnumberStyleADBL();
   int showConfirmDialog(String message, String title, int optionType);
   void deleteStepADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
@@ -93,7 +104,15 @@ public interface EditorI extends FocusListener {
   List<MetaTagConfig> metaTagConfigs();
   MetaTagConfig findMetaTagConfig(String name);
   Set<String> queryMetaTagConfigsInUse();
-  void openMetaTagConfigs();
+  /** Opens the editor for the meta tag configurations, in a dialog of its own.
+   * @return the editor, which the dialog shows */
+  MetaTagConfigsEditor openMetaTagConfigs();
+  /** Asks the user for a meta tag configuration, in a dialog of its own: a new one or an edited one.
+   * @param existing the configuration to edit, null to create a new one
+   * @param nameEditable whether the name may be changed - not if tags at steps or diagrams refer to it
+   * @param isNameTaken tells whether a name is already used by another configuration
+   * @return the configuration which the user confirmed, null if the user cancelled */
+  MetaTagConfig editMetaTagConfig(MetaTagConfig existing, boolean nameEditable, Predicate<String> isNameTaken);
   void showToast(String message);
   /** Follows the target of a hyperlink in a text, e.g. a Specman link, a web address or a mail address. */
   void followHyperlink(String target);

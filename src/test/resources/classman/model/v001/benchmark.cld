@@ -1,0 +1,110 @@
+// {"classmanVersion":"0.1","modelType":"classman.model.v001.ClassDiagramModel_V001"}
+// The benchmark diagram expressed in the draft format. Topology and routes follow the hand-made grid image,
+// positions and waypoints are chosen for the real box sizes so that nothing overlaps.
+classdiagram "Hilfe-Versionierung" {
+
+    class Hilfeversion (04de91aa) at(300, 20) <<Entity>> (e3a1d7c2) {TABLENAME=helpversion} {
+        -Versionsnummer : String [Pflicht, 2..50, TN=versionkey]
+        ...
+    }
+    class Hilfeversion-Markup (c0de0001) at(780, 20) {
+        -Sprache
+        -Beschreibung : CLOB
+    }
+    class Hilfeeintrag (c0de0002) at(540, 250) {
+        -Positionsschlüssel : String [Pflicht]
+        -"In Baum anzeigen" : J/N
+        -"autom Mandantenauswahl" : J/N
+        -"Weiterleitung zu Position" : String
+        -Formel : String
+    }
+    class Hilfetextblock (c0de0003) change(added, yellow) at(900, 250) {
+        -"autom Mandantenauswahl" : J/N
+        -"lfd Nummer" : Zahl
+    }
+    class Hilfe-Markup (c0de0004) at(1260, 400) {
+        -Sprache
+        -Beschreibung : CLOB
+    }
+    class Hilfekategorie (7c01a5e2) at(30, 250) {
+        -Level : Zahl
+        -"lfd Nummer" : Zahl
+        -optional : J/N
+        -schemaabhängig : J/N
+        -Resourcenschlüssel : String
+    }
+    class Mandant (c0de0006) at(760, 478) {
+    }
+    class Handbuchseite (c0de0007) at(680, 660) {
+        -Seitenschlüssel was(yellow, Seitenkey) : String [Pflicht]
+        -"In Baum anzeigen" : J/N
+    }
+    class Handbuchtextblock (c0de0008) at(1040, 667) {
+        -"lfd Nummer" : Zahl
+    }
+    class Handbuch-Markup (c0de0009) at(1260, 590) {
+        -Sprache
+        -Beschreibung : CLOB
+    }
+    class Handbuchseitenbezeichnung (b3e94d10) at(1080, 851) {
+        -Sprache
+        -Bezeichnung : String
+    }
+
+    composition 04de91aa 1 -> * c0de0001 "sprachabh. Beschreibung"
+        route 04de91aa.right@29 c0de0001.left@29
+    composition 04de91aa 1 -> * 7c01a5e2 "definiert für Handbuchseiten\nund Erfassungsleitfaden"
+        route 04de91aa.left@30 (110, 50) 7c01a5e2.top@80
+    composition 04de91aa 1 -> * c0de0002 "definiert für\nErfassungs-\nleitfaden"
+        route 04de91aa.bottom@200 (500, 270) c0de0002.left@20
+    association 04de91aa * -> * c0de0002 "erbt aus\nVorgänger-\nversionen"
+        route 04de91aa.bottom@300 c0de0002.top@60
+    composition 04de91aa 1 -> * c0de0007 "definiert für\nBenutzer-\nhandbuch"
+        route 04de91aa.bottom@20 (320, 705) c0de0007.left@45
+    association 04de91aa * -> * c0de0007 "erbt aus\nVorgänger-\nversionen"
+        route 04de91aa.bottom@110 (410, 680) c0de0007.left@20
+
+    composition c0de0002 1 -> 1..* c0de0003 "definiert"
+        route c0de0002.right@29 c0de0003.left@29
+    composition change(added, yellow) c0de0003 1 -> 1..* c0de0004 "sprachabh. Inhalt"
+        route c0de0003.right@29 (1323, 279) c0de0004.top@63
+    composition c0de0007 1 -> 1..* c0de0008 "definiert"
+        route c0de0007.right@29 c0de0008.left@22
+    composition c0de0008 1 -> 1..* c0de0009 "sprachabh. Inhalt"
+        route c0de0008.right@22 (1323, 689) c0de0009.bottom@63
+    composition c0de0007 1 -> 1..* b3e94d10 "sprachabh. Bezeichnung"
+        route c0de0007.bottom@140 (820, 880) b3e94d10.left@29
+
+    association (a0000001) 7c01a5e2 * -> * c0de0002 "kategorisiert"
+        route 7c01a5e2.right@50 c0de0002.left@50
+    association (a0000002) 7c01a5e2 * -> * c0de0007 "kategorisiert"
+        route 7c01a5e2.bottom@150 (180, 780) (720, 780) c0de0007.bottom@40
+    association (a0000003) c0de0002 * -> * c0de0006 "sichtbar für"
+        route c0de0002.bottom@100 (640, 500) c0de0006.left@22
+    association (a0000004) c0de0003 * -> * c0de0006 "sichtbar für"
+        route c0de0003.bottom@20 (920, 486) c0de0006.right@8
+    association (a0000005) c0de0007 * -> * c0de0006 "sichtbar für"
+        route c0de0007.top@110 c0de0006.bottom@30
+    association (a0000006) c0de0008 * -> * c0de0006 "sichtbar für"
+        route c0de0008.top@60 (1100, 514) c0de0006.right@36
+
+    class helpentrycategory (b0000001) at(200, 335)
+    class manualpagecategory (b0000002) at(300, 830) {
+        -"Seitenzahl in Kategorie" : Zahl
+    }
+    class helpentryinmandate (b0000003) at(640, 420)
+    class helptextblockinmandate (b0000004) at(920, 420)
+    class manualpageinmandate (b0000005) at(500, 600)
+    class manualtextblockinmandate (b0000006) at(1100, 560)
+    assocclass b0000001 -- a0000001
+    assocclass b0000002 -- a0000002
+    assocclass b0000003 -- a0000003
+    assocclass b0000004 -- a0000004
+    assocclass b0000005 -- a0000005
+    assocclass b0000006 -- a0000006
+
+    note (ed9e0001) at(30, 400) width=140 "Aus Level und lfd. Nummer ergibt sich eine Baumstruktur aller Hilfekategorien. Kategorien und deren Zuordnungen zu Handbuchseiten und Hilfeeinträgen werden nicht vererbt sondern bei Neuanlage einer Version kopiert."
+    note (ed9e0002) at(1080, 950) "Mindestens\nEnglisch muss\nvorhanden sein"
+    anchor ed9e0001 -- 7c01a5e2
+    anchor ed9e0002 -- b3e94d10
+}
