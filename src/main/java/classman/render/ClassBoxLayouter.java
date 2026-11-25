@@ -224,16 +224,20 @@ public class ClassBoxLayouter {
         return look != null ? look.icon : null;
     }
 
-    /** Puts the icon right of the first line of the name, in the height of the line. The name and the icon together
-     * are centered in the box, see the width which the name is centered in.
+    /** Puts the icon in the height of the first line of the name, right of its longest line, so that it can be seen to
+     * belong to the whole class. The name and the icon together are centered in the box, see the width which the name
+     * is centered in.
      * @return the icon in the scene, null if there is none */
     private SceneVectorImage addIcon(List<AbstractSceneElement> elements, VectorImage icon, List<SceneText> nameLines,
                                      double nameTop, double iconSize, double nameCenteringWidth) {
         if (icon == null) {
             return null;
         }
-        double x = nameLines.isEmpty() ? nameCenteringWidth / 2 + STEREOTYPE_ICON_GAP
-            : nameLines.get(0).left() + nameLines.get(0).width + STEREOTYPE_ICON_GAP;
+        double nameRight = nameCenteringWidth / 2;
+        for (SceneText line : nameLines) {
+            nameRight = Math.max(nameRight, line.left() + line.width);
+        }
+        double x = nameRight + STEREOTYPE_ICON_GAP;
         SceneVectorImage placed = new SceneVectorImage(x, nameTop, iconSize, iconSize, icon);
         elements.add(placed);
         return placed;

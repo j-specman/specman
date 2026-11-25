@@ -48,6 +48,22 @@ class StereotypeIconLayoutTest {
     assertTrue(icon.y <= name.y && name.y <= icon.y + icon.height, "icon " + icon.y + " name " + name.y);
   }
 
+  /** The icon belongs to the whole class, so it stands right of the longest line of a name which is wrapped, and in the
+   * height of the first one. */
+  @Test
+  void iconStandsRightOfLongestNameLine() throws ClassDiagramParseException {
+    Scene scene = layout("class \"Customer Acc\" at(0, 0) width=120 <<@With_Icon>>");
+    SceneText first = textNamed(scene, "Customer");
+    SceneText second = textNamed(scene, "Acc");
+
+    SceneVectorImage icon = all(scene, SceneVectorImage.class).get(0);
+
+    assertTrue(second.y > first.y);
+    assertEquals(first.left() + first.width + DiagramStyle.STEREOTYPE_ICON_GAP, icon.x, 0.01);
+    assertTrue(icon.y <= first.y && first.y <= icon.y + icon.height);
+    assertTrue(icon.y + icon.height <= second.y - MEASURER.ascent() + 0.01);
+  }
+
   @Test
   void iconWithoutLabelStillShowsIcon() throws ClassDiagramParseException {
     assertEquals(1, all(layout("class A at(0, 0) <<@Icon_Only>>"), SceneVectorImage.class).size());
