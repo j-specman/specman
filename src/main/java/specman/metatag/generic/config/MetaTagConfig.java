@@ -17,19 +17,23 @@ public class MetaTagConfig {
   private final String iconSvg;
   private final Color backgroundColor;
   private final Color borderColor;
+  private final Color foregroundColor;
   private final boolean freetextAllowed;
 
   /** @param iconSvg SVG markup of the icon, null for a tag without icon. A tag needs a label or
    * an icon, but that is a matter of the configuration dialog, not enforced here.
-   * @param borderColor null for a tag without border
+   * @param backgroundColor null for the default of whoever shows the configuration
+   * @param borderColor null for the default, which is no border for a tag
+   * @param foregroundColor the text color, null for the default of whoever shows the configuration
    * @param freetextAllowed whether the user can attach a freetext to tags of this configuration */
   public MetaTagConfig(String name, String label, String iconSvg, Color backgroundColor, Color borderColor,
-                       boolean freetextAllowed) {
+                       Color foregroundColor, boolean freetextAllowed) {
     this.name = Objects.requireNonNull(name);
     this.label = Objects.requireNonNull(label);
     this.iconSvg = iconSvg;
-    this.backgroundColor = Objects.requireNonNull(backgroundColor);
+    this.backgroundColor = backgroundColor;
     this.borderColor = borderColor;
+    this.foregroundColor = foregroundColor;
     this.freetextAllowed = freetextAllowed;
   }
 
@@ -49,17 +53,19 @@ public class MetaTagConfig {
     return iconSvg != null;
   }
 
+  /** @return the background color, null for the default */
   public Color getBackgroundColor() {
     return backgroundColor;
   }
 
-  public boolean hasBorderColor() {
-    return borderColor != null;
-  }
-
-  /** @return the border color, null if the tag has no border */
+  /** @return the border color, null for the default */
   public Color getBorderColor() {
     return borderColor;
+  }
+
+  /** @return the text color, null for the default */
+  public Color getForegroundColor() {
+    return foregroundColor;
   }
 
   public boolean allowsFreetext() {
@@ -76,12 +82,12 @@ public class MetaTagConfig {
     }
     MetaTagConfig that = (MetaTagConfig) other;
     return name.equals(that.name) && label.equals(that.label) && Objects.equals(iconSvg, that.iconSvg)
-      && backgroundColor.equals(that.backgroundColor) && Objects.equals(borderColor, that.borderColor)
-      && freetextAllowed == that.freetextAllowed;
+      && Objects.equals(backgroundColor, that.backgroundColor) && Objects.equals(borderColor, that.borderColor)
+      && Objects.equals(foregroundColor, that.foregroundColor) && freetextAllowed == that.freetextAllowed;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, label, iconSvg, backgroundColor, borderColor, freetextAllowed);
+    return Objects.hash(name, label, iconSvg, backgroundColor, borderColor, foregroundColor, freetextAllowed);
   }
 }

@@ -141,7 +141,7 @@ class ClassAppearanceTest {
 
     assertFalse(parsedClass().attributesHidden);
     assertTrue(host.reportedSources.isEmpty());
-    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(7);
+    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) ((javax.swing.JMenu) menuEntries(start -> null).get(4)).getMenuComponent(0);
     assertTrue(shows.isSelected());
     assertFalse(shows.isEnabled());
   }
@@ -216,13 +216,13 @@ class ClassAppearanceTest {
   @Test
   void showAttributesEntry() throws ClassDiagramParseException {
     open(CLASS);
-    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) menuEntries(start -> null).get(7);
+    JCheckBoxMenuItem shows = (JCheckBoxMenuItem) ((javax.swing.JMenu) menuEntries(start -> null).get(4)).getMenuComponent(0);
     assertTrue(shows.isSelected());
 
     shows.doClick(0);
 
     assertTrue(parsedClass().attributesHidden);
-    assertFalse(((JCheckBoxMenuItem) menuEntries(start -> null).get(7)).isSelected());
+    assertFalse(((JCheckBoxMenuItem) ((javax.swing.JMenu) menuEntries(start -> null).get(4)).getMenuComponent(0)).isSelected());
     assertFalse(menuEntries(start -> null).get(2).isEnabled());
   }
 }

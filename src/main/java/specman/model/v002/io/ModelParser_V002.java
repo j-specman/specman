@@ -225,8 +225,6 @@ public class ModelParser_V002 {
     }
 
     private MetaTagConfigModel_V002 buildMetaTagConfig(SpecmanModel_V002Parser.MetaTagConfigContext ctx) {
-        // The first color is the background, the optional second one the border.
-        List<TerminalNode> colors = ctx.COLOR_HEX();
         SpecmanModel_V002Parser.MetaTagContentContext content = ctx.metaTagContent();
         String label = content.labelParam() != null
             ? stripBackticks(content.labelParam().BACKTICK_STRING().getText())
@@ -238,10 +236,16 @@ public class ModelParser_V002 {
             stripBackticks(ctx.tagId().getText()),
             label,
             iconSvg,
-            ReadWriteColor.fromModelColor(colors.get(0).getText()).getRGB(),
-            colors.size() > 1 ? ReadWriteColor.fromModelColor(colors.get(1).getText()).getRGB() : null,
+            ctx.backgroundParam() != null ? toArgb(ctx.backgroundParam().COLOR_HEX()) : null,
+            ctx.borderParam() != null ? toArgb(ctx.borderParam().COLOR_HEX()) : null,
+            ctx.foregroundParam() != null ? toArgb(ctx.foregroundParam().COLOR_HEX()) : null,
             ctx.freetextParam() == null);
     }
+
+    private static int toArgb(TerminalNode colorHex) {
+        return ReadWriteColor.fromModelColor(colorHex.getText()).getRGB();
+    }
+
 
     private PdfExportOptionsModel_V002 buildPdfOptions(List<SpecmanModel_V002Parser.PdfOptionEntryContext> entries) {
         String filename = null;

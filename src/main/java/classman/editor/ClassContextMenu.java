@@ -39,9 +39,6 @@ class ClassContextMenu extends JPopupMenu {
     }
     addSeparator();
     add(new StyleMenuEntry(editing, box, texts, stylePicker, showDiagram));
-    for (Compartment_V001 compartment : Compartment_V001.values()) {
-      add(showsCompartmentItem(editing, box, compartment, texts, showDiagram));
-    }
     addSeparator();
     add(new AutomaticWidthMenuItem(editing, box, texts, showDiagram));
   }
@@ -67,17 +64,22 @@ class ClassContextMenu extends JPopupMenu {
     return item;
   }
 
-  /** A check item for each attribute or method, checked while it is shown. The menu can't be opened if the class has
-   * none. */
+  /** The submenu of a compartment: first a check item which shows or hides the whole compartment, then, below a
+   * separator, a check item for each attribute or method, checked while it is shown. */
   private static JMenu visibleMembersMenu(DiagramEditing editing, ClassModel_V001 box, Compartment_V001 compartment,
                                           EditorTexts texts, Runnable showDiagram) {
     JMenu menu = new JMenu(texts.get("menu.class.visible." + word(box, compartment)));
+    menu.add(showsCompartmentItem(editing, box, compartment, texts, showDiagram));
+    boolean separated = false;
     for (AbstractMemberModel_V001 member : box.members(compartment)) {
       if (!member.hiddenMarker) {
+        if (!separated) {
+          menu.addSeparator();
+          separated = true;
+        }
         menu.add(visibleItem(editing, box, member, showDiagram));
       }
     }
-    menu.setEnabled(menu.getMenuComponentCount() > 0);
     return menu;
   }
 

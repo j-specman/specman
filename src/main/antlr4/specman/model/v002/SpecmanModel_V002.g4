@@ -90,11 +90,25 @@ pdfOptionEntry
 // metaTags block is allowed - so that a model without meta tags can still be read by Specman 1.3.
 // The same goes for the tags parameter of a step. The first parameter is
 // the tagId, the name tags at steps refer to. A tag shows a label, an icon, or both, see
-// metaTagContent. The colors come first, because the background is mandatory in any case. The
-// border color is omitted for a tag without border. Tags allow a freetext by default, so only
+// metaTagContent. The colors come first, each of them is optional: a color which is not written is
+// the default of whoever uses the configuration (a tag at a step, a class box with the tag as
+// stereotype). Without a border color a tag has no border. Specman 1.4 wrote the background in any
+// case, so it can't read a configuration without it. Tags allow a freetext by default, so only
 // freetext=false is ever written, for a configuration which doesn't allow it.
 metaTagConfig
-    : 'tag' '(' tagId ',' 'background' '=' COLOR_HEX (',' 'border' '=' COLOR_HEX)? ',' metaTagContent (',' freetextParam)? ')'
+    : 'tag' '(' tagId (',' backgroundParam)? (',' borderParam)? (',' foregroundParam)? ',' metaTagContent (',' freetextParam)? ')'
+    ;
+
+backgroundParam
+    : 'background' '=' COLOR_HEX
+    ;
+
+borderParam
+    : 'border' '=' COLOR_HEX
+    ;
+
+foregroundParam
+    : 'foreground' '=' COLOR_HEX
     ;
 
 freetextParam
@@ -487,6 +501,7 @@ KW_TAGS            : 'tags' ;
 KW_LABEL           : 'label' ;
 KW_BACKGROUND      : 'background' ;
 KW_BORDER          : 'border' ;
+KW_FOREGROUND      : 'foreground' ;
 KW_ICON            : 'icon' ;
 KW_FREETEXT        : 'freetext' ;
 

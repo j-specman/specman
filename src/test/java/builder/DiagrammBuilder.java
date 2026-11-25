@@ -66,7 +66,11 @@ public class DiagrammBuilder {
 
   /** Adds a configuration of a meta tag with a white background, no border and no icon. */
   public DiagrammBuilder withMetaTagConfig(String name, String label, boolean freetextAllowed) {
-    diagramm.metaTagConfigs.add(new MetaTagConfigModel_V002(name, label, null, WHITE_ARGB, null, freetextAllowed));
+    return withMetaTagConfig(new MetaTagConfigModel_V002(name, label, null, WHITE_ARGB, null, null, freetextAllowed));
+  }
+
+  public DiagrammBuilder withMetaTagConfig(MetaTagConfigModel_V002 config) {
+    diagramm.metaTagConfigs.add(config);
     return this;
   }
 

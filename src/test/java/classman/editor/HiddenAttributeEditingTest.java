@@ -109,7 +109,7 @@ class HiddenAttributeEditingTest {
   }
 
   private static List<String> checked(JMenu menu) {
-    return Arrays.stream(menu.getMenuComponents()).map(c -> (JCheckBoxMenuItem) c)
+    return Arrays.stream(menu.getMenuComponents()).skip(1).filter(c -> c instanceof JCheckBoxMenuItem).map(c -> (JCheckBoxMenuItem) c)
       .map(item -> item.getText() + (item.isSelected() ? "+" : "-")).toList();
   }
 
@@ -118,15 +118,15 @@ class HiddenAttributeEditingTest {
   @Test
   void visibleSubmenuSwitchesAttributes() throws ClassDiagramParseException {
     open(CLASS);
-    assertEquals(List.of("x+", "y+", "z+"), checked(submenu("Hide / show attribute")));
+    assertEquals(List.of("x+", "y+", "z+"), checked(submenu("Hide / show attributes")));
 
-    ((JMenuItem) submenu("Hide / show attribute").getMenuComponents()[1]).doClick(0);
+    ((JMenuItem) submenu("Hide / show attributes").getMenuComponents()[3]).doClick(0);
 
     assertTrue(parsedClass().attributes.get(1).hidden);
-    assertEquals(List.of("x+", "y-", "z+"), checked(submenu("Hide / show attribute")));
+    assertEquals(List.of("x+", "y-", "z+"), checked(submenu("Hide / show attributes")));
 
-    JMenu menu = submenu("Hide / show attribute");
-    ((JMenuItem) menu.getMenuComponents()[1]).doClick(0);
+    JMenu menu = submenu("Hide / show attributes");
+    ((JMenuItem) menu.getMenuComponents()[3]).doClick(0);
 
     assertFalse(editing.source().contains("hidden"), editing.source());
     assertEquals(List.of("x+", "y+", "z+"), checked(menu));
@@ -136,10 +136,10 @@ class HiddenAttributeEditingTest {
   @Test
   void severalSwitchedInOneMenu() throws ClassDiagramParseException {
     open(CLASS);
-    JMenu menu = submenu("Hide / show attribute");
+    JMenu menu = submenu("Hide / show attributes");
 
-    ((JMenuItem) menu.getMenuComponents()[0]).doClick(0);
     ((JMenuItem) menu.getMenuComponents()[2]).doClick(0);
+    ((JMenuItem) menu.getMenuComponents()[4]).doClick(0);
 
     assertEquals(List.of("x-", "y+", "z-"), checked(menu));
     assertTrue(parsedClass().attributes.get(0).hidden);
@@ -152,17 +152,17 @@ class HiddenAttributeEditingTest {
   @Test
   void visibleSubmenuWithoutAttributes() throws ClassDiagramParseException {
     open("classdiagram {\n  class A (11111111) at(10, 20)\n}");
-    assertFalse(submenu("Hide / show attribute").isEnabled());
+    assertEquals(List.of(), checked(submenu("Hide / show attributes")));
 
     open("classdiagram {\n  class A (11111111) at(10, 20) {\n    -x\n    ...\n  }\n}");
-    assertEquals(List.of("x+"), checked(submenu("Hide / show attribute")));
+    assertEquals(List.of("x+"), checked(submenu("Hide / show attributes")));
 
     open("classdiagram {\n  class A (11111111) change(removed, yellow) at(10, 20) {\n    -x\n  }\n}");
-    assertEquals(List.of("x+"), checked(submenu("Hide / show attribute")));
-    assertFalse(submenu("Hide / show attribute").getMenuComponent(0).isEnabled());
+    assertEquals(List.of("x+"), checked(submenu("Hide / show attributes")));
+    assertFalse(submenu("Hide / show attributes").getMenuComponent(2).isEnabled());
 
     open(CLASS);
-    assertTrue(submenu("Hide / show attribute").isEnabled());
+    assertTrue(submenu("Hide / show attributes").isEnabled());
   }
 
   /** For an enum the entries talk about values. */
@@ -170,6 +170,6 @@ class HiddenAttributeEditingTest {
   void enumTalksAboutValues() throws ClassDiagramParseException {
     open("classdiagram {\n  enum E (11111111) at(10, 20) {\n    RED (hidden)\n    GREEN\n  }\n}");
 
-    assertEquals(List.of("RED-", "GREEN+"), checked(submenu("Hide / show value")));
+    assertEquals(List.of("RED-", "GREEN+"), checked(submenu("Hide / show values")));
   }
 }

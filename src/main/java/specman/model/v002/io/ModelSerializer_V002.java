@@ -185,9 +185,6 @@ public class ModelSerializer_V002 {
     }
 
     private void appendMetaTagConfig(MetaTagConfigModel_V002 config) {
-        String border = config.borderColor != null
-            ? BORDER + "=" + ReadWriteColor.toModelColor(new Color(config.borderColor, true))
-            : null;
         // The label may only be omitted if there is an icon instead, see the grammar.
         String label = config.label.isEmpty() && config.iconSvg != null
             ? null
@@ -199,9 +196,16 @@ public class ModelSerializer_V002 {
         String freetext = config.freetextAllowed ? null : FREETEXT + "=false";
         blockBegin(TAG,
             "`" + escapeBackticks(config.name) + "`",
-            BACKGROUND + "=" + ReadWriteColor.toModelColor(new Color(config.backgroundColor, true)),
-            border, label, icon, freetext);
+            colorParam(BACKGROUND, config.backgroundColor),
+            colorParam(BORDER, config.borderColor),
+            colorParam(FOREGROUND, config.foregroundColor),
+            label, icon, freetext);
         sb.append("\n");
+    }
+
+    /** @return null for a color which is the default, so that it isn't written */
+    private static String colorParam(ModelKeyword_V002 keyword, Integer argb) {
+        return argb != null ? keyword + "=" + ReadWriteColor.toModelColor(new Color(argb, true)) : null;
     }
 
     // ---- id → stepNumber map ----

@@ -341,7 +341,7 @@ The configurations of a diagram are managed in the dialog which is opened by cho
 
 image::metatag-config.png[Meta Tag Configuration]
 
-Most of the dialog for creating or editing a configuration is self-explanatory, and the preview shows what the tags will look like. The name is how the tags at steps refer to their configuration. It must be unique in the diagram, may only consist of letters, digits and underscores, and cannot be changed once tags use the configuration. The label is the text displayed in the tags of this configuration, if any. Either a label or an icon must be provided. The icon comes from an SVG file and is embedded in the diagram file, so the original file isn't needed any more. A border is optional and off by default, and the freetext option is on by default.
+Most of the dialog for creating or editing a configuration is self-explanatory, and the preview shows what the tags will look like. The name is how the tags at steps refer to their configuration. It must be unique in the diagram, may only consist of letters, digits and underscores, and cannot be changed once tags use the configuration. The label is the text displayed in the tags of this configuration, if any. Either a label or an icon must be provided. The icon comes from an SVG file and is embedded in the diagram file, so the original file isn't needed any more. Background, border and text color can each be left at the default: gray for the background, no border, and the usual text color. The freetext option is on by default.
 
 NOTE: The bottom corners of a tag are rounded. Parts of an icon which reach into these corners are cut off. If your icon has sharp corners at the bottom or fills its entire area, leave a little margin around the graphic in the SVG.
 

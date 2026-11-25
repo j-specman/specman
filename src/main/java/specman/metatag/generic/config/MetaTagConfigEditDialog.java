@@ -16,7 +16,6 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.util.function.Predicate;
@@ -26,15 +25,15 @@ import static specman.i18n.Messages.i18n;
 /** Modal form for creating or editing one {@link MetaTagConfig}. The result is only delivered if
  * the user confirms with OK; nothing is changed in the registry by this dialog itself. */
 class MetaTagConfigEditDialog extends IDialog {
-  private static final Color DEFAULT_BACKGROUND = new Color(0xE0E0E0);
   private static final int TEXT_FIELD_COLUMNS = 20;
 
   private final Predicate<String> isNameTaken;
   private final MetaTagConfigNameField nameField = new MetaTagConfigNameField(TEXT_FIELD_COLUMNS);
   private final JTextField labelField = new JTextField(TEXT_FIELD_COLUMNS);
   private final IconChooser iconChooser;
-  private final ColorChooseButton backgroundButton;
+  private final OptionalColorChooser backgroundChooser;
   private final OptionalColorChooser borderChooser;
+  private final OptionalColorChooser foregroundChooser;
   private final JCheckBox freetextCheckBox = new ICheckBox("dialog.metatag.edit.freetext.allowed", true);
   private final PreviewPanel preview = new PreviewPanel();
 
@@ -52,10 +51,12 @@ class MetaTagConfigEditDialog extends IDialog {
       nameField.setToolTipText(i18n("dialog.metatag.edit.name.locked.tooltip"));
     }
     iconChooser = new IconChooser(existing != null ? existing.getIconSvg() : null, this::refreshTagPreview);
-    backgroundButton = new ColorChooseButton("dialog.metatag.edit.background.chooser",
-      existing != null ? existing.getBackgroundColor() : DEFAULT_BACKGROUND, this::refreshTagPreview);
+    backgroundChooser = new OptionalColorChooser("dialog.metatag.edit.background.chooser",
+      existing != null ? existing.getBackgroundColor() : null, this::refreshTagPreview);
     borderChooser = new OptionalColorChooser("dialog.metatag.edit.border.chooser",
       existing != null ? existing.getBorderColor() : null, this::refreshTagPreview);
+    foregroundChooser = new OptionalColorChooser("dialog.metatag.edit.foreground.chooser",
+      existing != null ? existing.getForegroundColor() : null, this::refreshTagPreview);
     if (existing != null) {
       nameField.setText(existing.getName());
       labelField.setText(existing.getLabel());
@@ -107,7 +108,7 @@ class MetaTagConfigEditDialog extends IDialog {
    * height as long as the warning is invisible. */
   private JPanel buildFormPanel() {
     JPanel panel = new JPanel(new FormLayout("10px, right:default, 8px, fill:default:grow, 10px",
-      "10px, pref, 4px, pref, 4px, pref, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 10px"));
+      "10px, pref, 4px, pref, 4px, pref, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 4px, pref, 10px"));
     panel.add(new ILabel("dialog.metatag.edit.name"), CC.xy(2, 2));
     panel.add(nameField, CC.xy(4, 2));
     panel.add(new ILabel("dialog.metatag.edit.label"), CC.xy(2, 4));
@@ -116,13 +117,15 @@ class MetaTagConfigEditDialog extends IDialog {
     panel.add(iconChooser, CC.xy(4, 6));
     panel.add(iconChooser.getSizeWarning(), CC.xy(4, 7));
     panel.add(new ILabel("dialog.metatag.edit.background"), CC.xy(2, 9));
-    panel.add(backgroundButton, CC.xy(4, 9, "left, center"));
+    panel.add(backgroundChooser, CC.xy(4, 9, "left, center"));
     panel.add(new ILabel("dialog.metatag.edit.border"), CC.xy(2, 11));
     panel.add(borderChooser, CC.xy(4, 11, "left, center"));
-    panel.add(new ILabel("dialog.metatag.edit.freetext"), CC.xy(2, 13));
-    panel.add(freetextCheckBox, CC.xy(4, 13));
-    panel.add(new ILabel("dialog.metatag.edit.preview"), CC.xy(2, 15, "right, top"));
-    panel.add(preview, CC.xy(4, 15));
+    panel.add(new ILabel("dialog.metatag.edit.foreground"), CC.xy(2, 13));
+    panel.add(foregroundChooser, CC.xy(4, 13, "left, center"));
+    panel.add(new ILabel("dialog.metatag.edit.freetext"), CC.xy(2, 15));
+    panel.add(freetextCheckBox, CC.xy(4, 15));
+    panel.add(new ILabel("dialog.metatag.edit.preview"), CC.xy(2, 17, "right, top"));
+    panel.add(preview, CC.xy(4, 17));
     return panel;
   }
 
@@ -145,7 +148,7 @@ class MetaTagConfigEditDialog extends IDialog {
 
   private MetaTagConfig currentConfig() {
     return new MetaTagConfig(nameField.getText(), labelField.getText(), iconChooser.getIconSvg(),
-      backgroundButton.getColor(), borderChooser.getColor(), freetextCheckBox.isSelected());
+      backgroundChooser.getColor(), borderChooser.getColor(), foregroundChooser.getColor(), freetextCheckBox.isSelected());
   }
 
   private void confirm() {
