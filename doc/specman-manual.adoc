@@ -359,7 +359,7 @@ Tags can be attached to every step that has its own step number, with these exce
 * Steps marked as deleted do not accept new tags.
 * The headings of catch areas are no steps of their own and therefore don't have tags. The steps inside the handling sequence of a catch area do.
 
-Attaching and removing tags is not part of change tracking: it is not marked as a change, and works the same way in change mode and normal mode.
+Attaching and removing tags is not part of change tracking: it is not marked as a change, and works the same way in change mode and normal mode. The same goes for creating, editing and deleting configurations, including the tags which go with a deleted configuration. Tags and configurations are understood as meta information _about_ the specification, not part of its _content_. If meta information refers to cross-cutting concepts, the removal of a tag or a configuration may of course require changes of the content, and these changes are tracked.
 
 ### Working with tags
 Each tag has its own context menu, brought up by right-clicking the tag:
