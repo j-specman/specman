@@ -21,13 +21,30 @@ public class ToolbarToggleButton extends JToggleButton {
   private static final Color SELECTED_ICON_COLOR = new Color(0xEE, 0xEE, 0xEE);
 
   public ToolbarToggleButton(String iconPath, String tooltip) {
-    putClientProperty("FlatLaf.style", "toolbar.selectedBackground: " + SELECTED_BACKGROUND);
-    setMargin(new Insets(0, 0, 0, 0));
     setToolTipText(tooltip);
-    FlatSVGIcon icon = IconReader.readSvgIcon(iconPath, SpecmanIcons.SIZE_TOOLBAR);
-    icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> Color.BLACK.equals(color)
-        ? (isSelected() ? SELECTED_ICON_COLOR : UIManager.getColor("Label.foreground"))
-        : color));
-    setIcon(icon);
+    setIcon(IconReader.readSvgIcon(iconPath, SpecmanIcons.SIZE_TOOLBAR));
+    applyToolbarToggleLook(this);
+  }
+
+  /**
+   * Gives any toggle button the look of this class, e.g. the SHEF text style and alignment buttons, which are
+   * created from actions. The button must already have its icon, because the icon colors depend on the selection.
+   */
+  public static void applyToolbarToggleLook(AbstractButton button) {
+    button.putClientProperty("FlatLaf.style", "toolbar.selectedBackground: " + SELECTED_BACKGROUND);
+    button.setMargin(new Insets(0, 0, 0, 0));
+    if (button.getIcon() instanceof FlatSVGIcon icon) {
+      icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> recolor(color, button)));
+    }
+  }
+
+  /** Only the black of the Material icons is recolored: light gray on the selected background, the normal
+   * label color otherwise, which also follows the theme. */
+  private static Color recolor(Color iconColor, AbstractButton button) {
+    return Color.BLACK.equals(iconColor) ? iconColorOf(button) : iconColor;
+  }
+
+  private static Color iconColorOf(AbstractButton button) {
+    return button.isSelected() ? SELECTED_ICON_COLOR : UIManager.getColor("Label.foreground");
   }
 }
