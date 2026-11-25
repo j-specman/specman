@@ -1,11 +1,18 @@
 package specman.cli;
 
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+
 public class SpecmanCLI {
 
   public static final int EXIT_SUCCESS = 0;
   public static final int EXIT_ERROR = 1;
 
   private static final String OPTION_PREFIX = "--";
+
+  private SpecmanCLI() {
+    /* This utility class should not be instantiated */
+  }
 
   /** @return true if the first argument is an option like {@code --sanitize}, which makes the call a CLI operation
    * instead of starting the GUI. Files and links to open have no such prefix. */
@@ -24,23 +31,33 @@ public class SpecmanCLI {
     try {
       System.setProperty("java.awt.headless", "true");
 
-      CLIOperation operation = CLIOperation.fromArgs(args);
-      if (operation == CLIOperation.SANITIZE) {
-        return new SanitizeCLO(args).execute();
-      }
-      if (operation == CLIOperation.RESOLVE_LINK) {
-        return new ResolveLinkCLO(args).execute();
-      }
-      if (operation == CLIOperation.VERSION) {
-        return new VersionCLO(args).execute();
-      }
-      throw new CLIException(unknownOptionMessage(args));
+      return createOperation(args).execute();
     }
     catch(CLIException clix) {
-      System.err.println("ERROR");
-      System.err.println(clix.getMessage());
+      printError(clix);
       return EXIT_ERROR;
     }
+  }
+
+  /** Writes UTF-8 encoded on all platforms like {@code AbstractCLO.out}, because the messages quote texts of the file.
+   * The stream is looked up on each call, so that a replaced {@code System.err} is respected. */
+  private static void printError(CLIException clix) {
+    PrintStream err = new PrintStream(System.err, false, StandardCharsets.UTF_8);
+    err.println("ERROR");
+    err.println(clix.getMessage());
+    err.flush();
+  }
+
+  private static AbstractCLO createOperation(String[] args) throws CLIException {
+    CLIOperation operation = CLIOperation.fromArgs(args);
+    if (operation == null) {
+      throw new CLIException(unknownOptionMessage(args));
+    }
+    return switch (operation) {
+      case SANITIZE -> new SanitizeCLO(args);
+      case RESOLVE_LINK -> new ResolveLinkCLO(args);
+      case VERSION -> new VersionCLO(args);
+    };
   }
 
   private static String unknownOptionMessage(String[] args) {
