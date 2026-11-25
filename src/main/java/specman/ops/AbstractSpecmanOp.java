@@ -3,6 +3,9 @@ package specman.ops;
 import specman.link.LinkAliases;
 
 import java.io.File;
+import java.util.Collection;
+
+import static specman.i18n.Messages.i18n;
 
 /**
  * Base class for functionality extracted from the {@link specman.Specman} monolith.
@@ -22,6 +25,16 @@ public abstract class AbstractSpecmanOp implements SpecmanOpContextMixin {
 
   @Override
   public SpecmanOpContext context() { return context; }
+
+  /** Tells the user which meta tag configurations were missing in the document, so that what came from outside and
+   * used them, a tag at a step or a stereotype in a diagram, was dropped. */
+  protected void toastSkippedMetaTags(Collection<String> configNames) {
+    if (!configNames.isEmpty()) {
+      showToast(
+        i18n("msg.paste.tags.skipped.brief"),
+        i18n("msg.paste.tags.skipped.detail", String.join("\n• ", configNames)));
+    }
+  }
 
   /** @return whether the file is the one shown right now, however its path is written */
   protected boolean isOpen(File file) {

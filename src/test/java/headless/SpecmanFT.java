@@ -19,6 +19,8 @@ import specman.editarea.image.classman.ClassmanImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.editarea.image.AbstractSourceImageEditArea;
 import specman.link.AliasListPanel;
+import specman.metatag.generic.config.MetaTagConfig;
+import specman.metatag.generic.config.MetaTagConfigsEditor;
 import specman.metatag.stepnumberlabel.StepnumberContextMenu;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.model.v002.PdfExportOptionsModel_V002;
@@ -59,6 +61,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -93,6 +96,8 @@ public class SpecmanFT extends Specman {
   private final List<String> shownMessages = new ArrayList<>();
   private final Clipboard clipboard = new Clipboard("specman-test");
   private int confirmDialogAnswer = JOptionPane.YES_OPTION;
+  private MetaTagConfig metaTagConfigEditAnswer;
+  private boolean metaTagConfigNameEditable;
   private File fileChoiceAnswer;
   private File imageFileChoiceAnswer;
   private final Map<SourceFileKind, SourceFileChoice> sourceFileChoiceAnswers = new HashMap<>();
@@ -701,7 +706,25 @@ public class SpecmanFT extends Specman {
     return openedAliasListPanel;
   }
   @Override public void addRecentFile(File file) {}
-  @Override public void openMetaTagConfigs() {}
+  /** The editor for the meta tag configurations, without a dialog around it, so that the test can operate it. */
+  @Override public MetaTagConfigsEditor openMetaTagConfigs() { return newMetaTagConfigsEditor(); }
+
+  /** Defines what the user enters the next time the dialog for a meta tag configuration is shown, null for cancelling
+   * it. */
+  public void answerMetaTagConfigEditWith(MetaTagConfig config) {
+    metaTagConfigEditAnswer = config;
+  }
+
+  /** Whether the user was allowed to change the name of the configuration when asked the last time. */
+  public boolean metaTagConfigNameWasEditable() {
+    return metaTagConfigNameEditable;
+  }
+
+  @Override
+  public MetaTagConfig editMetaTagConfig(MetaTagConfig existing, boolean nameEditable, Predicate<String> isNameTaken) {
+    metaTagConfigNameEditable = nameEditable;
+    return metaTagConfigEditAnswer;
+  }
   @Override public void copyTableToClipboard(TableEditArea table) {}
   @Override public void cutTableToClipboard(TableEditArea table) {}
   @Override public void pasteTableInto(TextEditArea initiatingTextArea) {}

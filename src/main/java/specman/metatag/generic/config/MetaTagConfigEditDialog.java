@@ -24,7 +24,7 @@ import static specman.i18n.Messages.i18n;
 
 /** Modal form for creating or editing one {@link MetaTagConfig}. The result is only delivered if
  * the user confirms with OK; nothing is changed in the registry by this dialog itself. */
-class MetaTagConfigEditDialog extends IDialog {
+public class MetaTagConfigEditDialog extends IDialog {
   private static final int TEXT_FIELD_COLUMNS = 20;
 
   private final Predicate<String> isNameTaken;
@@ -43,7 +43,7 @@ class MetaTagConfigEditDialog extends IDialog {
   /** @param existing the configuration to edit, null to create a new one
    * @param nameEditable whether the name may be changed - not if tags at steps refer to it
    * @param isNameTaken tells whether a name is already used by another configuration */
-  MetaTagConfigEditDialog(Frame owner, MetaTagConfig existing, boolean nameEditable, Predicate<String> isNameTaken) {
+  public MetaTagConfigEditDialog(Frame owner, MetaTagConfig existing, boolean nameEditable, Predicate<String> isNameTaken) {
     super(owner, existing == null ? "dialog.metatag.edit.title.new" : "dialog.metatag.edit.title.edit");
     this.isNameTaken = isNameTaken;
     if (!nameEditable) {
@@ -68,7 +68,7 @@ class MetaTagConfigEditDialog extends IDialog {
   }
 
   /** @return the confirmed configuration, or null if the user cancelled */
-  MetaTagConfig showAndGet() {
+  public MetaTagConfig showAndGet() {
     setVisible(true);
     return result;
   }

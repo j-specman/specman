@@ -2,6 +2,7 @@ package specman.editarea.image.classman;
 
 import classman.editor.ClassDiagramEditorWindow;
 import classman.model.v001.change.SourceMarks_V001;
+import classman.model.v001.change.StereotypeReferences_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import org.jetbrains.annotations.NotNull;
 import specman.ChangeInfo;
@@ -10,12 +11,15 @@ import specman.editarea.image.AbstractSourceImageEditArea;
 import specman.editarea.image.Picture;
 import specman.editarea.image.SourceFileKind;
 import specman.editarea.image.SourceValidator;
+import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.undo.props.UDBL;
 
 import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.util.List;
+import java.util.Set;
 
 import static specman.ChangeSet.changeset;
 import static specman.Specman.editor;
@@ -34,6 +38,11 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
 
   private static final ClassmanSourceValidator VALIDATOR = new ClassmanSourceValidator();
   private static final SourceMarks_V001 MARKS = new SourceMarks_V001();
+  private static final StereotypeReferences_V001 STEREOTYPES = new StereotypeReferences_V001();
+
+  /** Shows the diagram anew when a configuration which its stereotypes may refer to was edited. It is registered as
+   * long as the diagram is part of the window, see {@link #addNotify()}. */
+  private final MetaTagConfigListener configListener = (oldConfig, newConfig) -> show(getSource());
 
   public ClassmanImageEditArea(String source, ChangeInfo changeInfo) {
     this(source, 1, changeInfo);
@@ -57,6 +66,43 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
   @Override
   protected Color pictureBackground() {
     return getChangeInfo().isAdded() ? BACKGROUND_COLOR_STANDARD : null;
+  }
+
+  @Override
+  public void addNotify() {
+    super.addNotify();
+    editor().addMetaTagConfigListener(configListener);
+  }
+
+  @Override
+  public void removeNotify() {
+    editor().removeMetaTagConfigListener(configListener);
+    super.removeNotify();
+  }
+
+  @Override
+  public Set<String> metaTagConfigNamesInUse() {
+    return STEREOTYPES.configsUsedIn(getSource());
+  }
+
+  @Override
+  public List<String> metaTagConfigUserNames(String configName) {
+    return STEREOTYPES.classesUsing(getSource(), configName);
+  }
+
+  /** The stereotypes which refer to the configuration are taken away, without a change mark: the configuration is
+   * not part of the content. */
+  @Override
+  public void removeMetaTagConfigUseUDBL(String configName) {
+    changeSourceUDBL(STEREOTYPES.withoutConfigs(getSource(), Set.of(configName)));
+  }
+
+  @Override
+  public void dropUnknownMetaTagConfigs(Set<String> dropped) {
+    String cleaned = ForeignStereotypes.withoutUnknownConfigs(getSource(), dropped);
+    if (!cleaned.equals(getSource())) {
+      setSource(cleaned);
+    }
   }
 
   @Override

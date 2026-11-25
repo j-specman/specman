@@ -2,6 +2,7 @@ package specman.ops;
 
 import specman.editarea.TextEditArea;
 import specman.editarea.image.classman.ClassmanImageEditArea;
+import specman.editarea.image.classman.ForeignStereotypes;
 import specman.editarea.image.classman.ClassmanSourceValidator;
 import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
@@ -15,7 +16,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import static specman.i18n.Messages.i18n;
 
@@ -180,7 +183,10 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
         fehler("msg.classman.file.invalid", file.getName(), problem);
         return null;
       }
-      return source;
+      Set<String> dropped = new LinkedHashSet<>();
+      String cleaned = ForeignStereotypes.withoutUnknownConfigs(source, dropped);
+      toastSkippedMetaTags(dropped);
+      return cleaned;
     }
     catch (IOException iox) {
       displayException(iox);
