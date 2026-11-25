@@ -67,13 +67,12 @@ class StereotypeEditingTest {
     assertFalse(hasStereotypeText());
   }
 
-  /** A class which has a stereotype can't get another one, and its stereotype is a text to change. */
+  /** The stereotype of a class is a text to change. */
   @Test
   void existingStereotypeIsText() throws ClassDiagramParseException {
     open(WITH_STEREOTYPE);
     selectClass();
 
-    assertFalse(editing.canAddStereotypeTo(editing.selectedClass()).can());
     assertEquals(stereotypeText(), editing.editableTextAt(centerOf(stereotypeText())));
     assertEquals("Entity", editing.textOf(stereotypeText()));
   }
@@ -85,7 +84,7 @@ class StereotypeEditingTest {
     selectClass();
     double heightBefore = boxArea().getHeight();
 
-    SceneTextArea row = editing.newStereotype(editing.selectedClass());
+    SceneTextArea row = editing.stereotypeRowForFreeText(editing.selectedClass());
 
     assertEquals(row, stereotypeText());
     assertEquals("", editing.textOf(row));
@@ -100,7 +99,7 @@ class StereotypeEditingTest {
   void createdStereotype() throws ClassDiagramParseException {
     open(BARE);
     selectClass();
-    editing.setText(editing.newStereotype(editing.selectedClass()), "Entity");
+    editing.setText(editing.stereotypeRowForFreeText(editing.selectedClass()), "Entity");
     assertEquals("Entity", classOf(editing.source()).stereotype);
     assertNull(classOf(editing.source()).stereotypeElementChange);
     assertNull(classOf(editing.source()).stereotypeChange);
@@ -108,7 +107,7 @@ class StereotypeEditingTest {
     host.trackedChangeSet = "yellow";
     open(BARE);
     selectClass();
-    editing.setText(editing.newStereotype(editing.selectedClass()), "Entity");
+    editing.setText(editing.stereotypeRowForFreeText(editing.selectedClass()), "Entity");
     assertEquals(ChangeType_V001.ADDED, classOf(editing.source()).stereotypeElementChange.type);
     assertEquals("yellow", classOf(editing.source()).stereotypeElementChange.changeSet);
   }
@@ -119,10 +118,10 @@ class StereotypeEditingTest {
     open(BARE);
     selectClass();
     String before = editing.source();
-    editing.setText(editing.newStereotype(editing.selectedClass()), "");
+    editing.setText(editing.stereotypeRowForFreeText(editing.selectedClass()), "");
     assertFalse(hasStereotypeText());
 
-    editing.newStereotype(editing.selectedClass());
+    editing.stereotypeRowForFreeText(editing.selectedClass());
     editing.discardNewPart();
 
     assertFalse(hasStereotypeText());
@@ -135,7 +134,7 @@ class StereotypeEditingTest {
   void rowIsNeverWritten() throws ClassDiagramParseException {
     open(BARE);
     selectClass();
-    editing.newStereotype(editing.selectedClass());
+    editing.stereotypeRowForFreeText(editing.selectedClass());
 
     editing.setText(editing.newClass(300, 60), "NewClass");
 
@@ -149,8 +148,8 @@ class StereotypeEditingTest {
     open("classdiagram {\n  class A (11111111) change(removed, yellow) at(10, 60)\n}");
     selectClass();
 
-    assertFalse(editing.canAddStereotypeTo(editing.selectedClass()).can());
-    assertThrows(IllegalArgumentException.class, () -> editing.newStereotype(editing.selectedClass()));
+    assertFalse(editing.canChangeStereotypeOf(editing.selectedClass()).can());
+    assertThrows(IllegalArgumentException.class, () -> editing.stereotypeRowForFreeText(editing.selectedClass()));
   }
 
   /** A stereotype which is removed while changes are tracked keeps its text and is struck through; typing it again
@@ -167,7 +166,7 @@ class StereotypeEditingTest {
     assertEquals("Entity", removed.stereotype);
     assertEquals(ChangeType_V001.REMOVED, removed.stereotypeElementChange.type);
     assertEquals("", editing.textOf(stereotypeText()));
-    assertTrue(editing.canAddStereotypeTo(editing.selectedClass()).can());
+    assertTrue(editing.canChangeStereotypeOf(editing.selectedClass()).can());
 
     editing.setText(stereotypeText(), "Entity");
 
@@ -183,7 +182,7 @@ class StereotypeEditingTest {
     selectClass();
     editing.setText(stereotypeText(), "");
 
-    SceneTextArea row = editing.newStereotype(editing.selectedClass());
+    SceneTextArea row = editing.stereotypeRowForFreeText(editing.selectedClass());
 
     assertEquals(stereotypeText(), row);
     assertEquals("Entity", classOf(editing.source()).stereotype);

@@ -921,32 +921,6 @@ public class DiagramEditing {
     return scene.textAreas.stream().filter(text -> text.taggedValue == pending).findFirst().orElseThrow();
   }
 
-  /** @return whether the class has no stereotype, or only one which a change set has removed */
-  public Can canAddStereotypeTo(ClassModel_V001 box) {
-    Can parts = canAddPartsTo(box);
-    if (!parts.can()) {
-      return parts;
-    }
-    return Can.IF(stereotypeOf(box).isEmpty(), texts.get("reason.stereotype.exists"));
-  }
-
-  /** Puts a blank stereotype row into the class, for the stereotype to be typed into. It is part of the picture, but
-   * not of the diagram, until it is given a text with {@link #setText}. A stereotype which a change set has removed is
-   * still there as a struck row, which is the area to type into.
-   * @return the area of the row
-   * @throws IllegalArgumentException if the class has a stereotype */
-  public SceneTextArea newStereotype(ClassModel_V001 box) {
-    if (!canAddStereotypeTo(box).can()) {
-      throw new IllegalArgumentException("The class can't get a stereotype: " + box.name);
-    }
-    if (box.stereotype == null) {
-      pendingStereotype.begin(box);
-      scene = host.renderer().layout(model);
-    }
-    return scene.textAreas.stream().filter(text -> text.element == box && text.kind == TextKind.STEREOTYPE)
-      .findFirst().orElseThrow();
-  }
-
   /** @return the names of the configurations of the host which a stereotype can refer to */
   public List<String> stereotypeConfigs() {
     return host.stereotypeConfigs();
@@ -1010,18 +984,18 @@ public class DiagramEditing {
     publish();
   }
 
-  /** Gives the row to type a stereotype of free text into, for any class which can get parts: the blank row of
-   * {@link #newStereotype} if it has no stereotype, the text of its stereotype if that is a free text, and a blank row
-   * in place of the stereotype if that refers to a configuration, which is back when the row is dropped or left empty.
+  /** Gives the row to type a stereotype of free text into, for any class which can get parts. A class without a
+   * stereotype gets a blank row, and so does one whose stereotype refers to a configuration, in its place; the
+   * reference is back when the row is dropped or left empty. The blank row is part of the picture, but not of the
+   * diagram, until it is given a text with {@link #setText}. For a free text it is the text of the stereotype, and for
+   * a stereotype which a change set has removed the struck row, which is there already.
+   * @return the area of the row
    * @throws IllegalArgumentException if the class can't get parts */
   public SceneTextArea stereotypeRowForFreeText(ClassModel_V001 box) {
     if (!canChangeStereotypeOf(box).can()) {
       throw new IllegalArgumentException("The class can't get a stereotype: " + box.name);
     }
-    if (stereotypeOf(box).isEmpty()) {
-      return newStereotype(box);
-    }
-    if (StereotypeReference_V001.isReference(box.stereotype)) {
+    if (box.stereotype == null || StereotypeReference_V001.isReference(stereotypeOf(box))) {
       pendingStereotype.replace(box);
       scene = host.renderer().layout(model);
     }
