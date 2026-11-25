@@ -1,7 +1,8 @@
 package specman.cli;
 
-import specman.cli.sanitize.SanitizeChangeTrackingValidator;
-import specman.cli.sanitize.SanitizeModelValidator;
+import specman.cli.sanitize.ChangeTrackingValidator;
+import specman.cli.sanitize.DuplicateIdValidator;
+import specman.cli.sanitize.MetaTagValidator;
 import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.io.ModelFileReader_V002;
 import specman.model.v002.io.ModelParseException;
@@ -16,7 +17,6 @@ import specman.model.v002.io.SteplinkUpdate;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
