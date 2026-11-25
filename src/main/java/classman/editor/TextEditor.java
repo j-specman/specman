@@ -275,10 +275,11 @@ class TextEditor {
     start(line);
   }
 
-  /** Puts a blank row for the stereotype into the class and starts to type it. A stereotype which a change set has
-   * removed is typed into its struck row. */
-  void startNewStereotype(ClassModel_V001 box) {
-    SceneTextArea row = editing.newStereotype(box);
+  /** Starts to type a stereotype of free text into the class: into a blank row for a new one, a stereotype which a
+   * change set has removed is typed into its struck row, the text of a free text stereotype is edited, and a stereotype
+   * which refers to a configuration is replaced by a blank row, which brings it back if nothing is typed. */
+  void startFreeTextStereotype(ClassModel_V001 box) {
+    SceneTextArea row = editing.stereotypeRowForFreeText(box);
     showDiagram.run();
     start(row);
   }

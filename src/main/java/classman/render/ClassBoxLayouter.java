@@ -6,6 +6,7 @@ import classman.model.v001.ChangeType_V001;
 import classman.model.v001.ClassModel_V001;
 import classman.model.v001.Compartment_V001;
 import classman.model.v001.ElementStyleModel_V001;
+import classman.model.v001.StereotypeReference_V001;
 import classman.model.v001.TaggedValueModel_V001;
 
 import java.awt.geom.Rectangle2D;
@@ -40,15 +41,18 @@ public class ClassBoxLayouter {
     private final ChangePalette palette;
     private final TextHighlighter highlighter;
     private final TextFont font;
+    private final StereotypeResolver stereotypes;
     private final MemberTextBuilder memberTextBuilder = new MemberTextBuilder();
 
-    /** @param measurer measures texts in the font */
-    public ClassBoxLayouter(TextMeasurer measurer, ChangePalette palette, TextFont font) {
+    /** @param measurer measures texts in the font
+     * @param stereotypes tells what a stereotype looks like which refers to a configuration of the host */
+    public ClassBoxLayouter(TextMeasurer measurer, ChangePalette palette, TextFont font, StereotypeResolver stereotypes) {
         this.measurer = measurer;
         this.wrapper = new TextWrapper(measurer);
         this.palette = palette;
         this.highlighter = new TextHighlighter(measurer, palette);
         this.font = font;
+        this.stereotypes = stereotypes;
     }
 
     public BoxLayout layout(ClassModel_V001 model) {
@@ -59,9 +63,9 @@ public class ClassBoxLayouter {
         String textColor = colors.text(isRemoved, VEILED_TEXT);
         String nameColor = colors.markedText(isRemoved, VEILED_MARKED_TEXT);
         String lineColor = colors.line(isRemoved);
-        boolean showsDerivedStereotype = model.kind.derivedStereotype != null && model.stereotype == null;
-        String derivedStereotype = showsDerivedStereotype ? stereotypeText(model.kind.derivedStereotype) : null;
-        String stereotype = model.stereotype == null ? null : stereotypeText(model.stereotype);
+        String stereotype = stereotypeText(model);
+        boolean showsDerivedStereotype = model.kind.derivedStereotype != null && stereotype == null;
+        String derivedStereotype = showsDerivedStereotype ? bracketed(model.kind.derivedStereotype) : null;
         List<MarkedText> taggedValues = taggedValueTexts(model);
         CompartmentLines attributes = CompartmentLines.of(model, Compartment_V001.ATTRIBUTES, memberTextBuilder);
         CompartmentLines methods = CompartmentLines.of(model, Compartment_V001.METHODS, memberTextBuilder);
@@ -179,8 +183,23 @@ public class ClassBoxLayouter {
         }
     }
 
-    private static String stereotypeText(String stereotype) {
-        return TextKind.STEREOTYPE.prefix + stereotype + TextKind.STEREOTYPE.suffix;
+    /** @return the text of the stereotype row with its angle brackets, null if there is nothing to show: no stereotype,
+     * or one which refers to a configuration without a label */
+    private String stereotypeText(ClassModel_V001 model) {
+        if (model.stereotype == null) {
+            return null;
+        }
+        if (!StereotypeReference_V001.isReference(model.stereotype)) {
+            return bracketed(model.stereotype);
+        }
+        String name = StereotypeReference_V001.nameOf(model.stereotype);
+        StereotypeLook look = stereotypes.lookOf(name);
+        String label = look != null ? look.label : name;
+        return label.isEmpty() ? null : bracketed(label);
+    }
+
+    private static String bracketed(String text) {
+        return TextKind.STEREOTYPE.prefix + text + TextKind.STEREOTYPE.suffix;
     }
 
     // ---- texts ----

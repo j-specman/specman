@@ -32,6 +32,10 @@ public interface EditorHost {
    * like */
   List<String> changeSets();
 
+  /** @return the names of the configurations which the user can choose a stereotype from, in the order the user
+   * knows them. The renderer tells what each of them looks like, see {@link #renderer()}. */
+  List<String> stereotypeConfigs();
+
   /** @return the language of the editor's texts */
   Locale locale();
 }

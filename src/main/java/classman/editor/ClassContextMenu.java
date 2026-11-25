@@ -26,8 +26,7 @@ class ClassContextMenu extends JPopupMenu {
    * @param showDiagram shows the diagram as the editing has it now */
   ClassContextMenu(DiagramEditing editing, ClassModel_V001 box, TextEditor textEditor, EditorTexts texts,
                    UnaryOperator<ElementStyleModel_V001> stylePicker, Runnable showDiagram) {
-    add(entry(texts.get("menu.class.add.stereotype"), editing.canAddStereotypeTo(box),
-      () -> textEditor.startNewStereotype(box)));
+    add(new StereotypeMenu(editing, box, textEditor, texts, showDiagram));
     add(entry(texts.get("menu.class.add.taggedvalue"), editing.canAddPartsTo(box),
       () -> textEditor.startNewTaggedValue(box)));
     for (Compartment_V001 compartment : Compartment_V001.values()) {

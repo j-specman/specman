@@ -3,6 +3,7 @@ package specman.editarea.image.classman;
 import classman.editor.EditorHost;
 import classman.render.DiagramRenderer;
 import specman.ChangeSet;
+import specman.metatag.generic.config.MetaTagConfig;
 
 import java.util.List;
 import java.util.Locale;
@@ -52,6 +53,11 @@ public class ClassmanEditorHost implements EditorHost {
   @Override
   public List<String> changeSets() {
     return List.copyOf(ChangeSet.ALL.keySet());
+  }
+
+  @Override
+  public List<String> stereotypeConfigs() {
+    return editor().metaTagConfigs().stream().map(MetaTagConfig::getName).toList();
   }
 
   @Override

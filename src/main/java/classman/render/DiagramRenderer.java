@@ -5,14 +5,18 @@ import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
 
 /** The way a host application gets the picture of a class diagram from its source text. What only the host knows,
- * the colors of its change sets and the words of its language, is given to the constructor. */
+ * the colors of its change sets, what the stereotypes look like which the diagram refers to, and the words of its
+ * language, is given to the constructor. */
 public final class DiagramRenderer {
   private final ChangeColors changeColors;
+  private final StereotypeResolver stereotypes;
   private final String problemTitle;
 
-  /** @param problemTitle headline of the picture shown instead of a diagram which can't be drawn */
-  public DiagramRenderer(ChangeColors changeColors, String problemTitle) {
+  /** @param stereotypes tells what the stereotypes look like which refer to a configuration of the host
+   * @param problemTitle headline of the picture shown instead of a diagram which can't be drawn */
+  public DiagramRenderer(ChangeColors changeColors, StereotypeResolver stereotypes, String problemTitle) {
     this.changeColors = changeColors;
+    this.stereotypes = stereotypes;
     this.problemTitle = problemTitle;
   }
 
@@ -28,7 +32,7 @@ public final class DiagramRenderer {
 
   /** @throws IllegalArgumentException if the model refers to a class, attribute or relation which it doesn't have */
   public Scene layout(ClassDiagramModel_V001 model) {
-    return new ClassDiagramLayouter(new AwtTextMeasurer(), changeColors).layout(model);
+    return new ClassDiagramLayouter(new AwtTextMeasurer(), changeColors, stereotypes).layout(model);
   }
 
   /** @return the color of the frame around a selected element which the change set has marked, as #rrggbb, or null

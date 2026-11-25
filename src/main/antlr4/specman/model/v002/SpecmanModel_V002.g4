@@ -388,10 +388,13 @@ tagRef
     : '(' tagId (',' BACKTICK_STRING)? ')'
     ;
 
-// The name of a meta tag configuration, which tags at steps refer to. It is written as a backtick
-// string and not as an identifier, because identifiers would collide with keywords like 'source' or
-// 'text' and other tokens, e.g. 'deadbeef' is a STEP_ID. There is no lexer token of its own for it,
-// because it would be indistinguishable from BACKTICK_STRING.
+// The name of a meta tag configuration, which tags at steps and stereotypes in class diagrams refer
+// to. It is written as a backtick string and not as an identifier for technical reasons: identifiers
+// would collide with keywords like 'source' or 'text' and other tokens, e.g. 'deadbeef' is a STEP_ID.
+// The content of the string is restricted nevertheless: the configuration dialog only allows letters
+// A-Z, a-z, digits and underscores, which is also what a class diagram accepts as the reference to a
+// configuration (<<@name>>). There is no lexer token of its own for it, because it would be
+// indistinguishable from BACKTICK_STRING.
 tagId
     : BACKTICK_STRING
     ;

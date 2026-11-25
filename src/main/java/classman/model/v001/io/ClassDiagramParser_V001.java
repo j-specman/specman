@@ -70,6 +70,7 @@ import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
 import classman.model.v001.RouteModel_V001;
 import classman.model.v001.StyleProperty_V001;
+import classman.model.v001.StereotypeReference_V001;
 import classman.model.v001.Side_V001;
 import classman.model.v001.TaggedValueModel_V001;
 import classman.model.v001.TextChangeModel_V001;
@@ -201,12 +202,17 @@ public class ClassDiagramParser_V001 {
         return declaration.ENUM() != null ? ClassKind_V001.ENUM : ClassKind_V001.CLASS;
     }
 
-    private String stereotype(TerminalNode stereotype) {
+    private String stereotype(TerminalNode stereotype) throws ClassDiagramParseException {
         if (stereotype == null) {
             return null;
         }
         String text = stereotype.getText();
-        return text.substring(2, text.length() - 2).trim();
+        String trimmed = text.substring(2, text.length() - 2).trim();
+        if (StereotypeReference_V001.isReference(trimmed) && !StereotypeReference_V001.isValidName(StereotypeReference_V001.nameOf(trimmed))) {
+            throw problem(stereotype.getSymbol(), "A stereotype which begins with @ refers to a configuration and needs "
+                + "a name of letters, digits and underscores: " + text);
+        }
+        return trimmed;
     }
 
     private TaggedValueModel_V001 buildTaggedValue(TaggedValueContext tag) throws ClassDiagramParseException {

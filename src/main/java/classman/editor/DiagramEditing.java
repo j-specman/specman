@@ -23,6 +23,7 @@ import classman.model.v001.NoteModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RelationEnd_V001;
 import classman.model.v001.RelationType_V001;
+import classman.model.v001.StereotypeReference_V001;
 import classman.model.v001.TaggedValueModel_V001;
 import classman.model.v001.change.ElementTextChanger_V001;
 import classman.model.v001.change.RelationEndTypeChanger_V001;
@@ -452,11 +453,19 @@ public class DiagramEditing {
    * the selected relation has no text yet, its placeholder at the point counts: the user creates the text there. */
   public SceneTextArea editableTextAt(Point2D point) {
     SceneTextArea text = scene.textAreaAt(point);
-    boolean editable = text != null && (text.element == selected || text.element instanceof AbstractRelationModel_V001);
+    boolean editable = text != null && (text.element == selected || text.element instanceof AbstractRelationModel_V001)
+      && !isReferenceText(text);
     if (editable) {
       return text;
     }
     return text == null ? selectedPlaceholderAt(point) : null;
+  }
+
+  /** @return true if the text is a stereotype which refers to a configuration of the host: the user chooses it from a
+   * menu, but can't type it */
+  private static boolean isReferenceText(SceneTextArea text) {
+    return text.kind == TextKind.STEREOTYPE
+      && StereotypeReference_V001.isReference(((ClassModel_V001) text.element).stereotype);
   }
 
   /** @return the label or multiplicity of the selected relation at the point, which the user can move, null if there
@@ -668,7 +677,8 @@ public class DiagramEditing {
   public boolean accepts(SceneTextArea text, String newText) {
     return switch (text.kind) {
       case FROM_MULTIPLICITY, TO_MULTIPLICITY -> !newText.contains("\n");
-      case STEREOTYPE -> !newText.contains("\n") && !newText.contains(">");
+      case STEREOTYPE -> !newText.contains("\n") && !newText.contains(">")
+        && StereotypeReference_V001.isFreeText(newText);
       case ATTRIBUTE_LINE, METHOD_LINE ->
         memberEditings.get(text.kind.compartment()).accepts(text, newText, host.trackedChangeSet());
       case TAGGED_VALUE -> taggedValueEditing.accepts(newText);
@@ -931,6 +941,88 @@ public class DiagramEditing {
     }
     if (box.stereotype == null) {
       pendingStereotype.begin(box);
+      scene = host.renderer().layout(model);
+    }
+    return scene.textAreas.stream().filter(text -> text.element == box && text.kind == TextKind.STEREOTYPE)
+      .findFirst().orElseThrow();
+  }
+
+  /** @return the names of the configurations of the host which a stereotype can refer to */
+  public List<String> stereotypeConfigs() {
+    return host.stereotypeConfigs();
+  }
+
+  /** @return whether the class can get another stereotype, or have its stereotype changed or removed: no change set
+   * has removed it */
+  public Can canChangeStereotypeOf(ClassModel_V001 box) {
+    return canAddPartsTo(box);
+  }
+
+  /** @return whether the class has a stereotype which can be removed: one which a change set has removed doesn't
+   * count */
+  public Can canRemoveStereotypeOf(ClassModel_V001 box) {
+    Can parts = canAddPartsTo(box);
+    if (!parts.can()) {
+      return parts;
+    }
+    return Can.IF(!stereotypeOf(box).isEmpty(), texts.get("reason.stereotype.missing"));
+  }
+
+  /** @return the name of the configuration of the host which the stereotype of the class refers to, null if the class
+   * has no stereotype or one which is a free text */
+  public String stereotypeConfigOf(ClassModel_V001 box) {
+    String stereotype = stereotypeOf(box);
+    return StereotypeReference_V001.isReference(stereotype) ? StereotypeReference_V001.nameOf(stereotype) : null;
+  }
+
+  /** @return true if the class has a stereotype which is a free text */
+  public boolean hasFreeTextStereotype(ClassModel_V001 box) {
+    String stereotype = stereotypeOf(box);
+    return !stereotype.isEmpty() && StereotypeReference_V001.isFreeText(stereotype);
+  }
+
+  /** Gives the class the stereotype which refers to the configuration of the host, in place of the one it has. Like
+   * any other text, a stereotype which is chosen is marked while changes are tracked, with the former one as backup.
+   * @throws IllegalArgumentException if the class can't get parts, or the name isn't one which a configuration can
+   * have */
+  public void setStereotypeConfig(ClassModel_V001 box, String configName) {
+    if (!canChangeStereotypeOf(box).can() || !StereotypeReference_V001.isValidName(configName)) {
+      throw new IllegalArgumentException("The class can't get the stereotype " + configName + ": " + box.name);
+    }
+    String reference = StereotypeReference_V001.textOf(configName);
+    if (reference.equals(stereotypeOf(box))) {
+      discardNewPart();
+      return;
+    }
+    pendingStereotype.discard();
+    textChanger.setStereotype(box, reference, host.trackedChangeSet());
+    publish();
+  }
+
+  /** Takes the stereotype away from the class. While changes are tracked it stays, marked as removed.
+   * @throws IllegalArgumentException if the class has no stereotype to remove */
+  public void removeStereotype(ClassModel_V001 box) {
+    if (!canRemoveStereotypeOf(box).can()) {
+      throw new IllegalArgumentException("The class has no stereotype to remove: " + box.name);
+    }
+    pendingStereotype.discard();
+    textChanger.setStereotype(box, "", host.trackedChangeSet());
+    publish();
+  }
+
+  /** Gives the row to type a stereotype of free text into, for any class which can get parts: the blank row of
+   * {@link #newStereotype} if it has no stereotype, the text of its stereotype if that is a free text, and a blank row
+   * in place of the stereotype if that refers to a configuration, which is back when the row is dropped or left empty.
+   * @throws IllegalArgumentException if the class can't get parts */
+  public SceneTextArea stereotypeRowForFreeText(ClassModel_V001 box) {
+    if (!canChangeStereotypeOf(box).can()) {
+      throw new IllegalArgumentException("The class can't get a stereotype: " + box.name);
+    }
+    if (stereotypeOf(box).isEmpty()) {
+      return newStereotype(box);
+    }
+    if (StereotypeReference_V001.isReference(box.stereotype)) {
+      pendingStereotype.replace(box);
       scene = host.renderer().layout(model);
     }
     return scene.textAreas.stream().filter(text -> text.element == box && text.kind == TextKind.STEREOTYPE)

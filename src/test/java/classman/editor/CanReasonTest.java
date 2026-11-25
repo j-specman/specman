@@ -55,11 +55,11 @@ class CanReasonTest {
   /** A menu entry which can't be chosen has the reason as its tooltip, one which can has none. */
   @Test
   void tooltipOfDisabledEntry() throws ClassDiagramParseException {
-    open("classdiagram {\n  class A (11111111) at(10, 20) <<Entity>>\n}");
+    open("classdiagram {\n  interface I (11111111) at(10, 20)\n}");
 
-    JMenuItem stereotype = entry("Add stereotype");
-    assertFalse(stereotype.isEnabled());
-    assertEquals("The class has a stereotype already.", stereotype.getToolTipText());
+    JMenuItem attribute = entry("Add attribute");
+    assertFalse(attribute.isEnabled());
+    assertEquals("An interface has no attributes.", attribute.getToolTipText());
     assertNull(entry("Add tagged value").getToolTipText());
   }
 
@@ -68,7 +68,7 @@ class CanReasonTest {
   void removedClass() throws ClassDiagramParseException {
     open("classdiagram {\n  class A (11111111) change(removed, yellow) at(10, 20)\n}");
 
-    assertEquals("A change set has removed the class.", entry("Add stereotype").getToolTipText());
+    assertEquals("A change set has removed the class.", entry("Stereotype").getToolTipText());
     assertEquals("A change set has removed the class.", entry("Style...").getToolTipText());
   }
 
@@ -92,7 +92,7 @@ class CanReasonTest {
   void germanTexts() {
     EditorTexts english = new EditorTexts(java.util.Locale.ENGLISH);
     EditorTexts german = new EditorTexts(java.util.Locale.GERMAN);
-    for (String key : new String[] {"reason.class.removed", "reason.stereotype.exists", "reason.interface.noattributes",
+    for (String key : new String[] {"reason.class.removed", "reason.stereotype.exists", "reason.stereotype.missing", "reason.interface.noattributes",
       "reason.attributes.hidden", "reason.attributes.marked", "reason.note.removed", "reason.width.automatic",
       "reason.endtype.otherdiamond", "reason.relation.removed", "reason.center.already"}) {
       assertFalse(german.get(key).isBlank(), key);

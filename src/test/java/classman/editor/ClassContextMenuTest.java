@@ -128,7 +128,7 @@ class ClassContextMenuTest {
 
     List<JMenuItem> entries = entries();
 
-    assertEquals(List.of("Add stereotype", "Add tagged value", "Add attribute", "Add method", "Hide / show attributes",
+    assertEquals(List.of("Stereotype", "Add tagged value", "Add attribute", "Add method", "Hide / show attributes",
       "Hide / show methods", "Style...", "Automatic width"),
       entries.stream().map(JMenuItem::getText).toList());
     assertTrue(entries.get(0).isEnabled());
@@ -136,15 +136,15 @@ class ClassContextMenuTest {
     assertTrue(entries.get(2).isEnabled());
   }
 
-  /** A class which has a stereotype can't get a second one, but can get attributes. */
+  /** A class which has a stereotype can change it, and get attributes. */
   @Test
-  void secondStereotypeIsNotOffered() throws Exception {
+  void stereotypeMenuStaysEnabledWithStereotype() throws Exception {
     open(WITH_STEREOTYPE);
     editing.selectAt(insideClass());
 
     List<JMenuItem> entries = entries();
 
-    assertFalse(entries.get(0).isEnabled());
+    assertTrue(entries.get(0).isEnabled());
     assertTrue(entries.get(1).isEnabled());
   }
 
@@ -169,13 +169,13 @@ class ClassContextMenuTest {
     assertFalse(editing.source().contains("width"), editing.source());
   }
 
-  /** The stereotype entry opens a field in the row which the class got for it. */
+  /** The free text entry of the stereotype menu opens a field in the row which the class got for it. */
   @Test
-  void stereotypeEntryStartsField() throws Exception {
+  void freeTextEntryStartsField() throws Exception {
     open(BARE);
     editing.selectAt(insideClass());
 
-    SwingUtilities.invokeAndWait(() -> entries().get(0).doClick(0));
+    SwingUtilities.invokeAndWait(() -> ((javax.swing.JMenu) entries().get(0)).getItem(0).doClick(0));
 
     assertTrue(textEditor.isEditing());
     assertEquals(1, canvas.getComponentCount());

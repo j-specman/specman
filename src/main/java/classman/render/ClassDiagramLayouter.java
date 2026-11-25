@@ -37,9 +37,14 @@ public class ClassDiagramLayouter {
     }
 
     public ClassDiagramLayouter(TextMeasurer measurer, ChangeColors changeColors) {
+        this(measurer, changeColors, StereotypeResolver.NONE);
+    }
+
+    /** @param stereotypes tells what the stereotypes look like which refer to a configuration of the host */
+    public ClassDiagramLayouter(TextMeasurer measurer, ChangeColors changeColors, StereotypeResolver stereotypes) {
         ChangePalette palette = new ChangePalette(changeColors);
         this.classLayouters = new FontLayouters<>(measurer, (fontMeasurer, font) ->
-            new ClassBoxLayouter(fontMeasurer, palette, font));
+            new ClassBoxLayouter(fontMeasurer, palette, font, stereotypes));
         this.noteLayouters = new FontLayouters<>(measurer, (fontMeasurer, font) ->
             new NoteBoxLayouter(fontMeasurer, palette, font));
         this.relationLayouters = new FontLayouters<>(measurer, (fontMeasurer, font) ->
