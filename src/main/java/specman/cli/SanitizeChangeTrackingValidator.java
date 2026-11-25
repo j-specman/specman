@@ -67,7 +67,7 @@ final class SanitizeChangeTrackingValidator {
     String plain = area.plainText != null ? area.plainText : "";
     Markup_V002 previous = null;
     for (Markup_V002 markup : area.markups) {
-      String where = located(positions.of(markup), describe(site) + ": markup " + range(markup));
+      String where = located(positions.of(markup), SanitizeModelValidator.describe(site) + ": markup " + range(markup));
       if (markup.from > markup.to) {
         errors.add(where + " ends before it starts");
       }
@@ -103,10 +103,6 @@ final class SanitizeChangeTrackingValidator {
 
   private static String range(Markup_V002 markup) {
     return "(" + markup.from + "," + markup.to + ")";
-  }
-
-  private static String describe(Site site) {
-    return site.step() != null ? SanitizeModelValidator.describe(site.step()) + " " + site.part() : site.part();
   }
 
   // ---- moved steps ----

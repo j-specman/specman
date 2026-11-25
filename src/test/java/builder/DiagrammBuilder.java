@@ -1,6 +1,8 @@
 package builder;
 
+import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.model.v002.DiagramModel_V002;
+import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.MetaTagConfigModel_V002;
 import specman.model.v002.io.ModelRenumberer_V002;
 import specman.model.v002.io.ModelSerializer_V002;
@@ -71,6 +73,13 @@ public class DiagrammBuilder {
 
   public DiagrammBuilder withMetaTagConfig(MetaTagConfigModel_V002 config) {
     diagramm.metaTagConfigs.add(config);
+    return this;
+  }
+
+  /** Puts a text and a Classman diagram with the given source into the intro. */
+  public DiagrammBuilder withIntroDiagram(String source) {
+    diagramm.intro = new EditorContentModel_V002("intro", null);
+    diagramm.intro.addArea(new ClassmanImageEditAreaModel_V002(source, 1f, null));
     return this;
   }
 

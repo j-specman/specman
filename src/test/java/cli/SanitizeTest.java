@@ -276,6 +276,85 @@ public class SanitizeTest {
     assertERROR(result, "Invalid meta tags", "'" + INVISIBLE_TAG + "' has neither label nor icon");
   }
 
+  // ---- stereotypes in class diagrams ----
+
+  private static String diagramWithStereotype(String configName) {
+    return "classdiagram {\n    class Customer (aaaaaaaa) <<@" + configName + ">>\n}\n";
+  }
+
+  /** A class diagram whose stereotypes refer to configurations which exist is accepted. */
+  @Test
+  void testStereotypeOfKnownConfigurationIsAccepted() {
+    File nsdFile = diagramm()
+      .withMetaTagConfig(TAG_WITH_FREETEXT, "Priority", true)
+      .withMainSequence(sequence()
+        .withStep(simple("first").withClassmanDiagram(diagramWithStereotype(TAG_WITH_FREETEXT))))
+      .persist();
+
+    assertOK(sanitize(nsdFile));
+  }
+
+  /** A stereotype which refers to a configuration that doesn't exist is reported as ERROR including the class, the
+   * configuration and the step with the diagram. */
+  @Test
+  void testStereotypeWithoutConfiguration() {
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first").withClassmanDiagram(diagramWithStereotype(UNKNOWN_TAG))))
+      .persist();
+
+    CLIResult result = sanitize(nsdFile);
+
+    assertERROR(result, "Invalid meta tags", "Step 1", "class 'Customer'", "'" + UNKNOWN_TAG + "' which has no configuration");
+  }
+
+  /** A diagram in the cell of a table is looked at as well. */
+  @Test
+  void testStereotypeWithoutConfigurationInTableCell() {
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first").withClassmanDiagramInTableCell(diagramWithStereotype(UNKNOWN_TAG))))
+      .persist();
+
+    assertERROR(sanitize(nsdFile), "Invalid meta tags", "Step 1", "table cell", "'" + UNKNOWN_TAG + "'");
+  }
+
+  /** A diagram in the intro is looked at as well. */
+  @Test
+  void testStereotypeWithoutConfigurationInIntro() {
+    File nsdFile = diagramm()
+      .withIntroDiagram(diagramWithStereotype(UNKNOWN_TAG))
+      .withMainSequence(sequence()
+        .withStep(simple("first")))
+      .persist();
+
+    assertERROR(sanitize(nsdFile), "Invalid meta tags", "intro", "'" + UNKNOWN_TAG + "'");
+  }
+
+  /** Tags at steps and stereotypes are reported together. */
+  @Test
+  void testTagAndStereotypeWithoutConfigurationAreReportedTogether() {
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first").withTag(UNKNOWN_TAG).withClassmanDiagram(diagramWithStereotype(UNKNOWN_TAG))))
+      .persist();
+
+    assertERROR(sanitize(nsdFile), "Invalid meta tags", "tag '" + UNKNOWN_TAG + "' has no configuration",
+      "class 'Customer'");
+  }
+
+  /** The old text of a change mark may refer to a configuration which doesn't exist, which is no use of it. */
+  @Test
+  void testBackupOfChangeMarkMayBeDangling() {
+    String source = "classdiagram {\n    class Customer (aaaaaaaa) <<Entity>> was(yellow, \"@" + UNKNOWN_TAG + "\")\n}\n";
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first").withClassmanDiagram(source)))
+      .persist();
+
+    assertOK(sanitize(nsdFile));
+  }
+
   // ---- change tracking ----
 
   /** Markups covering the text up to its last character, one after the other, are accepted. */

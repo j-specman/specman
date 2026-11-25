@@ -6,6 +6,7 @@ import specman.ChangeSet;
 import specman.editarea.markups.MarkupType;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.ChangeInfoModel_V002;
+import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.model.v002.Markup_V002;
@@ -120,6 +121,22 @@ abstract public class AbstractStepBuilder<S extends AbstractStepModel_V002, B ex
 
   public B withTag(String configName) {
     return withTag(configName, null);
+  }
+
+  /** Adds a Classman diagram with the given source behind the text of the step. */
+  public B withClassmanDiagram(String source) {
+    step.content.areas.add(new ClassmanImageEditAreaModel_V002(source, 1f, null));
+    return self();
+  }
+
+  /** Adds a table with one cell, which holds a text and a Classman diagram with the given source, behind the text of the
+   * step. */
+  public B withClassmanDiagramInTableCell(String source) {
+    EditorContentModel_V002 cell = new EditorContentModel_V002("cell", null);
+    cell.addArea(new ClassmanImageEditAreaModel_V002(source, 1f, null));
+    step.content.areas.add(new TableEditAreaModel_V002(List.of(List.of(cell)), TABLE_WIDTH_PERCENT,
+      List.of(TABLE_WIDTH_PERCENT), null));
+    return self();
   }
 
   /** Overrides the plain text rendition of the primary text. By default it equals the text itself.

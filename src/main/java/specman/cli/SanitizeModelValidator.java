@@ -1,9 +1,14 @@
 package specman.cli;
 
+import classman.model.v001.change.StereotypeReferences_V001;
+import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.AbstractStepModel_V002;
+import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.MetaTagConfigModel_V002;
 import specman.model.v002.MetaTagModel_V002;
+import specman.model.v002.io.TextAreaTraversal_V002;
+import specman.model.v002.io.TextAreaTraversal_V002.Site;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,6 +24,7 @@ import java.util.Set;
 final class SanitizeModelValidator {
 
   private static final String UNKNOWN_STEP_NUMBER = "?";
+  private static final StereotypeReferences_V001 STEREOTYPES = new StereotypeReferences_V001();
 
   private SanitizeModelValidator() {
   }
@@ -33,6 +39,7 @@ final class SanitizeModelValidator {
     for (AbstractStepModel_V002 step : model.queryAllSteps()) {
       checkTagsOfStep(step, configsByName, errors);
     }
+    checkStereotypesOfDiagrams(model, configsByName.keySet(), errors);
     AbstractCLO.assertNoErrors("Invalid meta tags", errors);
   }
 
@@ -94,12 +101,40 @@ final class SanitizeModelValidator {
     }
   }
 
+  /** The stereotype of a class in a class diagram may refer to a configuration, like a tag at a step does. The old text
+   * of a change mark is no use of it, it may refer to a configuration which has gone. */
+  private static void checkStereotypesOfDiagrams(DiagramModel_V002 model, Set<String> configNames, List<String> errors) {
+    TextAreaTraversal_V002.forEachContent(model, (content, site) -> {
+      for (AbstractEditAreaModel_V002 area : content.areas) {
+        if (area instanceof ClassmanImageEditAreaModel_V002 diagram) {
+          checkStereotypesOfDiagram(diagram.source, site, configNames, errors);
+        }
+      }
+    });
+  }
+
+  private static void checkStereotypesOfDiagram(String source, Site site, Set<String> configNames, List<String> errors) {
+    for (String configName : STEREOTYPES.configsUsedIn(source)) {
+      if (!configNames.contains(configName)) {
+        for (String className : STEREOTYPES.classesUsing(source, configName)) {
+          errors.add(describe(site) + ": class '" + className + "' has a stereotype of the tag '" + configName
+            + "' which has no configuration");
+        }
+      }
+    }
+  }
+
   private static String configError(MetaTagConfigModel_V002 config, String problem) {
     return "Meta tag configuration '" + config.name + "' " + problem;
   }
 
   private static String tagError(String stepLabel, MetaTagModel_V002 tag, String problem) {
     return stepLabel + ": tag '" + tag.configName + "' " + problem;
+  }
+
+  /** @return e.g. "Step 1.2 (a1b2c3d4) text", or "intro" */
+  static String describe(Site site) {
+    return site.step() != null ? describe(site.step()) + " " + site.part() : site.part();
   }
 
   /** @return e.g. "Step 1.2 (a1b2c3d4)" */
