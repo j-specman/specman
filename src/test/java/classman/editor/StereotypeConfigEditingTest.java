@@ -32,8 +32,8 @@ class StereotypeConfigEditingTest {
   private DiagramEditing editing;
 
   private void open(String source) throws ClassDiagramParseException {
-    host.stereotypeLooks.put("Domain_Value", new StereotypeLook("Domain Value"));
-    host.stereotypeLooks.put("Other", new StereotypeLook("Other"));
+    host.stereotypeLooks.put("Domain_Value", new StereotypeLook("Domain Value", null));
+    host.stereotypeLooks.put("Other", new StereotypeLook("Other", null));
     editing = new DiagramEditing(source, host);
     Rectangle2D area = editing.scene().elementAreas.get(0).area;
     editing.selectAt(new Point2D.Double(area.getCenterX(), area.getMaxY() - 2));

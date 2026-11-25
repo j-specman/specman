@@ -34,8 +34,8 @@ class StereotypeMenuTest {
   private TextEditor textEditor;
 
   private void open(String source) throws Exception {
-    host.stereotypeLooks.put("Domain_Value", new StereotypeLook("Domain Value"));
-    host.stereotypeLooks.put("Icon_Only", new StereotypeLook(""));
+    host.stereotypeLooks.put("Domain_Value", new StereotypeLook("Domain Value", null));
+    host.stereotypeLooks.put("Icon_Only", new StereotypeLook("", null));
     SwingUtilities.invokeAndWait(() -> {
       try {
         editing = new DiagramEditing(source, host);

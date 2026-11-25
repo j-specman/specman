@@ -16,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * stereotype of its own. */
 class StereotypeReferenceLayoutTest {
   private static final Map<String, StereotypeLook> LOOKS = Map.of(
-    "Domain_Value", new StereotypeLook("Domain Value"),
-    "IconOnly", new StereotypeLook(""));
+    "Domain_Value", new StereotypeLook("Domain Value", null),
+    "IconOnly", new StereotypeLook("", null));
   private static final ClassDiagramLayouter LAYOUTER =
     new ClassDiagramLayouter(new FixedTextMeasurer(), ChangeColors.NONE, LOOKS::get);
 

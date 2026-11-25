@@ -21,6 +21,10 @@ import static classman.render.DiagramStyle.FRAME_STROKE_WIDTH;
 import static classman.render.DiagramStyle.MIN_BOX_WIDTH;
 import static classman.render.DiagramStyle.PADDING_X;
 import static classman.render.DiagramStyle.PADDING_Y;
+import static classman.render.DiagramStyle.HIGHLIGHT_MARGIN;
+import static classman.render.DiagramStyle.STEREOTYPE_ICON_GAP;
+import static classman.render.DiagramStyle.STRIKE_COLOR;
+import static classman.render.DiagramStyle.STRIKE_WIDTH;
 import static classman.render.DiagramStyle.STROKE;
 import static classman.render.DiagramStyle.STROKE_WIDTH;
 import static classman.render.DiagramStyle.VEILED_STROKE;
@@ -69,7 +73,11 @@ public class ClassBoxLayouter {
         List<MarkedText> taggedValues = taggedValueTexts(model);
         CompartmentLines attributes = CompartmentLines.of(model, Compartment_V001.ATTRIBUTES, memberTextBuilder);
         CompartmentLines methods = CompartmentLines.of(model, Compartment_V001.METHODS, memberTextBuilder);
-        double contentWidth = contentWidth(model, derivedStereotype, stereotype, taggedValues, attributes, methods);
+        VectorImage icon = iconOf(model);
+        double iconSize = measurer.lineHeight();
+        double iconReserve = icon != null ? iconSize + STEREOTYPE_ICON_GAP : 0;
+        double contentWidth = contentWidth(model, iconReserve, derivedStereotype, stereotype, taggedValues, attributes,
+            methods);
         double width = contentWidth + 2 * PADDING_X;
 
         List<AbstractSceneElement> backgrounds = new ArrayList<>();
@@ -82,8 +90,10 @@ public class ClassBoxLayouter {
         y = addClippedCenteredText(elements, stereotypeLines, stereotype, contentWidth, width, y, textColor);
         double nameTop = y;
         List<SceneText> nameLines = new ArrayList<>();
-        y = addCenteredText(elements, nameLines, model.name, true, contentWidth, width, y, nameColor);
+        y = addCenteredText(elements, nameLines, model.name, true, contentWidth - iconReserve, width - iconReserve, y,
+            nameColor);
         double nameBottom = y;
+        SceneVectorImage iconElement = addIcon(elements, icon, nameLines, nameTop, iconSize, width - iconReserve);
         List<List<SceneText>> taggedLines = new ArrayList<>();
         Map<TaggedValueModel_V001, Rectangle2D.Double> taggedAreas = new LinkedHashMap<>();
         for (int i = 0; i < taggedValues.size(); i++) {
@@ -111,7 +121,8 @@ public class ClassBoxLayouter {
         }
 
         if (change == null) {
-            addHeaderMarks(backgrounds, overlays, model, stereotypeLines, nameLines, taggedValues, taggedLines);
+            addHeaderMarks(backgrounds, overlays, model, stereotypeLines, iconElement, nameLines, taggedValues,
+                taggedLines);
         } else if (isRemoved) {
             backgrounds.addAll(highlighter.wholeHighlights(change.changeSet, nameLines));
             overlays.addAll(highlighter.strikes(nameLines));
@@ -129,6 +140,10 @@ public class ClassBoxLayouter {
             textAreas.put(TextKind.STEREOTYPE,
                 new Rectangle2D.Double(PADDING_X, stereotypeTop, contentWidth, nameTop - stereotypeTop));
         }
+        else if (iconElement != null) {
+            textAreas.put(TextKind.STEREOTYPE,
+                new Rectangle2D.Double(iconElement.x, iconElement.y, iconElement.width, iconElement.height));
+        }
         textAreas.put(TextKind.CLASS_NAME, new Rectangle2D.Double(PADDING_X, nameTop, contentWidth, nameBottom - nameTop));
         return new BoxLayout(width, y, all, memberAreas, change == null ? 0 : FRAME_STROKE_WIDTH / 2, textAreas,
             new MemberLineAreas(TextKind.ATTRIBUTE_LINE, attributeLineAreas),
@@ -145,9 +160,11 @@ public class ClassBoxLayouter {
     }
 
     private void addHeaderMarks(List<AbstractSceneElement> backgrounds, List<AbstractSceneElement> overlays,
-                                ClassModel_V001 model, List<SceneText> stereotypeLines, List<SceneText> nameLines,
-                                List<MarkedText> taggedValues, List<List<SceneText>> taggedLines) {
+                                ClassModel_V001 model, List<SceneText> stereotypeLines, SceneVectorImage icon,
+                                List<SceneText> nameLines, List<MarkedText> taggedValues,
+                                List<List<SceneText>> taggedLines) {
         markStereotype(backgrounds, overlays, model, stereotypeLines);
+        markStereotypeIcon(backgrounds, overlays, model, icon);
         backgrounds.addAll(highlighter.changeHighlights(model.nameChange, model.name, nameLines));
         for (int i = 0; i < taggedValues.size(); i++) {
             markTaggedValue(backgrounds, overlays, model.taggedValues.get(i), taggedValues.get(i), taggedLines.get(i));
@@ -198,6 +215,51 @@ public class ClassBoxLayouter {
         return label.isEmpty() ? null : bracketed(label);
     }
 
+    /** @return the icon of the configuration which the stereotype refers to, null if there is none */
+    private VectorImage iconOf(ClassModel_V001 model) {
+        if (!StereotypeReference_V001.isReference(model.stereotype)) {
+            return null;
+        }
+        StereotypeLook look = stereotypes.lookOf(StereotypeReference_V001.nameOf(model.stereotype));
+        return look != null ? look.icon : null;
+    }
+
+    /** Puts the icon right of the first line of the name, in the height of the line. The name and the icon together
+     * are centered in the box, see the width which the name is centered in.
+     * @return the icon in the scene, null if there is none */
+    private SceneVectorImage addIcon(List<AbstractSceneElement> elements, VectorImage icon, List<SceneText> nameLines,
+                                     double nameTop, double iconSize, double nameCenteringWidth) {
+        if (icon == null) {
+            return null;
+        }
+        double x = nameLines.isEmpty() ? nameCenteringWidth / 2 + STEREOTYPE_ICON_GAP
+            : nameLines.get(0).left() + nameLines.get(0).width + STEREOTYPE_ICON_GAP;
+        SceneVectorImage placed = new SceneVectorImage(x, nameTop, iconSize, iconSize, icon);
+        elements.add(placed);
+        return placed;
+    }
+
+    /** The icon of the stereotype is marked like its text: a background if the stereotype is added or changed, and a
+     * line through it if it is removed. */
+    private void markStereotypeIcon(List<AbstractSceneElement> backgrounds, List<AbstractSceneElement> overlays,
+                                    ClassModel_V001 model, SceneVectorImage icon) {
+        if (icon == null) {
+            return;
+        }
+        ChangeModel_V001 elementChange = model.stereotypeElementChange;
+        String changeSet = elementChange != null ? elementChange.changeSet
+            : model.stereotypeChange != null ? model.stereotypeChange.changeSet : null;
+        if (changeSet == null) {
+            return;
+        }
+        backgrounds.add(new SceneRectangle(icon.x - HIGHLIGHT_MARGIN, icon.y, icon.width + 2 * HIGHLIGHT_MARGIN,
+            icon.height, palette.strong(changeSet), null, STROKE_WIDTH).keepingVisible());
+        if (elementChange != null && elementChange.type == ChangeType_V001.REMOVED) {
+            double y = icon.y + icon.height / 2;
+            overlays.add(new SceneLine(icon.x - 1, y, icon.x + icon.width + 1, y, false, STRIKE_COLOR, STRIKE_WIDTH));
+        }
+    }
+
     private static String bracketed(String text) {
         return TextKind.STEREOTYPE.prefix + text + TextKind.STEREOTYPE.suffix;
     }
@@ -220,18 +282,19 @@ public class ClassBoxLayouter {
 
     // ---- width ----
 
-    private double contentWidth(ClassModel_V001 model, String derivedStereotype, String stereotype,
+    /** @param iconReserve the width which the icon next to the name takes away from the name, 0 if there is no icon */
+    private double contentWidth(ClassModel_V001 model, double iconReserve, String derivedStereotype, String stereotype,
                                 List<MarkedText> taggedValues, CompartmentLines... compartments) {
         if (model.width == null) {
-            return Math.max(naturalWidth(model, derivedStereotype, stereotype, taggedValues, compartments),
+            return Math.max(naturalWidth(model, iconReserve, derivedStereotype, stereotype, taggedValues, compartments),
                 MIN_BOX_WIDTH - 2 * PADDING_X);
         }
-        return Math.max(model.width - 2 * PADDING_X, wrapper.longestWord(model.name, true));
+        return Math.max(model.width - 2 * PADDING_X, wrapper.longestWord(model.name, true) + iconReserve);
     }
 
-    private double naturalWidth(ClassModel_V001 model, String derivedStereotype, String stereotype,
+    private double naturalWidth(ClassModel_V001 model, double iconReserve, String derivedStereotype, String stereotype,
                                 List<MarkedText> taggedValues, CompartmentLines... compartments) {
-        double widest = measurer.width(model.name, true);
+        double widest = measurer.width(model.name, true) + iconReserve;
         if (derivedStereotype != null) {
             widest = Math.max(widest, measurer.width(derivedStereotype, false));
         }

@@ -7,6 +7,8 @@ public final class DiagramStyle {
     /** The space between two classes or notes which the layout stacks. */
     public static final double STACK_GAP = 40;
     public static final double MIN_BOX_WIDTH = 40;
+    /** The space between the class name and the icon of its stereotype. */
+    public static final double STEREOTYPE_ICON_GAP = 4;
     /** The width which a class or note gets while the editor creates it, so that the field for its text fits into the box. */
     public static final int NEW_BOX_WIDTH = 140;
     /** The size of the folded corner of a note. */

@@ -60,6 +60,8 @@ public class SceneGraphicsPainter {
                 strokeWidthOf(g, polygon.strokeWidth, polygon.keepsVisible), polygon.roundCorners);
         } else if (element instanceof SceneText text) {
             paintText(g, text);
+        } else if (element instanceof SceneVectorImage vector) {
+            vector.image.paint(g, vector.x, vector.y, vector.width, vector.height);
         } else {
             throw new IllegalArgumentException("Unknown scene element: " + element.getClass().getName());
         }

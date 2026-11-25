@@ -10,10 +10,13 @@ import static classman.render.DiagramStyle.DASH_LENGTH;
 import static classman.render.DiagramStyle.STROKE_WIDTH;
 
 /**
- * Writes a scene as SVG. It uses only rect, line, polyline, polygon and text, in the order of the scene.
- * The numbers are written with up to two decimals.
+ * Writes a scene as SVG. It uses only rect, line, polyline, polygon, text and image, in the order of the scene.
+ * The numbers are written with up to two decimals. A vector graphic is written as an image with a PNG in a high
+ * resolution: every program which reads the SVG, among them the PDF export, can show that.
  */
 public class SceneSvgWriter {
+    /** How many pixels of the PNG of a graphic cover one unit of the diagram. */
+    private static final int IMAGE_OVERSAMPLING = 4;
 
     public String write(Scene scene) {
         SvgFrame frame = SvgFrame.of(scene);
@@ -44,6 +47,9 @@ public class SceneSvgWriter {
         if (element instanceof SceneText text) {
             return text(text);
         }
+        if (element instanceof SceneVectorImage vector) {
+            return vectorImage(vector);
+        }
         throw new IllegalArgumentException("Unknown scene element: " + element.getClass().getName());
     }
 
@@ -68,6 +74,14 @@ public class SceneSvgWriter {
     private String polygon(ScenePolygon polygon) {
         return "<polygon points=\"" + points(polygon.xs, polygon.ys) + "\" fill=\"" + color(polygon.fill)
             + "\" stroke=\"" + color(polygon.stroke) + "\"" + strokeWidth(polygon.strokeWidth) + "/>";
+    }
+
+    private String vectorImage(SceneVectorImage vector) {
+        int pixelWidth = (int) Math.ceil(vector.width * IMAGE_OVERSAMPLING);
+        int pixelHeight = (int) Math.ceil(vector.height * IMAGE_OVERSAMPLING);
+        return "<image x=\"" + number(vector.x) + "\" y=\"" + number(vector.y)
+            + "\" width=\"" + number(vector.width) + "\" height=\"" + number(vector.height)
+            + "\" href=\"" + vector.image.pngDataUri(pixelWidth, pixelHeight) + "\"/>";
     }
 
     /** The text is anchored at its start, at the x where the layout puts its left end, whatever its anchor is. */
