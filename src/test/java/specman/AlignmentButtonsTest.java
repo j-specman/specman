@@ -9,8 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import specman.editarea.TextEditArea;
 
 import javax.swing.AbstractButton;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.io.File;
 import java.util.List;
 
@@ -54,27 +52,16 @@ class AlignmentButtonsTest {
       .findFirst().orElseThrow().getFirstEditArea().asTextArea());
   }
 
-  /** A focus event gives SHEF its editor and lets it set the state of the buttons. */
   private static TextEditArea focused(TextEditArea area) {
-    area.setCaretPosition(1);
-    for (FocusListener listener : area.getFocusListeners()) {
-      listener.focusGained(new FocusEvent(area, FocusEvent.FOCUS_GAINED));
-    }
-    specman.setLastFocusedTextArea(area);
-    return area;
+    return AlignmentButtonsSupport.focus(area);
   }
 
-  /** The buttons in the order of {@link HTMLAlignAction#LEFT} to {@link HTMLAlignAction#JUSTIFY}. */
   private static List<AbstractButton> alignButtons() {
-    List<AbstractButton> buttons = ((Specman) specman).shefEditorPane.getTextGroupComponents().stream()
-      .filter(AbstractButton.class::isInstance).map(AbstractButton.class::cast)
-      .filter(button -> button.getAction() instanceof HTMLAlignAction).toList();
-    assertEquals(4, buttons.size());
-    return buttons;
+    return AlignmentButtonsSupport.alignButtons();
   }
 
   private static void click(int alignment) {
-    alignButtons().get(alignment).doClick();
+    AlignmentButtonsSupport.click(alignment);
   }
 
   private static void assertOnlySelected(int alignment) {

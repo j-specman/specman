@@ -91,7 +91,7 @@ abstract public class AbstractChangemodeTest {
 
   /** The text must not be marked as changed anywhere. Markups covering no character at all
    * are not visible and don't count. */
-  static void assertNoChangeMarkups(TextEditArea textArea) {
+  protected static void assertNoChangeMarkups(TextEditArea textArea) {
     assertEquals(List.of(), visibleMarkups(textArea), "text markups in " + describe(textArea));
   }
 
