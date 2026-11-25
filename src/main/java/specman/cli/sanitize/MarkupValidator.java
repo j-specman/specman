@@ -104,8 +104,4 @@ final class MarkupValidator extends AbstractModelValidator {
   private static String range(Markup_V002 markup) {
     return "(" + markup.from + "," + markup.to + ")";
   }
-
-  private static String describe(Site site) {
-    return site.step() != null ? describe(site.step()) + " " + site.part() : site.part();
-  }
 }

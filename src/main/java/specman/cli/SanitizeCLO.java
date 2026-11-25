@@ -113,12 +113,6 @@ public class SanitizeCLO extends AbstractCLO {
     }
     catch (IOException e) {
       throw error("File can't be written: " + file.getAbsolutePath() + ": " + e.getMessage());
-  private static void write(File file, String content) throws CLIException {
-    try {
-      Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
-    }
-    catch (IOException e) {
-      throw error("File can't be written: " + file.getAbsolutePath() + ": " + e.getMessage());
     }
   }
 

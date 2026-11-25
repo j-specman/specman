@@ -34,6 +34,7 @@ public class MetaTagValidator extends AbstractModelValidator {
     for (AbstractStepModel_V002 step : model.queryAllSteps()) {
       checkTagsOfStep(step, configsByName, errors);
     }
+    checkStereotypesOfDiagrams(configsByName.keySet(), errors);
   }
 
   /** @return the configurations by their name, the errors of the configurations are added to the specified list. */
