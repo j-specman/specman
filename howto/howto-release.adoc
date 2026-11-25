@@ -55,6 +55,10 @@ Beide Release-Builds überspringen die Tests (sie sind ja gerade gelaufen) und b
 [source,shell]
 ----
 mvn -P windows-installer clean package -DskipTests "-Dspecman.inno.iscc=%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe"
+----
+
+[source,shell]
+----
 mvn -P release-bundle package -DskipTests
 ----
 
