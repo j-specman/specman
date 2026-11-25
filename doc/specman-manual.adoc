@@ -2,7 +2,7 @@
 :sectnums:
 
 # Specman 1.4 Manual
-:revdate: 2026-11-14
+:revdate: 2026-11-25
 
 _Last updated: {revdate}_
 
