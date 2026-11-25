@@ -1,9 +1,14 @@
 package headless.image.classman;
 
+import classman.render.DiagramStyle;
+import classman.render.Scene;
+import classman.render.SceneRectangle;
+import classman.render.SceneText;
 import org.junit.jupiter.api.Test;
 import specman.ChangeSet;
 import specman.editarea.EditContainer;
 import specman.editarea.image.classman.ClassmanImageEditArea;
+import specman.editarea.image.classman.ClassmanRenderer;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigsEditor;
@@ -11,6 +16,7 @@ import specman.metatag.generic.config.MetaTagConfigsEditor;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import java.awt.Color;
 import java.util.List;
 
 import static headless.HeadlessExtension.specman;
@@ -249,6 +255,24 @@ class ClassmanMetaTagConfigTest extends AbstractClassmanTest {
     click(editor, EDIT_BUTTON);
 
     assertEquals(widthBefore, diagram.getFullSizeImage().getWidth());
+  }
+
+  /** Scenario: The configuration has a background, a border and a text color, the last one a little transparent. The
+   * class takes them over; a color which the configuration leaves at the default stays the one of the class. */
+  @Test
+  void testColorsOfConfigReachTheClass() {
+    specman.setMetaTagConfigs(List.of(new MetaTagConfig("Domain", "Domain Value", null, new Color(0x11, 0x22, 0x33),
+      null, new Color(1, 2, 3, 128), true)));
+
+    Scene scene = ClassmanRenderer.renderScene(USING_DOMAIN);
+
+    SceneRectangle box = scene.elements.stream().filter(element -> element instanceof SceneRectangle)
+      .map(element -> (SceneRectangle) element).findFirst().orElseThrow();
+    assertEquals("#112233", box.fill);
+    assertEquals(DiagramStyle.STROKE, box.stroke);
+    SceneText name = scene.elements.stream().filter(element -> element instanceof SceneText)
+      .map(element -> (SceneText) element).filter(text -> text.text.equals("A")).findFirst().orElseThrow();
+    assertEquals("#01020380", name.fill);
   }
 
   /** Scenario: The user creates a configuration, which is available at once, and undoes it. */

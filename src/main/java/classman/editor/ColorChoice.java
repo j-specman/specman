@@ -1,5 +1,6 @@
 package classman.editor;
 
+import classman.render.SceneColor;
 import com.jgoodies.forms.factories.CC;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -19,9 +20,10 @@ class ColorChoice extends JPanel {
   private final JButton standard;
   private String color;
 
-  /** @param standardColor the color which the box has without one of its own, as #rrggbb
+  /** @param standardColor the color which the box has without one of its own, as #rrggbb or #rrggbbaa
    * @param start the color of the style, null for the standard one
-   * @param changed gets the color the user has chosen as #rrggbb, or null for the standard one */
+   * @param changed gets the color the user has chosen as #rrggbb, or #rrggbbaa if the user made it transparent, or
+   * null for the standard one */
   ColorChoice(String title, String standardColor, String start, EditorTexts texts, Consumer<String> changed) {
     super(new FormLayout("pref, 4px, pref", "pref"));
     this.title = title;
@@ -29,9 +31,9 @@ class ColorChoice extends JPanel {
     color = start;
     standard = new JButton(texts.get("style.dialog.standard"));
     choose.addActionListener(e -> {
-      Color chosen = JColorChooser.showDialog(this, title, Color.decode(shownColor()));
+      Color chosen = JColorChooser.showDialog(this, title, SceneColor.parse(shownColor()));
       if (chosen != null) {
-        String hex = String.format("#%02x%02x%02x", chosen.getRed(), chosen.getGreen(), chosen.getBlue());
+        String hex = SceneColor.of(chosen);
         color = hex.equalsIgnoreCase(standardColor) ? null : hex;
         update(changed);
       }

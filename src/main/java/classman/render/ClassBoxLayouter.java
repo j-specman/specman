@@ -62,7 +62,7 @@ public class ClassBoxLayouter {
     public BoxLayout layout(ClassModel_V001 model) {
         ChangeModel_V001 change = model.change;
         boolean isRemoved = change != null && change.type == ChangeType_V001.REMOVED;
-        ElementStyleModel_V001 style = model.style;
+        ElementStyleModel_V001 style = styleOf(model);
         StyleColors colors = new StyleColors(style, CLASS_FILL, STROKE, VEILED_STROKE);
         String textColor = colors.text(isRemoved, VEILED_TEXT);
         String nameColor = colors.markedText(isRemoved, VEILED_MARKED_TEXT);
@@ -215,12 +215,32 @@ public class ClassBoxLayouter {
         return label.isEmpty() ? null : bracketed(label);
     }
 
-    /** @return the icon of the configuration which the stereotype refers to, null if there is none */
-    private VectorImage iconOf(ClassModel_V001 model) {
+    /** @return the style of the class, in which the colors which the class doesn't have are those of the configuration
+     * which its stereotype refers to, if it has them */
+    private ElementStyleModel_V001 styleOf(ClassModel_V001 model) {
+        StereotypeLook look = lookOf(model);
+        if (look == null) {
+            return model.style;
+        }
+        ElementStyleModel_V001 style = model.style.copy();
+        style.fill = style.fill != null ? style.fill : look.background;
+        style.lineColor = style.lineColor != null ? style.lineColor : look.border;
+        style.textColor = style.textColor != null ? style.textColor : look.foreground;
+        return style;
+    }
+
+    /** @return the look of the configuration which the stereotype refers to, null if it doesn't refer to one, or the host
+     * doesn't know it */
+    private StereotypeLook lookOf(ClassModel_V001 model) {
         if (!StereotypeReference_V001.isReference(model.stereotype)) {
             return null;
         }
-        StereotypeLook look = stereotypes.lookOf(StereotypeReference_V001.nameOf(model.stereotype));
+        return stereotypes.lookOf(StereotypeReference_V001.nameOf(model.stereotype));
+    }
+
+    /** @return the icon of the configuration which the stereotype refers to, null if there is none */
+    private VectorImage iconOf(ClassModel_V001 model) {
+        StereotypeLook look = lookOf(model);
         return look != null ? look.icon : null;
     }
 

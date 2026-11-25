@@ -14,7 +14,7 @@ class RelationStyleDialog extends ElementStyleDialog {
   RelationStyleDialog(Window owner, ElementStyleModel_V001 start, DiagramRenderer renderer, List<String> changeSets,
                       EditorTexts texts) {
     super(owner, start, renderer, changeSets, texts, "style.dialog.title.relation", StyleProperty_V001.WITHOUT_FILL,
-      null);
+      StandardColors.RELATION);
   }
 
   @Override

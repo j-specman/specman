@@ -99,7 +99,7 @@ public class SceneGraphicsPainter {
     private void fillAndStroke(Graphics2D g, Shape shape, String fill, String stroke, double strokeWidth,
                                boolean roundCorners) {
         if (fill != null) {
-            g.setColor(Color.decode(fill));
+            g.setColor(SceneColor.parse(fill));
             g.fill(shape);
         }
         if (stroke != null) {
@@ -108,7 +108,7 @@ public class SceneGraphicsPainter {
     }
 
     private void stroke(Graphics2D g, Shape shape, String color, double width, boolean dashed, boolean roundCorners) {
-        g.setColor(Color.decode(color));
+        g.setColor(SceneColor.parse(color));
         g.setStroke(strokeOf(width, dashed, roundCorners));
         g.draw(shape);
     }
@@ -139,7 +139,7 @@ public class SceneGraphicsPainter {
      */
     private void paintText(Graphics2D g, SceneText text) {
         g.setFont(text.font.awtFont(text.bold));
-        g.setColor(Color.decode(text.fill == null ? TEXT_COLOR : text.fill));
+        g.setColor(SceneColor.parse(text.fill == null ? TEXT_COLOR : text.fill));
         g.fill(g.getFont().createGlyphVector(g.getFontRenderContext(), text.text)
             .getOutline((float) text.left(), (float) text.y));
     }

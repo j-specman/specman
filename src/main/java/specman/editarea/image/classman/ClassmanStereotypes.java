@@ -1,10 +1,12 @@
 package specman.editarea.image.classman;
 
+import classman.render.SceneColor;
 import classman.render.StereotypeLook;
 import classman.render.StereotypeResolver;
 import classman.render.VectorImage;
 import specman.metatag.generic.config.MetaTagConfig;
 
+import java.awt.Color;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -24,7 +26,13 @@ final class ClassmanStereotypes implements StereotypeResolver {
   }
 
   private static StereotypeLook lookOf(MetaTagConfig config) {
-    return new StereotypeLook(config.getLabel(), config.hasIcon() ? iconOf(config) : null);
+    return new StereotypeLook(config.getLabel(), config.hasIcon() ? iconOf(config) : null)
+      .withColors(colorOf(config.getBackgroundColor()), colorOf(config.getBorderColor()),
+        colorOf(config.getForegroundColor()));
+  }
+
+  private static String colorOf(Color color) {
+    return color != null ? SceneColor.of(color) : null;
   }
 
   /** The SVG of a configuration was checked when it was chosen, but a model file can hold anything: a graphic which

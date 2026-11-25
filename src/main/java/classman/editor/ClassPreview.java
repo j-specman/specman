@@ -25,8 +25,8 @@ final class ClassPreview {
   /** @return the picture of the class in the style. With a change set it has the frame of an added class, and its
    * attributes are marked, which a real diagram never shows together: the frame stands for everything in the class.
    * Here both are shown, so that the user sees all marks next to the colors of the style. */
-  static Scene scene(DiagramRenderer renderer, ElementStyleModel_V001 style, String changeSet) {
-    Scene laidOut = renderer.layout(of(style, changeSet));
+  static Scene scene(DiagramRenderer renderer, ElementStyleModel_V001 style, String changeSet, String stereotype) {
+    Scene laidOut = renderer.layout(of(style, changeSet, stereotype));
     if (changeSet == null) {
       return laidOut;
     }
@@ -36,11 +36,13 @@ final class ClassPreview {
   }
 
   /** @param changeSet the change set which marks the attributes, null for no marks
-   * @return a diagram with the class Person, which has a copy of the style. Name and attributes are the same in every
+   * @param stereotype the stereotype of the class which the style is for, null if it has none
+   * @return a diagram with the class Person, which has a copy of the style and the stereotype. Name and attributes are the same in every
    * language, so the preview needs no texts of its own. */
-  private static ClassDiagramModel_V001 of(ElementStyleModel_V001 style, String changeSet) {
+  private static ClassDiagramModel_V001 of(ElementStyleModel_V001 style, String changeSet, String stereotype) {
     ClassModel_V001 box = new ClassModel_V001("Person");
     box.style = style.copy();
+    box.stereotype = stereotype;
     AttributeModel_V001 changed = attribute("name", "String");
     AttributeModel_V001 added = attribute("email", "String");
     AttributeModel_V001 removed = attribute("fon", "String");

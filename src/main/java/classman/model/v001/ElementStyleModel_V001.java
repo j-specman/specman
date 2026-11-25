@@ -10,11 +10,11 @@ public class ElementStyleModel_V001 {
     /** The font sizes which an element can have. */
     public static final List<Integer> FONT_SIZES = List.of(8, 9, 10, 11, 12, 14, 16, 18, 20);
 
-    /** The background color as #rrggbb. */
+    /** The background color as #rrggbb, or #rrggbbaa if it is not opaque. */
     public String fill;
-    /** The color of all texts of the element as #rrggbb. */
+    /** The color of all texts of the element as #rrggbb, or #rrggbbaa if it is not opaque. */
     public String textColor;
-    /** The color of the lines of the element as #rrggbb: the border of a box and the line above the attributes of a
+    /** The color of the lines of the element as #rrggbb, or #rrggbbaa if it is not opaque: the border of a box and the line above the attributes of a
      * class, the fold of a note, the line and the marks at the ends of a relation. */
     public String lineColor;
     public FontFamily_V001 font;

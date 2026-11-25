@@ -32,7 +32,8 @@ grammar ClassDiagram_V001;
 //   * A class with width=N is N pixels wide; text wraps at spaces. Without width the content decides.
 //   * style(fill="#rrggbb", textcolor="#rrggbb", linecolor="#rrggbb", font=Roboto, fontsize=14) in the head gives the
 //     class box a look of its own: background, text and line color, font (SitkaDisplay, Roboto or CourierPrime) and
-//     font size. The entries come in any order, each is optional and may stand once. The words hideattributes and
+//     font size. A color is "#rrggbb", or "#rrggbbaa" if it is not opaque (aa is the alpha, ff is opaque, 00 invisible).
+//     The entries come in any order, each is optional and may stand once. The words hideattributes and
 //     hidemethods behind the style hide the attribute compartment (the values of an enum) and the method compartment;
 //     showmethods shows the method compartment of a class which has no methods. The attributes and methods stay in the
 //     source. Without a word the attribute compartment is shown, the method compartment if the class has methods.
@@ -233,7 +234,7 @@ widthSpec
     : WIDTH EQUALS NUMBER
     ;
 
-// The look of a class, note or relation. A color is a string "#rrggbb", the font a word, the font size a number, which the parser
+// The look of a class, note or relation. A color is a string "#rrggbb" or "#rrggbbaa", the font a word, the font size a number, which the parser
 // checks. Each entry may stand once, and a relation has no fill, which the parser checks too.
 styleSpec
     : STYLE LPAREN styleEntry (COMMA styleEntry)* RPAREN

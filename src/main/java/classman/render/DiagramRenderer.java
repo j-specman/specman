@@ -1,6 +1,7 @@
 package classman.render;
 
 import classman.model.v001.ClassDiagramModel_V001;
+import classman.model.v001.StereotypeReference_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
 
@@ -33,6 +34,15 @@ public final class DiagramRenderer {
   /** @throws IllegalArgumentException if the model refers to a class, attribute or relation which it doesn't have */
   public Scene layout(ClassDiagramModel_V001 model) {
     return new ClassDiagramLayouter(new AwtTextMeasurer(), changeColors, stereotypes).layout(model);
+  }
+
+  /** @return what the host says about the configuration which the stereotype refers to, null if the stereotype is a
+   * free text or the host doesn't know the configuration */
+  public StereotypeLook stereotypeLookOf(String stereotype) {
+    if (!StereotypeReference_V001.isReference(stereotype)) {
+      return null;
+    }
+    return stereotypes.lookOf(StereotypeReference_V001.nameOf(stereotype));
   }
 
   /** @return the color of the frame around a selected element which the change set has marked, as #rrggbb, or null

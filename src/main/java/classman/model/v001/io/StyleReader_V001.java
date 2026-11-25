@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 /** Reads the style(...) of a class, note or relation into the model and checks what the grammar leaves open. */
 class StyleReader_V001 {
-    private static final Pattern COLOR = Pattern.compile("#[0-9a-fA-F]{6}");
+    private static final Pattern COLOR = Pattern.compile("#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?");
 
     private final String elementWord;
     private final Set<StyleProperty_V001> properties;
@@ -28,7 +28,7 @@ class StyleReader_V001 {
 
     /** @return the style, a standard one if there is no style(...)
      * @throws ClassDiagramParseException if an entry stands twice or the element hasn't the part, a color isn't written
-     * "#rrggbb", the font isn't one of Specman's, or the font size isn't one of the sizes */
+     * "#rrggbb" or "#rrggbbaa", the font isn't one of Specman's, or the font size isn't one of the sizes */
     ElementStyleModel_V001 read(StyleSpecContext spec) throws ClassDiagramParseException {
         ElementStyleModel_V001 style = new ElementStyleModel_V001();
         if (spec == null) {
@@ -91,7 +91,7 @@ class StyleReader_V001 {
         String color = text.substring(1, text.length() - 1);
         if (!COLOR.matcher(color).matches()) {
             throw problem(entry.QUOTED_STRING().getSymbol(),
-                "The " + entry.colorKey.getText() + " of a " + elementWord + " must be a color written \"#rrggbb\".");
+                "The " + entry.colorKey.getText() + " of a " + elementWord + " must be a color written \"#rrggbb\" or \"#rrggbbaa\".");
         }
         return color.toLowerCase(Locale.ROOT);
     }

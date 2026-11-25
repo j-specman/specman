@@ -47,11 +47,26 @@ class StylePreviewTest {
   /** Without a change set the class is drawn in its style and nothing is marked. */
   @Test
   void unmarkedClassInItsStyle() {
-    Scene scene = ClassPreview.scene(renderer(), style("#336699", null), null);
+    Scene scene = ClassPreview.scene(renderer(), style("#336699", null), null, null);
 
     assertEquals(1, all(scene, SceneRectangle.class).size());
     assertEquals("#336699", all(scene, SceneRectangle.class).get(0).fill);
     assertTrue(all(scene, SceneText.class).stream().anyMatch(text -> text.text.equals("Person")));
+  }
+
+  /** The class of the preview has the stereotype of the real class, so its configuration colors show, and the own
+   * style still wins. */
+  @Test
+  void classPreviewShowsColorsOfConfiguration() {
+    host.stereotypeLooks.put("Domain_Value",
+      new classman.render.StereotypeLook("Domain Value", null).withColors("#112233", null, null));
+
+    Scene configured = ClassPreview.scene(renderer(), new ElementStyleModel_V001(), null, "@Domain_Value");
+    Scene styled = ClassPreview.scene(renderer(), style("#336699", null), null, "@Domain_Value");
+
+    assertEquals("#112233", all(configured, SceneRectangle.class).get(0).fill);
+    assertEquals("#336699", all(styled, SceneRectangle.class).get(0).fill);
+    assertTrue(all(configured, SceneText.class).stream().anyMatch(text -> text.text.equals("<<Domain Value>>")));
   }
 
   /** With a change set the class has the frame of an added class and its three attributes are marked: a changed
@@ -60,7 +75,7 @@ class StylePreviewTest {
   void markedClassHasFrameAndMarks() {
     DiagramRenderer renderer = renderer();
 
-    Scene scene = ClassPreview.scene(renderer, new ElementStyleModel_V001(), "yellow");
+    Scene scene = ClassPreview.scene(renderer, new ElementStyleModel_V001(), "yellow", null);
 
     List<SceneRectangle> rectangles = all(scene, SceneRectangle.class);
     assertTrue(rectangles.get(0).fill == null && STRONG.equals(rectangles.get(0).stroke), "frame comes first");

@@ -56,24 +56,24 @@ public class SceneSvgWriter {
     private String rectangle(SceneRectangle rectangle) {
         return "<rect x=\"" + number(rectangle.x) + "\" y=\"" + number(rectangle.y)
             + "\" width=\"" + number(rectangle.width) + "\" height=\"" + number(rectangle.height)
-            + "\" fill=\"" + color(rectangle.fill) + "\" stroke=\"" + color(rectangle.stroke) + "\""
+            + "\" " + paint("fill", rectangle.fill) + " " + paint("stroke", rectangle.stroke)
             + strokeWidth(rectangle.strokeWidth) + "/>";
     }
 
     private String line(SceneLine line) {
         return "<line x1=\"" + number(line.x1) + "\" y1=\"" + number(line.y1)
             + "\" x2=\"" + number(line.x2) + "\" y2=\"" + number(line.y2)
-            + "\" stroke=\"" + line.stroke + "\"" + strokeWidth(line.strokeWidth) + dashes(line.dashed) + "/>";
+            + "\" " + paint("stroke", line.stroke) + strokeWidth(line.strokeWidth) + dashes(line.dashed) + "/>";
     }
 
     private String polyline(ScenePolyline polyline) {
-        return "<polyline points=\"" + points(polyline.xs, polyline.ys) + "\" fill=\"none\" stroke=\"" + polyline.stroke + "\""
-            + strokeWidth(polyline.strokeWidth) + dashes(polyline.dashed) + "/>";
+        return "<polyline points=\"" + points(polyline.xs, polyline.ys) + "\" fill=\"none\" "
+            + paint("stroke", polyline.stroke) + strokeWidth(polyline.strokeWidth) + dashes(polyline.dashed) + "/>";
     }
 
     private String polygon(ScenePolygon polygon) {
-        return "<polygon points=\"" + points(polygon.xs, polygon.ys) + "\" fill=\"" + color(polygon.fill)
-            + "\" stroke=\"" + color(polygon.stroke) + "\"" + strokeWidth(polygon.strokeWidth) + "/>";
+        return "<polygon points=\"" + points(polygon.xs, polygon.ys) + "\" " + paint("fill", polygon.fill) + " "
+            + paint("stroke", polygon.stroke) + strokeWidth(polygon.strokeWidth) + "/>";
     }
 
     private String vectorImage(SceneVectorImage vector) {
@@ -89,7 +89,7 @@ public class SceneSvgWriter {
         return "<text x=\"" + number(text.left()) + "\" y=\"" + number(text.y)
             + "\" font-family=\"" + fontFamilies(text.font.family)
             + "\" font-size=\"" + text.font.size + "\"" + (text.bold ? " font-weight=\"bold\"" : "")
-            + (text.fill == null ? "" : " fill=\"" + text.fill + "\"") + ">"
+            + (text.fill == null ? "" : " " + paint("fill", text.fill)) + ">"
             + escaped(text.text) + "</text>";
     }
 
@@ -125,8 +125,15 @@ public class SceneSvgWriter {
         return dashed ? " stroke-dasharray=\"" + DASH_LENGTH + "," + DASH_GAP + "\"" : "";
     }
 
-    private String color(String color) {
-        return color == null ? "none" : color;
+    /** The attribute for a color, none for no color; a color which is not opaque gets the attribute for its opacity,
+     * because SVG colors have no alpha. */
+    private String paint(String attribute, String color) {
+        if (color == null) {
+            return attribute + "=\"none\"";
+        }
+        String opacity = SceneColor.opacity(color);
+        return attribute + "=\"" + SceneColor.rgb(color) + "\""
+            + (opacity == null ? "" : " " + attribute + "-opacity=\"" + opacity + "\"");
     }
 
     private String number(double value) {

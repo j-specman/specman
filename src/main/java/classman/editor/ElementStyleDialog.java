@@ -2,13 +2,13 @@ package classman.editor;
 
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.AbstractRelationModel_V001;
+import classman.model.v001.ClassModel_V001;
 import classman.model.v001.ElementStyleModel_V001;
 import classman.model.v001.FontFamily_V001;
 import classman.model.v001.NoteModel_V001;
 import classman.model.v001.StyleProperty_V001;
 import classman.render.DiagramFonts;
 import classman.render.DiagramRenderer;
-import classman.render.DiagramStyle;
 import classman.render.Scene;
 import classman.render.TextFont;
 import com.jgoodies.forms.factories.CC;
@@ -63,10 +63,10 @@ abstract class ElementStyleDialog extends JDialog {
    * @param changeSets the names of the change sets the preview can show
    * @param titleKey the key of the title of the dialog
    * @param properties the parts of the style which the element has, there is a row for each of them
-   * @param standardFill the background of the element without one of its own, null if it has no background */
+   * @param standard the colors of the element without colors of its own */
   protected ElementStyleDialog(Window owner, ElementStyleModel_V001 start, DiagramRenderer renderer,
                                List<String> changeSets, EditorTexts texts, String titleKey,
-                               Set<StyleProperty_V001> properties, String standardFill) {
+                               Set<StyleProperty_V001> properties, StandardColors standard) {
     super(owner, texts.get(titleKey), ModalityType.APPLICATION_MODAL);
     this.renderer = renderer;
     this.texts = texts;
@@ -79,7 +79,7 @@ abstract class ElementStyleDialog extends JDialog {
     prepareSizeCombo();
     setLayout(new FormLayout("pref, 8px, fill:pref:grow", "fill:pref, 8px, pref"));
     ((JComponent) getContentPane()).setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-    add(form(standardFill), CC.xy(1, 1));
+    add(form(standard), CC.xy(1, 1));
     add(previewPanel(changeSets), CC.xy(3, 1));
     add(buttons(), CC.xyw(1, 3, 3));
     refreshPreview();
@@ -99,7 +99,8 @@ abstract class ElementStyleDialog extends JDialog {
     if (element instanceof AbstractRelationModel_V001) {
       return new RelationStyleDialog(owner, start, renderer, changeSets, texts);
     }
-    return new ClassStyleDialog(owner, start, renderer, changeSets, texts);
+    String stereotype = element instanceof ClassModel_V001 box ? box.stereotype : null;
+    return new ClassStyleDialog(owner, start, renderer, changeSets, texts, stereotype);
   }
 
   /** Shows the dialog and waits for the user.
@@ -132,18 +133,18 @@ abstract class ElementStyleDialog extends JDialog {
   /** @return the radio buttons: first the one for the unmarked element, then one for each change set */
   List<JRadioButton> markButtons() { return markButtons; }
 
-  private JPanel form(String standardFill) {
+  private JPanel form(StandardColors standard) {
     Map<String, JComponent> rows = new LinkedHashMap<>();
     if (properties.contains(StyleProperty_V001.FILL)) {
-      rows.put("style.dialog.fill", colorChoice("style.dialog.fill", standardFill, style.fill,
+      rows.put("style.dialog.fill", colorChoice("style.dialog.fill", standard.fill, style.fill,
         color -> style.fill = color));
     }
     if (properties.contains(StyleProperty_V001.TEXT_COLOR)) {
-      rows.put("style.dialog.text", colorChoice("style.dialog.text", DiagramStyle.TEXT_COLOR, style.textColor,
+      rows.put("style.dialog.text", colorChoice("style.dialog.text", standard.text, style.textColor,
         color -> style.textColor = color));
     }
     if (properties.contains(StyleProperty_V001.LINE_COLOR)) {
-      rows.put("style.dialog.line", colorChoice("style.dialog.line", DiagramStyle.STROKE, style.lineColor,
+      rows.put("style.dialog.line", colorChoice("style.dialog.line", standard.line, style.lineColor,
         color -> style.lineColor = color));
     }
     if (properties.contains(StyleProperty_V001.FONT)) {
