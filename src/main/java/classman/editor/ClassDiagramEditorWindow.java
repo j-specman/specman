@@ -82,6 +82,8 @@ public class ClassDiagramEditorWindow extends JDialog {
     bindKey(KeyEvent.VK_DELETE, 0, editing::deleteSelected);
     bindKey(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK, editing::selectAllBoxes);
     bindKey(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK, editing::redo);
+    bindKey(KeyEvent.VK_UP, InputEvent.ALT_DOWN_MASK, () -> editing.moveSelectedMember(-1));
+    bindKey(KeyEvent.VK_DOWN, InputEvent.ALT_DOWN_MASK, () -> editing.moveSelectedMember(1));
     placeNear(owner);
   }
 
@@ -131,6 +133,9 @@ public class ClassDiagramEditorWindow extends JDialog {
     }
     else if (editing.isToolArmed()) {
       editing.disarmTool();
+      showDiagram();
+    }
+    else if (editing.deselectMember()) {
       showDiagram();
     }
     else if (editing.hasSelection()) {

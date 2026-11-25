@@ -78,6 +78,8 @@ public class DiagramEditing {
   private String source;
   private Scene scene;
   private AbstractDiagramElementModel_V001 selected;
+  private AbstractMemberModel_V001 selectedMember;
+  private boolean isMemberSelectedByThisPress;
   private final BoxGroup group = new BoxGroup();
   private RubberBand band;
   private LineEndRepair lineEndRepair;
@@ -172,6 +174,7 @@ public class DiagramEditing {
    * relation selected. The dashed line of a note, its anchor, is selected like the line of a relation. A point at the left or right side of a class, where its width is changed, selects the class,
    * also if the point is a little outside of it. */
   public void selectAt(Point2D point, double tolerance) {
+    isMemberSelectedByThisPress = false;
     if (groupMemberAt(point, tolerance) != null) {
       return;
     }
@@ -182,6 +185,9 @@ public class DiagramEditing {
     ResizeTarget edge = resizeTargetAt(point, tolerance);
     if (edge != null) {
       select(edge.box);
+      return;
+    }
+    if (selectMemberAt(point)) {
       return;
     }
     SceneElementArea hit = scene.elementAreaAt(point);
@@ -293,6 +299,7 @@ public class DiagramEditing {
   /** Selects one element, or nothing if it is null. That ends a selection of several boxes. */
   private void select(AbstractDiagramElementModel_V001 element) {
     selected = element;
+    selectedMember = null;
     group.clear();
   }
 
@@ -317,6 +324,7 @@ public class DiagramEditing {
       return;
     }
     selected = null;
+    selectedMember = null;
     group.replace(boxes);
   }
 
@@ -390,6 +398,74 @@ public class DiagramEditing {
     return selected instanceof NoteModel_V001 note ? note : null;
   }
 
+  /** @return the attribute, method or enum value whose row is selected within the selected class, null if none is */
+  public AbstractMemberModel_V001 selectedMember() { return selectedMember; }
+
+  /** Selects the row of a member of the selected class if the point is on it: the press which selects the class selects
+   * the class only, the next one the row. A row of a class which a change set has removed can't be selected.
+   * @return true if the point is on a row of the selected class */
+  private boolean selectMemberAt(Point2D point) {
+    SceneTextArea row = memberRowAt(point);
+    if (row == null) {
+      return false;
+    }
+    if (row.member != selectedMember) {
+      selectedMember = row.member;
+      isMemberSelectedByThisPress = true;
+    }
+    return true;
+  }
+
+  private SceneTextArea memberRowAt(Point2D point) {
+    ClassModel_V001 box = selectedClass();
+    SceneTextArea text = scene.textAreaAt(point);
+    boolean isRow = box != null && text != null && text.element == box && text.kind.compartment() != null
+      && text.member != null && MemberOrder.isShown(text.member) && !isRemoved(box.change);
+    return isRow ? text : null;
+  }
+
+  /** @return the row of the member in the picture, null if the picture has none */
+  private SceneTextArea rowOf(AbstractMemberModel_V001 member) {
+    return scene.textAreas.stream().filter(text -> text.member == member).findFirst().orElse(null);
+  }
+
+  /** Ends the selection of the row, the class stays selected.
+   * @return true if a row was selected */
+  public boolean deselectMember() {
+    boolean wasSelected = selectedMember != null;
+    selectedMember = null;
+    return wasSelected;
+  }
+
+  /** Moves the selected row by places among the shown rows of its compartment, nothing happens beyond the first or the
+   * last. It is one operation, and no change which change sets mark. */
+  public void moveSelectedMember(int places) {
+    ClassModel_V001 box = selectedClass();
+    Compartment_V001 compartment = box == null || selectedMember == null ? null : compartmentOf(box, selectedMember);
+    if (compartment != null && !isRemoved(box.change)
+        && MemberOrder.moveBy(box.members(compartment), selectedMember, places)) {
+      publish();
+    }
+  }
+
+  /** @return where the selected row is drawn, across the width of its box, null if none is selected */
+  private Rectangle2D selectedMemberArea() {
+    SceneTextArea row = selectedMember == null ? null : rowOf(selectedMember);
+    Rectangle2D box = selectedArea();
+    return row == null || box == null ? null
+      : new Rectangle2D.Double(box.getX(), row.area.getY(), box.getWidth(), row.area.getHeight());
+  }
+
+  /** Deletes the member of the selected row by the rules for the empty text of the line. The class stays selected. */
+  private void deleteSelectedMember() {
+    SceneTextArea row = rowOf(selectedMember);
+    if (row != null) {
+      memberEditings.get(row.kind.compartment()).setText(row, "", host.trackedChangeSet());
+      publish();
+    }
+    selectedMember = null;
+  }
+
   /** @return where the selected box is drawn, null if nothing is selected */
   public Rectangle2D selectedArea() {
     SceneElementArea selectedArea = selected != null ? scene.elementAreaOf(selected) : null;
@@ -436,7 +512,8 @@ public class DiagramEditing {
       frames.add(connectionTargetArea());
     }
     return new SelectionMarks(frames, selectedHandles(), selectedPlaceholders(), selectedTextLeaders(), trackedFieldColor(),
-      drawing != null ? drawing.line() : null, specialSelectionColor(), band != null ? band.rectangle() : null);
+      drawing != null ? drawing.line() : null, specialSelectionColor(), band != null ? band.rectangle() : null,
+      selectedMemberArea());
   }
 
   /** @return the color for the frame around the selected box if the usual one can't be told from the change set which
@@ -1047,6 +1124,10 @@ public class DiagramEditing {
     if (edge != null) {
       return new BoxResize(edge.box, edge.side, scene, minimumWidthOf(edge.box), positionFreezer());
     }
+    SceneTextArea selectedRow = memberRowAt(at);
+    if (selectedRow != null && selectedRow.member == selectedMember && !isMemberSelectedByThisPress) {
+      return new MemberReorderDrag(selectedClass(), selectedRow.kind.compartment(), selectedRow, scene, at);
+    }
     return selected instanceof AbstractBoxModel_V001 box && scene.elementAreaOf(box) != null
       ? new BoxDrag(box, at, scene, positionFreezer())
       : null;
@@ -1217,6 +1298,9 @@ public class DiagramEditing {
     }
     if (drag != null) {
       drag.to(at, snapTolerance);
+      if (drag.hasMoved() && !(drag instanceof MemberReorderDrag)) {
+        selectedMember = null;
+      }
       if (lineEndRepair != null) {
         lineEndRepair.reset();
       }
@@ -1562,6 +1646,10 @@ public class DiagramEditing {
    * operation. While changes are tracked, what the change set has added is removed and the rest is marked as removed,
    * so that the deletion can be rejected. */
   public void deleteSelected() {
+    if (selectedMember != null) {
+      deleteSelectedMember();
+      return;
+    }
     if (selected == null && group.isEmpty()) {
       return;
     }
@@ -1681,6 +1769,9 @@ public class DiagramEditing {
     scene = host.renderer().layout(model);
     if (selected != null && !isDrawn(selected)) {
       select(null);
+    }
+    if (selectedMember != null && rowOf(selectedMember) == null) {
+      selectedMember = null;
     }
     if (!group.isEmpty()) {
       group.retain(this::isDrawn);

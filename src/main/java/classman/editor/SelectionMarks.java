@@ -25,9 +25,12 @@ class SelectionMarks {
   final Color specialColor;
   /** The rectangle which the user pulls open to select boxes, null if none is. */
   final Rectangle2D rubberBand;
+  /** The row of the selected member, across the width of its class, null if no row is selected. */
+  final Rectangle2D memberRow;
 
   SelectionMarks(List<Rectangle2D> frames, List<Point2D> handles, List<Rectangle2D> placeholders, List<Line2D> leaders,
-                 Color placeholderFill, Line2D connectionLine, Color specialColor, Rectangle2D rubberBand) {
+                 Color placeholderFill, Line2D connectionLine, Color specialColor, Rectangle2D rubberBand,
+                 Rectangle2D memberRow) {
     this.frames = List.copyOf(frames);
     this.handles = List.copyOf(handles);
     this.placeholders = List.copyOf(placeholders);
@@ -36,9 +39,10 @@ class SelectionMarks {
     this.connectionLine = connectionLine;
     this.specialColor = specialColor;
     this.rubberBand = rubberBand;
+    this.memberRow = memberRow;
   }
 
   static SelectionMarks none() {
-    return new SelectionMarks(List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+    return new SelectionMarks(List.of(), List.of(), List.of(), List.of(), null, null, null, null, null);
   }
 }
