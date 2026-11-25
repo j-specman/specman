@@ -5,7 +5,7 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-abstract class AbstractCLO {
+public abstract class AbstractCLO {
 
   private static final String ERROR_LINE_INDENT = "\n  ";
 
@@ -41,7 +41,7 @@ abstract class AbstractCLO {
   }
 
   /** Fails with the heading followed by one line for each error, if there is any. */
-  protected static void assertNoErrors(String heading, List<String> errors) throws CLIException {
+  public static void assertNoErrors(String heading, List<String> errors) throws CLIException {
     assertThat(errors.isEmpty(), heading + ":" + ERROR_LINE_INDENT + String.join(ERROR_LINE_INDENT, errors));
   }
 
