@@ -1,5 +1,7 @@
 package specman.cli;
 
+import specman.cli.sanitize.SanitizeChangeTrackingValidator;
+import specman.cli.sanitize.SanitizeModelValidator;
 import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.io.ModelFileReader_V002;
 import specman.model.v002.io.ModelParseException;
