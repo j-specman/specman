@@ -34,6 +34,13 @@ class DiagramEditingTest {
 
   private final RecordingEditorHost host = new RecordingEditorHost();
 
+  /** The name of the diagram, which an imported diagram may have, is there for the title of the window. */
+  @Test
+  void diagramName() throws ClassDiagramParseException {
+    assertEquals("Library", new DiagramEditing("classdiagram \"Library\" {\n\n}", host).diagramName());
+    assertNull(new DiagramEditing(EMPTY, host).diagramName());
+  }
+
   /** The class lands where it was dropped and is reported with ID and name. */
   @Test
   void droppedClass() throws ClassDiagramParseException {

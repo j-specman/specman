@@ -117,6 +117,9 @@ public class DiagramEditing {
 
   public String source() { return source; }
 
+  /** @return the name which the diagram has in its source, null if it has none. The editor doesn't change it. */
+  public String diagramName() { return model.name; }
+
   /** @return the picture of the diagram as it is now, with the line of the selected relation or anchor drawn thicker,
    * and the line of the relation which a connection which is drawn would end at */
   public Scene scene() {

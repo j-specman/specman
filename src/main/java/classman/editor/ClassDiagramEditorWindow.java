@@ -56,8 +56,10 @@ public class ClassDiagramEditorWindow extends JDialog {
     super(SwingUtilities.getWindowAncestor(owner), ModalityType.APPLICATION_MODAL);
     this.host = host;
     texts = new EditorTexts(host.locale());
-    setTitle(texts.get("window.title"));
     editing = new DiagramEditing(source, host);
+    setTitle(editing.diagramName() == null
+      ? texts.get("window.title")
+      : texts.get("window.title") + " - " + editing.diagramName());
     canvas = new DiagramCanvas(editing.scene());
     textEditor = new TextEditor(canvas, editing, this::showDiagram);
     canvas.setPointerListener(new PointerControl(editing, this::showDiagram, textEditor::start, this::showContextMenu,
