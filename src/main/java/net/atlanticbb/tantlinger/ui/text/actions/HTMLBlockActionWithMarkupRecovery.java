@@ -2,19 +2,10 @@ package net.atlanticbb.tantlinger.ui.text.actions;
 
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import org.bushe.swing.action.ActionList;
-import specman.Specman;
-import specman.editarea.TextEditArea;
-import specman.editarea.markups.MarkedCharSequence;
-import specman.editarea.markups.MarkupBackgroundStyleInitializer;
-import specman.editarea.markups.MarkupRecovery;
-import specman.model.v002.Markup_V002;
-import specman.undo.manager.UndoRecording;
-import static specman.Specman.editor;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.lang.reflect.Field;
-import java.util.List;
 
 public class HTMLBlockActionWithMarkupRecovery extends HTMLBlockAction {
   private final HTMLBlockAction core;
@@ -43,23 +34,7 @@ public class HTMLBlockActionWithMarkupRecovery extends HTMLBlockAction {
 
   @Override
   protected void wysiwygEditPerformed(ActionEvent actionEvent, JEditorPane jEditorPane) {
-    try (UndoRecording ur = editor().composeUndo()) {
-      MarkedCharSequence marksBackup = backupMarkups(jEditorPane);
-      core.wysiwygEditPerformed(actionEvent, jEditorPane);
-      recoverMarkups(marksBackup, jEditorPane);
-    }
-  }
-
-  private void recoverMarkups(MarkedCharSequence marksBackup, JEditorPane jEditorPane) {
-    if (marksBackup != null) {
-      TextEditArea editArea = (TextEditArea) jEditorPane;
-      List<Markup_V002> recoveredChangemarks = new MarkupRecovery(editArea.getWrappedDocument(), marksBackup).recover();
-      new MarkupBackgroundStyleInitializer(editArea, recoveredChangemarks).styleChangedTextSections();
-    }
-  }
-
-  private MarkedCharSequence backupMarkups(JEditorPane jEditorPane) {
-    return ((TextEditArea)jEditorPane).findMarkups();
+    MarkupPreservingEdit.run(jEditorPane, () -> core.wysiwygEditPerformed(actionEvent, jEditorPane));
   }
 
   /** This turned out as the best compromise to inject the required markup recovery functionality
