@@ -4,6 +4,10 @@ Release notes Specman 1.x.x
 - Tabellen Operation Cursors re-designed
 - --version in CLI
 - Sanitizer prüft zusätzlich auf ungültige Markups und inkosistente Changesets in gekoppelten Quell- und Zielschritten einer Schrittverschiebung
+- Buttons für Textausrichtung funktionierten nicht richtig:
+  - Text ohne <div> (jeder neue Text) ließ sich nicht ausrichten, die SHEF-Bibliothek ignoriert Absätze direkt im Body.
+  - Mehrere Buttons waren gleichzeitig aktiv, und ein Klick auf den aktiven Button schaltete ihn optisch aus.
+- CLI Fehlerausgabe als UTF-8
 
 Aus aktueller Anwendung
 - Hat man 5 Sekunden Autosave-Intervall eingestellt, dann wird es auffällig, dass ein abhängendes Leerzeichen wegbereinigt wird.
