@@ -19,6 +19,8 @@ import specman.editarea.document.WrappedDocument;
 import specman.editarea.document.WrappedElement;
 import specman.editarea.document.WrappedPosition;
 import specman.editarea.image.classman.ClassmanImageEditArea;
+import specman.editarea.image.classman.LinkedClassmanImageEditArea;
+import specman.link.classman.ClassmanLinkResolution;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.metatag.stepnumberlabel.BreakCatchScrollMouseAdapter;
 import specman.model.v002.Markup_V002;
@@ -467,6 +469,10 @@ public class TextEditArea extends JEditorPane implements EditArea<TextEditAreaMo
 
     public ClassmanImageEditArea addClassmanImage(String classmanSource) {
         return getParent().addClassmanImageUDBL(classmanSource, this);
+    }
+
+    public LinkedClassmanImageEditArea addLinkedClassmanImage(String link, ClassmanLinkResolution resolution) {
+        return getParent().addLinkedClassmanImageUDBL(link, resolution, this);
     }
 
     public EditArea addTable(int columns, int rows) {

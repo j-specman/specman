@@ -15,6 +15,7 @@ import specman.editarea.image.SourceFileKind;
 import specman.editarea.image.SourceValidator;
 import specman.link.classman.ClassmanLink;
 import specman.metatag.generic.config.MetaTagConfigListener;
+import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.undo.props.UDBL;
 
@@ -38,7 +39,7 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
   public static final String FILE_EXTENSION = ClassmanLink.FILE_EXTENSION;
   public static final SourceFileKind FILE_KIND = new SourceFileKind(new String[] {FILE_EXTENSION}, "msg.filter.classman",
     "dialog.classman.choose.title", "dialog.classman.import.title",
-    "dialog.classman.choose.empty", "dialog.classman.choose.empty.tooltip");
+    "dialog.classman.choose.empty", "dialog.classman.choose.empty.tooltip", true);
 
   private static final ClassmanSourceValidator VALIDATOR = new ClassmanSourceValidator();
   private static final SourceMarks_V001 MARKS = new SourceMarks_V001();
@@ -50,16 +51,18 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
 
   public ClassmanImageEditArea(String source, ChangeInfo changeInfo) {
     this(source, 1, changeInfo);
+    displayInitially();
   }
 
   public ClassmanImageEditArea(ClassmanImageEditAreaModel_V002 model) {
     this(model.source, model.individualScalePercent,
       model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
+    displayInitially();
   }
 
-  private ClassmanImageEditArea(String source, float individualScalePercent, ChangeInfo changeInfo) {
+  /** Subclasses call {@link #displayInitially()} once they are constructed. */
+  protected ClassmanImageEditArea(String source, float individualScalePercent, ChangeInfo changeInfo) {
     super(source, individualScalePercent, changeInfo);
-    displayInitially();
     setBackground(panelColor());
   }
 
@@ -198,7 +201,7 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
   }
 
   @Override
-  public ClassmanImageEditAreaModel_V002 toModel(boolean formatierterText) {
+  public AbstractImageEditAreaModel_V002 toModel(boolean formatierterText) {
     return new ClassmanImageEditAreaModel_V002(getSource(), individualScalePercent, getChangeInfo());
   }
 }

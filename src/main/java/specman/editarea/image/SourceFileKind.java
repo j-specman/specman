@@ -2,7 +2,9 @@ package specman.editarea.image;
 
 /** What the dialog to choose a source file says and filters for, which differs for the kinds of diagrams that are
  * shown from a source. The message keys are those of the dialog's title, the button to start without a file and
- * its tooltip. The filter is only a preselection, the user can still choose any file. */
+ * its tooltip. The filter is only a preselection, the user can still choose any file.
+ * <p>
+ * A kind whose diagrams can be linked offers the user to link the file instead of taking its content. */
 public class SourceFileKind {
   public final String[] extensions;
   public final String filterMessageKey;
@@ -10,14 +12,26 @@ public class SourceFileKind {
   public final String importTitleKey;
   public final String emptyButtonKey;
   public final String emptyButtonTooltipKey;
+  private final boolean linkable;
 
   public SourceFileKind(String[] extensions, String filterMessageKey, String chooseTitleKey, String importTitleKey,
                         String emptyButtonKey, String emptyButtonTooltipKey) {
+    this(extensions, filterMessageKey, chooseTitleKey, importTitleKey, emptyButtonKey, emptyButtonTooltipKey, false);
+  }
+
+  public SourceFileKind(String[] extensions, String filterMessageKey, String chooseTitleKey, String importTitleKey,
+                        String emptyButtonKey, String emptyButtonTooltipKey, boolean linkable) {
     this.extensions = extensions.clone();
     this.filterMessageKey = filterMessageKey;
     this.chooseTitleKey = chooseTitleKey;
     this.importTitleKey = importTitleKey;
     this.emptyButtonKey = emptyButtonKey;
     this.emptyButtonTooltipKey = emptyButtonTooltipKey;
+    this.linkable = linkable;
+  }
+
+  /** @return true if diagrams of this kind can be linked to a file instead of containing the source */
+  public boolean isLinkable() {
+    return linkable;
   }
 }

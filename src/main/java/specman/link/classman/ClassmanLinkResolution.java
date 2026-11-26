@@ -49,6 +49,9 @@ public final class ClassmanLinkResolution {
   /** @return what the problem is about, see {@link ClassmanLinkProblem}, null if there is none */
   public String problemDetail() { return problemDetail; }
 
+  /** @return what is wrong, in the language of the user, null if the link leads to a class diagram */
+  public String problemText() { return problem == null ? null : problem.describe(problemDetail); }
+
   /** @return the ID of the diagram in the file, null if it has none or the link doesn't lead to a diagram */
   public String diagramId() { return diagramId; }
 

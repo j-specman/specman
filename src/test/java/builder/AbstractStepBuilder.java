@@ -7,6 +7,7 @@ import specman.editarea.markups.MarkupType;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.ChangeInfoModel_V002;
 import specman.model.v002.ClassmanImageEditAreaModel_V002;
+import specman.model.v002.LinkedClassmanImageEditAreaModel_V002;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.model.v002.Markup_V002;
@@ -126,6 +127,12 @@ abstract public class AbstractStepBuilder<S extends AbstractStepModel_V002, B ex
   /** Adds a Classman diagram with the given source behind the text of the step. */
   public B withClassmanDiagram(String source) {
     step.content.areas.add(new ClassmanImageEditAreaModel_V002(source, 1f, null));
+    return self();
+  }
+
+  /** Adds a Classman diagram which is linked to a file, behind the text of the step. */
+  public B withLinkedClassmanDiagram(String link) {
+    step.content.areas.add(new LinkedClassmanImageEditAreaModel_V002(link, 1f, null));
     return self();
   }
 

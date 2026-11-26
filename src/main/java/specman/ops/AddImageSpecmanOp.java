@@ -8,6 +8,10 @@ import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlSourceValidator;
 import specman.editarea.image.SvgPicture;
 import specman.editarea.image.SvgNotDisplayableException;
+import specman.link.LinkAliases;
+import specman.link.classman.ClassmanLink;
+import specman.link.classman.ClassmanLinkResolution;
+import specman.link.classman.ClassmanLinkResolver;
 import specman.util.TextFiles;
 
 import javax.imageio.ImageIO;
@@ -129,6 +133,9 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
     if (choice.isEmptyDiagram()) {
       addEmptyClassman(lastFocused);
     }
+    else if (choice.isLinked()) {
+      addLinkedClassman(lastFocused, choice.file());
+    }
     else if (!choice.isCancelled()) {
       addClassman(lastFocused, choice.file());
     }
@@ -138,6 +145,18 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
     ClassmanImageEditArea diagram = lastFocused.addClassmanImage(EMPTY_CLASSMAN);
     // The diagram has to be laid out before the editor can be shown next to it
     SwingUtilities.invokeLater(diagram::startFirstEdit);
+  }
+
+  /** Links the diagram in the file instead of taking its source, by the alias of the file if it has one, otherwise by
+   * its path. A file which doesn't have a class diagram is refused. */
+  private void addLinkedClassman(TextEditArea lastFocused, File file) {
+    ClassmanLinkResolution resolution = new ClassmanLinkResolver().resolve(file);
+    if (!resolution.isOk()) {
+      fehler("msg.classman.file.invalid", file.getName(), resolution.problemText());
+      return;
+    }
+    String link = ClassmanLink.of(file, LinkAliases.aliasOf(file), resolution.diagramId(), resolution.diagramName());
+    lastFocused.addLinkedClassmanImage(link, resolution);
   }
 
   /** A file with a source which can't be drawn is refused, so no diagram which fails to render ever gets into a spec. */

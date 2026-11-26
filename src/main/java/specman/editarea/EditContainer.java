@@ -18,6 +18,8 @@ import specman.editarea.image.ImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.editarea.image.SvgImageEditArea;
 import specman.editarea.image.classman.ClassmanImageEditArea;
+import specman.editarea.image.classman.LinkedClassmanImageEditArea;
+import specman.link.classman.ClassmanLinkResolution;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
 import specman.metatag.MetaTagPanel;
 import specman.metatag.TagMoveDirection;
@@ -27,6 +29,7 @@ import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.EditorContentModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
 import specman.model.v002.ClassmanImageEditAreaModel_V002;
+import specman.model.v002.LinkedClassmanImageEditAreaModel_V002;
 import specman.model.v002.PlantUmlImageEditAreaModel_V002;
 import specman.model.v002.SvgImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
@@ -168,6 +171,9 @@ public class EditContainer extends JPanel {
 			}
 			else if (editAreaModel instanceof ClassmanImageEditAreaModel_V002) {
 				editArea = new ClassmanImageEditArea((ClassmanImageEditAreaModel_V002) editAreaModel);
+			}
+			else if (editAreaModel instanceof LinkedClassmanImageEditAreaModel_V002) {
+				editArea = new LinkedClassmanImageEditArea((LinkedClassmanImageEditAreaModel_V002) editAreaModel);
 			}
 			else if (editAreaModel instanceof TableEditAreaModel_V002) {
 				editArea = new TableEditArea((TableEditAreaModel_V002) editAreaModel);
@@ -507,6 +513,14 @@ public class EditContainer extends JPanel {
 
 	public ClassmanImageEditArea addClassmanImageUDBL(String classmanSource, TextEditArea initiatingTextArea) {
 		ClassmanImageEditArea diagram = new ClassmanImageEditArea(classmanSource, TextInit.initialChangeInfo());
+		addImageAreaUDBL(diagram, initiatingTextArea);
+		return diagram;
+	}
+
+	public LinkedClassmanImageEditArea addLinkedClassmanImageUDBL(String link, ClassmanLinkResolution resolution,
+	                                                              TextEditArea initiatingTextArea) {
+		LinkedClassmanImageEditArea diagram =
+			new LinkedClassmanImageEditArea(link, resolution, TextInit.initialChangeInfo());
 		addImageAreaUDBL(diagram, initiatingTextArea);
 		return diagram;
 	}
