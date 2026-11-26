@@ -17,29 +17,23 @@ import java.util.List;
 
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static specman.i18n.Messages.i18n;
 import static specman.metatag.stepnumberlabel.StepnumberContextMenu.COPY_ITEM;
 import static specman.metatag.stepnumberlabel.StepnumberContextMenu.PASTE_ITEM;
 
 /** A diagram which comes from outside, pasted with its step or read from a file, may refer to meta tag configurations
- * which this document doesn't have. Like the tags at a pasted step, such stereotypes are dropped, and the user is told
- * which configurations were missing. */
+ * which this document doesn't have. Unlike the tags at a pasted step, such stereotypes stay as they are: the diagram
+ * shows them as unresolved, and nothing is said. */
 class ClassmanForeignConfigTest extends AbstractClassmanTest {
 
   private static final MetaTagConfig DOMAIN = new MetaTagConfig("Domain", "Domain Value", null, null, null, null, true);
   private static final String USING_DOMAIN = "classdiagram {\n    class A (aaaaaaaa) <<:Domain>>\n    class B (bbbbbbbb) <<Entity>>\n}\n";
-  private static final String SKIPPED_BRIEF = "msg.paste.tags.skipped.brief";
 
-  private static ClassmanImageEditArea pastedDiagramOfCopiedStep(boolean configStillThere) {
+  private static ClassmanImageEditArea pastedDiagramOfCopiedStepWithoutConfig() {
     specman.setMetaTagConfigs(List.of(DOMAIN));
     AbstractSchrittView original = copiedStepWithDiagram();
     EinfacherSchrittView target = specman.clickNewSimpleStep();
     specman.clickContextMenuItem(original, COPY_ITEM);
-    if (!configStillThere) {
-      specman.setMetaTagConfigs(List.of());
-    }
+    specman.setMetaTagConfigs(List.of());
     specman.clickContextMenuItem(target, PASTE_ITEM);
     specman.layoutComponents();
     AbstractSchrittView pasted = specman.findStepByStepID("3");
@@ -51,57 +45,29 @@ class ClassmanForeignConfigTest extends AbstractClassmanTest {
     return specman.findStepByStepID("1");
   }
 
-  /** Scenario: The configuration is known in the document which the step is pasted into. The stereotype stays. */
+  /** Scenario: The configuration is unknown in the document which the step is pasted into. The diagram comes as it
+   * is. */
   @Test
-  void testPastedStereotypeOfKnownConfigStays() {
-    ClassmanImageEditArea pasted = pastedDiagramOfCopiedStep(true);
+  void testPastedStereotypeOfUnknownConfigStays() {
+    ClassmanImageEditArea pasted = pastedDiagramOfCopiedStepWithoutConfig();
 
     assertEquals(USING_DOMAIN, pasted.getSource());
     assertEquals(List.of(), specman.shownMessages());
   }
 
-  /** Scenario: The configuration is unknown. The pasted diagram loses that stereotype only, the user is told, and the
-   * diagram which was copied is not touched. */
-  @Test
-  void testPastedStereotypeOfUnknownConfigIsDropped() {
-    ClassmanImageEditArea pasted = pastedDiagramOfCopiedStep(false);
-
-    assertFalse(pasted.getSource().contains(":Domain"), pasted.getSource());
-    assertTrue(pasted.getSource().contains("<<Entity>>"), pasted.getSource());
-    assertTrue(specman.shownMessages().contains(i18n(SKIPPED_BRIEF)), specman.shownMessages().toString());
-    ClassmanImageEditArea original = (ClassmanImageEditArea) specman.findStepByStepID("1").getFirstEditArea()
-      .asTextArea().getParent().getEditAreaAt(1);
-    assertEquals(USING_DOMAIN, original.getSource());
-  }
-
   /** Scenario: Undoing the paste takes the step out, as for any pasted step. */
   @Test
   void testUndoTakesPastedStepOut() {
-    pastedDiagramOfCopiedStep(false);
+    pastedDiagramOfCopiedStepWithoutConfig();
 
     specman.undo();
 
     specman.assertStepNumbers(List.of("1", "2"));
   }
 
-  /** Scenario: A file with a diagram which uses a configuration of another document is inserted: the diagram comes
-   * without that stereotype, and the user is told. */
+  /** Scenario: A file with a diagram which uses a configuration of another document is inserted as it is. */
   @Test
-  void testFileWithUnknownConfigIsInsertedWithoutIt(@TempDir Path directory) throws IOException {
-    EditContainer container = containerOfNewStep();
-
-    insertFrom(directory, USING_DOMAIN);
-
-    String source = ((ClassmanImageEditArea) container.getEditAreaAt(1)).getSource();
-    assertFalse(source.contains(":Domain"), source);
-    assertTrue(source.contains("<<Entity>>"), source);
-    assertTrue(specman.shownMessages().contains(i18n(SKIPPED_BRIEF)), specman.shownMessages().toString());
-  }
-
-  /** Scenario: The same file in a document which has the configuration: nothing is dropped. */
-  @Test
-  void testFileWithKnownConfigIsInsertedAsIs(@TempDir Path directory) throws IOException {
-    specman.setMetaTagConfigs(List.of(DOMAIN));
+  void testFileWithUnknownConfigIsInsertedAsIs(@TempDir Path directory) throws IOException {
     EditContainer container = containerOfNewStep();
 
     insertFrom(directory, USING_DOMAIN);

@@ -26,8 +26,8 @@ public abstract class AbstractSpecmanOp implements SpecmanOpContextMixin {
   @Override
   public SpecmanOpContext context() { return context; }
 
-  /** Tells the user which meta tag configurations were missing in the document, so that what came from outside and
-   * used them, a tag at a step or a stereotype in a diagram, was dropped. */
+  /** Tells the user which meta tag configurations were missing in the document, so that the tags at steps which came
+   * from outside and used them were dropped. */
   protected void toastSkippedMetaTags(Collection<String> configNames) {
     if (!configNames.isEmpty()) {
       showToast(

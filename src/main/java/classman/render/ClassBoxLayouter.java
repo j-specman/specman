@@ -201,18 +201,17 @@ public class ClassBoxLayouter {
     }
 
     /** @return the text of the stereotype row with its angle brackets, null if there is nothing to show: no stereotype,
-     * or one which refers to a configuration without a label */
+     * or one which refers to a configuration without a label. A reference to a configuration which the host doesn't
+     * know is shown as written, <<:Name>> */
     private String stereotypeText(ClassModel_V001 model) {
         if (model.stereotype == null) {
             return null;
         }
-        if (!StereotypeReference_V001.isReference(model.stereotype)) {
-            return bracketed(model.stereotype);
+        StereotypeLook look = lookOf(model);
+        if (StereotypeReference_V001.isReference(model.stereotype) && look != null) {
+            return look.label.isEmpty() ? null : bracketed(look.label);
         }
-        String name = StereotypeReference_V001.nameOf(model.stereotype);
-        StereotypeLook look = stereotypes.lookOf(name);
-        String label = look != null ? look.label : name;
-        return label.isEmpty() ? null : bracketed(label);
+        return bracketed(model.stereotype);
     }
 
     /** @return the style of the class, in which the colors which the class doesn't have are those of the configuration
@@ -238,10 +237,14 @@ public class ClassBoxLayouter {
         return stereotypes.lookOf(StereotypeReference_V001.nameOf(model.stereotype));
     }
 
-    /** @return the icon of the configuration which the stereotype refers to, null if there is none */
+    /** @return the icon of the configuration which the stereotype refers to, null if there is none. A reference to a
+     * configuration which the host doesn't know gets an icon which says so. */
     private VectorImage iconOf(ClassModel_V001 model) {
+        if (!StereotypeReference_V001.isReference(model.stereotype)) {
+            return null;
+        }
         StereotypeLook look = lookOf(model);
-        return look != null ? look.icon : null;
+        return look != null ? look.icon : UnresolvedStereotypeIcon.get();
     }
 
     /** Puts the icon in the height of the first line of the name, right of its longest line, so that it can be seen to

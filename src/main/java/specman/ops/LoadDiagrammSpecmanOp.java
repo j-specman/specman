@@ -20,7 +20,6 @@ import specman.model.v002.io.ModelRenumberer_V002;
 import specman.model.v002.io.ModelSerializer_V002;
 import specman.view.QuellSchrittView;
 import specman.visitor.DiagramPostInitializer;
-import specman.visitor.UnknownMetaTagConfigDropper;
 import specman.visitor.StepNumberIndexCollector;
 import specman.visitor.TextAreaCollector;
 import specman.view.SchrittSequenzView;
@@ -178,9 +177,6 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     quellZielZuweisungV002(model);
     DiagramPostInitializer.initialize(context()::traverseDiagram);
     Set<String> skippedMetaTags = namesOfUnknownTagConfigs(model);
-    UnknownMetaTagConfigDropper dropper = new UnknownMetaTagConfigDropper();
-    context().traverseDiagram(dropper);
-    skippedMetaTags.addAll(dropper.droppedConfigNames());
     getIntro().registerAllExistingStepnumbers();
     getOutro().registerAllExistingStepnumbers();
     setChangeModeEnabled(model.changeModeEnabled);
@@ -195,7 +191,7 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
   }
 
   /** Tags at steps whose meta tag configuration the file doesn't have are not loaded, see AbstractSchrittView. The
-   * stereotypes in diagrams are dropped by {@link UnknownMetaTagConfigDropper}.
+   * stereotypes in diagrams stay as they are, whatever they refer to.
    * @return the names of the configurations which are missing */
   private static Set<String> namesOfUnknownTagConfigs(DiagramModel_V002 model) {
     Set<String> configNames = new HashSet<>();

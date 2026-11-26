@@ -19,12 +19,12 @@ import static builder.BuilderFactory.sequence;
 import static builder.BuilderFactory.simple;
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static specman.i18n.Messages.i18n;
 
 /** A file may use meta tag configurations which it doesn't have, because somebody changed it by hand or an agent did.
- * Like for pasted steps, the tags and stereotypes which refer to them are dropped, and the user is told. */
+ * Like for pasted steps, the tags which refer to them are dropped, and the user is told. The stereotypes in diagrams
+ * stay. */
 @ExtendWith(HeadlessExtension.class)
 class UnknownMetaTagConfigLoadTest {
 
@@ -44,17 +44,29 @@ class UnknownMetaTagConfigLoadTest {
     return (ClassmanImageEditArea) step.getFirstEditArea().asTextArea().getParent().getEditAreaAt(1);
   }
 
-  /** Scenario: The file has a tag and a stereotype of a configuration which the file doesn't have, besides ones of a
-   * configuration it has. Only the unknown ones are dropped, and the user is told once. */
+  /** Scenario: The file has a tag of a configuration which the file doesn't have, besides one of a configuration it
+   * has, and a diagram with stereotypes of both. Only the unknown tag is dropped, and the user is told once. The
+   * diagram is left alone. */
   @Test
-  void testUnknownConfigsAreDroppedWithToast(@TempDir Path directory) throws IOException {
+  void testUnknownTagIsDroppedWithToastButStereotypeStays(@TempDir Path directory) throws IOException {
     new ModelCopyLoader(specman).loadModelCopy(fileWithTagsAndDiagram(), directory);
 
     assertEquals(Set.of("known"), specman.findStepByStepID("1").getTagConfigNames());
-    String source = diagramOfFirstStep().getSource();
-    assertTrue(source.contains("<<:known>>"), source);
-    assertFalse(source.contains("gone"), source);
+    assertEquals(BOTH_KINDS, diagramOfFirstStep().getSource());
     assertEquals(List.of(i18n(SKIPPED_BRIEF)), specman.shownMessages());
+  }
+
+  /** Scenario: The file only has stereotypes of unknown configurations. They stay and nothing is said. */
+  @Test
+  void testUnknownStereotypeNeedsNoToast(@TempDir Path directory) throws IOException {
+    File file = diagramm()
+      .withMainSequence(sequence().withStep(simple("first").withClassmanDiagram(BOTH_KINDS)))
+      .persist();
+
+    new ModelCopyLoader(specman).loadModelCopy(file, directory);
+
+    assertEquals(BOTH_KINDS, diagramOfFirstStep().getSource());
+    assertEquals(List.of(), specman.shownMessages());
   }
 
   /** Scenario: The file only uses configurations it has. Nothing is dropped, nothing is said. */

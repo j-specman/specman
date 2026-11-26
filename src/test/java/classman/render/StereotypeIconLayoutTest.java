@@ -89,11 +89,16 @@ class StereotypeIconLayoutTest {
   }
 
   @Test
-  void noIconWithoutIconOrFreeTextOrUnknownConfiguration() throws ClassDiagramParseException {
+  void noIconWithoutIconOrFreeText() throws ClassDiagramParseException {
     assertTrue(all(layout("class A at(0, 0) <<:No_Icon>>"), SceneVectorImage.class).isEmpty());
     assertTrue(all(layout("class A at(0, 0) <<Entity>>"), SceneVectorImage.class).isEmpty());
-    assertTrue(all(layout("class A at(0, 0) <<:Gone>>"), SceneVectorImage.class).isEmpty());
     assertTrue(all(layout("class A at(0, 0)"), SceneVectorImage.class).isEmpty());
+  }
+
+  /** A reference to a configuration which the host doesn't know shows the icon for an unresolved one. */
+  @Test
+  void unknownConfigurationHasOneIcon() throws ClassDiagramParseException {
+    assertEquals(1, all(layout("class A at(0, 0) <<:Gone>>"), SceneVectorImage.class).size());
   }
 
   private static boolean coversIconCenter(SceneRectangle rectangle, SceneVectorImage icon) {

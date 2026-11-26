@@ -101,14 +101,6 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
   }
 
   @Override
-  public void dropUnknownMetaTagConfigs(Set<String> dropped) {
-    String cleaned = ForeignStereotypes.withoutUnknownConfigs(getSource(), dropped);
-    if (!cleaned.equals(getSource())) {
-      setSource(cleaned);
-    }
-  }
-
-  @Override
   protected Picture pictureOf(String source) {
     return new ScenePicture(ClassmanRenderer.renderScene(source));
   }

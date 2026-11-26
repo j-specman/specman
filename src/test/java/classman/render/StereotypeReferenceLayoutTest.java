@@ -31,8 +31,8 @@ class StereotypeReferenceLayoutTest {
   }
 
   @Test
-  void unknownConfigurationIsShownByItsName() throws ClassDiagramParseException {
-    assertTrue(textsOf("class A <<:Gone>>").contains("<<Gone>>"));
+  void unknownConfigurationIsShownAsWritten() throws ClassDiagramParseException {
+    assertTrue(textsOf("class A <<:Gone>>").contains("<<:Gone>>"));
   }
 
   @Test

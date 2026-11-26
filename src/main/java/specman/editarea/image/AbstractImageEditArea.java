@@ -314,11 +314,6 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
   /** Takes away what the picture uses of the meta tag configuration, as an undoable edit. */
   public void removeMetaTagConfigUseUDBL(String configName) {}
 
-  /** Takes away what the picture uses of meta tag configurations which the document doesn't have, as part of what
-   * created the picture, so not as an edit of its own.
-   * @param dropped collects the names of the configurations which were missing */
-  public void dropUnknownMetaTagConfigs(Set<String> dropped) {}
-
   public ChangeInfo getChangeInfo() { return changeInfo; }
 
 

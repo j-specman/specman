@@ -26,7 +26,6 @@ import static specman.Specman.editor;
 import static specman.view.RelativeStepPosition.After;
 import static specman.i18n.Messages.i18n;
 import specman.visitor.DiagramPostInitializer;
-import specman.visitor.UnknownMetaTagConfigDropper;
 
 public class PasteStepsOp extends AbstractADBLSpecmanOp {
 
@@ -49,9 +48,8 @@ public class PasteStepsOp extends AbstractADBLSpecmanOp {
             ? new InternalPasteChangemarksAdjuster()
             : new ExternalPasteChangemarksAdjuster();
         stepModels = adjuster.adjust(stepModels, aenderungenVerfolgen());
-        UnknownMetaTagConfigDropper dropper = new UnknownMetaTagConfigDropper();
-        addSteps(stepModels, dropper);
-        toastSkippedMetaTags(stepModels, dropper.droppedConfigNames());
+        addSteps(stepModels);
+        toastSkippedMetaTags(stepModels);
       }
     }
     catch (ModelParseException ex) {
@@ -59,7 +57,7 @@ public class PasteStepsOp extends AbstractADBLSpecmanOp {
     }
   }
 
-  private void addSteps(List<AbstractStepModel_V002> stepModels, UnknownMetaTagConfigDropper dropper) {
+  private void addSteps(List<AbstractStepModel_V002> stepModels) {
     SchrittSequenzView parent = referenceStep.getParent();
     AbstractSchrittView reference = referenceStep;
     for (AbstractStepModel_V002 stepModel : stepModels) {
@@ -67,16 +65,14 @@ public class PasteStepsOp extends AbstractADBLSpecmanOp {
       parent.insertStep(newStep, After, reference);
       parent.renumberFollowingSteps(reference);
       DiagramPostInitializer.initialize(newStep::traverse);
-      newStep.traverse(dropper);
       newStepPostInit(newStep);
       reference = newStep;
     }
   }
 
-  /** Tags whose meta tag configuration doesn't exist in this diagram are not pasted, and neither are stereotypes in
-   * diagrams. Tells the user which configurations were missing, nested steps included.
-   * @param droppedFromDiagrams the names of the configurations which stereotypes of pasted diagrams referred to */
-  private void toastSkippedMetaTags(List<AbstractStepModel_V002> stepModels, Set<String> droppedFromDiagrams) {
+  /** Tags whose meta tag configuration doesn't exist in this diagram are not pasted. Tells the user which
+   * configurations were missing, nested steps included. */
+  private void toastSkippedMetaTags(List<AbstractStepModel_V002> stepModels) {
     Set<String> unknownConfigNames = new LinkedHashSet<>();
     List<AbstractStepModel_V002> allSteps = new ArrayList<>();
     for (AbstractStepModel_V002 stepModel : stepModels) {
@@ -89,7 +85,6 @@ public class PasteStepsOp extends AbstractADBLSpecmanOp {
         }
       }
     }
-    unknownConfigNames.addAll(droppedFromDiagrams);
     toastSkippedMetaTags(unknownConfigNames);
   }
 
