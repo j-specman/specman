@@ -32,6 +32,7 @@ grammar SpecmanModel_V002;
 //                      type=plantuml: PlantUML source in backticks, agents can read and edit it.
 //                      type=svg: SVG source in backticks, agents can read it.
 //                      type=classman: Classman class diagram source in backticks, agents can read and edit it.
+//                                     Or link=`classman://...`, a link to a file with the source, agents can follow it.
 //
 // EditContainer pattern (EditorContentModel_V002):
 //   Wherever the model contains an EditorContentModel, the format
@@ -322,11 +323,16 @@ tableCell
 // as the escape \u0060. The syntax of the source is the grammar ClassDiagram_V001.g4. There is no backup= for a
 // classman image: the change marks, change(...) and was(...), are part of the source and tell what the change sets
 // changed. Specman resolves them when accepting or rejecting changes, and renames them when merging change sets.
+// LinkedClassmanImageEditAreaModel_V002 (type=classman, content = link=`classman://...`) — a Classman class diagram
+// which is not part of this file but in a file of its own, named by the link. The link is a Classman URL, see
+// ClassmanLink: classman://alias[,id[,name]] or classman:///C:/path/to/diagram.cld; id and name are informative, the
+// alias is the one the user has assigned to the file in the link aliases. Specman reads the diagram from the file when
+// loading and writes it back when it has changed. Agents leave the link alone, they can edit the file it points to.
 imageBlock
     : 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' ID (',' changeParam)? ')' '{' BASE64_BLOCK '}'
     | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'plantuml' (',' changeParam)? ')' '{' BACKTICK_STRING (',' backupAttr)? '}'
     | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'svg' (',' changeParam)? ')' '{' BACKTICK_STRING '}'
-    | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'classman' (',' changeParam)? ')' '{' BACKTICK_STRING '}'
+    | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'classman' (',' changeParam)? ')' '{' ('link' '=')? BACKTICK_STRING '}'
     ;
 
 backupAttr
@@ -468,6 +474,7 @@ KW_IMAGE           : 'image' ;
 KW_PLANTUML        : 'plantuml' ;
 KW_SVG             : 'svg' ;
 KW_CLASSMAN        : 'classman' ;
+KW_LINK            : 'link' ;
 KW_TEXT            : 'text' ;
 KW_ORDERED         : 'ordered' ;
 KW_FLAT            : 'flat' ;

@@ -23,6 +23,7 @@ import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
 import specman.model.v002.PlantUmlImageEditAreaModel_V002;
 import specman.model.v002.ClassmanImageEditAreaModel_V002;
+import specman.model.v002.LinkedClassmanImageEditAreaModel_V002;
 import specman.model.v002.SvgImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
 import specman.model.v002.Markup_V002;
@@ -438,6 +439,9 @@ public class ModelSerializer_V002 {
         if (imageArea instanceof ClassmanImageEditAreaModel_V002) {
             return ClassmanImageEditAreaModel_V002.IMAGE_TYPE;
         }
+        if (imageArea instanceof LinkedClassmanImageEditAreaModel_V002) {
+            return ClassmanImageEditAreaModel_V002.IMAGE_TYPE;
+        }
         String type = ((ImageEditAreaModel_V002) imageArea).imageType;
         return type != null ? type : "png";
     }
@@ -451,6 +455,9 @@ public class ModelSerializer_V002 {
         }
         if (imageArea instanceof ClassmanImageEditAreaModel_V002 classman) {
             return "`" + classman.source + "`";
+        }
+        if (imageArea instanceof LinkedClassmanImageEditAreaModel_V002 linked) {
+            return LINK + "=`" + linked.link + "`";
         }
         byte[] imageData = ((ImageEditAreaModel_V002) imageArea).imageData;
         return "[base64:" + (imageData != null ? Base64.getEncoder().encodeToString(imageData) : "") + "]";

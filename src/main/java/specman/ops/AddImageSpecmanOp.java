@@ -8,13 +8,13 @@ import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlSourceValidator;
 import specman.editarea.image.SvgPicture;
 import specman.editarea.image.SvgNotDisplayableException;
+import specman.util.TextFiles;
 
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Locale;
 
 import static specman.i18n.Messages.i18n;
@@ -69,7 +69,7 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
   /** @return the source in the file, or null if the user got told why it can't be used */
   private String readValidPlantUmlSource(File file) {
     try {
-      String source = readTextFile(file);
+      String source = TextFiles.read(file);
       String problem = new PlantUmlSourceValidator().problemOf(source);
       if (problem != null) {
         fehler("msg.plantuml.file.invalid", file.getName(), problem);
@@ -81,17 +81,6 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
       displayException(iox);
       return null;
     }
-  }
-
-  private static final String BYTE_ORDER_MARK = String.valueOf((char) 0xFEFF);
-
-  /** The text with the line breaks Specman uses and without the byte order mark some editors put at the start. */
-  private static String readTextFile(File file) throws IOException {
-    String content = Files.readString(file.toPath(), StandardCharsets.UTF_8);
-    return content
-      .replace(BYTE_ORDER_MARK, "")
-      .replace("\r\n", "\n")
-      .replace('\r', '\n');
   }
 
   /** Asks the user for an image file and adds it after the text. Bitmaps are added as bitmaps, SVG files as
@@ -174,7 +163,7 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
   /** @return the source in the file, or null if the user got told why it can't be used */
   private String readValidClassmanSource(File file) {
     try {
-      String source = readTextFile(file);
+      String source = TextFiles.read(file);
       String problem = new ClassmanSourceValidator().problemOf(source);
       if (problem != null) {
         fehler("msg.classman.file.invalid", file.getName(), problem);
@@ -190,7 +179,7 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
 
   /** A file which can't be displayed is refused, so no graphic which fails to render ever gets into a spec. */
   private void addSvg(TextEditArea lastFocused, File file) throws IOException {
-    String source = readTextFile(file);
+    String source = TextFiles.read(file);
     try {
       new SvgPicture(source.getBytes(StandardCharsets.UTF_8));
     }

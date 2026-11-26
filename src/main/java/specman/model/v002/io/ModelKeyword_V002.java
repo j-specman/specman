@@ -32,6 +32,7 @@ public enum ModelKeyword_V002 {
     ROW(KW_ROW),
     CELL(KW_CELL),
     IMAGE(KW_IMAGE),
+    LINK(KW_LINK),
     TEXT(KW_TEXT),
     ORDERED(KW_ORDERED),
     FLAT(KW_FLAT),

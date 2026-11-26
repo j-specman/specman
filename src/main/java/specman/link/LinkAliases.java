@@ -74,6 +74,16 @@ public final class LinkAliases {
     entry.put(ALIAS_KEY, alias);
   }
 
+  /** Assigns the alias to the file, taking it away from the file which has it now. That file counts as decided against
+   * an alias then. This is for the user who tells which file an alias stands for, which another file had so far. */
+  public static void reassign(File file, String alias) {
+    File previous = fileOf(alias);
+    if (previous != null && !absolutePath(previous).equals(absolutePath(file))) {
+      assign(previous, "");
+    }
+    assign(file, alias);
+  }
+
   /** The file the alias is assigned to regardless of the alias' case, null if there is none. */
   public static File fileOf(String alias) {
     return entries().stream()

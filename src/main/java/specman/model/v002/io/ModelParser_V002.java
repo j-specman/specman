@@ -28,6 +28,7 @@ import specman.model.v002.IfStepModel_V002;
 import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.model.v002.ImageEditAreaModel_V002;
 import specman.model.v002.ClassmanImageEditAreaModel_V002;
+import specman.model.v002.LinkedClassmanImageEditAreaModel_V002;
 import specman.model.v002.PlantUmlImageEditAreaModel_V002;
 import specman.model.v002.SvgImageEditAreaModel_V002;
 import specman.model.v002.ListItemEditAreaModel_V002;
@@ -818,16 +819,19 @@ public class ModelParser_V002 {
             return new SvgImageEditAreaModel_V002(stripBackticks(ctx.BACKTICK_STRING().getText()), scale, changeInfo);
         }
         if (ctx.BACKTICK_STRING() != null) {
-            String source = stripBackticks(ctx.BACKTICK_STRING().getText());
+            String text = stripBackticks(ctx.BACKTICK_STRING().getText());
+            if (ctx.KW_LINK() != null) {
+                return new LinkedClassmanImageEditAreaModel_V002(text, scale, changeInfo);
+            }
             if (ctx.KW_CLASSMAN() != null) {
-                return new ClassmanImageEditAreaModel_V002(source, scale, changeInfo);
+                return new ClassmanImageEditAreaModel_V002(text, scale, changeInfo);
             }
             SpecmanModel_V002Parser.BackupAttrContext backup = ctx.backupAttr();
             if (backup == null) {
-                return new PlantUmlImageEditAreaModel_V002(source, null, null, scale, changeInfo);
+                return new PlantUmlImageEditAreaModel_V002(text, null, null, scale, changeInfo);
             }
             resolveChangeSet(backup.ID(), "backup=(...)");
-            return new PlantUmlImageEditAreaModel_V002(source, stripBackticks(backup.BACKTICK_STRING().getText()),
+            return new PlantUmlImageEditAreaModel_V002(text, stripBackticks(backup.BACKTICK_STRING().getText()),
                 backup.ID().getText(), scale, changeInfo);
         }
         String type = ctx.ID().getText();

@@ -13,6 +13,7 @@ import specman.editarea.image.AbstractSourceImageEditArea;
 import specman.editarea.image.Picture;
 import specman.editarea.image.SourceFileKind;
 import specman.editarea.image.SourceValidator;
+import specman.link.classman.ClassmanLink;
 import specman.metatag.generic.config.MetaTagConfigListener;
 import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.undo.props.UDBL;
@@ -34,7 +35,7 @@ import static specman.graphics.Styles.BACKGROUND_COLOR_STANDARD;
  * by the change marks in the source, see ClassDiagram_V001.g4: accepting, rejecting and merging change sets resolves
  * or renames them in the source. Nothing is tracked about the source as a whole. */
 public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
-  public static final String FILE_EXTENSION = "cld";
+  public static final String FILE_EXTENSION = ClassmanLink.FILE_EXTENSION;
   public static final SourceFileKind FILE_KIND = new SourceFileKind(new String[] {FILE_EXTENSION}, "msg.filter.classman",
     "dialog.classman.choose.title", "dialog.classman.import.title",
     "dialog.classman.choose.empty", "dialog.classman.choose.empty.tooltip");
