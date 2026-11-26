@@ -35,7 +35,7 @@ class StereotypeIconOutputTest {
     new ClassDiagramLayouter(new FixedTextMeasurer(), ChangeColors.NONE, LOOKS::get);
 
   private static Scene scene() throws ClassDiagramParseException {
-    return LAYOUTER.layout(new ClassDiagramParser_V001().parse("classdiagram {\n  class A at(0, 0) <<@With_Icon>>\n}"));
+    return LAYOUTER.layout(new ClassDiagramParser_V001().parse("classdiagram {\n  class A at(0, 0) <<:With_Icon>>\n}"));
   }
 
   @Test

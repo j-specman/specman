@@ -41,7 +41,7 @@ class ClassmanMetaTagConfigTest extends AbstractClassmanTest {
   private static final MetaTagConfig OTHER = new MetaTagConfig("Other", "Other", null, null, null, null, true);
   private static final MetaTagConfig LONGER_DOMAIN = new MetaTagConfig("Domain", "A very much longer label than before",
     null, null, null, null, true);
-  private static final String USING_DOMAIN = "classdiagram {\n    class A (aaaaaaaa) <<@Domain>>\n    class B (bbbbbbbb)\n}\n";
+  private static final String USING_DOMAIN = "classdiagram {\n    class A (aaaaaaaa) <<:Domain>>\n    class B (bbbbbbbb)\n}\n";
 
   private static ClassmanImageEditArea diagramUsingDomain() {
     specman.setMetaTagConfigs(List.of(DOMAIN, OTHER));
@@ -134,7 +134,7 @@ class ClassmanMetaTagConfigTest extends AbstractClassmanTest {
     specman.setMetaTagConfigs(List.of(DOMAIN));
     StringBuilder source = new StringBuilder("classdiagram {\n");
     for (int i = 1; i <= 13; i++) {
-      source.append("    class C").append(i).append(" <<@Domain>>\n");
+      source.append("    class C").append(i).append(" <<:Domain>>\n");
     }
     diagramWithSource(containerOfNewStep(), source.append("}\n").toString());
 
@@ -153,7 +153,7 @@ class ClassmanMetaTagConfigTest extends AbstractClassmanTest {
     specman.setMetaTagConfigs(List.of(DOMAIN));
     StringBuilder source = new StringBuilder("classdiagram {\n");
     for (int i = 1; i <= 10; i++) {
-      source.append("    class C").append(i).append(" <<@Domain>>\n");
+      source.append("    class C").append(i).append(" <<:Domain>>\n");
     }
     diagramWithSource(containerOfNewStep(), source.append("}\n").toString());
 

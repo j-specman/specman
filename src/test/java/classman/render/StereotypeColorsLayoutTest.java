@@ -37,7 +37,7 @@ class StereotypeColorsLayoutTest {
 
   @Test
   void colorsOfConfigurationAreTheColorsOfTheClass() throws ClassDiagramParseException {
-    Scene scene = layout("class A at(0, 0) <<@All>> {\n  -x\n}");
+    Scene scene = layout("class A at(0, 0) <<:All>> {\n  -x\n}");
 
     assertEquals("#112233", box(scene).fill);
     assertEquals("#445566", box(scene).stroke);
@@ -49,7 +49,7 @@ class StereotypeColorsLayoutTest {
 
   @Test
   void ownStyleWinsOverConfiguration() throws ClassDiagramParseException {
-    Scene scene = layout("class A at(0, 0) style(fill=\"#aaaaaa\", textcolor=\"#bbbbbb\", linecolor=\"#cccccc\") <<@All>>");
+    Scene scene = layout("class A at(0, 0) style(fill=\"#aaaaaa\", textcolor=\"#bbbbbb\", linecolor=\"#cccccc\") <<:All>>");
 
     assertEquals("#aaaaaa", box(scene).fill);
     assertEquals("#cccccc", box(scene).stroke);
@@ -58,7 +58,7 @@ class StereotypeColorsLayoutTest {
 
   @Test
   void ownStyleWinsPerColor() throws ClassDiagramParseException {
-    Scene scene = layout("class A at(0, 0) style(fill=\"#aaaaaa\") <<@All>>");
+    Scene scene = layout("class A at(0, 0) style(fill=\"#aaaaaa\") <<:All>>");
 
     assertEquals("#aaaaaa", box(scene).fill);
     assertEquals("#445566", box(scene).stroke);
@@ -67,7 +67,7 @@ class StereotypeColorsLayoutTest {
 
   @Test
   void colorWhichConfigurationLeavesAtDefaultIsTheDefaultOfTheClass() throws ClassDiagramParseException {
-    Scene scene = layout("class A at(0, 0) <<@Backgroundless>>");
+    Scene scene = layout("class A at(0, 0) <<:Backgroundless>>");
 
     assertEquals(DiagramStyle.CLASS_FILL, box(scene).fill);
     assertEquals("#445566", box(scene).stroke);
@@ -76,7 +76,7 @@ class StereotypeColorsLayoutTest {
 
   @Test
   void configurationWithoutColorsChangesNothing() throws ClassDiagramParseException {
-    Scene colorless = layout("class A at(0, 0) <<@Colorless>>");
+    Scene colorless = layout("class A at(0, 0) <<:Colorless>>");
     Scene plain = layout("class A at(0, 0)");
 
     assertEquals(box(plain).fill, box(colorless).fill);
@@ -85,7 +85,7 @@ class StereotypeColorsLayoutTest {
 
   @Test
   void unknownConfigurationChangesNothing() throws ClassDiagramParseException {
-    assertEquals(DiagramStyle.CLASS_FILL, box(layout("class A at(0, 0) <<@Gone>>")).fill);
+    assertEquals(DiagramStyle.CLASS_FILL, box(layout("class A at(0, 0) <<:Gone>>")).fill);
   }
 
   @Test
@@ -95,12 +95,12 @@ class StereotypeColorsLayoutTest {
 
   @Test
   void transparentColorOfConfigurationKeepsItsAlpha() throws ClassDiagramParseException {
-    assertEquals("#11223380", box(layout("class A at(0, 0) <<@Alpha>>")).fill);
+    assertEquals("#11223380", box(layout("class A at(0, 0) <<:Alpha>>")).fill);
   }
 
   @Test
   void removedClassVeilsColorsOfConfiguration() throws ClassDiagramParseException {
-    Scene scene = layout("class A change(removed, yellow) at(0, 0) <<@All>>");
+    Scene scene = layout("class A change(removed, yellow) at(0, 0) <<:All>>");
 
     String fill = all(scene, SceneRectangle.class).stream().filter(rectangle -> rectangle.fill != null)
       .findFirst().orElseThrow().fill;

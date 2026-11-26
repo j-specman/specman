@@ -27,24 +27,24 @@ class StereotypeReferenceLayoutTest {
 
   @Test
   void labelOfConfigurationIsShown() throws ClassDiagramParseException {
-    assertTrue(textsOf("class A <<@Domain_Value>>").contains("<<Domain Value>>"));
+    assertTrue(textsOf("class A <<:Domain_Value>>").contains("<<Domain Value>>"));
   }
 
   @Test
   void unknownConfigurationIsShownByItsName() throws ClassDiagramParseException {
-    assertTrue(textsOf("class A <<@Gone>>").contains("<<Gone>>"));
+    assertTrue(textsOf("class A <<:Gone>>").contains("<<Gone>>"));
   }
 
   @Test
   void configurationWithoutLabelShowsNoStereotypeText() throws ClassDiagramParseException {
-    assertEquals(List.of("A"), textsOf("class A <<@IconOnly>>"));
+    assertEquals(List.of("A"), textsOf("class A <<:IconOnly>>"));
   }
 
   @Test
   void interfaceKeepsDerivedStereotypeUntilLabelIsVisible() throws ClassDiagramParseException {
-    assertTrue(textsOf("interface A <<@IconOnly>>").contains("<<interface>>"));
+    assertTrue(textsOf("interface A <<:IconOnly>>").contains("<<interface>>"));
 
-    List<String> withLabel = textsOf("interface A <<@Domain_Value>>");
+    List<String> withLabel = textsOf("interface A <<:Domain_Value>>");
     assertTrue(withLabel.contains("<<Domain Value>>"));
     assertFalse(withLabel.contains("<<interface>>"));
   }

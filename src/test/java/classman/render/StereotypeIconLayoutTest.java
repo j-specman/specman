@@ -37,7 +37,7 @@ class StereotypeIconLayoutTest {
 
   @Test
   void iconStandsRightOfNameInItsLine() throws ClassDiagramParseException {
-    Scene scene = layout("class Customer at(0, 0) <<@With_Icon>>");
+    Scene scene = layout("class Customer at(0, 0) <<:With_Icon>>");
     SceneText name = textNamed(scene, "Customer");
 
     SceneVectorImage icon = all(scene, SceneVectorImage.class).get(0);
@@ -52,7 +52,7 @@ class StereotypeIconLayoutTest {
    * height of the first one. */
   @Test
   void iconStandsRightOfLongestNameLine() throws ClassDiagramParseException {
-    Scene scene = layout("class \"Customer Acc\" at(0, 0) width=120 <<@With_Icon>>");
+    Scene scene = layout("class \"Customer Acc\" at(0, 0) width=120 <<:With_Icon>>");
     SceneText first = textNamed(scene, "Customer");
     SceneText second = textNamed(scene, "Acc");
 
@@ -66,20 +66,20 @@ class StereotypeIconLayoutTest {
 
   @Test
   void iconWithoutLabelStillShowsIcon() throws ClassDiagramParseException {
-    assertEquals(1, all(layout("class A at(0, 0) <<@Icon_Only>>"), SceneVectorImage.class).size());
+    assertEquals(1, all(layout("class A at(0, 0) <<:Icon_Only>>"), SceneVectorImage.class).size());
   }
 
   @Test
   void boxIsWiderByIcon() throws ClassDiagramParseException {
-    double with = boxWidth(layout("class Customer at(0, 0) <<@With_Icon>>"));
-    double without = boxWidth(layout("class Customer at(0, 0) <<@No_Icon>>"));
+    double with = boxWidth(layout("class Customer at(0, 0) <<:With_Icon>>"));
+    double without = boxWidth(layout("class Customer at(0, 0) <<:No_Icon>>"));
 
     assertTrue(with > without, with + " vs " + without);
   }
 
   @Test
   void nameAndIconAreCenteredTogether() throws ClassDiagramParseException {
-    Scene scene = layout("class Customer at(0, 0) <<@With_Icon>>");
+    Scene scene = layout("class Customer at(0, 0) <<:With_Icon>>");
     SceneText name = textNamed(scene, "Customer");
     SceneVectorImage icon = all(scene, SceneVectorImage.class).get(0);
 
@@ -90,9 +90,9 @@ class StereotypeIconLayoutTest {
 
   @Test
   void noIconWithoutIconOrFreeTextOrUnknownConfiguration() throws ClassDiagramParseException {
-    assertTrue(all(layout("class A at(0, 0) <<@No_Icon>>"), SceneVectorImage.class).isEmpty());
+    assertTrue(all(layout("class A at(0, 0) <<:No_Icon>>"), SceneVectorImage.class).isEmpty());
     assertTrue(all(layout("class A at(0, 0) <<Entity>>"), SceneVectorImage.class).isEmpty());
-    assertTrue(all(layout("class A at(0, 0) <<@Gone>>"), SceneVectorImage.class).isEmpty());
+    assertTrue(all(layout("class A at(0, 0) <<:Gone>>"), SceneVectorImage.class).isEmpty());
     assertTrue(all(layout("class A at(0, 0)"), SceneVectorImage.class).isEmpty());
   }
 
@@ -105,7 +105,7 @@ class StereotypeIconLayoutTest {
 
   @Test
   void iconOnlyStereotypeHasAreaOfIcon() throws ClassDiagramParseException {
-    Scene scene = layout("class A at(0, 0) <<@Icon_Only>>");
+    Scene scene = layout("class A at(0, 0) <<:Icon_Only>>");
     SceneVectorImage icon = all(scene, SceneVectorImage.class).get(0);
 
     SceneTextArea area = scene.textAreas.stream().filter(text -> text.kind == TextKind.STEREOTYPE).findFirst()
@@ -116,7 +116,7 @@ class StereotypeIconLayoutTest {
 
   @Test
   void stereotypeWithLabelHasAreaOfItsRow() throws ClassDiagramParseException {
-    Scene scene = layout("class A at(0, 0) <<@With_Icon>>");
+    Scene scene = layout("class A at(0, 0) <<:With_Icon>>");
     SceneVectorImage icon = all(scene, SceneVectorImage.class).get(0);
 
     SceneTextArea area = scene.textAreas.stream().filter(text -> text.kind == TextKind.STEREOTYPE).findFirst()
@@ -127,7 +127,7 @@ class StereotypeIconLayoutTest {
 
   @Test
   void addedStereotypeMarksIcon() throws ClassDiagramParseException {
-    Scene scene = layout("class A at(0, 0) <<@Icon_Only>> change(added, yellow)");
+    Scene scene = layout("class A at(0, 0) <<:Icon_Only>> change(added, yellow)");
     SceneVectorImage icon = all(scene, SceneVectorImage.class).get(0);
 
     assertTrue(all(scene, SceneRectangle.class).stream().anyMatch(rectangle -> coversIconCenter(rectangle, icon)));
@@ -135,7 +135,7 @@ class StereotypeIconLayoutTest {
 
   @Test
   void changedStereotypeMarksIcon() throws ClassDiagramParseException {
-    Scene scene = layout("class A at(0, 0) <<@Icon_Only>> was(yellow, \"@With_Icon\")");
+    Scene scene = layout("class A at(0, 0) <<:Icon_Only>> was(yellow, \":With_Icon\")");
     SceneVectorImage icon = all(scene, SceneVectorImage.class).get(0);
 
     assertTrue(all(scene, SceneRectangle.class).stream().anyMatch(rectangle -> coversIconCenter(rectangle, icon)));
@@ -143,7 +143,7 @@ class StereotypeIconLayoutTest {
 
   @Test
   void removedStereotypeStrikesIconThrough() throws ClassDiagramParseException {
-    Scene scene = layout("class A at(0, 0) <<@Icon_Only>> change(removed, yellow)");
+    Scene scene = layout("class A at(0, 0) <<:Icon_Only>> change(removed, yellow)");
     SceneVectorImage icon = all(scene, SceneVectorImage.class).get(0);
 
     assertTrue(all(scene, SceneRectangle.class).stream().anyMatch(rectangle -> coversIconCenter(rectangle, icon)));
@@ -153,7 +153,7 @@ class StereotypeIconLayoutTest {
 
   @Test
   void unmarkedStereotypeLeavesIconUnmarked() throws ClassDiagramParseException {
-    Scene scene = layout("class A at(0, 0) <<@Icon_Only>>");
+    Scene scene = layout("class A at(0, 0) <<:Icon_Only>>");
     SceneVectorImage icon = all(scene, SceneVectorImage.class).get(0);
 
     assertTrue(all(scene, SceneRectangle.class).stream().noneMatch(rectangle -> coversIconCenter(rectangle, icon)));
@@ -161,7 +161,7 @@ class StereotypeIconLayoutTest {
 
   @Test
   void interfaceAndEnumGetIconToo() throws ClassDiagramParseException {
-    assertEquals(1, all(layout("interface A at(0, 0) <<@With_Icon>>"), SceneVectorImage.class).size());
-    assertEquals(1, all(layout("enum A at(0, 0) <<@With_Icon>> {\n  RED\n}"), SceneVectorImage.class).size());
+    assertEquals(1, all(layout("interface A at(0, 0) <<:With_Icon>>"), SceneVectorImage.class).size());
+    assertEquals(1, all(layout("enum A at(0, 0) <<:With_Icon>> {\n  RED\n}"), SceneVectorImage.class).size());
   }
 }

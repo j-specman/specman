@@ -393,7 +393,7 @@ tagRef
 // would collide with keywords like 'source' or 'text' and other tokens, e.g. 'deadbeef' is a STEP_ID.
 // The content of the string is restricted nevertheless: the configuration dialog only allows letters
 // A-Z, a-z, digits and underscores, which is also what a class diagram accepts as the reference to a
-// configuration (<<@name>>). There is no lexer token of its own for it, because it would be
+// configuration (<<:name>>). There is no lexer token of its own for it, because it would be
 // indistinguishable from BACKTICK_STRING.
 tagId
     : BACKTICK_STRING

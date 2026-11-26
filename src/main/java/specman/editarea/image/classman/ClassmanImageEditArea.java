@@ -1,5 +1,7 @@
 package specman.editarea.image.classman;
 
+import classman.clipboard.ClassDiagramClipboardContent;
+import classman.clipboard.ClassDiagramTransferable;
 import classman.editor.ClassDiagramEditorWindow;
 import classman.model.v001.change.SourceMarks_V001;
 import classman.model.v001.change.StereotypeReferences_V001;
@@ -18,6 +20,7 @@ import specman.undo.props.UDBL;
 import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.datatransfer.Transferable;
 import java.util.List;
 import java.util.Set;
 
@@ -108,6 +111,12 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
   @Override
   protected Picture pictureOf(String source) {
     return new ScenePicture(ClassmanRenderer.renderScene(source));
+  }
+
+  /** The diagram as source for pasting into Specman, and as picture for everything else. */
+  @Override
+  protected Transferable clipboardContent() {
+    return new ClassDiagramTransferable(new ClassDiagramClipboardContent(getSource()), getFullSizeImage());
   }
 
   @Override

@@ -279,7 +279,7 @@ public class SanitizeTest {
   // ---- stereotypes in class diagrams ----
 
   private static String diagramWithStereotype(String configName) {
-    return "classdiagram {\n    class Customer (aaaaaaaa) <<@" + configName + ">>\n}\n";
+    return "classdiagram {\n    class Customer (aaaaaaaa) <<:" + configName + ">>\n}\n";
   }
 
   /** A class diagram whose stereotypes refer to configurations which exist is accepted. */
@@ -346,7 +346,7 @@ public class SanitizeTest {
   /** The old text of a change mark may refer to a configuration which doesn't exist, which is no use of it. */
   @Test
   void testBackupOfChangeMarkMayBeDangling() {
-    String source = "classdiagram {\n    class Customer (aaaaaaaa) <<Entity>> was(yellow, \"@" + UNKNOWN_TAG + "\")\n}\n";
+    String source = "classdiagram {\n    class Customer (aaaaaaaa) <<Entity>> was(yellow, \":" + UNKNOWN_TAG + "\")\n}\n";
     File nsdFile = diagramm()
       .withMainSequence(sequence()
         .withStep(simple("first").withClassmanDiagram(source)))

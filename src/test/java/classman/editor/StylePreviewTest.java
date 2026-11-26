@@ -61,8 +61,8 @@ class StylePreviewTest {
     host.stereotypeLooks.put("Domain_Value",
       new classman.render.StereotypeLook("Domain Value", null).withColors("#112233", null, null));
 
-    Scene configured = ClassPreview.scene(renderer(), new ElementStyleModel_V001(), null, "@Domain_Value");
-    Scene styled = ClassPreview.scene(renderer(), style("#336699", null), null, "@Domain_Value");
+    Scene configured = ClassPreview.scene(renderer(), new ElementStyleModel_V001(), null, ":Domain_Value");
+    Scene styled = ClassPreview.scene(renderer(), style("#336699", null), null, ":Domain_Value");
 
     assertEquals("#112233", all(configured, SceneRectangle.class).get(0).fill);
     assertEquals("#336699", all(styled, SceneRectangle.class).get(0).fill);

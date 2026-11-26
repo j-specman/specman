@@ -1,5 +1,7 @@
 package classman.editor;
 
+import classman.clipboard.ClassDiagramClipboardContent;
+import classman.clipboard.ClassDiagramTransferable;
 import classman.model.v001.AbstractDiagramElementModel_V001;
 import classman.model.v001.ClassKind_V001;
 import classman.model.v001.ElementStyleModel_V001;
@@ -234,11 +236,13 @@ public class ClassDiagramEditorWindow extends JDialog {
     }
   }
 
-  /** Puts the diagram on the clipboard as a picture in the zoom which is set now, without the marks of the editing. */
+  /** Puts the diagram on the clipboard in the zoom which is set now, without the marks of the editing: as a picture,
+   * and as source for pasting it as a diagram. */
   private void copyToClipboard() {
     try {
       Toolkit.getDefaultToolkit().getSystemClipboard().setContents(
-        new ImageTransferable(SceneBitmap.of(editing.plainScene(), canvas.zoom())), null);
+        new ClassDiagramTransferable(new ClassDiagramClipboardContent(editing.source()),
+          SceneBitmap.of(editing.plainScene(), canvas.zoom())), null);
     }
     catch (IllegalStateException clipboardIsBusy) {
       JOptionPane.showMessageDialog(this, texts.get("copy.failed"), texts.get("window.title"),

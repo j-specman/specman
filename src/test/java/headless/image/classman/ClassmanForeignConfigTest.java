@@ -29,7 +29,7 @@ import static specman.metatag.stepnumberlabel.StepnumberContextMenu.PASTE_ITEM;
 class ClassmanForeignConfigTest extends AbstractClassmanTest {
 
   private static final MetaTagConfig DOMAIN = new MetaTagConfig("Domain", "Domain Value", null, null, null, null, true);
-  private static final String USING_DOMAIN = "classdiagram {\n    class A (aaaaaaaa) <<@Domain>>\n    class B (bbbbbbbb) <<Entity>>\n}\n";
+  private static final String USING_DOMAIN = "classdiagram {\n    class A (aaaaaaaa) <<:Domain>>\n    class B (bbbbbbbb) <<Entity>>\n}\n";
   private static final String SKIPPED_BRIEF = "msg.paste.tags.skipped.brief";
 
   private static ClassmanImageEditArea pastedDiagramOfCopiedStep(boolean configStillThere) {
@@ -66,7 +66,7 @@ class ClassmanForeignConfigTest extends AbstractClassmanTest {
   void testPastedStereotypeOfUnknownConfigIsDropped() {
     ClassmanImageEditArea pasted = pastedDiagramOfCopiedStep(false);
 
-    assertFalse(pasted.getSource().contains("@Domain"), pasted.getSource());
+    assertFalse(pasted.getSource().contains(":Domain"), pasted.getSource());
     assertTrue(pasted.getSource().contains("<<Entity>>"), pasted.getSource());
     assertTrue(specman.shownMessages().contains(i18n(SKIPPED_BRIEF)), specman.shownMessages().toString());
     ClassmanImageEditArea original = (ClassmanImageEditArea) specman.findStepByStepID("1").getFirstEditArea()
@@ -93,7 +93,7 @@ class ClassmanForeignConfigTest extends AbstractClassmanTest {
     insertFrom(directory, USING_DOMAIN);
 
     String source = ((ClassmanImageEditArea) container.getEditAreaAt(1)).getSource();
-    assertFalse(source.contains("@Domain"), source);
+    assertFalse(source.contains(":Domain"), source);
     assertTrue(source.contains("<<Entity>>"), source);
     assertTrue(specman.shownMessages().contains(i18n(SKIPPED_BRIEF)), specman.shownMessages().toString());
   }

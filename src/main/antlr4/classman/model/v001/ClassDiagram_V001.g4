@@ -3,7 +3,8 @@ grammar ClassDiagram_V001;
 // Classman class diagram text format, version 001 (draft) — maps 1:1 to ClassDiagramModel_V001
 //
 // First line of a file: JSON envelope comment, skipped like any comment, read separately:
-//   // {"classmanVersion":"0.1","modelType":"classman.model.v001.ClassDiagramModel_V001"}
+//   // {"classmanVersion":"0.1","modelType":"ClassDiagramModel_V001"}
+// The model type is the simple class name without package, so a move of the class doesn't invalidate the files.
 //
 // Names: unquoted if made of letters, digits, '_' and '-' or '/' between letters, else in double quotes.
 // This holds for class names, attribute names and attribute types alike: a name or type with spaces or
@@ -60,10 +61,10 @@ grammar ClassDiagram_V001;
 //     are optional, except that a class needs one to take part in a relation. Created in a class model, a diagram refers with them to the elements of the model: the
 //     stereotype is defined there once and assigned to the classes. A diagram which stands for itself needs none.
 //   * A stereotype is a free text, <<Entity>>, or refers to a meta tag configuration of the host (in Specman: of the
-//     document): <<@Domain_Value>>. The name consists of the letters A-Z and a-z, digits and underscores, the parser
+//     document): <<:Domain_Value>>. The name consists of the letters A-Z and a-z, digits and underscores, the parser
 //     refuses anything else. The host gives the reference its label, icon and colors, so the source carries none of
-//     them, and a free text never begins with @. A reference to a configuration which doesn't exist is a mistake, which
-//     Specman's sanitizer reports; the old text of a change mark, was(yellow, "@Domain_Value"), may refer to one which
+//     them, and a free text never begins with a colon. A reference to a configuration which doesn't exist is a mistake, which
+//     Specman's sanitizer reports; the old text of a change mark, was(yellow, ":Domain_Value"), may refer to one which
 //     has gone. There is no empty stereotype <<>>: a configuration without a label shows only its icon.
 //   * An anchor line can lead over waypoints (absolute pixel points): anchor 11223344 -- 04de91aa route (120, 40) (120, 90).
 //     The line starts at the note border facing the first waypoint and ends at the target facing the last one.

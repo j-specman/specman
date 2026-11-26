@@ -25,7 +25,7 @@ class StereotypeMenuTest {
   }
 
   private static final String BARE = "classdiagram {\n  class A (11111111) at(10, 60)\n}";
-  private static final String WITH_CONFIG = "classdiagram {\n  class A (11111111) at(10, 60) <<@Domain_Value>>\n}";
+  private static final String WITH_CONFIG = "classdiagram {\n  class A (11111111) at(10, 60) <<:Domain_Value>>\n}";
   private static final String WITH_FREE_TEXT = "classdiagram {\n  class A (11111111) at(10, 60) <<Entity>>\n}";
 
   private final RecordingEditorHost host = new RecordingEditorHost();
@@ -96,7 +96,7 @@ class StereotypeMenuTest {
 
     SwingUtilities.invokeAndWait(() -> entries().get(2).doClick(0));
 
-    assertEquals("@Domain_Value", editing.selectedClass().stereotype);
+    assertEquals(":Domain_Value", editing.selectedClass().stereotype);
   }
 
   @Test

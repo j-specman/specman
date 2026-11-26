@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class StereotypeReferencesTest {
   private static final String SOURCE = """
       classdiagram {
-          class A (aaaaaaaa) <<@Domain_Value>>
+          class A (aaaaaaaa) <<:Domain_Value>>
           class B (bbbbbbbb) <<Entity>>
-          interface C (cccccccc) <<@Other>> change(removed, yellow)
-          class D (dddddddd) <<@Other>> was(yellow, "@Domain_Value")
+          interface C (cccccccc) <<:Other>> change(removed, yellow)
+          class D (dddddddd) <<:Other>> was(yellow, ":Domain_Value")
           class E (eeeeeeee)
       }
       """;
@@ -42,14 +42,14 @@ class StereotypeReferencesTest {
 
   @Test
   void referenceInBackupOfChangeMarkIsNoUse() {
-    String source = "classdiagram {\n  class D <<Entity>> was(yellow, \"@Domain_Value\")\n}";
+    String source = "classdiagram {\n  class D <<Entity>> was(yellow, \":Domain_Value\")\n}";
 
     assertTrue(references.configsUsedIn(source).isEmpty());
   }
 
   @Test
   void configInStringOfNoteIsNoUse() {
-    String source = "classdiagram {\n  note \"see <<@Domain_Value>>\"\n}";
+    String source = "classdiagram {\n  note \"see <<:Domain_Value>>\"\n}";
 
     assertTrue(references.configsUsedIn(source).isEmpty());
   }
@@ -63,15 +63,15 @@ class StereotypeReferencesTest {
   void removingConfigTakesStereotypeFromAllItsClasses() {
     String rewritten = references.withoutConfigs(SOURCE, Set.of("Other"));
 
-    assertFalse(rewritten.contains("@Other"), rewritten);
+    assertFalse(rewritten.contains(":Other"), rewritten);
     assertFalse(rewritten.contains("change(removed"), rewritten);
-    assertTrue(rewritten.contains("<<@Domain_Value>>"), rewritten);
+    assertTrue(rewritten.contains("<<:Domain_Value>>"), rewritten);
     assertTrue(rewritten.contains("<<Entity>>"), rewritten);
   }
 
   @Test
   void removingConfigTakesWholeStereotypeWithItsMarks() {
-    String source = "classdiagram {\n  class D (dddddddd) <<@Other>> was(yellow, \"Entity\")\n}";
+    String source = "classdiagram {\n  class D (dddddddd) <<:Other>> was(yellow, \"Entity\")\n}";
 
     String rewritten = references.withoutConfigs(source, Set.of("Other"));
 

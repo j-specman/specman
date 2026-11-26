@@ -29,7 +29,7 @@ import static specman.i18n.Messages.i18n;
 class UnknownMetaTagConfigLoadTest {
 
   private static final String SKIPPED_BRIEF = "msg.paste.tags.skipped.brief";
-  private static final String BOTH_KINDS = "classdiagram {\n    class A (aaaaaaaa) <<@known>>\n    class B (bbbbbbbb) <<@gone>>\n}\n";
+  private static final String BOTH_KINDS = "classdiagram {\n    class A (aaaaaaaa) <<:known>>\n    class B (bbbbbbbb) <<:gone>>\n}\n";
 
   private static File fileWithTagsAndDiagram() {
     return diagramm()
@@ -52,7 +52,7 @@ class UnknownMetaTagConfigLoadTest {
 
     assertEquals(Set.of("known"), specman.findStepByStepID("1").getTagConfigNames());
     String source = diagramOfFirstStep().getSource();
-    assertTrue(source.contains("<<@known>>"), source);
+    assertTrue(source.contains("<<:known>>"), source);
     assertFalse(source.contains("gone"), source);
     assertEquals(List.of(i18n(SKIPPED_BRIEF)), specman.shownMessages());
   }
@@ -64,27 +64,27 @@ class UnknownMetaTagConfigLoadTest {
       .withMetaTagConfig("known", "Known", false)
       .withMainSequence(sequence()
         .withStep(simple("first").withTag("known")
-          .withClassmanDiagram("classdiagram {\n    class A (aaaaaaaa) <<@known>>\n}\n")))
+          .withClassmanDiagram("classdiagram {\n    class A (aaaaaaaa) <<:known>>\n}\n")))
       .persist();
 
     new ModelCopyLoader(specman).loadModelCopy(file, directory);
 
     assertEquals(Set.of("known"), specman.findStepByStepID("1").getTagConfigNames());
-    assertTrue(diagramOfFirstStep().getSource().contains("<<@known>>"));
+    assertTrue(diagramOfFirstStep().getSource().contains("<<:known>>"));
     assertEquals(List.of(), specman.shownMessages());
   }
 
   /** Scenario: A reference in the old text of a change mark isn't a use, so it stays and nothing is said. */
   @Test
   void testBackupOfChangeMarkIsLeftAlone(@TempDir Path directory) throws IOException {
-    String source = "classdiagram {\n    class A (aaaaaaaa) <<Entity>> was(yellow, \"@gone\")\n}\n";
+    String source = "classdiagram {\n    class A (aaaaaaaa) <<Entity>> was(yellow, \":gone\")\n}\n";
     File file = diagramm()
       .withMainSequence(sequence().withStep(simple("first").withClassmanDiagram(source)))
       .persist();
 
     new ModelCopyLoader(specman).loadModelCopy(file, directory);
 
-    assertTrue(diagramOfFirstStep().getSource().contains("@gone"));
+    assertTrue(diagramOfFirstStep().getSource().contains(":gone"));
     assertEquals(List.of(), specman.shownMessages());
   }
 }

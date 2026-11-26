@@ -209,7 +209,7 @@ public class ClassDiagramParser_V001 {
         String text = stereotype.getText();
         String trimmed = text.substring(2, text.length() - 2).trim();
         if (StereotypeReference_V001.isReference(trimmed) && !StereotypeReference_V001.isValidName(StereotypeReference_V001.nameOf(trimmed))) {
-            throw problem(stereotype.getSymbol(), "A stereotype which begins with @ refers to a configuration and needs "
+            throw problem(stereotype.getSymbol(), "A stereotype which begins with : refers to a configuration and needs "
                 + "a name of letters, digits and underscores: " + text);
         }
         return trimmed;

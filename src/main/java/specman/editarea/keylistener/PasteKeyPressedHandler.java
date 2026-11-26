@@ -1,5 +1,6 @@
 package specman.editarea.keylistener;
 
+import classman.clipboard.ClassDiagramTransferable;
 import specman.ChangeSet;
 import specman.clipboard.SpecmanTextTransferable;
 import specman.clipboard.SpecmanTableTransferable;
@@ -40,7 +41,7 @@ class PasteKeyPressedHandler extends AbstractKeyEventHandler {
 
   void handle() {
     try (UndoRecording ur = editor().composeUndo()) {
-      Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+      Clipboard clipboard = editor().clipboard();
       Transferable contents = clipboard.getContents(null);
       if (contents != null) {
         if (contents.isDataFlavorSupported(SpecmanTextTransferable.SPECMAN_TEXT_FLAVOR)) {
@@ -48,6 +49,12 @@ class PasteKeyPressedHandler extends AbstractKeyEventHandler {
           TextEditAreaModel_V002 model = (TextEditAreaModel_V002)
               contents.getTransferData(SpecmanTextTransferable.SPECMAN_TEXT_FLAVOR);
           pasteFormatted(model, contents, clipboard);
+          return;
+        }
+        // Checked before the imageFlavor fallback below, which a copied class diagram offers as well
+        if (contents.isDataFlavorSupported(ClassDiagramTransferable.CLASS_DIAGRAM_FLAVOR)) {
+          event.consume();
+          editor().pasteClassmanInto(textArea);
           return;
         }
         // Checked before the stringFlavor fallback below, which would otherwise swallow a

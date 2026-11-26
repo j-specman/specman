@@ -95,6 +95,7 @@ public interface EditorI extends FocusListener {
   void copyTableToClipboard(TableEditArea table);
   void cutTableToClipboard(TableEditArea table);
   void pasteTableInto(TextEditArea initiatingTextArea);
+  void pasteClassmanInto(TextEditArea initiatingTextArea);
   void moveBranchSequenceLeftADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   void moveBranchSequenceRightADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment);
   DragMouseAdapter createDragMouseAdapter();

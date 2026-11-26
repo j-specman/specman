@@ -25,7 +25,7 @@ class StereotypeConfigEditingTest {
   }
 
   private static final String BARE = "classdiagram {\n  class A (11111111) at(10, 60)\n}";
-  private static final String WITH_CONFIG = "classdiagram {\n  class A (11111111) at(10, 60) <<@Domain_Value>>\n}";
+  private static final String WITH_CONFIG = "classdiagram {\n  class A (11111111) at(10, 60) <<:Domain_Value>>\n}";
   private static final String WITH_FREE_TEXT = "classdiagram {\n  class A (11111111) at(10, 60) <<Entity>>\n}";
 
   private final RecordingEditorHost host = new RecordingEditorHost();
@@ -58,7 +58,7 @@ class StereotypeConfigEditingTest {
 
     editing.setStereotypeConfig(box(), "Domain_Value");
 
-    assertEquals("@Domain_Value", written().stereotype);
+    assertEquals(":Domain_Value", written().stereotype);
     assertNull(written().stereotypeElementChange);
     assertEquals("<<Domain Value>>", stereotypeAreaLabel());
   }
@@ -86,8 +86,8 @@ class StereotypeConfigEditingTest {
 
     editing.setStereotypeConfig(box(), "Other");
 
-    assertEquals("@Other", written().stereotype);
-    assertEquals("@Domain_Value", written().stereotypeChange.backup);
+    assertEquals(":Other", written().stereotype);
+    assertEquals(":Domain_Value", written().stereotypeChange.backup);
   }
 
   @Test
@@ -127,7 +127,7 @@ class StereotypeConfigEditingTest {
   void freeTextCanNotBeginWithReferencePrefix() throws ClassDiagramParseException {
     open(WITH_FREE_TEXT);
 
-    assertFalse(editing.accepts(stereotypeArea(), "@Domain_Value"));
+    assertFalse(editing.accepts(stereotypeArea(), ":Domain_Value"));
   }
 
   @Test
@@ -140,7 +140,7 @@ class StereotypeConfigEditingTest {
     editing.setText(row, "Entity");
 
     assertEquals("Entity", written().stereotype);
-    assertEquals("@Domain_Value", written().stereotypeChange.backup);
+    assertEquals(":Domain_Value", written().stereotypeChange.backup);
   }
 
   @Test
@@ -151,7 +151,7 @@ class StereotypeConfigEditingTest {
     editing.stereotypeRowForFreeText(box());
     editing.discardNewPart();
 
-    assertEquals("@Domain_Value", box().stereotype);
+    assertEquals(":Domain_Value", box().stereotype);
     assertEquals(before, editing.source());
   }
 
@@ -161,7 +161,7 @@ class StereotypeConfigEditingTest {
 
     editing.setText(editing.stereotypeRowForFreeText(box()), "");
 
-    assertEquals("@Domain_Value", written().stereotype);
+    assertEquals(":Domain_Value", written().stereotype);
     assertFalse(editing.canUndo());
   }
 
@@ -200,7 +200,7 @@ class StereotypeConfigEditingTest {
 
     editing.removeStereotype(box());
 
-    assertEquals("@Domain_Value", written().stereotype);
+    assertEquals(":Domain_Value", written().stereotype);
     assertEquals(ChangeType_V001.REMOVED, written().stereotypeElementChange.type);
   }
 

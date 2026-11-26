@@ -3,12 +3,12 @@ package classman.model.v001;
 import java.util.regex.Pattern;
 
 /** The text of a stereotype which refers to a configuration of the host instead of being a text of its own:
- * {@code @name}, written {@code <<@name>>} in the source. The host knows what the configuration looks like (label,
+ * {@code :name}, written {@code <<:name>>} in the source. The host knows what the configuration looks like (label,
  * icon, colors), so the diagram doesn't carry any of it. A free text never begins with the prefix, so the two can't be
  * mixed up, not even in the old text of a change mark. The name is what a configuration of the host is called:
  * letters A-Z and a-z, digits and underscores. */
 public final class StereotypeReference_V001 {
-    public static final String PREFIX = "@";
+    public static final String PREFIX = ":";
     private static final Pattern NAME = Pattern.compile("[A-Za-z0-9_]+");
 
     private StereotypeReference_V001() {

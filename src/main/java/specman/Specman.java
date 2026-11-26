@@ -1050,6 +1050,7 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
   @Override public void copyTableToClipboard(TableEditArea table) { new CopyTableOp(table).run(); }
   @Override public void cutTableToClipboard(TableEditArea table) { new CutTableOp(this, table).run(); }
   @Override public void pasteTableInto(TextEditArea initiatingTextArea) { new PasteTableOp(this, initiatingTextArea).run(); }
+  @Override public void pasteClassmanInto(TextEditArea initiatingTextArea) { new PasteClassmanOp(this, initiatingTextArea).run(); }
 
   @Override
   public void moveBranchSequenceLeftADBL(AbstractSchrittView step, InteractiveStepFragment initiatingFragment) {

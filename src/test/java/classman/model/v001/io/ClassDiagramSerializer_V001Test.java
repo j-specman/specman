@@ -60,7 +60,7 @@ class ClassDiagramSerializer_V001Test {
   void envelopeComment() throws ClassDiagramParseException {
     String written = roundTrip("classdiagram { }");
     assertTrue(written.startsWith(
-        "// {\"classmanVersion\":\"0.1\",\"modelType\":\"classman.model.v001.ClassDiagramModel_V001\"}\n"), written);
+        "// {\"classmanVersion\":\"0.1\",\"modelType\":\"ClassDiagramModel_V001\"}\n"), written);
   }
 
   /** Quote, backslash, line break and backtick in a text survive writing and reading, and no backtick is written. */

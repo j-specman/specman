@@ -32,7 +32,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusEvent;
@@ -162,10 +162,15 @@ public abstract class AbstractImageEditArea extends JPanel implements EditArea<A
 
   private void keyCopyPressed(KeyEvent e) {
     if (e.isControlDown()) {
-      Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-      clipboard.setContents(new ImageClipboardSelection(getFullSizeImage()), null);
+      editor().clipboard().setContents(clipboardContent(), null);
       e.consume();
     }
+  }
+
+  /** @return what Ctrl+C and Ctrl+X put into the clipboard: the picture by default. Subclasses which can be pasted
+   * as more than a picture add their own flavor. */
+  protected Transferable clipboardContent() {
+    return new ImageClipboardSelection(getFullSizeImage());
   }
 
   private void keyCutPressed(KeyEvent e) {

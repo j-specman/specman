@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
 public class ClassDiagramSerializer_V001 {
     private static final String INDENT = "    ";
     private static final String ENVELOPE =
-        "// {\"classmanVersion\":\"0.1\",\"modelType\":\"classman.model.v001.ClassDiagramModel_V001\"}";
+        "// {\"classmanVersion\":\"0.1\",\"modelType\":\"ClassDiagramModel_V001\"}";
     private static final Pattern NAME = Pattern.compile("[\\p{L}_][\\p{L}\\p{N}_]*(?:[-/][\\p{L}\\p{N}_]+)*");
     private static final Pattern INTEGER = Pattern.compile("-?[0-9]+");
 
