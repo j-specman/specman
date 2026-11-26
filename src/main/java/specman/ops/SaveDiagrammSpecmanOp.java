@@ -1,11 +1,13 @@
 package specman.ops;
 
 import specman.ScrollPause;
+import specman.editarea.image.classman.LinkedClassmanImageEditArea;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.MetaTagConfigModel_V002;
 import specman.model.v002.io.ModelSerializer_V002;
 import specman.i18n.IFileNameExtensionFilter;
+import specman.visitor.LinkedClassmanAreaCollector;
 import static specman.ChangeSet.changeset;
 import static specman.i18n.Messages.i18n;
 
@@ -48,6 +50,7 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
         }
         setDiagrammDatei(new File(ausgewaehlterDateiname));
       }
+      saveLinkedFiles();
       saveToFile(getDiagrammDatei());
       long wcTimestamp = 0;
       if (AutoSaveOp.isWorkingCopyNeeded()) {
@@ -68,6 +71,19 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
     }
     catch (IOException e) {
       displayException(e);
+    }
+  }
+
+  /** Writes the files of the linked diagrams which the user changed, before the model file, so that an error leaves the
+   * model file as it is. It is done here and not when the model is generated, because that is also done for the working
+   * copy, which must not change the files of other documents. */
+  private void saveLinkedFiles() throws IOException {
+    LinkedClassmanAreaCollector collector = new LinkedClassmanAreaCollector();
+    context().traverseDiagram(collector);
+    for (LinkedClassmanImageEditArea area : collector.areas()) {
+      if (area.needsSaving()) {
+        area.saveLinkedFile();
+      }
     }
   }
 

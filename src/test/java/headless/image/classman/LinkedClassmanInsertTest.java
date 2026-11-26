@@ -3,7 +3,6 @@ package headless.image.classman;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import specman.editarea.EditContainer;
-import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.classman.ClassmanImageEditArea;
 import specman.editarea.image.classman.LinkedClassmanImageEditArea;
 import specman.link.LinkAliases;
@@ -28,18 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class LinkedClassmanInsertTest extends AbstractClassmanTest {
   private static final String NAMED_DIAGRAM = "classdiagram \"Hilfe\" (0a1b2c3d) {\n    class A (aaaaaaaa)\n}\n";
 
-  private static File fileWith(Path directory, String content) throws IOException {
-    Path file = directory.resolve("hilfe.cld");
-    Files.writeString(file, content, StandardCharsets.UTF_8);
-    return file.toFile();
-  }
-
-  private static void insertLinked(File file) {
-    specman.answerClassmanFileChoiceWith(SourceFileChoice.linkedFile(file));
-    specman.doEdit(net.atlanticbb.tantlinger.ui.text.actions.ClassmanAction.class);
-    specman.layoutComponents();
-  }
-
   private static String linkOf(EditContainer container) {
     LinkedClassmanImageEditArea diagram = (LinkedClassmanImageEditArea) container.getEditAreaAt(1);
     return ((LinkedClassmanImageEditAreaModel_V002) diagram.toModel(false)).link;
@@ -49,9 +36,9 @@ class LinkedClassmanInsertTest extends AbstractClassmanTest {
   @Test
   void testLinkedFileWithoutAliasIsLinkedByPath(@TempDir Path directory) throws IOException {
     EditContainer container = containerOfNewStep();
-    File file = fileWith(directory, TWO_CLASSES);
+    File file = diagramFile(directory, TWO_CLASSES);
 
-    insertLinked(file);
+    insertLinkedDiagram(file);
 
     assertTrue(container.getEditAreaAt(1) instanceof LinkedClassmanImageEditArea);
     assertEquals(TWO_CLASSES, ((ClassmanImageEditArea) container.getEditAreaAt(1)).getSource());
@@ -64,10 +51,10 @@ class LinkedClassmanInsertTest extends AbstractClassmanTest {
   @Test
   void testLinkedFileWithAliasIsLinkedByAlias(@TempDir Path directory) throws IOException {
     EditContainer container = containerOfNewStep();
-    File file = fileWith(directory, TWO_CLASSES);
+    File file = diagramFile(directory, TWO_CLASSES);
     LinkAliases.assign(file, "hilfe");
 
-    insertLinked(file);
+    insertLinkedDiagram(file);
 
     assertEquals("classman://hilfe", linkOf(container));
   }
@@ -76,10 +63,10 @@ class LinkedClassmanInsertTest extends AbstractClassmanTest {
   @Test
   void testLinkTellsIdAndNameOfTheDiagram(@TempDir Path directory) throws IOException {
     EditContainer container = containerOfNewStep();
-    File file = fileWith(directory, NAMED_DIAGRAM);
+    File file = diagramFile(directory, NAMED_DIAGRAM);
     LinkAliases.assign(file, "hilfe");
 
-    insertLinked(file);
+    insertLinkedDiagram(file);
 
     assertEquals("classman://hilfe,0a1b2c3d,Hilfe", linkOf(container));
   }
@@ -89,7 +76,7 @@ class LinkedClassmanInsertTest extends AbstractClassmanTest {
   void testUndoTakesLinkedDiagramOut(@TempDir Path directory) throws IOException {
     EditContainer container = containerOfNewStep();
 
-    insertLinked(fileWith(directory, TWO_CLASSES));
+    insertLinkedDiagram(diagramFile(directory, TWO_CLASSES));
     specman.undo();
 
     assertFalse(hasDiagram(container), "a single undo must take the diagram out");
@@ -100,7 +87,7 @@ class LinkedClassmanInsertTest extends AbstractClassmanTest {
   void testFileWithoutDiagramIsRefused(@TempDir Path directory) throws IOException {
     EditContainer container = containerOfNewStep();
 
-    insertLinked(fileWith(directory, "classdiagram { class }"));
+    insertLinkedDiagram(diagramFile(directory, "classdiagram { class }"));
 
     assertFalse(hasDiagram(container), "no diagram must be inserted");
     assertEquals(List.of("msg.classman.file.invalid"), specman.shownMessages());
@@ -113,7 +100,7 @@ class LinkedClassmanInsertTest extends AbstractClassmanTest {
     Path file = directory.resolve("hilfe.txt");
     Files.writeString(file, TWO_CLASSES, StandardCharsets.UTF_8);
 
-    insertLinked(file.toFile());
+    insertLinkedDiagram(file.toFile());
 
     assertFalse(hasDiagram(container), "no diagram must be inserted");
     assertEquals(List.of("msg.classman.file.invalid"), specman.shownMessages());

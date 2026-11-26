@@ -5,8 +5,15 @@ import net.atlanticbb.tantlinger.ui.text.actions.ClassmanAction;
 import org.junit.jupiter.api.extension.ExtendWith;
 import specman.editarea.EditContainer;
 import specman.editarea.TextEditArea;
+import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.classman.ClassmanImageEditArea;
 import specman.view.EinfacherSchrittView;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,6 +49,20 @@ abstract class AbstractClassmanTest {
     specman.layoutComponents();
     assertTrue(hasDiagram(container), "A Classman diagram must follow the text");
     return (ClassmanImageEditArea) container.getEditAreaAt(1);
+  }
+
+  /** @return a file hilfe.cld with the content in the directory */
+  static File diagramFile(Path directory, String content) throws IOException {
+    Path file = directory.resolve("hilfe.cld");
+    Files.writeString(file, content, StandardCharsets.UTF_8);
+    return file.toFile();
+  }
+
+  /** Clicks the toolbar button for a Classman diagram, and answers the dialog by linking the file. */
+  static void insertLinkedDiagram(File file) {
+    specman.answerClassmanFileChoiceWith(SourceFileChoice.linkedFile(file));
+    specman.doEdit(ClassmanAction.class);
+    specman.layoutComponents();
   }
 
   static boolean hasDiagram(EditContainer container) {
