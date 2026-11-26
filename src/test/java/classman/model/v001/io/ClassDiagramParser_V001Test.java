@@ -141,6 +141,18 @@ class ClassDiagramParser_V001Test {
     assertNull(parser.parse("classdiagram { }").name);
   }
 
+  /** The optional diagram ID stands behind the name and its mark, and also without a name. */
+  @Test
+  void diagramId() throws ClassDiagramParseException {
+    ClassDiagramModel_V001 named = parser.parse("classdiagram \"Hilfe\" was(yellow, \"Alt\") (04de91aa) { }");
+    assertEquals("04de91aa", named.id);
+    assertEquals("Hilfe", named.name);
+    ClassDiagramModel_V001 unnamed = parser.parse("classdiagram (04de91aa) { }");
+    assertEquals("04de91aa", unnamed.id);
+    assertNull(unnamed.name);
+    assertNull(parser.parse("classdiagram \"Hilfe\" { }").id);
+  }
+
   /** An association with id, multiplicities, direction and a label with a line break. */
   @Test
   void associationParts() throws ClassDiagramParseException {

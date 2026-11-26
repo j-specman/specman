@@ -60,6 +60,9 @@ grammar ClassDiagram_V001;
 //   * IDs of classes, attributes, relations and stereotypes (class Hilfeversion (04de91aa) <<Entity>> (7b2f90c1))
 //     are optional, except that a class needs one to take part in a relation. Created in a class model, a diagram refers with them to the elements of the model: the
 //     stereotype is defined there once and assigned to the classes. A diagram which stands for itself needs none.
+//   * A diagram can have an ID of its own too, behind its name (and the change mark of the name) and before the opening
+//     brace, also if it has no name: classdiagram "Hilfe" (04de91aa) { ... } or classdiagram (04de91aa) { ... }.
+//     The ID prepares the diagram to be one of several in a class model.
 //   * A stereotype is a free text, <<Entity>>, or refers to a meta tag configuration of the host (in Specman: of the
 //     document): <<:Domain_Value>>. The name consists of the letters A-Z and a-z, digits and underscores, the parser
 //     refuses anything else. The host gives the reference its label, icon and colors, so the source carries none of
@@ -105,7 +108,7 @@ grammar ClassDiagram_V001;
 // ============================================================
 
 classDiagram
-    : CLASSDIAGRAM (diagramName nameChange=textChange?)? LBRACE element* RBRACE EOF
+    : CLASSDIAGRAM (diagramName nameChange=textChange?)? diagramId=ELEMENT_ID? LBRACE element* RBRACE EOF
     ;
 
 diagramName

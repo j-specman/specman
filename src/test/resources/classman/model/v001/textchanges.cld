@@ -1,6 +1,6 @@
 // {"classmanVersion":"0.1","modelType":"classman.model.v001.ClassDiagramModel_V001"}
 // Every kind of text marked as changed by a change set, with and without backup.
-classdiagram "Texts" was(yellow, "Old title") {
+classdiagram "Texts" was(yellow, "Old title") (d1a9c0de) {
 
     class Order was(yellow, Bestellung) (aaaaaaaa) <<Entity>> was(blue, Table) (e3a1d7c2) {TABLE was(yellow, T_OLD)=orders was(yellow, orders_v1), B=2} {
         -number was(yellow, nr) (a1a1a1a1) : String was(blue, "Zeichen\nkette") [Pflicht was(yellow, optional), 2..50, was, was was(blue)]

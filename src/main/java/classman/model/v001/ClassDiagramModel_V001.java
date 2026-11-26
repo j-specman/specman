@@ -9,6 +9,8 @@ public class ClassDiagramModel_V001 {
     public String name;
     /** Null if no change set changed the name. */
     public TextChangeModel_V001 nameChange;
+    /** 8 hex characters without parentheses, null for a diagram without an ID. */
+    public String id;
     public final List<AbstractDiagramElementModel_V001> elements = new ArrayList<>();
 
     public ClassDiagramModel_V001(String name) {

@@ -113,6 +113,7 @@ public class ClassDiagramParser_V001 {
         DiagramNameContext name = tree.diagramName();
         ClassDiagramModel_V001 model = new ClassDiagramModel_V001(name == null ? null : text(name));
         model.nameChange = textChange(tree.nameChange);
+        model.id = id(tree.diagramId);
         for (ElementContext element : tree.element()) {
             model.elements.add(buildElement(element));
         }

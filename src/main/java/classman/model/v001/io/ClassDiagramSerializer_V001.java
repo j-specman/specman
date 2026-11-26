@@ -62,6 +62,7 @@ public class ClassDiagramSerializer_V001 {
             out.append(' ').append(name(model.name));
             appendTextChange(out, model.nameChange);
         }
+        appendId(out, model.id);
         out.append(" {\n");
         boolean first = true;
         for (AbstractDiagramElementModel_V001 element : model.elements) {
