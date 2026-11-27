@@ -19,6 +19,7 @@ import specman.editarea.image.classman.ClassmanImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.editarea.image.AbstractSourceImageEditArea;
 import specman.link.AliasListPanel;
+import specman.link.LinkLocation;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.metatag.generic.config.MetaTagConfigsEditor;
 import specman.metatag.stepnumberlabel.StepnumberContextMenu;
@@ -105,8 +106,8 @@ public class SpecmanFT extends Specman {
   private AliasListPanel openedAliasListPanel;
   private final List<String> aliasesAskedFor = new ArrayList<>();
   private final List<File> fileSuggestionsOffered = new ArrayList<>();
-  private String classmanAliasAnswer;
-  private final List<File> filesAskedClassmanAliasFor = new ArrayList<>();
+  private LinkLocation classmanLocationAnswer;
+  private final List<File> filesAskedClassmanLocationFor = new ArrayList<>();
   private final List<String> linksOpenedInNewInstance = new ArrayList<>();
   private final List<String> addressesOpenedInBrowser = new ArrayList<>();
   private EditArea focusedArea;
@@ -618,21 +619,21 @@ public class SpecmanFT extends Specman {
     sourceFileChoiceAnswers.put(ClassmanImageEditArea.FILE_KIND, choice);
   }
 
-  /** Defines the alias the user gives when asked for one for a linked Classman diagram, empty for no alias. Without an
-   * answer, the user cancels. */
-  public void answerClassmanAliasWith(String alias) {
-    classmanAliasAnswer = alias;
+  /** Defines how the link names the file when the user is asked, while linking a Classman diagram, whether by an alias or
+   * by a path. Null for cancelling. Without an answer, the user cancels. */
+  public void answerClassmanLocationWith(LinkLocation location) {
+    classmanLocationAnswer = location;
   }
 
-  /** The files the user was asked an alias for when linking a Classman diagram, in the order of asking. */
-  public List<File> filesAskedClassmanAliasFor() {
-    return Collections.unmodifiableList(filesAskedClassmanAliasFor);
+  /** The files the user was asked how to name them in the link of a Classman diagram, in the order of asking. */
+  public List<File> filesAskedClassmanLocationFor() {
+    return Collections.unmodifiableList(filesAskedClassmanLocationFor);
   }
 
   @Override
-  public String askClassmanAlias(File file, String diagramId, String diagramName) {
-    filesAskedClassmanAliasFor.add(file);
-    return classmanAliasAnswer;
+  public LinkLocation askClassmanLocation(File file, String diagramId, String diagramName) {
+    filesAskedClassmanLocationFor.add(file);
+    return classmanLocationAnswer;
   }
 
   /** Whether the user was offered to start with an empty diagram when asked for a PlantUML file the last time. */

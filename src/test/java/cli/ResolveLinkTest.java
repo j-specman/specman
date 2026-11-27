@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import specman.cli.ResolveLinkCLO;
 import specman.link.LinkAliases;
+import specman.link.LinkLocation;
 import specman.link.SpecmanLink;
 import specman.link.resolver.ResolutionStatus;
 
@@ -32,6 +33,7 @@ import static specman.cli.ResolveLinkCLO.FIELD_SEPARATOR;
 import static specman.cli.ResolveLinkCLO.LINE_END;
 import static specman.cli.SpecmanCLI.EXIT_ERROR;
 import static specman.cli.SpecmanCLI.EXIT_SUCCESS;
+import static specman.link.SpecmanLink.FRAGMENT_SEPARATOR;
 import static specman.link.SpecmanLink.SEPARATOR;
 import static specman.link.resolver.ResolutionStatus.ERROR;
 import static specman.link.resolver.ResolutionStatus.OK;
@@ -92,7 +94,7 @@ public class ResolveLinkTest {
   }
 
   private static String aliasLink(String stepId) {
-    return ALIAS_LINK + SEPARATOR + stepId;
+    return ALIAS_LINK + FRAGMENT_SEPARATOR + stepId;
   }
 
   private static String aliasLink(String stepId, String stepNumber) {
@@ -203,7 +205,7 @@ public class ResolveLinkTest {
   /** Scenario: The alias isn't assigned to a file. There is no file to tell. */
   @Test
   void testUnknownAliasIsAnError() {
-    CLIResult result = resolveLinks(SpecmanLink.SCHEME + UNKNOWN_ALIAS + SEPARATOR + STEP_ID);
+    CLIResult result = resolveLinks(SpecmanLink.SCHEME + UNKNOWN_ALIAS + FRAGMENT_SEPARATOR + STEP_ID);
 
     assertResult(result,
       line(ERROR, null, UNKNOWN_ALIAS_MESSAGE + UNKNOWN_ALIAS));
@@ -219,6 +221,29 @@ public class ResolveLinkTest {
     CLIResult result = resolveLinks(link);
 
     assertResult(result, line(ERROR, file, "File not found"));
+  }
+
+  /** Scenario: The link has no file, so it points into the document it is in. There is none, so it can't be resolved. */
+  @Test
+  void testLocalLinkIsAnError() {
+    String link = SpecmanLink.SCHEME + FRAGMENT_SEPARATOR + STEP_ID + SEPARATOR + STEP_NUMBER;
+
+    CLIResult result = resolveLinks(link);
+
+    assertResult(result, line(ERROR, null,
+      "A link without a file points into the document it is in, so it can't be resolved on its own: " + link));
+    assertEquals(EXIT_ERROR, result.exitState);
+  }
+
+  /** Scenario: The link names the file by a path relative to the directory the command runs in. */
+  @Test
+  void testRelativePathStartsInTheWorkingDirectory() {
+    File file = diagramWithSteps();
+    String relativeLink = SpecmanLink.of(LinkLocation.relative(file, new File(".")), STEP_ID, STEP_NUMBER);
+
+    CLIResult result = resolveLinks(relativeLink);
+
+    assertResult(result, line(OK, file, relativeLink));
   }
 
   /** Scenario: The file exists but isn't a diagram. Without a step the file is all that counts, with a step it must be read. */

@@ -2,6 +2,7 @@ package specman.ops;
 
 import specman.editarea.TextEditArea;
 import specman.link.LinkAliases;
+import specman.link.LinkLocation;
 import specman.link.SpecmanLink;
 import specman.link.SpecmanLink.Reference;
 import specman.link.suggester.FileSuggester;
@@ -41,6 +42,10 @@ public class NavigateToLinkOp extends AbstractSpecmanOp {
       context.showToast(i18n(invalidLinkMessageKey));
       return;
     }
+    if (reference.isLocal()) {
+      navigateToStep(reference);
+      return;
+    }
     File file = fileOf(reference);
     if (file == null) {
       return;
@@ -75,13 +80,11 @@ public class NavigateToLinkOp extends AbstractSpecmanOp {
   }
 
   /** The file the link points to. For an alias nobody knows, the user is asked which file it stands for, with the
-   * file the existing aliases hint at preselected, and the answer is remembered. Null if the user doesn't tell. */
+   * file the existing aliases hint at preselected, and the answer is remembered. Null if the user doesn't tell. A
+   * relative path starts in the directory of the open document. */
   private File fileOf(Reference reference) {
-    if (!reference.hasAlias()) {
-      return reference.file();
-    }
-    File knownFile = LinkAliases.fileOf(reference.alias());
-    if (knownFile != null) {
+    File knownFile = reference.location().resolve(LinkLocation.baseDirectoryOf(getDiagrammDatei()));
+    if (knownFile != null || !reference.hasAlias()) {
       return knownFile;
     }
     File suggestedFile = new FileSuggester(LinkAliases.entries()).suggest(reference.alias());

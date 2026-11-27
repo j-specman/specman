@@ -74,6 +74,18 @@ public final class LinkAliases {
     entry.put(ALIAS_KEY, alias);
   }
 
+  /** Remembers what the user chose in the dialog for the file, when a link to it was made. An alias is assigned. A
+   * path or a link without a file is a choice for this one link: an alias which the file has stays, and a file which has
+   * none counts as decided against an alias, so Specman doesn't suggest one again. */
+  public static void remember(File file, LinkLocation location) {
+    if (location.isAlias()) {
+      assign(file, location.alias());
+    }
+    else if (!isAssigned(file)) {
+      assign(file, "");
+    }
+  }
+
   /** Assigns the alias to the file, taking it away from the file which has it now. That file counts as decided against
    * an alias then. This is for the user who tells which file an alias stands for, which another file had so far. */
   public static void reassign(File file, String alias) {

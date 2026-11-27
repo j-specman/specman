@@ -7,6 +7,7 @@ import specman.editarea.EditContainer;
 import specman.editarea.TextEditArea;
 import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.classman.ClassmanImageEditArea;
+import specman.link.LinkLocation;
 import specman.view.EinfacherSchrittView;
 
 import java.io.File;
@@ -59,16 +60,16 @@ abstract class AbstractClassmanTest {
   }
 
   /** Clicks the toolbar button for a Classman diagram, and answers the dialog by linking the file. If the file has no
-   * alias yet, the user decides against an alias. */
+   * alias yet, the user decides against an alias and takes the absolute path. */
   static void insertLinkedDiagram(File file) {
-    insertLinkedDiagram(file, "");
+    insertLinkedDiagram(file, LinkLocation.absolute(file));
   }
 
-  /** Like {@link #insertLinkedDiagram(File)}, but the user answers the question for an alias with the given one, which
-   * is null for cancelling. */
-  static void insertLinkedDiagram(File file, String aliasAnswer) {
+  /** Like {@link #insertLinkedDiagram(File)}, but the user answers the question how the link names the file with the
+   * given location, which is null for cancelling. */
+  static void insertLinkedDiagram(File file, LinkLocation answer) {
     specman.answerClassmanFileChoiceWith(SourceFileChoice.linkedFile(file));
-    specman.answerClassmanAliasWith(aliasAnswer);
+    specman.answerClassmanLocationWith(answer);
     specman.doEdit(ClassmanAction.class);
     specman.layoutComponents();
   }

@@ -10,6 +10,7 @@ import specman.i18n.Messages;
 import specman.link.AliasDialog;
 import specman.link.AliasListDialog;
 import specman.link.AliasListPanel;
+import specman.link.LinkLocation;
 import specman.link.SpecmanLink;
 import specman.link.classman.ClassmanLinkAliasPanel;
 import specman.menubar.SpecmanMenuBar;
@@ -778,10 +779,12 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	@Override
-	public String askClassmanAlias(File file, String diagramId, String diagramName) {
-		AtomicReference<String> alias = new AtomicReference<>();
-		new AliasDialog(frame, new ClassmanLinkAliasPanel(file, diagramId, diagramName, alias::set));
-		return alias.get();
+	public LinkLocation askClassmanLocation(File file, String diagramId, String diagramName) {
+		LinkLocation relativeLocation = diagrammDatei == null ? null
+			: LinkLocation.relative(file, LinkLocation.baseDirectoryOf(diagrammDatei));
+		AtomicReference<LinkLocation> location = new AtomicReference<>();
+		new AliasDialog(frame, new ClassmanLinkAliasPanel(file, diagramId, diagramName, relativeLocation, location::set));
+		return location.get();
 	}
 
 	/** Called while Specman is being constructed. Overrides must not depend on their own fields. */

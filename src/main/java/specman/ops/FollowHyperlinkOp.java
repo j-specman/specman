@@ -1,6 +1,6 @@
 package specman.ops;
 
-import specman.link.LinkAliases;
+import specman.link.LinkLocation;
 import specman.link.SpecmanLink;
 import specman.link.SpecmanLink.Reference;
 
@@ -34,18 +34,32 @@ public class FollowHyperlinkOp extends AbstractSpecmanOp {
 
   private void followSpecmanLink(String link) {
     Reference reference = SpecmanLink.parseOrNull(link);
-    if (reference == null || refersToCurrentlyOpenFile(reference)) {
+    if (reference == null || reference.isLocal() || refersToCurrentlyOpenFile(reference)) {
       new NavigateToLinkOp(context).run(link);
     }
     else {
-      context.openInNewInstance(link);
+      context.openInNewInstance(linkForNewInstance(reference, link));
     }
   }
 
   /** Whether the link's file is known and open. An alias nobody knows is not, the instance following the link asks for the file. */
   private boolean refersToCurrentlyOpenFile(Reference reference) {
-    File file = reference.hasAlias() ? LinkAliases.fileOf(reference.alias()) : reference.file();
+    File file = reference.location().resolve(baseDirectory());
     return file != null && isOpen(file);
+  }
+
+  /** A relative path starts in the directory of the document with the link, which the new instance doesn't have, so the
+   * new instance gets the path of the file. Any other link tells it all itself. */
+  private String linkForNewInstance(Reference reference, String link) {
+    if (!reference.location().isRelative()) {
+      return link;
+    }
+    File file = reference.location().resolve(baseDirectory());
+    return SpecmanLink.of(LinkLocation.absolute(file), reference.stepId(), reference.stepNumber());
+  }
+
+  private File baseDirectory() {
+    return LinkLocation.baseDirectoryOf(getDiagrammDatei());
   }
 
   private boolean isSystemScheme(String link) {

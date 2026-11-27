@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static specman.i18n.Messages.i18n;
+import static specman.link.SpecmanLink.FRAGMENT_SEPARATOR;
 import static specman.link.SpecmanLink.SCHEME;
 import static specman.link.SpecmanLink.SEPARATOR;
 import static specman.menubar.SpecmanMenuBar.OPEN_LINK_ITEM;
@@ -94,6 +95,38 @@ class NavigateToLinkTest extends AbstractLinkTest {
     assertEquals(List.of(), specman.shownMessages());
   }
 
+  /** Scenario: The link has no file, only a step. It points into the open document, even if that has never been saved. */
+  @Test
+  void testLocalLinkNavigatesInTheOpenDocument() {
+    EinfacherSchrittView step1 = specman.clickNewSimpleStep();
+    EinfacherSchrittView step2 = specman.clickNewSimpleStep();
+    putIntoClipboard(SCHEME + FRAGMENT_SEPARATOR + step2.getId() + SEPARATOR + step2.getNumber());
+    specman.focus(step1);
+
+    openLinkFromClipboard();
+
+    assertSame(step2, focusedStep());
+    assertEquals(List.of(), specman.shownMessages());
+  }
+
+  /** Scenario: The link names the file by a path relative to the directory of the open document, UC-721. Opening it loads
+   * UC-720 from the same directory and puts the cursor into its step 2. */
+  @Test
+  void testRelativeLinkStartsInTheDirectoryOfTheOpenDocument(@TempDir Path directory) throws Exception {
+    specman.clickNewSimpleStep();
+    EinfacherSchrittView step2 = specman.clickNewSimpleStep();
+    File linkedFile = saveDiagram(directory, "UC-720.nsd");
+    String stepId = step2.getId();
+    saveDiagram(directory, "UC-721.nsd");
+    putIntoClipboard(SCHEME + "./UC-720.nsd" + FRAGMENT_SEPARATOR + stepId + SEPARATOR + step2.getNumber());
+
+    openLinkFromClipboard();
+
+    assertEquals(linkedFile, specman.getDiagrammDatei());
+    assertEquals(stepId, focusedStep().getId());
+    assertEquals(List.of(), specman.shownMessages());
+  }
+
   /** Scenario: The link only names the file, not a step. Opening it loads the file and shows no complaint. */
   @Test
   void testLinkWithoutStepOpensFileOnly(@TempDir Path directory) throws Exception {
@@ -126,6 +159,38 @@ class NavigateToLinkTest extends AbstractLinkTest {
     assertEquals(List.of(), specman.shownMessages());
   }
 
+  /** Scenario: The clipboard holds a link of the old form, which had commas only and no hash sign. Such links are still
+   * in documents which were written before, so the link is followed as well. */
+  @Test
+  void testLinkOfOldFormIsFollowed(@TempDir Path directory) {
+    EinfacherSchrittView step1 = specman.clickNewSimpleStep();
+    EinfacherSchrittView step2 = specman.clickNewSimpleStep();
+    LinkAliases.assign(saveDiagram(directory, "UC-720.nsd"), "uc720");
+    putIntoClipboard(SCHEME + "uc720" + SEPARATOR + step2.getId() + SEPARATOR + step2.getNumber());
+    specman.focus(step1);
+
+    openLinkFromClipboard();
+
+    assertSame(step2, focusedStep());
+    assertEquals(List.of(), specman.shownMessages());
+  }
+
+  /** Scenario: A tool which treats the link like a web address added a slash in front of the hash sign and another one at
+   * the end. The link is followed all the same. */
+  @Test
+  void testSlashesAddedByToolsAreIgnored(@TempDir Path directory) {
+    EinfacherSchrittView step1 = specman.clickNewSimpleStep();
+    EinfacherSchrittView step2 = specman.clickNewSimpleStep();
+    LinkAliases.assign(saveDiagram(directory, "UC-720.nsd"), "uc720");
+    putIntoClipboard(SCHEME + "uc720/" + FRAGMENT_SEPARATOR + step2.getId() + SEPARATOR + step2.getNumber() + "/");
+    specman.focus(step1);
+
+    openLinkFromClipboard();
+
+    assertSame(step2, focusedStep());
+    assertEquals(List.of(), specman.shownMessages());
+  }
+
   /** Scenario: The link has an alias the user never assigned to a file. The user is asked which file it stands for
    * and chooses UC-720. Specman remembers that, so the next link with this alias doesn't ask again. */
   @Test
@@ -133,7 +198,7 @@ class NavigateToLinkTest extends AbstractLinkTest {
     EinfacherSchrittView step1 = specman.clickNewSimpleStep();
     EinfacherSchrittView step2 = specman.clickNewSimpleStep();
     File file = saveDiagram(directory, "UC-720.nsd");
-    putIntoClipboard(SCHEME + "uc720" + SEPARATOR + step2.getId() + SEPARATOR + step2.getNumber());
+    putIntoClipboard(SCHEME + "uc720" + FRAGMENT_SEPARATOR + step2.getId() + SEPARATOR + step2.getNumber());
     specman.answerFileChoicesWith(file);
     specman.focus(step1);
 
@@ -184,7 +249,7 @@ class NavigateToLinkTest extends AbstractLinkTest {
     EinfacherSchrittView step1 = specman.clickNewSimpleStep();
     EinfacherSchrittView step2 = specman.clickNewSimpleStep();
     saveDiagram(directory, "UC-720.nsd");
-    putIntoClipboard(SCHEME + "uc720" + SEPARATOR + step2.getId() + SEPARATOR + step2.getNumber());
+    putIntoClipboard(SCHEME + "uc720" + FRAGMENT_SEPARATOR + step2.getId() + SEPARATOR + step2.getNumber());
     specman.answerFileChoicesWith(null);
     specman.focus(step1);
 

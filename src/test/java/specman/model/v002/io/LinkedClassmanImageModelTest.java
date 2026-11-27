@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** A Classman diagram in the model is either embedded with its source, or linked to a file with it. */
 class LinkedClassmanImageModelTest {
-  private static final String LINK = "classman://hilfe,0a1b2c3d,Hilfe, Versionierung";
+  private static final String LINK = "classman://hilfe#0a1b2c3d,Hilfe, Versionierung";
   private static final String EMBEDDED = "classdiagram {\n    class A (aaaaaaaa)\n}\n";
 
   @Test

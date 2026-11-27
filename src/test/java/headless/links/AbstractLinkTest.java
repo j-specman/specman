@@ -19,7 +19,7 @@ import static headless.HeadlessExtension.specman;
 import static headless.SpecmanFT.findByName;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static specman.link.SpecmanLink.SEPARATOR;
+import static specman.link.SpecmanLink.FRAGMENT_SEPARATOR;
 
 /** Base class for tests about global links. It provides the headless Specman and the operation of the dialogs
  * around links like the user does. */
@@ -90,7 +90,7 @@ abstract class AbstractLinkTest {
 
   /** The link which names the file only, without step ID and number. */
   static String fileOnly(String link) {
-    return link.substring(0, link.indexOf(SEPARATOR));
+    return link.substring(0, link.indexOf(FRAGMENT_SEPARATOR));
   }
 
   /** Copies the link to the step like the user does who decides against an alias for the file, if asked. */

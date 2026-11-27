@@ -41,8 +41,21 @@ class ClassmanLinkResolverTest {
 
   private static File write(Path directory, String name, String content) throws IOException {
     Path file = directory.resolve(name);
+    Files.createDirectories(file.getParent());
     Files.writeString(file, content, StandardCharsets.UTF_8);
     return file.toFile();
+  }
+
+  /** Scenario: The link names the diagram by a path relative to the directory of the document which contains the link. */
+  @Test
+  void relativePathStartsInTheDirectoryOfTheDocument(@TempDir Path directory) throws IOException {
+    File diagram = write(directory, "diagrams/hilfe.cld", DIAGRAM);
+    File document = directory.resolve("specs/UC-720.nsd").toFile();
+
+    ClassmanLinkResolution resolution = new ClassmanLinkResolver(document).resolve("classman://../diagrams/hilfe.cld");
+
+    assertTrue(resolution.isOk());
+    assertEquals(diagram, resolution.file());
   }
 
   @Test

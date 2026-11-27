@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static specman.i18n.Messages.i18n;
 import static specman.link.LinkAliases.PROBLEM_FILE_TWICE;
 import static specman.link.LinkAliases.PROBLEM_TAKEN;
+import static specman.link.SpecmanLink.FRAGMENT_SEPARATOR;
 import static specman.link.SpecmanLink.SCHEME;
 import static specman.link.SpecmanLink.SEPARATOR;
 import static specman.menubar.SpecmanMenuBar.ALIASES_ITEM;
@@ -87,7 +88,7 @@ class AliasListTest extends AbstractLinkTest {
 
     assertTrue(closed.get());
     assertEquals(List.of(new Entry(file, "uc720b")), rowsOf(openList()));
-    assertEquals(SCHEME + "uc720b" + SEPARATOR + step.getId() + SEPARATOR + step.getNumber(), copyLink(step));
+    assertEquals(SCHEME + "uc720b" + FRAGMENT_SEPARATOR + step.getId() + SEPARATOR + step.getNumber(), copyLink(step));
   }
 
   /** Scenario: The user types characters into an alias in the list which an alias must not contain. They don't
@@ -136,8 +137,8 @@ class AliasListTest extends AbstractLinkTest {
     assertNotNull(clickCopyLink(step), "without an alias, the user must be asked again");
   }
 
-  /** Scenario: The user empties the alias of a file and saves. Links to the file use the path then, and the user
-   * isn't asked again. The file doesn't show up in the list anymore. */
+  /** Scenario: The user empties the alias of a file and saves. Links to the file use the path then, and the dialog offers
+   * no alias. The file doesn't show up in the list anymore. */
   @Test
   void testEmptiedAliasMeansDecidedAgainstAlias(@TempDir Path directory) throws Exception {
     EinfacherSchrittView step = specman.clickNewSimpleStep();
@@ -148,7 +149,9 @@ class AliasListTest extends AbstractLinkTest {
     click(listPanel, AliasListPanel.SAVE_BUTTON);
 
     assertEquals(List.of(), rowsOf(openList()));
-    assertNull(clickCopyLink(step), "the user decided against an alias, so there is nothing to ask");
+    AliasPanel panel = clickCopyLink(step);
+    assertEquals("", aliasField(panel).getText(), "the user decided against an alias, so none is offered");
+    click(panel, AliasPanel.OK_BUTTON);
     assertTrue(clipboardText().startsWith(SCHEME + "/"));
   }
 

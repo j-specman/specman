@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static specman.i18n.Messages.i18n;
 import static specman.link.LinkAliases.PROBLEM_TAKEN;
+import static specman.link.SpecmanLink.FRAGMENT_SEPARATOR;
 import static specman.link.SpecmanLink.SCHEME;
 import static specman.link.SpecmanLink.SEPARATOR;
 
@@ -49,7 +50,7 @@ class CopyLinkTest extends AbstractLinkTest {
     AliasPanel panel = clickCopyLink(step);
     AtomicBoolean closed = new AtomicBoolean();
     panel.onClose(() -> closed.set(true));
-    assertEquals(SCHEME + file.toURI().getRawPath() + SEPARATOR + step.getId() + SEPARATOR + step.getNumber(), preview(panel));
+    assertEquals(SCHEME + file.toURI().getRawPath() + FRAGMENT_SEPARATOR + step.getId() + SEPARATOR + step.getNumber(), preview(panel));
 
     click(panel, AliasPanel.CANCEL_BUTTON);
 
@@ -60,9 +61,10 @@ class CopyLinkTest extends AbstractLinkTest {
   }
 
   /** Scenario: The diagram is saved in a file with blanks and a comma in its name. The user copies the link of
-   * step 2 and decides against an alias. The clipboard then contains the link with the file, the step ID and the
-   * step number, separated by commas. The comma in the file name is encoded, so it can't be mistaken for a separator.
-   * Copying the link of step 1 afterwards doesn't ask again. */
+   * step 2 and decides against an alias. The clipboard then contains the link with the file, a hash sign, the step ID
+   * and the step number, separated by a comma. The comma in the file name is encoded, so a link which names the file only
+   * can't be mistaken for one of the old form, in which commas separated the step.
+   * Copying the link of step 1 afterwards shows the dialog again, without an alias, as the user decided against one. */
   @Test
   void testCopyLinkWithoutAlias(@TempDir Path directory) throws Exception {
     EinfacherSchrittView step1 = specman.clickNewSimpleStep();
@@ -71,23 +73,28 @@ class CopyLinkTest extends AbstractLinkTest {
 
     click(clickCopyLink(step2), AliasPanel.OK_BUTTON);
 
-    String[] parts = clipboardText().split(SEPARATOR, -1);
-    assertEquals(3, parts.length, String.join("|", parts));
-    assertTrue(parts[0].startsWith(SCHEME));
-    assertTrue(parts[0].endsWith("UC%20720%2C%20Eins.nsd"), parts[0]);
-    assertEquals(file, new File(URI.create("file://" + parts[0].substring(SCHEME.length()))));
-    assertEquals(step2.getId(), parts[1]);
-    assertEquals(step2.getNumber().toString(), parts[2]);
+    String[] locationAndFragment = clipboardText().split(FRAGMENT_SEPARATOR, -1);
+    assertEquals(2, locationAndFragment.length, String.join("|", locationAndFragment));
+    String location = locationAndFragment[0];
+    assertTrue(location.startsWith(SCHEME));
+    assertTrue(location.endsWith("UC%20720%2C%20Eins.nsd"), location);
+    assertEquals(file, new File(URI.create("file://" + location.substring(SCHEME.length()))));
+    String[] step = locationAndFragment[1].split(SEPARATOR, -1);
+    assertEquals(2, step.length, locationAndFragment[1]);
+    assertEquals(step2.getId(), step[0]);
+    assertEquals(step2.getNumber().toString(), step[1]);
 
     specman.clipboard().setContents(new StringSelection("something else"), null);
-    assertNull(clickCopyLink(step1), "the user already decided, so the dialog must not show up again");
-    assertEquals(step1.getId(), clipboardText().split(SEPARATOR, -1)[1]);
+    AliasPanel again = clickCopyLink(step1);
+    assertEquals("", aliasField(again).getText(), "the user decided against an alias, so none is offered");
+    click(again, AliasPanel.OK_BUTTON);
+    assertTrue(clipboardText().contains(FRAGMENT_SEPARATOR + step1.getId() + SEPARATOR), clipboardText());
     assertEquals(List.of(), specman.shownMessages());
   }
 
   /** Scenario: The user types an alias while copying a link. The link shown in the dialog uses the alias instead of
-   * the file. After confirming, the link is in the clipboard. Links to other steps of the file use the alias right
-   * away, without asking. */
+   * the file. After confirming, the link is in the clipboard. Copying the link to another step of the file shows the
+   * dialog again, with the alias in the field and the link using it. */
   @Test
   void testCopyLinkWithAlias(@TempDir Path directory) throws Exception {
     EinfacherSchrittView step1 = specman.clickNewSimpleStep();
@@ -97,12 +104,16 @@ class CopyLinkTest extends AbstractLinkTest {
 
     typeAlias(panel, "uc720");
 
-    String expectedLink = SCHEME + "uc720" + SEPARATOR + step1.getId() + SEPARATOR + step1.getNumber();
+    String expectedLink = SCHEME + "uc720" + FRAGMENT_SEPARATOR + step1.getId() + SEPARATOR + step1.getNumber();
     assertEquals(expectedLink, preview(panel));
     click(panel, AliasPanel.OK_BUTTON);
     assertEquals(expectedLink, clipboardText());
-    assertNull(clickCopyLink(step2));
-    assertEquals(SCHEME + "uc720" + SEPARATOR + step2.getId() + SEPARATOR + step2.getNumber(), clipboardText());
+    AliasPanel again = clickCopyLink(step2);
+    assertEquals("uc720", aliasField(again).getText());
+    assertNull(aliasField(again).getSelectedText(), "an existing alias must not be selected, a key press would replace it");
+    assertEquals(SCHEME + "uc720" + FRAGMENT_SEPARATOR + step2.getId() + SEPARATOR + step2.getNumber(), preview(again));
+    click(again, AliasPanel.OK_BUTTON);
+    assertEquals(SCHEME + "uc720" + FRAGMENT_SEPARATOR + step2.getId() + SEPARATOR + step2.getNumber(), clipboardText());
   }
 
   /** Scenario: The user types or pastes an alias with forbidden characters or too long. The characters an alias

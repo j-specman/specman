@@ -10,6 +10,7 @@ import specman.link.SpecmanLink;
 import specman.view.AbstractSchrittView;
 import specman.view.EinfacherSchrittView;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -59,6 +60,43 @@ class FollowHyperlinkTest extends AbstractLinkTest {
     EinfacherSchrittView step3 = specman.clickNewSimpleStep();
     saveDiagram(directory, "UC-720.nsd");
     TextEditArea text = textWithHyperlink(step1, copyLink(step3));
+
+    specman.ctrlClickOnFirstCharacter(text);
+
+    assertSame(step3, focusedStep());
+    assertEquals(List.of(), specman.linksOpenedInNewInstance());
+    assertEquals(List.of(), specman.shownMessages());
+  }
+
+  /** Scenario: The text of step 1 links to UC-720 by a path relative to the directory of the open document. A new
+   * instance has no document to start the path from, so it gets the absolute path of the file. */
+  @Test
+  void testRelativeLinkToOtherFileStartsNewInstanceWithAbsolutePath(@TempDir Path directory) throws Exception {
+    specman.clickNewSimpleStep();
+    EinfacherSchrittView step2 = specman.clickNewSimpleStep();
+    File linkedFile = saveDiagram(directory, "UC-720.nsd");
+    String stepId = step2.getId();
+    String stepNumber = String.valueOf(step2.getNumber());
+    EinfacherSchrittView linkingStep = specman.clickNewSimpleStep();
+    saveDiagram(directory, "UC-721.nsd");
+    TextEditArea text = textWithHyperlink(linkingStep,
+      SpecmanLink.SCHEME + "./UC-720.nsd" + SpecmanLink.FRAGMENT_SEPARATOR + stepId + SpecmanLink.SEPARATOR + stepNumber);
+
+    specman.ctrlClickOnFirstCharacter(text);
+
+    assertEquals(List.of(SpecmanLink.of(linkedFile, "", stepId, stepNumber)), specman.linksOpenedInNewInstance());
+    assertEquals(List.of(), specman.shownMessages());
+  }
+
+  /** Scenario: The text of step 1 links to step 3 of the open file by a link without file. Following it goes there
+   * right away. */
+  @Test
+  void testLocalLinkNavigatesInPlace() {
+    EinfacherSchrittView step1 = specman.clickNewSimpleStep();
+    specman.clickNewSimpleStep();
+    EinfacherSchrittView step3 = specman.clickNewSimpleStep();
+    TextEditArea text = textWithHyperlink(step1,
+      SpecmanLink.SCHEME + SpecmanLink.FRAGMENT_SEPARATOR + step3.getId() + SpecmanLink.SEPARATOR + step3.getNumber());
 
     specman.ctrlClickOnFirstCharacter(text);
 

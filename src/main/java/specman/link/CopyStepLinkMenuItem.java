@@ -12,8 +12,8 @@ import java.io.File;
 
 import static specman.Specman.editor;
 
-/** Context menu item of a step number which copies a global link to the step to the clipboard. If the user
- * hasn't decided yet whether links to the file use an alias, the {@link AliasPanel} asks first. */
+/** Context menu item of a step number which copies a global link to the step to the clipboard. The {@link AliasPanel}
+ * asks how the link names the file each time. */
 public class CopyStepLinkMenuItem extends IMenuItem {
 
   private static final String MESSAGE_KEY = "menu.context.copy.link";
@@ -39,26 +39,18 @@ public class CopyStepLinkMenuItem extends IMenuItem {
     this.dialogDisplayed = dialogDisplayed;
   }
 
-  /** The panel of the dialog opened by the last click, null if the click didn't need a dialog. */
+  /** The panel of the dialog opened by the last click. */
   public AliasPanel aliasPanel() {
     return aliasPanel;
   }
 
+  /** The dialog is always shown, because the user may want one form of the link this time and another one the next. The
+   * alias which the file has is in the field already. */
   private void copyLink() {
     File file = editor().getDiagrammDatei();
-    aliasPanel = null;
-    if (LinkAliases.isAssigned(file)) {
-      copyLinkToClipboard(file);
-    }
-    else {
-      askForAlias(file);
-    }
-  }
-
-  private void askForAlias(File file) {
-    aliasPanel = new StepLinkAliasPanel(file, currentStep, alias -> {
-      LinkAliases.assign(file, alias);
-      copyLinkToClipboard(file);
+    aliasPanel = new StepLinkAliasPanel(file, currentStep, location -> {
+      LinkAliases.remember(file, location);
+      copyLinkToClipboard(location);
     });
     aliasPanel.setDialogDisplayed(dialogDisplayed);
     if (dialogDisplayed) {
@@ -66,9 +58,8 @@ public class CopyStepLinkMenuItem extends IMenuItem {
     }
   }
 
-  private void copyLinkToClipboard(File file) {
-    String link = SpecmanLink.of(file, LinkAliases.aliasOf(file), currentStep);
-    editor().clipboard().setContents(new StringSelection(link), null);
+  private void copyLinkToClipboard(LinkLocation location) {
+    editor().clipboard().setContents(new StringSelection(SpecmanLink.of(location, currentStep)), null);
   }
 
   private Frame owner() {

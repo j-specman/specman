@@ -9,6 +9,7 @@ import specman.editarea.image.plantuml.PlantUmlSourceValidator;
 import specman.editarea.image.SvgPicture;
 import specman.editarea.image.SvgNotDisplayableException;
 import specman.link.LinkAliases;
+import specman.link.LinkLocation;
 import specman.link.classman.ClassmanLink;
 import specman.link.classman.ClassmanLinkResolution;
 import specman.link.classman.ClassmanLinkResolver;
@@ -147,23 +148,21 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
     SwingUtilities.invokeLater(diagram::startFirstEdit);
   }
 
-  /** Links the diagram in the file instead of taking its source, by the alias of the file if it has one, otherwise by
-   * its path. A file which doesn't have a class diagram is refused. If the user hasn't decided about an alias for the
-   * file yet, the user is asked, and cancelling cancels the whole insertion. */
+  /** Links the diagram in the file instead of taking its source. The user is asked how the link names the file, whether
+   * by an alias, which the file has already in the dialog, or by a path. A file which doesn't have a class diagram is
+   * refused. Cancelling the dialog cancels the whole insertion. */
   private void addLinkedClassman(TextEditArea lastFocused, File file) {
     ClassmanLinkResolution resolution = new ClassmanLinkResolver().resolve(file);
     if (!resolution.isOk()) {
       fehler("msg.classman.file.invalid", file.getName(), resolution.problemText());
       return;
     }
-    if (!LinkAliases.isAssigned(file)) {
-      String alias = context.askClassmanAlias(file, resolution.diagramId(), resolution.diagramName());
-      if (alias == null) {
-        return;
-      }
-      LinkAliases.assign(file, alias);
+    LinkLocation location = context.askClassmanLocation(file, resolution.diagramId(), resolution.diagramName());
+    if (location == null) {
+      return;
     }
-    String link = ClassmanLink.of(file, LinkAliases.aliasOf(file), resolution.diagramId(), resolution.diagramName());
+    LinkAliases.remember(file, location);
+    String link = ClassmanLink.of(location, resolution.diagramId(), resolution.diagramName());
     lastFocused.addLinkedClassmanImage(link, resolution);
   }
 

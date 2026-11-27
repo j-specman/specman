@@ -8,6 +8,7 @@ import specman.Specman;
 import specman.editarea.EditContainer;
 import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.SourceFileKind;
+import specman.link.LinkLocation;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.PdfExportOptionsModel_V002;
 import specman.view.AbstractSchrittView;
@@ -43,11 +44,12 @@ public interface SpecmanOpContext extends EditorI {
    *                            only possible when creating a new diagram
    * @return the chosen file, or the choice to start empty (if offered), or the choice to cancel */
   SourceFileChoice chooseSourceFile(SourceFileKind kind, boolean emptyDiagramOffered);
-  /** Asks the user for the alias of the file which a Classman diagram is linked to.
+  /** Asks the user how the link to a Classman diagram names its file: by an alias, or by one of the paths. The path
+   * relative to the document is only on offer if the document has been saved.
    * @param diagramId the ID of the diagram in the file, null if it has none
    * @param diagramName the name of the diagram in the file, null if it has none
-   * @return the alias, empty if the user wants none, null if the user cancels */
-  String askClassmanAlias(File file, String diagramId, String diagramName);
+   * @return how the link names the file, null if the user cancels */
+  LinkLocation askClassmanLocation(File file, String diagramId, String diagramName);
   /** Asks the user for an image file, null if the user doesn't choose any. */
   File chooseImageFile();
   /** Starts another Specman instance, which follows the link. */

@@ -3,7 +3,7 @@ package specman.link.classman;
 import classman.model.v001.ClassDiagramModel_V001;
 import classman.model.v001.io.ClassDiagramParseException;
 import classman.model.v001.io.ClassDiagramParser_V001;
-import specman.link.LinkAliases;
+import specman.link.LinkLocation;
 import specman.util.TextFiles;
 
 import java.io.File;
@@ -14,6 +14,18 @@ import java.util.Locale;
  * diagram as well as for the sanitizer. Only a file with the extension of diagram files is read, and it has to be a
  * class diagram. */
 public final class ClassmanLinkResolver {
+  private final File baseDirectory;
+
+  /** For links in no document in particular: A relative path starts in the working directory. */
+  public ClassmanLinkResolver() {
+    this(null);
+  }
+
+  /** @param documentFile the document which contains the links, null if it has no file. A relative path starts in the
+   * directory of the document, see {@link LinkLocation#baseDirectoryOf(File)}. */
+  public ClassmanLinkResolver(File documentFile) {
+    this.baseDirectory = LinkLocation.baseDirectoryOf(documentFile);
+  }
 
   /** @return what the link leads to. A link whose alias nobody knows leads nowhere. */
   public ClassmanLinkResolution resolve(String linkText) {
@@ -24,7 +36,7 @@ public final class ClassmanLinkResolver {
     catch (IllegalArgumentException notALink) {
       return ClassmanLinkResolution.broken(null, ClassmanLinkProblem.NOT_A_LINK, linkText);
     }
-    File file = reference.hasAlias() ? LinkAliases.fileOf(reference.alias()) : reference.file();
+    File file = reference.location().resolve(baseDirectory);
     if (file == null) {
       return ClassmanLinkResolution.broken(null, ClassmanLinkProblem.ALIAS_UNKNOWN, reference.alias());
     }

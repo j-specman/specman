@@ -33,13 +33,17 @@ import java.util.function.Function;
 
 import static specman.i18n.Messages.i18n;
 
-/** The content of the {@link AliasDialog}, in which the user is asked for an alias for the file a link points to.
- * While typing, the panel shows the resulting link and what is wrong with the alias, if anything.
+/** The content of the {@link AliasDialog}, in which the user is asked how a link names the file it points to: by an alias,
+ * which the user types, or by one of the paths which the buttons offer, see {@link LinkLocation}. While typing, the panel
+ * shows the resulting link and what is wrong with the alias, if anything.
  * Being a plain panel, it can be created and operated without displaying a dialog.
  * <p>
- * What differs between the kinds of links is the text of the dialog and the link shown as the result, which the
- * subclasses pass to the constructor: {@link StepLinkAliasPanel} for links to a step, and the panel for links to a
- * Classman diagram. */
+ * A button changes the link once, and can be clicked at any time. It takes away what has been typed in the alias field.
+ * Typing again goes back to an alias, and an empty alias field means the absolute path of the file.
+ * <p>
+ * What differs between the kinds of links is the text of the dialog, the link shown as the result and the paths on offer,
+ * which the subclasses pass to the constructor: {@link StepLinkAliasPanel} for links to a step, and the panel for links to
+ * a Classman diagram. */
 public abstract class AliasPanel extends JPanel {
   @Serial
   private static final long serialVersionUID = 1L;
@@ -48,6 +52,9 @@ public abstract class AliasPanel extends JPanel {
   public static final String PREVIEW_FIELD = "link.alias.preview";
   public static final String PROBLEM_LABEL = "link.alias.problem";
   public static final String ALL_ALIASES_BUTTON = "link.alias.all";
+  public static final String ABSOLUTE_BUTTON = "link.alias.absolute";
+  public static final String RELATIVE_BUTTON = "link.alias.relative";
+  public static final String LOCAL_BUTTON = "link.alias.local";
   public static final String OK_BUTTON = "link.alias.ok";
   public static final String CANCEL_BUTTON = "link.alias.cancel";
 
@@ -60,30 +67,37 @@ public abstract class AliasPanel extends JPanel {
 
   private final File file;
   private final String titleKey;
-  private final Function<String, String> linkOf;
-  private final Consumer<String> aliasAccepted;
+  private final Function<LinkLocation, String> linkOf;
+  private final Consumer<LinkLocation> locationAccepted;
   private final JTextField aliasField = new JTextField(ALIAS_FIELD_COLUMNS);
   private final JTextField previewField = new JTextField(PREVIEW_FIELD_COLUMNS);
   private final JLabel problemLabel = new JLabel(NO_PROBLEM_TEXT);
   private final JButton allAliases = new IButton("dialog.link.alias.all");
   private final JButton ok = new IButton("button.ok");
   private final JButton cancel = new IButton("button.cancel");
+  /** What the user chose with one of the buttons, null while the alias field decides. */
+  private LinkLocation chosenLocation;
   private Runnable closeAction = () -> { };
   private boolean dialogDisplayed = true;
+  /** True if the file had an alias, which is in the field and meant to stay unless the user changes it. */
+  private boolean existingAliasKept;
   private AliasListPanel aliasListPanel;
 
   /** @param titleKey the message key of the title of the dialog
    * @param descriptionKey the message key of the text which explains the dialog
-   * @param linkOf makes the link which the file gets with the alias, which may be empty for no alias
-   * @param aliasAccepted called with the alias, possibly empty for "no alias", when the user confirms, before the panel closes */
-  protected AliasPanel(File file, String titleKey, String descriptionKey, Function<String, String> linkOf,
-                       Consumer<String> aliasAccepted) {
+   * @param linkOf makes the link which the file gets with the location, which is the alias the user typed, the absolute
+   *               path of the file if there is no alias, or what a button chose
+   * @param relativeLocation what the button for the relative path chooses, null if there is none, which disables the button
+   * @param localOffered whether there is a button for the link without a file, which is not for every kind of link
+   * @param locationAccepted called with the location, when the user confirms, before the panel closes */
+  protected AliasPanel(File file, String titleKey, String descriptionKey, Function<LinkLocation, String> linkOf,
+                       LinkLocation relativeLocation, boolean localOffered, Consumer<LinkLocation> locationAccepted) {
     super(new FormLayout("10px, right:default, 8px, fill:default:grow, 10px",
-      "pref, 10px, pref, 4px, pref, 4px, pref, 10px, pref, 10px"));
+      "pref, 10px, pref, 4px, pref, 4px, pref, 4px, pref, 10px, pref, 10px"));
     this.file = file;
     this.titleKey = titleKey;
     this.linkOf = linkOf;
-    this.aliasAccepted = aliasAccepted;
+    this.locationAccepted = locationAccepted;
     aliasField.setName(ALIAS_FIELD);
     ((AbstractDocument) aliasField.getDocument()).setDocumentFilter(new AliasInputFilter());
     previewField.setName(PREVIEW_FIELD);
@@ -101,16 +115,18 @@ public abstract class AliasPanel extends JPanel {
     add(new IHeaderPanel(titleKey, descriptionKey, ICON), CC.xyw(1, 1, 5));
     add(new ILabel("dialog.link.alias.label"), CC.xy(2, 3));
     add(buildAliasPanel(), CC.xy(4, 3, "left, center"));
-    add(new ILabel("dialog.link.alias.preview.label"), CC.xy(2, 5));
-    add(previewField, CC.xy(4, 5));
-    add(problemLabel, CC.xy(4, 7));
-    add(buildButtonPanel(), CC.xyw(2, 9, 3));
+    add(new ILabel("dialog.link.alias.path.label"), CC.xy(2, 5));
+    add(buildPathPanel(relativeLocation, localOffered), CC.xy(4, 5, "left, center"));
+    add(new ILabel("dialog.link.alias.preview.label"), CC.xy(2, 7));
+    add(previewField, CC.xy(4, 7));
+    add(problemLabel, CC.xy(4, 9));
+    add(buildButtonPanel(), CC.xyw(2, 11, 3));
     aliasField.getDocument().addDocumentListener(new DocumentListener() {
-      @Override public void insertUpdate(DocumentEvent e) { refresh(); }
-      @Override public void removeUpdate(DocumentEvent e) { refresh(); }
-      @Override public void changedUpdate(DocumentEvent e) { refresh(); }
+      @Override public void insertUpdate(DocumentEvent e) { aliasTyped(); }
+      @Override public void removeUpdate(DocumentEvent e) { aliasTyped(); }
+      @Override public void changedUpdate(DocumentEvent e) { aliasTyped(); }
     });
-    prefillSuggestedAlias();
+    prefillAlias();
     registerEscapeAsCancel();
     refresh();
   }
@@ -144,12 +160,13 @@ public abstract class AliasPanel extends JPanel {
     }
   }
 
-  /** Once the panel is part of a window, Enter confirms and the cursor is where the user types the alias. */
+  /** Once the panel is part of a window, Enter confirms. The cursor is where the user types the alias, except if the file
+   * has one, which the user is likely to keep: then it is on the button to confirm. */
   @Override
   public void addNotify() {
     super.addNotify();
     getRootPane().setDefaultButton(ok);
-    aliasField.requestFocusInWindow();
+    (existingAliasKept ? ok : aliasField).requestFocusInWindow();
   }
 
   private void makeLookLikeLabel(JTextField field) {
@@ -159,26 +176,54 @@ public abstract class AliasPanel extends JPanel {
     field.setBorder(BorderFactory.createEmptyBorder());
   }
 
-  /** Offers an alias made like the existing ones, selected so the user can take it over or just type another one.
-   * A suggestion which isn't valid for the file or already used for another file is dropped. */
-  private void prefillSuggestedAlias() {
-    String suggestion = new AliasSuggester(LinkAliases.entries()).suggest(file);
-    if (suggestion != null && LinkAliases.problemKeyFor(file, suggestion) == null) {
-      aliasField.setText(suggestion);
-      aliasField.selectAll();
+  /** Offers the alias which the file has. It is neither selected nor is the cursor in the field, so a key which the user
+   * presses by accident doesn't spoil it: the user most likely wants to keep it, and Enter does so. A file which doesn't
+   * have one, and about which the user hasn't decided yet, gets an alias made like the existing ones, selected so the user
+   * can take it over or just type another one. A suggestion which isn't valid for the file or already used for another
+   * file is dropped. A file the user decided against an alias for gets none. */
+  private void prefillAlias() {
+    String alias = LinkAliases.aliasOf(file);
+    if (!alias.isEmpty()) {
+      aliasField.setText(alias);
+      existingAliasKept = true;
+      return;
+    }
+    if (!LinkAliases.isAssigned(file)) {
+      String suggestion = new AliasSuggester(LinkAliases.entries()).suggest(file);
+      if (suggestion != null && LinkAliases.problemKeyFor(file, suggestion) == null) {
+        aliasField.setText(suggestion);
+        aliasField.selectAll();
+      }
     }
   }
 
+  /** Typing, or taking away what was typed, hands the decision back to the alias field. An empty alias field means the
+   * absolute path of the file. */
+  private void aliasTyped() {
+    chosenLocation = null;
+    refresh();
+  }
+
+  /** What the button chose takes the place of the alias, so the alias field is emptied. */
+  private void choose(LinkLocation location) {
+    aliasField.setText("");
+    chosenLocation = location;
+    refresh();
+  }
+
+  private LinkLocation currentLocation() {
+    return chosenLocation != null ? chosenLocation : LinkLocation.of(file, aliasField.getText());
+  }
+
   private void refresh() {
-    String alias = aliasField.getText();
-    String problemKey = LinkAliases.problemKeyFor(file, alias);
+    String problemKey = chosenLocation != null ? null : LinkAliases.problemKeyFor(file, aliasField.getText());
     ok.setEnabled(problemKey == null);
     problemLabel.setText(problemKey == null ? NO_PROBLEM_TEXT : i18n(problemKey));
-    previewField.setText(problemKey == null ? linkOf.apply(alias) : "");
+    previewField.setText(problemKey == null ? linkOf.apply(currentLocation()) : "");
   }
 
   private void confirm() {
-    aliasAccepted.accept(aliasField.getText());
+    locationAccepted.accept(currentLocation());
     closeAction.run();
   }
 
@@ -187,6 +232,26 @@ public abstract class AliasPanel extends JPanel {
     panel.add(aliasField, CC.xy(1, 1));
     panel.add(allAliases, CC.xy(3, 1));
     return panel;
+  }
+
+  private JPanel buildPathPanel(LinkLocation relativeLocation, boolean localOffered) {
+    JPanel panel = new JPanel(new FormLayout("default, 6px, default, 6px, default", "pref"));
+    panel.add(pathButton("absolute", ABSOLUTE_BUTTON, LinkLocation.absolute(file)), CC.xy(1, 1));
+    JButton relative = pathButton("relative", RELATIVE_BUTTON, relativeLocation);
+    relative.setEnabled(relativeLocation != null);
+    panel.add(relative, CC.xy(3, 1));
+    if (localOffered) {
+      panel.add(pathButton("local", LOCAL_BUTTON, LinkLocation.local()), CC.xy(5, 1));
+    }
+    return panel;
+  }
+
+  private JButton pathButton(String messageKeySuffix, String name, LinkLocation location) {
+    JButton button = new IButton("dialog.link.alias." + messageKeySuffix);
+    button.setName(name);
+    button.setToolTipText(i18n("dialog.link.alias." + messageKeySuffix + ".tooltip"));
+    button.addActionListener(e -> choose(location));
+    return button;
   }
 
   private static void makeLookLikeWebLink(JButton button) {

@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static specman.link.SpecmanLink.FRAGMENT_SEPARATOR;
 import static specman.link.SpecmanLink.SCHEME;
 import static specman.link.SpecmanLink.SEPARATOR;
 
@@ -31,7 +32,7 @@ class SuggestedAliasTest extends AbstractLinkTest {
 
     AliasPanel panel = clickCopyLink(step);
 
-    String expectedLink = SCHEME + "uc721" + SEPARATOR + step.getId() + SEPARATOR + step.getNumber();
+    String expectedLink = SCHEME + "uc721" + FRAGMENT_SEPARATOR + step.getId() + SEPARATOR + step.getNumber();
     assertEquals("uc721", aliasField(panel).getText());
     assertEquals("uc721", aliasField(panel).getSelectedText());
     assertEquals(expectedLink, preview(panel));

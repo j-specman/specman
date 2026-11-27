@@ -56,7 +56,17 @@ class LinkedClassmanLoadTest {
     assertEquals(SOURCE, area.getSource());
   }
 
-  /** Scenario: The link names the file by its path. */
+  /** Scenario: The link names the file by a path relative to the directory of the document, which is loaded from there. */
+  @Test
+  void testDiagramIsReadFromFileOfRelativePath(@TempDir Path directory) throws IOException {
+    fileWithDiagram(directory);
+
+    ClassmanImageEditArea area = load(directory, "classman://./hilfe.cld");
+
+    assertEquals(SOURCE, area.getSource());
+  }
+
+  /** Scenario: The link names the file by its absolute path. */
   @Test
   void testDiagramIsReadFromFileOfPath(@TempDir Path directory) throws IOException {
     File file = fileWithDiagram(directory);

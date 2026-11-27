@@ -1,6 +1,7 @@
 package specman.link.resolver;
 
 import specman.link.LinkAliases;
+import specman.link.LinkLocation;
 import specman.link.SpecmanLink;
 import specman.link.SpecmanLink.Reference;
 import specman.model.v002.DiagramModel_V002;
@@ -15,7 +16,8 @@ import java.util.Map;
 
 /** Checks where a link leads to without Specman's user interface, for people and agents who can't ask the running application.
  * It resolves the file the link names or its alias stands for, checks that the file exists and, if the link names a step,
- * that the step is in the file and has the number the link says. The files are checked as they are saved on disk. A resolver
+ * that the step is in the file and has the number the link says. A relative path starts in the working directory, as there
+ * is no document the link is in, and a link without a file can't be resolved for the same reason. The files are checked as they are saved on disk. A resolver
  * keeps the step numbers of the files it has read, so it is worth using one for several links. */
 public class LinkResolver {
   private final Map<String, Map<String, String>> stepNumbersByFile = new HashMap<>();
@@ -25,7 +27,10 @@ public class LinkResolver {
     if (reference == null) {
       return LinkResolution.error(null, "Not a Specman link: " + linkText);
     }
-    File file = fileOf(reference);
+    if (reference.isLocal()) {
+      return LinkResolution.error(null, "A link without a file points into the document it is in, so it can't be resolved on its own: " + linkText);
+    }
+    File file = reference.location().resolve(LinkLocation.baseDirectoryOf(null));
     if (file == null) {
       return LinkResolution.error(null, "Unknown alias: " + reference.alias());
     }
@@ -33,13 +38,9 @@ public class LinkResolver {
       return LinkResolution.error(file, "File not found");
     }
     if (!reference.hasStep()) {
-      return LinkResolution.ok(file, linkTo(reference, file, null));
+      return LinkResolution.ok(file, linkTo(reference, null));
     }
     return resolveStep(reference, file);
-  }
-
-  private File fileOf(Reference reference) {
-    return reference.hasAlias() ? LinkAliases.fileOf(reference.alias()) : reference.file();
   }
 
   private LinkResolution resolveStep(Reference reference, File file) {
@@ -54,7 +55,7 @@ public class LinkResolver {
     if (currentNumber == null) {
       return LinkResolution.error(file, "Step " + reference.stepId() + " doesn't exist in the file");
     }
-    String link = linkTo(reference, file, currentNumber);
+    String link = linkTo(reference, currentNumber);
     return hasWrongNumber(reference, currentNumber) ? LinkResolution.sanitized(file, link) : LinkResolution.ok(file, link);
   }
 
@@ -62,10 +63,9 @@ public class LinkResolver {
     return reference.stepNumber() != null && !reference.stepNumber().equals(currentNumber);
   }
 
-  /** @return the link in the form the passed one has, with its alias if it has one, and the step number passed, which may be null */
-  private String linkTo(Reference reference, File file, String stepNumber) {
-    String alias = reference.hasAlias() ? reference.alias() : "";
-    return SpecmanLink.of(file, alias, reference.stepId(), stepNumber);
+  /** @return the link in the form the passed one has, with its alias or path, and the step number passed, which may be null */
+  private String linkTo(Reference reference, String stepNumber) {
+    return SpecmanLink.of(reference.location(), reference.stepId(), stepNumber);
   }
 
   /** @return the numbers the steps of the file have according to the file's structure, by step ID.

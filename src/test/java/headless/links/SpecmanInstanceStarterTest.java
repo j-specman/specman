@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /** Works on a fake Java runtime in a temporary directory, no process is started. */
 class SpecmanInstanceStarterTest {
 
-  private static final String LINK = "specman://uc720,2d34f85e,1.3";
+  private static final String LINK = "specman://uc720#2d34f85e,1.3";
   private static final String CLASS_PATH = "app/specman.jar;app/lib.jar";
 
   @TempDir

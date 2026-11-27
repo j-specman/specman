@@ -9,6 +9,8 @@ import specman.util.TextFiles;
 
 import java.io.IOException;
 
+import static specman.Specman.editor;
+
 /** A Classman diagram whose source is in a file of its own, which the model only links to. The user edits the diagram
  * like an embedded one. The file is written when the model is saved, if the user changed the diagram, see
  * {@link #saveLinkedFile()}. So whoever saves last wins, also over the other documents which link the file. The link
@@ -17,7 +19,8 @@ public class LinkedClassmanImageEditArea extends ClassmanImageEditArea {
   private ClassmanLinkTarget target;
 
   public LinkedClassmanImageEditArea(LinkedClassmanImageEditAreaModel_V002 model) {
-    this(model.link, new ClassmanLinkResolver().resolve(model.link), model.individualScalePercent,
+    this(model.link, new ClassmanLinkResolver(editor().getDiagrammDatei()).resolve(model.link),
+      model.individualScalePercent,
       model.changeInfo != null ? model.changeInfo.toChangeInfo() : ChangeInfo.UNTRACKED);
   }
 

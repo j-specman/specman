@@ -1,18 +1,22 @@
 package specman.link.classman;
 
+import specman.link.LinkLocation;
+import specman.link.LinkUrl;
+
 import java.io.File;
-import java.net.URI;
 
 /** A link to the file which has the source of a Classman class diagram, e.g. {@code classman:///C:/project/hilfe.cld}.
- * With an alias for the file, the alias replaces the path: {@code classman://hilfe}. The ID and the name of the diagram
- * can follow, {@code classman://hilfe,0a1b2c3d,Hilfe Versionierung}, which makes the link readable for people. The name
- * is the last part and may contain commas. */
+ * With an alias for the file, the alias replaces the path: {@code classman://hilfe}. The fragment behind the hash sign
+ * has the ID and the name of the diagram, {@code classman://hilfe#0a1b2c3d,Hilfe Versionierung}, which makes the link
+ * readable for people. They are informative, the file is what the link points to. The name is the last part and may
+ * contain commas and blanks. See {@link specman.link.LinkUrl} for what the form of the URL means. */
 public final class ClassmanLink {
   public static final String SCHEME = "classman://";
+  /** Separates the ID and the name of the diagram in the fragment. */
   public static final String SEPARATOR = ",";
   public static final String FILE_EXTENSION = "cld";
 
-  private static final int MAX_PARTS = 3;
+  private static final int MAX_FRAGMENT_PARTS = 2;
 
   private static final String PERCENT = "%";
   private static final String BACKTICK = "`";
@@ -22,55 +26,42 @@ public final class ClassmanLink {
   private static final String ESCAPED_BACKTICK = "%60";
   private static final String ESCAPED_LINE_FEED = "%0A";
   private static final String ESCAPED_CARRIAGE_RETURN = "%0D";
-  private static final String ESCAPED_SEPARATOR = "%2C";
 
   private ClassmanLink() {}
 
   /** The link to the passed file, which is identified by the alias if there is one (an empty alias means none),
    * otherwise by its path. The ID and the name of the diagram may be null, the ID even if the name isn't. */
   public static String of(File file, String alias, String diagramId, String diagramName) {
-    String link = alias.isEmpty() ? pathOf(file) : SCHEME + alias;
-    if (diagramId == null && diagramName == null) {
-      return link;
-    }
-    link += SEPARATOR + (diagramId == null ? "" : diagramId);
-    return diagramName == null ? link : link + SEPARATOR + escapeName(diagramName);
+    return of(LinkLocation.of(file, alias), diagramId, diagramName);
   }
 
-  /** @throws IllegalArgumentException if the text isn't a Classman link */
+  /** The link to the file which the location names. The ID and the name of the diagram may be null, the ID even if the
+   * name isn't. */
+  public static String of(LinkLocation location, String diagramId, String diagramName) {
+    if (diagramId == null && diagramName == null) {
+      return LinkUrl.of(SCHEME, location, null);
+    }
+    String fragment = diagramId == null ? "" : diagramId;
+    if (diagramName != null) {
+      fragment += SEPARATOR + escapeName(diagramName);
+    }
+    return LinkUrl.of(SCHEME, location, fragment);
+  }
+
+  /** @throws IllegalArgumentException if the text isn't a Classman link. A link without file isn't one, because it would
+   * point into the document it is in, which has no Classman diagram files. */
   public static ClassmanLinkReference parse(String text) {
-    String link = text.strip();
-    if (!link.startsWith(SCHEME)) {
-      throw new IllegalArgumentException("Not a Classman link: " + text);
+    LinkUrl url = LinkUrl.parse(text, SCHEME);
+    if (url.location().isLocal()) {
+      throw new IllegalArgumentException("Link without a file: " + text);
     }
-    String[] parts = link.substring(SCHEME.length()).split(SEPARATOR, MAX_PARTS);
-    String location = parts[0];
-    if (location.isEmpty()) {
-      throw new IllegalArgumentException("Not a Classman link: " + text);
-    }
-    File file = location.startsWith("/") ? fileOf(location) : null;
-    String alias = file == null ? location : null;
-    String name = partOrNull(parts, 2);
-    return new ClassmanLinkReference(file, alias, partOrNull(parts, 1), name == null ? null : unescapeName(name));
+    String[] parts = url.fragment() == null ? new String[0] : url.fragment().split(SEPARATOR, MAX_FRAGMENT_PARTS);
+    String name = partOrNull(parts, 1);
+    return new ClassmanLinkReference(url.location(), partOrNull(parts, 0), name == null ? null : unescapeName(name));
   }
 
   private static String partOrNull(String[] parts, int index) {
     return index < parts.length && !parts[index].isBlank() ? parts[index].strip() : null;
-  }
-
-  private static File fileOf(String encodedPath) {
-    try {
-      return new File(URI.create("file://" + encodedPath));
-    }
-    catch (IllegalArgumentException e) {
-      throw new IllegalArgumentException("Not a valid file path in a Classman link: " + encodedPath, e);
-    }
-  }
-
-  /** The path is URL-encoded as usual, e.g. blanks become %20. On top of that, commas are encoded, which URIs leave as
-   * they are, because the comma separates the file from the ID and the name. */
-  private static String pathOf(File file) {
-    return SCHEME + file.toURI().getRawPath().replace(SEPARATOR, ESCAPED_SEPARATOR);
   }
 
   /** The link is written between backticks in the model file and in a single line, so these have to go. The percent

@@ -402,34 +402,53 @@ Alias:: A short name you give to a Specman file. It stands for the file in URLs 
 A Specman URL looks like this:
 
 ----
-specman://uc720,2d34f85e,1.3
+specman://uc720#2d34f85e,1.3
 ----
 
-`uc720` is the alias of the file, `2d34f85e` the ID of the step, and `1.3` the number the step had when the URL was copied. Specman finds the step by its ID, so a URL keeps working when the step is moved or renumbered. The number is merely informative. The ID and number can be omitted. A URL without them addresses the file only.
+`uc720` is the alias of the file, `2d34f85e` the ID of the step, and `1.3` the number the step had when the URL was copied. The hash sign separates the file from the step, as it separates a web address from a position within the page. Specman finds the step by its ID, so a URL keeps working when the step is moved or renumbered. The number is merely informative. The ID and number can be omitted. A URL without them addresses the file only.
 
 Without an alias, the file is addressed by its path, e.g.
 
 ----
-specman:///C:/project/UC-720.nsd,2d34f85e,1.3
+specman:///C:/project/UC-720.nsd#2d34f85e,1.3
 ----
+
+A path can also be relative. It starts with `./` or `../` and begins in the directory of the document which contains the URL, e.g. in the text of a step:
+
+----
+specman://./UC-720.nsd#2d34f85e,1.3
+specman://../other-project/UC-720.nsd#2d34f85e,1.3
+----
+
+A relative URL keeps working when the directory with both files is moved or copied. Where no document contains the URL, e.g. when it is on the clipboard or on the command line, it begins in the directory of the open document, or in the working directory if no file is open.
+
+A URL without a file addresses a step of the document which contains it, e.g.
+
+----
+specman://#2d34f85e,1.3
+----
+
+It always names a step, and it can't be checked on its own, because nothing says which document it is in.
+
+URLs of the earlier form, which had commas instead of the hash sign, as in `specman://uc720,2d34f85e,1.3`, are still understood, so documents which contain them keep working. Specman only creates URLs of the new form.
 
 ### Copying a URL
 Right-click the number label of a step and choose _Copy Link_ from the context menu. The URL is in the clipboard now, ready to be pasted into a ticket, a source code comment or the URL field of a hyperlink in the text of another diagram (see <<_hyperlinks,Hyperlinks>>). The menu item is grayed out as long as the diagram hasn't been saved, because there is no file to address yet.
 
-The first time you copy a URL to a file, Specman asks for an alias for it.
+The dialog appears every time you copy a URL, because you may need one form of the URL this time and another one the next. If the file has an alias, it is in the alias field and the URL shown uses it. The first time for a file, Specman may propose an alias, see below.
 
 image::link-alias.png[Alias Dialog]
 
 The reason for aliases: a path is different on every computer, so a URL with a path only works for the one who copied it. An alias is the same for everybody. Each team member tells Specman once, on their own computer, which file the alias stands for, and the same URL works for all of them.
 
-The dialog shows the resulting URL while you type. An alias consists of letters, digits, underscores and hyphens, has up to 20 characters, and must be unique regardless of letter case. Specman proposes an alias if the aliases of other files in the same directory show a pattern which fits the new file name. E.g. if you have `uc730` for `CRM UC-730 Delete Customer.nsd`, it proposes `uc135` for `CRM UC-135 Send Newsletter.nsd`. If you leave the alias empty, URLs to this file contain its path. Both an alias and an empty alias are remembered, so the dialog doesn't come up again for this file.
+The dialog shows the resulting URL while you type. Instead of an alias, the buttons _Absolute_, _Relative_ and _Local_ choose how the URL names the file: by its full path, by a path relative to the directory of the document which contains the URL, or not at all, for a URL to a step of the document it is pasted into. Since Specman doesn't know yet where you are going to paste the URL, the relative path is simply the name of the file, in the same directory. A button replaces what you typed in the alias field and changes the URL once. Typing again goes back to an alias, and an empty alias field gives the full path. Whichever you choose, Specman doesn't propose an alias again for this file: a path counts as the decision against one. A path chosen with a button doesn't take away an alias the file has, as the buttons are meant for one URL only. To get rid of an alias, empty it in the list of aliases. An alias consists of letters, digits, underscores and hyphens, has up to 20 characters, and must be unique regardless of letter case. Specman proposes an alias if the aliases of other files in the same directory show a pattern which fits the new file name. E.g. if you have `uc730` for `CRM UC-730 Delete Customer.nsd`, it proposes `uc135` for `CRM UC-135 Send Newsletter.nsd`. If you leave the alias empty, URLs to this file contain its path. Both an alias and an empty alias are remembered, so the dialog doesn't come up again for this file.
 
-_File_ > _Aliases..._ lists the aliases you have so far, together with their files. A double click on an alias edits it, a double click on a file chooses another file, which you need when a file has moved or was renamed. Files which don't exist any more are marked as missing. _Delete_ removes the selected row, after which Specman asks for an alias again the next time you copy a URL in that file. Nothing is stored before you save, and saving is only possible while the aliases are unique. The list can also be opened with the _All..._ button of the alias dialog.
+_File_ > _Aliases..._ lists the aliases you have so far, together with their files. A double click on an alias edits it, a double click on a file chooses another file, which you need when a file has moved or was renamed. Files which don't exist any more are marked as missing. _Delete_ removes the selected row, after which Specman may propose an alias again the next time you copy a URL in that file. Nothing is stored before you save, and saving is only possible while the aliases are unique. The list can also be opened with the _All..._ button of the alias dialog.
 
 ### Following a URL
 There are three ways to follow a URL:
 
-* _File_ > _Open Link from Clipboard_ (Ctrl+L) follows the URL in the clipboard. Spaces around the URL and a slash at its end, which some tools add when copying, are ignored.
+* _File_ > _Open Link from Clipboard_ (Ctrl+L) follows the URL in the clipboard. Spaces around the URL and a slash at its end or in front of the hash sign, which some tools add when copying, are ignored.
 
 * Ctrl+click on a hyperlink in a step text whose target is a Specman URL, see <<_hyperlinks,Hyperlinks>>.
 
