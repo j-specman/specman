@@ -22,6 +22,7 @@ import static builder.BuilderFactory.sequence;
 import static builder.BuilderFactory.simple;
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** A diagram which the model only links to is read from its file when the document is loaded, and shown like an
@@ -83,5 +84,33 @@ class LinkedClassmanLoadTest {
 
     LinkedClassmanImageEditAreaModel_V002 model = (LinkedClassmanImageEditAreaModel_V002) area.toModel(false);
     assertEquals("classman://nobody", model.link);
+  }
+
+  /** Scenario: The link leads nowhere. The area shows a placeholder, which has a size like any picture. */
+  @Test
+  void testLinkWhichLeadsNowhereShowsPlaceholder(@TempDir Path directory) throws IOException {
+    LinkedClassmanImageEditArea area = (LinkedClassmanImageEditArea) load(directory, "classman://nobody");
+
+    assertTrue(area.isPlaceholder());
+    assertTrue(area.getFullSizeImage().getWidth() > 0);
+  }
+
+  /** Scenario: The file is there, but has no class diagram. The area shows the problem of the diagram like an embedded
+   * one does, not the placeholder. */
+  @Test
+  void testFileWithoutDiagramShowsNoPlaceholder(@TempDir Path directory) throws IOException {
+    Files.writeString(directory.resolve("hilfe.cld"), "classdiagram { class }", StandardCharsets.UTF_8);
+
+    LinkedClassmanImageEditArea area = (LinkedClassmanImageEditArea) load(directory, "classman://./hilfe.cld");
+
+    assertFalse(area.isPlaceholder());
+  }
+
+  /** Scenario: The link leads to a diagram. The diagram is shown, not a placeholder. */
+  @Test
+  void testDiagramIsNoPlaceholder(@TempDir Path directory) throws IOException {
+    fileWithDiagram(directory);
+
+    assertFalse(((LinkedClassmanImageEditArea) load(directory, "classman://./hilfe.cld")).isPlaceholder());
   }
 }

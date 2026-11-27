@@ -14,6 +14,11 @@ public final class ClassmanRenderer {
     return renderer().render(source);
   }
 
+  /** @return the scene which stands for a linked diagram that can't be shown */
+  static Scene renderLinkPlaceholder(String link, String problem) {
+    return renderer().renderLinkPlaceholder(link, problem);
+  }
+
   static DiagramRenderer renderer() {
     return new DiagramRenderer(new ClassmanChangeColors(), new ClassmanStereotypes(), i18n("msg.classman.render.error"));
   }

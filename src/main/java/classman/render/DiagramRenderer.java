@@ -31,6 +31,13 @@ public final class DiagramRenderer {
     }
   }
 
+  /** @param link the link of a diagram whose file the host couldn't use
+   * @param problem what is wrong, in the language of the user
+   * @return the picture to show instead of the diagram */
+  public Scene renderLinkPlaceholder(String link, String problem) {
+    return new LinkPlaceholderScene(new AwtTextMeasurer()).of(link, problem);
+  }
+
   /** @throws IllegalArgumentException if the model refers to a class, attribute or relation which it doesn't have */
   public Scene layout(ClassDiagramModel_V001 model) {
     return new ClassDiagramLayouter(new AwtTextMeasurer(), changeColors, stereotypes).layout(model);

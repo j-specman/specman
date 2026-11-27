@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -31,6 +32,20 @@ public final class VectorImage {
             throw new IllegalArgumentException("Not a valid SVG graphic");
         }
         return new VectorImage(document);
+    }
+
+    /** @param path where the SVG file is in the class path, e.g. images/svg/material/priority_high.svg
+     * @throws IllegalArgumentException if there is no such file or it isn't an SVG which can be shown */
+    public static VectorImage ofResource(String path) {
+        try (InputStream in = VectorImage.class.getClassLoader().getResourceAsStream(path)) {
+            if (in == null) {
+                throw new IllegalArgumentException("No graphic " + path);
+            }
+            return of(new String(in.readAllBytes(), StandardCharsets.UTF_8));
+        }
+        catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /** Paints the graphic into the area, fitted into it as the graphic says itself. */

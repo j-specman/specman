@@ -61,6 +61,7 @@ class LinkedClassmanDuplicateTest extends AbstractClassmanTest {
 
     assertFalse(diagramOfStep("1").isDuplicate());
     assertTrue(diagramOfStep("2").isDuplicate());
+    assertTrue(diagramOfStep("2").isPlaceholder());
     diagramOfStep("2").changeSource(THREE_CLASSES);
     save(directory);
 

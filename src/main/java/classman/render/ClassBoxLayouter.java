@@ -244,7 +244,7 @@ public class ClassBoxLayouter {
             return null;
         }
         StereotypeLook look = lookOf(model);
-        return look != null ? look.icon : UnresolvedStereotypeIcon.get();
+        return look != null ? look.icon : ProblemIcon.get();
     }
 
     /** Puts the icon in the height of the first line of the name, right of its longest line, so that it can be seen to

@@ -192,7 +192,7 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
   }
 
   /** @return 1 if the source changed, otherwise 0 */
-  private int changeSourceUDBL(String newSource) {
+  protected int changeSourceUDBL(String newSource) {
     if (newSource.equals(getSource())) {
       return 0;
     }
