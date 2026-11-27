@@ -2,7 +2,7 @@
 
 # Classman Diagram Editor: Concept and Functional Description
 
-*Status: updated 2026-11-24. Describes what is built, what was decided and why, and what is open. It is kept up to date with every step of the editor, because it is the source for the Specman system use cases which will be derived from it later: the behavior is hard to read back from the code. Where something is planned and not built, it says so.*
+*Status: updated 2026-11-27. Describes what is built, what was decided and why, and what is open. It is kept up to date with every step of the editor, because it is the source for the Specman system use cases which will be derived from it later: the behavior is hard to read back from the code. Where something is planned and not built, it says so.*
 
 ## Goal
 Class diagrams are shown in the Aktogramm, painted with Graphics2D, and are edited in a window of their own: creating, moving, renaming and deleting every kind of element, without editing the diagram source by hand. The editor is later the core of Classman itself. It must not depend on Specman, and the interface between the two stays narrow.
@@ -82,6 +82,7 @@ The texts of the editor come from a resource bundle of Classman, the host passes
 |Give the style of one element to another (format painter) |built |Button *Painter* in the palette, see <<Format Painter>>.
 |Hide single attributes, show them again |built |Context menu of the class, see <<Hiding Single Attributes>>.
 |Automatic width again |built |Context menu of the class or note, see <<The Context Menu of a Class>> and <<Width of a Note>>.
+|Link a diagram to a `.cld` file instead of embedding it |built |Interim form: insert, placeholder for broken links, relink, one file once per document, saving, warning in change mode, sanitizer; see <<Linked Diagrams (Intermediate Form)>>.
 |===
 
 ## Editor Window
@@ -674,8 +675,94 @@ Two buttons below the zoom buttons of the palette take the diagram out of the ed
 * A move is reported when the mouse is released, one step for the whole drag.
 * The keys belong to the text field while a text is typed.
 
+## Linked Diagrams (Intermediate Form)
+Built 2026-11-27. A diagram in a step can be *embedded*, its source is in the model file, or *linked*, its source is in a `.cld` file of its own, which the model file only names. Linked diagrams are an *intermediate form* until the real Classman exists. There, diagrams are elements of a class model, are linked from the use cases and are edited in Classman, not in Specman. The interim form lets a diagram be shared by several use cases and be kept apart from them, with the editor of Specman. It has hooks which the final form will not have (the file is written by whoever saves last), and the manual says so, see <<Manual Notes>>.
+
+A linked diagram is edited like an embedded one: same editor window, same undo, same change marks. Where it behaves differently, the following says so.
+
+### The Link
+A link names the file by a *Classman URL*, `classman://location#fragment`, see `LinkUrl` and `ClassmanLink`:
+
+* The *location* names the file: an alias of the user (`classman://hilfe`), the absolute path (`classman:///C:/project/hilfe.cld`), or a path relative to the directory of the document (`classman://./hilfe.cld`, `classman://../shared/hilfe.cld`). There is no local form: a diagram is always in another file than the document, so a link without a file is no Classman link.
+* The *fragment* has the ID and the name of the diagram, `#0a1b2c3d,Hilfe Versionierung`, as far as the diagram has them. They are informative, to make the link readable for people, and written once when the diagram is linked: the file is what the link points to, so they are never maintained, and a changed name in the file doesn't touch the link. The name is the last part and may contain commas.
+* The file must have the extension `.cld` and must parse as a class diagram. Nothing else is read or written.
+* An alias is the user's own assignment of a file (File > Aliases), kept in the preferences of the user, not in the model. A colleague who opens the document the first time has no such assignment and sees a broken link, see <<Broken Links>>.
+
+In the model file the diagram is `image(scale=..., type=classman) { link=`classman://hilfe#0a1b2c3d,Hilfe` }`. The source is not in the model file. The word `link=` tells it from the embedded form, which has the source in backticks (see <<Consequences for the Format>>).
+
+### Inserting a Linked Diagram
+* The file dialog for a new Classman diagram has the row *Diagram storage: embedded / linked*. Embedded is preselected. With *linked*, the empty diagram isn't offered: the file has to exist, and must be a class diagram. The row is only there when a diagram is created, not when a source is imported into an existing diagram.
+* After the file is chosen, the dialog for the link location is *always* shown. The alias is prefilled with the one the file has, or with a suggestion (see the matching of `specman.link.suggester`). The buttons *Absolute* and *Relative* (only if the document has been saved) take the path instead of an alias. The preview shows the URL the model gets. *Cancel* cancels the whole insertion.
+* A file which another diagram of the document links already is refused with a message, see <<One File, One Diagram>>.
+* The insertion is one undo step.
+
+### Display
+* The area shows the diagram of the file, with the painter of the editor. Its tooltip is the link text; embedded diagrams have none.
+* A diagram which can't be shown is replaced by a *placeholder*: a red exclamation mark, the link in link blue, and a line saying what is wrong. The cases: the link is no Classman link, the alias is assigned to no file, the file has the wrong extension, is missing or can't be read, or the file is already linked by another diagram of this document. The placeholder is also what the PDF export shows, as it takes the picture of the area.
+* A file which is read but doesn't parse as a class diagram is not a placeholder case: the area shows the problem scene of the renderer, with the message of the parser, like an embedded diagram with a broken source.
+* Whenever there is no file which the diagram could be written to (placeholder, or a file which isn't a class diagram), the diagram is *not editable*: the double click and the item *Edit* do nothing, because nothing the user did would reach the file. Marks and configurations of such a diagram are not changed by the operations of change mode and by removing meta tag configurations, and copying gives only the picture.
+
+### Broken Links
+A placeholder is something to fix, so it is clickable and shows the hand cursor:
+
+* *The alias is assigned to no file*, or the file of the alias is missing: one click opens a file dialog for class diagram files. The chosen file must be a class diagram and not linked by another diagram of the document. Then the alias is assigned to it for the user. The link in the model doesn't change, so the document isn't changed and there is no undo step: the assignment is the user's, not the document's. The dialog proposes no file; the suggestions of the step links only know model files.
+* *Any other placeholder* (a path which leads nowhere, text which is no link, a duplicate): one click chooses a file the same way and shows the location dialog, and the diagram gets the new link text. This is a change of the document, and one undo step.
+* *Relink...* in the context menu does the second for every linked diagram, also for one which works. The item replaces *Import...*, which does not exist for linked diagrams. A diagram may be relinked to its own file. If it has changes which are not written yet, relinking is one undo step with them, so undo brings them back.
+
+### One File, One Diagram
+A document links a file at most once, because two diagrams on one file would overwrite each other's changes when the document is saved. The decision was to refuse it, not to share one source between the diagrams: nobody has said why they would need to.
+
+* Inserting a file which is linked already is refused.
+* When a document is loaded or steps are pasted, the later diagram of a file is a *duplicate*: it shows the placeholder, and never writes. When pasting, it is the pasted diagram, whatever the order in the document is.
+* Known gap: undo of the deletion of a step can bring back a diagram which isn't marked as a duplicate. The sanitizer reports it.
+
+### Saving
+* A linked file is written when the document is saved, *before* the model file, and only if the user has changed the diagram since the file was read or written. A file nobody changed is not touched, not even to give it the line breaks of Specman. Written is the source as it is, UTF-8.
+* When reading, a byte order mark is removed and the line breaks become `\n`.
+* A write error is reported and aborts the save: the model file is not written, so the two don't get out of step.
+* Whoever saves last wins, also over other documents which link the same file. There is no check whether the file has changed meanwhile.
+* The `.wrk` working copy and the auto-save only have the link. Unsaved changes of a linked diagram are lost if Specman crashes (accepted, as the hook would be heavy for an intermediate form).
+* A diagram which isn't OK never writes.
+
+### Change Mode
+The marks of the change sets are in the source, so they are in the file. Accepting, rejecting and merging change a linked diagram like an embedded one, and with that its file, which other use cases may link as well. Therefore, before the operation, a dialog tells how many linked diagrams have marks of the change set, and asks:
+
+* *Continue* with the checkbox *Change the linked diagrams too* (checked): the diagrams are changed, their files are written when the document is saved.
+* *Continue* with the checkbox cleared: the operation runs in the document as usual, the linked diagrams keep their marks. It holds for this operation only; the next one asks again.
+* *Cancel*: nothing happens.
+
+Without a linked diagram which has marks of the change set (duplicates and placeholders don't count), there is no question. The change of the area itself, being added or deleted in the document, is not a mark in the file and always follows the operation.
+
+### Stereotypes and Meta Tag Configurations
+Linked diagrams take part in everything which concerns the meta tag configurations of the document, like embedded ones: the list of uses of a configuration, the user names, removing a configuration. A reference to a configuration which doesn't exist is *never removed* any more, when loading, pasting or importing, for embedded and linked diagrams alike (decided 2026-11-26): the file of a colleague may have configurations which this document hasn't. It is shown as `<<:Name>>` with the red exclamation mark, and the sanitizer reports it.
+
+### Sanitizer
+`specman --sanitize` checks the linked diagrams of the model (`LinkedDiagramValidator`), relative to the document, and reports as ERROR:
+
+* a link which is no Classman link, or names an alias which is assigned to no file (the assignment is the user's, so the check of an agent or a colleague fails until the alias is assigned; that is deliberate, the document can't be read completely without it),
+* a file which is missing, can't be read, doesn't have the extension `.cld`, or is not a valid class diagram (with the message of the parser),
+* a file which is linked more than once, at the later diagram, with the step of the first.
+
+The stereotypes of linked files are checked like those of embedded diagrams (`MetaTagValidator`). Open: local links inside a linked file, which can't work, are not reported yet.
+
+### Format
+* The grammar of the model file has the alternative `image(... type=classman ...) { link=`...` }`, see <<Consequences for the Format>>.
+* The grammar of the diagram has an optional diagram ID: `classdiagram "Name" (0a1b2c3d) { ... }`, also for an unnamed diagram. A linked diagram carries it into the link, and it is the preparation for the class model, where diagrams are told apart by ID. New diagrams don't get an ID yet.
+
+### Manual Notes
+Sentences for the chapter on class diagrams, when it is written:
+
+* A class diagram can be kept in the document or in a file of its own with the extension `.cld`. In the second case the document only has a link, and the same diagram can be shown in several use cases, but not twice in one.
+* Linked diagrams are an interim form. Later, diagrams will be elements of a class model, and Classman will edit them; the links will then point there.
+* The link names the file by an alias which you assign to the file, or by its path. The alias is yours and is kept on your computer. A colleague who opens the document sees a placeholder with the link, clicks it, and chooses the file once.
+* Changes in a linked diagram are written to its file when the document is saved. Other use cases which show the same diagram see the change the next time they are loaded. Whoever saves last wins.
+* Accepting, rejecting and merging changes also changes the linked diagrams. Specman asks first, and you can leave the linked diagrams alone.
+* Specman doesn't save changes of linked diagrams in its automatic working copy. Save before you stop for the day.
+
 ## Consequences for the Format
 The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the editor needed, and what was decided on the way:
+
+* A diagram may have an ID, `classdiagram (0a1b2c3d) { ... }`, written behind the name, if there is one. Like the ID of a class it is eight hex digits; it is optional and isn't created by the editor yet, see <<Linked Diagrams (Intermediate Form)>>.
 
 * Relations and the anchors of their routes refer to classes by their IDs, class names are free text. A class needs an ID to take part in a relation.
 * A dependency is written like an implementation, `dependency (<ID>) change(added, yellow) style(...) <from ID> -> <to ID> "label" route ...`, with the keyword `dependency` and always `->`. The difference: an end may be the ID of an attribute (enum values included), which then needs an ID too. A route anchor on an attribute is `<attribute ID>.side@offset`, on its border box. In the model it is a `DependencyRelationModel_V001`, a relation of type `DEPENDENCY`.
@@ -700,6 +787,7 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 * Tool state and every operation on the model are plain logic and are tested without a window; the field and its keys are tested headless on the event dispatch thread.
 * The look of the window and the feel of the mouse operations are checked by hand.
 * The dependency rule between `classman.*` and `specman.*` is tested.
+* Linked diagrams are tested headless in the style of the user: real buttons and dialogs answered by the test instance of Specman, one small scenario per case (insert, load, relink, duplicates, saving, change mode), files in a temporary directory. The sanitizer checks are in `SanitizeTest`, which needs the alias node of the test, like the headless tests.
 
 ## Open Points
 . More entries in the menu of the end handle, for example the label and the multiplicity of the end (both can be created through the dashed places of a selected relation already). Changing the type of a relation is built, see <<The Ends of a Line: Menu of the End Handle>>. Open: a switch between inheritance and implementation, which depends on the kinds of the classes.
@@ -724,3 +812,4 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 . A white halo around the enlarged highlight of an attribute text, which sits on the colored class fill and contrasts less than frames on white.
 . *Stereotypes from meta tag configurations* (icon, label, colors) are built, see <<Stereotypes from Meta Tag Configurations>>. Open there: whether the place of the icon feels right with a name which wraps.
 . Model-bound mode of Classman (only stereotypes and tags defined in the model can be chosen) is a separate topic and not part of this concept. The infos of an attribute are meant to follow the same path as stereotypes and tagged values: in the free mode of Specman they are free texts, in Classman they are chosen from a set of tags which the model defines for attributes, and refer to the definition by an ID. The format leaves room for it: an info is a list entry of its own, and an optional ID can be added behind its text, like the ID of a stereotype, without changing the rest.
+. *Linked diagrams:* local links inside a linked `.cld` file can't work, since the file is no part of a document; the sanitizer should report them. Also open: a check of the file for changes by somebody else before it is written (today whoever saves last wins), the unmarked duplicate which undo of a step deletion can bring back, and the diagram ID for new diagrams once the class model needs it. See <<Linked Diagrams (Intermediate Form)>>.

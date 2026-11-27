@@ -325,9 +325,10 @@ tableCell
 // changed. Specman resolves them when accepting or rejecting changes, and renames them when merging change sets.
 // LinkedClassmanImageEditAreaModel_V002 (type=classman, content = link=`classman://...`) — a Classman class diagram
 // which is not part of this file but in a file of its own, named by the link. The link is a Classman URL, see
-// ClassmanLink: classman://alias[,id[,name]] or classman:///C:/path/to/diagram.cld; id and name are informative, the
-// alias is the one the user has assigned to the file in the link aliases. Specman reads the diagram from the file when
-// loading and writes it back when it has changed. Agents leave the link alone, they can edit the file it points to.
+// ClassmanLink: classman://alias[#id[,name]], classman:///C:/path/to/diagram.cld or classman://./relative/diagram.cld;
+// id and name are informative, the alias is the one the user has assigned to the file in the link aliases. Specman
+// reads the diagram from the file when loading and writes it back when it has changed. Agents leave the link alone,
+// they can edit the file it points to.
 imageBlock
     : 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' ID (',' changeParam)? ')' '{' BASE64_BLOCK '}'
     | 'image' '(' 'scale' '=' PERCENT ',' 'type' '=' 'plantuml' (',' changeParam)? ')' '{' BACKTICK_STRING (',' backupAttr)? '}'

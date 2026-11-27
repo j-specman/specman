@@ -6,6 +6,10 @@ grammar ClassDiagram_V001;
 //   // {"classmanVersion":"0.1","modelType":"ClassDiagramModel_V001"}
 // The model type is the simple class name without package, so a move of the class doesn't invalidate the files.
 //
+// The diagram itself may have a name and an ID, both optional and in this order:  classdiagram "Name" (0a1b2c3d) { ... }
+// The ID is eight hex digits in parentheses like the ID of an element, also for a diagram without a name. It is there
+// for whoever refers to the diagram (a link from Specman, later a class model); the editor doesn't create one yet.
+//
 // Names: unquoted if made of letters, digits, '_' and '-' or '/' between letters, else in double quotes.
 // This holds for class names, attribute names and attribute types alike: a name or type with spaces or
 // other special characters must be written in double quotes, e.g.  -"In Baum anzeigen" : J/N
