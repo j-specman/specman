@@ -3,6 +3,8 @@ package specman.ops;
 import specman.editarea.TextEditArea;
 import specman.editarea.image.classman.ClassmanImageEditArea;
 import specman.editarea.image.classman.ClassmanSourceValidator;
+import specman.editarea.image.classman.LinkedClassmanDuplicates;
+import specman.visitor.LinkedClassmanAreaCollector;
 import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlSourceValidator;
@@ -155,6 +157,10 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
     ClassmanLinkResolution resolution = new ClassmanLinkResolver().resolve(file);
     if (!resolution.isOk()) {
       fehler("msg.classman.file.invalid", file.getName(), resolution.problemText());
+      return;
+    }
+    if (LinkedClassmanDuplicates.isLinkedBy(file, LinkedClassmanAreaCollector.areasOf(context::traverseDiagram))) {
+      fehler("msg.classman.file.linked.already", file.getName());
       return;
     }
     LinkLocation location = context.askClassmanLocation(file, resolution.diagramId(), resolution.diagramName());

@@ -6,6 +6,8 @@ import specman.clipboard.SpecmanStepsTransferable;
 import specman.clipboard.ExternalPasteChangemarksAdjuster;
 import specman.clipboard.InternalPasteChangemarksAdjuster;
 import specman.clipboard.PasteChangemarksAdjusterI;
+import specman.editarea.image.classman.LinkedClassmanDuplicates;
+import specman.editarea.image.classman.LinkedClassmanImageEditArea;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.MetaTagModel_V002;
 import specman.model.v002.io.ModelParser_V002;
@@ -26,6 +28,7 @@ import static specman.Specman.editor;
 import static specman.view.RelativeStepPosition.After;
 import static specman.i18n.Messages.i18n;
 import specman.visitor.DiagramPostInitializer;
+import specman.visitor.LinkedClassmanAreaCollector;
 
 public class PasteStepsOp extends AbstractADBLSpecmanOp {
 
@@ -65,9 +68,18 @@ public class PasteStepsOp extends AbstractADBLSpecmanOp {
       parent.insertStep(newStep, After, reference);
       parent.renumberFollowingSteps(reference);
       DiagramPostInitializer.initialize(newStep::traverse);
+      markDuplicateLinks(newStep);
       newStepPostInit(newStep);
       reference = newStep;
     }
+  }
+
+  /** A pasted diagram which links a file that the diagram has linked already is the duplicate, wherever it was pasted. */
+  private void markDuplicateLinks(AbstractSchrittView newStep) {
+    List<LinkedClassmanImageEditArea> pasted = LinkedClassmanAreaCollector.areasOf(newStep::traverse);
+    List<LinkedClassmanImageEditArea> established = new ArrayList<>(LinkedClassmanAreaCollector.areasOf(context()::traverseDiagram));
+    established.removeAll(pasted);
+    LinkedClassmanDuplicates.markDuplicates(established, pasted);
   }
 
   /** Tags whose meta tag configuration doesn't exist in this diagram are not pasted. Tells the user which

@@ -17,10 +17,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import javax.swing.JComponent;
 
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** The user chooses a file in the dialog for a new diagram and says that the diagram is to link to it, not to take its
@@ -114,6 +116,19 @@ class LinkedClassmanInsertTest extends AbstractClassmanTest {
     insertLinkedDiagram(file, LinkLocation.alias("hilfe"));
 
     assertEquals("classman://hilfe#0a1b2c3d,Hilfe", linkOf(container));
+  }
+
+  /** Scenario: A linked diagram can't be told from an embedded one by looking at it, so it shows its link as tooltip.
+   * An embedded diagram has none. */
+  @Test
+  void testOnlyLinkedDiagramHasTooltipWithLink(@TempDir Path directory) throws IOException {
+    EditContainer linkedContainer = containerOfNewStep();
+    insertLinkedDiagram(diagramFile(directory, TWO_CLASSES), LinkLocation.alias("hilfe"));
+    EditContainer embeddedContainer = containerOfNewStep();
+    existingDiagram(embeddedContainer);
+
+    assertEquals("classman://hilfe", ((JComponent) linkedContainer.getEditAreaAt(1)).getToolTipText());
+    assertNull(((JComponent) embeddedContainer.getEditAreaAt(1)).getToolTipText());
   }
 
   /** Scenario: A single undo takes the linked diagram out again. */

@@ -20,6 +20,8 @@ import specman.model.v002.io.ModelRenumberer_V002;
 import specman.model.v002.io.ModelSerializer_V002;
 import specman.view.QuellSchrittView;
 import specman.visitor.DiagramPostInitializer;
+import specman.visitor.LinkedClassmanAreaCollector;
+import specman.editarea.image.classman.LinkedClassmanDuplicates;
 import specman.visitor.StepNumberIndexCollector;
 import specman.visitor.TextAreaCollector;
 import specman.view.SchrittSequenzView;
@@ -176,6 +178,7 @@ public class LoadDiagrammSpecmanOp extends AbstractInitSpecmanOp {
     rewriteStaleStepNumberLinks(model);
     quellZielZuweisungV002(model);
     DiagramPostInitializer.initialize(context()::traverseDiagram);
+    LinkedClassmanDuplicates.markDuplicates(List.of(), LinkedClassmanAreaCollector.areasOf(context()::traverseDiagram));
     Set<String> skippedMetaTags = namesOfUnknownTagConfigs(model);
     getIntro().registerAllExistingStepnumbers();
     getOutro().registerAllExistingStepnumbers();

@@ -7,6 +7,7 @@ import specman.model.v002.AbstractImageEditAreaModel_V002;
 import specman.model.v002.LinkedClassmanImageEditAreaModel_V002;
 import specman.util.TextFiles;
 
+import java.io.File;
 import java.io.IOException;
 
 import static specman.Specman.editor;
@@ -33,7 +34,23 @@ public class LinkedClassmanImageEditArea extends ClassmanImageEditArea {
                                       ChangeInfo changeInfo) {
     super(resolution.source() != null ? resolution.source() : "", individualScalePercent, changeInfo);
     this.target = ClassmanLinkTarget.of(link, resolution);
+    setToolTipText(link);
     displayInitially();
+  }
+
+  /** @return the file which is written when the diagram is saved, null if there is none, see
+   * {@link ClassmanLinkTarget#file()} */
+  public File linkedFile() {
+    return target.file();
+  }
+
+  public boolean isDuplicate() {
+    return target.isDuplicate();
+  }
+
+  /** The diagram is not the first in the document to link its file, so it never writes the file. */
+  public void markDuplicate() {
+    target = target.asDuplicate();
   }
 
   /** @return true if the user changed the diagram since its file was read or written, and the file is one which can be

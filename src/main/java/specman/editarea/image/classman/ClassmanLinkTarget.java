@@ -10,29 +10,39 @@ final class ClassmanLinkTarget {
   private final String link;
   private final File file;
   private final String savedSource;
+  private final boolean duplicate;
 
-  private ClassmanLinkTarget(String link, File file, String savedSource) {
+  private ClassmanLinkTarget(String link, File file, String savedSource, boolean duplicate) {
     this.link = link;
     this.file = file;
     this.savedSource = savedSource;
+    this.duplicate = duplicate;
   }
 
   /** @param link the link text which the model keeps */
   static ClassmanLinkTarget of(String link, ClassmanLinkResolution resolution) {
     return new ClassmanLinkTarget(link, resolution.isOk() ? resolution.file() : null,
-      resolution.source() != null ? resolution.source() : "");
+      resolution.source() != null ? resolution.source() : "", false);
   }
 
   /** @return the same target, whose file now has the source */
   ClassmanLinkTarget saved(String source) {
-    return new ClassmanLinkTarget(link, file, source);
+    return new ClassmanLinkTarget(link, file, source, duplicate);
+  }
+
+  /** @return the same target as the one of a diagram which is not the first to link the file: it has no file to write */
+  ClassmanLinkTarget asDuplicate() {
+    return new ClassmanLinkTarget(link, null, savedSource, true);
   }
 
   String link() { return link; }
 
-  /** @return the file the diagram is written to, null if the link doesn't lead to a class diagram: nothing is written
-   * then, so that a file which is no diagram is never overwritten */
+  /** @return the file the diagram is written to, null if the link doesn't lead to a class diagram or if another diagram
+   * links the file as well: nothing is written then, so that a file which is no diagram is never overwritten and two
+   * diagrams never overwrite each other */
   File file() { return file; }
+
+  boolean isDuplicate() { return duplicate; }
 
   /** @return the text the file had when it was last read or written */
   String savedSource() { return savedSource; }

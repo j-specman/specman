@@ -78,9 +78,7 @@ public class SaveDiagrammSpecmanOp extends AbstractSpecmanOp {
    * model file as it is. It is done here and not when the model is generated, because that is also done for the working
    * copy, which must not change the files of other documents. */
   private void saveLinkedFiles() throws IOException {
-    LinkedClassmanAreaCollector collector = new LinkedClassmanAreaCollector();
-    context().traverseDiagram(collector);
-    for (LinkedClassmanImageEditArea area : collector.areas()) {
+    for (LinkedClassmanImageEditArea area : LinkedClassmanAreaCollector.areasOf(context()::traverseDiagram)) {
       if (area.needsSaving()) {
         area.saveLinkedFile();
       }
