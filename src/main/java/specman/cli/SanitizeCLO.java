@@ -2,7 +2,9 @@ package specman.cli;
 
 import specman.cli.sanitize.ChangeTrackingValidator;
 import specman.cli.sanitize.DuplicateIdValidator;
+import specman.cli.sanitize.LinkedDiagramValidator;
 import specman.cli.sanitize.MetaTagValidator;
+import specman.link.classman.ClassmanLinkResolver;
 import specman.model.v002.DiagramModel_V002;
 import specman.model.v002.io.ModelFileReader_V002;
 import specman.model.v002.io.ModelParseException;
@@ -66,7 +68,9 @@ public class SanitizeCLO extends AbstractCLO {
     ParseOutcome outcome = readModel(file);
     DiagramModel_V002 model = outcome.model();
     new DuplicateIdValidator(model).validate();
-    new MetaTagValidator(model).validate();
+    ClassmanLinkResolver resolver = new ClassmanLinkResolver(file);
+    new LinkedDiagramValidator(model, resolver).validate();
+    new MetaTagValidator(model, resolver).validate();
 
     Renumbering renumbering = renumberSteps(model);
     SanitizeResult result = ModelStepnumberRewriter_V002.rewrite(model, renumbering.toNumberMapping());

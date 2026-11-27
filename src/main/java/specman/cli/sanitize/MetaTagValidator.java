@@ -1,10 +1,13 @@
 package specman.cli.sanitize;
 
 import classman.model.v001.change.StereotypeReferences_V001;
+import specman.link.classman.ClassmanLinkResolution;
+import specman.link.classman.ClassmanLinkResolver;
 import specman.model.v002.AbstractEditAreaModel_V002;
 import specman.model.v002.AbstractStepModel_V002;
 import specman.model.v002.ClassmanImageEditAreaModel_V002;
 import specman.model.v002.DiagramModel_V002;
+import specman.model.v002.LinkedClassmanImageEditAreaModel_V002;
 import specman.model.v002.MetaTagConfigModel_V002;
 import specman.model.v002.MetaTagModel_V002;
 import specman.model.v002.io.TextAreaTraversal_V002;
@@ -22,10 +25,13 @@ public class MetaTagValidator extends AbstractModelValidator {
   private static final StereotypeReferences_V001 STEREOTYPES = new StereotypeReferences_V001();
 
   private final DiagramModel_V002 model;
+  private final ClassmanLinkResolver resolver;
 
-  public MetaTagValidator(DiagramModel_V002 model) {
+  /** @param resolver follows the links of linked diagrams, relative to the document */
+  public MetaTagValidator(DiagramModel_V002 model, ClassmanLinkResolver resolver) {
     super("Invalid meta tags");
     this.model = model;
+    this.resolver = resolver;
   }
 
   @Override
@@ -83,12 +89,19 @@ public class MetaTagValidator extends AbstractModelValidator {
   }
 
   /** The stereotype of a class in a class diagram may refer to a configuration, like a tag at a step does. The old text
-   * of a change mark is no use of it, it may refer to a configuration which has gone. */
+   * of a change mark is no use of it, it may refer to a configuration which has gone. A linked diagram is checked as
+   * the file has it, if the link leads to a diagram. */
   private void checkStereotypesOfDiagrams(Set<String> configNames, List<String> errors) {
     TextAreaTraversal_V002.forEachContent(model, (content, site) -> {
       for (AbstractEditAreaModel_V002 area : content.areas) {
         if (area instanceof ClassmanImageEditAreaModel_V002 diagram) {
           checkStereotypesOfDiagram(diagram.source, site, configNames, errors);
+        }
+        else if (area instanceof LinkedClassmanImageEditAreaModel_V002 linked) {
+          ClassmanLinkResolution resolution = resolver.resolve(linked.link);
+          if (resolution.isOk()) {
+            checkStereotypesOfDiagram(resolution.source(), site, configNames, errors);
+          }
         }
       }
     });

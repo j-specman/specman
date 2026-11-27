@@ -1,10 +1,15 @@
 package cli;
 
 import builder.DiagrammBuilder;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import specman.Aenderungsart;
 import specman.editarea.markups.MarkupType;
+import specman.link.LinkAliases;
+import specman.link.classman.ClassmanLink;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +17,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 import static builder.BuilderFactory.diagramm;
 import static builder.BuilderFactory.sequence;
@@ -28,11 +36,14 @@ import static specman.cli.SpecmanCLI.EXIT_SUCCESS;
 /** Tests of the {@code --sanitize} command line operation. */
 public class SanitizeTest {
 
+  private Preferences testPreferences;
+
   private static final String TAG_WITH_FREETEXT = "priority";
   private static final String TAG_WITHOUT_FREETEXT = "done";
   private static final String UNKNOWN_TAG = "unknown";
   private static final String INVISIBLE_TAG = "invisible";
   private static final String TEXT = "Das System prüft die Eingabe.";
+  private static final String TWO_CLASSES = "classdiagram {\n    class Hello\n    class World\n}\n";
   private static final String CHANGESET = "yellow";
   private static final String OTHER_CHANGESET = "pink";
   private static final String UNKNOWN_CHANGESET = "nosuchcolor";
@@ -46,6 +57,18 @@ public class SanitizeTest {
   @BeforeAll
   static void deleteOldNsdFiles() throws IOException {
     DiagrammBuilder.deleteOldNsdFiles();
+  }
+
+  @BeforeEach
+  void useTestAliases() {
+    testPreferences = Preferences.userRoot().node("specman-test-" + UUID.randomUUID());
+    LinkAliases.useNode(testPreferences);
+  }
+
+  @AfterEach
+  void forgetTestAliases() throws BackingStoreException {
+    LinkAliases.useNode(null);
+    testPreferences.removeNode();
   }
 
   /** A model file which is already consistent is reported as OK and the call ends successfully. */
@@ -353,6 +376,96 @@ public class SanitizeTest {
       .persist();
 
     assertOK(sanitize(nsdFile));
+  }
+
+  // ---- linked class diagrams ----
+
+  private static File diagramFile(Path directory, String name, String content) throws IOException {
+    Path file = directory.resolve(name);
+    Files.writeString(file, content);
+    return file.toFile();
+  }
+
+  private static String linkTo(File file) {
+    return ClassmanLink.of(file, "", null, null);
+  }
+
+  /** A link which leads to a class diagram is accepted. */
+  @Test
+  void testLinkedDiagramIsAccepted(@TempDir Path directory) throws IOException {
+    File diagram = diagramFile(directory, "ok.cld", diagramWithStereotype(TAG_WITH_FREETEXT));
+    File nsdFile = diagramm()
+      .withMetaTagConfig(TAG_WITH_FREETEXT, "Priority", true)
+      .withMainSequence(sequence()
+        .withStep(simple("first").withLinkedClassmanDiagram(linkTo(diagram))))
+      .persist();
+
+    assertOK(sanitize(nsdFile));
+  }
+
+  /** A link whose alias is assigned to no file is reported as ERROR including the step and the alias. */
+  @Test
+  void testLinkedDiagramWithUnknownAlias(@TempDir Path directory) throws IOException {
+    File diagram = diagramFile(directory, "ok.cld", TWO_CLASSES);
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first").withLinkedClassmanDiagram(ClassmanLink.of(diagram, "nosuch", null, null))))
+      .persist();
+
+    assertERROR(sanitize(nsdFile), "Invalid linked class diagrams", "Step 1", "alias 'nosuch'");
+  }
+
+  /** A link to a file which doesn't exist is reported as ERROR including the file. */
+  @Test
+  void testLinkedDiagramWithMissingFile(@TempDir Path directory) {
+    File missing = directory.resolve("missing.cld").toFile();
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first").withLinkedClassmanDiagram(linkTo(missing))))
+      .persist();
+
+    assertERROR(sanitize(nsdFile), "Invalid linked class diagrams", "Step 1", "missing file", "missing.cld");
+  }
+
+  /** A file whose content is not a valid class diagram is reported as ERROR including what is wrong with it. */
+  @Test
+  void testLinkedFileWithoutDiagram(@TempDir Path directory) throws IOException {
+    File broken = diagramFile(directory, "broken.cld", "this is no class diagram");
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first").withLinkedClassmanDiagram(linkTo(broken))))
+      .persist();
+
+    assertERROR(sanitize(nsdFile), "Invalid linked class diagrams", "Step 1", "not a valid class diagram", "broken.cld");
+  }
+
+  /** A file which two diagrams link is reported once, at the second diagram, with the step of the first. */
+  @Test
+  void testFileLinkedTwice(@TempDir Path directory) throws IOException {
+    String link = linkTo(diagramFile(directory, "twice.cld", TWO_CLASSES));
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first").withLinkedClassmanDiagram(link))
+        .withStep(simple("second").withLinkedClassmanDiagram(link)))
+      .persist();
+
+    CLIResult result = sanitize(nsdFile);
+
+    assertERROR(result, "Invalid linked class diagrams", "Step 2", "twice.cld", "which Step 1");
+    assertEquals(1, result.stderr.split("link '", -1).length - 1, "only the second link is reported: " + result.stderr);
+  }
+
+  /** The stereotypes in a linked file are checked like those of an embedded diagram. */
+  @Test
+  void testStereotypeWithoutConfigurationInLinkedFile(@TempDir Path directory) throws IOException {
+    File diagram = diagramFile(directory, "stereotype.cld", diagramWithStereotype(UNKNOWN_TAG));
+    File nsdFile = diagramm()
+      .withMainSequence(sequence()
+        .withStep(simple("first").withLinkedClassmanDiagram(linkTo(diagram))))
+      .persist();
+
+    assertERROR(sanitize(nsdFile), "Invalid meta tags", "Step 1", "class 'Customer'",
+      "'" + UNKNOWN_TAG + "' which has no configuration");
   }
 
   // ---- change tracking ----
