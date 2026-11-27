@@ -39,6 +39,10 @@ public interface SpecmanOpContext extends EditorI {
   /** Asks the user which file the alias of a link stands for, null if the user doesn't choose any.
    * @param suggestedFile the file the user is offered as the probable answer, null if there is none */
   File chooseFileForAlias(String alias, File suggestedFile);
+  /** Asks the user which Classman diagram file the alias of a link stands for, null if the user doesn't choose any. */
+  File chooseClassmanFileForAlias(String alias);
+  /** Asks the user for the Classman diagram file which a link is to lead to, null if the user doesn't choose any. */
+  File chooseClassmanFile();
   /** Asks the user for a file with the source of a diagram of the given kind.
    * @param emptyDiagramOffered whether the user may also choose to start with an empty diagram instead, which is
    *                            only possible when creating a new diagram

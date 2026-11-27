@@ -3,6 +3,7 @@ package specman.undo.props;
 import specman.ChangeInfo;
 import specman.editarea.EditArea;
 import specman.editarea.image.AbstractSourceImageEditArea;
+import specman.editarea.image.classman.LinkedClassmanImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.editarea.image.SourceBackup;
 import specman.metatag.stepnumberlabel.StepnumberLabel;
@@ -75,6 +76,14 @@ public class UDBL {
     if (!Objects.equals(undoSource, source)) {
       diagram.setSource(source);
       addEdit(new UndoableSetProperty<>(undoSource, diagram::setSource, diagram::getSource));
+    }
+  }
+
+  public static void setLinkUDBL(LinkedClassmanImageEditArea diagram, String link) {
+    String undoLink = diagram.getLink();
+    if (!Objects.equals(undoLink, link)) {
+      diagram.setLink(link);
+      addEdit(new UndoableSetProperty<>(undoLink, diagram::setLink, diagram::getLink));
     }
   }
 

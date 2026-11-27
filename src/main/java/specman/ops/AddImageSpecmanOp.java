@@ -3,8 +3,6 @@ package specman.ops;
 import specman.editarea.TextEditArea;
 import specman.editarea.image.classman.ClassmanImageEditArea;
 import specman.editarea.image.classman.ClassmanSourceValidator;
-import specman.editarea.image.classman.LinkedClassmanDuplicates;
-import specman.visitor.LinkedClassmanAreaCollector;
 import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlSourceValidator;
@@ -14,7 +12,6 @@ import specman.link.LinkAliases;
 import specman.link.LinkLocation;
 import specman.link.classman.ClassmanLink;
 import specman.link.classman.ClassmanLinkResolution;
-import specman.link.classman.ClassmanLinkResolver;
 import specman.util.TextFiles;
 
 import javax.imageio.ImageIO;
@@ -27,7 +24,7 @@ import java.util.Locale;
 import static specman.i18n.Messages.i18n;
 
 
-public class AddImageSpecmanOp extends AbstractSpecmanOp {
+public class AddImageSpecmanOp extends AbstractClassmanLinkOp {
   public static final String EMPTY_PLANTUML = "@startuml\n\n@enduml";
   public static final String EMPTY_CLASSMAN = "classdiagram {\n\n}";
   public static final String[] IMAGE_FILE_EXTENSIONS = {"jpg", "png", "gif", "bmp", "svg", ClassmanImageEditArea.FILE_EXTENSION};
@@ -154,13 +151,8 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
    * by an alias, which the file has already in the dialog, or by a path. A file which doesn't have a class diagram is
    * refused. Cancelling the dialog cancels the whole insertion. */
   private void addLinkedClassman(TextEditArea lastFocused, File file) {
-    ClassmanLinkResolution resolution = new ClassmanLinkResolver().resolve(file);
-    if (!resolution.isOk()) {
-      fehler("msg.classman.file.invalid", file.getName(), resolution.problemText());
-      return;
-    }
-    if (LinkedClassmanDuplicates.isLinkedBy(file, LinkedClassmanAreaCollector.areasOf(context::traverseDiagram))) {
-      fehler("msg.classman.file.linked.already", file.getName());
+    ClassmanLinkResolution resolution = resolveLinkable(file);
+    if (resolution == null) {
       return;
     }
     LinkLocation location = context.askClassmanLocation(file, resolution.diagramId(), resolution.diagramName());

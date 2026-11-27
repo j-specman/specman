@@ -7,6 +7,7 @@ import specman.editarea.InteractiveStepFragment;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.editarea.image.classman.ClassmanImageEditArea;
+import specman.editarea.image.classman.LinkedClassmanImageEditArea;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.metatag.generic.GenericMetaTag;
 import specman.metatag.generic.config.MetaTagConfig;
@@ -65,6 +66,9 @@ public interface EditorI extends FocusListener {
 	void importPlantUmlSource(PlantUmlImageEditArea diagram);
 	/** Asks the user for a file and replaces the source of the diagram by its content. */
 	void importClassmanSource(ClassmanImageEditArea diagram);
+	/** Asks the user for a file to repair the link of the diagram, which is shown as a placeholder, and shows the diagram
+	 * of that file. */
+	void relinkClassman(LinkedClassmanImageEditArea diagram);
 	void undoLastEditAndForget();
 	SpecmanUndoManager getUndoManager();
 	List<AbstractSchrittView> listAllSteps();

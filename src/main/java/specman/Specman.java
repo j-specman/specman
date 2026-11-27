@@ -34,6 +34,7 @@ import specman.editarea.EditContainer;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.editarea.image.classman.ClassmanImageEditArea;
+import specman.editarea.image.classman.LinkedClassmanImageEditArea;
 import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.SourceFileKind;
 import specman.editarea.image.SourceFileChooser;
@@ -419,6 +420,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	}
 
 	@Override
+	public void relinkClassman(LinkedClassmanImageEditArea diagram) {
+		new RelinkClassmanOp(this).relink(diagram);
+	}
+
+	@Override
 	public void undoLastEditAndForget() {
 		undoManager.undoAndForget();
 	}
@@ -753,9 +759,25 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 
 	@Override
 	public File chooseFileForAlias(String alias, File suggestedFile) {
+		return chooseFile(i18n("dialog.link.open.choose.file", alias), suggestedFile, "msg.filter.diagrams", "nsd");
+	}
+
+	@Override
+	public File chooseClassmanFileForAlias(String alias) {
+		return chooseFile(i18n("dialog.link.open.choose.file", alias), null, "msg.filter.classman",
+			ClassmanImageEditArea.FILE_EXTENSION);
+	}
+
+	@Override
+	public File chooseClassmanFile() {
+		return chooseFile(i18n("dialog.classman.relink.title"), null, "msg.filter.classman",
+			ClassmanImageEditArea.FILE_EXTENSION);
+	}
+
+	private File chooseFile(String title, File suggestedFile, String filterMessageKey, String extension) {
 		JFileChooser fileChooser = new JFileChooser(diagrammDatei != null ? diagrammDatei.getParentFile() : null);
-		fileChooser.setDialogTitle(i18n("dialog.link.open.choose.file", alias));
-		fileChooser.setFileFilter(new IFileNameExtensionFilter("msg.filter.diagrams", "nsd"));
+		fileChooser.setDialogTitle(title);
+		fileChooser.setFileFilter(new IFileNameExtensionFilter(filterMessageKey, extension));
 		if (suggestedFile != null) {
 			fileChooser.setSelectedFile(suggestedFile);
 		}

@@ -1,6 +1,8 @@
 package specman.editarea.image.classman;
 
+import specman.link.classman.ClassmanLink;
 import specman.link.classman.ClassmanLinkProblem;
+import specman.link.classman.ClassmanLinkReference;
 import specman.link.classman.ClassmanLinkResolution;
 
 import java.io.File;
@@ -48,6 +50,17 @@ final class ClassmanLinkTarget {
   }
 
   String link() { return link; }
+
+  /** @return the alias the link names its file by, null if it names it otherwise or isn't a link at all */
+  String alias() {
+    try {
+      ClassmanLinkReference reference = ClassmanLink.parse(link);
+      return reference.hasAlias() ? reference.alias() : null;
+    }
+    catch (IllegalArgumentException notALink) {
+      return null;
+    }
+  }
 
   /** @return the file the diagram is written to, null if the link doesn't lead to a class diagram or if another diagram
    * links the file as well: nothing is written then, so that a file which is no diagram is never overwritten and two

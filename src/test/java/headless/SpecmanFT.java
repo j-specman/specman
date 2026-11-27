@@ -105,6 +105,7 @@ public class SpecmanFT extends Specman {
   private final Map<SourceFileKind, Boolean> emptyDiagramOffered = new HashMap<>();
   private AliasListPanel openedAliasListPanel;
   private final List<String> aliasesAskedFor = new ArrayList<>();
+  private int classmanFilesAskedFor;
   private final List<File> fileSuggestionsOffered = new ArrayList<>();
   private LinkLocation classmanLocationAnswer;
   private final List<File> filesAskedClassmanLocationFor = new ArrayList<>();
@@ -404,6 +405,13 @@ public class SpecmanFT extends Specman {
     throw new IllegalStateException("No step number label found for step " + step.getNumber());
   }
 
+  /** Left-clicks the component once, like the user does. */
+  public void leftClick(Component component) {
+    component.dispatchEvent(new MouseEvent(component, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(),
+      MouseEvent.BUTTON1_DOWN_MASK, 1, 1, 1, false, MouseEvent.BUTTON1));
+    waitForEventsProcessed();
+  }
+
   private static void rightClick(Component component) {
     component.dispatchEvent(new MouseEvent(component, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(),
       MouseEvent.BUTTON3_DOWN_MASK, 1, 1, 1, false, MouseEvent.BUTTON3));
@@ -605,6 +613,23 @@ public class SpecmanFT extends Specman {
   public File chooseFileForAlias(String alias, File suggestedFile) {
     aliasesAskedFor.add(alias);
     fileSuggestionsOffered.add(suggestedFile);
+    return fileChoiceAnswer;
+  }
+
+  @Override
+  public File chooseClassmanFile() {
+    classmanFilesAskedFor++;
+    return fileChoiceAnswer;
+  }
+
+  /** How often the user was asked for a Classman diagram file, outside of an alias. */
+  public int classmanFilesAskedFor() {
+    return classmanFilesAskedFor;
+  }
+
+  @Override
+  public File chooseClassmanFileForAlias(String alias) {
+    aliasesAskedFor.add(alias);
     return fileChoiceAnswer;
   }
 
