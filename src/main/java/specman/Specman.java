@@ -7,9 +7,11 @@ import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import specman.cli.SpecmanCLI;
 import specman.i18n.IFileNameExtensionFilter;
 import specman.i18n.Messages;
+import specman.link.AliasDialog;
 import specman.link.AliasListDialog;
 import specman.link.AliasListPanel;
 import specman.link.SpecmanLink;
+import specman.link.classman.ClassmanLinkAliasPanel;
 import specman.menubar.SpecmanMenuBar;
 import specman.draganddrop.DragMouseAdapter;
 import specman.draganddrop.GlassPane;
@@ -63,6 +65,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import static specman.graphics.Styles.DIAGRAMM_LINE_COLOR;
@@ -772,6 +775,13 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 	public SourceFileChoice chooseSourceFile(SourceFileKind kind, boolean emptyDiagramOffered) {
 		File directory = diagrammDatei != null ? diagrammDatei.getParentFile() : null;
 		return new SourceFileChooser(kind, directory, emptyDiagramOffered).choose(scrollPane);
+	}
+
+	@Override
+	public String askClassmanAlias(File file, String diagramId, String diagramName) {
+		AtomicReference<String> alias = new AtomicReference<>();
+		new AliasDialog(frame, new ClassmanLinkAliasPanel(file, diagramId, diagramName, alias::set));
+		return alias.get();
 	}
 
 	/** Called while Specman is being constructed. Overrides must not depend on their own fields. */

@@ -148,12 +148,20 @@ public class AddImageSpecmanOp extends AbstractSpecmanOp {
   }
 
   /** Links the diagram in the file instead of taking its source, by the alias of the file if it has one, otherwise by
-   * its path. A file which doesn't have a class diagram is refused. */
+   * its path. A file which doesn't have a class diagram is refused. If the user hasn't decided about an alias for the
+   * file yet, the user is asked, and cancelling cancels the whole insertion. */
   private void addLinkedClassman(TextEditArea lastFocused, File file) {
     ClassmanLinkResolution resolution = new ClassmanLinkResolver().resolve(file);
     if (!resolution.isOk()) {
       fehler("msg.classman.file.invalid", file.getName(), resolution.problemText());
       return;
+    }
+    if (!LinkAliases.isAssigned(file)) {
+      String alias = context.askClassmanAlias(file, resolution.diagramId(), resolution.diagramName());
+      if (alias == null) {
+        return;
+      }
+      LinkAliases.assign(file, alias);
     }
     String link = ClassmanLink.of(file, LinkAliases.aliasOf(file), resolution.diagramId(), resolution.diagramName());
     lastFocused.addLinkedClassmanImage(link, resolution);

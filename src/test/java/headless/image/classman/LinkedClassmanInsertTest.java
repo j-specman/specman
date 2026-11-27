@@ -32,19 +32,59 @@ class LinkedClassmanInsertTest extends AbstractClassmanTest {
     return ((LinkedClassmanImageEditAreaModel_V002) diagram.toModel(false)).link;
   }
 
-  /** Scenario: The file has no alias. The diagram shows the content of the file and links it by its path. */
+  /** Scenario: The file has no alias yet, and the user is asked for one. The user decides against an alias. The diagram
+   * shows the content of the file and links it by its path. */
   @Test
   void testLinkedFileWithoutAliasIsLinkedByPath(@TempDir Path directory) throws IOException {
     EditContainer container = containerOfNewStep();
     File file = diagramFile(directory, TWO_CLASSES);
 
-    insertLinkedDiagram(file);
+    insertLinkedDiagram(file, "");
 
     assertTrue(container.getEditAreaAt(1) instanceof LinkedClassmanImageEditArea);
     assertEquals(TWO_CLASSES, ((ClassmanImageEditArea) container.getEditAreaAt(1)).getSource());
     ClassmanLinkReference reference = ClassmanLink.parse(linkOf(container));
     assertEquals(file.getAbsoluteFile(), reference.file());
+    assertEquals(List.of(file), specman.filesAskedClassmanAliasFor());
     assertEquals(List.of(), specman.shownMessages());
+  }
+
+  /** Scenario: The user gives an alias for the file. The link uses it, and the file has it from now on. */
+  @Test
+  void testAliasFromTheDialogIsUsedAndRemembered(@TempDir Path directory) throws IOException {
+    EditContainer container = containerOfNewStep();
+    File file = diagramFile(directory, TWO_CLASSES);
+
+    insertLinkedDiagram(file, "hilfe");
+
+    assertEquals("classman://hilfe", linkOf(container));
+    assertEquals("hilfe", LinkAliases.aliasOf(file));
+  }
+
+  /** Scenario: The user cancels the question for an alias. Nothing is inserted and nothing is decided about the file. */
+  @Test
+  void testCancellingTheAliasDialogCancelsTheInsertion(@TempDir Path directory) throws IOException {
+    EditContainer container = containerOfNewStep();
+    File file = diagramFile(directory, TWO_CLASSES);
+
+    insertLinkedDiagram(file, null);
+
+    assertFalse(hasDiagram(container), "no diagram must be inserted");
+    assertFalse(LinkAliases.isAssigned(file), "nothing must be decided about the file");
+    assertEquals(List.of(), specman.shownMessages());
+  }
+
+  /** Scenario: The user has an alias for the file already, or decided against one. The user is not asked again. */
+  @Test
+  void testDecidedFileIsNotAskedAgain(@TempDir Path directory) throws IOException {
+    EditContainer container = containerOfNewStep();
+    File file = diagramFile(directory, TWO_CLASSES);
+    LinkAliases.assign(file, "hilfe");
+
+    insertLinkedDiagram(file, null);
+
+    assertEquals("classman://hilfe", linkOf(container));
+    assertEquals(List.of(), specman.filesAskedClassmanAliasFor());
   }
 
   /** Scenario: The user has an alias for the file. The link uses it. */

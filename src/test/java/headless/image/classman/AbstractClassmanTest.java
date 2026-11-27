@@ -58,9 +58,17 @@ abstract class AbstractClassmanTest {
     return file.toFile();
   }
 
-  /** Clicks the toolbar button for a Classman diagram, and answers the dialog by linking the file. */
+  /** Clicks the toolbar button for a Classman diagram, and answers the dialog by linking the file. If the file has no
+   * alias yet, the user decides against an alias. */
   static void insertLinkedDiagram(File file) {
+    insertLinkedDiagram(file, "");
+  }
+
+  /** Like {@link #insertLinkedDiagram(File)}, but the user answers the question for an alias with the given one, which
+   * is null for cancelling. */
+  static void insertLinkedDiagram(File file, String aliasAnswer) {
     specman.answerClassmanFileChoiceWith(SourceFileChoice.linkedFile(file));
+    specman.answerClassmanAliasWith(aliasAnswer);
     specman.doEdit(ClassmanAction.class);
     specman.layoutComponents();
   }

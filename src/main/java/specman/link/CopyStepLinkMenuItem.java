@@ -56,7 +56,7 @@ public class CopyStepLinkMenuItem extends IMenuItem {
   }
 
   private void askForAlias(File file) {
-    aliasPanel = new AliasPanel(file, currentStep, alias -> {
+    aliasPanel = new StepLinkAliasPanel(file, currentStep, alias -> {
       LinkAliases.assign(file, alias);
       copyLinkToClipboard(file);
     });

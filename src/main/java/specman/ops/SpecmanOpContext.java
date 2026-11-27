@@ -43,6 +43,11 @@ public interface SpecmanOpContext extends EditorI {
    *                            only possible when creating a new diagram
    * @return the chosen file, or the choice to start empty (if offered), or the choice to cancel */
   SourceFileChoice chooseSourceFile(SourceFileKind kind, boolean emptyDiagramOffered);
+  /** Asks the user for the alias of the file which a Classman diagram is linked to.
+   * @param diagramId the ID of the diagram in the file, null if it has none
+   * @param diagramName the name of the diagram in the file, null if it has none
+   * @return the alias, empty if the user wants none, null if the user cancels */
+  String askClassmanAlias(File file, String diagramId, String diagramName);
   /** Asks the user for an image file, null if the user doesn't choose any. */
   File chooseImageFile();
   /** Starts another Specman instance, which follows the link. */

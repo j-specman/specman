@@ -12,7 +12,7 @@ public class AliasDialog extends IDialog {
   private static final long serialVersionUID = 1L;
 
   public AliasDialog(Window owner, AliasPanel panel) {
-    super(owner, "dialog.link.alias.title");
+    super(owner, panel.titleKey());
     panel.onClose(() -> setVisible(false));
     getContentPane().add(panel);
     pack();

@@ -9,7 +9,6 @@ import specman.i18n.IButton;
 import specman.i18n.IHeaderPanel;
 import specman.i18n.ILabel;
 import specman.link.suggester.AliasSuggester;
-import specman.view.AbstractSchrittView;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -30,13 +29,18 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.Serial;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static specman.i18n.Messages.i18n;
 
 /** The content of the {@link AliasDialog}, in which the user is asked for an alias for the file a link points to.
  * While typing, the panel shows the resulting link and what is wrong with the alias, if anything.
- * Being a plain panel, it can be created and operated without displaying a dialog. */
-public class AliasPanel extends JPanel {
+ * Being a plain panel, it can be created and operated without displaying a dialog.
+ * <p>
+ * What differs between the kinds of links is the text of the dialog and the link shown as the result, which the
+ * subclasses pass to the constructor: {@link StepLinkAliasPanel} for links to a step, and the panel for links to a
+ * Classman diagram. */
+public abstract class AliasPanel extends JPanel {
   @Serial
   private static final long serialVersionUID = 1L;
 
@@ -55,7 +59,8 @@ public class AliasPanel extends JPanel {
   private static final String NO_PROBLEM_TEXT = " ";
 
   private final File file;
-  private final AbstractSchrittView step;
+  private final String titleKey;
+  private final Function<String, String> linkOf;
   private final Consumer<String> aliasAccepted;
   private final JTextField aliasField = new JTextField(ALIAS_FIELD_COLUMNS);
   private final JTextField previewField = new JTextField(PREVIEW_FIELD_COLUMNS);
@@ -67,12 +72,17 @@ public class AliasPanel extends JPanel {
   private boolean dialogDisplayed = true;
   private AliasListPanel aliasListPanel;
 
-  /** @param aliasAccepted called with the alias, possibly empty for "no alias", when the user confirms, before the panel closes */
-  public AliasPanel(File file, AbstractSchrittView step, Consumer<String> aliasAccepted) {
+  /** @param titleKey the message key of the title of the dialog
+   * @param descriptionKey the message key of the text which explains the dialog
+   * @param linkOf makes the link which the file gets with the alias, which may be empty for no alias
+   * @param aliasAccepted called with the alias, possibly empty for "no alias", when the user confirms, before the panel closes */
+  protected AliasPanel(File file, String titleKey, String descriptionKey, Function<String, String> linkOf,
+                       Consumer<String> aliasAccepted) {
     super(new FormLayout("10px, right:default, 8px, fill:default:grow, 10px",
       "pref, 10px, pref, 4px, pref, 4px, pref, 10px, pref, 10px"));
     this.file = file;
-    this.step = step;
+    this.titleKey = titleKey;
+    this.linkOf = linkOf;
     this.aliasAccepted = aliasAccepted;
     aliasField.setName(ALIAS_FIELD);
     ((AbstractDocument) aliasField.getDocument()).setDocumentFilter(new AliasInputFilter());
@@ -88,7 +98,7 @@ public class AliasPanel extends JPanel {
     ok.addActionListener(e -> confirm());
     cancel.setName(CANCEL_BUTTON);
     cancel.addActionListener(e -> closeAction.run());
-    add(new IHeaderPanel("dialog.link.alias.title", "dialog.link.alias.description", ICON), CC.xyw(1, 1, 5));
+    add(new IHeaderPanel(titleKey, descriptionKey, ICON), CC.xyw(1, 1, 5));
     add(new ILabel("dialog.link.alias.label"), CC.xy(2, 3));
     add(buildAliasPanel(), CC.xy(4, 3, "left, center"));
     add(new ILabel("dialog.link.alias.preview.label"), CC.xy(2, 5));
@@ -103,6 +113,11 @@ public class AliasPanel extends JPanel {
     prefillSuggestedAlias();
     registerEscapeAsCancel();
     refresh();
+  }
+
+  /** @return the message key of the title of the dialog around the panel */
+  String titleKey() {
+    return titleKey;
   }
 
   /** Defines what to do when the panel is done, i.e. after the user confirmed or cancelled. */
@@ -159,7 +174,7 @@ public class AliasPanel extends JPanel {
     String problemKey = LinkAliases.problemKeyFor(file, alias);
     ok.setEnabled(problemKey == null);
     problemLabel.setText(problemKey == null ? NO_PROBLEM_TEXT : i18n(problemKey));
-    previewField.setText(problemKey == null ? SpecmanLink.of(file, alias, step) : "");
+    previewField.setText(problemKey == null ? linkOf.apply(alias) : "");
   }
 
   private void confirm() {

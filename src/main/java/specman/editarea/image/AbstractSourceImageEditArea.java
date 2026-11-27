@@ -10,17 +10,25 @@ import java.awt.event.MouseEvent;
 
 import static specman.Specman.editor;
 
-/** An edit area which shows a vector diagram rendered from its source. A double click opens an editor for the source to
- * the right of the diagram, a right click its context menu. The diagram is only updated when the editor is left or the
- * user asks for a preview, because most intermediate states while typing are not sensible diagrams.
+/** An edit area which shows a vector diagram rendered from its source. A double click opens the editor of the diagram,
+ * a right click its context menu, which also offers the source editor.
  * <p>
- * Subclasses say how the source is rendered and checked, see {@link #pictureOf(String)}
- * and {@link #sourceValidator()}.
+ * By default, the double click opens a source editor, a popup to the right of the diagram in which the user types the
+ * image's source code, see {@link #editSource()}. A subclass can have an editor of its own instead, see {@link #doubleClicked()}:
+ * PlantUML images use the source editor, Classman diagramms images open a diagram editor in a window of its own.
+ * <p>
+ * The source editor only updates the diagram when it is closed or the user asks for a preview, because most
+ * intermediate states while typing are not reasonable diagrams even if there is no syntax error.
+ * <p>
+ * Subclasses say how the source is rendered and checked, see {@link #pictureOf(String)} and {@link #sourceValidator()}.
  * Subclasses can track changes of the source as a whole, see {@link #applySourceChange(String)}, or give the source
  * change marks of its own. */
 public abstract class AbstractSourceImageEditArea extends AbstractVectorImageEditArea {
+  /** The content of the image area: what the model persists, what the user's changes and undo apply to, and what the
+   * editors start from. Unlike {@link #displayedSource}, it doesn't follow the preview of the source editor. */
   private String source;
-  /** Differs from the source while the editor shows the preview the user asked for. */
+  /** What the picture is drawn from right now. It is the {@link #source}, except while the source editor shows the
+   * preview the user asked for. */
   private String displayedSource;
   /** True from the insertion of a new diagram until the user confirmed some content. Leaving the editor
    * before that takes the diagram out again, as if it had never been inserted. */
@@ -64,8 +72,8 @@ public abstract class AbstractSourceImageEditArea extends AbstractVectorImageEdi
     }
   }
 
-  /** Shows the diagram for the given source, which doesn't have to be the source of the area: The editor uses this
-   * for its preview. */
+  /** Shows the diagram for the given source, which doesn't have to be the source of the area: The source editor uses
+   * this for its preview. */
   protected void show(String sourceToShow) {
     displayedSource = sourceToShow;
     showPicture(pictureOf(sourceToShow));
@@ -85,11 +93,12 @@ public abstract class AbstractSourceImageEditArea extends AbstractVectorImageEdi
     }
   }
 
-  /** The source editor opens by default. */
+  /** The source editor opens by default. A subclass with an editor of its own opens that one instead. */
   protected void doubleClicked() {
     editSource();
   }
 
+  /** Opens the source editor to the right of the diagram, which every subclass offers in the context menu. */
   public void editSource() {
     SourceEditorPopup popup = newEditorPopup();
     if (awaitingFirstContent) {
@@ -105,7 +114,8 @@ public abstract class AbstractSourceImageEditArea extends AbstractVectorImageEdi
   }
 
   /** For a diagram that has just been inserted with an empty template as source, whose second line is empty: lets
-   * the user enter the content right away. The relayout which the insertion requested may still be pending, and the
+   * the user enter the content right away, in the source editor. A subclass with an editor of its own opens that one
+   * instead. The relayout which the insertion requested may still be pending, and the
    * editor is placed by the diagram's position on screen at the time it is shown. So the layout is completed and the
    * diagram scrolled into view first, otherwise the editor can end up far from the diagram, e.g. for a diagram in
    * the outro. */
@@ -118,7 +128,7 @@ public abstract class AbstractSourceImageEditArea extends AbstractVectorImageEdi
     }
   }
 
-  /** Called when the editor was closed with source it accepted. The first content of a new diagram belongs to its
+  /** Called when the source editor was closed with source it accepted. The first content of a new diagram belongs to its
    * insertion, so a single undo takes the whole diagram out. */
   public void commitSource(String newSource) {
     if (awaitingFirstContent) {
@@ -130,7 +140,7 @@ public abstract class AbstractSourceImageEditArea extends AbstractVectorImageEdi
     }
   }
 
-  /** Called when the editor was closed, no matter if the source was committed or discarded. A new diagram which got
+  /** Called when the source editor was closed, no matter if the source was committed or discarded. A new diagram which got
    * no content is taken out again, without trace. */
   public void editorClosed() {
     if (awaitingFirstContent) {
