@@ -15,8 +15,8 @@ import java.util.List;
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static specman.ops.AddImageSpecmanOp.EMPTY_CLASSMAN;
 
 /** A new Classman diagram is inserted with the toolbar button: empty, with the diagram editor opening right away, or
  * with the source of a file. Only a file with source which the editor would accept as well is taken over. */
@@ -24,17 +24,27 @@ class ClassmanInsertTest extends AbstractClassmanTest {
 
   private static final String REFUSED_MESSAGE_KEY = "msg.classman.file.invalid";
 
-  /** Scenario: By default, the button inserts an empty diagram behind the text, and the user is offered the choice. */
+  /** Scenario: By default, the button inserts an empty diagram behind the text, and the user is offered the choice. The
+   * new diagram has an ID right away. */
   @Test
   void testToolbarButtonInsertsEmptyDiagramBehindText() {
     EditContainer container = containerOfNewStep();
 
     ClassmanImageEditArea diagram = insertDiagramByToolbarButton(container);
 
-    assertEquals(EMPTY_CLASSMAN, diagram.getSource());
+    assertTrue(diagram.getSource().matches("classdiagram \\([0-9a-f]{8}\\) \\{\n\n}"), diagram.getSource());
     assertTrue(diagram.getFullSizeImage().getWidth() > 0, "Even an empty diagram must have an extent");
     assertTrue(diagram.getTotalScalePercent() > 0, "The diagram must be shown on screen");
     assertTrue(specman.classmanEmptyDiagramWasOffered(), "starting empty must be offered for a new diagram");
+  }
+
+  /** Scenario: Two new diagrams don't get the same ID. */
+  @Test
+  void testNewDiagramsHaveDifferentIds() {
+    ClassmanImageEditArea first = insertDiagramByToolbarButton(containerOfNewStep());
+    ClassmanImageEditArea second = insertDiagramByToolbarButton(containerOfNewStep());
+
+    assertNotEquals(first.getSource(), second.getSource());
   }
 
   /** Scenario: The user works in the diagram editor which opened with the new diagram. The diagram stays when the
@@ -43,16 +53,17 @@ class ClassmanInsertTest extends AbstractClassmanTest {
   void testDiagramStaysAfterTheDiagramEditorDidSomething() {
     EditContainer container = containerOfNewStep();
     ClassmanImageEditArea diagram = insertDiagramByToolbarButton(container);
+    String inserted = diagram.getSource();
 
     diagram.changeSource(TWO_CLASSES);
-    diagram.firstEditClosed(EMPTY_CLASSMAN);
+    diagram.firstEditClosed(inserted);
 
     assertTrue(hasDiagram(container), "The diagram must stay");
     assertEquals(TWO_CLASSES, diagram.getSource());
 
     specman.undo();
     assertTrue(hasDiagram(container), "The first undo takes back what the editor did");
-    assertEquals(EMPTY_CLASSMAN, diagram.getSource());
+    assertEquals(inserted, diagram.getSource());
 
     specman.undo();
     assertFalse(hasDiagram(container), "The second undo takes the diagram out");
@@ -65,7 +76,7 @@ class ClassmanInsertTest extends AbstractClassmanTest {
     EditContainer container = containerOfNewStep();
     ClassmanImageEditArea diagram = insertDiagramByToolbarButton(container);
 
-    diagram.firstEditClosed(EMPTY_CLASSMAN);
+    diagram.firstEditClosed(diagram.getSource());
 
     assertFalse(hasDiagram(container), "The diagram must be gone");
     assertFalse(specman.getUndoManager().canRedo(), "The insertion must not be redoable");

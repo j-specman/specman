@@ -747,7 +747,7 @@ The stereotypes of linked files are checked like those of embedded diagrams (`Me
 
 ### Format
 * The grammar of the model file has the alternative `image(... type=classman ...) { link=`...` }`, see <<Consequences for the Format>>.
-* The grammar of the diagram has an optional diagram ID: `classdiagram "Name" (0a1b2c3d) { ... }`, also for an unnamed diagram. A linked diagram carries it into the link, and it is the preparation for the class model, where diagrams are told apart by ID. New diagrams don't get an ID yet.
+* The grammar of the diagram has an optional diagram ID: `classdiagram "Name" (0a1b2c3d) { ... }`, also for an unnamed diagram. A linked diagram carries it into the link, and it is the preparation for the class model, where diagrams are told apart by ID. A new, empty diagram gets an ID when it is inserted (decided 2026-11-27); imported files and existing diagrams keep what they have, a file is never changed to give it one. Copying an embedded diagram copies its ID too, so two diagrams can have the same one.
 
 ### Manual Notes
 Sentences for the chapter on class diagrams, when it is written:
@@ -762,7 +762,7 @@ Sentences for the chapter on class diagrams, when it is written:
 ## Consequences for the Format
 The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the editor needed, and what was decided on the way:
 
-* A diagram may have an ID, `classdiagram (0a1b2c3d) { ... }`, written behind the name, if there is one. Like the ID of a class it is eight hex digits; it is optional and isn't created by the editor yet, see <<Linked Diagrams (Intermediate Form)>>.
+* A diagram may have an ID, `classdiagram (0a1b2c3d) { ... }`, written behind the name, if there is one. Like the ID of a class it is eight hex digits; it is optional, and a new empty diagram gets one when it is inserted, see <<Linked Diagrams (Intermediate Form)>>.
 
 * Relations and the anchors of their routes refer to classes by their IDs, class names are free text. A class needs an ID to take part in a relation.
 * A dependency is written like an implementation, `dependency (<ID>) change(added, yellow) style(...) <from ID> -> <to ID> "label" route ...`, with the keyword `dependency` and always `->`. The difference: an end may be the ID of an attribute (enum values included), which then needs an ID too. A route anchor on an attribute is `<attribute ID>.side@offset`, on its border box. In the model it is a `DependencyRelationModel_V001`, a relation of type `DEPENDENCY`.
@@ -812,4 +812,4 @@ The grammar is `ClassDiagram_V001.g4`, its header describes every rule. What the
 . A white halo around the enlarged highlight of an attribute text, which sits on the colored class fill and contrasts less than frames on white.
 . *Stereotypes from meta tag configurations* (icon, label, colors) are built, see <<Stereotypes from Meta Tag Configurations>>. Open there: whether the place of the icon feels right with a name which wraps.
 . Model-bound mode of Classman (only stereotypes and tags defined in the model can be chosen) is a separate topic and not part of this concept. The infos of an attribute are meant to follow the same path as stereotypes and tagged values: in the free mode of Specman they are free texts, in Classman they are chosen from a set of tags which the model defines for attributes, and refer to the definition by an ID. The format leaves room for it: an info is a list entry of its own, and an optional ID can be added behind its text, like the ID of a stereotype, without changing the rest.
-. *Linked diagrams:* local links inside a linked `.cld` file can't work, since the file is no part of a document; the sanitizer should report them. Also open: a check of the file for changes by somebody else before it is written (today whoever saves last wins), the unmarked duplicate which undo of a step deletion can bring back, and the diagram ID for new diagrams once the class model needs it. See <<Linked Diagrams (Intermediate Form)>>.
+. *Linked diagrams:* local links inside a linked `.cld` file can't work, since the file is no part of a document; the sanitizer should report them. Also open: a check of the file for changes by somebody else before it is written (today whoever saves last wins), the unmarked duplicate which undo of a step deletion can bring back, and the same diagram ID in copies of an embedded diagram (whether the copy needs a new one depends on what the class model does with IDs). See <<Linked Diagrams (Intermediate Form)>>.

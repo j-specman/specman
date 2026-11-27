@@ -1,5 +1,6 @@
 package specman.ops;
 
+import classman.model.v001.ElementId_V001;
 import specman.editarea.TextEditArea;
 import specman.editarea.image.classman.ClassmanImageEditArea;
 import specman.editarea.image.classman.ClassmanSourceValidator;
@@ -20,17 +21,22 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.Random;
 
 import static specman.i18n.Messages.i18n;
 
 
 public class AddImageSpecmanOp extends AbstractClassmanLinkOp {
   public static final String EMPTY_PLANTUML = "@startuml\n\n@enduml";
-  public static final String EMPTY_CLASSMAN = "classdiagram {\n\n}";
   public static final String[] IMAGE_FILE_EXTENSIONS = {"jpg", "png", "gif", "bmp", "svg", ClassmanImageEditArea.FILE_EXTENSION};
 
   public AddImageSpecmanOp(SpecmanOpContext context) {
     super(context);
+  }
+
+  /** @return the source of a new, empty diagram, which has an ID from the start, so that it can be referred to */
+  public static String emptyClassman() {
+    return "classdiagram (" + ElementId_V001.random(new Random()) + ") {\n\n}";
   }
 
   /** Asks the user for a file to take the diagram's source from. Without a file, the diagram starts empty. A file
@@ -142,7 +148,7 @@ public class AddImageSpecmanOp extends AbstractClassmanLinkOp {
   }
 
   private void addEmptyClassman(TextEditArea lastFocused) {
-    ClassmanImageEditArea diagram = lastFocused.addClassmanImage(EMPTY_CLASSMAN);
+    ClassmanImageEditArea diagram = lastFocused.addClassmanImage(emptyClassman());
     // The diagram has to be laid out before the editor can be shown next to it
     SwingUtilities.invokeLater(diagram::startFirstEdit);
   }

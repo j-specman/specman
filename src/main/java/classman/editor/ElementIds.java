@@ -1,12 +1,12 @@
 package classman.editor;
 
+import classman.model.v001.ElementId_V001;
+
 import java.util.Random;
 import java.util.Set;
 
-/** Makes up the IDs of new diagram elements: 8 lower-case hex characters, like Specman step IDs. */
+/** Makes up the IDs of new diagram elements, see {@link ElementId_V001}. */
 class ElementIds {
-  private static final int LENGTH = 8;
-
   private final Random random;
 
   ElementIds(Random random) {
@@ -16,7 +16,7 @@ class ElementIds {
   String newIdNotIn(Set<String> taken) {
     String id;
     do {
-      id = String.format("%0" + LENGTH + "x", random.nextInt());
+      id = ElementId_V001.random(random);
     }
     while (taken.contains(id));
     return id;
