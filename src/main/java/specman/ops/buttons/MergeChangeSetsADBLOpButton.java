@@ -42,10 +42,17 @@ public class MergeChangeSetsADBLOpButton extends AbstractSpecmanOpButton {
 
   /** Makes all changes of the given change set changes of the current change set. */
   public void mergeChangeSets(ChangeSet source) {
+    LinkedMarksConfirmation linkedMarks = new LinkedMarksConfirmation(context);
+    if (!linkedMarks.confirmed(source)) {
+      return;
+    }
     try (UndoRecording ur = composeUndo()) {
       ChangeSet targetSet = ChangeSet.changeset();
       context().traverseDiagram(new ChangeSetMerger(targetSet, source, true));
       diagrammAktualisieren(null);
+    }
+    finally {
+      linkedMarks.finished();
     }
   }
 

@@ -191,6 +191,11 @@ public class ClassmanImageEditArea extends AbstractSourceImageEditArea {
     super.mergeChangeSetUDBL(target, source, withMarkups);
   }
 
+  /** @return true if the source has marks of the change set, which accepting, rejecting and merging would change */
+  protected boolean hasMarksOf(ChangeSet changeSet) {
+    return !MARKS.accepted(getSource(), changeSet.name).equals(getSource());
+  }
+
   /** @return 1 if the source changed, otherwise 0 */
   protected int changeSourceUDBL(String newSource) {
     if (newSource.equals(getSource())) {

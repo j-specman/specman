@@ -8,6 +8,7 @@ import specman.Specman;
 import specman.editarea.EditContainer;
 import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.SourceFileKind;
+import specman.editarea.image.classman.LinkedChangesAnswer;
 import specman.link.LinkLocation;
 import specman.metatag.generic.config.MetaTagConfig;
 import specman.model.v002.PdfExportOptionsModel_V002;
@@ -54,6 +55,10 @@ public interface SpecmanOpContext extends EditorI {
    * @param diagramName the name of the diagram in the file, null if it has none
    * @return how the link names the file, null if the user cancels */
   LinkLocation askClassmanLocation(File file, String diagramId, String diagramName);
+  /** Tells the user that an operation of change mode would change linked diagrams, and asks whether to go on, and
+   * whether to change them.
+   * @param count the number of linked diagrams with marks of the change set */
+  LinkedChangesAnswer askAboutLinkedChanges(int count, String changeSetName);
   /** Asks the user for an image file, null if the user doesn't choose any. */
   File chooseImageFile();
   /** Starts another Specman instance, which follows the link. */

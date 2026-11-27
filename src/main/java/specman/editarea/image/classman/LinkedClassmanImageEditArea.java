@@ -1,6 +1,7 @@
 package specman.editarea.image.classman;
 
 import specman.ChangeInfo;
+import specman.ChangeSet;
 import specman.editarea.ImageClipboardSelection;
 import specman.editarea.image.Picture;
 import specman.editarea.image.SourceImageContextMenu;
@@ -28,6 +29,7 @@ import static specman.Specman.editor;
  * is what the model keeps, also if it leads nowhere. */
 public class LinkedClassmanImageEditArea extends ClassmanImageEditArea {
   private ClassmanLinkTarget target;
+  private boolean leftAlone;
 
   public LinkedClassmanImageEditArea(LinkedClassmanImageEditAreaModel_V002 model) {
     this(model.link, new ClassmanLinkResolver(editor().getDiagrammDatei()).resolve(model.link),
@@ -165,10 +167,22 @@ public class LinkedClassmanImageEditArea extends ClassmanImageEditArea {
     return target.file() != null ? super.clipboardContent() : new ImageClipboardSelection(getFullSizeImage());
   }
 
-  /** Marks and configurations are in the file, which a diagram that can't be written must not change. */
+  /** Marks and configurations are in the file, which a diagram that can't be written must not change, and neither one
+   * which the user wants left alone, see {@link #setLeftAlone}. */
   @Override
   protected int changeSourceUDBL(String newSource) {
-    return target.file() != null ? super.changeSourceUDBL(newSource) : 0;
+    return target.file() != null && !leftAlone ? super.changeSourceUDBL(newSource) : 0;
+  }
+
+  /** While an operation of change mode runs, the diagram keeps its source, so the marks stay in the file. The change
+   * of the area itself, being added or deleted in the document, is not affected. */
+  public void setLeftAlone(boolean leftAlone) {
+    this.leftAlone = leftAlone;
+  }
+
+  /** @return true if accepting, rejecting or merging the change set changes the diagram, and so the file */
+  public boolean hasMarksToChange(ChangeSet changeSet) {
+    return target.file() != null && hasMarksOf(changeSet);
   }
 
   /** @return true if the user changed the diagram since its file was read or written, and the file is one which can be

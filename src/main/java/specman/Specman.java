@@ -34,6 +34,8 @@ import specman.editarea.EditContainer;
 import specman.editarea.TableEditArea;
 import specman.editarea.TextEditArea;
 import specman.editarea.image.classman.ClassmanImageEditArea;
+import specman.editarea.image.classman.LinkedChangesAnswer;
+import specman.editarea.image.classman.LinkedChangesDialog;
 import specman.editarea.image.classman.LinkedClassmanImageEditArea;
 import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.SourceFileKind;
@@ -807,6 +809,11 @@ public class Specman extends JRootPane implements EditorI, SpaltenContainerI, Sp
 		AtomicReference<LinkLocation> location = new AtomicReference<>();
 		new AliasDialog(frame, new ClassmanLinkAliasPanel(file, diagramId, diagramName, relativeLocation, location::set));
 		return location.get();
+	}
+
+	@Override
+	public LinkedChangesAnswer askAboutLinkedChanges(int count, String changeSetName) {
+		return LinkedChangesDialog.ask(frame, count, changeSetName);
 	}
 
 	/** Called while Specman is being constructed. Overrides must not depend on their own fields. */

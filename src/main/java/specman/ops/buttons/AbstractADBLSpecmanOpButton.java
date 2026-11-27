@@ -19,13 +19,29 @@ public abstract class AbstractADBLSpecmanOpButton extends AbstractSpecmanOpButto
   @Override
   void registerActionListener() {
     addActionListener(e -> {
+      if (!confirmed()) {
+        return;
+      }
       try (UndoRecording ur = composeUndo()) {
         execute();
       }
       catch (EditException ex) {
         context.showError(ex);
       }
+      finally {
+        finished();
+      }
     });
+  }
+
+  /** Called before the operation starts, to let the user cancel it.
+   * @return false if the operation must not be executed */
+  boolean confirmed() {
+    return true;
+  }
+
+  /** Called after an operation which {@link #confirmed()} let start, whether it succeeded or not. */
+  void finished() {
   }
 
 }

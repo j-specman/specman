@@ -5,8 +5,20 @@ import specman.*;
 
 public class AcceptChangesADBLOpButton extends AbstractADBLSpecmanOpButton {
 
+  private final LinkedMarksConfirmation linkedMarks = new LinkedMarksConfirmation(context);
+
   public AcceptChangesADBLOpButton(Specman specman) {
     super(specman);
+  }
+
+  @Override
+  boolean confirmed() {
+    return linkedMarks.confirmed(ChangeSet.changeset());
+  }
+
+  @Override
+  void finished() {
+    linkedMarks.finished();
   }
 
   @Override

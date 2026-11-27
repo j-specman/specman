@@ -16,6 +16,7 @@ import specman.editarea.image.SourceImageContextMenu;
 import specman.editarea.image.SourceFileChoice;
 import specman.editarea.image.SourceFileKind;
 import specman.editarea.image.classman.ClassmanImageEditArea;
+import specman.editarea.image.classman.LinkedChangesAnswer;
 import specman.editarea.image.plantuml.PlantUmlImageEditArea;
 import specman.editarea.image.AbstractSourceImageEditArea;
 import specman.link.AliasListPanel;
@@ -108,6 +109,8 @@ public class SpecmanFT extends Specman {
   private int classmanFilesAskedFor;
   private final List<File> fileSuggestionsOffered = new ArrayList<>();
   private LinkLocation classmanLocationAnswer;
+  private LinkedChangesAnswer linkedChangesAnswer = LinkedChangesAnswer.CHANGE_LINKED;
+  private final List<Integer> linkedChangesAskedFor = new ArrayList<>();
   private final List<File> filesAskedClassmanLocationFor = new ArrayList<>();
   private final List<String> linksOpenedInNewInstance = new ArrayList<>();
   private final List<String> addressesOpenedInBrowser = new ArrayList<>();
@@ -659,6 +662,23 @@ public class SpecmanFT extends Specman {
   public LinkLocation askClassmanLocation(File file, String diagramId, String diagramName) {
     filesAskedClassmanLocationFor.add(file);
     return classmanLocationAnswer;
+  }
+
+  /** Defines how the user answers when asked whether an operation of change mode may change linked diagrams. Without
+   * an answer, the user continues and lets it change them. */
+  public void answerLinkedChangesWith(LinkedChangesAnswer answer) {
+    linkedChangesAnswer = answer;
+  }
+
+  /** The numbers of linked diagrams the user was told would be changed, one entry per question. */
+  public List<Integer> linkedChangesAskedFor() {
+    return Collections.unmodifiableList(linkedChangesAskedFor);
+  }
+
+  @Override
+  public LinkedChangesAnswer askAboutLinkedChanges(int count, String changeSetName) {
+    linkedChangesAskedFor.add(count);
+    return linkedChangesAnswer;
   }
 
   /** Whether the user was offered to start with an empty diagram when asked for a PlantUML file the last time. */
