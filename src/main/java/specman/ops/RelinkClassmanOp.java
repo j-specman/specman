@@ -5,6 +5,7 @@ import specman.link.LinkAliases;
 import specman.link.LinkLocation;
 import specman.link.classman.ClassmanLink;
 import specman.link.classman.ClassmanLinkResolution;
+import specman.undo.manager.UndoRecording;
 import specman.undo.props.UDBL;
 
 import java.io.File;
@@ -39,21 +40,25 @@ public class RelinkClassmanOp extends AbstractClassmanLinkOp {
   }
 
   /** The user chooses the file and how the new link names it, like for a new diagram. The alias which the link had can't
-   * be taken over: for a duplicate it would take the file away from the other diagram, and a path has none. The link is
-   * replaced in one undo step. */
+   * be taken over: for a duplicate it would take the file away from the other diagram, and a path has none. The link and
+   * the source of the file replace the old ones in one undo step. Changes the user made to the diagram which weren't
+   * written yet stay with the old link, where undo brings them back. */
   private void relinkByNewLink(LinkedClassmanImageEditArea diagram) {
     File chosen = context.chooseClassmanFile();
     if (chosen == null) {
       return;
     }
-    ClassmanLinkResolution resolution = resolveLinkable(chosen);
+    ClassmanLinkResolution resolution = resolveLinkable(chosen, diagram);
     if (resolution == null) {
       return;
     }
     LinkLocation location = context.askClassmanLocation(chosen, resolution.diagramId(), resolution.diagramName());
     if (location != null) {
       LinkAliases.remember(chosen, location);
-      UDBL.setLinkUDBL(diagram, ClassmanLink.of(location, resolution.diagramId(), resolution.diagramName()));
+      try (UndoRecording ur = context.composeUndo()) {
+        UDBL.setLinkUDBL(diagram, ClassmanLink.of(location, resolution.diagramId(), resolution.diagramName()));
+        UDBL.setSourceUDBL(diagram, resolution.source());
+      }
     }
   }
 }

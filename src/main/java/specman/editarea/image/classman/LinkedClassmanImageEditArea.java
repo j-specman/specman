@@ -3,6 +3,7 @@ package specman.editarea.image.classman;
 import specman.ChangeInfo;
 import specman.editarea.ImageClipboardSelection;
 import specman.editarea.image.Picture;
+import specman.editarea.image.SourceImageContextMenu;
 import specman.link.classman.ClassmanLinkResolution;
 import specman.link.classman.ClassmanLinkResolver;
 import specman.model.v002.AbstractImageEditAreaModel_V002;
@@ -75,21 +76,23 @@ public class LinkedClassmanImageEditArea extends ClassmanImageEditArea {
     return target.link();
   }
 
-  /** Follows the link again, after the alias it names its file by was assigned to a file. */
+  /** Follows the link again, after the alias it names its file by was assigned to a file, and shows the diagram of the
+   * file. Not undoable. */
   public void resolveAgain() {
     setLink(target.link());
+    setSource(target.savedSource());
   }
 
-  /** Follows the link and shows what it leads to, the diagram of the file or a placeholder. Not undoable on its own, see
-   * {@link specman.undo.props.UDBL#setLinkUDBL}. */
+  /** Follows the link and shows what it leads to, the diagram of the file or a placeholder. The source stays what it
+   * is, which {@link specman.undo.props.UDBL#setLinkUDBL} relies on to undo exactly; the one who links another file also
+   * sets the source to the one of the file. Not undoable on its own. */
   public void setLink(String link) {
-    ClassmanLinkResolution resolution = new ClassmanLinkResolver(editor().getDiagrammDatei()).resolve(link);
-    ClassmanLinkTarget resolved = ClassmanLinkTarget.of(link, resolution);
-    target = isLinkedElsewhere(resolved.file()) ? resolved.asDuplicate() : resolved;
+    target = ClassmanLinkTarget.of(link, new ClassmanLinkResolver(editor().getDiagrammDatei()).resolve(link));
+    if (isLinkedElsewhere(target.file())) {
+      target = target.asDuplicate();
+    }
     setToolTipText(link);
     updateCursor();
-    setSource(resolution.source() != null ? resolution.source() : "");
-    // The picture depends on the target as well, which can change while the source stays the same
     show(getSource());
   }
 
@@ -131,9 +134,27 @@ public class LinkedClassmanImageEditArea extends ClassmanImageEditArea {
       : super.pictureOf(source);
   }
 
+  /** A diagram which can't be written is not edited: its source is nobody's diagram, and nothing the user did to it
+   * would reach the file. The user can link another file instead. */
+  @Override
+  public boolean isSourceEditable() {
+    return target.file() != null;
+  }
+
+  @Override
+  protected String importMenuItemKey() {
+    return SourceImageContextMenu.RELINK_ITEM;
+  }
+
+  /** The user links another file instead of importing a source into the diagram. */
+  @Override
+  public void importSource() {
+    editor().relinkClassman(this);
+  }
+
   @Override
   protected void doubleClicked() {
-    if (!isPlaceholder()) {
+    if (isSourceEditable()) {
       super.doubleClicked();
     }
   }

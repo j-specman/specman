@@ -5,12 +5,14 @@ import headless.ModelCopyLoader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import specman.editarea.image.SourceImageContextMenu;
 import specman.editarea.image.classman.LinkedClassmanImageEditArea;
 import specman.link.LinkAliases;
 import specman.link.LinkLocation;
 import specman.link.classman.ClassmanLink;
 import specman.model.v002.LinkedClassmanImageEditAreaModel_V002;
 
+import javax.swing.JMenuItem;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,6 +26,7 @@ import static builder.BuilderFactory.simple;
 import static headless.HeadlessExtension.specman;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** A diagram which names its file by an alias nobody knows, or which stands for a file that is gone, is repaired by
@@ -31,6 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(HeadlessExtension.class)
 class LinkedClassmanRelinkTest {
   private static final String SOURCE = "classdiagram {\n    class A (aaaaaaaa)\n}\n";
+  private static final String OTHER_SOURCE = "classdiagram {\n    class B (bbbbbbbb)\n}\n";
+  private static final String CHANGED_SOURCE = "classdiagram {\n    class A (aaaaaaaa)\n    class C (cccccccc)\n}\n";
 
   private static File diagramFile(Path directory, String name, String content) throws IOException {
     Path file = directory.resolve(name);
@@ -207,5 +212,77 @@ class LinkedClassmanRelinkTest {
     assertEquals("classman://./gone.cld", diagramOfStep("1").getLink());
     assertFalse(LinkAliases.isAssigned(file));
     assertEquals(1, specman.classmanFilesAskedFor());
+  }
+
+  /** Scenario: The menu of a diagram which shows its file offers relinking instead of importing, and editing stays
+   * possible. */
+  @Test
+  void testMenuOfLinkedDiagramOffersRelinkInsteadOfImport(@TempDir Path directory) throws IOException {
+    File file = diagramFile(directory, "hilfe.cld", SOURCE);
+    load(directory, ClassmanLink.of(file, "", null, null));
+    LinkedClassmanImageEditArea diagram = diagramOfStep("1");
+
+    JMenuItem edit = specman.contextMenuItem(diagram, SourceImageContextMenu.EDIT_ITEM);
+    JMenuItem relink = specman.contextMenuItem(diagram, SourceImageContextMenu.RELINK_ITEM);
+
+    assertTrue(edit.isEnabled());
+    assertTrue(relink.isEnabled());
+    assertThrows(IllegalStateException.class, () -> specman.contextMenuItem(diagram, SourceImageContextMenu.IMPORT_ITEM));
+  }
+
+  /** Scenario: A placeholder can't be edited, and can be relinked. A diagram of a file which has no class diagram can't
+   * be edited either, as nothing of it would reach the file. */
+  @Test
+  void testMenuOfDiagramWhichIsNotShownDoesNotOfferEditing(@TempDir Path directory) throws IOException {
+    diagramFile(directory, "invalid.cld", "classdiagram { class }");
+    load(directory, "classman://nobody", "classman://./invalid.cld");
+
+    for (String stepId : List.of("1", "2")) {
+      LinkedClassmanImageEditArea diagram = diagramOfStep(stepId);
+
+      assertFalse(specman.contextMenuItem(diagram, SourceImageContextMenu.EDIT_ITEM).isEnabled());
+      assertTrue(specman.contextMenuItem(diagram, SourceImageContextMenu.RELINK_ITEM).isEnabled());
+    }
+  }
+
+  /** Scenario: The user relinks a diagram which works to another file, from the menu. The diagram shows the other file,
+   * and the changes the user hadn't written yet are not lost: one undo brings back the link and them. */
+  @Test
+  void testRelinkFromMenuKeepsUnwrittenChangesForUndo(@TempDir Path directory) throws IOException {
+    File file = diagramFile(directory, "hilfe.cld", SOURCE);
+    File other = diagramFile(directory, "other.cld", OTHER_SOURCE);
+    String link = ClassmanLink.of(file, "", null, null);
+    load(directory, link);
+    LinkedClassmanImageEditArea diagram = diagramOfStep("1");
+    diagram.changeSource(CHANGED_SOURCE);
+    specman.answerFileChoicesWith(other);
+    specman.answerClassmanLocationWith(LinkLocation.alias("other"));
+
+    specman.clickContextMenuItem(diagram, SourceImageContextMenu.RELINK_ITEM);
+
+    assertEquals(OTHER_SOURCE, diagram.getSource());
+    assertEquals("classman://other", diagram.getLink());
+    assertFalse(diagram.needsSaving());
+    specman.undo();
+    assertEquals(CHANGED_SOURCE, diagram.getSource());
+    assertEquals(link, diagram.getLink());
+    assertTrue(diagram.needsSaving());
+  }
+
+  /** Scenario: The user relinks a diagram to the file it has already, only to name it another way. That is no
+   * duplicate. */
+  @Test
+  void testRelinkToOwnFileWithOtherLocation(@TempDir Path directory) throws IOException {
+    File file = diagramFile(directory, "hilfe.cld", SOURCE);
+    load(directory, ClassmanLink.of(file, "", null, null));
+    LinkedClassmanImageEditArea diagram = diagramOfStep("1");
+    specman.answerFileChoicesWith(file);
+    specman.answerClassmanLocationWith(LinkLocation.alias("hilfe"));
+
+    specman.clickContextMenuItem(diagram, SourceImageContextMenu.RELINK_ITEM);
+
+    assertEquals("classman://hilfe", diagram.getLink());
+    assertFalse(diagram.isPlaceholder());
+    assertEquals(List.of(), specman.shownMessages());
   }
 }

@@ -50,6 +50,13 @@ public abstract class AbstractSourceImageEditArea extends AbstractVectorImageEdi
   /** Asks the user for a file and replaces the source by its content. */
   public abstract void importSource();
 
+  /** @return whether the user can edit the source, which is what the editors of the diagram start from */
+  public boolean isSourceEditable() { return true; }
+
+  /** @return the message key of the item in the context menu whose action is {@link #importSource()}, for a diagram
+   * which doesn't import but does something related instead */
+  protected String importMenuItemKey() { return SourceImageContextMenu.IMPORT_ITEM; }
+
   /** Subclasses call this once they are constructed, to show the diagram for the source. */
   protected void displayInitially() {
     displayedSource = source;
