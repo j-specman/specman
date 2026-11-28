@@ -1,4 +1,4 @@
-// {"specmanVersion":"1.4.0","modelType":"specman.model.v002.DiagramModel_V002"}
+// {"specmanVersion":"1.5.0","modelType":"specman.model.v002.DiagramModel_V002"}
 // Specman: Enter Vacation Request
 // Format defined by grammar: SpecmanModel_V002.g4
 // Step numbers (first parameter of each step): unique diagram-wide; referenced by catch blocks and step links in text; sanitizer renumbers consistently
@@ -6,7 +6,8 @@
 // markups=[...] fields: change-tracking annotations, maintained by Specman
 // image(..., type=png) { [base64:...] } blocks: embedded binary image data (base64-encoded)
 // image(..., type=plantuml) { `...` } blocks: PlantUML source of a diagram, Specman renders the picture from it
-// backup=(changeset, `...`) in a plantuml image: source from before that change set changed it, maintained by Specman, leave it alone
+// image(..., type=classman) { `...` } blocks: Classman class diagram source, Specman renders the picture from it
+// backup=(changeset, `...`) in a plantuml image: source from before that change set changed it, maintained by Specman, leave it alone (a classman image carries its change marks in its source)
 
 settings {
     width=675
@@ -115,7 +116,7 @@ The flow starts here again with every change of one of the days.`)
     </h2>`, plain=`Calculate leave days`, deco=Co) {
         while(3.1, a8e03c57, `For every day from the first to the last day, the system checks...`, plain=`For every day from the first to the last day, the system checks...`, barWidth=22) {
             ifElse(3.1.1, 1d94b6f0, `Is the day a work day, i.e. neither a Saturday, nor a Sunday nor a public 
-    holiday in the federal state of the employee's working location?`, plain=`Is the day a work day, i.e. neither a Saturday, nor a Sunday nor a public holiday in the federal state of the employee's working location?`, ifRatio=28.62%) {
+    holiday in the federal state of the employee's working location?`, plain=`Is the day a work day, i.e. neither a Saturday, nor a Sunday nor a public holiday in the federal state of the employee's working location?`, ifRatio=27.92%) {
                 text(`<div>
       <i><font size="3">Note:</font></i>
     </div>
@@ -176,43 +177,58 @@ Wire frame`) {
     text(`<h2>
       Domain model
     </h2>`, plain=`Domain model`)
-    image(scale=92.51%, type=plantuml) { `@startuml
-' Layout hints, effective with Graphviz only (ELK ignores them)
-left to right direction
-skinparam linetype polyline
-class Employee {
-  name
-  email
-  annualLeaveDays
+    image(scale=95%, type=classman) { `// {"classmanVersion":"0.1","modelType":"ClassDiagramModel_V001"}
+classdiagram {
+    class Employee (e0000001) at(0, 70) {
+        name
+        email
+        "annual leave days"
+    }
+
+    class "Working Location" (e0000002) at(210, 37) {
+        name
+    }
+
+    class "Federal State" (e0000003) at(399, 37) {
+        name
+    }
+
+    class "Public Holiday" (e0000004) at(580, 34) width=92 {
+        date
+        name
+    }
+
+    class "Vacation Request" (e0000005) at(209, 125) {
+        "first day"
+        "last day"
+        "leave days"
+        state (2aaec3b3)
+    }
+
+    enum "Request State" (e0000006) at(399, 126) {
+        PENDING
+        APPROVED
+        REJECTED
+    }
+
+    association e0000001 * at(10, -12) -> 1 at(18, -15) e0000002 "works at"
+        route e0000001.right@26 e0000002.left@12
+
+    association e0000001 * -> 0..1 e0000001 "Supervisor"
+        route e0000001.top@25 (25, 38) (85, 38) e0000001.top@85
+
+    association e0000001 1 at(16, -15) -> * e0000005 "requests" at(57%, 14)
+
+    association e0000002 * at(12, -14) -> 1 at(12, -13) e0000003 "lies in"
+        route e0000002.right@12 e0000003.left@12
+
+    association e0000003 1 at(11, -14) -> * at(16, -14) e0000004 "observes"
+        route e0000003.right@10 e0000004.left@13
+
+    dependency (6ab6469e) 2aaec3b3 -> e0000006
+        route 2aaec3b3.right@7 (343, 200) e0000006.left@20
 }
-class WorkingLocation {
-  name
-}
-class FederalState {
-  name
-}
-class PublicHoliday {
-  date
-  name
-}
-class VacationRequest {
-  firstDay
-  lastDay
-  leaveDays
-  state
-}
-enum RequestState {
-  PENDING
-  APPROVED
-  REJECTED
-}
-Employee "*" --> "1" WorkingLocation : works at
-Employee "*" --> "0..1" Employee : Supervisor
-Employee "1" --> "*" VacationRequest : requests
-VacationRequest --> RequestState
-WorkingLocation "*" --> "1" FederalState : lies in
-FederalState "1" --> "*" PublicHoliday : observes
-@enduml` }
+` }
     text(`<h2>
       Open issues
     </h2>

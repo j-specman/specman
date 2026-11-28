@@ -35,7 +35,7 @@ While the diamond for a decision node is known from activity and BPMN diagrams, 
 
 - The format tolerates arbitrary nesting of steps and extensive text content. It does not limit the work if business requirements need very precise alignment at deep levels of detail.
 
-For a specification to become _really_ understandable, its wording must be based on a clearly defined vocabulary of the business domain. Simple domain class modeling can be done directly in Specman via the PlantUML integration. The appendix of the vacation request model contains a wire frame for a dialog - embedded here as a screenshot - and the domain model with the terms used such as "Vacation Request" and "Working Location" and their relationships.
+For a specification to become _really_ understandable, its wording must be based on a clearly defined vocabulary of the business domain. Simple domain class modeling can be done directly in Specman by its integrated class diagramm editor or by its PlantUML integration. The appendix of the vacation request model contains a wire frame for a dialog - embedded here as a screenshot - and the domain model with the terms used such as "Vacation Request" and "Working Location" and their relationships.
 
 image::uc-331-request-vacation-outro.png[Request Vacation Wire Frame and Domain Model and Open Issues]
 
