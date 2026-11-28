@@ -33,6 +33,7 @@ class AttachLineHandleDrag extends Drag {
   private final List<PositionModel_V001> waypointsBefore;
   private final AnchorModel_V001 startBefore;
   private final AnchorModel_V001 endBefore;
+  private final WaypointEndRepair endRepair;
   private String hungOntoClassId;
   private boolean moved;
 
@@ -42,10 +43,11 @@ class AttachLineHandleDrag extends Drag {
    * or only the one the line leads to if it can't be hung onto another class now
    * @param slideTarget the attribute or relation the line leads to, whose border or line the end slides along
    * without leaving it, null if the line leads to a class
-   * @param ownTarget what the line leads to when the drag starts */
+   * @param ownTarget what the line leads to when the drag starts
+   * @param endRepair keeps the ends next to a dragged waypoint out of their boxes */
   AttachLineHandleDrag(RouteEditing routeEditing, AttachLineModel_V001 attachLine, Rectangle2D boxArea, int handle, List<Point2D> path,
                    Point2D pressedAt, Map<String, Rectangle2D> reachableClasses, AttachTarget slideTarget,
-                   AttachTarget ownTarget) {
+                   AttachTarget ownTarget, WaypointEndRepair endRepair) {
     this.routeEditing = routeEditing;
     this.attachLine = attachLine;
     this.boxArea = boxArea;
@@ -55,6 +57,7 @@ class AttachLineHandleDrag extends Drag {
     this.reachableClasses = reachableClasses;
     this.slideTarget = slideTarget;
     this.ownTarget = ownTarget;
+    this.endRepair = endRepair;
     this.startIsComputed = attachLine.start == null;
     this.endIsComputed = attachLine.end == null;
     this.ownClassId = attachLine.targetId;
@@ -72,6 +75,10 @@ class AttachLineHandleDrag extends Drag {
   @Override
   void to(Point2D at, double tolerance) {
     moved = true;
+    if (endRepair.isRepairing()) {
+      attachLine.start = startBefore;
+      attachLine.end = endBefore;
+    }
     Point2D grabbed = path.get(handle);
     List<Double> neighborXs = new ArrayList<>();
     List<Double> neighborYs = new ArrayList<>();
@@ -90,6 +97,8 @@ class AttachLineHandleDrag extends Drag {
     }
     else {
       routeEditing.moveWaypoint(attachLine, handle - 1, target);
+      attachLine.start = endRepair.start(attachLine.start, target);
+      attachLine.end = endRepair.end(attachLine.end, target);
     }
   }
 

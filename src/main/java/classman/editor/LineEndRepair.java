@@ -168,8 +168,8 @@ class LineEndRepair {
     }
     List<Point2D> points = line.points();
     RouteModel_V001 route = relation.route;
-    AnchorModel_V001 start = repaired(route.start, points.get(0), points.get(1), scene);
-    AnchorModel_V001 end = repaired(route.end, points.get(points.size() - 1), points.get(points.size() - 2), scene);
+    AnchorModel_V001 start = repaired(route.start, points.get(1), scene);
+    AnchorModel_V001 end = repaired(route.end, points.get(points.size() - 2), scene);
     if (start == route.start && end == route.end) {
       return false;
     }
@@ -183,8 +183,8 @@ class LineEndRepair {
       return false;
     }
     List<Point2D> points = line.points();
-    AnchorModel_V001 start = repaired(attachLine.start, points.get(0), points.get(1), scene);
-    AnchorModel_V001 end = repaired(attachLine.end, points.get(points.size() - 1), points.get(points.size() - 2), scene);
+    AnchorModel_V001 start = repaired(attachLine.start, points.get(1), scene);
+    AnchorModel_V001 end = repaired(attachLine.end, points.get(points.size() - 2), scene);
     if (start == attachLine.start && end == attachLine.end) {
       return false;
     }
@@ -193,19 +193,23 @@ class LineEndRepair {
     return true;
   }
 
-  /** @param endPoint where the line ends on its box now
-   * @param neighbor the next point of the line, a waypoint or the other end
-   * @return the anchor itself if the line leaves the box properly, or an anchor where the line enters the box */
-  private AnchorModel_V001 repaired(AnchorModel_V001 anchor, Point2D endPoint, Point2D neighbor, Scene scene) {
-    if (anchor == null || anchor.center || anchor.isOnLine()) {
-      return anchor;
+  private AnchorModel_V001 repaired(AnchorModel_V001 anchor, Point2D neighbor, Scene scene) {
+    if (anchor == null) {
+      return null;
     }
     AbstractBoxModel_V001 box = model.boxWithId(anchor.classId);
     SceneElementArea boxArea = box != null ? scene.elementAreaOf(box) : null;
-    if (boxArea == null) {
+    return boxArea != null ? repaired(anchor, boxArea.area, neighbor) : anchor;
+  }
+
+  /** @param area where the box is which the anchor is fixed on
+   * @param neighbor the next point of the line, a waypoint or the other end
+   * @return the anchor itself if the line leaves the box properly, or an anchor where the line enters the box */
+  static AnchorModel_V001 repaired(AnchorModel_V001 anchor, Rectangle2D area, Point2D neighbor) {
+    if (anchor == null || anchor.center || anchor.isOnLine()) {
       return anchor;
     }
-    Rectangle2D area = boxArea.area;
+    Point2D endPoint = BoxGeometry.sidePoint(area, anchor.side, anchor.offset);
     Point2D entry = BoxGeometry.entryIntoInterior(area, neighbor, endPoint);
     return entry != null ? BoxGeometry.nearestAnchor(anchor.classId, area, entry) : anchor;
   }

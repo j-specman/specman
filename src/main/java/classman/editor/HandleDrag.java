@@ -1,6 +1,7 @@
 package classman.editor;
 
 import classman.model.v001.AbstractRelationModel_V001;
+import classman.model.v001.AnchorModel_V001;
 import classman.model.v001.PositionModel_V001;
 import classman.model.v001.RouteModel_V001;
 import classman.render.BoxGeometry;
@@ -17,8 +18,9 @@ import java.util.Map;
  * horizontal lines are easy to get. An end which is joined to the dragged point by a vertical or horizontal part of
  * the line slides along its class with the point, so the part stays straight, see {@link StraightEnd}. An end is hung
  * onto another class while the mouse is on that class or close to it,
- * and stays on the class it caught last while the mouse is on none. A relation without a route gets one on the first
- * move. Cancelling takes the route, the classes and the points back. */
+ * and stays on the class it caught last while the mouse is on none. An end next to a waypoint is fixed where the line
+ * enters its class if the line to the waypoint would run through the class, see {@link WaypointEndRepair}. A relation
+ * without a route gets one on the first move. Cancelling takes the route, the classes and the points back. */
 class HandleDrag extends Drag {
   private final RouteEditing routeEditing;
   private final AbstractRelationModel_V001 relation;
@@ -29,9 +31,12 @@ class HandleDrag extends Drag {
   private final Rectangle2D toArea;
   private final Map<String, Rectangle2D> reachableClasses;
   private final String ownClassId;
+  private final WaypointEndRepair endRepair;
   private boolean moved;
   private List<StraightEnd> straightEnds = List.of();
   private RouteModel_V001 routeBefore;
+  private AnchorModel_V001 startBefore;
+  private AnchorModel_V001 endBefore;
   private String fromIdBefore;
   private String toIdBefore;
   private String hungOntoClassId;
@@ -40,9 +45,11 @@ class HandleDrag extends Drag {
    * @param handle the index of the dragged point in the path: 0 is the start, the last the end
    * @param fromArea where the source class is, toArea where the target class is
    * @param reachableClasses the classes, by ID, which the dragged end may be hung onto, in the order of drawing: all of
-   * them, or only its own if the relation can't be hung onto another class now */
+   * them, or only its own if the relation can't be hung onto another class now
+   * @param endRepair keeps the ends next to a dragged waypoint out of their boxes */
   HandleDrag(RouteEditing routeEditing, AbstractRelationModel_V001 relation, List<Point2D> path, int handle,
-             Point2D pressedAt, Rectangle2D fromArea, Rectangle2D toArea, Map<String, Rectangle2D> reachableClasses) {
+             Point2D pressedAt, Rectangle2D fromArea, Rectangle2D toArea, Map<String, Rectangle2D> reachableClasses,
+             WaypointEndRepair endRepair) {
     this.routeEditing = routeEditing;
     this.relation = relation;
     this.path = path;
@@ -51,6 +58,7 @@ class HandleDrag extends Drag {
     this.fromArea = fromArea;
     this.toArea = toArea;
     this.reachableClasses = reachableClasses;
+    this.endRepair = endRepair;
     this.ownClassId = handle == 0 ? relation.fromId : relation.toId;
     this.hungOntoClassId = ownClassId;
   }
@@ -65,8 +73,14 @@ class HandleDrag extends Drag {
     if (!moved) {
       rememberState();
       routeEditing.ensureRoute(relation, path, fromArea, toArea);
+      startBefore = relation.route.start;
+      endBefore = relation.route.end;
       straightEnds = StraightEnd.following(path, handle, relation.route, fromArea, toArea);
       moved = true;
+    }
+    if (endRepair.isRepairing()) {
+      routeEditing.slideStart(relation, startBefore);
+      routeEditing.slideEnd(relation, endBefore);
     }
     Point2D grabbed = path.get(handle);
     Point2D target = PointSnapper.snapped(new Point2D.Double(grabbed.getX() + at.getX() - pressedAt.getX(),
@@ -85,6 +99,10 @@ class HandleDrag extends Drag {
     Point2D placed = placedHandle();
     for (StraightEnd end : straightEnds) {
       end.follow(routeEditing, relation, placed);
+    }
+    if (endRepair.isRepairing()) {
+      routeEditing.slideStart(relation, endRepair.start(relation.route.start, placed));
+      routeEditing.slideEnd(relation, endRepair.end(relation.route.end, placed));
     }
   }
 

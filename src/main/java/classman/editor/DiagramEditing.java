@@ -1190,15 +1190,27 @@ public class DiagramEditing {
   private Drag handleDrag(int handle, Point2D at) {
     if (selected instanceof AttachLineModel_V001 attachLine) {
       AttachTarget slideTarget = leadsToClass(attachLine) ? null : scene.attachTargets.find(attachLine.targetId);
-      return new AttachLineHandleDrag(routeEditing, attachLine, scene.elementAreaOf(model.boxWithId(attachLine.startId)).area,
+      Rectangle2D startArea = scene.elementAreaOf(model.boxWithId(attachLine.startId)).area;
+      WaypointEndRepair endRepair = new WaypointEndRepair(handle, selectedLine().points().size(), startArea,
+        boxAreaOrNull(attachLine.targetId));
+      return new AttachLineHandleDrag(routeEditing, attachLine, startArea,
         handle, selectedLine().points(), at, classesAnAttachLineMayHangOnto(attachLine), slideTarget,
-        scene.attachTargets.find(attachLine.targetId));
+        scene.attachTargets.find(attachLine.targetId), endRepair);
     }
     SceneRelationLine line = scene.relationLineOf(selected);
     AbstractRelationModel_V001 relation = line.relation;
     boolean isEnd = handle == 0 || handle == line.points().size() - 1;
+    WaypointEndRepair endRepair = new WaypointEndRepair(handle, line.points().size(), boxAreaOrNull(relation.fromId),
+      boxAreaOrNull(relation.toId));
     return new HandleDrag(routeEditing, relation, line.points(), handle, at, endArea(relation.fromId),
-      endArea(relation.toId), isEnd ? classesAnEndMayHangOnto(relation, handle == 0) : Map.of());
+      endArea(relation.toId), isEnd ? classesAnEndMayHangOnto(relation, handle == 0) : Map.of(), endRepair);
+  }
+
+  /** @return where the box with the ID is, null if the ID is none of a box, but of an attribute or a relation */
+  private Rectangle2D boxAreaOrNull(String id) {
+    AbstractBoxModel_V001 box = model.boxWithId(id);
+    SceneElementArea area = box != null ? scene.elementAreaOf(box) : null;
+    return area != null ? area.area : null;
   }
 
   /** The classes by ID in the order of drawing which an end of the relation may be hung onto: all of them, but while
